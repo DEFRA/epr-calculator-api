@@ -1,0 +1,8 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/src/.vs/EPR.Calculator.API/v17
+/src/EPR.Calculator.API/.vs/EPR.Calculator.API
+/src/EPR.Calculator.API/EPR.Calculator.API/obj
