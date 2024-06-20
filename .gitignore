@@ -6,3 +6,11 @@
 /src/.vs/EPR.Calculator.API/v17
 /src/EPR.Calculator.API/.vs/EPR.Calculator.API
 /src/EPR.Calculator.API/EPR.Calculator.API/obj
+/src/EPR.Calculator.API/EPR.Calculator.API/bin/Debug/net8.0
+/src/EPR.Calculator.API/EPR.Calculator.API.UnitTests/obj
+/src/EPR.Calculator.API/EPR.Calculator.API.UnitTests/bin/Debug/net8.0
+/src/EPR.Calculator.API/EPR.Calculator.Core/bin/Debug/net8.0
+/src/EPR.Calculator.API/EPR.Calculator.Core/obj/Debug/net8.0
+/src/EPR.Calculator.API/EPR.Calculator.Core/obj
+/src/EPR.Calculator.API/EPR.Calculator.Core.UnitTests/bin/Debug/net8.0
+/src/EPR.Calculator.API/EPR.Calculator.Core.UnitTests/obj
