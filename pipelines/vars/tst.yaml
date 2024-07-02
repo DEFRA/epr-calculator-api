@@ -1,0 +1,6 @@
+variables:
+  azureSubscription: 'AZD-RWD-TST1'
+  docker.imageName: 'eprcalculatorapi'
+  acr.azureContainerRegistryName: 'tstrwdinfac1401'
+  acr.repositoryName: 'eprcalculatorapirepository'
+  serviceName: 'tstrwdwebwa1420'
