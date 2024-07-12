@@ -1,0 +1,34 @@
+In order to run the EF migrations we need to in always in sync
+
+*** Command to install the dotnet tool for Entity framework core ***
+
+dotnet tool install -g dotnet-ef
+
+**** Command to Run the created the Migrations ****
+
+dotnet ef migrations add init 
+
+or
+
+dotnet ef migrations add InitialCreate --output-dir Your/Directory
+
+**** Command to add a migration *****
+
+dotnet ef migrations add AddBlogCreatedTimestamp
+
+**** Command to remove a Migration *****
+
+dotnet ef migrations remove
+
+**** Listing Migrations *****
+
+dotnet ef migrations list
+
+**** Checking for Model changes *****
+
+dotnet ef migrations has-pending-model-changes
+
+
+***** Command to Update the migrations on the database *****
+
+dotnet ef database update
