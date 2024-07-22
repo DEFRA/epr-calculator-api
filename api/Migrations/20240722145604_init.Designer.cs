@@ -12,7 +12,7 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20240722133953_init")]
+    [Migration("20240722145604_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -459,7 +459,7 @@ namespace api.Migrations
             modelBuilder.Entity("api.Models.DefaultParameterSettingDetail", b =>
                 {
                     b.HasOne("api.Models.DefaultParameterSettingMaster", "DefaultParameterSettingMaster")
-                        .WithMany()
+                        .WithMany("Details")
                         .HasForeignKey("DefaultParameterSettingMasterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -473,6 +473,11 @@ namespace api.Migrations
                     b.Navigation("DefaultParameterSettingMaster");
 
                     b.Navigation("ParameterUniqueReference");
+                });
+
+            modelBuilder.Entity("api.Models.DefaultParameterSettingMaster", b =>
+                {
+                    b.Navigation("Details");
                 });
 #pragma warning restore 612, 618
         }

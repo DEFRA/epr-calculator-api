@@ -23,22 +23,21 @@ namespace api.Controllers
             var validator = new CreateDefaultParameterSettingDtoValidator();
             var validationResult = validator.Validate(createDefaultParameterDto);
 
-            if (validationResult?.IsInvalid != null)
+            if (validationResult != null && validationResult.IsInvalid)
             {
                 return BadRequest(validationResult.Errors);
             }
-
+            var defaultParamSettingMaster = new DefaultParameterSettingMaster
+            {
+                CreatedAt = DateTime.Now,
+                CreatedBy = "Testuser",
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null,
+                ParameterYear = createDefaultParameterDto.ParameterYear
+            };
+            this._context.DefaultParameterSettings.Add(defaultParamSettingMaster);
             foreach (var templateValue in createDefaultParameterDto.SchemeParameterTemplateValues)
             {
-                var defaultParamSettingMaster = new DefaultParameterSettingMaster
-                {
-                    CreatedAt = DateTime.Now,
-                    CreatedBy = "Testuser",
-                    EffectiveFrom = DateTime.Now,
-                    EffectiveTo = null,
-                    ParameterYear = createDefaultParameterDto.ParameterYear
-                };
-                this._context.DefaultParameterSettings.Add(defaultParamSettingMaster);
                 this._context.DefaultParameterSettingDetail.Add(new DefaultParameterSettingDetail
                 {
                     ParameterValue = templateValue.ParameterValue,
@@ -47,7 +46,7 @@ namespace api.Controllers
                 });
             }
             this._context.SaveChanges();
-            return new ObjectResult(createDefaultParameterDto) { StatusCode = StatusCodes.Status201Created };
+            return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
         }
 
         [HttpGet]

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.Extensions.Hosting;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace api.Models
 {
@@ -27,5 +28,7 @@ namespace api.Models
         [Column("created_at")]
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        public ICollection<DefaultParameterSettingDetail> Details { get; } = new List<DefaultParameterSettingDetail>();
     }
 }

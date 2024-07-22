@@ -1,5 +1,6 @@
 ﻿using api.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata;
 
 namespace api.Data
 {
@@ -19,6 +20,13 @@ namespace api.Data
             modelBuilder.Entity<DefaultParameterTemplateMaster>();
             modelBuilder.Entity<DefaultParameterSettingDetail>();
             modelBuilder.Entity<DefaultParameterSettingMaster>();
+
+            modelBuilder.Entity<DefaultParameterSettingMaster>()
+            .HasMany(e => e.Details)
+            .WithOne(e => e.DefaultParameterSettingMaster)
+            .HasForeignKey(e => e.DefaultParameterSettingMasterId)
+            .IsRequired(true);
+
             Seeder.Initialize(modelBuilder);
         }
     }
