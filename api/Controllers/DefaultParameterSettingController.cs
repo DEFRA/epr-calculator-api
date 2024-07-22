@@ -17,7 +17,7 @@ namespace api.Controllers
         }
 
         [HttpPost]
-        [Route("api/CreateDefaultParameterSetting")]
+        [Route("api/defaultParameterSetting")]
         public IActionResult Create([FromBody] CreateDefaultParameterSettingDto createDefaultParameterDto)
         {
             var validator = new CreateDefaultParameterSettingDtoValidator();
@@ -50,7 +50,7 @@ namespace api.Controllers
         }
 
         [HttpGet]
-        [Route("api/GetDefaultParameterSetting")]
+        [Route("api/defaultParameterSetting")]
         public IActionResult Get()
         {
             return Ok(new {Test = "This is not implemented!"});
