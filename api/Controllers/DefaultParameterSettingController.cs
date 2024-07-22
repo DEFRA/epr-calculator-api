@@ -1,7 +1,9 @@
 ﻿using api.Data;
 using api.Dtos;
 using api.Models;
+using api.Validators;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace api.Controllers
 {
@@ -18,6 +20,14 @@ namespace api.Controllers
         [Route("api/CreateDefaultParameterSetting")]
         public IActionResult Create([FromBody] CreateDefaultParameterSettingDto createDefaultParameterDto)
         {
+            var validator = new CreateDefaultParameterSettingDtoValidator();
+            var validationResult = validator.Validate(createDefaultParameterDto);
+
+            if (validationResult?.IsInvalid != null)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
             foreach (var templateValue in createDefaultParameterDto.SchemeParameterTemplateValues)
             {
                 var defaultParamSettingMaster = new DefaultParameterSettingMaster
