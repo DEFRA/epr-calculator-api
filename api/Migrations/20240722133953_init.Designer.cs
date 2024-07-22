@@ -12,7 +12,7 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20240722111032_init")]
+    [Migration("20240722133953_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -128,7 +128,7 @@ namespace api.Migrations
                     b.HasData(
                         new
                         {
-                            ParameterUniqueReferenceId = "COMC - AL",
+                            ParameterUniqueReferenceId = "COMC-AL",
                             ParameterCategory = "Communication costs",
                             ParameterType = "Aluminium",
                             ValidRangeFrom = 0m,
@@ -136,7 +136,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "COMC - FC",
+                            ParameterUniqueReferenceId = "COMC-FC",
                             ParameterCategory = "Communication costs",
                             ParameterType = "Fibre composite",
                             ValidRangeFrom = 0m,
@@ -144,7 +144,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "COMC - GL",
+                            ParameterUniqueReferenceId = "COMC-GL",
                             ParameterCategory = "Communication costs",
                             ParameterType = "Glass",
                             ValidRangeFrom = 0m,
@@ -152,7 +152,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "COMC - PC",
+                            ParameterUniqueReferenceId = "COMC-PC",
                             ParameterCategory = "Communication costs",
                             ParameterType = "Paper or card",
                             ValidRangeFrom = 0m,
@@ -160,7 +160,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "COMC - PL",
+                            ParameterUniqueReferenceId = "COMC-PL",
                             ParameterCategory = "Communication costs",
                             ParameterType = "Plastic",
                             ValidRangeFrom = 0m,
@@ -168,7 +168,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "COMC - ST",
+                            ParameterUniqueReferenceId = "COMC-ST",
                             ParameterCategory = "Communication costs",
                             ParameterType = "Steel",
                             ValidRangeFrom = 0m,
@@ -176,7 +176,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "COMC - WD",
+                            ParameterUniqueReferenceId = "COMC-WD",
                             ParameterCategory = "Communication costs",
                             ParameterType = "Wood",
                             ValidRangeFrom = 0m,
@@ -184,7 +184,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "COMC - OT",
+                            ParameterUniqueReferenceId = "COMC-OT",
                             ParameterCategory = "Communication costs",
                             ParameterType = "Other",
                             ValidRangeFrom = 0m,
@@ -192,7 +192,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "SAOC - ENG",
+                            ParameterUniqueReferenceId = "SAOC-ENG",
                             ParameterCategory = "Scheme administrator operating costs",
                             ParameterType = "England",
                             ValidRangeFrom = 0m,
@@ -200,7 +200,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "SAOC - WLS",
+                            ParameterUniqueReferenceId = "SAOC-WLS",
                             ParameterCategory = "Scheme administrator operating costs",
                             ParameterType = "Wales",
                             ValidRangeFrom = 0m,
@@ -208,7 +208,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "SAOC - SCT",
+                            ParameterUniqueReferenceId = "SAOC-SCT",
                             ParameterCategory = "Scheme administrator operating costs",
                             ParameterType = "Scotland",
                             ValidRangeFrom = 0m,
@@ -216,7 +216,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "SAOC - NIR",
+                            ParameterUniqueReferenceId = "SAOC-NIR",
                             ParameterCategory = "Scheme administrator operating costs",
                             ParameterType = "Northern Ireland",
                             ValidRangeFrom = 0m,
@@ -224,7 +224,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LAPC - ENG",
+                            ParameterUniqueReferenceId = "LAPC-ENG",
                             ParameterCategory = "Local authority data preparation costs",
                             ParameterType = "England",
                             ValidRangeFrom = 0m,
@@ -232,7 +232,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LAPC - WLS",
+                            ParameterUniqueReferenceId = "LAPC-WLS",
                             ParameterCategory = "Local authority data preparation costs",
                             ParameterType = "Wales",
                             ValidRangeFrom = 0m,
@@ -240,7 +240,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LAPC - SCT",
+                            ParameterUniqueReferenceId = "LAPC-SCT",
                             ParameterCategory = "Local authority data preparation costs",
                             ParameterType = "Scotland",
                             ValidRangeFrom = 0m,
@@ -248,7 +248,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LAPC - NIR",
+                            ParameterUniqueReferenceId = "LAPC-NIR",
                             ParameterCategory = "Local authority data preparation costs",
                             ParameterType = "Northern Ireland",
                             ValidRangeFrom = 0m,
@@ -256,7 +256,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "SCSC - ENG",
+                            ParameterUniqueReferenceId = "SCSC-ENG",
                             ParameterCategory = "Scheme setup costs",
                             ParameterType = "England",
                             ValidRangeFrom = 0m,
@@ -264,7 +264,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "SCSC - WLS",
+                            ParameterUniqueReferenceId = "SCSC-WLS",
                             ParameterCategory = "Scheme setup costs",
                             ParameterType = "Wales",
                             ValidRangeFrom = 0m,
@@ -272,7 +272,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "SCSC - SCT",
+                            ParameterUniqueReferenceId = "SCSC-SCT",
                             ParameterCategory = "Scheme setup costs",
                             ParameterType = "Scotland",
                             ValidRangeFrom = 0m,
@@ -280,7 +280,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "SCSC - NIR",
+                            ParameterUniqueReferenceId = "SCSC-NIR",
                             ParameterCategory = "Scheme setup costs",
                             ParameterType = "Northern Ireland",
                             ValidRangeFrom = 0m,
@@ -288,7 +288,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LRET - AL",
+                            ParameterUniqueReferenceId = "LRET-AL",
                             ParameterCategory = "Late reporting tonnage",
                             ParameterType = "Aluminium",
                             ValidRangeFrom = 0m,
@@ -296,7 +296,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LRET - FC",
+                            ParameterUniqueReferenceId = "LRET-FC",
                             ParameterCategory = "Late reporting tonnage",
                             ParameterType = "Aluminium",
                             ValidRangeFrom = 0m,
@@ -304,7 +304,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LRET - GL",
+                            ParameterUniqueReferenceId = "LRET-GL",
                             ParameterCategory = "Late reporting tonnage",
                             ParameterType = "Aluminium",
                             ValidRangeFrom = 0m,
@@ -312,7 +312,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LRET - PC",
+                            ParameterUniqueReferenceId = "LRET-PC",
                             ParameterCategory = "Late reporting tonnage",
                             ParameterType = "Aluminium",
                             ValidRangeFrom = 0m,
@@ -320,7 +320,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LRET - PL",
+                            ParameterUniqueReferenceId = "LRET-PL",
                             ParameterCategory = "Late reporting tonnage",
                             ParameterType = "Aluminium",
                             ValidRangeFrom = 0m,
@@ -328,7 +328,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LRET - ST",
+                            ParameterUniqueReferenceId = "LRET-ST",
                             ParameterCategory = "Late reporting tonnage",
                             ParameterType = "Aluminium",
                             ValidRangeFrom = 0m,
@@ -336,7 +336,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LRET - WD",
+                            ParameterUniqueReferenceId = "LRET-WD",
                             ParameterCategory = "Late reporting tonnage",
                             ParameterType = "Aluminium",
                             ValidRangeFrom = 0m,
@@ -344,7 +344,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LRET - OT",
+                            ParameterUniqueReferenceId = "LRET-OT",
                             ParameterCategory = "Late reporting tonnage",
                             ParameterType = "Aluminium",
                             ValidRangeFrom = 0m,
@@ -352,7 +352,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "BADEBT - P",
+                            ParameterUniqueReferenceId = "BADEBT-P",
                             ParameterCategory = "Communication costs",
                             ParameterType = "Aluminium",
                             ValidRangeFrom = 0m,
@@ -360,7 +360,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "MATT - AI",
+                            ParameterUniqueReferenceId = "MATT-AI",
                             ParameterCategory = "Materiality threshold",
                             ParameterType = "Amount Increase",
                             ValidRangeFrom = 0m,
@@ -368,7 +368,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "MATT - AD",
+                            ParameterUniqueReferenceId = "MATT-AD",
                             ParameterCategory = "Materiality threshold",
                             ParameterType = "Amount Decrease",
                             ValidRangeFrom = 0m,
@@ -376,7 +376,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "MATT - PI",
+                            ParameterUniqueReferenceId = "MATT-PI",
                             ParameterCategory = "Materiality threshold",
                             ParameterType = "Percent Increase",
                             ValidRangeFrom = 0m,
@@ -384,7 +384,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "MATT - PD",
+                            ParameterUniqueReferenceId = "MATT-PD",
                             ParameterCategory = "Materiality threshold",
                             ParameterType = "Percent Decrease",
                             ValidRangeFrom = 0m,
@@ -392,7 +392,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "TONT - AI",
+                            ParameterUniqueReferenceId = "TONT-AI",
                             ParameterCategory = "Tonnage change threshold",
                             ParameterType = "Amount Increase",
                             ValidRangeFrom = 0m,
@@ -400,7 +400,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "TONT - DI",
+                            ParameterUniqueReferenceId = "TONT-DI",
                             ParameterCategory = "Tonnage change threshold",
                             ParameterType = "Amount Decrease",
                             ValidRangeFrom = 0m,
@@ -408,7 +408,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "TONT - PI",
+                            ParameterUniqueReferenceId = "TONT-PI",
                             ParameterCategory = "Tonnage change threshold",
                             ParameterType = "Percent Increase",
                             ValidRangeFrom = 0m,
@@ -416,7 +416,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "TONT - PD",
+                            ParameterUniqueReferenceId = "TONT-PD",
                             ParameterCategory = "Tonnage change threshold",
                             ParameterType = "Percent Decrease",
                             ValidRangeFrom = 0m,
@@ -424,7 +424,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LEVY - ENG",
+                            ParameterUniqueReferenceId = "LEVY-ENG",
                             ParameterCategory = "Levy",
                             ParameterType = "England",
                             ValidRangeFrom = 0m,
@@ -432,7 +432,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LEVY - WLS",
+                            ParameterUniqueReferenceId = "LEVY-WLS",
                             ParameterCategory = "Levy",
                             ParameterType = "Wales",
                             ValidRangeFrom = 0m,
@@ -440,7 +440,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LEVY - SCT",
+                            ParameterUniqueReferenceId = "LEVY-SCT",
                             ParameterCategory = "Levy",
                             ParameterType = "Scotland",
                             ValidRangeFrom = 0m,
@@ -448,7 +448,7 @@ namespace api.Migrations
                         },
                         new
                         {
-                            ParameterUniqueReferenceId = "LEVY - NIR",
+                            ParameterUniqueReferenceId = "LEVY-NIR",
                             ParameterCategory = "Levy",
                             ParameterType = "Northern Ireland",
                             ValidRangeFrom = 0m,
