@@ -27,25 +27,42 @@ namespace api.Controllers
             {
                 return BadRequest(validationResult.Errors);
             }
-            var defaultParamSettingMaster = new DefaultParameterSettingMaster
+            using (var transaction = _context.Database.BeginTransaction())
             {
-                CreatedAt = DateTime.Now,
-                CreatedBy = "Testuser",
-                EffectiveFrom = DateTime.Now,
-                EffectiveTo = null,
-                ParameterYear = createDefaultParameterDto.ParameterYear
-            };
-            this._context.DefaultParameterSettings.Add(defaultParamSettingMaster);
-            foreach (var templateValue in createDefaultParameterDto.SchemeParameterTemplateValues)
-            {
-                this._context.DefaultParameterSettingDetail.Add(new DefaultParameterSettingDetail
+                try
                 {
-                    ParameterValue = templateValue.ParameterValue,
-                    ParameterUniqueReferenceId = templateValue.ParameterUniqueReferenceId,
-                    DefaultParameterSettingMaster = defaultParamSettingMaster
-                });
+                    var oldDefaultSettings = this._context.DefaultParameterSettings.Where(x => x.EffectiveTo == null).ToList();
+                    oldDefaultSettings.ForEach(x => { x.EffectiveTo = DateTime.Now; });
+
+                    var defaultParamSettingMaster = new DefaultParameterSettingMaster
+                    {
+                        CreatedAt = DateTime.Now,
+                        CreatedBy = "Testuser",
+                        EffectiveFrom = DateTime.Now,
+                        EffectiveTo = null,
+                        ParameterYear = createDefaultParameterDto.ParameterYear
+                    };
+                    this._context.DefaultParameterSettings.Add(defaultParamSettingMaster);
+
+                    foreach (var templateValue in createDefaultParameterDto.SchemeParameterTemplateValues)
+                    {
+                        this._context.DefaultParameterSettingDetail.Add(new DefaultParameterSettingDetail
+                        {
+                            ParameterValue = templateValue.ParameterValue,
+                            ParameterUniqueReferenceId = templateValue.ParameterUniqueReferenceId,
+                            DefaultParameterSettingMaster = defaultParamSettingMaster
+                        });
+                    }
+                    this._context.SaveChanges();
+                    transaction.Commit();
+                }
+                catch (Exception exception)
+                {
+                    transaction.Rollback();
+                    return StatusCode(StatusCodes.Status500InternalServerError, exception);
+                }
             }
-            this._context.SaveChanges();
+                
             return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
         }
 
