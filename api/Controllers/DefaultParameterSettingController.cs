@@ -22,11 +22,11 @@ namespace api.Controllers
         {
             var validator = new CreateDefaultParameterSettingDtoValidator();
             var validationResult = validator.Validate(createDefaultParameterDto);
-
             if (validationResult != null && validationResult.IsInvalid)
             {
                 return BadRequest(validationResult.Errors);
             }
+
             using (var transaction = _context.Database.BeginTransaction())
             {
                 try
