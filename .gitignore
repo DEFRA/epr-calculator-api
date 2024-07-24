@@ -6,3 +6,6 @@ api/obj/project.nuget.cache
 /.vs/EPR.Calculator.API
 /EPR.Calculator.API/bin
 /EPR.Calculator.API/obj
+/EPR.Calculator.API.UnitTests/bin/Debug/net8.0
+/EPR.Calculator.API.UnitTests/obj/Debug/net8.0
+/EPR.Calculator.API.UnitTests/obj
