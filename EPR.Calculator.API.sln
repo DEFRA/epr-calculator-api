@@ -5,7 +5,9 @@ VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EPR.Calculator.API", "EPR.Calculator.API\EPR.Calculator.API.csproj", "{6F17BA20-DBB1-4354-8D71-3AA831450CE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPR.Calculator.API.UnitTests", "EPR.Calculator.API.UnitTests\EPR.Calculator.API.UnitTests.csproj", "{51705AC9-C603-427A-A71E-340524E9A997}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EPR.Calculator.API.UnitTests", "EPR.Calculator.API.UnitTests\EPR.Calculator.API.UnitTests.csproj", "{51705AC9-C603-427A-A71E-340524E9A997}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{103BCD9B-8BFE-4100-8977-E66A1731BC39}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +26,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6F17BA20-DBB1-4354-8D71-3AA831450CE7} = {103BCD9B-8BFE-4100-8977-E66A1731BC39}
+		{51705AC9-C603-427A-A71E-340524E9A997} = {103BCD9B-8BFE-4100-8977-E66A1731BC39}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B22EC9BC-2DDC-48E0-8FFB-CD4E3C95B283}
