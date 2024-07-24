@@ -9,3 +9,4 @@ api/obj/project.nuget.cache
 /EPR.Calculator.API.UnitTests/bin/Debug/net8.0
 /EPR.Calculator.API.UnitTests/obj/Debug/net8.0
 /EPR.Calculator.API.UnitTests/obj
+/EPR.Calculator.API.UnitTests/bin/Release/net8.0
