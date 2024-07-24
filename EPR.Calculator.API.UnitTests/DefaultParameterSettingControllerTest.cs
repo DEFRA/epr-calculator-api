@@ -1,9 +1,10 @@
 ﻿using api.Dtos;
 using Microsoft.AspNetCore.Mvc;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace api.Tests.Controllers
 {
+    [TestClass]
     public class DefaultParameterSettingControllerTest : BaseControllerTest
     {
         private static string[] _uniqueReferences = {"BADEBT-P", "COMC-AL", "COMC-FC", "COMC-GL",
@@ -16,7 +17,7 @@ namespace api.Tests.Controllers
                                                     "SAOC-SCT", "SAOC-WLS", "SCSC-ENG","SCSC-NIR", "SCSC-SCT",
                                                     "SCSC-WLS", "TONT-AI", "TONT-DI", "TONT-PD","TONT-PI" };
 
-        [Test]
+        [TestMethod]
         public void CreateTest_With41_Records()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValue>();
@@ -34,14 +35,14 @@ namespace api.Tests.Controllers
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
             var actionResult = _controller.Create(createDefaultParameterDto) as ObjectResult;
-            Assert.That(actionResult.StatusCode, Is.EqualTo(201));
+            Assert.AreEqual(actionResult.StatusCode, 201);
 
-            Assert.That(_dbContext.DefaultParameterSettingDetail.Count(), Is.EqualTo(41));
-            Assert.That(_dbContext.DefaultParameterSettings.Count(), Is.EqualTo(1));
-            Assert.That(_dbContext.DefaultParameterTemplateMasterList.Count(), Is.EqualTo(41));
+            Assert.AreEqual(_dbContext.DefaultParameterSettingDetail.Count(), 41);
+            Assert.AreEqual(_dbContext.DefaultParameterSettings.Count(), 1);
+            Assert.AreEqual(_dbContext.DefaultParameterTemplateMasterList.Count(), 41);
         }
 
-        [Test]
+        [TestMethod]
         public void CreateTest_With41_Records_When_Existing_Updates()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValue>();
@@ -59,17 +60,17 @@ namespace api.Tests.Controllers
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
             var actionResult1 = _controller.Create(createDefaultParameterDto) as ObjectResult;
-            Assert.That(actionResult1.StatusCode, Is.EqualTo(201));
+            Assert.AreEqual(actionResult1.StatusCode, 201);
 
             var actionResult2 = _controller.Create(createDefaultParameterDto) as ObjectResult;
-            Assert.That(actionResult2.StatusCode, Is.EqualTo(201));
+            Assert.AreEqual(actionResult2.StatusCode, 201);
 
-            Assert.That(_dbContext.DefaultParameterSettingDetail.Count(), Is.EqualTo(82));
-            Assert.That(_dbContext.DefaultParameterSettings.Count(), Is.EqualTo(2));
-            Assert.That(_dbContext.DefaultParameterTemplateMasterList.Count(), Is.EqualTo(41));
+            Assert.AreEqual(_dbContext.DefaultParameterSettingDetail.Count(), 82);
+            Assert.AreEqual(_dbContext.DefaultParameterSettings.Count(), 2);
+            Assert.AreEqual(_dbContext.DefaultParameterTemplateMasterList.Count(), 41);
 
-            Assert.That(_dbContext.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2), Is.EqualTo(41));
-            Assert.That(_dbContext.DefaultParameterSettings.Count(a => a.EffectiveTo == null), Is.EqualTo(1));
+            Assert.AreEqual(_dbContext.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2), 41);
+            Assert.AreEqual(_dbContext.DefaultParameterSettings.Count(a => a.EffectiveTo == null), 1);
         }
     }
 }

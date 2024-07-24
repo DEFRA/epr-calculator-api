@@ -2,7 +2,7 @@
 using api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace api.Tests.Controllers
 {
@@ -16,7 +16,7 @@ namespace api.Tests.Controllers
             .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
 
-        [SetUp]
+        [TestInitialize]
         public void SetUp()
         {
             _dbContext = new ApplicationDBContext(_dbContextOptions);
@@ -25,7 +25,7 @@ namespace api.Tests.Controllers
             _controller = new DefaultParameterSettingController(_dbContext);
         }
 
-        [TearDown]
+        [TestCleanup]
         public void TearDown()
         {
             _dbContext.Database.EnsureDeleted();
