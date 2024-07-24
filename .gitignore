@@ -3,3 +3,6 @@ api/obj/project.nuget.cache
 /api/obj/Debug/net8.0
 /.vs/epr-calculator-api
 /.vs/ProjectEvaluation
+/.vs/EPR.Calculator.API
+/EPR.Calculator.API/bin
+/EPR.Calculator.API/obj
