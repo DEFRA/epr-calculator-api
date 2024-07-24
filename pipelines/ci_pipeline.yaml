@@ -31,9 +31,9 @@ variables:
   - name: solutionFolder
     value: src
   - name: projectFolder
-    value: EPR.Calculator.Api
+    value: EPR.Calculator.API
   - name: testProjectFolder
-    value: EPR.Calculator.Api/EPR.Calculator.Api.UnitTests
+    value: EPR.Calculator.API/EPR.Calculator.API.UnitTests
   - name: sonarQubeProjectKey
     value: epr-calculator-api
   - name: sonarQubeProjectName
