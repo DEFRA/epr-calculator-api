@@ -20,6 +20,7 @@ RUN dotnet publish "EPR.Calculator.API.csproj" -c Release /p:AzureBuild=true -o 
 
 # RUN dotnet tool install --global dotnet-ef --version 8.0.7
 # ENV PATH="$PATH:/root/.dotnet/tools"
+RUN dotnet tool install -g dotnet-ef --version 8.0.7
 RUN dotnet ef database update
 
 FROM base AS final
