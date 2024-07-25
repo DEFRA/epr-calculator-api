@@ -6,7 +6,7 @@ EXPOSE 8080
 RUN apk update && apk --no-cache add icu-libs
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=0
 
-FROM defradigital/dotnetcore-development:dotnet6.0 AS build
+FROM defradigital/dotnetcore-development:dotnet8.0 AS build
 USER root
 WORKDIR /src
 COPY ["EPR.Calculator.API/EPR.Calculator.API.csproj", "EPR.Calculator.API/"]
