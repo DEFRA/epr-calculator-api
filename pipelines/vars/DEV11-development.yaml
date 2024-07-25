@@ -3,7 +3,7 @@ variables:
   docker.imageName: 'eprcalculatorapi'
   acr.azureContainerRegistryName: 'devrwdinfac1401'
   acr.repositoryName: 'eprcalculatorapirepository'
-  serviceName: 'devrwdinfcab401'
+  serviceName: 'DEVRWDWEBWAB422'
   kvName: DEVRWDINFKV1401
   sqlDBserver: 'devrwddbssq1401.database.windows.net'
   sqlDB: 'PayCal'
