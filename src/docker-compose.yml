@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  epr.calculator.api:
+    image: ${DOCKER_REGISTRY-}eprcalculatorapi
+    build:
+      context: .
+      dockerfile: EPR.Calculator.API/Dockerfile
