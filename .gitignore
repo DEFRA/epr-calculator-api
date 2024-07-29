@@ -18,3 +18,5 @@ api/obj/project.nuget.cache
 /src/.vs/EPR.Calculator.API/v17
 /src/.vs/EPR.Calculator.API/DesignTimeBuild
 /src/.vs
+/src/bin/Debug
+/src/obj
