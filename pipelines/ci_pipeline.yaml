@@ -33,7 +33,7 @@ variables:
   - name: projectFolder
     value: EPR.Calculator.API
   - name: testProjectFolder
-    value: EPR.Calculator.API/EPR.Calculator.API.UnitTests
+    value: EPR.Calculator.API.UnitTests
   - name: DataFolder
     value: EPR.Calculator.API.Data
   - name: sonarQubeProjectKey
