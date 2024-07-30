@@ -18,7 +18,10 @@ namespace EPR.Calculator.API.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer();
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer();
+            }
         } 
 
        // public ApplicationDBContext(DbContextOptions dbContextOptions) : base(dbContextOptions) { }
