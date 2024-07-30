@@ -1,0 +1,15 @@
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\bin\Debug\net8.0\EPR.Calculator.API.Data.deps.json
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\bin\Debug\net8.0\EPR.Calculator.API.Data.runtimeconfig.json
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\bin\Debug\net8.0\EPR.Calculator.API.Data.dll
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\bin\Debug\net8.0\EPR.Calculator.API.Data.pdb
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\obj\Debug\net8.0\EPR.Calculator.API.Data.csproj.AssemblyReference.cache
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\obj\Debug\net8.0\EPR.Calculator.API.Data.GeneratedMSBuildEditorConfig.editorconfig
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\obj\Debug\net8.0\EPR.Calculator.API.Data.AssemblyInfoInputs.cache
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\obj\Debug\net8.0\EPR.Calculator.API.Data.AssemblyInfo.cs
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\obj\Debug\net8.0\EPR.Calculator.API.Data.csproj.CoreCompileInputs.cache
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\obj\Debug\net8.0\EPR.Calculator.API.Data.sourcelink.json
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\obj\Debug\net8.0\EPR.Calculator.API.Data.dll
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\obj\Debug\net8.0\refint\EPR.Calculator.API.Data.dll
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\obj\Debug\net8.0\EPR.Calculator.API.Data.pdb
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\obj\Debug\net8.0\EPR.Calculator.API.Data.genruntimeconfig.cache
+C:\GitRepo\epr-calculator-api\src\EPR.Calculator.API.Data\obj\Debug\net8.0\ref\EPR.Calculator.API.Data.dll
