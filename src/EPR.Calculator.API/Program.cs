@@ -1,4 +1,4 @@
-using api.Data;
+using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

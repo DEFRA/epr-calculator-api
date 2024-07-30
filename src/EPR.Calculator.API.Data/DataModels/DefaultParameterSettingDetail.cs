@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
-namespace api.Models
+namespace EPR.Calculator.API.Data.DataModels
 {
     [Table("default_parameter_setting_detail")]
     public class DefaultParameterSettingDetail

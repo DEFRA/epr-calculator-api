@@ -6,11 +6,7 @@ dotnet tool install -g dotnet-ef
 
 **** Command to Run the created the Migrations ****
 
-dotnet ef migrations add init 
-
-or
-
-dotnet ef migrations add InitialCreate --output-dir Your/Directory
+dotnet ef migrations add AddInitialMigration --startup-project EPR.Calculator.API --project EPR.Calculator.API.Data
 
 **** Command to add a migration *****
 
@@ -28,7 +24,6 @@ dotnet ef migrations list
 
 dotnet ef migrations has-pending-model-changes
 
-
 ***** Command to Update the migrations on the database *****
 
-dotnet ef database update
+dotnet ef database update --verbose --project "EPR.Calculator.API.Data" --startup-project "EPR.Calculator.API"

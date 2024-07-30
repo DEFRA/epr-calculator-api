@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
-namespace api.Models
+namespace EPR.Calculator.API.Data.DataModels
 {
     [Table("default_parameter_template_master")]
     public class DefaultParameterTemplateMaster

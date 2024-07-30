@@ -1,7 +1,6 @@
-﻿using Microsoft.Extensions.Hosting;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-namespace api.Models
+namespace EPR.Calculator.API.Data.DataModels
 {
     [Table("default_parameter_setting_master")]
     public class DefaultParameterSettingMaster

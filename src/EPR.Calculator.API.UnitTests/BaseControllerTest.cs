@@ -1,5 +1,5 @@
-﻿using api.Controllers;
-using api.Data;
+﻿using EPR.Calculator.API.Controllers;
+using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

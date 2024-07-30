@@ -1,7 +1,7 @@
-﻿using api.Models;
+﻿using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace api.Data
+namespace EPR.Calculator.API.Data.DataSeeder
 {
     public static class Seeder
     {

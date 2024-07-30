@@ -1,11 +1,10 @@
-﻿using api.Data;
-using api.Dtos;
-using api.Models;
+﻿using api.Dtos;
 using api.Validators;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 
-namespace api.Controllers
+namespace EPR.Calculator.API.Controllers
 {
     public class DefaultParameterSettingController : ControllerBase
     {
