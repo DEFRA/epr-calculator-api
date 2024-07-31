@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "composeLaunchAction": "LaunchBrowser",
+      "composeLaunchServiceName": "epr.calculator.api",
+      "composeLaunchUrl": "{Scheme}://localhost:{ServicePort}/swagger",
+      "serviceActions": {
+        "devrwddbssq1401.database.windows.net": "StartWithoutDebugging",
+        "epr.calculator.api": "StartDebugging"
+      }
+    }
+  }
+}

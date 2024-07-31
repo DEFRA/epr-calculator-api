@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+  epr.calculator.api:
+    image: ${DOCKER_REGISTRY-}eprcalculatorapi
+    build:
+      context: .
+      dockerfile: EPR.Calculator.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=tcp:devrwddbssq1401.database.windows.net,1433;Initial Catalog=PayCal;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication="Active Directory Managed Identity";
+    depends_on:
+      - devrwddbssq1401.database.windows.net
