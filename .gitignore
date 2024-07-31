@@ -12,6 +12,7 @@ api/obj/project.nuget.cache
 /EPR.Calculator.API.UnitTests/bin/Release/net8.0
 /src/.vs/EPR.Calculator.API/FileContentIndex
 /src/EPR.Calculator.API/bin
+/src/EPR.Calculator.API.Data/bin
 /src/EPR.Calculator.API/obj
 /src/EPR.Calculator.API.UnitTests/bin
 /src/EPR.Calculator.API.UnitTests/obj
