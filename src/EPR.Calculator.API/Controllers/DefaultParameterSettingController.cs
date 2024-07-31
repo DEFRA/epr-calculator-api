@@ -3,6 +3,8 @@ using api.Validators;
 using Microsoft.AspNetCore.Mvc;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using api.Mappers;
+using Newtonsoft.Json;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -66,10 +68,39 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("api/defaultParameterSetting")]
-        public IActionResult Get()
+        [Route("api/defaultParameterSetting/parameterYear")]
+        public IActionResult Get(string parameterYear)
         {
-            return Ok(new {Test = "This is not implemented!"});
+            if (string.IsNullOrEmpty(parameterYear))
+            {
+                // Return 400 error if the year is null or empty
+                return new ObjectResult("The input value cannot be null or empty. Please provide a valid value and try again") { StatusCode = StatusCodes.Status400BadRequest };
+            }
+
+            // Fetch the data based on the year passed to the API
+            var currentDefaultSetting = _context.DefaultParameterSettings
+                .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == parameterYear);
+
+            if (currentDefaultSetting == null)
+            {
+                // Return 404 error if the year is not found
+                return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
+            }
+
+            try
+            {
+                var _pramSettingDetails = _context.DefaultParameterSettingDetail.ToList();
+                var _templateDetails = _context.DefaultParameterTemplateMasterList;
+                var schemeParameters = CreateDefaultParameterSettingMapper.Map(currentDefaultSetting, _templateDetails);
+                // Return data in JSON format
+                var json = JsonConvert.SerializeObject(schemeParameters, Formatting.Indented);
+                return new ObjectResult(schemeParameters) { StatusCode = StatusCodes.Status200OK };
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+
         }
     }
 }
