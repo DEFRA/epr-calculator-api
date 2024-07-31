@@ -1,4 +1,4 @@
-﻿using api.Dtos;
+﻿using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -20,10 +20,10 @@ namespace api.Tests.Controllers
         [TestMethod]
         public void CreateTest_With41_Records()
         {
-            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValue>();
+            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             foreach (var item in _uniqueReferences)
             {
-                schemeParameterTemplateValues.Add(new SchemeParameterTemplateValue
+                schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
                 {
                     ParameterValue = 90,
                     ParameterUniqueReferenceId = item
@@ -45,10 +45,10 @@ namespace api.Tests.Controllers
         [TestMethod]
         public void CreateTest_With41_Records_When_Existing_Updates()
         {
-            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValue>();
+            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             foreach (var item in _uniqueReferences)
             {
-                schemeParameterTemplateValues.Add(new SchemeParameterTemplateValue
+                schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
                 {
                     ParameterValue = 90,
                     ParameterUniqueReferenceId = item

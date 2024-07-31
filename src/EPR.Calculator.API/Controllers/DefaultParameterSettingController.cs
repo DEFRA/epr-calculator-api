@@ -1,4 +1,4 @@
-﻿using api.Dtos;
+﻿using EPR.Calculator.API.Dtos;
 using api.Validators;
 using Microsoft.AspNetCore.Mvc;
 using EPR.Calculator.API.Data;
@@ -19,7 +19,7 @@ namespace EPR.Calculator.API.Controllers
         [Route("api/defaultParameterSetting")]
         public IActionResult Create([FromBody] CreateDefaultParameterSettingDto createDefaultParameterDto)
         {
-            var validator = new CreateDefaultParameterSettingDtoValidator();
+            var validator = new CreateDefaultParameterSettingDtoValidator(this._context);
             var validationResult = validator.Validate(createDefaultParameterDto);
             if (validationResult != null && validationResult.IsInvalid)
             {

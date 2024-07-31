@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace api.Dtos
+namespace EPR.Calculator.API.Dtos
 {
     public class DefaultParameterSettingDetailDto
     {
