@@ -38,7 +38,7 @@ namespace EPR.Calculator.API.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
+            // Down is not needed for this as this is a Data seed table and not a Transaction table
         }
     }
 }
