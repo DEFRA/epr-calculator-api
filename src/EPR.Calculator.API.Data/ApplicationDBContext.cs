@@ -6,11 +6,9 @@ namespace EPR.Calculator.API.Data
 {
     public class ApplicationDBContext : DbContext
     {
-
         public ApplicationDBContext()
         {
         }
-
 
         public ApplicationDBContext(DbContextOptions options) : base(options)
         {
@@ -23,8 +21,6 @@ namespace EPR.Calculator.API.Data
                 optionsBuilder.UseSqlServer();
             }
         } 
-
-       // public ApplicationDBContext(DbContextOptions dbContextOptions) : base(dbContextOptions) { }
 
         public DbSet<DefaultParameterSettingMaster> DefaultParameterSettings { get; set; }
 
