@@ -5,35 +5,16 @@ using System.Text;
 
 namespace api.Validators
 {
-    public class CreateDefaultParameterSettingDtoValidator
+    public class CreateDefaultParameterDataValidator
     {
         private readonly ApplicationDBContext _context;
-        public CreateDefaultParameterSettingDtoValidator(ApplicationDBContext context)
+        public CreateDefaultParameterDataValidator(ApplicationDBContext context)
         {
             _context = context;
         }
         public ValidationResultDto Validate(CreateDefaultParameterSettingDto createDefaultParameterSettingDto)
         {
             var validationResult = new ValidationResultDto();
-
-            if (string.IsNullOrEmpty(createDefaultParameterSettingDto?.ParameterYear))
-            {
-                var error = new ErrorDto
-                {
-                    Message = "ParameterYear is mandatory",
-                    Description = ""
-                };
-            }
-
-            if (createDefaultParameterSettingDto?.SchemeParameterTemplateValues.Count() != 41)
-            {
-                var error = new ErrorDto
-                {
-                    Message = "SchemeParameterTemplateValues should have a count of 41",
-                    Description = ""
-                };
-                validationResult.Errors.Add(error);
-            }
 
             var errors = ValidateByValues(createDefaultParameterSettingDto);
             validationResult.Errors.AddRange(errors);
