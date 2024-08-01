@@ -92,9 +92,6 @@ namespace EPR.Calculator.API.Controllers
                 var _pramSettingDetails = _context.DefaultParameterSettingDetail.ToList();
                 var _templateDetails = _context.DefaultParameterTemplateMasterList;
                 var schemeParameters = CreateDefaultParameterSettingMapper.Map(currentDefaultSetting, _templateDetails);
-
-                // Return data in JSON format
-                var json = JsonConvert.SerializeObject(schemeParameters, Formatting.Indented);
                 return new ObjectResult(schemeParameters) { StatusCode = StatusCodes.Status200OK };
             }
             catch (Exception exception)

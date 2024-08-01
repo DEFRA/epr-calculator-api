@@ -1,8 +1,10 @@
 ﻿using api.Dtos;
 using api.Mappers;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.UnitTests.Moq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace api.Tests.Controllers
@@ -10,15 +12,7 @@ namespace api.Tests.Controllers
     [TestClass]
     public class CreateDefaultParameterSettingMapper : BaseControllerTest
     {
-        private static string[] _uniqueReferences = {"BADEBT-P", "COMC-AL", "COMC-FC", "COMC-GL",
-                                                     "COMC-OT", "COMC-PC", "COMC-PL", "COMC-ST",
-                                                     "COMC-WD", "LAPC-ENG","LAPC-NIR", "LAPC-SCT",
-                                                    "LAPC-WLS", "LEVY-ENG", "LEVY-NIR", "LEVY-SCT", "LEVY-WLS",
-                                                    "LRET-AL", "LRET-FC", "LRET-GL", "LRET-OT",
-                                                    "LRET-PC", "LRET-PL", "LRET-ST", "LRET-WD", "MATT-AD",
-                                                    "MATT-AI", "MATT-PD", "MATT-PI", "SAOC-ENG", "SAOC-NIR",
-                                                    "SAOC-SCT", "SAOC-WLS", "SCSC-ENG","SCSC-NIR", "SCSC-SCT",
-                                                    "SCSC-WLS", "TONT-AI", "TONT-DI", "TONT-PD","TONT-PI" };
+        String[] _uniqueReferences = CreateDefaultParameterMoqData._uniqueReferences;
 
         [TestMethod]
         public void Get_Required_ResultSet_WithDefaultSchemeParametersDto()

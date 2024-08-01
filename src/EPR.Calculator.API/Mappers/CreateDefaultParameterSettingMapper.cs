@@ -23,8 +23,8 @@ namespace api.Mappers
                     CreatedAt = defaultParameterSettingMaster.CreatedAt,
                     DefaultParameterSettingMasterId = item.Id,
                     ParameterUniqueRef = item.ParameterUniqueReferenceId,
-                    ParameterType = defaultParameterTemplate.FirstOrDefault(x => x.ParameterUniqueReferenceId == item.ParameterUniqueReferenceId)?.ParameterType,
-                    ParameterCategory = defaultParameterTemplate.FirstOrDefault(x => x.ParameterUniqueReferenceId == item.ParameterUniqueReferenceId)?.ParameterCategory,
+                    ParameterType = defaultParameterTemplate.Single(x => x.ParameterUniqueReferenceId == item.ParameterUniqueReferenceId)?.ParameterType,
+                    ParameterCategory = defaultParameterTemplate.Single(x => x.ParameterUniqueReferenceId == item.ParameterUniqueReferenceId)?.ParameterCategory,
                     ParameterValue = item.ParameterValue
                 };
 
