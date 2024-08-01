@@ -104,7 +104,7 @@ namespace api.Tests.Controllers
             var actionResult1 = _controller.Get("2024-25") as ObjectResult;
 
             //Assert
-            var okResult=actionResult1 as ObjectResult;
+            var okResult = actionResult1 as ObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(okResult.StatusCode, 200);
 
@@ -138,7 +138,7 @@ namespace api.Tests.Controllers
                 ParameterValue = 90m,
             };
 
-            // Return 400 error if the year is null or empty
+            // Return 404 error if the year does not exist
             //Act
             var result = _controller.Get("2028-25");
             //Assert
@@ -148,9 +148,40 @@ namespace api.Tests.Controllers
 
         }
 
+        [TestMethod]
+        public void GetSchemeParameter_Return_400_Error_WithN_No_YearSupplied()
+        {
+            DataPostCall();
+
+            var tempdateData = new DefaultSchemeParametersDto()
+            {
+                Id = 1,
+                ParameterYear = "2024-25",
+                EffectiveFrom = DateTime.Now,
+
+                EffectiveTo = null,
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+
+                DefaultParameterSettingMasterId = 1,
+                ParameterUniqueRef = "BADEBT-P",
+                ParameterType = "Aluminium",
+                ParameterCategory = "Communication costs",
+                ParameterValue = 90m,
+            };
+
+            // Return 400 error if the year is null or empty
+            //Act
+            var result = _controller.Get("");
+            //Assert
+            var okResult = result as ObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(okResult.StatusCode, 400);
+
+        }
 
         // Private Methods
-        private void DataPostCall()
+        public void DataPostCall()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValue>();
             foreach (var item in _uniqueReferences)
@@ -167,8 +198,6 @@ namespace api.Tests.Controllers
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
             var actionResult = _controller.Create(createDefaultParameterDto) as ObjectResult;
-
-
         }
     }
 }

@@ -63,13 +63,13 @@ namespace EPR.Calculator.API.Controllers
                     return StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
             }
-                
+
             return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
         }
 
         [HttpGet]
-        [Route("api/defaultParameterSetting/parameterYear")]
-        public IActionResult Get(string parameterYear)
+        [Route("api/defaultParameterSetting/{parameterYear}")]
+        public IActionResult Get([FromRoute] string parameterYear)
         {
             if (string.IsNullOrEmpty(parameterYear))
             {
