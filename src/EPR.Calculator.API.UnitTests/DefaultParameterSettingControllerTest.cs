@@ -15,7 +15,7 @@ namespace api.Tests.Controllers
                                                     "LRET-PC", "LRET-PL", "LRET-ST", "LRET-WD", "MATT-AD",
                                                     "MATT-AI", "MATT-PD", "MATT-PI", "SAOC-ENG", "SAOC-NIR", 
                                                     "SAOC-SCT", "SAOC-WLS", "SCSC-ENG","SCSC-NIR", "SCSC-SCT",
-                                                    "SCSC-WLS", "TONT-AI", "TONT-DI", "TONT-PD","TONT-PI" };
+                                                    "SCSC-WLS", "TONT-AI", "TONT-AD", "TONT-PD","TONT-PI" };
 
         [TestMethod]
         public void CreateTest_With41_Records()
@@ -23,11 +23,24 @@ namespace api.Tests.Controllers
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             foreach (var item in _uniqueReferences)
             {
-                schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                if (item == "MATT-PD" || item == "TONT-PD")
                 {
-                    ParameterValue = 90,
-                    ParameterUniqueReferenceId = item
-                });
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = 0,
+                        ParameterUniqueReferenceId = item
+                    });
+                }
+                else
+                {
+
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = 90,
+                        ParameterUniqueReferenceId = item
+                    });
+
+                }
             }
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
@@ -48,11 +61,24 @@ namespace api.Tests.Controllers
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             foreach (var item in _uniqueReferences)
             {
-                schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                if (item == "MATT-PD" || item == "TONT-PD")
                 {
-                    ParameterValue = 90,
-                    ParameterUniqueReferenceId = item
-                });
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = 0,
+                        ParameterUniqueReferenceId = item
+                    });
+                }
+                else
+                {
+
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = 90,
+                        ParameterUniqueReferenceId = item
+                    });
+
+                }
             }
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
