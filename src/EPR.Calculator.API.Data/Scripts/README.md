@@ -1,7 +1,7 @@
 ## Local test of migration Docker container ##
 
 ### Prepare Azure SQL Edge Database
-
+Test
 1. Start container using azure-sql-edge:latest image. 
    ```shell
    docker run -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=Password1!' -p 1433:1433 \
