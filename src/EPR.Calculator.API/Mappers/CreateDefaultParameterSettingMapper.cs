@@ -1,7 +1,6 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace api.Mappers
 {
