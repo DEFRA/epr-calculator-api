@@ -1,10 +1,4 @@
-﻿using api.Tests.Controllers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests.Moq
 {
@@ -19,6 +13,6 @@ namespace EPR.Calculator.API.UnitTests.Moq
                                                     "LRET-PC", "LRET-PL", "LRET-ST", "LRET-WD", "MATT-AD",
                                                     "MATT-AI", "MATT-PD", "MATT-PI", "SAOC-ENG", "SAOC-NIR",
                                                     "SAOC-SCT", "SAOC-WLS", "SCSC-ENG","SCSC-NIR", "SCSC-SCT",
-                                                    "SCSC-WLS", "TONT-AI", "TONT-DI", "TONT-PD","TONT-PI" };
+                                                    "SCSC-WLS", "TONT-AI", "TONT-AD", "TONT-PD","TONT-PI" };
     }
 }

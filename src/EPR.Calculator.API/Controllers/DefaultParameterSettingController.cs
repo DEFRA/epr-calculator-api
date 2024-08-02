@@ -3,12 +3,9 @@ using api.Validators;
 using Microsoft.AspNetCore.Mvc;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-<<<<<<< HEAD
 using api.Mappers;
 using Newtonsoft.Json;
-=======
 using FluentValidation;
->>>>>>> feature/415482-UD
 
 namespace EPR.Calculator.API.Controllers
 {

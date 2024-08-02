@@ -1,10 +1,6 @@
-﻿using api.Dtos;
-using api.Mappers;
-using EPR.Calculator.API.Dtos;
+﻿using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.UnitTests.Moq;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Primitives;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace api.Tests.Controllers
@@ -12,11 +8,15 @@ namespace api.Tests.Controllers
     [TestClass]
     public class CreateDefaultParameterSettingMapper : BaseControllerTest
     {
-        String[] _uniqueReferences = CreateDefaultParameterMoqData._uniqueReferences;
-
         [TestMethod]
         public void Get_Required_ResultSet_WithDefaultSchemeParametersDto()
         {
+            /**
+             *  
+             *  CreateDefaultParameterSettingMapper.Map
+             * **/
+
+
             DataPostCall();
 
             var tempdateData = new DefaultSchemeParametersDto()
@@ -60,10 +60,10 @@ namespace api.Tests.Controllers
         // Private Methods
         private void DataPostCall()
         {
-            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValue>();
-            foreach (var item in _uniqueReferences)
+            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
+            foreach (var item in CreateDefaultParameterMoqData._uniqueReferences)
             {
-                schemeParameterTemplateValues.Add(new SchemeParameterTemplateValue
+                schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
                 {
                     ParameterValue = 90,
                     ParameterUniqueReferenceId = item

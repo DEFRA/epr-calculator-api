@@ -1,65 +1,18 @@
-<<<<<<< HEAD
-﻿using api.Dtos;
-using api.Mappers;
-using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.UnitTests.Moq;
-=======
 ﻿using EPR.Calculator.API.Dtos;
->>>>>>> feature/415482-UD
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using EPR.Calculator.API.UnitTests.Moq;
 
 namespace api.Tests.Controllers
 {
     [TestClass]
     public class DefaultParameterSettingControllerTest : BaseControllerTest
     {
-<<<<<<< HEAD
-        String[] _uniqueReferences = CreateDefaultParameterMoqData._uniqueReferences;
-=======
-        private static string[] _uniqueReferences = {"BADEBT-P", "COMC-AL", "COMC-FC", "COMC-GL",
-                                                     "COMC-OT", "COMC-PC", "COMC-PL", "COMC-ST",
-                                                     "COMC-WD", "LAPC-ENG","LAPC-NIR", "LAPC-SCT",
-                                                    "LAPC-WLS", "LEVY-ENG", "LEVY-NIR", "LEVY-SCT", "LEVY-WLS",
-                                                    "LRET-AL", "LRET-FC", "LRET-GL", "LRET-OT",
-                                                    "LRET-PC", "LRET-PL", "LRET-ST", "LRET-WD", "MATT-AD",
-                                                    "MATT-AI", "MATT-PD", "MATT-PI", "SAOC-ENG", "SAOC-NIR", 
-                                                    "SAOC-SCT", "SAOC-WLS", "SCSC-ENG","SCSC-NIR", "SCSC-SCT",
-                                                    "SCSC-WLS", "TONT-AI", "TONT-AD", "TONT-PD","TONT-PI" };
->>>>>>> feature/415482-UD
 
         [TestMethod]
         public void CreateTest_With41_Records()
         {
-            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
-            foreach (var item in _uniqueReferences)
-            {
-                if (item == "MATT-PD" || item == "TONT-PD")
-                {
-                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
-                    {
-                        ParameterValue = 0,
-                        ParameterUniqueReferenceId = item
-                    });
-                }
-                else
-                {
-
-                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
-                    {
-                        ParameterValue = 90,
-                        ParameterUniqueReferenceId = item
-                    });
-
-                }
-            }
-            var createDefaultParameterDto = new CreateDefaultParameterSettingDto
-            {
-                ParameterYear = "2024-25",
-                SchemeParameterTemplateValues = schemeParameterTemplateValues
-            };
-            var actionResult = _controller.Create(createDefaultParameterDto) as ObjectResult;
+            var actionResult = DataPostCall();
             Assert.AreEqual(actionResult.StatusCode, 201);
 
             Assert.AreEqual(_dbContext.DefaultParameterSettingDetail.Count(), 41);
@@ -70,37 +23,10 @@ namespace api.Tests.Controllers
         [TestMethod]
         public void CreateTest_With41_Records_When_Existing_Updates()
         {
-            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
-            foreach (var item in _uniqueReferences)
-            {
-                if (item == "MATT-PD" || item == "TONT-PD")
-                {
-                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
-                    {
-                        ParameterValue = 0,
-                        ParameterUniqueReferenceId = item
-                    });
-                }
-                else
-                {
-
-                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
-                    {
-                        ParameterValue = 90,
-                        ParameterUniqueReferenceId = item
-                    });
-
-                }
-            }
-            var createDefaultParameterDto = new CreateDefaultParameterSettingDto
-            {
-                ParameterYear = "2024-25",
-                SchemeParameterTemplateValues = schemeParameterTemplateValues
-            };
-            var actionResult1 = _controller.Create(createDefaultParameterDto) as ObjectResult;
+            var actionResult1 = DataPostCall();
             Assert.AreEqual(actionResult1.StatusCode, 201);
 
-            var actionResult2 = _controller.Create(createDefaultParameterDto) as ObjectResult;
+            var actionResult2 = DataPostCall();
             Assert.AreEqual(actionResult2.StatusCode, 201);
 
             Assert.AreEqual(_dbContext.DefaultParameterSettingDetail.Count(), 82);
@@ -215,16 +141,29 @@ namespace api.Tests.Controllers
         }
 
         // Private Methods
-        public void DataPostCall()
+        public ObjectResult DataPostCall()
         {
-            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValue>();
-            foreach (var item in _uniqueReferences)
+            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
+            foreach (var item in CreateDefaultParameterMoqData._uniqueReferences)
             {
-                schemeParameterTemplateValues.Add(new SchemeParameterTemplateValue
+                if (item == "MATT-PD" || item == "TONT-PD")
                 {
-                    ParameterValue = 90,
-                    ParameterUniqueReferenceId = item
-                });
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = 0,
+                        ParameterUniqueReferenceId = item
+                    });
+                }
+                else
+                {
+
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = 90,
+                        ParameterUniqueReferenceId = item
+                    });
+
+                }
             }
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
@@ -232,6 +171,7 @@ namespace api.Tests.Controllers
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
             var actionResult = _controller.Create(createDefaultParameterDto) as ObjectResult;
+            return actionResult;
         }
     }
 }
