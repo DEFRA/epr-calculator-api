@@ -1,7 +1,11 @@
+<<<<<<< HEAD
 ﻿using api.Dtos;
 using api.Mappers;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.UnitTests.Moq;
+=======
+﻿using EPR.Calculator.API.Dtos;
+>>>>>>> feature/415482-UD
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,19 +15,44 @@ namespace api.Tests.Controllers
     [TestClass]
     public class DefaultParameterSettingControllerTest : BaseControllerTest
     {
+<<<<<<< HEAD
         String[] _uniqueReferences = CreateDefaultParameterMoqData._uniqueReferences;
+=======
+        private static string[] _uniqueReferences = {"BADEBT-P", "COMC-AL", "COMC-FC", "COMC-GL",
+                                                     "COMC-OT", "COMC-PC", "COMC-PL", "COMC-ST",
+                                                     "COMC-WD", "LAPC-ENG","LAPC-NIR", "LAPC-SCT",
+                                                    "LAPC-WLS", "LEVY-ENG", "LEVY-NIR", "LEVY-SCT", "LEVY-WLS",
+                                                    "LRET-AL", "LRET-FC", "LRET-GL", "LRET-OT",
+                                                    "LRET-PC", "LRET-PL", "LRET-ST", "LRET-WD", "MATT-AD",
+                                                    "MATT-AI", "MATT-PD", "MATT-PI", "SAOC-ENG", "SAOC-NIR", 
+                                                    "SAOC-SCT", "SAOC-WLS", "SCSC-ENG","SCSC-NIR", "SCSC-SCT",
+                                                    "SCSC-WLS", "TONT-AI", "TONT-AD", "TONT-PD","TONT-PI" };
+>>>>>>> feature/415482-UD
 
         [TestMethod]
         public void CreateTest_With41_Records()
         {
-            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValue>();
+            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             foreach (var item in _uniqueReferences)
             {
-                schemeParameterTemplateValues.Add(new SchemeParameterTemplateValue
+                if (item == "MATT-PD" || item == "TONT-PD")
                 {
-                    ParameterValue = 90,
-                    ParameterUniqueReferenceId = item
-                });
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = 0,
+                        ParameterUniqueReferenceId = item
+                    });
+                }
+                else
+                {
+
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = 90,
+                        ParameterUniqueReferenceId = item
+                    });
+
+                }
             }
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
@@ -41,14 +70,27 @@ namespace api.Tests.Controllers
         [TestMethod]
         public void CreateTest_With41_Records_When_Existing_Updates()
         {
-            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValue>();
+            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             foreach (var item in _uniqueReferences)
             {
-                schemeParameterTemplateValues.Add(new SchemeParameterTemplateValue
+                if (item == "MATT-PD" || item == "TONT-PD")
                 {
-                    ParameterValue = 90,
-                    ParameterUniqueReferenceId = item
-                });
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = 0,
+                        ParameterUniqueReferenceId = item
+                    });
+                }
+                else
+                {
+
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = 90,
+                        ParameterUniqueReferenceId = item
+                    });
+
+                }
             }
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {

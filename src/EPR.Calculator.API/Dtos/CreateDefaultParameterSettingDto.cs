@@ -1,10 +1,8 @@
-﻿using System.Reflection.Metadata.Ecma335;
-
-namespace api.Dtos
+﻿namespace EPR.Calculator.API.Dtos
 {
     public class CreateDefaultParameterSettingDto
     {
         public string ParameterYear { get; set; }
-        public IEnumerable<SchemeParameterTemplateValue> SchemeParameterTemplateValues { get; set; }
+        public IEnumerable<SchemeParameterTemplateValueDto> SchemeParameterTemplateValues { get; set; }
     }
 }
