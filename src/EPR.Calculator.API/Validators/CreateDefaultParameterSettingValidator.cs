@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Dtos;
+﻿using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Dtos;
 using FluentValidation;
 
 namespace EPR.Calculator.API.Validators
@@ -7,9 +8,9 @@ namespace EPR.Calculator.API.Validators
     {
         public CreateDefaultParameterSettingValidator() 
         {
-            RuleFor(x => x.ParameterYear).NotEmpty().WithMessage("Parameter Year is required");
+            RuleFor(x => x.ParameterYear).NotEmpty().WithMessage((ErrorMessages.YearRequired));
             RuleFor(x => x.SchemeParameterTemplateValues).NotNull().Must(x => x.Count() == 41)
-                .WithMessage("SchemeParameterTemplateValues should have a count of 41");
+                .WithMessage((ErrorMessages.SchemeParameterTemplateValuesMissing));
             RuleFor(x => x.SchemeParameterTemplateValues).ForEach(x => x.SetValidator(new SchemeParameterTemplateValueValidator()));
         }
     }
