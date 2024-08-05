@@ -82,8 +82,8 @@ namespace api.Validators
         private string FormattedErrorString(DefaultParameterTemplateMaster defaultParameterTemplateMaster)
         {
             var sb = new StringBuilder();
-            sb.Append($"Parameter Type {defaultParameterTemplateMaster.ParameterType}");
-            sb.Append($"and Parameter Category {defaultParameterTemplateMaster.ParameterCategory}");
+            sb.Append($"Parameter Type {defaultParameterTemplateMaster.ParameterType} ");
+            sb.Append($"and Parameter Category {defaultParameterTemplateMaster.ParameterCategory} ");
             sb.Append($"and Parameter Unique ref {defaultParameterTemplateMaster.ParameterUniqueReferenceId}");
             return sb.ToString();
         }
@@ -91,9 +91,9 @@ namespace api.Validators
         private string FormattedErrorStringForValues(DefaultParameterTemplateMaster defaultParameterTemplateMaster, decimal valueProvided)
         {
             var sb = new StringBuilder();
-            sb.Append($"Parameter Value too big or small. Value Provided was {valueProvided} for");
-            sb.Append($"Parameter Type {defaultParameterTemplateMaster.ParameterType}");
-            sb.Append($"and Parameter Category {defaultParameterTemplateMaster.ParameterCategory}");
+            sb.Append($"Parameter Value too big or small. Value Provided was {valueProvided} for ");
+            sb.Append($"Parameter Type {defaultParameterTemplateMaster.ParameterType} ");
+            sb.Append($"and Parameter Category {defaultParameterTemplateMaster.ParameterCategory} ");
             sb.Append($"and Parameter Unique ref {defaultParameterTemplateMaster.ParameterUniqueReferenceId}. ");
             sb.Append($"Value from is {defaultParameterTemplateMaster.ValidRangeFrom} and Value To is {defaultParameterTemplateMaster.ValidRangeTo}.");
             return sb.ToString();
