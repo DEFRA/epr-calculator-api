@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace EPR.Calculator.API.Data.DataModels
 {
+    [ExcludeFromCodeCoverage]
     [Table("default_parameter_setting_detail")]
     public class DefaultParameterSettingDetail
     {

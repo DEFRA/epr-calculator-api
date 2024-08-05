@@ -1,5 +1,8 @@
-﻿namespace EPR.Calculator.API.Dtos
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace EPR.Calculator.API.Dtos
 {
+    [ExcludeFromCodeCoverage]
     public class DefaultSchemeParametersDto
     {
         public int Id { get; set; }
