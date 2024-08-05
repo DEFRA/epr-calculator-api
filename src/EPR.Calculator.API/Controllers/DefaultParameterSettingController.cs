@@ -6,6 +6,8 @@ using EPR.Calculator.API.Data.DataModels;
 using api.Mappers;
 using Newtonsoft.Json;
 using FluentValidation;
+using Microsoft.IdentityModel.Tokens;
+using EPR.Calculator.API.Validators;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -76,19 +78,16 @@ namespace EPR.Calculator.API.Controllers
         [Route("api/defaultParameterSetting/{parameterYear}")]
         public IActionResult Get([FromRoute] string parameterYear)
         {
-            if (string.IsNullOrEmpty(parameterYear))
+            if (!ModelState.IsValid)
             {
-                // Return 400 error if the year is null or empty
-                return new ObjectResult("The input value cannot be null or empty. Please provide a valid value and try again") { StatusCode = StatusCodes.Status400BadRequest };
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            // Fetch the data based on the year passed to the API
             var currentDefaultSetting = _context.DefaultParameterSettings
                 .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == parameterYear);
 
             if (currentDefaultSetting == null)
             {
-                // Return 404 error if the year is not found
                 return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
             }
 

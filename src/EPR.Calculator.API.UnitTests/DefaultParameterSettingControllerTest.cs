@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EPR.Calculator.API.UnitTests.Moq;
+using EPR.Calculator.API.Validators;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Http;
 
 namespace api.Tests.Controllers
 {
@@ -39,7 +42,7 @@ namespace api.Tests.Controllers
 
         //GET API
         [TestMethod]
-        public void Get_RequestOkResult_WithDefaultSchemeParametersDto()
+        public void Get_RequestOkResult_WithDefaultSchemeParametersDto_WhenDataExist()
         {
             DataPostCall();
 
@@ -79,24 +82,7 @@ namespace api.Tests.Controllers
         [TestMethod]
         public void GetSchemeParameter_ReturnNotFound_WithDefaultSchemeParametersDoesNotExist()
         {
-            DataPostCall();
-
-            var tempdateData = new DefaultSchemeParametersDto()
-            {
-                Id = 1,
-                ParameterYear = "2024-25",
-                EffectiveFrom = DateTime.Now,
-
-                EffectiveTo = null,
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-
-                DefaultParameterSettingMasterId = 1,
-                ParameterUniqueRef = "BADEBT-P",
-                ParameterType = "Aluminium",
-                ParameterCategory = "Communication costs",
-                ParameterValue = 90m,
-            };
+            DataPostCall();           
 
             // Return 404 error if the year does not exist
             //Act
@@ -111,33 +97,12 @@ namespace api.Tests.Controllers
         [TestMethod]
         public void GetSchemeParameter_Return_400_Error_WithN_No_YearSupplied()
         {
-            DataPostCall();
-
-            var tempdateData = new DefaultSchemeParametersDto()
-            {
-                Id = 1,
-                ParameterYear = "2024-25",
-                EffectiveFrom = DateTime.Now,
-
-                EffectiveTo = null,
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-
-                DefaultParameterSettingMasterId = 1,
-                ParameterUniqueRef = "BADEBT-P",
-                ParameterType = "Aluminium",
-                ParameterCategory = "Communication costs",
-                ParameterValue = 90m,
-            };
-
-            // Return 400 error if the year is null or empty
-            //Act
-            var result = _controller.Get("");
-            //Assert
-            var okResult = result as ObjectResult;
-            Assert.IsNotNull(okResult);
-            Assert.AreEqual(okResult.StatusCode, 400);
-
+            ParameterYearValueValidationValidator _validator = new ParameterYearValueValidationValidator();
+             string _parameter = string.Empty;
+             var result= _validator.Validate(_parameter);
+            
+            Assert.IsNotNull(result);            
+            Assert.AreEqual(result.Errors.First().ErrorMessage, "Parameter Year is required");
         }
 
         // Private Methods
