@@ -11,7 +11,6 @@ namespace api.Tests.Controllers
     [TestClass]
     public class DefaultParameterSettingControllerTest : BaseControllerTest
     {
-
         [TestMethod]
         public void CreateTest_With41_Records()
         {
@@ -39,7 +38,6 @@ namespace api.Tests.Controllers
             Assert.AreEqual(_dbContext.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2), 41);
             Assert.AreEqual(_dbContext.DefaultParameterSettings.Count(a => a.EffectiveTo == null), 1);
         }
-
         //GET API
         [TestMethod]
         public void Get_RequestOkResult_WithDefaultSchemeParametersDto_WhenDataExist()
@@ -82,7 +80,7 @@ namespace api.Tests.Controllers
         [TestMethod]
         public void GetSchemeParameter_ReturnNotFound_WithDefaultSchemeParametersDoesNotExist()
         {
-            DataPostCall();           
+            DataPostCall();
 
             // Return 404 error if the year does not exist
             //Act
@@ -98,10 +96,10 @@ namespace api.Tests.Controllers
         public void GetSchemeParameter_Return_400_Error_WithN_No_YearSupplied()
         {
             ParameterYearValueValidationValidator _validator = new ParameterYearValueValidationValidator();
-             string _parameter = string.Empty;
-             var result= _validator.Validate(_parameter);
-            
-            Assert.IsNotNull(result);            
+            string _parameter = string.Empty;
+            var result = _validator.Validate(_parameter);
+
+            Assert.IsNotNull(result);
             Assert.AreEqual(result.Errors.First().ErrorMessage, "Parameter Year is required");
         }
 

@@ -1,13 +1,10 @@
-﻿using EPR.Calculator.API.Dtos;
+﻿using api.Mappers;
 using api.Validators;
-using Microsoft.AspNetCore.Mvc;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using api.Mappers;
-using Newtonsoft.Json;
+using EPR.Calculator.API.Dtos;
 using FluentValidation;
-using Microsoft.IdentityModel.Tokens;
-using EPR.Calculator.API.Validators;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EPR.Calculator.API.Controllers
 {
