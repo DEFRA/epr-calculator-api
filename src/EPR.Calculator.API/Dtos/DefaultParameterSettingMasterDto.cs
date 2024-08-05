@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace api.Dtos
+namespace EPR.Calculator.API.Dtos
 {
     public class DefaultParameterSettingMasterDto
     {

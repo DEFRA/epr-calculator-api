@@ -1,4 +1,4 @@
-﻿namespace api.Dtos
+﻿namespace EPR.Calculator.API.Dtos
 {
     public class ErrorDto
     {
