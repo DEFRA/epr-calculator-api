@@ -22,3 +22,4 @@ api/obj/project.nuget.cache
 /src/bin/Debug
 /src/obj
 /.vs
+/src/EPR.Calculator.API.Data.obj
