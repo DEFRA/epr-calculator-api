@@ -22,11 +22,11 @@ namespace api.Validators
             return validationResult;
         }
 
-        private IEnumerable<ErrorDto> ValidateByValues(CreateDefaultParameterSettingDto createDefaultParameterSettingDto)
+        private IEnumerable<CreateDefaultParameterSettingErrorDto> ValidateByValues(CreateDefaultParameterSettingDto createDefaultParameterSettingDto)
         {
             IEnumerable<DefaultParameterTemplateMaster> defaultTemplateMasterList = this._context.DefaultParameterTemplateMasterList.ToList();
 
-            var errors = new List<ErrorDto>();
+            var errors = new List<CreateDefaultParameterSettingErrorDto>();
             var schemeParameterTemplateValues = createDefaultParameterSettingDto.SchemeParameterTemplateValues;
 
             foreach (var defaultParameterTemplateMaster in defaultTemplateMasterList)
@@ -37,6 +37,7 @@ namespace api.Validators
                 {
                     var error = new CreateDefaultParameterSettingErrorDto
                     {
+                        ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
                         ParameterType = defaultParameterTemplateMaster.ParameterType,
                         ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
                         Message = $"Expecting only One with Parameter Type {this.FormattedErrorString(defaultParameterTemplateMaster)}",
@@ -48,6 +49,7 @@ namespace api.Validators
                 {
                     var error = new CreateDefaultParameterSettingErrorDto
                     {
+                        ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
                         ParameterType = defaultParameterTemplateMaster.ParameterType,
                         ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
                         Message = $"Expecting at least One with Parameter Type {this.FormattedErrorString(defaultParameterTemplateMaster)}",
@@ -63,6 +65,7 @@ namespace api.Validators
                     {
                         var error = new CreateDefaultParameterSettingErrorDto
                         {
+                            ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
                             ParameterType = defaultParameterTemplateMaster.ParameterType,
                             ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
                             Message = $"{this.FormattedErrorStringForValues(defaultParameterTemplateMaster, matchingTemplate.ParameterValue)}",
@@ -79,8 +82,8 @@ namespace api.Validators
         private string FormattedErrorString(DefaultParameterTemplateMaster defaultParameterTemplateMaster)
         {
             var sb = new StringBuilder();
-            sb.Append($"Parameter Type {defaultParameterTemplateMaster.ParameterType}");
-            sb.Append($"and Parameter Category {defaultParameterTemplateMaster.ParameterCategory}");
+            sb.Append($"Parameter Type {defaultParameterTemplateMaster.ParameterType} ");
+            sb.Append($"and Parameter Category {defaultParameterTemplateMaster.ParameterCategory} ");
             sb.Append($"and Parameter Unique ref {defaultParameterTemplateMaster.ParameterUniqueReferenceId}");
             return sb.ToString();
         }
@@ -88,9 +91,9 @@ namespace api.Validators
         private string FormattedErrorStringForValues(DefaultParameterTemplateMaster defaultParameterTemplateMaster, decimal valueProvided)
         {
             var sb = new StringBuilder();
-            sb.Append($"Parameter Value too big or small. Value Provided was {valueProvided} for");
-            sb.Append($"Parameter Type {defaultParameterTemplateMaster.ParameterType}");
-            sb.Append($"and Parameter Category {defaultParameterTemplateMaster.ParameterCategory}");
+            sb.Append($"Parameter Value too big or small. Value Provided was {valueProvided} for ");
+            sb.Append($"Parameter Type {defaultParameterTemplateMaster.ParameterType} ");
+            sb.Append($"and Parameter Category {defaultParameterTemplateMaster.ParameterCategory} ");
             sb.Append($"and Parameter Unique ref {defaultParameterTemplateMaster.ParameterUniqueReferenceId}. ");
             sb.Append($"Value from is {defaultParameterTemplateMaster.ValidRangeFrom} and Value To is {defaultParameterTemplateMaster.ValidRangeTo}.");
             return sb.ToString();

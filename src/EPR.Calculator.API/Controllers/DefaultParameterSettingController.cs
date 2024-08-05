@@ -1,4 +1,4 @@
-﻿using api.Mappers;
+using api.Mappers;
 using api.Validators;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;

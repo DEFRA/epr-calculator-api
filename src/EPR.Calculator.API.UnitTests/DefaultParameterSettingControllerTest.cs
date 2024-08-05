@@ -1,4 +1,4 @@
-﻿using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EPR.Calculator.API.UnitTests.Moq;
