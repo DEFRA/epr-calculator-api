@@ -52,7 +52,7 @@ namespace api.Validators
                         ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
                         ParameterType = defaultParameterTemplateMaster.ParameterType,
                         ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
-                        Message = $"Expecting at least One with Parameter Type {this.FormattedErrorString(defaultParameterTemplateMaster)}",
+                        Message = $"Expecting at least One with {this.FormattedErrorString(defaultParameterTemplateMaster)}",
                         Description = ""
                     };
                     errors.Add(error);
@@ -68,7 +68,7 @@ namespace api.Validators
                             ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
                             ParameterType = defaultParameterTemplateMaster.ParameterType,
                             ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
-                            Message = $"{this.FormattedErrorStringForValues(defaultParameterTemplateMaster, matchingTemplate.ParameterValue)}",
+                            Message = $"{this.FormattedErrorStringForValues(defaultParameterTemplateMaster, matchingTemplate.ParameterValue.Value)}",
                             Description = ""
                         };
                         errors.Add(error);
