@@ -21,6 +21,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+	  <SonarQubeSetting Include="sonar.cpd.exclusions">
+		  <Value>Scripts/migrations.sql</Value>
+	  </SonarQubeSetting>
   </ItemGroup>
 
 </Project>
