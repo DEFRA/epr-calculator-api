@@ -23,6 +23,7 @@
     </PackageReference>
 	  <SonarQubeSetting Include="sonar.cpd.exclusions">
 		  <Value>Scripts/migrations.sql</Value>
+		  <Value>Migrations/**/*.cs</Value>
 	  </SonarQubeSetting>
   </ItemGroup>
 
