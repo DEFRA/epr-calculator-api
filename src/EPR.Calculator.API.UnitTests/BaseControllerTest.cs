@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace api.Tests.Controllers
 {
+    [TestClass]
     public class BaseControllerTest
     {
         protected ApplicationDBContext _dbContext;
@@ -44,6 +45,13 @@ namespace api.Tests.Controllers
             _dbContext.SaveChanges();
 
             _controller = new DefaultParameterSettingController(_dbContext);
+        }
+
+        [TestMethod]
+        public void CheckDbContext()
+        {
+            Assert.IsNotNull(_dbContext);
+            Assert.IsTrue(_dbContext.Database.IsInMemory());
         }
 
         [TestCleanup]
