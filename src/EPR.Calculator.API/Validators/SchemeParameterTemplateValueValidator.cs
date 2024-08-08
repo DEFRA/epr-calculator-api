@@ -9,7 +9,7 @@ namespace EPR.Calculator.API.Validators
         {
             public SchemeParameterTemplateValueValidator()
             {
-                RuleFor(x => x.ParameterValue).NotEmpty().WithMessage("ParameterValue is missing");
+                RuleFor(x => x.ParameterValue).NotNull().WithMessage("ParameterValue is missing");
                 RuleFor(x => x.ParameterUniqueReferenceId).NotEmpty().WithMessage("ParameterUniqueReferenceId is missing");
             }
         }
