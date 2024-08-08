@@ -56,7 +56,7 @@ namespace EPR.Calculator.API.UnitTests
 
             var errors = actionResult.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
             Assert.IsNotNull(errors);
-            Assert.IsTrue(errors.Count() == 41);
+            Assert.IsTrue(errors.Count() == CommonConstants.TemplateCount);
         }
 
         [TestMethod]

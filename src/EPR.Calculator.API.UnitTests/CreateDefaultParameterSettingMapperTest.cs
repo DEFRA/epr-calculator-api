@@ -1,4 +1,5 @@
 ﻿using api.Mappers;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.UnitTests.Moq;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ namespace api.Tests.Controllers
             Assert.IsNotNull(currentDefaultSetting.Details);
             Assert.IsNotNull(_templateDetails);
             Assert.IsNotNull(schemeParameters);
-            Assert.AreEqual(41, schemeParameters.Count);
+            Assert.AreEqual(CommonConstants.TemplateCount, schemeParameters.Count);
         }
 
         // Private Methods
