@@ -10,14 +10,6 @@ namespace EPR.Calculator.API.Data
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer();
-            }
-        } 
-
         public DbSet<DefaultParameterSettingMaster> DefaultParameterSettings { get; set; }
 
         public DbSet<DefaultParameterSettingDetail> DefaultParameterSettingDetail { get; set; }
