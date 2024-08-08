@@ -21,9 +21,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-	  <SonarQubeSetting Include="sonar.cpd.exclusions">
-		  <Value>Scripts/migrations.sql</Value>
-		  <Value>Migrations/**/*.cs</Value>
+	  <SonarQubeSetting Include="sonar.coverage.exclusions">
+		  <Value>Scripts/migrations.sql,Migrations/*.cs</Value>
 	  </SonarQubeSetting>
   </ItemGroup>
 
