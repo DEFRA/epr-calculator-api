@@ -10,16 +10,6 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class DefaultParameterSettingControllerValidationTest : BaseControllerTest
     {
-        private static string[] _uniqueReferences = {"BADEBT-P", "COMC-AL", "COMC-FC", "COMC-GL",
-                                                     "COMC-OT", "COMC-PC", "COMC-PL", "COMC-ST",
-                                                     "COMC-WD", "LAPC-ENG","LAPC-NIR", "LAPC-SCT",
-                                                    "LAPC-WLS", "LEVY-ENG", "LEVY-NIR", "LEVY-SCT", "LEVY-WLS",
-                                                    "LRET-AL", "LRET-FC", "LRET-GL", "LRET-OT",
-                                                    "LRET-PC", "LRET-PL", "LRET-ST", "LRET-WD", "MATT-AD",
-                                                    "MATT-AI", "MATT-PD", "MATT-PI", "SAOC-ENG", "SAOC-NIR",
-                                                    "SAOC-SCT", "SAOC-WLS", "SCSC-ENG","SCSC-NIR", "SCSC-SCT",
-                                                    "SCSC-WLS", "TONT-AI", "TONT-AD", "TONT-PD","TONT-PI" };
-
         [TestMethod]
         public void InvalidTest_With_NoRecords()
         {
@@ -63,7 +53,7 @@ namespace EPR.Calculator.API.UnitTests
         public void InvalidTest_With_Missing_Data()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
-            foreach (var uniqueRef in _uniqueReferences)
+            foreach (var uniqueRef in DefaultParameterUniqueReferences.UniqueReferences)
             {
                 schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
                 {

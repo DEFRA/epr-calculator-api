@@ -1,7 +1,6 @@
 ﻿using api.Mappers;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.UnitTests.Moq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -33,7 +32,7 @@ namespace api.Tests.Controllers
         public ObjectResult DataPostCall()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
-            foreach (var item in CreateDefaultParameterMoqData._uniqueReferences)
+            foreach (var item in DefaultParameterUniqueReferences.UniqueReferences)
             {
                 if (item == "MATT-PD" || item == "TONT-PD")
                 {
