@@ -10,9 +10,9 @@ namespace EPR.Calculator.API.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("delete dbo.default_parameter_setting_detail");
-            migrationBuilder.Sql("delete dbo.default_parameter_setting_master");
-            migrationBuilder.Sql("delete dbo.default_parameter_template_master");
+            migrationBuilder.Sql("delete dbo.default_parameter_setting_detail where 1=1");
+            migrationBuilder.Sql("delete dbo.default_parameter_setting_master where 1=1");
+            migrationBuilder.Sql("delete dbo.default_parameter_template_master where 1=1");
             migrationBuilder.InsertData(
                table: "default_parameter_template_master",
                columns: new[] { "parameter_unique_ref", "parameter_category", "parameter_type", "valid_Range_from", "valid_Range_to" },
