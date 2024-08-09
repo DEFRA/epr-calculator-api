@@ -32,4 +32,9 @@
 			<Value>Scripts/*.*,Migrations/*.cs,DataSeeder/Seeder.cs,DataModels/*.cs</Value>
 		</SonarQubeSetting>
     </ItemGroup>
+	<ItemGroup>
+		<SonarQubeSetting Include="sonar.coverage.exclusions">
+			<Value>**/*.sql</Value>
+		</SonarQubeSetting>
+	</ItemGroup>
 </Project>
