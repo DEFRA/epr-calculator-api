@@ -509,3 +509,100 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240809131657_UpdateTemplateMasterData'
+)
+BEGIN
+    delete dbo.default_parameter_setting_detail where 1=1
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240809131657_UpdateTemplateMasterData'
+)
+BEGIN
+    delete dbo.default_parameter_setting_master where 1=1
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240809131657_UpdateTemplateMasterData'
+)
+BEGIN
+    delete dbo.default_parameter_template_master where 1=1
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240809131657_UpdateTemplateMasterData'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
+        SET IDENTITY_INSERT [default_parameter_template_master] ON;
+    EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])
+    VALUES (N''COMC-AL'', N''Aluminium'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-FC'', N''Fibre composite'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-GL'', N''Glass'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-PC'', N''Paper or card'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-PL'', N''Plastic'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-ST'', N''Steel'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-WD'', N''Wood'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-OT'', N''Other'', N''Communication costs'', 0.0, 999999999.99),
+    (N''SAOC-ENG'', N''England'', N''Scheme administrator operating costs'', 0.0, 999999999.99),
+    (N''SAOC-WLS'', N''Wales'', N''Scheme administrator operating costs'', 0.0, 999999999.99),
+    (N''SAOC-SCT'', N''Scotland'', N''Scheme administrator operating costs'', 0.0, 999999999.99),
+    (N''SAOC-NIR'', N''Northern Ireland'', N''Scheme administrator operating costs'', 0.0, 999999999.99),
+    (N''LAPC-ENG'', N''England'', N''Local authority data preparation costs'', 0.0, 999999999.99),
+    (N''LAPC-WLS'', N''Wales'', N''Local authority data preparation costs'', 0.0, 999999999.99),
+    (N''LAPC-SCT'', N''Scotland'', N''Local authority data preparation costs'', 0.0, 999999999.99),
+    (N''LAPC-NIR'', N''Northern Ireland'', N''Local authority data preparation costs'', 0.0, 999999999.99),
+    (N''SCSC-ENG'', N''England'', N''Scheme setup costs'', 0.0, 999999999.99),
+    (N''SCSC-WLS'', N''Wales'', N''Scheme setup costs'', 0.0, 999999999.99),
+    (N''SCSC-SCT'', N''Scotland'', N''Scheme setup costs'', 0.0, 999999999.99),
+    (N''SCSC-NIR'', N''Northern Ireland'', N''Scheme setup costs'', 0.0, 999999999.99),
+    (N''LRET-AL'', N''Aluminium'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-FC'', N''Fibre composite'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-GL'', N''Glass'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-PC'', N''Paper or card'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-PL'', N''Plastic'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-ST'', N''Steel'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-WD'', N''Wood'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-OT'', N''Other'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''BADEBT-P'', N''BadDebt'', N''Bad debt provision percentage'', 0.0, 999.99),
+    (N''MATT-AI'', N''Amount Increase'', N''Materiality threshold'', 0.0, 999999999.99),
+    (N''MATT-AD'', N''Amount Decrease'', N''Materiality threshold'', -999999999.99, 0.0),
+    (N''MATT-PI'', N''Percent Increase'', N''Materiality threshold'', 0.0, 999.99),
+    (N''MATT-PD'', N''Percent Decrease'', N''Materiality threshold'', -999.99, 0.0),
+    (N''TONT-AI'', N''Amount Increase'', N''Tonnage change threshold'', 0.0, 999999999.99),
+    (N''TONT-AD'', N''Amount Decrease'', N''Tonnage change threshold'', -999999999.99, 0.0),
+    (N''TONT-PI'', N''Percent Increase'', N''Tonnage change threshold'', 0.0, 999.99),
+    (N''TONT-PD'', N''Percent Decrease'', N''Tonnage change threshold'', -999.99, 0.0),
+    (N''LEVY-ENG'', N''England'', N''Levy'', 0.0, 999999999.99),
+    (N''LEVY-WLS'', N''Wales'', N''Levy'', 0.0, 999999999.99),
+    (N''LEVY-SCT'', N''Scotland'', N''Levy'', 0.0, 999999999.99),
+    (N''LEVY-NIR'', N''Northern Ireland'', N''Levy'', 0.0, 999999999.99)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
+        SET IDENTITY_INSERT [default_parameter_template_master] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240809131657_UpdateTemplateMasterData'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20240809131657_UpdateTemplateMasterData', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
