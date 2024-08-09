@@ -23,7 +23,7 @@ namespace EPR.Calculator.API.Data.DataModels
         public DefaultParameterTemplateMaster ParameterUniqueReference {  get; set; }
 
         [Column("parameter_value")]
-        [Precision(18, 2)]
+        [Precision(18, 3)]
         public decimal ParameterValue { get; set; }
     }
 }

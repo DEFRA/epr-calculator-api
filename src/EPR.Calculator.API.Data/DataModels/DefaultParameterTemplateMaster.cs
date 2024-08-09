@@ -26,7 +26,7 @@ namespace EPR.Calculator.API.Data.DataModels
         [NotNull]
         public string ParameterCategory { get; set; }
 
-        [Column("valid_Range_from")]
+        [Column("valid_Range_from", TypeName = "decimal(18, 3)")]
         [NotNull]
         public decimal ValidRangeFrom { get; set; }
 
