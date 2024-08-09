@@ -359,7 +359,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20240808120743_UpdateTemplateMaster'
 )
 BEGIN
-    delete dbo.default_parameter_setting_detail
+    delete dbo.default_parameter_setting_detail where 1=1
 END;
 GO
 
@@ -368,7 +368,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20240808120743_UpdateTemplateMaster'
 )
 BEGIN
-    delete dbo.default_parameter_setting_master
+    delete dbo.default_parameter_setting_master where 1=1
 END;
 GO
 
@@ -377,7 +377,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20240808120743_UpdateTemplateMaster'
 )
 BEGIN
-    delete dbo.default_parameter_template_master
+    delete dbo.default_parameter_template_master where 1=1
 END;
 GO
 
