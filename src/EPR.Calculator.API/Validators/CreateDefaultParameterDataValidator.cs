@@ -68,7 +68,7 @@ namespace api.Validators
                             ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
                             ParameterType = defaultParameterTemplateMaster.ParameterType,
                             ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
-                            Message = $"{this.FormattedErrorStringForValues(defaultParameterTemplateMaster, matchingTemplate.ParameterValue.Value)}",
+                            Message = $"{this.FormattedErrorStringForValues(defaultParameterTemplateMaster)}",
                             Description = ""
                         };
                         errors.Add(error);
@@ -88,15 +88,42 @@ namespace api.Validators
             return sb.ToString();
         }
 
-        private string FormattedErrorStringForValues(DefaultParameterTemplateMaster defaultParameterTemplateMaster, decimal valueProvided)
+        private string FormattedErrorStringForValues(DefaultParameterTemplateMaster defaulTemplate)
         {
             var sb = new StringBuilder();
-            sb.Append($"Parameter Value too big or small. Value Provided was {valueProvided} for ");
-            sb.Append($"Parameter Type {defaultParameterTemplateMaster.ParameterType} ");
-            sb.Append($"and Parameter Category {defaultParameterTemplateMaster.ParameterCategory} ");
-            sb.Append($"and Parameter Unique ref {defaultParameterTemplateMaster.ParameterUniqueReferenceId}. ");
-            sb.Append($"Value from is {defaultParameterTemplateMaster.ValidRangeFrom} and Value To is {defaultParameterTemplateMaster.ValidRangeTo}.");
+            if (IsNotPercentage(defaulTemplate))
+            {
+                sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
+                sb.Append($"must be between {defaulTemplate.ValidRangeFrom} and {defaulTemplate.ValidRangeTo}");
+            }
+            else if(IsPercentageIncrease(defaulTemplate))
+            {
+                sb.Append($"The {defaulTemplate.ParameterType} percentage increase ");
+                sb.Append($"must be between {defaulTemplate.ValidRangeFrom} and {defaulTemplate.ValidRangeTo}");
+            }
+            else
+            {
+                sb.Append($"The {defaulTemplate.ParameterType} percentage decrease ");
+                sb.Append($"must be between {defaulTemplate.ValidRangeFrom} and {defaulTemplate.ValidRangeTo}");
+            }
+
             return sb.ToString();
+        }
+
+        private bool IsPercentageIncrease(DefaultParameterTemplateMaster defaultTemplate)
+        {
+            return ((!string.IsNullOrEmpty(defaultTemplate.ParameterCategory)
+                && defaultTemplate.ParameterCategory.ToLower().Contains("percent")) ||
+                (!string.IsNullOrEmpty(defaultTemplate.ParameterType)
+                && defaultTemplate.ParameterType.ToLower().Contains("percent"))) &&
+                defaultTemplate.ValidRangeFrom >= 0;
+        }
+
+        private bool IsNotPercentage(DefaultParameterTemplateMaster defaultTemplate)
+        {
+            return !string.IsNullOrEmpty(defaultTemplate.ParameterCategory)
+                && !defaultTemplate.ParameterCategory.ToLower().Contains("percent")
+                && !defaultTemplate.ParameterType.ToLower().Contains("percent");
         }
     }
 }
