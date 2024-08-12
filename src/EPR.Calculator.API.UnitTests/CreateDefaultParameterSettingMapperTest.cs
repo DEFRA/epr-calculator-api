@@ -1,6 +1,6 @@
 ﻿using api.Mappers;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.UnitTests.Moq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -25,14 +25,14 @@ namespace api.Tests.Controllers
             Assert.IsNotNull(currentDefaultSetting.Details);
             Assert.IsNotNull(_templateDetails);
             Assert.IsNotNull(schemeParameters);
-            Assert.AreEqual(41, schemeParameters.Count);
+            Assert.AreEqual(CommonConstants.TemplateCount, schemeParameters.Count);
         }
 
         // Private Methods
         public ObjectResult DataPostCall()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
-            foreach (var item in CreateDefaultParameterMoqData._uniqueReferences)
+            foreach (var item in DefaultParameterUniqueReferences.UniqueReferences)
             {
                 if (item == "MATT-PD" || item == "TONT-PD")
                 {

@@ -26,8 +26,10 @@
 		<SonarQubeSetting Include="sonar.coverage.exclusions">
 			<Value>Scripts/*.*,Migrations/*.cs,DataSeeder/Seeder.cs,DataModels/*.cs</Value>
 		</SonarQubeSetting>
-		<SonarQubeSetting Include="sonar.cpd.exclusions,">
-			<Value>Scripts/*.*,Migrations/*.cs,DataSeeder/Seeder.cs,DataModels/*.cs</Value>
+	</ItemGroup>
+	<ItemGroup>
+		<SonarQubeSetting Include="sonar.coverage.exclusions">
+			<Value>**/*.sql,Migrations/*.cs,DataSeeder/Seeder.cs,DataModels/*.cs</Value>
 		</SonarQubeSetting>
-    </ItemGroup>
+	</ItemGroup>
 </Project>

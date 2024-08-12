@@ -1,10 +1,8 @@
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using EPR.Calculator.API.UnitTests.Moq;
-using EPR.Calculator.API.Validators;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Http;
 
 namespace api.Tests.Controllers
 {
@@ -12,18 +10,18 @@ namespace api.Tests.Controllers
     public class DefaultParameterSettingControllerTest : BaseControllerTest
     {
         [TestMethod]
-        public void CreateTest_With41_Records()
+        public void CreateTest_With_Records()
         {
             var actionResult = DataPostCall();
             Assert.AreEqual(actionResult.StatusCode, 201);
 
-            Assert.AreEqual(_dbContext.DefaultParameterSettingDetail.Count(), 41);
+            Assert.AreEqual(_dbContext.DefaultParameterSettingDetail.Count(), CommonConstants.TemplateCount);
             Assert.AreEqual(_dbContext.DefaultParameterSettings.Count(), 1);
-            Assert.AreEqual(_dbContext.DefaultParameterTemplateMasterList.Count(), 41);
+            Assert.AreEqual(_dbContext.DefaultParameterTemplateMasterList.Count(), CommonConstants.TemplateCount);
         }
 
         [TestMethod]
-        public void CreateTest_With41_Records_When_Existing_Updates()
+        public void CreateTest_With_Records_When_Existing_Updates()
         {
             var actionResult1 = DataPostCall();
             Assert.AreEqual(actionResult1.StatusCode, 201);
@@ -31,11 +29,11 @@ namespace api.Tests.Controllers
             var actionResult2 = DataPostCall();
             Assert.AreEqual(actionResult2.StatusCode, 201);
 
-            Assert.AreEqual(_dbContext.DefaultParameterSettingDetail.Count(), 82);
+            Assert.AreEqual(_dbContext.DefaultParameterSettingDetail.Count(), CommonConstants.TemplateCount*2);
             Assert.AreEqual(_dbContext.DefaultParameterSettings.Count(), 2);
-            Assert.AreEqual(_dbContext.DefaultParameterTemplateMasterList.Count(), 41);
+            Assert.AreEqual(_dbContext.DefaultParameterTemplateMasterList.Count(), CommonConstants.TemplateCount);
 
-            Assert.AreEqual(_dbContext.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2), 41);
+            Assert.AreEqual(_dbContext.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2), CommonConstants.TemplateCount);
             Assert.AreEqual(_dbContext.DefaultParameterSettings.Count(a => a.EffectiveTo == null), 1);
         }
         //GET API
@@ -70,7 +68,7 @@ namespace api.Tests.Controllers
             Assert.AreEqual(okResult.StatusCode, 200);
 
             var actionResul2 = okResult.Value as List<DefaultSchemeParametersDto>;
-            Assert.AreEqual(actionResul2.Count, 41);
+            Assert.AreEqual(actionResul2.Count, CommonConstants.TemplateCount);
 
             Assert.AreEqual(tempdateData.Id, actionResul2[0].Id);
             Assert.AreEqual(tempdateData.ParameterValue, actionResul2[0].ParameterValue);
@@ -107,7 +105,7 @@ namespace api.Tests.Controllers
         public ObjectResult DataPostCall()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
-            foreach (var item in CreateDefaultParameterMoqData._uniqueReferences)
+            foreach (var item in DefaultParameterUniqueReferences.UniqueReferences)
             {
                 if (item == "MATT-PD" || item == "TONT-PD")
                 {

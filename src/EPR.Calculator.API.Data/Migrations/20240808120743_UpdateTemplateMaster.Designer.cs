@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240808120743_UpdateTemplateMaster")]
+    partial class UpdateTemplateMaster
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,8 +44,8 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("parameter_unique_ref");
 
                     b.Property<decimal>("ParameterValue")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)")
                         .HasColumnName("parameter_value");
 
                     b.HasKey("Id");
@@ -111,13 +114,11 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("parameter_type");
 
                     b.Property<decimal>("ValidRangeFrom")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18, 3)")
+                        .HasColumnType("decimal(18,2)")
                         .HasColumnName("valid_Range_from");
 
                     b.Property<decimal>("ValidRangeTo")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
+                        .HasColumnType("decimal(18,2)")
                         .HasColumnName("valid_Range_to");
 
                     b.HasKey("ParameterUniqueReferenceId");
