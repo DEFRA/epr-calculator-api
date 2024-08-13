@@ -40,7 +40,7 @@ namespace api.Validators
                         ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
                         ParameterType = defaultParameterTemplateMaster.ParameterType,
                         ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
-                        Message = $"Expecting only One with Parameter Type {this.FormattedErrorString(defaultParameterTemplateMaster)}",
+                        Message = $"Expecting only One with Parameter Type {this.FormattedErrorForMoreThanOneUniqueRefs(defaultParameterTemplateMaster)}",
                         Description = ""
                     };
                     errors.Add(error);
@@ -52,7 +52,7 @@ namespace api.Validators
                         ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
                         ParameterType = defaultParameterTemplateMaster.ParameterType,
                         ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
-                        Message = $"Expecting at least One with {this.FormattedErrorString(defaultParameterTemplateMaster)}",
+                        Message = this.FormattedErrorForMissingValues(defaultParameterTemplateMaster),
                         Description = ""
                     };
                     errors.Add(error);
@@ -68,7 +68,7 @@ namespace api.Validators
                             ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
                             ParameterType = defaultParameterTemplateMaster.ParameterType,
                             ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
-                            Message = $"{this.FormattedErrorStringForValues(defaultParameterTemplateMaster)}",
+                            Message = $"{this.FormattedErrorForOutOfRangeValues(defaultParameterTemplateMaster)}",
                             Description = ""
                         };
                         errors.Add(error);
@@ -79,7 +79,7 @@ namespace api.Validators
             return errors;
         }
 
-        private string FormattedErrorString(DefaultParameterTemplateMaster defaultParameterTemplateMaster)
+        private string FormattedErrorForMoreThanOneUniqueRefs(DefaultParameterTemplateMaster defaultParameterTemplateMaster)
         {
             var sb = new StringBuilder();
             sb.Append($"Parameter Type {defaultParameterTemplateMaster.ParameterType} ");
@@ -88,7 +88,27 @@ namespace api.Validators
             return sb.ToString();
         }
 
-        private string FormattedErrorStringForValues(DefaultParameterTemplateMaster defaulTemplate)
+        private string FormattedErrorForMissingValues(DefaultParameterTemplateMaster defaulTemplate)
+        {
+            var sb = new StringBuilder();
+            if (IsNotPercentage(defaulTemplate))
+            {
+                sb.Append($"Enter the {defaulTemplate.ParameterType} ");
+                sb.Append($"for {defaulTemplate.ParameterCategory}");
+            }
+            else if (IsPercentageIncrease(defaulTemplate))
+            {
+                sb.Append($"Enter the {defaulTemplate.ParameterType} increase");
+            }
+            else
+            {
+                sb.Append($"Enter the {defaulTemplate.ParameterType} decrease");
+            }
+
+            return sb.ToString();
+        }
+
+        private string FormattedErrorForOutOfRangeValues(DefaultParameterTemplateMaster defaulTemplate)
         {
             var sb = new StringBuilder();
             if (IsNotPercentage(defaulTemplate))
