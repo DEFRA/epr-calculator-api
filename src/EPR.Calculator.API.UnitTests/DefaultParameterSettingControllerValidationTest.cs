@@ -74,9 +74,10 @@ namespace EPR.Calculator.API.UnitTests
             var errors = actionResult.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
             Assert.IsNotNull(errors);
             Assert.IsTrue(errors.Count() == 1);
-            Assert.AreEqual(errors.First().ParameterUniqueRef, "BADEBT-P");
-            Assert.AreEqual(errors.First().ParameterCategory, "Communication costs");
-            Assert.AreEqual(errors.First().ParameterType, "Aluminium");
+            var firstError = errors.First();
+            Assert.AreEqual(firstError.ParameterUniqueRef, "BADEBT-P");
+            Assert.AreEqual(firstError.ParameterCategory, "Communication costs");
+            Assert.AreEqual(firstError.ParameterType, "Aluminium");
         }
     }
 }
