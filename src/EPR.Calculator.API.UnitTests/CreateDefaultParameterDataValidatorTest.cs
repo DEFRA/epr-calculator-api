@@ -66,6 +66,27 @@ namespace EPR.Calculator.API.UnitTests
                 }
             };
 
+        private decimal GetInvalidValueForUniqueRef(string parameterUniqueReferenceId)
+        {
+            switch (parameterUniqueReferenceId)
+            {
+                case "COMC-AL":
+                    return -1m;
+                case "BADEBT-P":
+                    return -1m;
+                case "MATT-AD":
+                    return 1m;
+                case "MATT-PI":
+                    return 1000m;
+                case "MATT-PD":
+                    return -1000m;
+                case "TONT-AI":
+                    return -1m;
+                default:
+                    return 0m;
+            }
+        }
+
         [TestInitialize]
         public void Initialise()
         {
@@ -96,7 +117,7 @@ namespace EPR.Calculator.API.UnitTests
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
             var vr = this.validator.Validate(dto);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Expecting at least One with")) == this.data.Count);
+            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Enter the")) == this.data.Count);
         }
 
         [TestMethod]
@@ -143,27 +164,6 @@ namespace EPR.Calculator.API.UnitTests
             };
             var vr = this.validator.Validate(dto);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("must be between")) == 6);
-        }
-
-        private decimal GetInvalidValueForUniqueRef(string parameterUniqueReferenceId)
-        {
-            switch (parameterUniqueReferenceId) 
-            {
-                case "COMC-AL":
-                    return -1m;
-                case "BADEBT-P":
-                    return -1m;
-                case "MATT-AD":
-                    return 1m;
-                case "MATT-PI":
-                    return 1000m;
-                case "MATT-PD":
-                    return -1000m;
-                case "TONT-AI":
-                    return -1m;
-                default:
-                    return 0m;
-            }
         }
     }
 }
