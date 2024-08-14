@@ -86,7 +86,7 @@ namespace api.Validators
 
         private string GetParameterValue(DefaultParameterTemplateMaster defaultTemplate, string parameterValue)
         {
-            return IsNotPercentage(defaultTemplate) ? parameterValue : parameterValue.TrimEnd('%');
+            return IsNotPercentage(defaultTemplate) ? parameterValue.TrimStart('£') : parameterValue.TrimEnd('%');
         }
 
         private string FormattedErrorForMoreThanOneUniqueRefs(DefaultParameterTemplateMaster defaultParameterTemplateMaster)
