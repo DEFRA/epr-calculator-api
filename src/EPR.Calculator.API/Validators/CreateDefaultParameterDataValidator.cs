@@ -128,7 +128,7 @@ namespace api.Validators
             if (IsNotPercentage(defaulTemplate))
             {
                 sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
-                sb.Append($"can only include numbers, commas and decimal points.");
+                sb.Append($"can only include numbers, commas and decimal points");
             }
             else if (IsPercentageIncrease(defaulTemplate))
             {
