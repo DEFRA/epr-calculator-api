@@ -1,6 +1,6 @@
-﻿using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Dtos;
 using System.Text;
 
 namespace api.Validators
@@ -50,7 +50,13 @@ namespace api.Validators
                     decimal parameterValue;
                     var matchingTemplate = matchingTemplates.Single();
                     var parameterValueStr = this.GetParameterValue(defaultParameterTemplateMaster, matchingTemplate.ParameterValue);
-                    if (decimal.TryParse(parameterValueStr, out parameterValue))
+                    if(string.IsNullOrEmpty(parameterValueStr))
+                    {
+                        var errorMessage = $"{this.FormattedErrorForEmptyValue(defaultParameterTemplateMaster)}";
+                        var error = this.CreateErrorDto(defaultParameterTemplateMaster, errorMessage);
+                        errors.Add(error);
+                    }
+                    else if (decimal.TryParse(parameterValueStr, out parameterValue))
                     {
                         if (parameterValue < defaultParameterTemplateMaster.ValidRangeFrom ||
                             parameterValue > defaultParameterTemplateMaster.ValidRangeTo)
@@ -87,6 +93,24 @@ namespace api.Validators
         private string GetParameterValue(DefaultParameterTemplateMaster defaultTemplate, string parameterValue)
         {
             return IsNotPercentage(defaultTemplate) ? parameterValue.Replace("£", string.Empty) : parameterValue.TrimEnd('%');
+        }
+
+        private string FormattedErrorForEmptyValue(DefaultParameterTemplateMaster defaultTemplate)
+        {
+            var sb = new StringBuilder();
+            if (IsNotPercentage(defaultTemplate))
+            {
+                sb.Append($"Enter the {defaultTemplate.ParameterType} for {defaultTemplate.ParameterCategory}");
+            }
+            else if (IsPercentageIncrease(defaultTemplate))
+            {
+                sb.Append($"Enter the {defaultTemplate.ParameterType} percentage increase");
+            }
+            else
+            {
+                sb.Append($"Enter the {defaultTemplate.ParameterType} percentage decrease");
+            }
+            return sb.ToString();
         }
 
         private string FormattedErrorForMoreThanOneUniqueRefs(DefaultParameterTemplateMaster defaultParameterTemplateMaster)
