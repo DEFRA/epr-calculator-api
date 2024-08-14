@@ -19,7 +19,8 @@ namespace EPR.Calculator.API.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<DefaultParameterTemplateMaster>();
+            modelBuilder.Entity<DefaultParameterTemplateMaster>().Property(x => x.ValidRangeFrom).HasPrecision(18, 3);
+            modelBuilder.Entity<DefaultParameterTemplateMaster>().Property(x => x.ValidRangeTo).HasPrecision(18, 3);
             modelBuilder.Entity<DefaultParameterSettingDetail>();
             modelBuilder.Entity<DefaultParameterSettingMaster>();
 
