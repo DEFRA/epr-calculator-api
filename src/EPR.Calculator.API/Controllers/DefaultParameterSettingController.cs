@@ -53,7 +53,7 @@ namespace EPR.Calculator.API.Controllers
                     {
                         this._context.DefaultParameterSettingDetail.Add(new DefaultParameterSettingDetail
                         {
-                            ParameterValue = decimal.Parse(templateValue.ParameterValue.TrimEnd('%').TrimStart('£')),
+                            ParameterValue = decimal.Parse(templateValue.ParameterValue.TrimEnd('%').Replace("£", string.Empty)),
                             ParameterUniqueReferenceId = templateValue.ParameterUniqueReferenceId,
                             DefaultParameterSettingMaster = defaultParamSettingMaster
                         });
