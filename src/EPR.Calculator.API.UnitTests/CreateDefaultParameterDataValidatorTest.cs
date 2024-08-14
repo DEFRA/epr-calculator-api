@@ -1,7 +1,9 @@
 ﻿using api.Validators;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -142,6 +144,35 @@ namespace EPR.Calculator.API.UnitTests
             };
             var vr = this.validator.Validate(dto);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Expecting only One with Parameter Type")) == 1);
+        }
+
+
+        [TestMethod]
+        public void ValidateTest_For_Invalid_Format()
+        {
+            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
+
+            foreach (var item in data)
+            {
+                schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                {
+                    ParameterUniqueReferenceId = item.ParameterUniqueReferenceId,
+                    ParameterValue = "£"
+                });
+            }
+
+            var dto = new CreateDefaultParameterSettingDto
+            {
+                ParameterYear = "2024-25",
+                SchemeParameterTemplateValues = schemeParameterTemplateValues
+            };
+            var vr = this.validator.Validate(dto);
+            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium can only include numbers, commas and decimal points.")) == 1);
+            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("The Bad debt provision percentage percentage increase can only include numbers, commas, decimal points and a percentage symbol (%)")) == 1);
+            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Materiality threshold for Amount Decrease can only include numbers, commas and decimal points.")) == 1);
+            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage increase can only include numbers, commas, decimal points and a percentage symbol (%)")) == 1);
+            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage decrease can only include numbers, commas, decimal points and a percentage symbol (%)")) == 1);
+            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Tonnage change threshold for Amount Increase can only include numbers, commas and decimal points.")) == 1);
         }
 
         [TestMethod]
