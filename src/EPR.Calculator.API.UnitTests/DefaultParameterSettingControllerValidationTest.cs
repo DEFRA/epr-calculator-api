@@ -57,7 +57,7 @@ namespace EPR.Calculator.API.UnitTests
             {
                 schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
                 {
-                    ParameterValue = 0,
+                    ParameterValue = "0",
                     ParameterUniqueReferenceId = uniqueRef
                 });
             }

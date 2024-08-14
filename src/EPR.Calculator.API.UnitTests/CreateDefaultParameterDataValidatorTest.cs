@@ -66,24 +66,24 @@ namespace EPR.Calculator.API.UnitTests
                 }
             };
 
-        private decimal GetInvalidValueForUniqueRef(string parameterUniqueReferenceId)
+        private string GetInvalidValueForUniqueRef(string parameterUniqueReferenceId)
         {
             switch (parameterUniqueReferenceId)
             {
                 case "COMC-AL":
-                    return -1m;
+                    return "-1";
                 case "BADEBT-P":
-                    return -1m;
+                    return "-1";
                 case "MATT-AD":
-                    return 1m;
+                    return "1";
                 case "MATT-PI":
-                    return 1000m;
+                    return "1000";
                 case "MATT-PD":
-                    return -1000m;
+                    return "-1000";
                 case "TONT-AI":
-                    return -1m;
+                    return "-1";
                 default:
-                    return 0m;
+                    return "0";
             }
         }
 
@@ -128,12 +128,12 @@ namespace EPR.Calculator.API.UnitTests
             schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
             {
                 ParameterUniqueReferenceId = "COMC-AL",
-                ParameterValue = 0
+                ParameterValue = "0"
             });
             schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
             {
                 ParameterUniqueReferenceId = "COMC-AL",
-                ParameterValue = 0
+                ParameterValue = "0"
             });
             var dto = new CreateDefaultParameterSettingDto
             {

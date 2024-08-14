@@ -35,42 +35,35 @@ namespace api.Validators
 
                 if (matchingTemplates.Count() > 1)
                 {
-                    var error = new CreateDefaultParameterSettingErrorDto
-                    {
-                        ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
-                        ParameterType = defaultParameterTemplateMaster.ParameterType,
-                        ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
-                        Message = $"Expecting only One with Parameter Type {this.FormattedErrorForMoreThanOneUniqueRefs(defaultParameterTemplateMaster)}",
-                        Description = ""
-                    };
+                    var errorMessage = $"Expecting only One with Parameter Type {this.FormattedErrorForMoreThanOneUniqueRefs(defaultParameterTemplateMaster)}";
+                    var error = this.CreateErrorDto(defaultParameterTemplateMaster, errorMessage);
                     errors.Add(error);
                 }
                 else if (matchingTemplates.Count() == 0)
                 {
-                    var error = new CreateDefaultParameterSettingErrorDto
-                    {
-                        ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
-                        ParameterType = defaultParameterTemplateMaster.ParameterType,
-                        ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
-                        Message = this.FormattedErrorForMissingValues(defaultParameterTemplateMaster),
-                        Description = ""
-                    };
+                    var errorMessage = this.FormattedErrorForMissingValues(defaultParameterTemplateMaster);
+                    var error = this.CreateErrorDto(defaultParameterTemplateMaster, errorMessage);
                     errors.Add(error);
                 }
                 else
                 {
+                    decimal parameterValue;
                     var matchingTemplate = matchingTemplates.Single();
-                    if (matchingTemplate.ParameterValue < defaultParameterTemplateMaster.ValidRangeFrom ||
-                        matchingTemplate.ParameterValue > defaultParameterTemplateMaster.ValidRangeTo)
+                    var parameterValueStr = this.GetParameterValue(defaultParameterTemplateMaster, matchingTemplate.ParameterValue);
+                    if (decimal.TryParse(parameterValueStr, out parameterValue))
                     {
-                        var error = new CreateDefaultParameterSettingErrorDto
+                        if (parameterValue < defaultParameterTemplateMaster.ValidRangeFrom ||
+                            parameterValue > defaultParameterTemplateMaster.ValidRangeTo)
                         {
-                            ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
-                            ParameterType = defaultParameterTemplateMaster.ParameterType,
-                            ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
-                            Message = $"{this.FormattedErrorForOutOfRangeValues(defaultParameterTemplateMaster)}",
-                            Description = ""
-                        };
+                            var errorMessage = $"{this.FormattedErrorForOutOfRangeValues(defaultParameterTemplateMaster)}";
+                            var error = this.CreateErrorDto(defaultParameterTemplateMaster, errorMessage);
+                            errors.Add(error);
+                        }
+                    }
+                    else
+                    {
+                        var errorMessage = $"{this.FormattedErrorForNonDecimalValues(defaultParameterTemplateMaster)}";
+                        var error = this.CreateErrorDto(defaultParameterTemplateMaster, errorMessage);
                         errors.Add(error);
                     }
                 }
@@ -79,12 +72,51 @@ namespace api.Validators
             return errors;
         }
 
+        private CreateDefaultParameterSettingErrorDto CreateErrorDto(DefaultParameterTemplateMaster template, string errorMessage)
+        {
+            return new CreateDefaultParameterSettingErrorDto
+            {
+                ParameterUniqueRef = template.ParameterUniqueReferenceId,
+                ParameterType = template.ParameterType,
+                ParameterCategory = template.ParameterCategory,
+                Message = errorMessage,
+                Description = ""
+            };
+        }
+
+        private string GetParameterValue(DefaultParameterTemplateMaster defaultTemplate, string parameterValue)
+        {
+            return IsNotPercentage(defaultTemplate) ? parameterValue : parameterValue.TrimEnd('%');
+        }
+
         private string FormattedErrorForMoreThanOneUniqueRefs(DefaultParameterTemplateMaster defaultParameterTemplateMaster)
         {
             var sb = new StringBuilder();
             sb.Append($"Parameter Type {defaultParameterTemplateMaster.ParameterType} ");
             sb.Append($"and Parameter Category {defaultParameterTemplateMaster.ParameterCategory} ");
             sb.Append($"and Parameter Unique ref {defaultParameterTemplateMaster.ParameterUniqueReferenceId}");
+            return sb.ToString();
+        }
+
+        private string FormattedErrorForNonDecimalValues(DefaultParameterTemplateMaster defaulTemplate)
+        {
+            var sb = new StringBuilder();
+            if (IsNotPercentage(defaulTemplate))
+            {
+                sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
+                sb.Append($"can only include numbers, commas and decimal points.");
+            }
+            else if (IsPercentageIncrease(defaulTemplate))
+            {
+                sb.Append($"The {defaulTemplate.ParameterType} percentage increase ");
+                sb.Append($"can only include numbers, commas, decimal points and a percentage symbol (%)");
+            }
+            else
+            {
+                sb.Append($"The {defaulTemplate.ParameterType} percentage decrease ");
+                sb.Append($"can only include numbers, commas, decimal points and a percentage symbol (%)");
+            }
+
             return sb.ToString();
         }
 
@@ -116,7 +148,7 @@ namespace api.Validators
                 sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
                 sb.Append($"must be between {defaulTemplate.ValidRangeFrom} and {defaulTemplate.ValidRangeTo}");
             }
-            else if(IsPercentageIncrease(defaulTemplate))
+            else if (IsPercentageIncrease(defaulTemplate))
             {
                 sb.Append($"The {defaulTemplate.ParameterType} percentage increase ");
                 sb.Append($"must be between {defaulTemplate.ValidRangeFrom} and {defaulTemplate.ValidRangeTo}");

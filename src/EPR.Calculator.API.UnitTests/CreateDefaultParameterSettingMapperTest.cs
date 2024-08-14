@@ -38,7 +38,7 @@ namespace api.Tests.Controllers
                 {
                     schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
                     {
-                        ParameterValue = 0,
+                        ParameterValue = "0",
                         ParameterUniqueReferenceId = item
                     });
                 }
@@ -47,7 +47,7 @@ namespace api.Tests.Controllers
 
                     schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
                     {
-                        ParameterValue = 90,
+                        ParameterValue = "90",
                         ParameterUniqueReferenceId = item
                     });
 
