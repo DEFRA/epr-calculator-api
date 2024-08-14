@@ -606,3 +606,32 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240814103125_UpdateBadDebtInTemplateMaster'
+)
+BEGIN
+    update dbo.default_parameter_template_master
+    set parameter_type = 'Bad debt provision',
+    parameter_category = 'Percentage'
+    where parameter_type like '%Bad debt provision percentage%'
+
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240814103125_UpdateBadDebtInTemplateMaster'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20240814103125_UpdateBadDebtInTemplateMaster', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
