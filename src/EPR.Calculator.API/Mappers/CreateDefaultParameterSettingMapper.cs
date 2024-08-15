@@ -12,6 +12,7 @@ namespace api.Mappers
 
             foreach (var item in defaultParameterSettingMaster.Details)
             {
+                var selectedTemplate = defaultParameterTemplate.Single(x => x.ParameterUniqueReferenceId == item.ParameterUniqueReferenceId);
                 var data = new DefaultSchemeParametersDto
                 {
                     Id = item.Id,
@@ -22,8 +23,8 @@ namespace api.Mappers
                     CreatedAt = defaultParameterSettingMaster.CreatedAt,
                     DefaultParameterSettingMasterId = item.Id,
                     ParameterUniqueRef = item.ParameterUniqueReferenceId,
-                    ParameterType = defaultParameterTemplate.Single(x => x.ParameterUniqueReferenceId == item.ParameterUniqueReferenceId)?.ParameterType,
-                    ParameterCategory = defaultParameterTemplate.Single(x => x.ParameterUniqueReferenceId == item.ParameterUniqueReferenceId)?.ParameterCategory,
+                    ParameterType = selectedTemplate.ParameterType,
+                    ParameterCategory = selectedTemplate.ParameterCategory,
                     ParameterValue = item.ParameterValue
                 };
 
