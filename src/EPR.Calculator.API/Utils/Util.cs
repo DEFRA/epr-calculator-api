@@ -105,7 +105,7 @@ namespace EPR.Calculator.API.Utils
             else if (IsTonnageAmountIncrease(defaulTemplate) || IsTonnageAmountDecrease(defaulTemplate))
             {
                 sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
-                sb.Append($"must be between {String.Format("{0:C}", defaulTemplate.ValidRangeFrom)} and {String.Format("{0:C}", defaulTemplate.ValidRangeTo)}");
+                sb.Append($"must be between £{Math.Round(defaulTemplate.ValidRangeFrom, 2, MidpointRounding.ToZero)} and £{Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)}");
             }
             else if (IsBadDebt(defaulTemplate))
             {
@@ -125,7 +125,7 @@ namespace EPR.Calculator.API.Utils
             else
             {
                 sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
-                sb.Append($"must be between {String.Format("{0:C}", defaulTemplate.ValidRangeFrom)} and {String.Format("{0:C}", defaulTemplate.ValidRangeTo)}");
+                sb.Append($"must be between £{Math.Round(defaulTemplate.ValidRangeFrom, 2, MidpointRounding.ToZero)} and £{Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)}");
             }
 
             return sb.ToString();
