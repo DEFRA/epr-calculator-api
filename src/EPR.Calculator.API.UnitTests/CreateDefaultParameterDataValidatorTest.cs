@@ -193,6 +193,7 @@ namespace EPR.Calculator.API.UnitTests
                 ParameterYear = "2024-25",
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
+
             var vr = this.validator.Validate(dto);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("must be between")) == 6);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium must be between £0.00 and £999,999,999.99")) == 1);
