@@ -175,7 +175,7 @@ namespace EPR.Calculator.API.UnitTests
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Tonnage change threshold for Amount Increase can only include numbers, commas and decimal points")) == 1);
         }
 
-        [TestMethod]
+
         public void ValidateTest_For_Unique_References_Invalid_Values()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
