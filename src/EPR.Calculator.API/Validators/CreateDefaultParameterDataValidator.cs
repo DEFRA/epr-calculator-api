@@ -1,7 +1,7 @@
-﻿using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using System.Text;
+using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Utils;
 
 namespace api.Validators
 {
@@ -35,42 +35,41 @@ namespace api.Validators
 
                 if (matchingTemplates.Count() > 1)
                 {
-                    var error = new CreateDefaultParameterSettingErrorDto
-                    {
-                        ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
-                        ParameterType = defaultParameterTemplateMaster.ParameterType,
-                        ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
-                        Message = $"Expecting only One with Parameter Type {this.FormattedErrorString(defaultParameterTemplateMaster)}",
-                        Description = ""
-                    };
+                    var errorMessage = $"Expecting only One with Parameter Type {Util.FormattedErrorForMoreThanOneUniqueRefs(defaultParameterTemplateMaster)}";
+                    var error = Util.CreateErrorDto(defaultParameterTemplateMaster, errorMessage);
                     errors.Add(error);
                 }
                 else if (matchingTemplates.Count() == 0)
                 {
-                    var error = new CreateDefaultParameterSettingErrorDto
-                    {
-                        ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
-                        ParameterType = defaultParameterTemplateMaster.ParameterType,
-                        ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
-                        Message = $"Expecting at least One with {this.FormattedErrorString(defaultParameterTemplateMaster)}",
-                        Description = ""
-                    };
+                    var errorMessage = Util.FormattedErrorForMissingValues(defaultParameterTemplateMaster);
+                    var error = Util.CreateErrorDto(defaultParameterTemplateMaster, errorMessage);
                     errors.Add(error);
                 }
                 else
                 {
+                    decimal parameterValue;
                     var matchingTemplate = matchingTemplates.Single();
-                    if (matchingTemplate.ParameterValue < defaultParameterTemplateMaster.ValidRangeFrom ||
-                        matchingTemplate.ParameterValue > defaultParameterTemplateMaster.ValidRangeTo)
+                    var parameterValueStr = Util.GetParameterValue(defaultParameterTemplateMaster, matchingTemplate.ParameterValue);
+                    if(string.IsNullOrEmpty(parameterValueStr))
                     {
-                        var error = new CreateDefaultParameterSettingErrorDto
+                        var errorMessage = $"{Util.FormattedErrorForEmptyValue(defaultParameterTemplateMaster)}";
+                        var error = Util.CreateErrorDto(defaultParameterTemplateMaster, errorMessage);
+                        errors.Add(error);
+                    }
+                    else if (decimal.TryParse(parameterValueStr, out parameterValue))
+                    {
+                        if (parameterValue < defaultParameterTemplateMaster.ValidRangeFrom ||
+                            parameterValue > defaultParameterTemplateMaster.ValidRangeTo)
                         {
-                            ParameterUniqueRef = defaultParameterTemplateMaster.ParameterUniqueReferenceId,
-                            ParameterType = defaultParameterTemplateMaster.ParameterType,
-                            ParameterCategory = defaultParameterTemplateMaster.ParameterCategory,
-                            Message = $"{this.FormattedErrorStringForValues(defaultParameterTemplateMaster, matchingTemplate.ParameterValue.Value)}",
-                            Description = ""
-                        };
+                            var errorMessage = $"{Util.FormattedErrorForOutOfRangeValues(defaultParameterTemplateMaster)}";
+                            var error = Util.CreateErrorDto(defaultParameterTemplateMaster, errorMessage);
+                            errors.Add(error);
+                        }
+                    }
+                    else
+                    {
+                        var errorMessage = $"{Util.FormattedErrorForNonDecimalValues(defaultParameterTemplateMaster)}";
+                        var error = Util.CreateErrorDto(defaultParameterTemplateMaster, errorMessage);
                         errors.Add(error);
                     }
                 }
@@ -79,24 +78,6 @@ namespace api.Validators
             return errors;
         }
 
-        private string FormattedErrorString(DefaultParameterTemplateMaster defaultParameterTemplateMaster)
-        {
-            var sb = new StringBuilder();
-            sb.Append($"Parameter Type {defaultParameterTemplateMaster.ParameterType} ");
-            sb.Append($"and Parameter Category {defaultParameterTemplateMaster.ParameterCategory} ");
-            sb.Append($"and Parameter Unique ref {defaultParameterTemplateMaster.ParameterUniqueReferenceId}");
-            return sb.ToString();
-        }
-
-        private string FormattedErrorStringForValues(DefaultParameterTemplateMaster defaultParameterTemplateMaster, decimal valueProvided)
-        {
-            var sb = new StringBuilder();
-            sb.Append($"Parameter Value too big or small. Value Provided was {valueProvided} for ");
-            sb.Append($"Parameter Type {defaultParameterTemplateMaster.ParameterType} ");
-            sb.Append($"and Parameter Category {defaultParameterTemplateMaster.ParameterCategory} ");
-            sb.Append($"and Parameter Unique ref {defaultParameterTemplateMaster.ParameterUniqueReferenceId}. ");
-            sb.Append($"Value from is {defaultParameterTemplateMaster.ValidRangeFrom} and Value To is {defaultParameterTemplateMaster.ValidRangeTo}.");
-            return sb.ToString();
-        }
+        
     }
 }
