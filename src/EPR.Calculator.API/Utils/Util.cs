@@ -103,12 +103,12 @@ namespace EPR.Calculator.API.Utils
             else if (IsPercentageIncrease(defaulTemplate))
             {
                 sb.Append($"The {defaulTemplate.ParameterType} percentage increase ");
-                sb.Append($"must be between {defaulTemplate.ValidRangeFrom} and {defaulTemplate.ValidRangeTo}");
+                sb.Append($"must be between {defaulTemplate.ValidRangeFrom}% and {defaulTemplate.ValidRangeTo}%");
             }
             else
             {
                 sb.Append($"The {defaulTemplate.ParameterType} percentage decrease ");
-                sb.Append($"must be between {defaulTemplate.ValidRangeFrom} and {defaulTemplate.ValidRangeTo}");
+                sb.Append($"must be between {defaulTemplate.ValidRangeFrom}% and {defaulTemplate.ValidRangeTo}%");
             }
 
             return sb.ToString();
