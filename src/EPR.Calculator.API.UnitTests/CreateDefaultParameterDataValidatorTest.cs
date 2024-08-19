@@ -195,12 +195,12 @@ namespace EPR.Calculator.API.UnitTests
             };
             var vr = this.validator.Validate(dto);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("must be between")) == 6);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium must be between 0 and 999999999.99")) == 1);
+            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium must be between £0.00 and £999,999,999.99")) == 1);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("The Bad debt provision percentage")) == 1);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Materiality threshold for Amount Decrease must be between -999999999.99 and 0")) == 1);
+            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Materiality threshold for Amount Decrease must be between -£999,999,999.99 and £0.00")) == 1);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage increase must be between 0% and 999.99%")) == 1);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage decrease must be between -999.99% and 0%")) == 1);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Tonnage change threshold for Amount Increase must be between 0 and 999999999.99")) == 1);
+            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Tonnage change threshold for Amount Increase must be between 0 and 999999999.99 tons")) == 1);
         }
     }
 }

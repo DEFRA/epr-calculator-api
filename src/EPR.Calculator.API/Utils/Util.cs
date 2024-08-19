@@ -95,23 +95,64 @@ namespace EPR.Calculator.API.Utils
         public static string FormattedErrorForOutOfRangeValues(DefaultParameterTemplateMaster defaulTemplate)
         {
             var sb = new StringBuilder();
-            if (IsNotPercentage(defaulTemplate))
+
+            if (IsTonnage(defaulTemplate))
             {
                 sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
-                sb.Append($"must be between {defaulTemplate.ValidRangeFrom} and {defaulTemplate.ValidRangeTo}");
+                sb.Append($"must be between {decimal.Truncate(defaulTemplate.ValidRangeFrom)} and {Math.Round(defaulTemplate.ValidRangeTo, 3, MidpointRounding.ToZero)} ");
+                sb.Append("tons");
+            }
+            else if (IsTonnageAmountIncrease(defaulTemplate) || IsTonnageAmountDecrease(defaulTemplate))
+            {
+                sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
+                sb.Append($"must be between {String.Format("{0:C}", defaulTemplate.ValidRangeFrom)} and {String.Format("{0:C}", defaulTemplate.ValidRangeTo)}");
+            }
+            else if (IsBadDebt(defaulTemplate))
+            {
+                sb.Append($"The {defaulTemplate.ParameterType} ");
+                sb.Append($"must be between {decimal.Truncate(defaulTemplate.ValidRangeFrom)}% and {Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)}%");
             }
             else if (IsPercentageIncrease(defaulTemplate))
             {
                 sb.Append($"The {defaulTemplate.ParameterType} percentage increase ");
-                sb.Append($"must be between {defaulTemplate.ValidRangeFrom}% and {defaulTemplate.ValidRangeTo}%");
+                sb.Append($"must be between { decimal.Truncate(defaulTemplate.ValidRangeFrom)}% and {Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)}%");
+            }
+            else if (IsPercentageDecrease(defaulTemplate))
+            {
+                sb.Append($"The {defaulTemplate.ParameterType} percentage decrease ");
+                sb.Append($"must be between {Math.Round(defaulTemplate.ValidRangeFrom, 2, MidpointRounding.ToZero)}% and {decimal.Truncate(defaulTemplate.ValidRangeTo)}%");
             }
             else
             {
-                sb.Append($"The {defaulTemplate.ParameterType} percentage decrease ");
-                sb.Append($"must be between {defaulTemplate.ValidRangeFrom}% and {defaulTemplate.ValidRangeTo}%");
+                sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
+                sb.Append($"must be between {String.Format("{0:C}", defaulTemplate.ValidRangeFrom)} and {String.Format("{0:C}", defaulTemplate.ValidRangeTo)}");
             }
 
             return sb.ToString();
+        }
+
+        public static bool IsTonnage(DefaultParameterTemplateMaster defaultTemplate)
+        {
+            return defaultTemplate.ParameterType.ToLower().Contains("tonnage")
+                && !defaultTemplate.ParameterCategory.ToLower().Contains("amount")
+                && !defaultTemplate.ParameterCategory.ToLower().Contains("percent");
+        }
+
+        public static bool IsTonnageAmountIncrease(DefaultParameterTemplateMaster defaultTemplate)
+        {
+            return defaultTemplate.ParameterType.ToLower().Contains("tonnage")
+                && defaultTemplate.ParameterCategory.ToLower().Contains("amount increase");
+        }
+
+        public static bool IsTonnageAmountDecrease(DefaultParameterTemplateMaster defaultTemplate)
+        {
+            return defaultTemplate.ParameterType.ToLower().Contains("tonnage")
+                && defaultTemplate.ParameterCategory.ToLower().Contains("amount decrease");
+        }
+
+        public static bool IsBadDebt(DefaultParameterTemplateMaster defaultTemplate)
+        {
+            return defaultTemplate.ParameterType.ToLower().Contains("bad debt");
         }
 
         public static bool IsPercentageIncrease(DefaultParameterTemplateMaster defaultTemplate)
@@ -121,6 +162,15 @@ namespace EPR.Calculator.API.Utils
                 (!string.IsNullOrEmpty(defaultTemplate.ParameterType)
                 && defaultTemplate.ParameterType.ToLower().Contains("percent"))) &&
                 defaultTemplate.ValidRangeFrom >= 0;
+        }
+
+        public static bool IsPercentageDecrease(DefaultParameterTemplateMaster defaultTemplate)
+        {
+            return ((!string.IsNullOrEmpty(defaultTemplate.ParameterCategory)
+                && defaultTemplate.ParameterCategory.ToLower().Contains("percent")) ||
+                (!string.IsNullOrEmpty(defaultTemplate.ParameterType)
+                && defaultTemplate.ParameterType.ToLower().Contains("percent"))) &&
+                defaultTemplate.ValidRangeFrom < 0;
         }
 
         public static bool IsNotPercentage(DefaultParameterTemplateMaster defaultTemplate)
