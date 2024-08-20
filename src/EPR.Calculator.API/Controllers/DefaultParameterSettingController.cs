@@ -1,4 +1,4 @@
-using api.Mappers;
+﻿using api.Mappers;
 using api.Validators;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -53,7 +53,7 @@ namespace EPR.Calculator.API.Controllers
                     {
                         this._context.DefaultParameterSettingDetail.Add(new DefaultParameterSettingDetail
                         {
-                            ParameterValue = decimal.Parse(templateValue.ParameterValue.TrimEnd('%').Replace("�", string.Empty)),
+                            ParameterValue = decimal.Parse(templateValue.ParameterValue.TrimEnd('%').Replace("£", string.Empty)),
                             ParameterUniqueReferenceId = templateValue.ParameterUniqueReferenceId,
                             DefaultParameterSettingMaster = defaultParamSettingMaster
                         });
