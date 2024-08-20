@@ -16,6 +16,10 @@ namespace EPR.Calculator.API.Data
 
         public DbSet<DefaultParameterTemplateMaster> DefaultParameterTemplateMasterList { get; set; }
 
+        public DbSet<CalculatorRunClassification> CalculatorRunClassifications { get; set; }
+
+        public DbSet<CalculatorRun> CalculatorRuns { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
