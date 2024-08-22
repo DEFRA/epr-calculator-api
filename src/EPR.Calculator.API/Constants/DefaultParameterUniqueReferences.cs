@@ -1,6 +1,9 @@
 ﻿
+using System.Diagnostics.CodeAnalysis;
+
 namespace EPR.Calculator.API.Constants
 {
+    [ExcludeFromCodeCoverage]
     public static class DefaultParameterUniqueReferences 
     {
         public static string[] UniqueReferences = {"BADEBT-P", "COMC-AL", "COMC-FC", "COMC-GL",

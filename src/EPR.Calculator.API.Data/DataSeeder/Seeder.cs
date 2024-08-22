@@ -1,8 +1,10 @@
-﻿using EPR.Calculator.API.Data.DataModels;
+﻿using System.Diagnostics.CodeAnalysis;
+using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Data.DataSeeder
 {
+    [ExcludeFromCodeCoverage]
     public static class Seeder
     {
         public static void Initialize(ModelBuilder modelBuilder)
