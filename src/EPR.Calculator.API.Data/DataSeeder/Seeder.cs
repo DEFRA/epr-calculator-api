@@ -351,7 +351,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             modelBuilder.Entity<CalculatorRunClassification>().HasData(new CalculatorRunClassification
             {
                 Id = 1,
-                Status = "In THE QUEUE",
+                Status = "IN THE QUEUE",
                 CreatedBy = "Test User",
                 CreatedAt = DateTime.Now
             },
