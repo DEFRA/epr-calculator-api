@@ -13,21 +13,24 @@ namespace EPR.Calculator.API.Data.DataModels
     [Table("calculator_run_classification")]
     public class CalculatorRunClassification
     {
+        [Column("id")]
+        [Required]
         public int Id { get; set; }
 
         [Column("status")]
+        [StringLength(250)]
         [Required]
         public string Status { get; set; }
 
         [Column("created_by")]
-        [Required]
         [StringLength(400)]
+        [Required]
         public string CreatedBy { get; set; } = string.Empty;
 
         [Column("created_at")]
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        public ICollection<CalculatorRun> Details { get; } = new List<CalculatorRun>();
+        public ICollection<CalculatorRun> CalculatorRunDetails { get; } = new List<CalculatorRun>();
     }
 }

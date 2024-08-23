@@ -13,17 +13,26 @@ namespace EPR.Calculator.API.Data.DataModels
     [Table("calculator_run")]
     public class CalculatorRun
     {
+        [Column("id")]
+        [Required]
         public int Id { get; set; }
 
-        [Column("run_classification_status_id")]
+        [Column("calculator_run_classification_id")]
         [Required]
-        public int RunClassificationStatusId { get; set; }
+        public int CalculatorRunClassificationId { get; set; }
 
         [Column("name")]
+        [StringLength(250)]
         [Required]
         public string Name { get; set; }
 
+        [Column("financial_year")]
+        [StringLength(250)]
+        [Required]
+        public string Financial_Year { get; set; }
+
         [Column("created_by")]
+        [StringLength(400)]
         [Required]
         public string CreatedBy { get; set; } = string.Empty;
 
@@ -32,11 +41,10 @@ namespace EPR.Calculator.API.Data.DataModels
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         [Column("updated_by")]
-        public string UpdatedBy { get; set; }
+        [StringLength(400)]
+        public string? UpdatedBy { get; set; }
 
         [Column("updated_at")]
-        public DateTime UpdatedAt { get; set; }
-
-        public CalculatorRunClassification calculatorRunClassification { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }
