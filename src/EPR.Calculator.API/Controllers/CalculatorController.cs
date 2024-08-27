@@ -21,6 +21,11 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
+            if (string.IsNullOrWhiteSpace(financialYear))
+            {
+                return new ObjectResult("Invalid financial year provided") { StatusCode  = StatusCodes.Status400BadRequest };
+            }
+
             try
             {
                 var calculatorRuns = _context.CalculatorRuns.Where(run => run.Financial_Year == financialYear).ToList();
