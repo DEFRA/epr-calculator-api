@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EPR.Calculator.API.Controllers
@@ -14,21 +15,21 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("api/calculatorRuns")]
-        public IActionResult GetCalculatorRuns([FromBody] string financialYear)
+        public IActionResult GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
         {
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            if (string.IsNullOrWhiteSpace(financialYear))
+            if (string.IsNullOrWhiteSpace(request.FinancialYear))
             {
                 return new ObjectResult("Invalid financial year provided") { StatusCode  = StatusCodes.Status400BadRequest };
             }
 
             try
             {
-                var calculatorRuns = _context.CalculatorRuns.Where(run => run.Financial_Year == financialYear).ToList();
+                var calculatorRuns = _context.CalculatorRuns.Where(run => run.Financial_Year == request.FinancialYear).ToList();
 
                 if (calculatorRuns.Count == 0)
                 {

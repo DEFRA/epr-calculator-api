@@ -1,5 +1,6 @@
 ﻿using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -30,7 +31,11 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void Get_Calculator_Runs_Return_Results_Test()
         {
-            var actionResult = _controller.GetCalculatorRuns("2024-25") as ObjectResult;
+            var runParams = new CalculatorRunsParamsDto
+            {
+                FinancialYear = "2024-25"
+            };
+            var actionResult = _controller.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.StatusCode);
         }
@@ -38,7 +43,11 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void Get_Calculator_Runs_Return_Not_Found_Test()
         {
-            var actionResult = _controller.GetCalculatorRuns("2022-23") as ObjectResult;
+            var runParams = new CalculatorRunsParamsDto
+            {
+                FinancialYear = "2022-23"
+            };
+            var actionResult = _controller.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(404, actionResult.StatusCode);
         }
@@ -46,7 +55,11 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void Get_Calculator_Runs_Return_Bad_Request_Test()
         {
-            var actionResult = _controller.GetCalculatorRuns(null) as ObjectResult;
+            var runParams = new CalculatorRunsParamsDto
+            {
+                FinancialYear = null
+            };
+            var actionResult = _controller.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(400, actionResult.StatusCode);
         }
