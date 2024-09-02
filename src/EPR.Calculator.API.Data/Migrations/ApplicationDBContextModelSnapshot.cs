@@ -22,225 +22,6 @@ namespace EPR.Calculator.API.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CalculatorRunClassificationId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_classification_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("Financial_Year")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("financial_year");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("name");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("updated_by");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CalculatorRunClassificationId");
-
-                    b.ToTable("calculator_run");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CalculatorRunClassificationId = 1,
-                            CreatedAt = new DateTime(2025, 5, 28, 10, 1, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Default settings check"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CalculatorRunClassificationId = 2,
-                            CreatedAt = new DateTime(2025, 5, 21, 12, 9, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Alteration check"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CalculatorRunClassificationId = 3,
-                            CreatedAt = new DateTime(2025, 5, 11, 9, 14, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Test 10"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CalculatorRunClassificationId = 4,
-                            CreatedAt = new DateTime(2025, 5, 13, 11, 18, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "June check"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CalculatorRunClassificationId = 4,
-                            CreatedAt = new DateTime(2025, 5, 10, 8, 13, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Pre June check"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CalculatorRunClassificationId = 4,
-                            CreatedAt = new DateTime(2025, 5, 8, 10, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Local Authority data check 5"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CalculatorRunClassificationId = 4,
-                            CreatedAt = new DateTime(2025, 5, 7, 11, 20, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Local Authority data check 4"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            CalculatorRunClassificationId = 4,
-                            CreatedAt = new DateTime(2025, 6, 24, 14, 29, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Local Authority data check 3"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            CalculatorRunClassificationId = 4,
-                            CreatedAt = new DateTime(2025, 6, 27, 16, 39, 12, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Local Authority data check 2"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            CalculatorRunClassificationId = 4,
-                            CreatedAt = new DateTime(2025, 6, 14, 17, 6, 26, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Local Authority data check"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            CalculatorRunClassificationId = 5,
-                            CreatedAt = new DateTime(2025, 5, 1, 9, 12, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Fee adjustment check"
-                        });
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("status");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("calculator_run_classification");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2024, 8, 23, 12, 19, 7, 621, DateTimeKind.Local).AddTicks(6280),
-                            CreatedBy = "Test User",
-                            Status = "IN THE QUEUE"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedAt = new DateTime(2024, 8, 23, 12, 19, 7, 621, DateTimeKind.Local).AddTicks(6289),
-                            CreatedBy = "Test User",
-                            Status = "RUNNING"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedAt = new DateTime(2024, 8, 23, 12, 19, 7, 621, DateTimeKind.Local).AddTicks(6297),
-                            CreatedBy = "Test User",
-                            Status = "UNCLASSIFIED"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedAt = new DateTime(2024, 8, 23, 12, 19, 7, 621, DateTimeKind.Local).AddTicks(6305),
-                            CreatedBy = "Test User",
-                            Status = "PLAY"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedAt = new DateTime(2024, 8, 23, 12, 19, 7, 621, DateTimeKind.Local).AddTicks(6312),
-                            CreatedBy = "Test User",
-                            Status = "ERROR"
-                        });
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingDetail", b =>
                 {
                     b.Property<int>("Id")
@@ -270,7 +51,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasIndex("ParameterUniqueReferenceId");
 
-                    b.ToTable("default_parameter_setting_detail");
+                    b.ToTable("default_parameter_setting_detail", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingMaster", b =>
@@ -307,7 +88,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("default_parameter_setting_master");
+                    b.ToTable("default_parameter_setting_master", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.DefaultParameterTemplateMaster", b =>
@@ -341,7 +122,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("ParameterUniqueReferenceId");
 
-                    b.ToTable("default_parameter_template_master");
+                    b.ToTable("default_parameter_template_master", (string)null);
 
                     b.HasData(
                         new
@@ -674,15 +455,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
-                {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", null)
-                        .WithMany("CalculatorRunDetails")
-                        .HasForeignKey("CalculatorRunClassificationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingDetail", b =>
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingMaster", "DefaultParameterSettingMaster")
@@ -700,11 +472,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("DefaultParameterSettingMaster");
 
                     b.Navigation("ParameterUniqueReference");
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", b =>
-                {
-                    b.Navigation("CalculatorRunDetails");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingMaster", b =>
