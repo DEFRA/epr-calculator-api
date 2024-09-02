@@ -635,3 +635,81 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240902153316_AddCalcRunTables'
+)
+BEGIN
+    CREATE TABLE [calculator_run_classification] (
+        [id] int NOT NULL IDENTITY,
+        [status] nvarchar(250) NOT NULL,
+        [created_by] nvarchar(400) NOT NULL,
+        [created_at] datetime2 NOT NULL,
+        CONSTRAINT [PK_calculator_run_classification] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240902153316_AddCalcRunTables'
+)
+BEGIN
+    CREATE TABLE [calculator_run] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_classification_id] int NOT NULL,
+        [name] nvarchar(250) NOT NULL,
+        [financial_year] nvarchar(250) NOT NULL,
+        [created_by] nvarchar(400) NOT NULL,
+        [created_at] datetime2 NOT NULL,
+        [updated_by] nvarchar(400) NULL,
+        [updated_at] datetime2 NULL,
+        CONSTRAINT [PK_calculator_run] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_calculator_run_calculator_run_classification_calculator_run_classification_id] FOREIGN KEY ([calculator_run_classification_id]) REFERENCES [calculator_run_classification] ([id]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240902153316_AddCalcRunTables'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'created_at', N'created_by', N'status') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
+        SET IDENTITY_INSERT [calculator_run_classification] ON;
+    EXEC(N'INSERT INTO [calculator_run_classification] ([id], [created_at], [created_by], [status])
+    VALUES (1, ''2024-09-02T16:33:15.3358091+01:00'', N''Test User'', N''IN THE QUEUE''),
+    (2, ''2024-09-02T16:33:15.3358097+01:00'', N''Test User'', N''RUNNING''),
+    (3, ''2024-09-02T16:33:15.3358102+01:00'', N''Test User'', N''UNCLASSIFIED''),
+    (4, ''2024-09-02T16:33:15.3358106+01:00'', N''Test User'', N''PLAY''),
+    (5, ''2024-09-02T16:33:15.3358110+01:00'', N''Test User'', N''ERROR'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'created_at', N'created_by', N'status') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
+        SET IDENTITY_INSERT [calculator_run_classification] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240902153316_AddCalcRunTables'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_calculator_run_classification_id] ON [calculator_run] ([calculator_run_classification_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240902153316_AddCalcRunTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20240902153316_AddCalcRunTables', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
