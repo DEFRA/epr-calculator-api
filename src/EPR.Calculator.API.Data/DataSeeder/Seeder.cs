@@ -395,7 +395,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 CalculatorRunClassificationId = 1,
                 Financial_Year = "2024-25",
                 CreatedBy = "Test User",
-                CreatedAt = new DateTime(2025, 8, 28, 10, 01, 0)
+                CreatedAt = new DateTime(2025, 8, 28, 10, 01, 0, DateTimeKind.Utc)
             },
             new CalculatorRun {
                 Id = 2,
@@ -403,7 +403,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 CalculatorRunClassificationId = 2,
                 Financial_Year = "2024-25",
                 CreatedBy = "Test User",
-                CreatedAt = new DateTime(2025, 8, 21, 12, 9, 0)
+                CreatedAt = new DateTime(2025, 8, 21, 12, 9, 0, DateTimeKind.Utc)
             },
             new CalculatorRun
             {
@@ -412,7 +412,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 CalculatorRunClassificationId = 3,
                 Financial_Year = "2024-25",
                 CreatedBy = "Test User",
-                CreatedAt = new DateTime(2025, 5, 11, 9, 14, 0)
+                CreatedAt = new DateTime(2025, 5, 11, 9, 14, 0, DateTimeKind.Utc)
             },
             new CalculatorRun
             {
@@ -421,7 +421,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 CalculatorRunClassificationId = 4,
                 Financial_Year = "2024-25",
                 CreatedBy = "Test User",
-                CreatedAt = new DateTime(2025, 5, 13, 11, 18, 0)
+                CreatedAt = new DateTime(2025, 5, 13, 11, 18, 0, DateTimeKind.Utc)
             },
             new CalculatorRun
             {
@@ -430,7 +430,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 CalculatorRunClassificationId = 4,
                 Financial_Year = "2024-25",
                 CreatedBy = "Test User",
-                CreatedAt = new DateTime(2025, 5, 10, 8, 13, 0)
+                CreatedAt = new DateTime(2025, 5, 10, 8, 13, 0, DateTimeKind.Utc)
             },
             new CalculatorRun
             {
@@ -439,7 +439,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 CalculatorRunClassificationId = 4,
                 Financial_Year = "2024-25",
                 CreatedBy = "Test User",
-                CreatedAt = new DateTime(2025, 5, 8, 10, 0, 0)
+                CreatedAt = new DateTime(2025, 5, 8, 10, 0, 0, DateTimeKind.Utc)
             },
             new CalculatorRun
             {
@@ -448,7 +448,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 CalculatorRunClassificationId = 4,
                 Financial_Year = "2024-25",
                 CreatedBy = "Test User",
-                CreatedAt = new DateTime(2025, 5, 7, 11, 20, 0)
+                CreatedAt = new DateTime(2025, 5, 7, 11, 20, 0, DateTimeKind.Utc)
             },
             new CalculatorRun
             {
@@ -457,7 +457,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 CalculatorRunClassificationId = 4,
                 Financial_Year = "2024-25",
                 CreatedBy = "Test User",
-                CreatedAt = new DateTime(2025, 6, 24, 14, 29, 0)
+                CreatedAt = new DateTime(2025, 6, 24, 14, 29, 0, DateTimeKind.Utc)
             },
             new CalculatorRun
             {
@@ -466,7 +466,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 CalculatorRunClassificationId = 4,
                 Financial_Year = "2024-25",
                 CreatedBy = "Test User",
-                CreatedAt = new DateTime(2025, 6, 27, 16, 39, 12)
+                CreatedAt = new DateTime(2025, 6, 27, 16, 39, 12, DateTimeKind.Utc)
             },
             new CalculatorRun
             {
@@ -475,7 +475,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 CalculatorRunClassificationId = 4,
                 Financial_Year = "2024-25",
                 CreatedBy = "Test User",
-                CreatedAt = new DateTime(2025, 6, 14, 17, 6, 26)
+                CreatedAt = new DateTime(2025, 6, 14, 17, 6, 26, DateTimeKind.Utc)
             },
             new CalculatorRun
             {
@@ -484,7 +484,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 CalculatorRunClassificationId = 5,
                 Financial_Year = "2024-25",
                 CreatedBy = "Test User",
-                CreatedAt = new DateTime(2025, 5, 1, 9, 12, 0)
+                CreatedAt = new DateTime(2025, 5, 1, 9, 12, 0, DateTimeKind.Utc)
             });
         }
     }
