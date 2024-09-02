@@ -1,20 +1,25 @@
 ﻿using api.Mappers;
 using api.Validators;
+using EPR.Calculator.API.CommandHandlers;
+using EPR.Calculator.API.Commands;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace EPR.Calculator.API.Controllers
 {
     public class DefaultParameterSettingController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
+        private readonly ICreateDefaultParameterCommandHandler commandHandler;
 
-        public DefaultParameterSettingController(ApplicationDBContext context)
+        public DefaultParameterSettingController(ApplicationDBContext context, ICreateDefaultParameterCommandHandler commandHandler)
         {
             this._context = context;
+            this.commandHandler = commandHandler;
         }
 
         [HttpPost]
@@ -25,50 +30,23 @@ namespace EPR.Calculator.API.Controllers
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
-            var customValidator = new CreateDefaultParameterDataValidator(this._context);
-            var validationResult = customValidator.Validate(request);
-            if (validationResult != null && validationResult.IsInvalid)
+
+            var command = new CreateDefaultParameterCommand
             {
-                return BadRequest(validationResult.Errors);
+                ParameterYear = request.ParameterYear,
+                SchemeParameterTemplateValues = request.SchemeParameterTemplateValues
+            };
+            try
+            {
+                this.commandHandler.Handle(command);
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
 
-            using (var transaction = _context.Database.BeginTransaction())
-            {
-                try
-                {
-                    var oldDefaultSettings = this._context.DefaultParameterSettings.Where(x => x.EffectiveTo == null).ToList();
-                    oldDefaultSettings.ForEach(x => { x.EffectiveTo = DateTime.Now; });
-
-                    var defaultParamSettingMaster = new DefaultParameterSettingMaster
-                    {
-                        CreatedAt = DateTime.Now,
-                        CreatedBy = "Testuser",
-                        EffectiveFrom = DateTime.Now,
-                        EffectiveTo = null,
-                        ParameterYear = request.ParameterYear
-                    };
-                    this._context.DefaultParameterSettings.Add(defaultParamSettingMaster);
-
-                    foreach (var templateValue in request.SchemeParameterTemplateValues)
-                    {
-                        this._context.DefaultParameterSettingDetail.Add(new DefaultParameterSettingDetail
-                        {
-                            ParameterValue = decimal.Parse(templateValue.ParameterValue.TrimEnd('%').Replace("£", string.Empty)),
-                            ParameterUniqueReferenceId = templateValue.ParameterUniqueReferenceId,
-                            DefaultParameterSettingMaster = defaultParamSettingMaster
-                        });
-                    }
-                    this._context.SaveChanges();
-                    transaction.Commit();
-                }
-                catch (Exception exception)
-                {
-                    transaction.Rollback();
-                    return StatusCode(StatusCodes.Status500InternalServerError, exception);
-                }
-            }
-
-            return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+            return command.IsInvalid ? BadRequest(command.ValidationErrors) :
+                new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
         }
 
         [HttpGet]

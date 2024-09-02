@@ -12,22 +12,21 @@ namespace api.Validators
         {
             _context = context;
         }
-        public ValidationResultDto Validate(CreateDefaultParameterSettingDto createDefaultParameterSettingDto)
+        public ValidationResultDto Validate(IEnumerable<SchemeParameterTemplateValueDto> schemeParameterTemplateValues)
         {
             var validationResult = new ValidationResultDto();
 
-            var errors = ValidateByValues(createDefaultParameterSettingDto);
+            var errors = ValidateByValues(schemeParameterTemplateValues);
             validationResult.Errors.AddRange(errors);
             validationResult.IsInvalid = validationResult.Errors.Any();
             return validationResult;
         }
 
-        private IEnumerable<CreateDefaultParameterSettingErrorDto> ValidateByValues(CreateDefaultParameterSettingDto createDefaultParameterSettingDto)
+        private IEnumerable<CreateDefaultParameterSettingErrorDto> ValidateByValues(IEnumerable<SchemeParameterTemplateValueDto> schemeParameterTemplateValues)
         {
             IEnumerable<DefaultParameterTemplateMaster> defaultTemplateMasterList = this._context.DefaultParameterTemplateMasterList.ToList();
 
             var errors = new List<CreateDefaultParameterSettingErrorDto>();
-            var schemeParameterTemplateValues = createDefaultParameterSettingDto.SchemeParameterTemplateValues;
 
             foreach (var defaultParameterTemplateMaster in defaultTemplateMasterList)
             {
