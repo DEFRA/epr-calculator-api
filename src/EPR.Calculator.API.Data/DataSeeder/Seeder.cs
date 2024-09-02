@@ -10,6 +10,8 @@ namespace EPR.Calculator.API.Data.DataSeeder
         public static void Initialize(ModelBuilder modelBuilder)
         {
             InitializeDefaultParameterTemplateMaster(modelBuilder);
+            InitializeCalculatorRunClassification(modelBuilder);
+            InitializeCalculatorRuns(modelBuilder);
         }
 
         public static void InitializeDefaultParameterTemplateMaster(ModelBuilder modelBuilder)
@@ -341,6 +343,148 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 ParameterType = "Northern Ireland",
                 ValidRangeFrom = 0,
                 ValidRangeTo = 999999999.99M,
+            });
+        }
+
+        public static void InitializeCalculatorRunClassification(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CalculatorRunClassification>().HasData(new CalculatorRunClassification
+            {
+                Id = 1,
+                Status = "IN THE QUEUE",
+                CreatedBy = "Test User",
+                CreatedAt = DateTime.Now
+            },
+            new CalculatorRunClassification
+            {
+                Id = 2,
+                Status = "RUNNING",
+                CreatedBy = "Test User",
+                CreatedAt = DateTime.Now
+            },
+            new CalculatorRunClassification
+            {
+                Id = 3,
+                Status = "UNCLASSIFIED",
+                CreatedBy = "Test User",
+                CreatedAt = DateTime.Now
+            },
+            new CalculatorRunClassification
+            {
+                Id = 4,
+                Status = "PLAY",
+                CreatedBy = "Test User",
+                CreatedAt = DateTime.Now
+            },
+            new CalculatorRunClassification
+            {
+                Id = 5,
+                Status = "ERROR",
+                CreatedBy = "Test User",
+                CreatedAt = DateTime.Now
+            });
+        }
+
+        // TODO: The below method is to store the mock data and should be deleted after the create calculation run API is implemented
+        public static void InitializeCalculatorRuns(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CalculatorRun>().HasData(new CalculatorRun
+            {
+                Id = 1,
+                Name = "Default settings check",
+                CalculatorRunClassificationId = 1,
+                Financial_Year = "2024-25",
+                CreatedBy = "Test User",
+                CreatedAt = new DateTime(2025, 5, 28, 10, 01, 0)
+            },
+            new CalculatorRun {
+                Id = 2,
+                Name = "Alteration check",
+                CalculatorRunClassificationId = 2,
+                Financial_Year = "2024-25",
+                CreatedBy = "Test User",
+                CreatedAt = new DateTime(2025, 5, 21, 12, 9, 0)
+            },
+            new CalculatorRun
+            {
+                Id = 3,
+                Name = "Test 10",
+                CalculatorRunClassificationId = 3,
+                Financial_Year = "2024-25",
+                CreatedBy = "Test User",
+                CreatedAt = new DateTime(2025, 5, 11, 9, 14, 0)
+            },
+            new CalculatorRun
+            {
+                Id = 4,
+                Name = "June check",
+                CalculatorRunClassificationId = 4,
+                Financial_Year = "2024-25",
+                CreatedBy = "Test User",
+                CreatedAt = new DateTime(2025, 5, 13, 11, 18, 0)
+            },
+            new CalculatorRun
+            {
+                Id = 5,
+                Name = "Pre June check",
+                CalculatorRunClassificationId = 4,
+                Financial_Year = "2024-25",
+                CreatedBy = "Test User",
+                CreatedAt = new DateTime(2025, 5, 10, 8, 13, 0)
+            },
+            new CalculatorRun
+            {
+                Id = 6,
+                Name = "Local Authority data check 5",
+                CalculatorRunClassificationId = 4,
+                Financial_Year = "2024-25",
+                CreatedBy = "Test User",
+                CreatedAt = new DateTime(2025, 5, 8, 10, 0, 0)
+            },
+            new CalculatorRun
+            {
+                Id = 7,
+                Name = "Local Authority data check 4",
+                CalculatorRunClassificationId = 4,
+                Financial_Year = "2024-25",
+                CreatedBy = "Test User",
+                CreatedAt = new DateTime(2025, 5, 7, 11, 20, 0)
+            },
+            new CalculatorRun
+            {
+                Id = 8,
+                Name = "Local Authority data check 3",
+                CalculatorRunClassificationId = 4,
+                Financial_Year = "2024-25",
+                CreatedBy = "Test User",
+                CreatedAt = new DateTime(2025, 6, 24, 14, 29, 0)
+            },
+            new CalculatorRun
+            {
+                Id = 9,
+                Name = "Local Authority data check 2",
+                CalculatorRunClassificationId = 4,
+                Financial_Year = "2024-25",
+                CreatedBy = "Test User",
+                CreatedAt = new DateTime(2025, 6, 27, 16, 39, 12)
+            },
+            new CalculatorRun
+            {
+                Id = 10,
+                Name = "Local Authority data check",
+                CalculatorRunClassificationId = 4,
+                Financial_Year = "2024-25",
+                CreatedBy = "Test User",
+                CreatedAt = new DateTime(2025, 6, 14, 17, 6, 26)
+            },
+            new CalculatorRun
+            {
+                Id = 11,
+                Name = "Fee adjustment check",
+                CalculatorRunClassificationId = 5,
+                Financial_Year = "2024-25",
+                CreatedBy = "Test User",
+                CreatedAt = new DateTime(2025, 5, 1, 9, 12, 0)
             });
         }
     }

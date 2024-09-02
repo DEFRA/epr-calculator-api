@@ -91,7 +91,7 @@ namespace api.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetSchemeParameter_Return_400_Error_WithN_No_YearSupplied()
+        public void GetSchemeParameter_Return_400_Error_With_No_YearSupplied()
         {
             ParameterYearValueValidationValidator _validator = new ParameterYearValueValidationValidator();
             string _parameter = string.Empty;
