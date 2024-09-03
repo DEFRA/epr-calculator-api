@@ -29,7 +29,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRuns = _context.CalculatorRuns.Where(run => run.Financial_Year == request.FinancialYear).ToList();
+                var calculatorRuns = _context.CalculatorRuns.Where(run => run.Financial_Year == request.FinancialYear).OrderByDescending(run => run.CreatedAt).ToList();
 
                 if (calculatorRuns.Count == 0)
                 {

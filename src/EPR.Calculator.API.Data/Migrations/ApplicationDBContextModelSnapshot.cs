@@ -71,107 +71,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.HasIndex("CalculatorRunClassificationId");
 
                     b.ToTable("calculator_run");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CalculatorRunClassificationId = 1,
-                            CreatedAt = new DateTime(2025, 5, 28, 10, 1, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Default settings check"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CalculatorRunClassificationId = 2,
-                            CreatedAt = new DateTime(2025, 5, 21, 12, 9, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Alteration check"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CalculatorRunClassificationId = 3,
-                            CreatedAt = new DateTime(2025, 5, 11, 9, 14, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Test 10"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CalculatorRunClassificationId = 4,
-                            CreatedAt = new DateTime(2025, 5, 13, 11, 18, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "June check"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CalculatorRunClassificationId = 4,
-                            CreatedAt = new DateTime(2025, 5, 10, 8, 13, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Pre June check"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CalculatorRunClassificationId = 4,
-                            CreatedAt = new DateTime(2025, 5, 8, 10, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Local Authority data check 5"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CalculatorRunClassificationId = 4,
-                            CreatedAt = new DateTime(2025, 5, 7, 11, 20, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Local Authority data check 4"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            CalculatorRunClassificationId = 4,
-                            CreatedAt = new DateTime(2025, 6, 24, 14, 29, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Local Authority data check 3"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            CalculatorRunClassificationId = 4,
-                            CreatedAt = new DateTime(2025, 6, 27, 16, 39, 12, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Local Authority data check 2"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            CalculatorRunClassificationId = 4,
-                            CreatedAt = new DateTime(2025, 6, 14, 17, 6, 26, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Local Authority data check"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            CalculatorRunClassificationId = 5,
-                            CreatedAt = new DateTime(2025, 5, 1, 9, 12, 0, 0, DateTimeKind.Unspecified),
-                            CreatedBy = "Test User",
-                            Financial_Year = "2024-25",
-                            Name = "Fee adjustment check"
-                        });
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", b =>
@@ -207,35 +106,35 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2024, 8, 23, 12, 19, 7, 621, DateTimeKind.Local).AddTicks(6280),
+                            CreatedAt = new DateTime(2024, 9, 2, 16, 33, 15, 335, DateTimeKind.Local).AddTicks(8091),
                             CreatedBy = "Test User",
                             Status = "IN THE QUEUE"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2024, 8, 23, 12, 19, 7, 621, DateTimeKind.Local).AddTicks(6289),
+                            CreatedAt = new DateTime(2024, 9, 2, 16, 33, 15, 335, DateTimeKind.Local).AddTicks(8097),
                             CreatedBy = "Test User",
                             Status = "RUNNING"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2024, 8, 23, 12, 19, 7, 621, DateTimeKind.Local).AddTicks(6297),
+                            CreatedAt = new DateTime(2024, 9, 2, 16, 33, 15, 335, DateTimeKind.Local).AddTicks(8102),
                             CreatedBy = "Test User",
                             Status = "UNCLASSIFIED"
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2024, 8, 23, 12, 19, 7, 621, DateTimeKind.Local).AddTicks(6305),
+                            CreatedAt = new DateTime(2024, 9, 2, 16, 33, 15, 335, DateTimeKind.Local).AddTicks(8106),
                             CreatedBy = "Test User",
                             Status = "PLAY"
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2024, 8, 23, 12, 19, 7, 621, DateTimeKind.Local).AddTicks(6312),
+                            CreatedAt = new DateTime(2024, 9, 2, 16, 33, 15, 335, DateTimeKind.Local).AddTicks(8110),
                             CreatedBy = "Test User",
                             Status = "ERROR"
                         });
