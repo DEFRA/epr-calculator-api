@@ -1,5 +1,6 @@
 ﻿using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,12 @@ namespace EPR.Calculator.API.UnitTests
         {
             _dbContext = new ApplicationDBContext(_dbContextOptions);
             _dbContext.Database.EnsureCreated();
+
+            _dbContext.CalculatorRuns.AddRange([
+                new CalculatorRun() { Id = 1, CalculatorRunClassificationId = 1, Name = "Test Run", Financial_Year = "2024-25", CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc), CreatedBy = "Test User" },
+                new CalculatorRun() { Id = 2, CalculatorRunClassificationId = 2, Name = "Test Calculated Result", Financial_Year = "2024-25", CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc), CreatedBy = "Test User" }
+            ]);
+            _dbContext.SaveChanges();
 
             _controller = new CalculatorController(_dbContext);
         }
