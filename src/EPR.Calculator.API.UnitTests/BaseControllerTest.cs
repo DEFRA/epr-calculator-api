@@ -1,6 +1,11 @@
-﻿using EPR.Calculator.API.Controllers;
+﻿using EPR.Calculator.API.CommandHandlers;
+using EPR.Calculator.API.Commands;
+using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Queries;
+using EPR.Calculator.API.QueryHandlers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -10,8 +15,8 @@ namespace api.Tests.Controllers
     [TestClass]
     public class BaseControllerTest
     {
-        protected ApplicationDBContext _dbContext;
-        protected DefaultParameterSettingController _controller;
+        protected ApplicationDBContext dbContext;
+        protected DefaultParameterSettingController controller;
 
         protected static DbContextOptions _dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
             .UseInMemoryDatabase(databaseName: "PayCal")
@@ -21,15 +26,15 @@ namespace api.Tests.Controllers
         [TestInitialize]
         public void SetUp()
         {
-            _dbContext = new ApplicationDBContext(_dbContextOptions);
-            _dbContext.Database.EnsureCreated();
-            var percentDecreses = _dbContext.DefaultParameterTemplateMasterList.Where(x => x.ValidRangeTo < 0).ToList();
+            this.dbContext = new ApplicationDBContext(_dbContextOptions);
+            this.dbContext.Database.EnsureCreated();
+            var percentDecreses = dbContext.DefaultParameterTemplateMasterList.Where(x => x.ValidRangeTo < 0).ToList();
             foreach (var percent in percentDecreses) 
             {
                 percent.ValidRangeFrom = percent.ValidRangeTo;
                 percent.ValidRangeTo = 0M;
             }
-            var tontDI =_dbContext.DefaultParameterTemplateMasterList.SingleOrDefault(x => x.ParameterUniqueReferenceId == "TONT-DI");
+            var tontDI =dbContext.DefaultParameterTemplateMasterList.SingleOrDefault(x => x.ParameterUniqueReferenceId == "TONT-DI");
 
             var tontAd = new DefaultParameterTemplateMaster
             {
@@ -40,24 +45,27 @@ namespace api.Tests.Controllers
                 ValidRangeTo = 999999999.99M
             };
             tontAd.ParameterUniqueReferenceId = "TONT-AD";
-            _dbContext.Entry(tontDI).State = EntityState.Deleted;
-            _dbContext.DefaultParameterTemplateMasterList.Add(tontAd);
-            _dbContext.SaveChanges();
+            this.dbContext.Entry(tontDI).State = EntityState.Deleted;
+            this.dbContext.DefaultParameterTemplateMasterList.Add(tontAd);
+            this.dbContext.SaveChanges();
 
-            _controller = new DefaultParameterSettingController(_dbContext);
+            ICommandHandler<CreateDefaultParameterCommand> commandHandler = new CreateDefaultParameterCommandHandler(dbContext);
+            IQueryHandler<DefaultParameterSettingDetailQuery, IEnumerable<DefaultSchemeParametersDto>> queryHandler = new DefaultParameterSettingDetailQueryHandler(dbContext);
+
+            controller = new DefaultParameterSettingController(this.dbContext, commandHandler, queryHandler);
         }
 
         [TestMethod]
         public void CheckDbContext()
         {
-            Assert.IsNotNull(_dbContext);
-            Assert.IsTrue(_dbContext.Database.IsInMemory());
+            Assert.IsNotNull(this.dbContext);
+            Assert.IsTrue(this.dbContext.Database.IsInMemory());
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            _dbContext.Database.EnsureDeleted();
+            this.dbContext.Database.EnsureDeleted();
         }
     }
 }

@@ -118,7 +118,7 @@ namespace EPR.Calculator.API.UnitTests
                 ParameterYear = "2024-25",
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
-            var vr = this.validator.Validate(dto);
+            var vr = this.validator.Validate(dto.SchemeParameterTemplateValues);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Enter the")) == this.data.Count);
         }
 
@@ -142,7 +142,7 @@ namespace EPR.Calculator.API.UnitTests
                 ParameterYear = "2024-25",
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
-            var vr = this.validator.Validate(dto);
+            var vr = this.validator.Validate(dto.SchemeParameterTemplateValues);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Expecting only One with Parameter Type")) == 1);
         }
 
@@ -166,7 +166,7 @@ namespace EPR.Calculator.API.UnitTests
                 ParameterYear = "2024-25",
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
-            var vr = this.validator.Validate(dto);
+            var vr = this.validator.Validate(dto.SchemeParameterTemplateValues);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium can only include numbers, commas and decimal points")) == 1);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("The Bad debt provision percentage percentage increase can only include numbers, commas, decimal points and a percentage symbol (%)")) == 1);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Materiality threshold for Amount Decrease can only include numbers, commas and decimal points")) == 1);
@@ -194,7 +194,7 @@ namespace EPR.Calculator.API.UnitTests
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
 
-            var vr = this.validator.Validate(dto);
+            var vr = this.validator.Validate(dto.SchemeParameterTemplateValues);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("must be between")) == 6);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium must be between £0.00 and £999,999,999.99")) == 1);
             Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("The Bad debt provision percentage")) == 1);
