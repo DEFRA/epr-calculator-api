@@ -5,7 +5,8 @@ using EPR.Calculator.API.Queries;
 
 namespace EPR.Calculator.API.QueryHandlers
 {
-    public class DefaultParameterSettingDetailQueryHandler : IDefaultParameterSettingDetailQueryHandler
+
+    public class DefaultParameterSettingDetailQueryHandler : IQueryHandler<DefaultParameterSettingDetailQuery, IEnumerable<DefaultSchemeParametersDto>>
     {
         private readonly ApplicationDBContext context;
 

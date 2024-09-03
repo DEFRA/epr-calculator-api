@@ -1,25 +1,27 @@
 ﻿using api.Mappers;
-using api.Validators;
 using EPR.Calculator.API.CommandHandlers;
 using EPR.Calculator.API.Commands;
 using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
-using FluentValidation;
+using EPR.Calculator.API.Queries;
+using EPR.Calculator.API.QueryHandlers;
 using Microsoft.AspNetCore.Mvc;
-using System;
 
 namespace EPR.Calculator.API.Controllers
 {
     public class DefaultParameterSettingController : ControllerBase
     {
-        private readonly ApplicationDBContext _context;
-        private readonly ICreateDefaultParameterCommandHandler commandHandler;
+        private readonly ApplicationDBContext context;
+        private readonly ICommandHandler<CreateDefaultParameterCommand> commandHandler;
+        private readonly IQueryHandler<DefaultParameterSettingDetailQuery, IEnumerable<DefaultSchemeParametersDto>> queryHandler;
 
-        public DefaultParameterSettingController(ApplicationDBContext context, ICreateDefaultParameterCommandHandler commandHandler)
+        public DefaultParameterSettingController(ApplicationDBContext context,
+            ICommandHandler<CreateDefaultParameterCommand> commandHandler,
+            IQueryHandler<DefaultParameterSettingDetailQuery, IEnumerable<DefaultSchemeParametersDto>> queryHandler)
         {
-            this._context = context;
+            this.context = context;
             this.commandHandler = commandHandler;
+            this.queryHandler = queryHandler;
         }
 
         [HttpPost]
@@ -58,26 +60,18 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var currentDefaultSetting = _context.DefaultParameterSettings
-                .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == parameterYear);
-
-            if (currentDefaultSetting == null)
-            {
-                return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
-            }
-
             try
             {
-                var _pramSettingDetails = _context.DefaultParameterSettingDetail.ToList();
-                var _templateDetails = _context.DefaultParameterTemplateMasterList;
-                var schemeParameters = CreateDefaultParameterSettingMapper.Map(currentDefaultSetting, _templateDetails);
-                return new ObjectResult(schemeParameters) { StatusCode = StatusCodes.Status200OK };
+                var query = new DefaultParameterSettingDetailQuery(parameterYear);
+                var schemeParameters = this.queryHandler.Query(query);
+                return schemeParameters.Any() ?
+                    new ObjectResult(schemeParameters) { StatusCode = StatusCodes.Status200OK } :
+                    new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
             }
             catch (Exception exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
-
         }
     }
 }

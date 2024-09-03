@@ -1,5 +1,4 @@
 ﻿using api.Validators;
-using Azure.Core;
 using EPR.Calculator.API.Commands;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -7,7 +6,7 @@ using EPR.Calculator.API.Data.DataModels;
 namespace EPR.Calculator.API.CommandHandlers
 {
 
-    public class CreateDefaultParameterCommandHandler : ICreateDefaultParameterCommandHandler
+    public class CreateDefaultParameterCommandHandler : ICommandHandler<CreateDefaultParameterCommand>
     {
         private readonly ApplicationDBContext context;
         public CreateDefaultParameterCommandHandler(ApplicationDBContext context) 

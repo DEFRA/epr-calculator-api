@@ -1,4 +1,9 @@
+using EPR.Calculator.API.CommandHandlers;
+using EPR.Calculator.API.Commands;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Queries;
+using EPR.Calculator.API.QueryHandlers;
 using EPR.Calculator.API.Validators;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +20,8 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+builder.Services.AddScoped<ICommandHandler<CreateDefaultParameterCommand>, CreateDefaultParameterCommandHandler>();
+builder.Services.AddScoped<IQueryHandler<DefaultParameterSettingDetailQuery, IEnumerable<DefaultSchemeParametersDto>>, DefaultParameterSettingDetailQueryHandler>();
 
 var app = builder.Build();
 
