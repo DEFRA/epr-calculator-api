@@ -713,3 +713,142 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    CREATE TABLE [lapcap_data_master] (
+        [id] int NOT NULL IDENTITY,
+        [year] nvarchar(50) NOT NULL,
+        [effective_from] datetime2 NOT NULL,
+        [effective_to] datetime2 NULL,
+        [created_by] nvarchar(400) NOT NULL,
+        [created_at] datetime2 NOT NULL,
+        CONSTRAINT [PK_lapcap_data_master] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    CREATE TABLE [lapcap_data_template_master] (
+        [unique_ref] nvarchar(400) NOT NULL,
+        [country] nvarchar(400) NOT NULL,
+        [material] nvarchar(400) NOT NULL,
+        [total_cost_from] decimal(18,2) NOT NULL,
+        [total_cost_to] decimal(18,2) NOT NULL,
+        CONSTRAINT [PK_lapcap_data_template_master] PRIMARY KEY ([unique_ref])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    CREATE TABLE [lapcap_data_detail] (
+        [id] int NOT NULL IDENTITY,
+        [lapcap_data_master_id] int NOT NULL,
+        [lapcap_data_template_master_unique_ref] nvarchar(400) NOT NULL,
+        [total_cost] decimal(18,2) NOT NULL,
+        CONSTRAINT [PK_lapcap_data_detail] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_lapcap_data_detail_lapcap_data_master_lapcap_data_master_id] FOREIGN KEY ([lapcap_data_master_id]) REFERENCES [lapcap_data_master] ([id]) ON DELETE CASCADE,
+        CONSTRAINT [FK_lapcap_data_detail_lapcap_data_template_master_lapcap_data_template_master_unique_ref] FOREIGN KEY ([lapcap_data_template_master_unique_ref]) REFERENCES [lapcap_data_template_master] ([unique_ref]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T12:05:03.7732558+01:00''
+    WHERE [id] = 1;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T12:05:03.7732561+01:00''
+    WHERE [id] = 2;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T12:05:03.7732563+01:00''
+    WHERE [id] = 3;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T12:05:03.7732565+01:00''
+    WHERE [id] = 4;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T12:05:03.7732567+01:00''
+    WHERE [id] = 5;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    CREATE INDEX [IX_lapcap_data_detail_lapcap_data_master_id] ON [lapcap_data_detail] ([lapcap_data_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_lapcap_data_detail_lapcap_data_template_master_unique_ref] ON [lapcap_data_detail] ([lapcap_data_template_master_unique_ref]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20240905110503_LapcapData', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
