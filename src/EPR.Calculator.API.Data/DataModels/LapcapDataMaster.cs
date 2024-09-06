@@ -1,31 +1,35 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 
 namespace EPR.Calculator.API.Data.DataModels
 {
-    [ExcludeFromCodeCoverage]
-    [Table("calculator_run_classification")]
-    public class CalculatorRunClassification
+    [Table("lapcap_data_master")]
+    public class LapcapDataMaster
     {
         [Column("id")]
         [Required]
         public int Id { get; set; }
 
-        [Column("status")]
-        [StringLength(250)]
+        [StringLength(50)]
+        [Column("year")]
+        public string Year { get; set; }
+
+        [Column("effective_from")]
         [Required]
-        public string Status { get; set; }
+        public DateTime EffectiveFrom { get; set; }
+
+        [Column("effective_to")]
+        public DateTime? EffectiveTo { get; set; }
 
         [Column("created_by")]
-        [StringLength(400)]
         [Required]
+        [StringLength(400)]
         public string CreatedBy { get; set; } = string.Empty;
 
         [Column("created_at")]
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        public ICollection<CalculatorRun> CalculatorRunDetails { get; } = new List<CalculatorRun>();
+        public ICollection<LapcapDataDetail> Details { get; } = new List<LapcapDataDetail>();
     }
 }

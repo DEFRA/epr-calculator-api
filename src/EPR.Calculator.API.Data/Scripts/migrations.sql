@@ -713,3 +713,258 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    CREATE TABLE [lapcap_data_master] (
+        [id] int NOT NULL IDENTITY,
+        [year] nvarchar(50) NOT NULL,
+        [effective_from] datetime2 NOT NULL,
+        [effective_to] datetime2 NULL,
+        [created_by] nvarchar(400) NOT NULL,
+        [created_at] datetime2 NOT NULL,
+        CONSTRAINT [PK_lapcap_data_master] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    CREATE TABLE [lapcap_data_template_master] (
+        [unique_ref] nvarchar(400) NOT NULL,
+        [country] nvarchar(400) NOT NULL,
+        [material] nvarchar(400) NOT NULL,
+        [total_cost_from] decimal(18,2) NOT NULL,
+        [total_cost_to] decimal(18,2) NOT NULL,
+        CONSTRAINT [PK_lapcap_data_template_master] PRIMARY KEY ([unique_ref])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    CREATE TABLE [lapcap_data_detail] (
+        [id] int NOT NULL IDENTITY,
+        [lapcap_data_master_id] int NOT NULL,
+        [lapcap_data_template_master_unique_ref] nvarchar(400) NOT NULL,
+        [total_cost] decimal(18,2) NOT NULL,
+        CONSTRAINT [PK_lapcap_data_detail] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_lapcap_data_detail_lapcap_data_master_lapcap_data_master_id] FOREIGN KEY ([lapcap_data_master_id]) REFERENCES [lapcap_data_master] ([id]) ON DELETE CASCADE,
+        CONSTRAINT [FK_lapcap_data_detail_lapcap_data_template_master_lapcap_data_template_master_unique_ref] FOREIGN KEY ([lapcap_data_template_master_unique_ref]) REFERENCES [lapcap_data_template_master] ([unique_ref]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T12:05:03.7732558+01:00''
+    WHERE [id] = 1;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T12:05:03.7732561+01:00''
+    WHERE [id] = 2;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T12:05:03.7732563+01:00''
+    WHERE [id] = 3;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T12:05:03.7732565+01:00''
+    WHERE [id] = 4;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T12:05:03.7732567+01:00''
+    WHERE [id] = 5;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    CREATE INDEX [IX_lapcap_data_detail_lapcap_data_master_id] ON [lapcap_data_detail] ([lapcap_data_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_lapcap_data_detail_lapcap_data_template_master_unique_ref] ON [lapcap_data_detail] ([lapcap_data_template_master_unique_ref]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905110503_LapcapData'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20240905110503_LapcapData', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905121521_LapcapDataSeed'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T13:15:21.5953009+01:00''
+    WHERE [id] = 1;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905121521_LapcapDataSeed'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T13:15:21.5953012+01:00''
+    WHERE [id] = 2;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905121521_LapcapDataSeed'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T13:15:21.5953014+01:00''
+    WHERE [id] = 3;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905121521_LapcapDataSeed'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T13:15:21.5953017+01:00''
+    WHERE [id] = 4;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905121521_LapcapDataSeed'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-05T13:15:21.5953019+01:00''
+    WHERE [id] = 5;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905121521_LapcapDataSeed'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'unique_ref', N'country', N'material', N'total_cost_from', N'total_cost_to') AND [object_id] = OBJECT_ID(N'[lapcap_data_template_master]'))
+        SET IDENTITY_INSERT [lapcap_data_template_master] ON;
+    EXEC(N'INSERT INTO [lapcap_data_template_master] ([unique_ref], [country], [material], [total_cost_from], [total_cost_to])
+    VALUES (N''ENG-AL'', N''England'', N''Aluminium'', 0.0, 999999999.99),
+    (N''ENG-FC'', N''England'', N''Fibre composite'', 0.0, 999999999.99),
+    (N''ENG-GL'', N''England'', N''Glass'', 0.0, 999999999.99),
+    (N''ENG-OT'', N''England'', N''Other'', 0.0, 999999999.99),
+    (N''ENG-PC'', N''England'', N''Paper or card'', 0.0, 999999999.99),
+    (N''ENG-PL'', N''England'', N''Plastic'', 0.0, 999999999.99),
+    (N''ENG-ST'', N''England'', N''Steel'', 0.0, 999999999.99),
+    (N''ENG-WD'', N''England'', N''Wood'', 0.0, 999999999.99),
+    (N''NI-AL'', N''NI'', N''Aluminium'', 0.0, 999999999.99),
+    (N''NI-FC'', N''NI'', N''Fibre composite'', 0.0, 999999999.99),
+    (N''NI-GL'', N''NI'', N''Glass'', 0.0, 999999999.99),
+    (N''NI-OT'', N''NI'', N''Other'', 0.0, 999999999.99),
+    (N''NI-PC'', N''NI'', N''Paper or card'', 0.0, 999999999.99),
+    (N''NI-PL'', N''NI'', N''Plastic'', 0.0, 999999999.99),
+    (N''NI-ST'', N''NI'', N''Steel'', 0.0, 999999999.99),
+    (N''NI-WD'', N''NI'', N''Wood'', 0.0, 999999999.99),
+    (N''SCT-AL'', N''Scotland'', N''Aluminium'', 0.0, 999999999.99),
+    (N''SCT-FC'', N''Scotland'', N''Fibre composite'', 0.0, 999999999.99),
+    (N''SCT-GL'', N''Scotland'', N''Glass'', 0.0, 999999999.99),
+    (N''SCT-OT'', N''Scotland'', N''Other'', 0.0, 999999999.99),
+    (N''SCT-PC'', N''Scotland'', N''Paper or card'', 0.0, 999999999.99),
+    (N''SCT-PL'', N''Scotland'', N''Plastic'', 0.0, 999999999.99),
+    (N''SCT-ST'', N''Scotland'', N''Steel'', 0.0, 999999999.99),
+    (N''SCT-WD'', N''Scotland'', N''Wood'', 0.0, 999999999.99),
+    (N''WLS-AL'', N''Wales'', N''Aluminium'', 0.0, 999999999.99),
+    (N''WLS-FC'', N''Wales'', N''Fibre composite'', 0.0, 999999999.99),
+    (N''WLS-GL'', N''Wales'', N''Glass'', 0.0, 999999999.99),
+    (N''WLS-OT'', N''Wales'', N''Other'', 0.0, 999999999.99),
+    (N''WLS-PC'', N''Wales'', N''Paper or card'', 0.0, 999999999.99),
+    (N''WLS-PL'', N''Wales'', N''Plastic'', 0.0, 999999999.99),
+    (N''WLS-ST'', N''Wales'', N''Steel'', 0.0, 999999999.99),
+    (N''WLS-WD'', N''Wales'', N''Wood'', 0.0, 999999999.99)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'unique_ref', N'country', N'material', N'total_cost_from', N'total_cost_to') AND [object_id] = OBJECT_ID(N'[lapcap_data_template_master]'))
+        SET IDENTITY_INSERT [lapcap_data_template_master] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240905121521_LapcapDataSeed'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20240905121521_LapcapDataSeed', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+

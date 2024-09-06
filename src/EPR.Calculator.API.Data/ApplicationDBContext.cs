@@ -1,11 +1,12 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
-using Microsoft.EntityFrameworkCore;
 using EPR.Calculator.API.Data.DataSeeder;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Data
 {
     public class ApplicationDBContext : DbContext
     {
+
         public ApplicationDBContext(DbContextOptions options) : base(options)
         {
         }
@@ -33,6 +34,22 @@ namespace EPR.Calculator.API.Data
             .WithOne(e => e.DefaultParameterSettingMaster)
             .HasForeignKey(e => e.DefaultParameterSettingMasterId)
             .IsRequired(true);
+
+            modelBuilder.Entity<LapcapDataTemplateMaster>();
+            modelBuilder.Entity<LapcapDataMaster>();
+            modelBuilder.Entity<LapcapDataDetail>();
+
+            modelBuilder.Entity<LapcapDataMaster>()
+            .HasMany(e => e.Details)
+            .WithOne(e => e.LapcapDataMaster)
+            .HasForeignKey(e => e.LapcapDataMasterId)
+            .IsRequired(true);
+
+            modelBuilder.Entity<LapcapDataTemplateMaster>()
+            .HasOne(e => e.LapcapDataDetail)
+            .WithOne(e => e.LapcapDataTemplateMaster)
+            .HasForeignKey<LapcapDataDetail>(e => e.UniqueReference)
+            .IsRequired();
 
             Seeder.Initialize(modelBuilder);
         }
