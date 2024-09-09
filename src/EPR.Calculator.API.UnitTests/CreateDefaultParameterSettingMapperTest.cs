@@ -15,8 +15,8 @@ namespace api.Tests.Controllers
         {
 
             DataPostCall();
-            var currentDefaultSetting = _dbContext.DefaultParameterSettings.SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == "2024-25");
-            var _templateDetails = _dbContext.DefaultParameterTemplateMasterList;
+            var currentDefaultSetting = dbContext.DefaultParameterSettings.SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == "2024-25");
+            var _templateDetails = dbContext.DefaultParameterTemplateMasterList;
 
             var schemeParameters = CreateDefaultParameterSettingMapper.Map(currentDefaultSetting, _templateDetails);
 
@@ -25,7 +25,7 @@ namespace api.Tests.Controllers
             Assert.IsNotNull(currentDefaultSetting.Details);
             Assert.IsNotNull(_templateDetails);
             Assert.IsNotNull(schemeParameters);
-            Assert.AreEqual(CommonConstants.TemplateCount, schemeParameters.Count);
+            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, schemeParameters.Count);
         }
 
         // Private Methods
@@ -58,7 +58,7 @@ namespace api.Tests.Controllers
                 ParameterYear = "2024-25",
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
-            var actionResult = _controller.Create(createDefaultParameterDto) as ObjectResult;
+            var actionResult = defaultParameterSettingController.Create(createDefaultParameterDto) as ObjectResult;
             return actionResult;
         }
     }

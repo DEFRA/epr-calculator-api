@@ -20,9 +20,9 @@ namespace EPR.Calculator.API.UnitTests
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
 
-            _controller.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
-            _controller.ModelState.AddModelError("SchemeParameterTemplateValues", ErrorMessages.SchemeParameterTemplateValuesMissing);
-            var actionResult = _controller.Create(createDefaultParameterDto) as ObjectResult;
+            defaultParameterSettingController.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
+            defaultParameterSettingController.ModelState.AddModelError("SchemeParameterTemplateValues", ErrorMessages.SchemeParameterTemplateValuesMissing);
+            var actionResult = defaultParameterSettingController.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(actionResult.StatusCode, 400);
 
             var modelErrors = actionResult.Value as IEnumerable<ModelError>;
@@ -41,12 +41,12 @@ namespace EPR.Calculator.API.UnitTests
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
 
-            var actionResult = _controller.Create(createDefaultParameterDto) as ObjectResult;
+            var actionResult = defaultParameterSettingController.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(actionResult.StatusCode, 400);
 
             var errors = actionResult.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
             Assert.IsNotNull(errors);
-            Assert.IsTrue(errors.Count() == CommonConstants.TemplateCount);
+            Assert.IsTrue(errors.Count() == DefaultParameterUniqueReferences.UniqueReferences.Length);
         }
 
         [TestMethod]
@@ -68,7 +68,7 @@ namespace EPR.Calculator.API.UnitTests
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
 
-            var actionResult = _controller.Create(createDefaultParameterDto) as ObjectResult;
+            var actionResult = defaultParameterSettingController.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(actionResult.StatusCode, 400);
 
             var errors = actionResult.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;

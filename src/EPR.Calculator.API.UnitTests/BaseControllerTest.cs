@@ -10,8 +10,9 @@ namespace api.Tests.Controllers
     [TestClass]
     public class BaseControllerTest
     {
-        protected ApplicationDBContext _dbContext;
-        protected DefaultParameterSettingController _controller;
+        protected ApplicationDBContext dbContext;
+        protected DefaultParameterSettingController defaultParameterSettingController;
+        protected LapcapDataController lapcapDataController;
 
         protected static DbContextOptions _dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
             .UseInMemoryDatabase(databaseName: "PayCal")
@@ -21,15 +22,15 @@ namespace api.Tests.Controllers
         [TestInitialize]
         public void SetUp()
         {
-            _dbContext = new ApplicationDBContext(_dbContextOptions);
-            _dbContext.Database.EnsureCreated();
-            var percentDecreses = _dbContext.DefaultParameterTemplateMasterList.Where(x => x.ValidRangeTo < 0).ToList();
+            dbContext = new ApplicationDBContext(_dbContextOptions);
+            dbContext.Database.EnsureCreated();
+            var percentDecreses = dbContext.DefaultParameterTemplateMasterList.Where(x => x.ValidRangeTo < 0).ToList();
             foreach (var percent in percentDecreses) 
             {
                 percent.ValidRangeFrom = percent.ValidRangeTo;
                 percent.ValidRangeTo = 0M;
             }
-            var tontDI =_dbContext.DefaultParameterTemplateMasterList.SingleOrDefault(x => x.ParameterUniqueReferenceId == "TONT-DI");
+            var tontDI =dbContext.DefaultParameterTemplateMasterList.SingleOrDefault(x => x.ParameterUniqueReferenceId == "TONT-DI");
 
             var tontAd = new DefaultParameterTemplateMaster
             {
@@ -40,24 +41,25 @@ namespace api.Tests.Controllers
                 ValidRangeTo = 999999999.99M
             };
             tontAd.ParameterUniqueReferenceId = "TONT-AD";
-            _dbContext.Entry(tontDI).State = EntityState.Deleted;
-            _dbContext.DefaultParameterTemplateMasterList.Add(tontAd);
-            _dbContext.SaveChanges();
+            dbContext.Entry(tontDI).State = EntityState.Deleted;
+            dbContext.DefaultParameterTemplateMasterList.Add(tontAd);
+            dbContext.SaveChanges();
 
-            _controller = new DefaultParameterSettingController(_dbContext);
+            defaultParameterSettingController = new DefaultParameterSettingController(dbContext);
+            lapcapDataController = new LapcapDataController(dbContext);
         }
 
         [TestMethod]
         public void CheckDbContext()
         {
-            Assert.IsNotNull(_dbContext);
-            Assert.IsTrue(_dbContext.Database.IsInMemory());
+            Assert.IsNotNull(dbContext);
+            Assert.IsTrue(dbContext.Database.IsInMemory());
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            _dbContext.Database.EnsureDeleted();
+            dbContext.Database.EnsureDeleted();
         }
     }
 }
