@@ -23,7 +23,7 @@ namespace EPR.Calculator.API.UnitTests
             defaultParameterSettingController?.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
             defaultParameterSettingController?.ModelState.AddModelError("SchemeParameterTemplateValues", ErrorMessages.SchemeParameterTemplateValuesMissing);
             var actionResult = defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
-            Assert.AreEqual(actionResult?.StatusCode, 400);
+            Assert.AreEqual(400, actionResult?.StatusCode);
 
             var modelErrors = actionResult?.Value as IEnumerable<ModelError>;
             Assert.IsNotNull(modelErrors);
@@ -42,7 +42,7 @@ namespace EPR.Calculator.API.UnitTests
             };
 
             var actionResult = defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
-            Assert.AreEqual(actionResult?.StatusCode, 400);
+            Assert.AreEqual(400, actionResult?.StatusCode);
 
             var errors = actionResult?.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
             Assert.IsNotNull(errors);
@@ -69,7 +69,7 @@ namespace EPR.Calculator.API.UnitTests
             };
 
             var actionResult = defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
-            Assert.AreEqual(actionResult?.StatusCode, 400);
+            Assert.AreEqual(400, actionResult?.StatusCode);
 
             var errors = actionResult?.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
             Assert.IsNotNull(errors);

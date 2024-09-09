@@ -13,7 +13,7 @@ namespace EPR.Calculator.API.UnitTests
         public void CreateTest_With_Records()
         {
             var actionResult = DataPostCall();
-            Assert.AreEqual(actionResult?.StatusCode, 201);
+            Assert.AreEqual(201, actionResult?.StatusCode);
 
             Assert.AreEqual(LapcapDataUniqueReferences.UniqueReferences.Length, dbContext?.LapcapDataDetail.Count());
             Assert.AreEqual(1, dbContext?.LapcapDataMaster.Count());

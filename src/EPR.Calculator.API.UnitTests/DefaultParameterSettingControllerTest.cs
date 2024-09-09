@@ -15,9 +15,9 @@ namespace api.Tests.Controllers
             var actionResult = DataPostCall();
             Assert.AreEqual(201, actionResult?.StatusCode);
 
-            Assert.AreEqual(dbContext?.DefaultParameterSettingDetail.Count(), DefaultParameterUniqueReferences.UniqueReferences.Length);
-            Assert.AreEqual(dbContext?.DefaultParameterSettings.Count(), 1);
-            Assert.AreEqual(dbContext?.DefaultParameterTemplateMasterList.Count(), DefaultParameterUniqueReferences.UniqueReferences.Length);
+            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterSettingDetail.Count());
+            Assert.AreEqual(1, dbContext?.DefaultParameterSettings.Count());
+            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterTemplateMasterList.Count());
         }
 
         [TestMethod]
