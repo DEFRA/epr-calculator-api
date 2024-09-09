@@ -13,28 +13,28 @@ namespace api.Tests.Controllers
         public void CreateTest_With_Records()
         {
             var actionResult = DataPostCall();
-            Assert.AreEqual(actionResult.StatusCode, 201);
+            Assert.AreEqual(actionResult?.StatusCode, 201);
 
-            Assert.AreEqual(dbContext.DefaultParameterSettingDetail.Count(), DefaultParameterUniqueReferences.UniqueReferences.Length);
-            Assert.AreEqual(dbContext.DefaultParameterSettings.Count(), 1);
-            Assert.AreEqual(dbContext.DefaultParameterTemplateMasterList.Count(), DefaultParameterUniqueReferences.UniqueReferences.Length);
+            Assert.AreEqual(dbContext?.DefaultParameterSettingDetail.Count(), DefaultParameterUniqueReferences.UniqueReferences.Length);
+            Assert.AreEqual(dbContext?.DefaultParameterSettings.Count(), 1);
+            Assert.AreEqual(dbContext?.DefaultParameterTemplateMasterList.Count(), DefaultParameterUniqueReferences.UniqueReferences.Length);
         }
 
         [TestMethod]
         public void CreateTest_With_Records_When_Existing_Updates()
         {
             var actionResult1 = DataPostCall();
-            Assert.AreEqual(actionResult1.StatusCode, 201);
+            Assert.AreEqual(actionResult1?.StatusCode, 201);
 
             var actionResult2 = DataPostCall();
-            Assert.AreEqual(actionResult2.StatusCode, 201);
+            Assert.AreEqual(actionResult2?.StatusCode, 201);
 
-            Assert.AreEqual(dbContext.DefaultParameterSettingDetail.Count(), DefaultParameterUniqueReferences.UniqueReferences.Length * 2);
-            Assert.AreEqual(dbContext.DefaultParameterSettings.Count(), 2);
-            Assert.AreEqual(dbContext.DefaultParameterTemplateMasterList.Count(), DefaultParameterUniqueReferences.UniqueReferences.Length);
+            Assert.AreEqual(dbContext?.DefaultParameterSettingDetail.Count(), DefaultParameterUniqueReferences.UniqueReferences.Length * 2);
+            Assert.AreEqual(dbContext?.DefaultParameterSettings.Count(), 2);
+            Assert.AreEqual(dbContext?.DefaultParameterTemplateMasterList.Count(), DefaultParameterUniqueReferences.UniqueReferences.Length);
 
-            Assert.AreEqual(dbContext.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2), DefaultParameterUniqueReferences.UniqueReferences.Length);
-            Assert.AreEqual(dbContext.DefaultParameterSettings.Count(a => a.EffectiveTo == null), 1);
+            Assert.AreEqual(dbContext?.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2), DefaultParameterUniqueReferences.UniqueReferences.Length);
+            Assert.AreEqual(dbContext?.DefaultParameterSettings.Count(a => a.EffectiveTo == null), 1);
         }
         //GET API
         [TestMethod]
@@ -60,7 +60,7 @@ namespace api.Tests.Controllers
             };
 
             //Act
-            var actionResult1 = defaultParameterSettingController.Get("2024-25") as ObjectResult;
+            var actionResult1 = defaultParameterSettingController?.Get("2024-25") as ObjectResult;
 
             //Assert
             var okResult = actionResult1 as ObjectResult;
@@ -68,11 +68,11 @@ namespace api.Tests.Controllers
             Assert.AreEqual(okResult.StatusCode, 200);
 
             var actionResul2 = okResult.Value as List<DefaultSchemeParametersDto>;
-            Assert.AreEqual(actionResul2.Count, DefaultParameterUniqueReferences.UniqueReferences.Length);
+            Assert.AreEqual(actionResul2?.Count, DefaultParameterUniqueReferences.UniqueReferences.Length);
 
-            Assert.AreEqual(tempdateData.Id, actionResul2[0].Id);
-            Assert.AreEqual(tempdateData.ParameterValue, actionResul2[0].ParameterValue);
-            Assert.AreEqual(tempdateData.ParameterUniqueRef, actionResul2[0].ParameterUniqueRef);
+            Assert.AreEqual(tempdateData.Id, actionResul2?[0].Id);
+            Assert.AreEqual(tempdateData.ParameterValue, actionResul2?[0].ParameterValue);
+            Assert.AreEqual(tempdateData.ParameterUniqueRef, actionResul2?[0].ParameterUniqueRef);
         }
 
         [TestMethod]
@@ -82,7 +82,7 @@ namespace api.Tests.Controllers
 
             // Return 404 error if the year does not exist
             //Act
-            var result = defaultParameterSettingController.Get("2028-25");
+            var result = defaultParameterSettingController?.Get("2028-25");
             //Assert
             var okResult = result as ObjectResult;
             Assert.IsNotNull(okResult);
@@ -102,7 +102,7 @@ namespace api.Tests.Controllers
         }
 
         // Private Methods
-        public ObjectResult DataPostCall()
+        public ObjectResult? DataPostCall()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             foreach (var item in DefaultParameterUniqueReferences.UniqueReferences)
@@ -131,7 +131,7 @@ namespace api.Tests.Controllers
                 ParameterYear = "2024-25",
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
-            var actionResult = defaultParameterSettingController.Create(createDefaultParameterDto) as ObjectResult;
+            var actionResult = defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
             return actionResult;
         }
     }

@@ -10,19 +10,19 @@ namespace api.Tests.Controllers
     [TestClass]
     public class BaseControllerTest
     {
-        protected ApplicationDBContext dbContext;
-        protected DefaultParameterSettingController defaultParameterSettingController;
-        protected LapcapDataController lapcapDataController;
-
-        protected static DbContextOptions _dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-            .UseInMemoryDatabase(databaseName: "PayCal")
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-            .Options;
+        protected ApplicationDBContext? dbContext;
+        protected DefaultParameterSettingController? defaultParameterSettingController;
+        protected LapcapDataController? lapcapDataController;
 
         [TestInitialize]
         public void SetUp()
         {
-            dbContext = new ApplicationDBContext(_dbContextOptions);
+            var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
+            .UseInMemoryDatabase(databaseName: "PayCal")
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
+
+            dbContext = new ApplicationDBContext(dbContextOptions);
             dbContext.Database.EnsureCreated();
             var percentDecreses = dbContext.DefaultParameterTemplateMasterList.Where(x => x.ValidRangeTo < 0).ToList();
             foreach (var percent in percentDecreses) 
@@ -59,7 +59,7 @@ namespace api.Tests.Controllers
         [TestCleanup]
         public void TearDown()
         {
-            dbContext.Database.EnsureDeleted();
+            dbContext?.Database.EnsureDeleted();
         }
     }
 }
