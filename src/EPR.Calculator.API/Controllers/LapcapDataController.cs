@@ -22,8 +22,8 @@ namespace EPR.Calculator.API.Controllers
             {
                 try
                 {
-                    var oldDefaultSettings = this.context.DefaultParameterSettings.Where(x => x.EffectiveTo == null).ToList();
-                    oldDefaultSettings.ForEach(x => { x.EffectiveTo = DateTime.Now; });
+                    var oldLapcapData = this.context.LapcapDataMaster.Where(x => x.EffectiveTo == null).ToList();
+                    oldLapcapData.ForEach(x => { x.EffectiveTo = DateTime.Now; });
 
                     var lapcapDataMaster = new LapcapDataMaster
                     {
