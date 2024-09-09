@@ -52,10 +52,10 @@ namespace EPR.Calculator.API.Data
             .IsRequired(true);
 
             modelBuilder.Entity<LapcapDataTemplateMaster>()
-            .HasOne(e => e.LapcapDataDetail)
+            .HasMany(e => e.Details)
             .WithOne(e => e.LapcapDataTemplateMaster)
-            .HasForeignKey<LapcapDataDetail>(e => e.UniqueReference)
-            .IsRequired();
+            .HasForeignKey(e => e.UniqueReference)
+            .IsRequired(true);
 
             Seeder.Initialize(modelBuilder);
         }
