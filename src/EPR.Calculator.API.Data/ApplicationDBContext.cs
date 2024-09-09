@@ -21,6 +21,12 @@ namespace EPR.Calculator.API.Data
 
         public DbSet<CalculatorRun> CalculatorRuns { get; set; }
 
+        public DbSet<LapcapDataTemplateMaster> LapcapDataTemplateMaster { get; set; }
+
+        public DbSet<LapcapDataMaster> LapcapDataMaster { get; set; }
+
+        public DbSet<LapcapDataDetail> LapcapDataDetail { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
