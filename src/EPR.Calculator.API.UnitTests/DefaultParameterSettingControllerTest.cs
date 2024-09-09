@@ -13,7 +13,7 @@ namespace api.Tests.Controllers
         public void CreateTest_With_Records()
         {
             var actionResult = DataPostCall();
-            Assert.AreEqual(actionResult?.StatusCode, 201);
+            Assert.AreEqual(201, actionResult?.StatusCode);
 
             Assert.AreEqual(dbContext?.DefaultParameterSettingDetail.Count(), DefaultParameterUniqueReferences.UniqueReferences.Length);
             Assert.AreEqual(dbContext?.DefaultParameterSettings.Count(), 1);
@@ -24,17 +24,18 @@ namespace api.Tests.Controllers
         public void CreateTest_With_Records_When_Existing_Updates()
         {
             var actionResult1 = DataPostCall();
-            Assert.AreEqual(actionResult1?.StatusCode, 201);
+            Assert.AreEqual(201, actionResult1?.StatusCode);
 
             var actionResult2 = DataPostCall();
-            Assert.AreEqual(actionResult2?.StatusCode, 201);
+            Assert.AreEqual(201, actionResult2?.StatusCode);
 
-            Assert.AreEqual(dbContext?.DefaultParameterSettingDetail.Count(), DefaultParameterUniqueReferences.UniqueReferences.Length * 2);
-            Assert.AreEqual(dbContext?.DefaultParameterSettings.Count(), 2);
-            Assert.AreEqual(dbContext?.DefaultParameterTemplateMasterList.Count(), DefaultParameterUniqueReferences.UniqueReferences.Length);
+            var expectedLength = DefaultParameterUniqueReferences.UniqueReferences.Length * 2;
+            Assert.AreEqual(expectedLength, dbContext?.DefaultParameterSettingDetail.Count());
+            Assert.AreEqual(2, dbContext?.DefaultParameterSettings.Count());
+            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterTemplateMasterList.Count());
 
-            Assert.AreEqual(dbContext?.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2), DefaultParameterUniqueReferences.UniqueReferences.Length);
-            Assert.AreEqual(dbContext?.DefaultParameterSettings.Count(a => a.EffectiveTo == null), 1);
+            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2));
+            Assert.AreEqual(1, dbContext?.DefaultParameterSettings.Count(a => a.EffectiveTo == null));
         }
         //GET API
         [TestMethod]
@@ -86,7 +87,7 @@ namespace api.Tests.Controllers
             //Assert
             var okResult = result as ObjectResult;
             Assert.IsNotNull(okResult);
-            Assert.AreEqual(okResult.StatusCode, 404);
+            Assert.AreEqual(404, okResult.StatusCode);
 
         }
 
@@ -98,7 +99,7 @@ namespace api.Tests.Controllers
             var result = _validator.Validate(_parameter);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(result.Errors.First().ErrorMessage, "Parameter Year is required");
+            Assert.AreEqual("Parameter Year is required", result.Errors.First().ErrorMessage);
         }
 
         // Private Methods

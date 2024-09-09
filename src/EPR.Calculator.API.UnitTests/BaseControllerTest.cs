@@ -30,7 +30,7 @@ namespace api.Tests.Controllers
                 percent.ValidRangeFrom = percent.ValidRangeTo;
                 percent.ValidRangeTo = 0M;
             }
-            var tontDI =dbContext.DefaultParameterTemplateMasterList.SingleOrDefault(x => x.ParameterUniqueReferenceId == "TONT-DI");
+            var tontDI = dbContext.DefaultParameterTemplateMasterList.SingleOrDefault(x => x.ParameterUniqueReferenceId == "TONT-DI");
 
             var tontAd = new DefaultParameterTemplateMaster
             {
@@ -41,7 +41,9 @@ namespace api.Tests.Controllers
                 ValidRangeTo = 999999999.99M
             };
             tontAd.ParameterUniqueReferenceId = "TONT-AD";
+#pragma warning disable CS8634 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'class' constraint.
             dbContext.Entry(tontDI).State = EntityState.Deleted;
+#pragma warning restore CS8634 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'class' constraint.
             dbContext.DefaultParameterTemplateMasterList.Add(tontAd);
             dbContext.SaveChanges();
 

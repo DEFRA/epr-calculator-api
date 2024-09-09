@@ -6,7 +6,7 @@ namespace EPR.Calculator.API.Constants
     [ExcludeFromCodeCoverage]
     public static class LapcapDataUniqueReferences
     {
-        public static string[] UniqueReferences = {"ENG-AL", "ENG-FC", "ENG-GL", "ENG-OT",
+        public static readonly string[] UniqueReferences = {"ENG-AL", "ENG-FC", "ENG-GL", "ENG-OT",
                                                     "ENG-PC", "ENG-PL", "ENG-ST", "ENG-WD",
                                                     "NI-AL", "NI-FC", "NI-GL", "NI-OT", 
                                                     "NI-PC", "NI-PL", "NI-ST", "NI-WD",

@@ -64,7 +64,7 @@ namespace EPR.Calculator.API.UnitTests
         {
             var runParams = new CalculatorRunsParamsDto
             {
-                FinancialYear = null
+                FinancialYear = string.Empty
             };
             var actionResult = controller?.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);

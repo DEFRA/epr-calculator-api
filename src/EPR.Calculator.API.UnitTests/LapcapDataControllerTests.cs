@@ -15,8 +15,8 @@ namespace EPR.Calculator.API.UnitTests
             var actionResult = DataPostCall();
             Assert.AreEqual(actionResult?.StatusCode, 201);
 
-            Assert.AreEqual(dbContext?.LapcapDataDetail.Count(), LapcapDataUniqueReferences.UniqueReferences.Length);
-            Assert.AreEqual(dbContext?.LapcapDataMaster.Count(), 1);
+            Assert.AreEqual(LapcapDataUniqueReferences.UniqueReferences.Length, dbContext?.LapcapDataDetail.Count());
+            Assert.AreEqual(1, dbContext?.LapcapDataMaster.Count());
         }
 
         public ObjectResult? DataPostCall()
