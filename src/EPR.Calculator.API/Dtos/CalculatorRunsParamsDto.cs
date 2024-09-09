@@ -5,6 +5,6 @@ namespace EPR.Calculator.API.Dtos
     [ExcludeFromCodeCoverage]
     public class CalculatorRunsParamsDto
     {
-        public string FinancialYear { get; set; }
+        public required string FinancialYear { get; set; }
     }
 }

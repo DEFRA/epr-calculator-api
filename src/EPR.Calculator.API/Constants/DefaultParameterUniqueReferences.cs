@@ -6,7 +6,7 @@ namespace EPR.Calculator.API.Constants
     [ExcludeFromCodeCoverage]
     public static class DefaultParameterUniqueReferences 
     {
-        public static string[] UniqueReferences = {"BADEBT-P", "COMC-AL", "COMC-FC", "COMC-GL",
+        public static readonly string[] UniqueReferences = {"BADEBT-P", "COMC-AL", "COMC-FC", "COMC-GL",
                                                     "COMC-OT", "COMC-PC", "COMC-PL", "COMC-ST",
                                                     "COMC-WD", "LAPC-ENG", "LAPC-NIR", "LAPC-SCT", "LAPC-WLS",
                                                     "LEVY-ENG", "LEVY-NIR", "LEVY-SCT", "LEVY-WLS",
