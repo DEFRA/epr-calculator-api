@@ -1,9 +1,7 @@
 ﻿using api.Validators;
-using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -13,8 +11,8 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class CreateDefaultParameterDataValidatorTest
     {
-        private ApplicationDBContext context;
-        private CreateDefaultParameterDataValidator validator;
+        private ApplicationDBContext? context;
+        private CreateDefaultParameterDataValidator? validator;
 
         List<DefaultParameterTemplateMaster> data = new List<DefaultParameterTemplateMaster>
             {
@@ -106,7 +104,7 @@ namespace EPR.Calculator.API.UnitTests
         [TestCleanup]
         public void TearDown()
         {
-            this.context.Database.EnsureDeleted();
+            this.context?.Database.EnsureDeleted();
         }
 
         [TestMethod]
@@ -118,8 +116,8 @@ namespace EPR.Calculator.API.UnitTests
                 ParameterYear = "2024-25",
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
-            var vr = this.validator.Validate(dto);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Enter the")) == this.data.Count);
+            var vr = this.validator?.Validate(dto);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Enter the")) == this.data.Count);
         }
 
         [TestMethod]
@@ -142,8 +140,8 @@ namespace EPR.Calculator.API.UnitTests
                 ParameterYear = "2024-25",
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
-            var vr = this.validator.Validate(dto);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Expecting only One with Parameter Type")) == 1);
+            var vr = this.validator?.Validate(dto);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Expecting only One with Parameter Type")) == 1);
         }
 
 
@@ -166,13 +164,13 @@ namespace EPR.Calculator.API.UnitTests
                 ParameterYear = "2024-25",
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
-            var vr = this.validator.Validate(dto);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium can only include numbers, commas and decimal points")) == 1);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("The Bad debt provision percentage percentage increase can only include numbers, commas, decimal points and a percentage symbol (%)")) == 1);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Materiality threshold for Amount Decrease can only include numbers, commas and decimal points")) == 1);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage increase can only include numbers, commas, decimal points and a percentage symbol (%)")) == 1);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage decrease can only include numbers, commas, decimal points and a percentage symbol (%)")) == 1);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Tonnage change threshold for Amount Increase can only include numbers, commas and decimal points")) == 1);
+            var vr = this.validator?.Validate(dto);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium can only include numbers, commas and decimal points")) == 1);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("The Bad debt provision percentage percentage increase can only include numbers, commas, decimal points and a percentage symbol (%)")) == 1);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Materiality threshold for Amount Decrease can only include numbers, commas and decimal points")) == 1);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage increase can only include numbers, commas, decimal points and a percentage symbol (%)")) == 1);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage decrease can only include numbers, commas, decimal points and a percentage symbol (%)")) == 1);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Tonnage change threshold for Amount Increase can only include numbers, commas and decimal points")) == 1);
         }
 
 
@@ -194,14 +192,14 @@ namespace EPR.Calculator.API.UnitTests
                 SchemeParameterTemplateValues = schemeParameterTemplateValues
             };
 
-            var vr = this.validator.Validate(dto);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("must be between")) == 6);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium must be between £0.00 and £999,999,999.99")) == 1);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("The Bad debt provision percentage")) == 1);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Materiality threshold for Amount Decrease must be between -£999,999,999.99 and £0.00")) == 1);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage increase must be between 0% and 999.99%")) == 1);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage decrease must be between -999.99% and 0%")) == 1);
-            Assert.IsTrue(vr.Errors.Count(error => error.Message.Contains("Tonnage change threshold for Amount Increase must be between £0.00 and £999,999,999.99")) == 1);
+            var vr = this.validator?.Validate(dto);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("must be between")) == 6);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium must be between £0.00 and £999,999,999.99")) == 1);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("The Bad debt provision percentage")) == 1);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Materiality threshold for Amount Decrease must be between -£999,999,999.99 and £0.00")) == 1);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage increase must be between 0% and 999.99%")) == 1);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage decrease must be between -999.99% and 0%")) == 1);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Tonnage change threshold for Amount Increase must be between £0.00 and £999,999,999.99")) == 1);
         }
     }
 }

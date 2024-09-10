@@ -29,6 +29,6 @@ namespace EPR.Calculator.API.Data.DataModels
         [Column("total_cost_to")]
         public decimal TotalCostTo { get; set; }
 
-        public virtual LapcapDataDetail LapcapDataDetail { get; set; }
+        public ICollection<LapcapDataDetail> Details { get; } = new List<LapcapDataDetail>();
     }
 }

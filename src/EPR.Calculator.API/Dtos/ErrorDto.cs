@@ -5,8 +5,8 @@ namespace EPR.Calculator.API.Dtos
     [ExcludeFromCodeCoverage]
     public class ErrorDto
     {
-        public string Message { get; set; }
+        public required string Message { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
     }
 }

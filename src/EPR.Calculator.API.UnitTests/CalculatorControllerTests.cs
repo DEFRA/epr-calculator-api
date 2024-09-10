@@ -12,27 +12,27 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class CalculatorControllerTests
     {
-        private ApplicationDBContext _dbContext;
-        private CalculatorController _controller;
-
-        private static DbContextOptions _dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-                .UseInMemoryDatabase(databaseName: "PayCal")
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-                .Options;
+        private ApplicationDBContext? dbContext;
+        private CalculatorController? controller;
 
         [TestInitialize]
         public void Setup()
         {
-            _dbContext = new ApplicationDBContext(_dbContextOptions);
-            _dbContext.Database.EnsureCreated();
+            var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
+                .UseInMemoryDatabase(databaseName: "PayCal")
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+                .Options;
 
-            _dbContext.CalculatorRuns.AddRange([
+            dbContext = new ApplicationDBContext(dbContextOptions);
+            dbContext.Database.EnsureCreated();
+
+            dbContext.CalculatorRuns.AddRange([
                 new CalculatorRun() { Id = 1, CalculatorRunClassificationId = 1, Name = "Test Run", Financial_Year = "2024-25", CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc), CreatedBy = "Test User" },
                 new CalculatorRun() { Id = 2, CalculatorRunClassificationId = 2, Name = "Test Calculated Result", Financial_Year = "2024-25", CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc), CreatedBy = "Test User" }
             ]);
-            _dbContext.SaveChanges();
+            dbContext.SaveChanges();
 
-            _controller = new CalculatorController(_dbContext);
+            controller = new CalculatorController(dbContext);
         }
 
         [TestMethod]
@@ -42,7 +42,7 @@ namespace EPR.Calculator.API.UnitTests
             {
                 FinancialYear = "2024-25"
             };
-            var actionResult = _controller.GetCalculatorRuns(runParams) as ObjectResult;
+            var actionResult = controller?.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.StatusCode);
         }
@@ -54,7 +54,7 @@ namespace EPR.Calculator.API.UnitTests
             {
                 FinancialYear = "2022-23"
             };
-            var actionResult = _controller.GetCalculatorRuns(runParams) as ObjectResult;
+            var actionResult = controller?.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(404, actionResult.StatusCode);
         }
@@ -64,9 +64,9 @@ namespace EPR.Calculator.API.UnitTests
         {
             var runParams = new CalculatorRunsParamsDto
             {
-                FinancialYear = null
+                FinancialYear = string.Empty
             };
-            var actionResult = _controller.GetCalculatorRuns(runParams) as ObjectResult;
+            var actionResult = controller?.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(400, actionResult.StatusCode);
         }
@@ -74,7 +74,7 @@ namespace EPR.Calculator.API.UnitTests
         [TestCleanup]
         public void TearDown()
         {
-            _dbContext.Database.EnsureDeleted();
+            dbContext?.Database.EnsureDeleted();
         }
     }
 }

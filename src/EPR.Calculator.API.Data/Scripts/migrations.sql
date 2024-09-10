@@ -968,3 +968,92 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240909095829_LapcapRelationship'
+)
+BEGIN
+    DROP INDEX [IX_lapcap_data_detail_lapcap_data_template_master_unique_ref] ON [lapcap_data_detail];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240909095829_LapcapRelationship'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-09T10:58:28.7309507+01:00''
+    WHERE [id] = 1;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240909095829_LapcapRelationship'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-09T10:58:28.7309513+01:00''
+    WHERE [id] = 2;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240909095829_LapcapRelationship'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-09T10:58:28.7309519+01:00''
+    WHERE [id] = 3;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240909095829_LapcapRelationship'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-09T10:58:28.7309523+01:00''
+    WHERE [id] = 4;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240909095829_LapcapRelationship'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-09-09T10:58:28.7309528+01:00''
+    WHERE [id] = 5;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240909095829_LapcapRelationship'
+)
+BEGIN
+    CREATE INDEX [IX_lapcap_data_detail_lapcap_data_template_master_unique_ref] ON [lapcap_data_detail] ([lapcap_data_template_master_unique_ref]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240909095829_LapcapRelationship'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20240909095829_LapcapRelationship', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
