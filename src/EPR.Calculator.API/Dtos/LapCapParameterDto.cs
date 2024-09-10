@@ -6,18 +6,21 @@ namespace EPR.Calculator.API.Dtos
     public class LapCapParameterDto
     {
         public int Id { get; set; }
-        public string Year { get; set; }
 
-        public string CreatedBy { get; set; }
+        required public string Year { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        required public string CreatedBy { get; set; }
 
-        public int LapcapDataMasterId { get; set; }
-        public string LapcapTempUniqueRef { get; set; }
-        public string Country { get; set; }
+        required public DateTime CreatedAt { get; set; }
 
-        public string Material { get; set; }
+        required public int LapcapDataMasterId { get; set; }
 
-        public decimal TotalCost { get; set; }
+        required public string LapcapTempUniqueRef { get; set; }
+
+        required public string Country { get; set; }
+
+        required public string Material { get; set; }
+
+        required public decimal TotalCost { get; set; }
     }
 }
