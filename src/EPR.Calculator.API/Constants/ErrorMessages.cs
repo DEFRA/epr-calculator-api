@@ -8,5 +8,7 @@ namespace EPR.Calculator.API.Constants
         public static readonly string YearRequired = "Parameter Year is required";
         public static readonly string SchemeParameterTemplateValuesMissing =
             $"Uploaded Scheme parameter template should have a count of {DefaultParameterUniqueReferences.UniqueReferences.Length}";
+        public static readonly string LapcapDataTemplateValuesMissing =
+            $"Uploaded Scheme parameter template should have a count of {LapcapDataUniqueReferences.UniqueReferences.Length}";
     }
 }
