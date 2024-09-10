@@ -50,7 +50,8 @@ namespace api.Tests.Controllers
 
             var validator = new CreateDefaultParameterDataValidator(dbContext);
             defaultParameterSettingController = new DefaultParameterSettingController(dbContext, validator);
-            lapcapDataController = new LapcapDataController(dbContext);
+            ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(dbContext);
+            lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator);
         }
 
         [TestMethod]
