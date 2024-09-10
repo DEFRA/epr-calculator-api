@@ -48,7 +48,7 @@ namespace EPR.Calculator.API.UnitTests
             //Assert
             var okResult = actionResult1 as ObjectResult;
             Assert.IsNotNull(okResult);
-            Assert.AreEqual(okResult.StatusCode, 200);
+            Assert.AreEqual(200, okResult.StatusCode);
 
             var actionResul2 = okResult.Value as List<LapCapParameterDto>;
             Assert.AreEqual(actionResul2?.Count, LapcapDataUniqueReferences.UniqueReferences.Length);
