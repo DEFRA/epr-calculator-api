@@ -21,7 +21,6 @@ namespace EPR.Calculator.API.Controllers
         [Route("api/lapcapData")]
         public IActionResult Create([FromBody] CreateLapcapDataDto request)
         {
-<<<<<<< HEAD
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
@@ -31,9 +30,6 @@ namespace EPR.Calculator.API.Controllers
             {
                 return BadRequest(validationResult.Errors);
             }
-=======
-            var templateMaster = this.context.LapcapDataTemplateMaster.ToList();
->>>>>>> main
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
