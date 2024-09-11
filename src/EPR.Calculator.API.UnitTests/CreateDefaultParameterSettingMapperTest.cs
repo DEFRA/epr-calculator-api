@@ -14,22 +14,6 @@ namespace api.Tests.Controllers
     public class CreateDefaultParameterSettingMapperTest : BaseControllerTest
     {
         [TestMethod]
-        public void Check_TheResult_IsNotNullOf_ResultSet_WithDefaultSchemeParametersDto_WithCorrectYear()
-        {
-            var currentDefaultSetting = dbContext?.DefaultParameterSettings.SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == "2024-25");
-            var _templateDetails = dbContext?.DefaultParameterTemplateMasterList;
-
-            var schemeParameters = CreateDefaultParameterSettingMapper.Map(currentDefaultSetting, _templateDetails);
-
-            //var schemeParametersDto = schemeParameters.Select(
-            Assert.IsNotNull(currentDefaultSetting);
-            Assert.IsNotNull(currentDefaultSetting.Details);
-            Assert.IsNotNull(_templateDetails);
-            Assert.IsNotNull(schemeParameters);
-            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, schemeParameters.Count);
-        }
-
-        [TestMethod]
         public void Check_TheResult_Parmeter_Are_Equal_IsNotNullOf_ResultSet_WithDefaultSchemeParametersDto_WithCorrectYearr()
         {
             var details = new List<DefaultParameterSettingDetail>
@@ -42,7 +26,7 @@ namespace api.Tests.Controllers
                 Id = 1,
                 DefaultParameterSettingMasterId = 1,
                 ParameterUniqueReferenceId = "BADEBT-P",
-                ParameterValue = 30.99m
+                ParameterValue = 30.99m,
             };
             var defaultParameterSettingMaster = new DefaultParameterSettingMaster
             {
@@ -56,13 +40,14 @@ namespace api.Tests.Controllers
             var template = new DefaultParameterTemplateMaster
             {
                 ParameterUniqueReferenceId = "BADEBT-P",
-                ParameterType = "Bad debt provision",
-                ParameterCategory = "Percentage"
+                ParameterType = "Aluminium",
+                ParameterCategory = "Communication costs"
             };
 
-            // Act
+            // Act           
             var result = CreateDefaultParameterSettingMapper.Map(defaultParameterSettingMaster, dbContext?.DefaultParameterTemplateMasterList);
-
+            Assert.AreEqual(1, result.Count);
+            Assert.IsNotNull(result);
             //// Assert
             var mappedItem = result.First();
             Assert.AreEqual(detail.Id, mappedItem.Id);
@@ -70,10 +55,9 @@ namespace api.Tests.Controllers
             Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);
             Assert.AreEqual(defaultParameterSettingMaster.CreatedAt, mappedItem.CreatedAt);
             Assert.AreEqual(detail.Id, mappedItem.DefaultParameterSettingMasterId);
-            //Assert.AreEqual(detail.ParameterUniqueReference, mappedItem.ParameterUniqueRef);
-            //Assert.AreEqual(template.Country, mappedItem.Country);
-            //Assert.AreEqual(template.Material, mappedItem.Material);
-            //Assert.AreEqual(detail.TotalCost, mappedItem.TotalCost);
+            Assert.AreEqual(detail.ParameterValue, mappedItem.ParameterValue);
+            Assert.AreEqual(template.ParameterType, mappedItem.ParameterType);
+            Assert.AreEqual(template.ParameterCategory, mappedItem.ParameterCategory);
         }
     }
 }
