@@ -6,7 +6,7 @@ namespace EPR.Calculator.API.Mappers
 {
     public static class LAPCAPParameterSettingMapper
     {
-        public static List<LapCapParameterDto> Map(LapcapDataMaster defaultParameterSettingMaster, DbSet<LapcapDataTemplateMaster> defaultParameterTemplate)
+        public static List<LapCapParameterDto> Map(LapcapDataMaster defaultParameterSettingMaster, IEnumerable<LapcapDataTemplateMaster> defaultParameterTemplate)
         {
             var result = new List<LapCapParameterDto>();
 

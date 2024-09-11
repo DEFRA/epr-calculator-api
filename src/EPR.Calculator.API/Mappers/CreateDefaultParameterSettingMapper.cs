@@ -6,7 +6,7 @@ namespace api.Mappers
 {
     public static class CreateDefaultParameterSettingMapper
     {
-        public static List<DefaultSchemeParametersDto> Map(DefaultParameterSettingMaster defaultParameterSettingMaster, DbSet<DefaultParameterTemplateMaster> defaultParameterTemplate)
+        public static List<DefaultSchemeParametersDto> Map(DefaultParameterSettingMaster defaultParameterSettingMaster, IEnumerable<DefaultParameterTemplateMaster> defaultParameterTemplate)
         {
             var result = new List<DefaultSchemeParametersDto>();
 
