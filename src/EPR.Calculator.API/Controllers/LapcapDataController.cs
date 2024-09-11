@@ -30,6 +30,7 @@ namespace EPR.Calculator.API.Controllers
             {
                 return BadRequest(validationResult.Errors);
             }
+            var templateMaster = context.LapcapDataTemplateMaster.ToList();
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
