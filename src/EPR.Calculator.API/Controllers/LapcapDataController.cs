@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Data;
+﻿using api.Validators;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
@@ -8,17 +9,28 @@ namespace EPR.Calculator.API.Controllers
     public class LapcapDataController : ControllerBase
     {
         private readonly ApplicationDBContext context;
+        private readonly ILapcapDataValidator validator;
 
-        public LapcapDataController(ApplicationDBContext context)
+        public LapcapDataController(ApplicationDBContext context, ILapcapDataValidator validator)
         {
             this.context = context;
+            this.validator = validator;
         }
 
         [HttpPost]
         [Route("api/lapcapData")]
         public IActionResult Create([FromBody] CreateLapcapDataDto request)
         {
-            var templateMaster = this.context.LapcapDataTemplateMaster.ToList();
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+            var validationResult = validator.Validate(request);
+            if (validationResult != null && validationResult.IsInvalid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+            var templateMaster = context.LapcapDataTemplateMaster.ToList();
             using (var transaction = context.Database.BeginTransaction())
             {
                 try

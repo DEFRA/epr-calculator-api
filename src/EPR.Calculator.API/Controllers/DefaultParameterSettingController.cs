@@ -11,10 +11,13 @@ namespace EPR.Calculator.API.Controllers
     public class DefaultParameterSettingController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
+        private readonly ICreateDefaultParameterDataValidator validator;
 
-        public DefaultParameterSettingController(ApplicationDBContext context)
+        public DefaultParameterSettingController(ApplicationDBContext context,
+                ICreateDefaultParameterDataValidator validator)
         {
             this._context = context;
+            this.validator = validator;
         }
 
         [HttpPost]
@@ -25,8 +28,7 @@ namespace EPR.Calculator.API.Controllers
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
-            var customValidator = new CreateDefaultParameterDataValidator(this._context);
-            var validationResult = customValidator.Validate(request);
+            var validationResult = validator.Validate(request);
             if (validationResult != null && validationResult.IsInvalid)
             {
                 return BadRequest(validationResult.Errors);

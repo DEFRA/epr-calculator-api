@@ -1,3 +1,4 @@
+using api.Validators;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Validators;
 using FluentValidation;
@@ -14,6 +15,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddScoped<ICreateDefaultParameterDataValidator, CreateDefaultParameterDataValidator>();
+builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {

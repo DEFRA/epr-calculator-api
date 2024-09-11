@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Controllers;
+﻿using api.Validators;
+using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
@@ -47,8 +48,10 @@ namespace api.Tests.Controllers
             dbContext.DefaultParameterTemplateMasterList.Add(tontAd);
             dbContext.SaveChanges();
 
-            defaultParameterSettingController = new DefaultParameterSettingController(dbContext);
-            lapcapDataController = new LapcapDataController(dbContext);
+            var validator = new CreateDefaultParameterDataValidator(dbContext);
+            defaultParameterSettingController = new DefaultParameterSettingController(dbContext, validator);
+            ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(dbContext);
+            lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator);
         }
 
         [TestMethod]

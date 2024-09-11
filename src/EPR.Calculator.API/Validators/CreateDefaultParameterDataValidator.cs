@@ -5,7 +5,8 @@ using EPR.Calculator.API.Utils;
 
 namespace api.Validators
 {
-    public class CreateDefaultParameterDataValidator
+
+    public class CreateDefaultParameterDataValidator : ICreateDefaultParameterDataValidator
     {
         private readonly ApplicationDBContext _context;
         public CreateDefaultParameterDataValidator(ApplicationDBContext context)
