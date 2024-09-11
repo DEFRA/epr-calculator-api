@@ -66,5 +66,267 @@ namespace api.Tests.Controllers
         {
             dbContext?.Database.EnsureDeleted();
         }
+        
+        protected static IEnumerable<LapcapDataTemplateMaster> GetTemplateMasterData()
+        {
+            var list = new List<LapcapDataTemplateMaster>();
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "ENG-AL",
+                Country = "England",
+                Material = "Aluminium",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "ENG-FC",
+                Country = "England",
+                Material = "Fibre composite",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "ENG-GL",
+                Country = "England",
+                Material = "Glass",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "ENG-PC",
+                Country = "England",
+                Material = "Paper or card",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "ENG-PL",
+                Country = "England",
+                Material = "Plastic",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "ENG-ST",
+                Country = "England",
+                Material = "Steel",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "ENG-WD",
+                Country = "England",
+                Material = "Wood",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "ENG-OT",
+                Country = "England",
+                Material = "Other",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "NI-AL",
+                Country = "NI",
+                Material = "Aluminium",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "NI-FC",
+                Country = "NI",
+                Material = "Fibre composite",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "NI-GL",
+                Country = "NI",
+                Material = "Glass",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "NI-PC",
+                Country = "NI",
+                Material = "Paper or card",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "NI-PL",
+                Country = "NI",
+                Material = "Plastic",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "NI-ST",
+                Country = "NI",
+                Material = "Steel",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "NI-WD",
+                Country = "NI",
+                Material = "Wood",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "NI-OT",
+                Country = "NI",
+                Material = "Other",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "SCT-AL",
+                Country = "Scotland",
+                Material = "Aluminium",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "SCT-FC",
+                Country = "Scotland",
+                Material = "Fibre composite",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "SCT-GL",
+                Country = "Scotland",
+                Material = "Glass",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "SCT-PC",
+                Country = "Scotland",
+                Material = "Paper or card",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "SCT-PL",
+                Country = "Scotland",
+                Material = "Plastic",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "SCT-ST",
+                Country = "Scotland",
+                Material = "Steel",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "SCT-WD",
+                Country = "Scotland",
+                Material = "Wood",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "SCT-OT",
+                Country = "Scotland",
+                Material = "Other",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "WLS-AL",
+                Country = "Wales",
+                Material = "Aluminium",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "WLS-FC",
+                Country = "Wales",
+                Material = "Fibre composite",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "WLS-GL",
+                Country = "Wales",
+                Material = "Glass",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "WLS-PC",
+                Country = "Wales",
+                Material = "Paper or card",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "WLS-PL",
+                Country = "Wales",
+                Material = "Plastic",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "WLS-ST",
+                Country = "Wales",
+                Material = "Steel",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "WLS-WD",
+                Country = "Wales",
+                Material = "Wood",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            list.Add(new LapcapDataTemplateMaster
+            {
+                UniqueReference = "WLS-OT",
+                Country = "Wales",
+                Material = "Other",
+                TotalCostFrom = 0M,
+                TotalCostTo = 999999999.99M,
+            });
+            return list;
+        }
     }
 }
