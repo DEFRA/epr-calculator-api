@@ -18,6 +18,7 @@ namespace EPR.Calculator.API.Controllers
         [Route("api/lapcapData")]
         public IActionResult Create([FromBody] CreateLapcapDataDto request)
         {
+            var templateMaster = this.context.LapcapDataTemplateMaster.ToList();
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
@@ -37,10 +38,13 @@ namespace EPR.Calculator.API.Controllers
 
                     foreach (var templateValue in request.LapcapDataTemplateValues)
                     {
+                        var uniqueReference = templateMaster.Single(x =>
+                            x.Material == templateValue.Material && x.Country == templateValue.CountryName).UniqueReference;
+
                         this.context.LapcapDataDetail.Add(new LapcapDataDetail
                         {
                             TotalCost = decimal.Parse(templateValue.TotalCost.Replace("£", string.Empty)),
-                            UniqueReference = templateValue.UniqueReference,
+                            UniqueReference = uniqueReference,
                             LapcapDataMaster = lapcapDataMaster
                         });
                     }
