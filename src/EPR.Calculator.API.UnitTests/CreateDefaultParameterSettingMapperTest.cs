@@ -64,13 +64,13 @@ namespace api.Tests.Controllers
             var result = CreateDefaultParameterSettingMapper.Map(defaultParameterSettingMaster, dbContext?.DefaultParameterTemplateMasterList);
 
             //// Assert
-            //var mappedItem = result.First();
-            //Assert.AreEqual(detail.Id, mappedItem.Id);
-            //Assert.AreEqual(defaultParameterSettingMaster.Year, mappedItem.Year);
-            //Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);
-            //Assert.AreEqual(defaultParameterSettingMaster.CreatedAt, mappedItem.CreatedAt);
-            //Assert.AreEqual(detail.Id, mappedItem.LapcapDataMasterId);
-            //Assert.AreEqual(detail.UniqueReference, mappedItem.LapcapTempUniqueRef);
+            var mappedItem = result.First();
+            Assert.AreEqual(detail.Id, mappedItem.Id);
+            Assert.AreEqual(defaultParameterSettingMaster.ParameterYear, mappedItem.ParameterYear);
+            Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);
+            Assert.AreEqual(defaultParameterSettingMaster.CreatedAt, mappedItem.CreatedAt);
+            Assert.AreEqual(detail.Id, mappedItem.DefaultParameterSettingMasterId);
+            //Assert.AreEqual(detail.ParameterUniqueReference, mappedItem.ParameterUniqueRef);
             //Assert.AreEqual(template.Country, mappedItem.Country);
             //Assert.AreEqual(template.Material, mappedItem.Material);
             //Assert.AreEqual(detail.TotalCost, mappedItem.TotalCost);
