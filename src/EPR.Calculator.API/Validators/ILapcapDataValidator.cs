@@ -4,6 +4,6 @@ namespace api.Validators
 {
     public interface ILapcapDataValidator
     {
-        ValidationResultDto Validate(CreateLapcapDataDto createLapcapDataDto);
+        LapcapValidationResultDto Validate(CreateLapcapDataDto createLapcapDataDto);
     }
 }
