@@ -1,5 +1,6 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Utils;
 
 namespace api.Validators
 {
@@ -26,24 +27,23 @@ namespace api.Validators
 
                 if (matchingCount == 0)
                 {
-                    errors.Add(new CreateLapcapDataErrorDto {
-                        Country = lapcapTemplate.Country,
-                        Material = lapcapTemplate.Material,
-                        Message = "",
-                        Description = "",
-                        UniqueReference =lapcapTemplate.UniqueReference
-                    });
+                    var message = $"";
+                    var errorDto = Util.CreateLapcapDataErrorDto(lapcapTemplate.Country,
+                                                                    lapcapTemplate.Material,
+                                                                    lapcapTemplate.Material,
+                                                                    string.Empty,
+                                                                    message);
+                    errors.Add(errorDto);
                 }
                 else if (matchingCount > 1) 
                 {
-                    errors.Add(new CreateLapcapDataErrorDto
-                    {
-                        Country = lapcapTemplate.Country,
-                        Material = lapcapTemplate.Material,
-                        Message = "",
-                        Description = "",
-                        UniqueReference = lapcapTemplate.UniqueReference
-                    });
+                    var message = "";
+                    var errorDto = Util.CreateLapcapDataErrorDto(lapcapTemplate.Country,
+                                                                    lapcapTemplate.Material,
+                                                                    lapcapTemplate.Material,
+                                                                    string.Empty,
+                                                                    message);
+                    errors.Add(errorDto);
                 }
                 else
                 {
@@ -52,40 +52,37 @@ namespace api.Validators
                     var totalCostStr = data.TotalCost;
                     if (string.IsNullOrEmpty(totalCostStr))
                     {
-                        errors.Add(new CreateLapcapDataErrorDto
-                        {
-                            Country = lapcapTemplate.Country,
-                            Material = lapcapTemplate.Material,
-                            Message = "",
-                            Description = "",
-                            UniqueReference = lapcapTemplate.UniqueReference
-                        });
+                        var message = "";
+                        var errorDto = Util.CreateLapcapDataErrorDto(lapcapTemplate.Country,
+                                                                        lapcapTemplate.Material,
+                                                                        lapcapTemplate.Material,
+                                                                        string.Empty,
+                                                                        message);
+                        errors.Add(errorDto);
                     }
                     else if (decimal.TryParse(totalCostStr, out totalCostValue))
                     {
                         if (totalCostValue < lapcapTemplate.TotalCostFrom ||
                             totalCostValue > lapcapTemplate.TotalCostTo)
                         {
-                            errors.Add(new CreateLapcapDataErrorDto
-                            {
-                                Country = lapcapTemplate.Country,
-                                Material = lapcapTemplate.Material,
-                                Message = "",
-                                Description = "",
-                                UniqueReference = lapcapTemplate.UniqueReference
-                            });
+                            var message = "";
+                            var errorDto = Util.CreateLapcapDataErrorDto(lapcapTemplate.Country,
+                                                                            lapcapTemplate.Material,
+                                                                            lapcapTemplate.Material,
+                                                                            string.Empty,
+                                                                            message);
+                            errors.Add(errorDto);
                         }
                     }
                     else
                     {
-                        errors.Add(new CreateLapcapDataErrorDto
-                        {
-                            Country = lapcapTemplate.Country,
-                            Material = lapcapTemplate.Material,
-                            Message = "",
-                            Description = "",
-                            UniqueReference = lapcapTemplate.UniqueReference
-                        });
+                        var message = "";
+                        var errorDto = Util.CreateLapcapDataErrorDto(lapcapTemplate.Country,
+                                                                        lapcapTemplate.Material,
+                                                                        lapcapTemplate.Material,
+                                                                        string.Empty,
+                                                                        message);
+                        errors.Add(errorDto);
                     }
                 }
             }
