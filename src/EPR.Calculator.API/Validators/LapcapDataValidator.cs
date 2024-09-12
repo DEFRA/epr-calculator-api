@@ -17,33 +17,26 @@ namespace api.Validators
             var lapcapTemplateList = this.context.LapcapDataTemplateMaster.ToList();
             var validationResult = new LapcapValidationResultDto();
             var lapcapDataTemplateValues = createLapcapDataDto.LapcapDataTemplateValues;
-            var errors = new List<CreateLapcapDataErrorDto>();
 
             foreach (var lapcapTemplate in lapcapTemplateList)
             {
                 var matchingLapcapData = lapcapDataTemplateValues.Where(x => x.CountryName == lapcapTemplate.Country &&
                     x.Material == lapcapTemplate.Material);
                 var matchingCount = matchingLapcapData.Count();
+                var country = lapcapTemplate.Country;
+                var material = lapcapTemplate.Material;
+                var uniqueRef = lapcapTemplate.UniqueReference;
+                var totalCostFrom = lapcapTemplate.TotalCostFrom;
+                var totalCostTo = lapcapTemplate.TotalCostTo;
+                var errorMessage = string.Empty;
 
                 if (matchingCount == 0)
                 {
-                    var message = $"";
-                    var errorDto = Util.CreateLapcapDataErrorDto(lapcapTemplate.Country,
-                                                                    lapcapTemplate.Material,
-                                                                    lapcapTemplate.Material,
-                                                                    string.Empty,
-                                                                    message);
-                    errors.Add(errorDto);
+                    errorMessage = $"Enter the lapcap data for {country} and {material}";
                 }
                 else if (matchingCount > 1) 
                 {
-                    var message = "";
-                    var errorDto = Util.CreateLapcapDataErrorDto(lapcapTemplate.Country,
-                                                                    lapcapTemplate.Material,
-                                                                    lapcapTemplate.Material,
-                                                                    string.Empty,
-                                                                    message);
-                    errors.Add(errorDto);
+                    errorMessage = $"Expecting only One with {country} and {material}";
                 }
                 else
                 {
@@ -52,42 +45,28 @@ namespace api.Validators
                     var totalCostStr = data.TotalCost;
                     if (string.IsNullOrEmpty(totalCostStr))
                     {
-                        var message = "";
-                        var errorDto = Util.CreateLapcapDataErrorDto(lapcapTemplate.Country,
-                                                                        lapcapTemplate.Material,
-                                                                        lapcapTemplate.Material,
-                                                                        string.Empty,
-                                                                        message);
-                        errors.Add(errorDto);
+                        errorMessage = $"Enter the lapcap data for {country} and {material}";
                     }
                     else if (decimal.TryParse(totalCostStr, out totalCostValue))
                     {
                         if (totalCostValue < lapcapTemplate.TotalCostFrom ||
                             totalCostValue > lapcapTemplate.TotalCostTo)
                         {
-                            var message = "";
-                            var errorDto = Util.CreateLapcapDataErrorDto(lapcapTemplate.Country,
-                                                                            lapcapTemplate.Material,
-                                                                            lapcapTemplate.Material,
-                                                                            string.Empty,
-                                                                            message);
-                            errors.Add(errorDto);
+                            errorMessage = $"Total cost for {country} and {material} should be between {totalCostFrom} and {totalCostTo}";
                         }
                     }
                     else
                     {
-                        var message = "";
-                        var errorDto = Util.CreateLapcapDataErrorDto(lapcapTemplate.Country,
-                                                                        lapcapTemplate.Material,
-                                                                        lapcapTemplate.Material,
-                                                                        string.Empty,
-                                                                        message);
-                        errors.Add(errorDto);
+                        errorMessage = $"Enter the lapcap data for {country} and {material}";
                     }
                 }
+                if(!string.IsNullOrEmpty(errorMessage))
+                {
+                    var errorDto = Util.CreateLapcapDataErrorDto(country, material, errorMessage, string.Empty, uniqueRef);
+                    validationResult.Errors.Add(errorDto);
+                }
             }
-            validationResult.Errors.AddRange(errors);
-            validationResult.IsInvalid = errors.Count() > 0;
+            validationResult.IsInvalid = validationResult.Errors.Count() > 0;
             return validationResult;
         }
     }
