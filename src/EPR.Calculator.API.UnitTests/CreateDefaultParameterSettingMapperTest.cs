@@ -14,7 +14,7 @@ namespace api.Tests.Controllers
     public class CreateDefaultParameterSettingMapperTest : BaseControllerTest
     {
         [TestMethod]
-        public void Check_TheResult_Parmeter_Are_Equal_IsNotNullOf_ResultSet_WithDefaultSchemeParametersDto_WithCorrectYearr()
+        public void Check_TheResult_Parmeter_Are_Equal_IsNotNullOf_ResultSet_WithDefaultSchemeParametersDto_WithCorrectYear()
         {
             var details = new List<DefaultParameterSettingDetail>
                 {
