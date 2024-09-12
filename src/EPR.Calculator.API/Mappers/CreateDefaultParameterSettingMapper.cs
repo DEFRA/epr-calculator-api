@@ -1,12 +1,12 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
-using Microsoft.EntityFrameworkCore;
 
 namespace api.Mappers
 {
     public static class CreateDefaultParameterSettingMapper
     {
-        public static List<DefaultSchemeParametersDto> Map(DefaultParameterSettingMaster defaultParameterSettingMaster, DbSet<DefaultParameterTemplateMaster> defaultParameterTemplate)
+        public static List<DefaultSchemeParametersDto> Map(DefaultParameterSettingMaster defaultParameterSettingMaster,
+                                                           IEnumerable<DefaultParameterTemplateMaster> defaultParameterTemplate)
         {
             var result = new List<DefaultSchemeParametersDto>();
 
@@ -21,7 +21,7 @@ namespace api.Mappers
                     EffectiveTo = defaultParameterSettingMaster.EffectiveTo,
                     CreatedBy = defaultParameterSettingMaster.CreatedBy,
                     CreatedAt = defaultParameterSettingMaster.CreatedAt,
-                    DefaultParameterSettingMasterId = item.Id,
+                    DefaultParameterSettingMasterId = defaultParameterSettingMaster.Id,
                     ParameterUniqueRef = item.ParameterUniqueReferenceId,
                     ParameterType = selectedTemplate.ParameterType,
                     ParameterCategory = selectedTemplate.ParameterCategory,

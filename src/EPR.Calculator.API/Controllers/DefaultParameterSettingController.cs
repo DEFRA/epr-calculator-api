@@ -90,8 +90,8 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var _pramSettingDetails = _context.DefaultParameterSettingDetail.ToList();
-                var _templateDetails = _context.DefaultParameterTemplateMasterList;
+                var _pramSettingDetails = _context.DefaultParameterSettingDetail.Where(x => x.DefaultParameterSettingMasterId == currentDefaultSetting.Id).ToList();
+                var _templateDetails = _context.DefaultParameterTemplateMasterList.ToList();
                 var schemeParameters = CreateDefaultParameterSettingMapper.Map(currentDefaultSetting, _templateDetails);
                 return new ObjectResult(schemeParameters) { StatusCode = StatusCodes.Status200OK };
             }
