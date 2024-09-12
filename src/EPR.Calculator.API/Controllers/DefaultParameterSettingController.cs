@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EPR.Calculator.API.Controllers
 {
+    [Route("v1")]
     public class DefaultParameterSettingController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
@@ -21,7 +22,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpPost]
-        [Route("api/defaultParameterSetting")]
+        [Route("defaultParameterSetting")]
         public IActionResult Create([FromBody] CreateDefaultParameterSettingDto request)
         {
             if (!ModelState.IsValid)
@@ -74,7 +75,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("api/defaultParameterSetting/{parameterYear}")]
+        [Route("defaultParameterSetting/{parameterYear}")]
         public IActionResult Get([FromRoute] string parameterYear)
         {
             if (!ModelState.IsValid)

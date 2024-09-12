@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EPR.Calculator.API.Controllers
 {
+    [Route("v1")]
     public class LapcapDataController : ControllerBase
     {
         private readonly ApplicationDBContext context;
@@ -18,7 +19,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpPost]
-        [Route("api/lapcapData")]
+        [Route("lapcapData")]
         public IActionResult Create([FromBody] CreateLapcapDataDto request)
         {
             if (!ModelState.IsValid)
