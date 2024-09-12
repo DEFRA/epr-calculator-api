@@ -45,20 +45,28 @@ namespace api.Tests.Controllers
                 ParameterCategory = "Communication costs"
             };
 
-            // Act           
-            var result = CreateDefaultParameterSettingMapper.Map(defaultParameterSettingMaster, dbContext?.DefaultParameterTemplateMasterList);
-            Assert.AreEqual(1, result.Count);
-            Assert.IsNotNull(result);
-            //// Assert
-            var mappedItem = result.First();
-            Assert.AreEqual(detail.Id, mappedItem.Id);
-            Assert.AreEqual(defaultParameterSettingMaster.ParameterYear, mappedItem.ParameterYear);
-            Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);
-            Assert.AreEqual(defaultParameterSettingMaster.CreatedAt, mappedItem.CreatedAt);
-            Assert.AreEqual(detail.DefaultParameterSettingMasterId, mappedItem.DefaultParameterSettingMasterId);
-            Assert.AreEqual(detail.ParameterValue, mappedItem.ParameterValue);
-            Assert.AreEqual(template.ParameterType, mappedItem.ParameterType);
-            Assert.AreEqual(template.ParameterCategory, mappedItem.ParameterCategory);
+            //Check if dbContext is not null
+            if (dbContext != null)
+            {
+                // Act           
+                var result = CreateDefaultParameterSettingMapper.Map(defaultParameterSettingMaster, dbContext.DefaultParameterTemplateMasterList);
+                Assert.AreEqual(1, result.Count);
+                Assert.IsNotNull(result);
+                //// Assert
+                var mappedItem = result.First();
+                Assert.AreEqual(detail.Id, mappedItem.Id);
+                Assert.AreEqual(defaultParameterSettingMaster.ParameterYear, mappedItem.ParameterYear);
+                Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);
+                Assert.AreEqual(defaultParameterSettingMaster.CreatedAt, mappedItem.CreatedAt);
+                Assert.AreEqual(detail.DefaultParameterSettingMasterId, mappedItem.DefaultParameterSettingMasterId);
+                Assert.AreEqual(detail.ParameterValue, mappedItem.ParameterValue);
+                Assert.AreEqual(template.ParameterType, mappedItem.ParameterType);
+                Assert.AreEqual(template.ParameterCategory, mappedItem.ParameterCategory);
+            }
+            else
+            {
+                throw new Exception(typeof(DefaultParameterTemplateMaster).FullName);
+            }
         }
     }
 }

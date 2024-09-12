@@ -41,20 +41,28 @@ namespace EPR.Calculator.API.UnitTests
                 Material = "Aluminium"
             };
 
-            // Act
-            var result = LapcapDataParameterSettingMapper.Map(defaultParameterSettingMaster, dbContext?.LapcapDataTemplateMaster);
+            //Check if dbContext is not null
+            if (dbContext != null)
+            {
+                // Act
+                var result = LapcapDataParameterSettingMapper.Map(defaultParameterSettingMaster, dbContext.LapcapDataTemplateMaster);
 
-            // Assert
-            var mappedItem = result.First();
-            Assert.AreEqual(detail.Id, mappedItem.Id);
-            Assert.AreEqual(defaultParameterSettingMaster.Year, mappedItem.Year);
-            Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);
-            Assert.AreEqual(defaultParameterSettingMaster.CreatedAt, mappedItem.CreatedAt);
-            Assert.AreEqual(detail.LapcapDataMasterId, mappedItem.LapcapDataMasterId);
-            Assert.AreEqual(detail.UniqueReference, mappedItem.LapcapTempUniqueRef);
-            Assert.AreEqual(template.Country, mappedItem.Country);
-            Assert.AreEqual(template.Material, mappedItem.Material);
-            Assert.AreEqual(detail.TotalCost, mappedItem.TotalCost);
+                // Assert
+                var mappedItem = result.First();
+                Assert.AreEqual(detail.Id, mappedItem.Id);
+                Assert.AreEqual(defaultParameterSettingMaster.Year, mappedItem.Year);
+                Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);
+                Assert.AreEqual(defaultParameterSettingMaster.CreatedAt, mappedItem.CreatedAt);
+                Assert.AreEqual(detail.LapcapDataMasterId, mappedItem.LapcapDataMasterId);
+                Assert.AreEqual(detail.UniqueReference, mappedItem.LapcapTempUniqueRef);
+                Assert.AreEqual(template.Country, mappedItem.Country);
+                Assert.AreEqual(template.Material, mappedItem.Material);
+                Assert.AreEqual(detail.TotalCost, mappedItem.TotalCost);
+            }
+            else
+            {
+                throw new Exception(typeof(LapcapDataTemplateMaster).FullName);
+            }
         }
     }
 }
