@@ -1,12 +1,12 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
-using Microsoft.EntityFrameworkCore;
 
 namespace api.Mappers
 {
     public static class CreateDefaultParameterSettingMapper
     {
-        public static List<DefaultSchemeParametersDto> Map(DefaultParameterSettingMaster defaultParameterSettingMaster, IEnumerable<DefaultParameterTemplateMaster> defaultParameterTemplate)
+        public static List<DefaultSchemeParametersDto> Map(DefaultParameterSettingMaster defaultParameterSettingMaster,
+                                                           IEnumerable<DefaultParameterTemplateMaster> defaultParameterTemplate)
         {
             var result = new List<DefaultSchemeParametersDto>();
 

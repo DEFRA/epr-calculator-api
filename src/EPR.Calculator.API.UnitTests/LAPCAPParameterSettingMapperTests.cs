@@ -1,9 +1,6 @@
 ﻿using api.Tests.Controllers;
-using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests
@@ -45,7 +42,7 @@ namespace EPR.Calculator.API.UnitTests
             };
 
             // Act
-            var result = LAPCAPParameterSettingMapper.Map(defaultParameterSettingMaster, dbContext?.LapcapDataTemplateMaster);
+            var result = LapcapDataParameterSettingMapper.Map(defaultParameterSettingMaster, dbContext?.LapcapDataTemplateMaster);
 
             // Assert
             var mappedItem = result.First();

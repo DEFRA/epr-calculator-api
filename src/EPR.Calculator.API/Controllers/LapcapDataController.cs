@@ -96,8 +96,8 @@ namespace EPR.Calculator.API.Controllers
             try
             {
                 var _lapcappramSettingDetails = this.context.LapcapDataDetail.Where(x => x.LapcapDataMasterId == currentDefaultSetting.Id).ToList();
-                var _lapcaptemplateDetails = this.context.LapcapDataTemplateMaster;
-                var lapcapdatavalues = LAPCAPParameterSettingMapper.Map(currentDefaultSetting, _lapcaptemplateDetails);
+                var _lapcaptemplateDetails = this.context.LapcapDataTemplateMaster.ToList();
+                var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(currentDefaultSetting, _lapcaptemplateDetails);
                 return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
             }
             catch (Exception exception)
