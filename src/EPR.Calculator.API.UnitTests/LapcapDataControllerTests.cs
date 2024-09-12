@@ -85,9 +85,15 @@ namespace EPR.Calculator.API.UnitTests
         public ObjectResult? DataPostCall()
         {
             var lapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>();
-            foreach (var uniqueRef in LapcapDataUniqueReferences.UniqueReferences)
+            var masterData = GetTemplateMasterData();
+            foreach (var templateMaster in masterData)
             {
-                lapcapDataTemplateValues.Add(new LapcapDataTemplateValueDto { TotalCost = "20", UniqueReference = uniqueRef });
+                lapcapDataTemplateValues.Add(new LapcapDataTemplateValueDto
+                {
+                    TotalCost = "20",
+                    CountryName = templateMaster.Country,
+                    Material = templateMaster.Material,
+                });
             }
             var createDefaultParameterDto = new CreateLapcapDataDto
             {
