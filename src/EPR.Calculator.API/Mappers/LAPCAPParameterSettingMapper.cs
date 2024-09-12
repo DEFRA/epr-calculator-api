@@ -20,7 +20,7 @@ namespace EPR.Calculator.API.Mappers
                     Year = defaultParameterSettingMaster.Year,
                     CreatedBy = defaultParameterSettingMaster.CreatedBy,
                     CreatedAt = defaultParameterSettingMaster.CreatedAt,
-                    LapcapDataMasterId = item.Id,
+                    LapcapDataMasterId = defaultParameterSettingMaster.Id,
                     LapcapTempUniqueRef = item.UniqueReference,
                     Country = selectedTemplate.Country,
                     Material = selectedTemplate.Material,

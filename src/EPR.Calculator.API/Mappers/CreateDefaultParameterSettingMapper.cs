@@ -21,7 +21,7 @@ namespace api.Mappers
                     EffectiveTo = defaultParameterSettingMaster.EffectiveTo,
                     CreatedBy = defaultParameterSettingMaster.CreatedBy,
                     CreatedAt = defaultParameterSettingMaster.CreatedAt,
-                    DefaultParameterSettingMasterId = item.Id,
+                    DefaultParameterSettingMasterId = defaultParameterSettingMaster.Id,
                     ParameterUniqueRef = item.ParameterUniqueReferenceId,
                     ParameterType = selectedTemplate.ParameterType,
                     ParameterCategory = selectedTemplate.ParameterCategory,
