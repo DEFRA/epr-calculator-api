@@ -18,16 +18,18 @@ namespace EPR.Calculator.API.UnitTests
             var details = new List<LapcapDataDetail>
                 {
                     new LapcapDataDetail
-                    {Id=1, LapcapDataMasterId = 1, UniqueReference = "ENG-AL", TotalCost = 30.99m }
+                    {Id=1, LapcapDataMasterId = 1, UniqueReference = "ENG-AL", TotalCost = 30.99m, }
                 };
             var detail = new LapcapDataDetail
             {
                 Id = 1,
+                LapcapDataMasterId = 2,
                 UniqueReference = "ENG-AL",
                 TotalCost = 30.99m
             };
             var defaultParameterSettingMaster = new LapcapDataMaster
             {
+                Id = 2,
                 Year = "2024-25",
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
@@ -51,7 +53,7 @@ namespace EPR.Calculator.API.UnitTests
             Assert.AreEqual(defaultParameterSettingMaster.Year, mappedItem.Year);
             Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);
             Assert.AreEqual(defaultParameterSettingMaster.CreatedAt, mappedItem.CreatedAt);
-            Assert.AreEqual(detail.Id, mappedItem.LapcapDataMasterId);
+            Assert.AreEqual(detail.LapcapDataMasterId, mappedItem.LapcapDataMasterId);
             Assert.AreEqual(detail.UniqueReference, mappedItem.LapcapTempUniqueRef);
             Assert.AreEqual(template.Country, mappedItem.Country);
             Assert.AreEqual(template.Material, mappedItem.Material);

@@ -19,17 +19,18 @@ namespace api.Tests.Controllers
             var details = new List<DefaultParameterSettingDetail>
                 {
                 new DefaultParameterSettingDetail
-                    {Id=1, DefaultParameterSettingMasterId = 1, ParameterUniqueReferenceId="BADEBT-P", ParameterValue=30.99m }
+                    {Id=1, DefaultParameterSettingMasterId = 2, ParameterUniqueReferenceId="BADEBT-P", ParameterValue=30.99m }
                 };
             var detail = new DefaultParameterSettingDetail
             {
                 Id = 1,
-                DefaultParameterSettingMasterId = 1,
+                DefaultParameterSettingMasterId =2,
                 ParameterUniqueReferenceId = "BADEBT-P",
                 ParameterValue = 30.99m,
             };
             var defaultParameterSettingMaster = new DefaultParameterSettingMaster
             {
+                Id = 2,
                 ParameterYear = "2024-25",
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
@@ -54,7 +55,7 @@ namespace api.Tests.Controllers
             Assert.AreEqual(defaultParameterSettingMaster.ParameterYear, mappedItem.ParameterYear);
             Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);
             Assert.AreEqual(defaultParameterSettingMaster.CreatedAt, mappedItem.CreatedAt);
-            Assert.AreEqual(detail.Id, mappedItem.DefaultParameterSettingMasterId);
+            Assert.AreEqual(detail.DefaultParameterSettingMasterId, mappedItem.DefaultParameterSettingMasterId);
             Assert.AreEqual(detail.ParameterValue, mappedItem.ParameterValue);
             Assert.AreEqual(template.ParameterType, mappedItem.ParameterType);
             Assert.AreEqual(template.ParameterCategory, mappedItem.ParameterCategory);
