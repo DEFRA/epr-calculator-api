@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Mappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EPR.Calculator.API.Controllers
@@ -72,6 +73,51 @@ namespace EPR.Calculator.API.Controllers
             }
 
             return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+        }
+
+        /// <summary>
+        /// Retrieves LAPCAP data for a specified year.
+        /// </summary>
+        /// <param name="parameterYear">The year for which to retrieve LAPCAP data.</param>
+        /// <returns>
+        /// An IActionResult containing the LAPCAP data for the specified year, or an appropriate error message:
+        /// - 400 Bad Request if the model state is invalid.
+        /// - 404 Not Found if no data is available for the specified year.
+        /// - 500 Internal Server Error if an exception occurs during data retrieval.
+        /// </returns>
+        /// <response code="200">Returns the LAPCAP data for the specified year.</response>
+        /// <response code="400">If the model state is invalid.</response>
+        /// <response code="404">If no data is available for the specified year.</response>
+        /// <response code="500">If an internal server error occurs.</response>
+        [HttpGet]
+        [Route("api/lapcapData/{parameterYear}")]
+        public IActionResult Get([FromRoute] string parameterYear)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            var currentDefaultSetting = this.context.LapcapDataMaster
+                .SingleOrDefault(x => x.EffectiveTo == null && x.Year == parameterYear);
+
+            if (currentDefaultSetting == null)
+            {
+                return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
+            }
+
+            try
+            {
+                var _lapcappramSettingDetails = this.context.LapcapDataDetail.Where(x => x.LapcapDataMasterId == currentDefaultSetting.Id).ToList();
+                var _lapcaptemplateDetails = this.context.LapcapDataTemplateMaster.ToList();
+                var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(currentDefaultSetting, _lapcaptemplateDetails);
+                return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+
         }
     }
 }

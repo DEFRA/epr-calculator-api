@@ -1,6 +1,9 @@
 ﻿using api.Mappers;
 using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Mappers;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -11,55 +14,59 @@ namespace api.Tests.Controllers
     public class CreateDefaultParameterSettingMapperTest : BaseControllerTest
     {
         [TestMethod]
-        public void Check_TheResult_IsNotNullOf_ResultSet_WithDefaultSchemeParametersDto_WithCorrectYear()
+        public void Check_TheResult_Parmeter_Are_Equal_IsNotNullOf_ResultSet_WithDefaultSchemeParametersDto_WithCorrectYear()
         {
-
-            DataPostCall();
-            var currentDefaultSetting = dbContext?.DefaultParameterSettings.SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == "2024-25");
-            var _templateDetails = dbContext?.DefaultParameterTemplateMasterList;
-
-            var schemeParameters = CreateDefaultParameterSettingMapper.Map(currentDefaultSetting, _templateDetails);
-
-            //var schemeParametersDto = schemeParameters.Select(
-            Assert.IsNotNull(currentDefaultSetting);
-            Assert.IsNotNull(currentDefaultSetting.Details);
-            Assert.IsNotNull(_templateDetails);
-            Assert.IsNotNull(schemeParameters);
-            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, schemeParameters.Count);
-        }
-
-        // Private Methods
-        public ObjectResult? DataPostCall()
-        {
-            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
-            foreach (var item in DefaultParameterUniqueReferences.UniqueReferences)
-            {
-                if (item == "MATT-PD" || item == "TONT-PD")
+            var details = new List<DefaultParameterSettingDetail>
                 {
-                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
-                    {
-                        ParameterValue = "0",
-                        ParameterUniqueReferenceId = item
-                    });
-                }
-                else
-                {
-
-                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
-                    {
-                        ParameterValue = "90",
-                        ParameterUniqueReferenceId = item
-                    });
-
-                }
-            }
-            var createDefaultParameterDto = new CreateDefaultParameterSettingDto
+                new DefaultParameterSettingDetail
+                    {Id=1, DefaultParameterSettingMasterId = 2, ParameterUniqueReferenceId="BADEBT-P", ParameterValue=30.99m }
+                };
+            var detail = new DefaultParameterSettingDetail
             {
-                ParameterYear = "2024-25",
-                SchemeParameterTemplateValues = schemeParameterTemplateValues
+                Id = 1,
+                DefaultParameterSettingMasterId =2,
+                ParameterUniqueReferenceId = "BADEBT-P",
+                ParameterValue = 30.99m,
             };
-            var actionResult = defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
-            return actionResult;
+            var defaultParameterSettingMaster = new DefaultParameterSettingMaster
+            {
+                Id = 2,
+                ParameterYear = "2024-25",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+            };
+
+            details.ForEach(detail => defaultParameterSettingMaster.Details.Add(detail));
+
+            var template = new DefaultParameterTemplateMaster
+            {
+                ParameterUniqueReferenceId = "BADEBT-P",
+                ParameterType = "Aluminium",
+                ParameterCategory = "Communication costs"
+            };
+
+            //Check if dbContext is not null
+            if (dbContext != null)
+            {
+                // Act           
+                var result = CreateDefaultParameterSettingMapper.Map(defaultParameterSettingMaster, dbContext.DefaultParameterTemplateMasterList);
+                Assert.AreEqual(1, result.Count);
+                Assert.IsNotNull(result);
+                //// Assert
+                var mappedItem = result.First();
+                Assert.AreEqual(detail.Id, mappedItem.Id);
+                Assert.AreEqual(defaultParameterSettingMaster.ParameterYear, mappedItem.ParameterYear);
+                Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);
+                Assert.AreEqual(defaultParameterSettingMaster.CreatedAt, mappedItem.CreatedAt);
+                Assert.AreEqual(detail.DefaultParameterSettingMasterId, mappedItem.DefaultParameterSettingMasterId);
+                Assert.AreEqual(detail.ParameterValue, mappedItem.ParameterValue);
+                Assert.AreEqual(template.ParameterType, mappedItem.ParameterType);
+                Assert.AreEqual(template.ParameterCategory, mappedItem.ParameterCategory);
+            }
+            else
+            {
+                throw new Exception(typeof(DefaultParameterTemplateMaster).FullName);
+            }
         }
     }
 }
