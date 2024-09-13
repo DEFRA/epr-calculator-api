@@ -1,6 +1,6 @@
 ﻿using EPR.Calculator.API.Dtos;
 
-namespace api.Validators
+namespace EPR.Calculator.API.Validators
 {
     public interface ICreateDefaultParameterDataValidator
     {

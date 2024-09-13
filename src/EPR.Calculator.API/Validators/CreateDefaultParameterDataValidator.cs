@@ -3,7 +3,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Utils;
 
-namespace api.Validators
+namespace EPR.Calculator.API.Validators
 {
 
     public class CreateDefaultParameterDataValidator : ICreateDefaultParameterDataValidator

@@ -1,5 +1,5 @@
-﻿using api.Mappers;
-using api.Validators;
+﻿using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;

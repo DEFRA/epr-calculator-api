@@ -4,7 +4,7 @@ using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace api.Tests.Controllers
+namespace EPR.Calculator.API.Tests.Controllers
 {
     [TestClass]
     public class DefaultParameterSettingControllerTest : BaseControllerTest

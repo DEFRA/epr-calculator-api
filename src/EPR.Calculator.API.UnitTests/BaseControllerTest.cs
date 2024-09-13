@@ -1,4 +1,4 @@
-﻿using api.Validators;
+﻿using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace api.Tests.Controllers
+namespace EPR.Calculator.API.Tests.Controllers
 {
     [TestClass]
     public class BaseControllerTest
