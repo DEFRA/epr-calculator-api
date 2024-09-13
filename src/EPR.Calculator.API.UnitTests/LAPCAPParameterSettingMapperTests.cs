@@ -6,9 +6,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
-    public class LAPCAPParameterSettingMapperTests : BaseControllerTest
+    public class LapcapParameterSettingMapperTests : BaseControllerTest
     {
-
         [TestMethod]
         public void Check_TheResult_IsNotNullOf_ResultSet_WithDefaultLAPCAPParametersDto_WithCorrectYear()
         {
