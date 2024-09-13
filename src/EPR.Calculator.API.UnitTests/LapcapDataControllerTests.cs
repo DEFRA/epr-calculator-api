@@ -44,6 +44,20 @@ namespace EPR.Calculator.API.UnitTests
             Assert.AreEqual("Enter the lapcap data for England and Wood", errors.First().Message);
         }
 
+        [TestMethod]
+        public void CreateTest_With_More_Records()
+        {
+            var createDefaultParameterDto = CreateDto();
+            var list = new List<LapcapDataTemplateValueDto>(createDefaultParameterDto.LapcapDataTemplateValues);
+            list?.Add(new LapcapDataTemplateValueDto { CountryName = "England", Material = "Wood", TotalCost = "9" });
+            createDefaultParameterDto.LapcapDataTemplateValues = list.AsEnumerable();
+            var actionResult = lapcapDataController?.Create(createDefaultParameterDto) as ObjectResult;
+            Assert.AreEqual(400, actionResult?.StatusCode);
+            var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;
+            Assert.IsNotNull(errors);
+            Assert.AreEqual(1, errors.Count(x => x.Message == "Expecting only One with England and Wood"));
+        }
+
         public CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
         {
             var lapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>();
