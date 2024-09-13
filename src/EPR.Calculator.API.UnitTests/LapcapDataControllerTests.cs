@@ -12,33 +12,60 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void CreateTest_With_Records()
         {
-            var actionResult = DataPostCall();
+            var createDefaultParameterDto = CreateDto();
+            var actionResult = lapcapDataController?.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(201, actionResult?.StatusCode);
 
             Assert.AreEqual(LapcapDataUniqueReferences.UniqueReferences.Length, dbContext?.LapcapDataDetail.Count());
             Assert.AreEqual(1, dbContext?.LapcapDataMaster.Count());
         }
 
-        public ObjectResult? DataPostCall()
+        [TestMethod]
+        public void CreateTest_With_Missing_Year()
+        {
+            var createDefaultParameterDto = CreateDto();
+            createDefaultParameterDto.ParameterYear = string.Empty;
+            lapcapDataController?.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
+            var actionResult = lapcapDataController?.Create(createDefaultParameterDto) as ObjectResult;
+            Assert.AreEqual(400, actionResult?.StatusCode);
+        }
+
+        [TestMethod]
+        public void CreateTest_With_Missing_Records()
+        {
+            var uniqueRef = "ENG-WD";
+            var createDefaultParameterDto = CreateDto([uniqueRef]);
+            createDefaultParameterDto.LapcapDataTemplateValues = createDefaultParameterDto.LapcapDataTemplateValues;
+            var actionResult = lapcapDataController?.Create(createDefaultParameterDto) as ObjectResult;
+            Assert.AreEqual(400, actionResult?.StatusCode);
+            var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;
+            Assert.IsNotNull(errors);
+            Assert.AreEqual(uniqueRef, errors.First().UniqueReference);
+            Assert.AreEqual("Enter the lapcap data for England and Wood", errors.First().Message);
+        }
+
+        public CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
         {
             var lapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>();
             var masterData = GetTemplateMasterData();
             foreach (var templateMaster in masterData)
             {
-                lapcapDataTemplateValues.Add(new LapcapDataTemplateValueDto
+                if (uniqueRefsToAvoid == null || !uniqueRefsToAvoid.Contains(templateMaster.UniqueReference))
                 {
-                    TotalCost = "20",
-                    CountryName = templateMaster.Country,
-                    Material = templateMaster.Material,
-                });
+                    lapcapDataTemplateValues.Add(new LapcapDataTemplateValueDto
+                    {
+                        TotalCost = "20",
+                        CountryName = templateMaster.Country,
+                        Material = templateMaster.Material,
+                    });
+                }
             }
             var createDefaultParameterDto = new CreateLapcapDataDto
             {
                 ParameterYear = "2024-25",
                 LapcapDataTemplateValues = lapcapDataTemplateValues
             };
-            var actionResult = lapcapDataController?.Create(createDefaultParameterDto) as ObjectResult;
-            return actionResult;
+            return createDefaultParameterDto;
         }
     }
 }
