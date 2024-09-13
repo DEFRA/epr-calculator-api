@@ -110,8 +110,12 @@ namespace EPR.Calculator.API.UnitTests
         {
             var createDefaultParameterDto = CreateDto();
             var list = new List<LapcapDataTemplateValueDto>(createDefaultParameterDto.LapcapDataTemplateValues);
-            list?.Add(new LapcapDataTemplateValueDto { CountryName = "England", Material = "Wood", TotalCost = "9" });
-            createDefaultParameterDto.LapcapDataTemplateValues = list.AsEnumerable();
+            if (list != null)
+            {
+                list.Add(new LapcapDataTemplateValueDto { CountryName = "England", Material = "Wood", TotalCost = "9" });
+                createDefaultParameterDto.LapcapDataTemplateValues = list.AsEnumerable();
+            }
+
             var actionResult = lapcapDataController?.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
             var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;
@@ -119,7 +123,7 @@ namespace EPR.Calculator.API.UnitTests
             Assert.AreEqual(1, errors.Count(x => x.Message == "Expecting only One with England and Wood"));
         }
 
-        public CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
+        public static CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
         {
             var lapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>();
             var masterData = GetTemplateMasterData();

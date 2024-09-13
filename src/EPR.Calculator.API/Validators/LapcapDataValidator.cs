@@ -66,7 +66,7 @@ namespace api.Validators
                     validationResult.Errors.Add(errorDto);
                 }
             }
-            validationResult.IsInvalid = validationResult.Errors.Count() > 0;
+            validationResult.IsInvalid = validationResult.Errors.Count > 0;
             return validationResult;
         }
     }
