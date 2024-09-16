@@ -90,7 +90,7 @@ namespace EPR.Calculator.API.Controllers
         /// <response code="404">If no data is available for the specified year.</response>
         /// <response code="500">If an internal server error occurs.</response>
         [HttpGet]
-        [Route("api/lapcapData/{parameterYear}")]
+        [Route("lapcapData/{parameterYear}")]
         public IActionResult Get([FromRoute] string parameterYear)
         {
             if (!ModelState.IsValid)
