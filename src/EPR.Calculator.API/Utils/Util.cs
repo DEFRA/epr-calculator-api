@@ -179,5 +179,21 @@ namespace EPR.Calculator.API.Utils
                 && !defaultTemplate.ParameterCategory.ToLower().Contains("percent")
                 && !defaultTemplate.ParameterType.ToLower().Contains("percent");
         }
+
+        public static CreateLapcapDataErrorDto CreateLapcapDataErrorDto(string country,
+                                                                        string material,
+                                                                        string message,
+                                                                        string description,
+                                                                        string uniqueReference)
+        {
+            return new CreateLapcapDataErrorDto
+            {
+                Country = country,
+                Material = material,
+                Message = message,
+                Description = description,
+                UniqueReference = uniqueReference
+            };
+        }
     }
 }

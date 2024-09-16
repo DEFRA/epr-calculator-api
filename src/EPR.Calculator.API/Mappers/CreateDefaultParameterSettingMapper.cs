@@ -1,7 +1,7 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 
-namespace api.Mappers
+namespace EPR.Calculator.API.Mappers
 {
     public static class CreateDefaultParameterSettingMapper
     {

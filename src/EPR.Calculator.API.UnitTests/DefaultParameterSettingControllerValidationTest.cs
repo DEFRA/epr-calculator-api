@@ -1,4 +1,4 @@
-﻿using api.Tests.Controllers;
+﻿using EPR.Calculator.API.Tests.Controllers;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;

@@ -3,9 +3,10 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Utils;
 
-namespace api.Validators
+namespace EPR.Calculator.API.Validators
 {
-    public class CreateDefaultParameterDataValidator
+
+    public class CreateDefaultParameterDataValidator : ICreateDefaultParameterDataValidator
     {
         private readonly ApplicationDBContext _context;
         public CreateDefaultParameterDataValidator(ApplicationDBContext context)

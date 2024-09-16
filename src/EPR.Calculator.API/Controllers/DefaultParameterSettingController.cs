@@ -1,5 +1,5 @@
-﻿using api.Mappers;
-using api.Validators;
+﻿using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -8,25 +8,28 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EPR.Calculator.API.Controllers
 {
+    [Route("v1")]
     public class DefaultParameterSettingController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
+        private readonly ICreateDefaultParameterDataValidator validator;
 
-        public DefaultParameterSettingController(ApplicationDBContext context)
+        public DefaultParameterSettingController(ApplicationDBContext context,
+                ICreateDefaultParameterDataValidator validator)
         {
             this._context = context;
+            this.validator = validator;
         }
 
         [HttpPost]
-        [Route("api/defaultParameterSetting")]
+        [Route("defaultParameterSetting")]
         public IActionResult Create([FromBody] CreateDefaultParameterSettingDto request)
         {
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
-            var customValidator = new CreateDefaultParameterDataValidator(this._context);
-            var validationResult = customValidator.Validate(request);
+            var validationResult = validator.Validate(request);
             if (validationResult != null && validationResult.IsInvalid)
             {
                 return BadRequest(validationResult.Errors);
@@ -72,7 +75,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("api/defaultParameterSetting/{parameterYear}")]
+        [Route("defaultParameterSetting/{parameterYear}")]
         public IActionResult Get([FromRoute] string parameterYear)
         {
             if (!ModelState.IsValid)

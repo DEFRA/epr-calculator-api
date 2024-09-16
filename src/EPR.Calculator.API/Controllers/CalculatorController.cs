@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EPR.Calculator.API.Controllers
 {
+    [Route("v1")]
     public class CalculatorController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
@@ -14,7 +15,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpPost]
-        [Route("api/calculatorRuns")]
+        [Route("calculatorRuns")]
         public IActionResult GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
         {
             if (!ModelState.IsValid)
@@ -45,7 +46,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("api/calculatorRuns/{id}")]
+        [Route("calculatorRuns/{id}")]
         public IActionResult GetCalculatorRun()
         {
             // TODO: Return the details of a particular run

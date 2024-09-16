@@ -1,14 +1,9 @@
-﻿using api.Mappers;
-using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Dtos;
+﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Mappers;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 
-namespace api.Tests.Controllers
+namespace EPR.Calculator.API.Tests.Controllers
 {
     [TestClass]
     public class CreateDefaultParameterSettingMapperTest : BaseControllerTest
