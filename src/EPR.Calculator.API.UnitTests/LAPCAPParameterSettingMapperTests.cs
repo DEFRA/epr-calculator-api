@@ -29,6 +29,7 @@ namespace EPR.Calculator.API.UnitTests
                 Year = "2024-25",
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
             };
 
             details.ForEach(detail => defaultParameterSettingMaster.Details.Add(detail));
@@ -57,6 +58,7 @@ namespace EPR.Calculator.API.UnitTests
                 Assert.AreEqual(template.Country, mappedItem.Country);
                 Assert.AreEqual(template.Material, mappedItem.Material);
                 Assert.AreEqual(detail.TotalCost, mappedItem.TotalCost);
+                Assert.AreEqual(defaultParameterSettingMaster.EffectiveFrom, mappedItem.EffectiveFrom);
             }
             else
             {
