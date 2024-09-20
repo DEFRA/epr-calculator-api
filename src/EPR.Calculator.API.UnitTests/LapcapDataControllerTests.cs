@@ -30,6 +30,7 @@ namespace EPR.Calculator.API.UnitTests
                 Country = "England",
                 Material = "Aluminium",
                 TotalCost = 20m,
+                EffectiveFrom = DateTime.Now,
             };
 
             //Act

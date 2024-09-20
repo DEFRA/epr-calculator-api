@@ -13,6 +13,8 @@ namespace EPR.Calculator.API.Dtos
 
         required public DateTime CreatedAt { get; set; }
 
+        required public DateTime EffectiveFrom { get; set; }
+
         required public int LapcapDataMasterId { get; set; }
 
         required public string LapcapTempUniqueRef { get; set; }
