@@ -24,7 +24,8 @@ namespace EPR.Calculator.API.Mappers
                     LapcapTempUniqueRef = item.UniqueReference,
                     Country = selectedTemplate.Country,
                     Material = selectedTemplate.Material,
-                    TotalCost = item.TotalCost
+                    TotalCost = item.TotalCost,
+                    EffectiveFrom = lapcapSettingMaster.EffectiveFrom
                 };
 
                 result.Add(data);
