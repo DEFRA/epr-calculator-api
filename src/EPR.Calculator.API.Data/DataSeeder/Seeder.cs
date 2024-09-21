@@ -76,7 +76,47 @@ namespace EPR.Calculator.API.Data.DataSeeder
             {
                 ParameterUniqueReferenceId = "COMC-OT",
                 ParameterCategory = "Communication costs",
-                ParameterType = "Other",
+                ParameterType = "Other materials",
+                ValidRangeFrom = 0,
+                ValidRangeTo = 999999999.99M,
+            },
+            new DefaultParameterTemplateMaster
+            {
+                ParameterUniqueReferenceId = "COMC-UK",
+                ParameterCategory = "Communication costs",
+                ParameterType = "United Kingdom",
+                ValidRangeFrom = 0,
+                ValidRangeTo = 999999999.99M,
+            },
+            new DefaultParameterTemplateMaster
+            {
+                ParameterUniqueReferenceId = "COMC-ENG",
+                ParameterCategory = "Communication costs",
+                ParameterType = "England",
+                ValidRangeFrom = 0,
+                ValidRangeTo = 999999999.99M,
+            },
+            new DefaultParameterTemplateMaster
+            {
+                ParameterUniqueReferenceId = "COMC-WLS",
+                ParameterCategory = "Communication costs",
+                ParameterType = "Wales",
+                ValidRangeFrom = 0,
+                ValidRangeTo = 999999999.99M,
+            },
+            new DefaultParameterTemplateMaster
+            {
+                ParameterUniqueReferenceId = "COMC-SCT",
+                ParameterCategory = "Communication costs",
+                ParameterType = "Scotland",
+                ValidRangeFrom = 0,
+                ValidRangeTo = 999999999.99M,
+            },
+            new DefaultParameterTemplateMaster
+            {
+                ParameterUniqueReferenceId = "COMC-NIR",
+                ParameterCategory = "Communication costs",
+                ParameterType = "Northern Ireland",
                 ValidRangeFrom = 0,
                 ValidRangeTo = 999999999.99M,
             },
@@ -188,7 +228,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             {
                 ParameterUniqueReferenceId = "LRET-FC",
                 ParameterCategory = "Late reporting tonnage",
-                ParameterType = "Aluminium",
+                ParameterType = "Fibre composite",
                 ValidRangeFrom = 0,
                 ValidRangeTo = 999999999.99M,
             },
@@ -196,7 +236,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             {
                 ParameterUniqueReferenceId = "LRET-GL",
                 ParameterCategory = "Late reporting tonnage",
-                ParameterType = "Aluminium",
+                ParameterType = "Glass",
                 ValidRangeFrom = 0,
                 ValidRangeTo = 999999999.99M,
             },
@@ -204,7 +244,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             {
                 ParameterUniqueReferenceId = "LRET-PC",
                 ParameterCategory = "Late reporting tonnage",
-                ParameterType = "Aluminium",
+                ParameterType = "Paper or card",
                 ValidRangeFrom = 0,
                 ValidRangeTo = 999999999.99M,
             },
@@ -212,7 +252,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             {
                 ParameterUniqueReferenceId = "LRET-PL",
                 ParameterCategory = "Late reporting tonnage",
-                ParameterType = "Aluminium",
+                ParameterType = "Plastic",
                 ValidRangeFrom = 0,
                 ValidRangeTo = 999999999.99M,
             },
@@ -220,7 +260,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             {
                 ParameterUniqueReferenceId = "LRET-ST",
                 ParameterCategory = "Late reporting tonnage",
-                ParameterType = "Aluminium",
+                ParameterType = "Steel",
                 ValidRangeFrom = 0,
                 ValidRangeTo = 999999999.99M,
             },
@@ -228,7 +268,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             {
                 ParameterUniqueReferenceId = "LRET-WD",
                 ParameterCategory = "Late reporting tonnage",
-                ParameterType = "Aluminium",
+                ParameterType = "Wood",
                 ValidRangeFrom = 0,
                 ValidRangeTo = 999999999.99M,
             },
@@ -236,17 +276,17 @@ namespace EPR.Calculator.API.Data.DataSeeder
             {
                 ParameterUniqueReferenceId = "LRET-OT",
                 ParameterCategory = "Late reporting tonnage",
-                ParameterType = "Aluminium",
+                ParameterType = "Other materials",
                 ValidRangeFrom = 0,
                 ValidRangeTo = 999999999.99M,
             },
             new DefaultParameterTemplateMaster
             {
                 ParameterUniqueReferenceId = "BADEBT-P",
-                ParameterCategory = "Communication costs",
-                ParameterType = "Aluminium",
+                ParameterCategory = "Bad debt provision",
+                ParameterType = "Percentage",
                 ValidRangeFrom = 0,
-                ValidRangeTo = 999999999.99M,
+                ValidRangeTo = 1000.00M,
             },
             new DefaultParameterTemplateMaster
             {
@@ -290,7 +330,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             },
             new DefaultParameterTemplateMaster
             {
-                ParameterUniqueReferenceId = "TONT-DI",
+                ParameterUniqueReferenceId = "TONT-AD",
                 ParameterCategory = "Tonnage change threshold",
                 ParameterType = "Amount Decrease",
                 ValidRangeFrom = 0,
@@ -311,38 +351,6 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 ParameterType = "Percent Decrease",
                 ValidRangeFrom = 0,
                 ValidRangeTo = -1000.00M,
-            },
-            new DefaultParameterTemplateMaster
-            {
-                ParameterUniqueReferenceId = "LEVY-ENG",
-                ParameterCategory = "Levy",
-                ParameterType = "England",
-                ValidRangeFrom = 0,
-                ValidRangeTo = 999999999.99M,
-            },
-            new DefaultParameterTemplateMaster
-            {
-                ParameterUniqueReferenceId = "LEVY-WLS",
-                ParameterCategory = "Levy",
-                ParameterType = "Wales",
-                ValidRangeFrom = 0,
-                ValidRangeTo = 999999999.99M,
-            },
-            new DefaultParameterTemplateMaster
-            {
-                ParameterUniqueReferenceId = "LEVY-SCT",
-                ParameterCategory = "Levy",
-                ParameterType = "Scotland",
-                ValidRangeFrom = 0,
-                ValidRangeTo = 999999999.99M,
-            },
-            new DefaultParameterTemplateMaster
-            {
-                ParameterUniqueReferenceId = "LEVY-NIR",
-                ParameterCategory = "Levy",
-                ParameterType = "Northern Ireland",
-                ValidRangeFrom = 0,
-                ValidRangeTo = 999999999.99M,
             });
         }
 
