@@ -1,0 +1,78 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\DEFRA\\epr-calculator-api\\src\\EPR.Calculator.API.Common\\EPR.Calculator.API.Common.csproj": {}
+  },
+  "projects": {
+    "C:\\DEFRA\\epr-calculator-api\\src\\EPR.Calculator.API.Common\\EPR.Calculator.API.Common.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\DEFRA\\epr-calculator-api\\src\\EPR.Calculator.API.Common\\EPR.Calculator.API.Common.csproj",
+        "projectName": "EPR.Calculator.API.Common",
+        "projectPath": "C:\\DEFRA\\epr-calculator-api\\src\\EPR.Calculator.API.Common\\EPR.Calculator.API.Common.csproj",
+        "packagesPath": "C:\\Users\\a926516\\.nuget\\packages\\",
+        "outputPath": "C:\\DEFRA\\epr-calculator-api\\src\\EPR.Calculator.API.Common\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\a926516\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Azure.Messaging.ServiceBus": {
+              "target": "Package",
+              "version": "[7.18.1, )"
+            },
+            "Microsoft.Extensions.Configuration.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.205/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

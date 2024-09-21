@@ -1,0 +1,13 @@
+C:\DEFRA\epr-calculator-api\src\EPR.Calculator.API.Common\bin\Debug\net8.0\EPR.Calculator.API.Common.deps.json
+C:\DEFRA\epr-calculator-api\src\EPR.Calculator.API.Common\bin\Debug\net8.0\EPR.Calculator.API.Common.dll
+C:\DEFRA\epr-calculator-api\src\EPR.Calculator.API.Common\bin\Debug\net8.0\EPR.Calculator.API.Common.pdb
+C:\DEFRA\epr-calculator-api\src\EPR.Calculator.API.Common\obj\Debug\net8.0\EPR.Calculator.API.Common.csproj.AssemblyReference.cache
+C:\DEFRA\epr-calculator-api\src\EPR.Calculator.API.Common\obj\Debug\net8.0\EPR.Calculator.API.Common.GeneratedMSBuildEditorConfig.editorconfig
+C:\DEFRA\epr-calculator-api\src\EPR.Calculator.API.Common\obj\Debug\net8.0\EPR.Calculator.API.Common.AssemblyInfoInputs.cache
+C:\DEFRA\epr-calculator-api\src\EPR.Calculator.API.Common\obj\Debug\net8.0\EPR.Calculator.API.Common.AssemblyInfo.cs
+C:\DEFRA\epr-calculator-api\src\EPR.Calculator.API.Common\obj\Debug\net8.0\EPR.Calculator.API.Common.csproj.CoreCompileInputs.cache
+C:\DEFRA\epr-calculator-api\src\EPR.Calculator.API.Common\obj\Debug\net8.0\EPR.Calculator.API.Common.sourcelink.json
+C:\DEFRA\epr-calculator-api\src\EPR.Calculator.API.Common\obj\Debug\net8.0\EPR.Calculator.API.Common.dll
+C:\DEFRA\epr-calculator-api\src\EPR.Calculator.API.Common\obj\Debug\net8.0\refint\EPR.Calculator.API.Common.dll
+C:\DEFRA\epr-calculator-api\src\EPR.Calculator.API.Common\obj\Debug\net8.0\EPR.Calculator.API.Common.pdb
+C:\DEFRA\epr-calculator-api\src\EPR.Calculator.API.Common\obj\Debug\net8.0\ref\EPR.Calculator.API.Common.dll

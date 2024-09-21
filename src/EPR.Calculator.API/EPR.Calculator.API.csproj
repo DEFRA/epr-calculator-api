@@ -37,6 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EPR.Calculator.API.Common\EPR.Calculator.API.Common.csproj" />
     <ProjectReference Include="..\EPR.Calculator.API.Data\EPR.Calculator.API.Data.csproj" />
   </ItemGroup>
 	<ItemGroup>
@@ -48,5 +49,8 @@
 		<SonarQubeSetting Include="sonar.cpd.exclusions">
 			<Value>Dtos/*.cs,Constants/*.cs</Value>
 		</SonarQubeSetting>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Helpers\" />
 	</ItemGroup>
 </Project>

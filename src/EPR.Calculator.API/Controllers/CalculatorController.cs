@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Common;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -50,6 +51,16 @@ namespace EPR.Calculator.API.Controllers
         public IActionResult GetCalculatorRun()
         {
             // TODO: Return the details of a particular run
+            return new OkResult();
+        }
+
+        [HttpPost]
+        [Route("calculatorRun")]
+        public async Task<IActionResult> CreateCalculatorRun()
+        {
+            await ServiceBus.SendMessage("", "");
+
+            // TODO: Initiate calculator run by sending message to the Azure Service Bus
             return new OkResult();
         }
     }
