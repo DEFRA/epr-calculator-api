@@ -1,17 +1,28 @@
 ﻿using Azure.Messaging.ServiceBus;
+using EPR.Calculator.API.Common.Models;
 
 namespace EPR.Calculator.API.Common
 {
     public static class ServiceBus
     {
-        public static async Task SendMessage(string connectionString, string queueName)
+        private static readonly string ConnectionString = ConfigurationHelper.GetSetting("ServiceBus:ConnectionString");
+        private static readonly string QueueName = ConfigurationHelper.GetSetting("ServiceBus:QueueName");
+
+        public static async Task SendMessage(CalculatorRunMessage message)
         {
-            ServiceBusClient serviceBusClient = new ServiceBusClient(connectionString);
+            try
+            {
+                ServiceBusClient serviceBusClient = new ServiceBusClient(ConnectionString);
 
-            ServiceBusMessage serviceBusMessage = new ServiceBusMessage("Test message");
+                ServiceBusMessage serviceBusMessage = new ServiceBusMessage(message.CalculatorRunId);
 
-            ServiceBusSender serviceBusSender = serviceBusClient.CreateSender(queueName);
-            await serviceBusSender.SendMessageAsync(serviceBusMessage);
+                ServiceBusSender serviceBusSender = serviceBusClient.CreateSender(QueueName);
+                await serviceBusSender.SendMessageAsync(serviceBusMessage);
+            }
+            catch (Exception)
+            {
+                // TO DO: throw exception
+            }
         }
     }
 }

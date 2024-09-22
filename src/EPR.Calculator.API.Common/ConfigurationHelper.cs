@@ -1,18 +1,23 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EPR.Calculator.API.Common
 {
     public static class ConfigurationHelper
     {
-        public static IConfiguration config;
-        public static void Initialise(IConfiguration configuration)
+        private static IConfiguration AppSetting { get; }
+
+        static ConfigurationHelper()
         {
-            config = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory()) // or specify the correct path if needed
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            AppSetting = builder.Build();
+        }
+
+        public static string GetSetting(string key)
+        {
+            return AppSetting[key];
         }
     }
 }
