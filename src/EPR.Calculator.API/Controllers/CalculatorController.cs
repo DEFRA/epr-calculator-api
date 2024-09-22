@@ -1,5 +1,4 @@
 ﻿using EPR.Calculator.API.Common;
-using EPR.Calculator.API.Common.Models;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
@@ -57,19 +56,12 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRun")]
-        public async Task<IActionResult> CreateCalculatorRun([FromBody] CalculatorRunMessage request)
+        public async Task<IActionResult> CreateCalculatorRun()
         {
-            try
-            {
-                await ServiceBus.SendMessage(request);
+            await ServiceBus.SendMessage("", "");
 
-                // TODO: Initiate calculator run by sending message to the Azure Service Bus
-                return new OkResult();
-            }
-            catch (Exception exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception);
-            }
+            // TODO: Initiate calculator run by sending message to the Azure Service Bus
+            return new OkResult();
         }
     }
 }

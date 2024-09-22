@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EPR.Calculator.API.Common")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+af906ca79939e8f0111c82a0b81c0c70d92f23f3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ca1f5348b81663a2ad260b82ec0d86ee25c92897")]
 [assembly: System.Reflection.AssemblyProductAttribute("EPR.Calculator.API.Common")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EPR.Calculator.API.Common")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
