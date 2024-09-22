@@ -18,6 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
+	<Content Include="appsettings.Test.json">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\EPR.Calculator.API\EPR.Calculator.API.csproj" />
   </ItemGroup>
 

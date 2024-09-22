@@ -10,10 +10,12 @@ namespace EPR.Calculator.API.Controllers
     public class CalculatorController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
+        private readonly IConfiguration _configuration;
 
-        public CalculatorController(ApplicationDBContext context)
+        public CalculatorController(ApplicationDBContext context, IConfiguration configuration)
         {
             this._context = context;
+            this._configuration = configuration;
         }
 
         [HttpPost]
@@ -59,10 +61,25 @@ namespace EPR.Calculator.API.Controllers
         [Route("calculatorRun")]
         public async Task<IActionResult> CreateCalculatorRun([FromBody] CalculatorRunMessage message)
         {
-            await ServiceBus.SendMessage(message);
+            try
+            {
+                var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
+                var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
 
-            // TODO: Initiate calculator run by sending message to the Azure Service Bus
-            return new OkResult();
+                if (string.IsNullOrWhiteSpace(serviceBusConnectionString) || string.IsNullOrWhiteSpace(serviceBusQueueName))
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+                }
+
+                await ServiceBus.SendMessage(serviceBusConnectionString, serviceBusQueueName, message);
+
+                // TODO: Initiate calculator run by sending message to the Azure Service Bus
+                return new OkResult();
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }            
         }
     }
 }
