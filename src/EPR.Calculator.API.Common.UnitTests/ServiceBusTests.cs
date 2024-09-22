@@ -6,7 +6,7 @@ namespace EPR.Calculator.API.Common.UnitTests
     public class ServiceBusTests
     {
         [TestMethod]
-        public void TestMethod1()
+        public void ServiceBus_Should_Send_Message()
         {
         }
     }

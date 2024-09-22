@@ -22,7 +22,7 @@
 
   <ItemGroup>
 	<Content Include="appsettings.Test.json">
-	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</Content>
   </ItemGroup>
 
