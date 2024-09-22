@@ -48,3 +48,6 @@ src/EPR.Calculator.API.Common/obj/Debug/net8.0/EPR.Calculator.API.Common.Assembl
 src/EPR.Calculator.API.Common/bin/Debug/net8.0/EPR.Calculator.API.Common.pdb
 src/EPR.Calculator.API.Common/bin/Debug/net8.0/EPR.Calculator.API.Common.dll
 src/EPR.Calculator.API.Common/bin/Debug/net8.0/EPR.Calculator.API.Common.deps.json
+src/EPR.Calculator.API.Common/obj/Debug/net8.0/EPR.Calculator.API.Common.AssemblyInfo.cs
+src/EPR.Calculator.API.Common/obj/Debug/net8.0/EPR.Calculator.API.Common.AssemblyInfoInputs.cache
+src/EPR.Calculator.API.Common/obj/Debug/net8.0/EPR.Calculator.API.Common.assets.cache
