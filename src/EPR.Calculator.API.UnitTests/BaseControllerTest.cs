@@ -233,8 +233,8 @@ namespace EPR.Calculator.API.Tests.Controllers
                 ParameterUniqueReferenceId = "MATT-AD",
                 ParameterCategory = "Amount Decrease",
                 ParameterType = "Materiality threshold",
-                ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeFrom = -999999999.990m,
+                ValidRangeTo = 0.00m
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -249,8 +249,8 @@ namespace EPR.Calculator.API.Tests.Controllers
                 ParameterUniqueReferenceId = "MATT-PD",
                 ParameterCategory = "Percent Decrease",
                 ParameterType = "Materiality threshold",
-                ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeFrom = -999.990m,
+                ValidRangeTo = 0.00m
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -258,7 +258,7 @@ namespace EPR.Calculator.API.Tests.Controllers
                 ParameterCategory = "Percent Increase",
                 ParameterType = "Materiality threshold",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999.990m
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -282,7 +282,7 @@ namespace EPR.Calculator.API.Tests.Controllers
                 ParameterCategory = "Bad debt provision",
                 ParameterType = "Percentage",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 1000.000m
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -361,8 +361,8 @@ namespace EPR.Calculator.API.Tests.Controllers
                 ParameterUniqueReferenceId = "TONT-AD",
                 ParameterCategory = "Amount Decrease",
                 ParameterType = "Tonnage change threshold",
-                ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeFrom = -999999999.990m,
+                ValidRangeTo = 0.00m
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -377,8 +377,8 @@ namespace EPR.Calculator.API.Tests.Controllers
                 ParameterUniqueReferenceId = "TONT-PD",
                 ParameterCategory = "Percent Decrease",
                 ParameterType = "Tonnage change threshold",
-                ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeFrom = -999.990m,
+                ValidRangeTo = 0.00m
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -386,7 +386,7 @@ namespace EPR.Calculator.API.Tests.Controllers
                 ParameterCategory = "Percent Increase",
                 ParameterType = "Tonnage change threshold",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999.990m
             });
             return list;
         }
