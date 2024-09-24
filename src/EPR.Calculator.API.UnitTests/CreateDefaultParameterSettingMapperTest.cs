@@ -36,8 +36,8 @@ namespace EPR.Calculator.API.Tests.Controllers
             var template = new DefaultParameterTemplateMaster
             {
                 ParameterUniqueReferenceId = "BADEBT-P",
-                ParameterType = "Aluminium",
-                ParameterCategory = "Communication costs"
+                ParameterType = "Percentage",
+                ParameterCategory = "Bad debt provision"
             };
 
             //Check if dbContext is not null
