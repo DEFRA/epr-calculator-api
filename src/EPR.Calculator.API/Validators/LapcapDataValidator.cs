@@ -45,7 +45,6 @@ namespace EPR.Calculator.API.Validators
                     var totalCostStr = data.TotalCost;
                     if (string.IsNullOrEmpty(totalCostStr))
                     {
-                        //Enter the total costs for aluminium in England
                         errorMessage = $"Enter the total costs for {material} in {country}.";
                     }
                     else if (decimal.TryParse(totalCostStr, out totalCostValue))
@@ -58,7 +57,6 @@ namespace EPR.Calculator.API.Validators
                     }
                     else
                     {
-                        //Total costs for aluminium can only include numbers, commas and decimal points.
                         errorMessage = $"Total costs for {material} can only include numbers, commas and decimal points.";
                     }
                 }
