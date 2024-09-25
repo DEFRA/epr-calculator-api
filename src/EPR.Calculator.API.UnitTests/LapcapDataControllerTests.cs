@@ -20,7 +20,7 @@ namespace EPR.Calculator.API.UnitTests
             var tempdateData = new LapCapParameterDto()
             {
                 Id = 1,
-                Year = "2024-25",
+                ProjectionYear = "2024-25",
                 LapcapDataMasterId = 1,
 
                 LapcapTempUniqueRef = "ENG-AL",
