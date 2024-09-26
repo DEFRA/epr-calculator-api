@@ -32,7 +32,7 @@ namespace EPR.Calculator.API.Controllers
                 var result = await pipelineClient.GetPipelineAsync(
                 this.PipelineName);
 
-                return Ok(result.GetRawResponse().ToString());
+                return Ok(result.Value);
             }
             catch (Exception ex)
             {
@@ -42,12 +42,12 @@ namespace EPR.Calculator.API.Controllers
 
         [Route("AzureSynapseTest")]
         [HttpPost]
-        public async Task<IActionResult> PostPipeline(Dictionary<string,object> parameters)
+        public async Task<IActionResult> PostPipeline()
         {
 #if DEBUG
-            var credentials = new InteractiveBrowserCredential();
+            var credentials = new DefaultAzureCredential();
 #else
-                        var TokenCredential credentials = new ManagedIdentityCredential();
+            var TokenCredential credentials = new ManagedIdentityCredential();
 #endif
 
             var pipelineClient = new PipelineClient(
@@ -57,10 +57,9 @@ namespace EPR.Calculator.API.Controllers
             try
             {
                 var result = await pipelineClient.CreatePipelineRunAsync(
-                this.PipelineName,
-                parameters: parameters);
+                this.PipelineName);
 
-                return Ok(result.GetRawResponse().ToString());
+                return Ok($"RunId: {result.Value.RunId}");
             }
             catch (Exception ex)
             {
