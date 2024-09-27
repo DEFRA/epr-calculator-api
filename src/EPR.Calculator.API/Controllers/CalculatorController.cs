@@ -1,5 +1,5 @@
-﻿using EPR.Calculator.API.Common;
-using EPR.Calculator.API.Common.Models;
+﻿using EPR.Calculator.API.Common.Models;
+using EPR.Calculator.API.Common.ServiceBus;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
@@ -63,6 +63,10 @@ namespace EPR.Calculator.API.Controllers
         {
             try
             {
+                // There will not be any request body for this API call as the calculator run id should be created in this API controller
+
+                // TO DO: Create calculator run record, get the calculator run id and send it in the message
+
                 var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
                 var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
 
@@ -73,7 +77,6 @@ namespace EPR.Calculator.API.Controllers
 
                 await ServiceBus.SendMessage(serviceBusConnectionString, serviceBusQueueName, message);
 
-                // TODO: Initiate calculator run by sending message to the Azure Service Bus
                 return new OkResult();
             }
             catch (Exception exception)

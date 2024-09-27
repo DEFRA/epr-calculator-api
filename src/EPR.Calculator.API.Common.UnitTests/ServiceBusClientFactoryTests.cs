@@ -1,19 +1,18 @@
-using Azure.Messaging.ServiceBus;
-using EPR.Calculator.API.Common.Models;
+﻿using Azure.Messaging.ServiceBus;
 using EPR.Calculator.API.Common.ServiceBus;
 
 namespace EPR.Calculator.API.Common.UnitTests
 {
     [TestClass]
-    public class ServiceBusTests
+    public class ServiceBusClientFactoryTests
     {
         [TestMethod]
-        public async Task SendMessage_ReturnErrorIfNoConnectionString()
+        public void GetServiceBusClient_ReturnErrorIfNoConnectionString()
         {
             try
             {
-                var message = new CalculatorRunMessage { CalculatorRunId = "123450" };
-                await ServiceBus.ServiceBus.SendMessage(string.Empty, "TestQueue", message);
+                var serviceBusClientFactory = new ServiceBusClientFactory(string.Empty);
+                var serviceBusClient = serviceBusClientFactory.GetServiceBusClient();
             }
             catch (ServiceBusException exception)
             {
