@@ -108,11 +108,11 @@ namespace EPR.Calculator.API.Tests.Controllers
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             foreach (var item in DefaultParameterUniqueReferences.UniqueReferences)
             {
-                if (item == "MATT-PD" || item == "TONT-PD")
+                if (item == "MATT-AD" || item == "MATT-PD" || item == "TONT-AD" || item == "TONT-PD")
                 {
                     schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
                     {
-                        ParameterValue = "0",
+                        ParameterValue = "-90",
                         ParameterUniqueReferenceId = item
                     });
                 }

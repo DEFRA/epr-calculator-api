@@ -76,8 +76,8 @@ namespace EPR.Calculator.API.UnitTests
             Assert.IsTrue(errors.Count() == 1);
             var firstError = errors.First();
             Assert.AreEqual(firstError.ParameterUniqueRef, "BADEBT-P");
-            Assert.AreEqual(firstError.ParameterCategory, "Communication costs");
-            Assert.AreEqual(firstError.ParameterType, "Aluminium");
+            Assert.AreEqual(firstError.ParameterCategory, "Bad debt provision");
+            Assert.AreEqual(firstError.ParameterType, "Percentage");
         }
     }
 }
