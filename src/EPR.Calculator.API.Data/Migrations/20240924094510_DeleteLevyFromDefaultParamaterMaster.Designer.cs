@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240924094510_DeleteLevyFromDefaultParamaterMaster")]
+    partial class DeleteLevyFromDefaultParamaterMaster
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -106,35 +109,35 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2024, 9, 24, 20, 44, 8, 278, DateTimeKind.Local).AddTicks(6481),
+                            CreatedAt = new DateTime(2024, 9, 24, 10, 45, 10, 89, DateTimeKind.Local).AddTicks(8687),
                             CreatedBy = "Test User",
                             Status = "IN THE QUEUE"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2024, 9, 24, 20, 44, 8, 278, DateTimeKind.Local).AddTicks(6486),
+                            CreatedAt = new DateTime(2024, 9, 24, 10, 45, 10, 89, DateTimeKind.Local).AddTicks(8691),
                             CreatedBy = "Test User",
                             Status = "RUNNING"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2024, 9, 24, 20, 44, 8, 278, DateTimeKind.Local).AddTicks(6491),
+                            CreatedAt = new DateTime(2024, 9, 24, 10, 45, 10, 89, DateTimeKind.Local).AddTicks(8694),
                             CreatedBy = "Test User",
                             Status = "UNCLASSIFIED"
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2024, 9, 24, 20, 44, 8, 278, DateTimeKind.Local).AddTicks(6495),
+                            CreatedAt = new DateTime(2024, 9, 24, 10, 45, 10, 89, DateTimeKind.Local).AddTicks(8697),
                             CreatedBy = "Test User",
                             Status = "PLAY"
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2024, 9, 24, 20, 44, 8, 278, DateTimeKind.Local).AddTicks(6500),
+                            CreatedAt = new DateTime(2024, 9, 24, 10, 45, 10, 89, DateTimeKind.Local).AddTicks(8699),
                             CreatedBy = "Test User",
                             Status = "ERROR"
                         });
@@ -632,11 +635,11 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("effective_to");
 
-                    b.Property<string>("ProjectionYear")
+                    b.Property<string>("Year")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasColumnName("projection_year");
+                        .HasColumnName("year");
 
                     b.HasKey("Id");
 

@@ -46,7 +46,7 @@ namespace EPR.Calculator.API.Controllers
                         CreatedBy = "Testuser",
                         EffectiveFrom = DateTime.Now,
                         EffectiveTo = null,
-                        Year = request.ParameterYear
+                        ProjectionYear = request.ParameterYear
                     };
                     this.context.LapcapDataMaster.Add(lapcapDataMaster);
 
@@ -99,7 +99,7 @@ namespace EPR.Calculator.API.Controllers
             }
 
             var currentDefaultSetting = this.context.LapcapDataMaster
-                .SingleOrDefault(x => x.EffectiveTo == null && x.Year == parameterYear);
+                .SingleOrDefault(setting => setting.EffectiveTo == null && setting.ProjectionYear == parameterYear);
 
             if (currentDefaultSetting == null)
             {

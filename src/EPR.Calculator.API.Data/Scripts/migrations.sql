@@ -1057,3 +1057,112 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240924194409_UpdateLapcapDataMasterYearColumnName'
+)
+BEGIN
+    EXEC sp_rename N'[dbo].[lapcap_data_master].[year]', N'projection_year', N'COLUMN';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240924194409_UpdateLapcapDataMasterYearColumnName'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20240924194409_UpdateLapcapDataMasterYearColumnName', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240924094510_DeleteLevyFromDefaultParamaterMaster'
+)
+BEGIN
+    delete d from dbo.default_parameter_setting_detail d
+    inner join dbo.default_parameter_template_master m
+    on d.parameter_unique_ref = m.parameter_unique_ref
+    where m.parameter_type = 'Levy'
+
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240924094510_DeleteLevyFromDefaultParamaterMaster'
+)
+BEGIN
+    delete from dbo.default_parameter_template_master where parameter_type = 'Levy'
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240924094510_DeleteLevyFromDefaultParamaterMaster'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20240924094510_DeleteLevyFromDefaultParamaterMaster', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240924110427_AddCommunicationCostsDefaultParamaterMaster'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
+        SET IDENTITY_INSERT [default_parameter_template_master] ON;
+    EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])
+    VALUES (N''COMC-UK'', N''United Kingdom'', N''Communication costs by country'', 0.0, 999999999.99),
+    (N''COMC-ENG'', N''England'', N''Communication costs by country'', 0.0, 999999999.99),
+    (N''COMC-WLS'', N''Wales'', N''Communication costs by country'', 0.0, 999999999.99),
+    (N''COMC-SCT'', N''Scotland'', N''Communication costs by country'', 0.0, 999999999.99),
+    (N''COMC-NIR'', N''Northern Ireland'', N''Communication costs by country'', 0.0, 999999999.99)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
+        SET IDENTITY_INSERT [default_parameter_template_master] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240924110427_AddCommunicationCostsDefaultParamaterMaster'
+)
+BEGIN
+    update dbo.default_parameter_template_master
+    set parameter_type = 'Communication costs by material'
+    where parameter_type = 'Communication costs'
+
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240924110427_AddCommunicationCostsDefaultParamaterMaster'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20240924110427_AddCommunicationCostsDefaultParamaterMaster', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
