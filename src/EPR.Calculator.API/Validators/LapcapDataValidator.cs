@@ -53,7 +53,7 @@ namespace EPR.Calculator.API.Validators
                         if (totalCostValue < lapcapTemplate.TotalCostFrom ||
                             totalCostValue > lapcapTemplate.TotalCostTo)
                         {                          
-                            errorMessage = $"Total cost for {material} in {country} must be between £{Convert.ToInt16(totalCostFrom)} and £{totalCostTo.ToString("#,##0.00")}";
+                            errorMessage = $"Total costs for {material} in {country} must be between £{Convert.ToInt16(totalCostFrom)} and £{totalCostTo.ToString("#,##0.00")}";
                         }
                     }
                     else

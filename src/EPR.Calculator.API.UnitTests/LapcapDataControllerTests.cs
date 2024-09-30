@@ -103,7 +103,7 @@ namespace EPR.Calculator.API.UnitTests
             var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;
             Assert.IsNotNull(errors);
             Assert.AreEqual(uniqueRef, errors.First().UniqueReference);
-            Assert.AreEqual("Enter the total costs for Wood in England.", errors.First().Message);
+            Assert.AreEqual("Enter the total costs for Wood in England", errors.First().Message);
         }
 
         [TestMethod]
@@ -121,7 +121,7 @@ namespace EPR.Calculator.API.UnitTests
             Assert.AreEqual(400, actionResult?.StatusCode);
             var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;
             Assert.IsNotNull(errors);
-            Assert.AreEqual(1, errors.Count(x => x.Message == "You have entered the total costs for Wood in England more than once."));
+            Assert.AreEqual(1, errors.Count(x => x.Message == "You have entered the total costs for Wood in England more than once"));
         }
 
         public static CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
