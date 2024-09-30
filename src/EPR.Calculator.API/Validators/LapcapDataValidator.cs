@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Utils;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EPR.Calculator.API.Validators
 {
@@ -51,8 +52,8 @@ namespace EPR.Calculator.API.Validators
                     {
                         if (totalCostValue < lapcapTemplate.TotalCostFrom ||
                             totalCostValue > lapcapTemplate.TotalCostTo)
-                        {
-                            errorMessage = $"Total cost for {material} in {country} must be between £{totalCostFrom} and £{totalCostTo}";
+                        {                          
+                            errorMessage = $"Total cost for {material} in {country} must be between £{Convert.ToInt16(totalCostFrom)} and £{totalCostTo.ToString("#,##0.00")}";
                         }
                     }
                     else
