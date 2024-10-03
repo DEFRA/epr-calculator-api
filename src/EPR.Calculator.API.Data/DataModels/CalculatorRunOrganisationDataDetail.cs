@@ -10,15 +10,15 @@ namespace EPR.Calculator.API.Data.DataModels
     {
         [StringLength(400)]
         [Column("organisation_id")]
-        public string OrganisationId { get; set; }
+        public required string OrganisationId { get; set; }
 
         [StringLength(400)]
         [Column("subsidiary_id")]
-        public string SubsidaryId { get; set; }
+        public required string SubsidaryId { get; set; }
 
         [StringLength(400)]
         [Column("organisation_name")]
-        public string OrganisationName { get; set; }
+        public required string OrganisationName { get; set; }
 
         [Column("load_ts")]
         public DateTime LoadTimeStamp { get; set; }

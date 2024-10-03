@@ -15,10 +15,13 @@ namespace EPR.Calculator.API.Data.DataModels
 
         [Column("effective_from")]
         public required DateTime EffectiveFrom { get; set; }
+
         [Column("effective_to")]
         public DateTime? EffectiveTo { get; set; }
+
         [Column("created_by")]
         public required string CreatedBy { get; set; }
+
         [Column("created_at")]
         public required DateTime CreatedAt { get; set; }
     }
