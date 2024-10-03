@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+	<Target Name="GenerateSqlScript" AfterTargets="AfterBuild" Condition="$(AzureBuild) != true">
+		<Exec Condition="$(Configuration) == Release" Command="dotnet-ef migrations script --configuration Release --verbose --no-build --context EPR.Payment.Service.Common.Data.AppDbContext --idempotent --output Scripts/migrations.sql" />
+	</Target>
+
   <ItemGroup>
     <Folder Include="Migrations\" />
   </ItemGroup>
@@ -31,4 +35,12 @@
 		  <Value>Scripts/*.*,Migrations/*.*,DataSeeder/*.*,DataModels/*.*</Value>
 	  </SonarQubeSetting>
   </ItemGroup>
+	<ItemGroup>
+		<Compile Update="Migrations\*.cs">
+			<SonarQubeExclude>true</SonarQubeExclude>
+		</Compile>
+		<None Update="Scripts\**\*">
+			<SonarQubeExclude>true</SonarQubeExclude>
+		</None>
+	</ItemGroup>
 </Project>
