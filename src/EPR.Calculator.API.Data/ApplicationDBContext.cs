@@ -6,6 +6,9 @@ namespace EPR.Calculator.API.Data
 {
     public class ApplicationDBContext : DbContext
     {
+        public ApplicationDBContext()
+        {
+        }
 
         public ApplicationDBContext(DbContextOptions options) : base(options)
         {
