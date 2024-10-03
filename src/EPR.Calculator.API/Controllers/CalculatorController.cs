@@ -14,6 +14,20 @@ namespace EPR.Calculator.API.Controllers
             this._context = context;
         }
 
+        //[HttpPost]
+        //[Route("calculatorRun")]
+        //public IActionResult CreateCalculatorRun()
+        //{
+        //    try
+        //    {
+
+        //    }
+        //    catch (Exception exception)
+        //    {
+
+        //    }
+        //}
+
         [HttpPost]
         [Route("calculatorRuns")]
         public IActionResult GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
