@@ -88,11 +88,35 @@ namespace EPR.Calculator.API.Data
             modelBuilder.Entity<CalculatorRunPomDataMaster>()
             .HasMany(e => e.Details)
             .WithOne(e => e.CalculatorRunPomDataMaster)
-            .HasForeignKey(e => e.CalculatorRunPomDataMasterId)
-            .IsRequired(true);
+            .HasForeignKey(e => e.CalculatorRunPomDataMasterId);
 
             modelBuilder.Entity<OrganisationData>();
             modelBuilder.Entity<PomData>();
+
+            modelBuilder.Entity<CalculatorRun>().Property(e => e.CalculatorRunPomDataMasterId).IsRequired(false);
+            modelBuilder.Entity<CalculatorRun>().Property(e => e.CalculatorRunOrganisationDataMasterId).IsRequired(false);
+            modelBuilder.Entity<CalculatorRun>().Property(e => e.LapcapDataMasterId).IsRequired(false);
+            modelBuilder.Entity<CalculatorRun>().Property(e => e.DefaultParameterSettingMasterId).IsRequired(false);
+
+            modelBuilder.Entity<CalculatorRunPomDataMaster>()
+            .HasMany(e => e.RunDetails)
+            .WithOne(e => e.CalculatorRunPomDataMaster)
+            .HasForeignKey(e => e.CalculatorRunPomDataMasterId);
+
+            modelBuilder.Entity<CalculatorRunOrganisationDataMaster>()
+            .HasMany(e => e.RunDetails)
+            .WithOne(e => e.CalculatorRunOrganisationDataMaster)
+            .HasForeignKey(e => e.CalculatorRunOrganisationDataMasterId);
+
+            modelBuilder.Entity<LapcapDataMaster>()
+            .HasMany(e => e.RunDetails)
+            .WithOne(e => e.LapcapDataMaster)
+            .HasForeignKey(e => e.LapcapDataMasterId);
+
+            modelBuilder.Entity<DefaultParameterSettingMaster>()
+            .HasMany(e => e.RunDetails)
+            .WithOne(e => e.DefaultParameterSettingMaster)
+            .HasForeignKey(e => e.DefaultParameterSettingMasterId);
 
             Seeder.Initialize(modelBuilder);
         }

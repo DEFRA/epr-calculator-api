@@ -26,5 +26,7 @@ namespace EPR.Calculator.API.Data.DataModels
         public required DateTime CreatedAt { get; set; }
 
         public ICollection<CalculatorRunOrganisationDataDetail> Details { get; } = new List<CalculatorRunOrganisationDataDetail>();
+
+        public ICollection<CalculatorRun>? RunDetails { get; }
     }
 }
