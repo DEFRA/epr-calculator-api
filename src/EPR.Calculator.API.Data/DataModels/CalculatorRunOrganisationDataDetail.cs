@@ -25,5 +25,7 @@ namespace EPR.Calculator.API.Data.DataModels
 
         [Column("calculator_run_organization_data_master_id")]
         public int CalculatorRunOrganisationDataMasterId { get; set; }
+
+        public virtual CalculatorRunOrganisationDataMaster CalculatorRunOrganisationDataMaster { get; set; }
     }
 }

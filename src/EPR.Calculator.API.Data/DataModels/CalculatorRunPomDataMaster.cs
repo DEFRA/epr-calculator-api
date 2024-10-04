@@ -24,5 +24,7 @@ namespace EPR.Calculator.API.Data.DataModels
 
         [Column("created_at")]
         public required DateTime CreatedAt { get; set; }
+
+        public ICollection<CalculatorRunPomDataDetail> Details { get; } = new List<CalculatorRunPomDataDetail>();
     }
 }

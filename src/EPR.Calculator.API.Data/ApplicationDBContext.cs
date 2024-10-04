@@ -6,7 +6,7 @@ namespace EPR.Calculator.API.Data
 {
     public class ApplicationDBContext : DbContext
     {
-
+        public ApplicationDBContext() { }
         public ApplicationDBContext(DbContextOptions options) : base(options)
         {
         }
@@ -26,6 +26,14 @@ namespace EPR.Calculator.API.Data
         public DbSet<LapcapDataMaster> LapcapDataMaster { get; set; }
 
         public DbSet<LapcapDataDetail> LapcapDataDetail { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer();
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
