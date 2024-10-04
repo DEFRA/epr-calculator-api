@@ -6,7 +6,6 @@ namespace EPR.Calculator.API.Data
 {
     public class ApplicationDBContext : DbContext
     {
-        public ApplicationDBContext() { }
         public ApplicationDBContext(DbContextOptions options) : base(options)
         {
         }
@@ -38,14 +37,6 @@ namespace EPR.Calculator.API.Data
         public DbSet<OrganisationData> OrganisationData { get; set; }
 
         public DbSet<PomData> PomData { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer();
-            }
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
