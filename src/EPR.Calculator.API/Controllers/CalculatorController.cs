@@ -1,4 +1,6 @@
-﻿using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Common.Models;
+using EPR.Calculator.API.Common.ServiceBus;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,25 +10,41 @@ namespace EPR.Calculator.API.Controllers
     public class CalculatorController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
+        private readonly IConfiguration _configuration;
 
-        public CalculatorController(ApplicationDBContext context)
+        public CalculatorController(ApplicationDBContext context, IConfiguration configuration)
         {
             this._context = context;
+            this._configuration = configuration;
         }
 
-        //[HttpPost]
-        //[Route("calculatorRun")]
-        //public IActionResult CreateCalculatorRun()
-        //{
-        //    try
-        //    {
+        [HttpPost]
+        [Route("calculatorRun")]
+        public async Task<IActionResult> CreateCalculatorRun([FromBody] CalculatorRunMessage message)
+        {
+            try
+            {
+                // There will not be any request body for this API call as the calculator run id should be created in this API controller
 
-        //    }
-        //    catch (Exception exception)
-        //    {
+                // TO DO: Create calculator run record, get the calculator run id and send it in the message
 
-        //    }
-        //}
+                var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
+                var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
+
+                if (string.IsNullOrWhiteSpace(serviceBusConnectionString) || string.IsNullOrWhiteSpace(serviceBusQueueName))
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+                }
+
+                await ServiceBus.SendMessage(serviceBusConnectionString, serviceBusQueueName, message);
+
+                return new OkResult();
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+        }
 
         [HttpPost]
         [Route("calculatorRuns")]
