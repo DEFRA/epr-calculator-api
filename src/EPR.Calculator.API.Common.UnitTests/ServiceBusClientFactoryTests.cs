@@ -11,7 +11,7 @@ namespace EPR.Calculator.API.Common.UnitTests
         {
             try
             {
-                var serviceBusClientFactory = new ServiceBusClientFactory(string.Empty);
+                var serviceBusClientFactory = new ServiceBusClientFactory(string.Empty, 1, 1);
                 var serviceBusClient = serviceBusClientFactory.GetServiceBusClient();
             }
             catch (ServiceBusException exception)

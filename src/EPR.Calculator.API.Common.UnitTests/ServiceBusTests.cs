@@ -11,8 +11,8 @@ namespace EPR.Calculator.API.Common.UnitTests
         {
             try
             {
-                var message = new CalculatorRunMessage { CalculatorRunId = "123450", FinancialYear = "2024-25" };
-                await ServiceBus.ServiceBus.SendMessage(string.Empty, "TestQueue", message);
+                var message = new CalculatorRunMessage { CalculatorRunId = 123450, FinancialYear = "2024-25" };
+                await ServiceBus.ServiceBus.SendMessage(string.Empty, "TestQueue", message, 1, 1);
             }
             catch (ServiceBusException exception)
             {

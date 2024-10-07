@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Common.Models;
 using EPR.Calculator.API.Common.ServiceBus;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,29 +21,68 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRun")]
-        public async Task<IActionResult> CreateCalculatorRun([FromBody] CalculatorRunMessage message)
+        public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                // There will not be any request body for this API call as the calculator run id should be created in this API controller
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
 
-                // TO DO: Create calculator run record, get the calculator run id and send it in the message
+            var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
+            var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
 
-                var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
-                var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
+            if (string.IsNullOrWhiteSpace(serviceBusConnectionString) || string.IsNullOrWhiteSpace(serviceBusQueueName))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
 
-                if (string.IsNullOrWhiteSpace(serviceBusConnectionString) || string.IsNullOrWhiteSpace(serviceBusQueueName))
+            var messageRetryTimesFound = int.TryParse(this._configuration.GetSection("MessageRetry").GetSection("PostMessageRetryCount").Value, out int messageRetryTimes);
+            var messageRetryPeriodFound = int.TryParse(this._configuration.GetSection("MessageRetry").GetSection("PostMessageRetryPeriod").Value, out int messageRetryPeriod);
+
+            if (!messageRetryPeriodFound || !messageRetryTimesFound)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError);
+                    // Setup calculator run details
+                    var calculatorRun = new CalculatorRun
+                    {
+                        Name = request.CalculatorRunName,
+                        Financial_Year = request.FinancialYear,
+                        CreatedBy = request.CreatedBy,
+                        CreatedAt = DateTime.Now,
+                        CalculatorRunClassificationId = 1
+                    };
+
+                    // Save calculator run details to the database
+                    this._context.CalculatorRuns.Add(calculatorRun);
+                    this._context.SaveChanges();
+
+                    // Setup message
+                    var calculatorRunMessage = new CalculatorRunMessage
+                    {
+                        CalculatorRunId = calculatorRun.Id,
+                        FinancialYear = calculatorRun.Financial_Year
+                    };
+
+                    // Send message to service bus
+                    await ServiceBus.SendMessage(serviceBusConnectionString, serviceBusQueueName, calculatorRunMessage, messageRetryTimes, messageRetryPeriod);
+
+                    // All good, commit transaction
+                    transaction.Commit();
+                }
+                catch (Exception exception)
+                {
+                    // Error, rollback transaction
+                    transaction.Rollback();
+                    return StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
 
-                await ServiceBus.SendMessage(serviceBusConnectionString, serviceBusQueueName, message);
-
-                return new OkResult();
-            }
-            catch (Exception exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+                return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
             }
         }
 
