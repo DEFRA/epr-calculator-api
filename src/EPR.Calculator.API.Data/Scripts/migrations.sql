@@ -1166,3 +1166,379 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD [calculator_run_organization_data_master_id] int NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD [calculator_run_pom_data_master_id] int NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD [default_parameter_setting_master_id] int NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD [lapcap_data_master_id] int NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    CREATE TABLE [calculator_run_organization_data_master] (
+        [id] int NOT NULL IDENTITY,
+        [calendar_year] nvarchar(max) NOT NULL,
+        [effective_from] datetime2 NOT NULL,
+        [effective_to] datetime2 NULL,
+        [created_by] nvarchar(max) NOT NULL,
+        [created_at] datetime2 NOT NULL,
+        CONSTRAINT [PK_calculator_run_organization_data_master] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    CREATE TABLE [calculator_run_pom_data_master] (
+        [id] int NOT NULL IDENTITY,
+        [calendar_year] nvarchar(max) NOT NULL,
+        [effective_from] datetime2 NOT NULL,
+        [effective_to] datetime2 NULL,
+        [created_by] nvarchar(max) NOT NULL,
+        [created_at] datetime2 NOT NULL,
+        CONSTRAINT [PK_calculator_run_pom_data_master] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    CREATE TABLE [organization_data] (
+        [organisation_id] nvarchar(400) NOT NULL,
+        [subsidiary_id] nvarchar(400) NOT NULL,
+        [organisation_name] nvarchar(400) NOT NULL,
+        [load_ts] datetime2 NOT NULL,
+        CONSTRAINT [PK_organization_data] PRIMARY KEY ([organisation_id], [subsidiary_id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    CREATE TABLE [pom_data] (
+        [organisation_id] nvarchar(400) NOT NULL,
+        [subsidiary_id] nvarchar(400) NOT NULL,
+        [submission_period] nvarchar(400) NOT NULL,
+        [packaging_activity] nvarchar(400) NULL,
+        [packaging_type] nvarchar(400) NULL,
+        [packaging_class] nvarchar(400) NULL,
+        [packaging_material] nvarchar(400) NULL,
+        [packaging_material_weight] nvarchar(400) NULL,
+        [load_ts] datetime2 NOT NULL,
+        CONSTRAINT [PK_pom_data] PRIMARY KEY ([organisation_id], [subsidiary_id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    CREATE TABLE [calculator_run_organization_data_detail] (
+        [organisation_id] nvarchar(400) NOT NULL,
+        [subsidiary_id] nvarchar(400) NOT NULL,
+        [organisation_name] nvarchar(400) NOT NULL,
+        [load_ts] datetime2 NOT NULL,
+        [calculator_run_organization_data_master_id] int NOT NULL,
+        CONSTRAINT [PK_calculator_run_organization_data_detail] PRIMARY KEY ([organisation_id], [subsidiary_id]),
+        CONSTRAINT [FK_calculator_run_organization_data_detail_calculator_run_organization_data_master_calculator_run_organization_data_master_id] FOREIGN KEY ([calculator_run_organization_data_master_id]) REFERENCES [calculator_run_organization_data_master] ([id]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    CREATE TABLE [calculator_run_pom_data_detail] (
+        [organisation_id] nvarchar(400) NOT NULL,
+        [subsidiary_id] nvarchar(400) NOT NULL,
+        [submission_period] nvarchar(400) NOT NULL,
+        [packaging_activity] nvarchar(400) NULL,
+        [packaging_type] nvarchar(400) NULL,
+        [packaging_class] nvarchar(400) NULL,
+        [packaging_material] nvarchar(400) NULL,
+        [packaging_material_weight] nvarchar(400) NULL,
+        [load_ts] datetime2 NOT NULL,
+        [calculator_run_pom_data_master_id] int NOT NULL,
+        CONSTRAINT [PK_calculator_run_pom_data_detail] PRIMARY KEY ([organisation_id], [subsidiary_id]),
+        CONSTRAINT [FK_calculator_run_pom_data_detail_calculator_run_pom_data_master_calculator_run_pom_data_master_id] FOREIGN KEY ([calculator_run_pom_data_master_id]) REFERENCES [calculator_run_pom_data_master] ([id]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-04T14:46:49.1790461+01:00''
+    WHERE [id] = 1;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-04T14:46:49.1790464+01:00''
+    WHERE [id] = 2;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-04T14:46:49.1790466+01:00''
+    WHERE [id] = 3;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-04T14:46:49.1790469+01:00''
+    WHERE [id] = 4;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-04T14:46:49.1790471+01:00''
+    WHERE [id] = 5;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_calculator_run_organization_data_master_id] ON [calculator_run] ([calculator_run_organization_data_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_calculator_run_pom_data_master_id] ON [calculator_run] ([calculator_run_pom_data_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_default_parameter_setting_master_id] ON [calculator_run] ([default_parameter_setting_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_lapcap_data_master_id] ON [calculator_run] ([lapcap_data_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_organization_data_detail_calculator_run_organization_data_master_id] ON [calculator_run_organization_data_detail] ([calculator_run_organization_data_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_pom_data_detail_calculator_run_pom_data_master_id] ON [calculator_run_pom_data_detail] ([calculator_run_pom_data_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD CONSTRAINT [FK_calculator_run_calculator_run_organization_data_master_calculator_run_organization_data_master_id] FOREIGN KEY ([calculator_run_organization_data_master_id]) REFERENCES [calculator_run_organization_data_master] ([id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD CONSTRAINT [FK_calculator_run_calculator_run_pom_data_master_calculator_run_pom_data_master_id] FOREIGN KEY ([calculator_run_pom_data_master_id]) REFERENCES [calculator_run_pom_data_master] ([id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD CONSTRAINT [FK_calculator_run_default_parameter_setting_master_default_parameter_setting_master_id] FOREIGN KEY ([default_parameter_setting_master_id]) REFERENCES [default_parameter_setting_master] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD CONSTRAINT [FK_calculator_run_lapcap_data_master_lapcap_data_master_id] FOREIGN KEY ([lapcap_data_master_id]) REFERENCES [lapcap_data_master] ([id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241004134649_CalcRunTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20241004134649_CalcRunTables', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241007082551_CalcRunMinorChanges'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-07T09:25:51.2638112+01:00''
+    WHERE [id] = 1;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241007082551_CalcRunMinorChanges'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-07T09:25:51.2638115+01:00''
+    WHERE [id] = 2;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241007082551_CalcRunMinorChanges'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-07T09:25:51.2638118+01:00''
+    WHERE [id] = 3;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241007082551_CalcRunMinorChanges'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-07T09:25:51.2638120+01:00''
+    WHERE [id] = 4;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241007082551_CalcRunMinorChanges'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-07T09:25:51.2638127+01:00''
+    WHERE [id] = 5;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241007082551_CalcRunMinorChanges'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20241007082551_CalcRunMinorChanges', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+

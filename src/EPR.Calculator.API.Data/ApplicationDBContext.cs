@@ -38,6 +38,18 @@ namespace EPR.Calculator.API.Data
 
         public DbSet<LapcapDataDetail> LapcapDataDetail { get; set; }
 
+        public DbSet<CalculatorRunOrganisationDataDetail> CalculatorRunOrganisationDataDetails { get; set; }
+
+        public DbSet<CalculatorRunOrganisationDataMaster> CalculatorRunOrganisationDataMaster {  get; set; }
+
+        public DbSet<CalculatorRunPomDataDetail> CalculatorRunPomDataDetails { get; set; }
+
+        public DbSet<CalculatorRunPomDataMaster> CalculatorRunPomDataMaster { get; set; }
+
+        public DbSet<OrganisationData> OrganisationData { get; set; }
+
+        public DbSet<PomData> PomData { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -67,6 +79,47 @@ namespace EPR.Calculator.API.Data
             .WithOne(e => e.LapcapDataTemplateMaster)
             .HasForeignKey(e => e.UniqueReference)
             .IsRequired(true);
+
+            modelBuilder.Entity<CalculatorRunOrganisationDataDetail>();
+            modelBuilder.Entity<CalculatorRunOrganisationDataMaster>()
+            .HasMany(e => e.Details)
+            .WithOne(e => e.CalculatorRunOrganisationDataMaster )
+            .HasForeignKey(e => e.CalculatorRunOrganisationDataMasterId)
+            .IsRequired(true);
+
+            modelBuilder.Entity<CalculatorRunPomDataDetail>();
+            modelBuilder.Entity<CalculatorRunPomDataMaster>()
+            .HasMany(e => e.Details)
+            .WithOne(e => e.CalculatorRunPomDataMaster)
+            .HasForeignKey(e => e.CalculatorRunPomDataMasterId);
+
+            modelBuilder.Entity<OrganisationData>();
+            modelBuilder.Entity<PomData>();
+
+            modelBuilder.Entity<CalculatorRun>().Property(e => e.CalculatorRunPomDataMasterId).IsRequired(false);
+            modelBuilder.Entity<CalculatorRun>().Property(e => e.CalculatorRunOrganisationDataMasterId).IsRequired(false);
+            modelBuilder.Entity<CalculatorRun>().Property(e => e.LapcapDataMasterId).IsRequired(false);
+            modelBuilder.Entity<CalculatorRun>().Property(e => e.DefaultParameterSettingMasterId).IsRequired(false);
+
+            modelBuilder.Entity<CalculatorRunPomDataMaster>()
+            .HasMany(e => e.RunDetails)
+            .WithOne(e => e.CalculatorRunPomDataMaster)
+            .HasForeignKey(e => e.CalculatorRunPomDataMasterId);
+
+            modelBuilder.Entity<CalculatorRunOrganisationDataMaster>()
+            .HasMany(e => e.RunDetails)
+            .WithOne(e => e.CalculatorRunOrganisationDataMaster)
+            .HasForeignKey(e => e.CalculatorRunOrganisationDataMasterId);
+
+            modelBuilder.Entity<LapcapDataMaster>()
+            .HasMany(e => e.RunDetails)
+            .WithOne(e => e.LapcapDataMaster)
+            .HasForeignKey(e => e.LapcapDataMasterId);
+
+            modelBuilder.Entity<DefaultParameterSettingMaster>()
+            .HasMany(e => e.RunDetails)
+            .WithOne(e => e.DefaultParameterSettingMaster)
+            .HasForeignKey(e => e.DefaultParameterSettingMasterId);
 
             Seeder.Initialize(modelBuilder);
         }
