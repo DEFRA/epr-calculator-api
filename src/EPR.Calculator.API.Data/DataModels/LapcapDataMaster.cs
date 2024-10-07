@@ -32,5 +32,7 @@ namespace EPR.Calculator.API.Data.DataModels
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public ICollection<LapcapDataDetail> Details { get; } = new List<LapcapDataDetail>();
+
+        public ICollection<CalculatorRun>? RunDetails { get; }
     }
 }

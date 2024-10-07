@@ -41,5 +41,25 @@ namespace EPR.Calculator.API.Data.DataModels
 
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
+
+        [Column("calculator_run_pom_data_master_id")]
+        public int? CalculatorRunPomDataMasterId { get; set; }
+
+        [Column("calculator_run_organization_data_master_id")]
+        public int? CalculatorRunOrganisationDataMasterId { get; set; }
+
+        [Column("lapcap_data_master_id")]
+        public int? LapcapDataMasterId { get; set; }
+
+        [Column("default_parameter_setting_master_id")]
+        public int? DefaultParameterSettingMasterId { get; set; }
+
+        public CalculatorRunPomDataMaster? CalculatorRunPomDataMaster { get; set; }
+
+        public CalculatorRunOrganisationDataMaster? CalculatorRunOrganisationDataMaster { get; set; }
+
+        public LapcapDataMaster? LapcapDataMaster { get; set; }
+
+        public DefaultParameterSettingMaster? DefaultParameterSettingMaster { get; set; }
     }
 }
