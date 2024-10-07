@@ -28,8 +28,8 @@ namespace EPR.Calculator.API.Data.DataModels
         public DateTime LoadTimeStamp { get; set; }
 
         [Column("calculator_run_organization_data_master_id")]
-        public int CalculatorRunOrganisationDataMasterId { get; set; }
+        public required int CalculatorRunOrganisationDataMasterId { get; set; }
 
-        public virtual CalculatorRunOrganisationDataMaster CalculatorRunOrganisationDataMaster { get; set; }
+        public required virtual CalculatorRunOrganisationDataMaster CalculatorRunOrganisationDataMaster { get; set; }
     }
 }
