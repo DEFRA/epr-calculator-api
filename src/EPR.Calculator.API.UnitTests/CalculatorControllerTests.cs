@@ -5,6 +5,7 @@ using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests
@@ -12,6 +13,7 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class CalculatorControllerTests
     {
+        private readonly IConfiguration configuration = ConfigurationItems.GetConfigurationValues();
         private ApplicationDBContext? dbContext;
         private CalculatorController? controller;
 
@@ -32,7 +34,7 @@ namespace EPR.Calculator.API.UnitTests
             ]);
             dbContext.SaveChanges();
 
-            controller = new CalculatorController(dbContext);
+            controller = new CalculatorController(dbContext, configuration);
         }
 
         [TestMethod]
