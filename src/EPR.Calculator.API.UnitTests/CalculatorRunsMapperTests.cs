@@ -30,12 +30,12 @@ namespace EPR.Calculator.API.UnitTests
             var result = CalculatorRunsMapper.Map(calculatorRun);
 
             // Assert
-            Assert.AreEqual(calculatorRun.Id, result.Id);
-            Assert.AreEqual(calculatorRun.Name, result.CalculatorRunName);
-            Assert.AreEqual(calculatorRun.Financial_Year, result.FinancialYear);
-            Assert.AreEqual(calculatorRun.CreatedAt, result.CreatedAt);
-            Assert.AreEqual(calculatorRun.CalculatorRunClassificationId, result.RunClassificationId);
-            Assert.AreEqual(calculatorRun.CreatedBy, result.CreatedBy);
+            Assert.AreEqual(calculatorRun.Id, result?.Id);
+            Assert.AreEqual(calculatorRun.Name, result?.CalculatorRunName);
+            Assert.AreEqual(calculatorRun.Financial_Year, result?.FinancialYear);
+            Assert.AreEqual(calculatorRun.CreatedAt, result?.CreatedAt);
+            Assert.AreEqual(calculatorRun.CalculatorRunClassificationId, result?.RunClassificationId);
+            Assert.AreEqual(calculatorRun.CreatedBy, result?.CreatedBy);
         }
 
         [TestMethod]

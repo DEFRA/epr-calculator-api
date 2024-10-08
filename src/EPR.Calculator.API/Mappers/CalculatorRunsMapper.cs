@@ -5,7 +5,7 @@ namespace EPR.Calculator.API.Mappers
 {
     public class CalculatorRunsMapper
     {
-        public static CalculatorRunsDetailsDto Map(CalculatorRun calculatorRuns)
+        public static CalculatorRunsDetailsDto? Map(CalculatorRun calculatorRuns)
         {
             if (calculatorRuns == null)
             {
