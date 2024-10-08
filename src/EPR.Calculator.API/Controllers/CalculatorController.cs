@@ -15,8 +15,8 @@ namespace EPR.Calculator.API.Controllers
 
         public CalculatorController(ApplicationDBContext context, IConfiguration configuration)
         {
-            this._context = context;
-            this._configuration = configuration;
+            _context = context;
+            _configuration = configuration;
         }
 
         [HttpPost]
@@ -59,14 +59,15 @@ namespace EPR.Calculator.API.Controllers
                     };
 
                     // Save calculator run details to the database
-                    this._context.CalculatorRuns.Add(calculatorRun);
-                    this._context.SaveChanges();
+                    _context.CalculatorRuns.Add(calculatorRun);
+                    _context.SaveChanges();
 
                     // Setup message
                     var calculatorRunMessage = new CalculatorRunMessage
                     {
                         CalculatorRunId = calculatorRun.Id,
-                        FinancialYear = calculatorRun.Financial_Year
+                        FinancialYear = calculatorRun.Financial_Year,
+                        CreatedBy = User.Identity.Name ?? request.CreatedBy
                     };
 
                     // Send message to service bus
@@ -81,9 +82,9 @@ namespace EPR.Calculator.API.Controllers
                     transaction.Rollback();
                     return StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
-
-                return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
             }
+
+            return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
         }
 
         [HttpPost]

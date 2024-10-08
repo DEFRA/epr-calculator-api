@@ -11,5 +11,7 @@ namespace EPR.Calculator.API.Common.Models
         public required int CalculatorRunId { get; set; }
 
         public required string FinancialYear { get; set; }
+
+        public required string CreatedBy { get; set; }
     }
 }
