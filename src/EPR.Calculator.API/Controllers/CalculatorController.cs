@@ -23,22 +23,53 @@ namespace EPR.Calculator.API.Controllers
         [Route("calculatorRun")]
         public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
         {
+            // Return bad request if the model is invalid
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
+            // Get active default parameter settings for the given financial year
+            var activeDefaultParameterSettings = _context.DefaultParameterSettings
+                        .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == request.FinancialYear);
+
+            // Get active Lapcap data for the given financial year
+            var activeLapcapData = _context.LapcapDataMaster
+                .SingleOrDefault(data => data.ProjectionYear == request.FinancialYear && data.EffectiveTo == null);
+
+            // Return not found with detailed message if there are no active default paramater settings and lapcap data
+            if (activeDefaultParameterSettings == null && activeLapcapData == null)
+            {
+                return new ObjectResult($"Default parameter settings and Lapcap data not available for the financial year {request.FinancialYear}.") { StatusCode = StatusCodes.Status404NotFound };
+            }
+
+            // Return not found with detailed message if no active default parameter settings found
+            if (activeDefaultParameterSettings == null)
+            {
+                return new ObjectResult($"Default parameter settings not available for the financial year {request.FinancialYear}.") { StatusCode = StatusCodes.Status404NotFound };
+            }
+
+            // Return not found with detailed message if no active lapcap data found
+            if (activeLapcapData == null)
+            {
+                return new ObjectResult($"Lapcap data not available for the financial year {request.FinancialYear}.") { StatusCode = StatusCodes.Status404NotFound };
+            }
+
+            // Read configuration items: service bus connection string and queue name
             var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
             var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
 
+            // Return server error if configuration items not found
             if (string.IsNullOrWhiteSpace(serviceBusConnectionString) || string.IsNullOrWhiteSpace(serviceBusQueueName))
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
+            // Read configuration items: message retry count and period
             var messageRetryTimesFound = int.TryParse(this._configuration.GetSection("MessageRetry").GetSection("PostMessageRetryCount").Value, out int messageRetryTimes);
             var messageRetryPeriodFound = int.TryParse(this._configuration.GetSection("MessageRetry").GetSection("PostMessageRetryPeriod").Value, out int messageRetryPeriod);
 
+            // Return server error if configuration items not found
             if (!messageRetryPeriodFound || !messageRetryTimesFound)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
@@ -67,7 +98,7 @@ namespace EPR.Calculator.API.Controllers
                     {
                         CalculatorRunId = calculatorRun.Id,
                         FinancialYear = calculatorRun.Financial_Year,
-                        CreatedBy = User.Identity.Name ?? request.CreatedBy
+                        CreatedBy = User?.Identity?.Name ?? request.CreatedBy
                     };
 
                     // Send message to service bus
@@ -84,6 +115,7 @@ namespace EPR.Calculator.API.Controllers
                 }
             }
 
+            // Return ccepted status code: Accepted
             return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
         }
 
