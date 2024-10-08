@@ -7,17 +7,23 @@ namespace EPR.Calculator.API.Mappers
     {
         public static CalculatorRunsDetailsDto Map(CalculatorRun calculatorRuns)
         {
-
-            var result = new CalculatorRunsDetailsDto
+            if (calculatorRuns == null)
             {
-                Id = calculatorRuns.Id,
-                CalculatorRunName = calculatorRuns.Name,
-                FinancialYear = calculatorRuns.Financial_Year,
-                CreatedAt = calculatorRuns.CreatedAt,
-                RunClassificationId = calculatorRuns.CalculatorRunClassificationId,
-                CreatedBy = calculatorRuns.CreatedBy,
-            };
-            return result;
+                return null;
+            }
+            else
+            {
+                var result = new CalculatorRunsDetailsDto
+                {
+                    Id = calculatorRuns.Id,
+                    CalculatorRunName = calculatorRuns.Name,
+                    FinancialYear = calculatorRuns.Financial_Year,
+                    CreatedAt = calculatorRuns.CreatedAt,
+                    RunClassificationId = calculatorRuns.CalculatorRunClassificationId,
+                    CreatedBy = calculatorRuns.CreatedBy,
+                };
+                return result;
+            }
         }
     }
 }
