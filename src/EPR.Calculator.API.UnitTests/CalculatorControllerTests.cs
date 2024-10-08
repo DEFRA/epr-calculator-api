@@ -71,6 +71,45 @@ namespace EPR.Calculator.API.UnitTests
             Assert.AreEqual(400, actionResult.StatusCode);
         }
 
+        [TestMethod]
+        public void Get_Calculator_Runs_Return_Results_By_Name_Test()
+        {
+            string calculatorRunsName = "Test Run";
+
+            var actionResult = controller?.GetCalculatorRunByName(calculatorRunsName) as ObjectResult;
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(200, actionResult.StatusCode);
+        }
+
+        [TestMethod]
+        public void Get_Calculator_Runs_Return_Results_Not_found()
+        {
+            string calculatorRunsName = "test 45610";
+
+            var actionResult = controller?.GetCalculatorRunByName(calculatorRunsName) as ObjectResult;
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(404, actionResult.StatusCode);
+        }
+
+        [TestMethod]
+        public void Get_Calculator_Runs_Return_Result_With_String_Comparison_CaseInsensitive()
+        {
+            string calculatorRunsName = "TEST run";
+
+            var actionResult = controller?.GetCalculatorRunByName(calculatorRunsName) as ObjectResult;
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(200, actionResult.StatusCode);
+        }
+
+        [TestMethod]
+        public void Get_Calculator_Runs_Return_Result_Internal_Server_Error_Handling()
+        {
+            string calculatorRunsName = "Test Run";
+            var actionResult = controller?.GetCalculatorRunByName(calculatorRunsName) as ObjectResult;
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(500, actionResult.StatusCode);
+        }        
+
         [TestCleanup]
         public void TearDown()
         {
