@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="appSettings.Test.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="appSettings.Test.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
