@@ -72,31 +72,31 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void Get_Calculator_Runs_Return_Results_By_Name_Test()
+        public void Get_Calculator_Run_Return_Results_By_Name_Test()
         {
-            string calculatorRunsName = "Test Run";
+            string calculatorRunName = "Test Run";
 
-            var actionResult = controller?.GetCalculatorRunByName(calculatorRunsName) as ObjectResult;
+            var actionResult = controller?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.StatusCode);
         }
 
         [TestMethod]
-        public void Get_Calculator_Runs_Return_Results_Not_found()
+        public void Get_Calculator_Run_Return_Results_Not_found()
         {
-            string calculatorRunsName = "test 45610";
+            string calculatorRunName = "test 45610";
 
-            var actionResult = controller?.GetCalculatorRunByName(calculatorRunsName) as ObjectResult;
+            var actionResult = controller?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(404, actionResult.StatusCode);
         }
 
         [TestMethod]
-        public void Get_Calculator_Runs_Return_Result_With_String_Comparison_CaseInsensitive()
+        public void Get_Calculator_Run_Return_Result_With_String_Comparison_CaseInsensitive()
         {
-            string calculatorRunsName = "TEST run";
+            string calculatorRunName = "TEST run";
 
-            var actionResult = controller?.GetCalculatorRunByName(calculatorRunsName) as ObjectResult;
+            var actionResult = controller?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.StatusCode);
         }     

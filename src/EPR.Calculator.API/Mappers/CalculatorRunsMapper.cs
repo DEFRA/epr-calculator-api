@@ -3,24 +3,24 @@ using EPR.Calculator.API.Dtos;
 
 namespace EPR.Calculator.API.Mappers
 {
-    public class CalculatorRunsMapper
+    public class CalculatorRunMapper
     {
-        public static CalculatorRunsDetailsDto? Map(CalculatorRun calculatorRuns)
+        public static CalculatorRunDetailsDto? Map(CalculatorRun calculatorRun)
         {
-            if (calculatorRuns == null)
+            if (calculatorRun == null)
             {
                 return null;
             }
             else
             {
-                var result = new CalculatorRunsDetailsDto
+                var result = new CalculatorRunDetailsDto
                 {
-                    Id = calculatorRuns.Id,
-                    CalculatorRunName = calculatorRuns.Name,
-                    FinancialYear = calculatorRuns.Financial_Year,
-                    CreatedAt = calculatorRuns.CreatedAt,
-                    RunClassificationId = calculatorRuns.CalculatorRunClassificationId,
-                    CreatedBy = calculatorRuns.CreatedBy,
+                    Id = calculatorRun.Id,
+                    CalculatorRunName = calculatorRun.Name,
+                    FinancialYear = calculatorRun.Financial_Year,
+                    CreatedAt = calculatorRun.CreatedAt,
+                    RunClassificationId = calculatorRun.CalculatorRunClassificationId,
+                    CreatedBy = calculatorRun.CreatedBy,
                 };
                 return result;
             }

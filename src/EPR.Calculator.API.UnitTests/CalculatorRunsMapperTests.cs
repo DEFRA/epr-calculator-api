@@ -27,7 +27,7 @@ namespace EPR.Calculator.API.UnitTests
             };
 
             // Act
-            var result = CalculatorRunsMapper.Map(calculatorRun);
+            var result = CalculatorRunMapper.Map(calculatorRun);
 
             // Assert
             Assert.AreEqual(calculatorRun.Id, result?.Id);
@@ -42,7 +42,7 @@ namespace EPR.Calculator.API.UnitTests
         public void Map_ShouldReturnNull_WhenGivenNullCalculatorRun()
         {
             // Act
-            var result = CalculatorRunsMapper.Map(null);
+            var result = CalculatorRunMapper.Map(null);
 
             // Assert
             Assert.IsNull(result);

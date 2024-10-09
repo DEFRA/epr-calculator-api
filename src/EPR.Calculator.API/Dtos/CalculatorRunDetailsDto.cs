@@ -1,6 +1,6 @@
 ﻿namespace EPR.Calculator.API.Dtos
 {
-    public class CalculatorRunsDetailsDto
+    public class CalculatorRunDetailsDto
     {
         public int Id { get; set; }
 
