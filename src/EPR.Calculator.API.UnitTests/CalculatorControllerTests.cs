@@ -2,6 +2,8 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Validators;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -69,6 +71,17 @@ namespace EPR.Calculator.API.UnitTests
             var actionResult = controller?.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(400, actionResult.StatusCode);
+        }
+
+        [TestMethod]
+        public void Get_Calculator_Run_Return_400_Error_With_No_NameSupplied()
+        {
+            CalculatorRunValidator _validator = new CalculatorRunValidator();
+            string _name = string.Empty;
+            var result = _validator.Validate(_name);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("Calculator Run Name is Required", result.Errors.First().ErrorMessage);
         }
 
         [TestMethod]

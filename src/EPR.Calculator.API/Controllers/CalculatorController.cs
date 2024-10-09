@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -65,16 +66,15 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var calculatorRun = _context.CalculatorRuns.Any(run => run.Name.ToLower() == name.ToLower());
-
-            if (calculatorRun == false)
-            {
-                return new ObjectResult("No data found for this calculator name") { StatusCode = StatusCodes.Status404NotFound };
-            }
-
             try
             {
-                return new ObjectResult(StatusCodes.Status200OK );
+                var calculatorRun = _context.CalculatorRuns.Any(run => run.Name.ToLower() == name.ToLower());
+
+                if (calculatorRun == false)
+                {
+                    return new ObjectResult("No data found for this calculator name") { StatusCode = StatusCodes.Status404NotFound };
+                }
+                return new ObjectResult(StatusCodes.Status200OK);
             }
             catch (Exception exception)
             {
