@@ -1,6 +1,6 @@
-﻿using EPR.Calculator.API.Tests.Controllers;
-using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Tests.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -127,7 +127,7 @@ namespace EPR.Calculator.API.UnitTests
         public static CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
         {
             var lapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>();
-            var masterData = GetTemplateMasterData();
+            var masterData = GetLapcapTemplateMasterData();
             foreach (var templateMaster in masterData)
             {
                 if (uniqueRefsToAvoid == null || !uniqueRefsToAvoid.Contains(templateMaster.UniqueReference))

@@ -1,4 +1,8 @@
-﻿using EPR.Calculator.API.Data;
+﻿using Azure.Core;
+using EPR.Calculator.API.Common.Models;
+using EPR.Calculator.API.Common.ServiceBus;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,10 +12,111 @@ namespace EPR.Calculator.API.Controllers
     public class CalculatorController : ControllerBase
     {
         private readonly ApplicationDBContext _context;
+        private readonly IConfiguration _configuration;
 
-        public CalculatorController(ApplicationDBContext context)
+        public CalculatorController(ApplicationDBContext context, IConfiguration configuration)
         {
-            this._context = context;
+            _context = context;
+            _configuration = configuration;
+        }
+
+        [HttpPost]
+        [Route("calculatorRun")]
+        public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
+        {
+            // Return bad request if the model is invalid
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            var message = DataPreChecksBeforeInitialisingCalculatorRun(request.FinancialYear);
+
+            if (!string.IsNullOrWhiteSpace(message))
+            {
+                return new ObjectResult(message) { StatusCode = StatusCodes.Status424FailedDependency };
+            }
+
+            // Read configuration items: service bus connection string and queue name 
+            var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
+            var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
+
+            if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
+            {
+                return new ObjectResult("Configuration item not found: ServiceBus__ConnectionString") { StatusCode = StatusCodes.Status500InternalServerError };
+            }
+
+            if (string.IsNullOrWhiteSpace(serviceBusQueueName))
+            {
+                return new ObjectResult("Configuration item not found: ServiceBus__QueueName") { StatusCode = StatusCodes.Status500InternalServerError };
+            }
+
+            // Read configuration items: message retry count and period
+            var messageRetryCountFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value, out int messageRetryCount);
+            var messageRetryPeriodFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value, out int messageRetryPeriod);
+
+            if (!messageRetryCountFound)
+            {
+                return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryCount") { StatusCode = StatusCodes.Status500InternalServerError };
+            }
+
+            if (!messageRetryPeriodFound)
+            {
+                return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryPeriod") { StatusCode = StatusCodes.Status500InternalServerError };
+            }
+
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
+                {
+                    // Get active default parameter settings master id
+                    var activeDefaultParameterSettingsMasterId = _context.DefaultParameterSettings
+                        .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == request.FinancialYear)?.Id;
+
+                    // Get active lapcap data master id
+                    var activeLapcapDataMasterId = _context.LapcapDataMaster
+                        .SingleOrDefault(data => data.ProjectionYear == request.FinancialYear && data.EffectiveTo == null)?.Id;
+
+                    // Setup calculator run details
+                    var calculatorRun = new CalculatorRun
+                    {
+                        Name = request.CalculatorRunName,
+                        Financial_Year = request.FinancialYear,
+                        CreatedBy = request.CreatedBy,
+                        CreatedAt = DateTime.Now,
+                        CalculatorRunClassificationId = 1,
+                        DefaultParameterSettingMasterId = activeDefaultParameterSettingsMasterId,
+                        LapcapDataMasterId = activeLapcapDataMasterId
+                    };
+
+                    // Save calculator run details to the database
+                    _context.CalculatorRuns.Add(calculatorRun);
+                    _context.SaveChanges();
+
+                    // Setup message
+                    var calculatorRunMessage = new CalculatorRunMessage
+                    {
+                        CalculatorRunId = calculatorRun.Id,
+                        FinancialYear = calculatorRun.Financial_Year,
+                        CreatedBy = User?.Identity?.Name ?? request.CreatedBy
+                    };
+
+                    // Send message to service bus
+                    await ServiceBus.SendMessage(serviceBusConnectionString, serviceBusQueueName, calculatorRunMessage, messageRetryCount, messageRetryPeriod);
+
+                    // All good, commit transaction
+                    transaction.Commit();
+                }
+                catch (Exception exception)
+                {
+                    // Error, rollback transaction
+                    transaction.Rollback();
+                    return StatusCode(StatusCodes.Status500InternalServerError, exception);
+                }
+            }
+
+            // Return ccepted status code: Accepted
+            return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
         }
 
         [HttpPost]
@@ -51,6 +156,38 @@ namespace EPR.Calculator.API.Controllers
         {
             // TODO: Return the details of a particular run
             return new OkResult();
+        }
+
+        private string DataPreChecksBeforeInitialisingCalculatorRun(string financialYear)
+        {
+            // Get active default parameter settings for the given financial year
+            var activeDefaultParameterSettings = _context.DefaultParameterSettings
+                        .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == financialYear);
+
+            // Get active Lapcap data for the given financial year
+            var activeLapcapData = _context.LapcapDataMaster
+                .SingleOrDefault(data => data.ProjectionYear == financialYear && data.EffectiveTo == null);
+
+            // Return no active default paramater settings and lapcap data message
+            if (activeDefaultParameterSettings == null && activeLapcapData == null)
+            {
+                return $"Default parameter settings and Lapcap data not available for the financial year {financialYear}.";
+            }
+
+            // Return no active default parameter settings found message
+            if (activeDefaultParameterSettings == null)
+            {
+                return $"Default parameter settings not available for the financial year {financialYear}.";
+            }
+
+            // Return no active lapcap data found message
+            if (activeLapcapData == null)
+            {
+                return $"Lapcap data not available for the financial year {financialYear}.";
+            }
+
+            // All good, return empty string
+            return string.Empty;
         }
     }
 }
