@@ -1,7 +1,6 @@
 ﻿using Azure.Messaging.ServiceBus;
 using EPR.Calculator.API.Common.ServiceBus;
 using Moq;
-using Moq.Protected;
 
 namespace EPR.Calculator.API.Common.UnitTests
 {
@@ -14,11 +13,30 @@ namespace EPR.Calculator.API.Common.UnitTests
             try
             {
                 var serviceBusClientFactory = new ServiceBusClientFactory(string.Empty, 1, 1);
-                var serviceBusClient = serviceBusClientFactory.GetServiceBusClient();
+                serviceBusClientFactory.GetServiceBusClient();
             }
             catch (ServiceBusException exception)
             {
                 Assert.IsTrue(exception.Message.Contains("ServiceBusClient: Connection string not provided."));
+                Assert.AreEqual(ServiceBusFailureReason.ServiceCommunicationProblem, exception.Reason);
+            }
+        }
+
+        [TestMethod]
+        public void GetServiceBusClient_ReturnErrorIfServiceBusClientNotSetupCorrectly()
+        {
+            try
+            {
+                Mock<ServiceBusClient> serviceBusClientMock = new Mock<ServiceBusClient>();
+                serviceBusClientMock
+                    .Setup(client => client.ToString())
+                    .Returns(string.Empty);
+
+                var serviceBusClientFactory = new ServiceBusClientFactory("Test connection string", 1, 1);
+                serviceBusClientFactory.GetServiceBusClient();
+            }
+            catch (ServiceBusException exception)
+            {
                 Assert.AreEqual(ServiceBusFailureReason.ServiceCommunicationProblem, exception.Reason);
             }
         }

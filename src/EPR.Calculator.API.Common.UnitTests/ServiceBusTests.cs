@@ -23,6 +23,41 @@ namespace EPR.Calculator.API.Common.UnitTests
             }
         }
 
+        //[TestMethod]
+        //public async Task SendMessage_Check()
+        //{
+        //    var options = new ServiceBusClientOptions();
+        //    options.RetryOptions = new ServiceBusRetryOptions
+        //    {
+        //        Delay = TimeSpan.FromSeconds(2),
+        //        MaxDelay = TimeSpan.FromSeconds(2),
+        //        Mode = ServiceBusRetryMode.Exponential,
+        //        MaxRetries = 3,
+        //    };
+
+        //    Mock<ServiceBusClientFactory> serviceBusClientFactoryMock = new Mock<ServiceBusClientFactory>();
+        //    serviceBusClientFactoryMock
+        //        .Protected()
+        //        .Setup(client => client.GetServiceBusClient())
+        //        .Returns(new ServiceBusClient("Test connection string", options));
+
+        //    Mock<ServiceBusSender> senderMock = new Mock<ServiceBusSender>();
+        //    senderMock
+        //        .Setup(sender => sender.SendMessageAsync(It.IsAny<ServiceBusMessage>(), It.IsAny<CancellationToken>()))
+        //        .Returns(Task.CompletedTask);
+
+        //    var message = new CalculatorRunMessage { CalculatorRunId = 123450, FinancialYear = "2024-25", CreatedBy = "Test User" };
+        //    await ServiceBus.ServiceBus.SendMessage(string.Empty, "TestQueue", message, 1, 1);
+
+        //    var messageString = JsonConvert.SerializeObject(message);
+        //    var serviceBusMessage = new ServiceBusMessage(messageString);
+
+        //    senderMock
+        //        .Verify(sender => sender.SendMessageAsync(
+        //            It.Is<ServiceBusMessage>(m => (m.MessageId == serviceBusMessage.MessageId)),
+        //            It.IsAny<CancellationToken>()));
+        //}
+
         [TestMethod]
         public async Task SendMessage_Succeeds()
         {
