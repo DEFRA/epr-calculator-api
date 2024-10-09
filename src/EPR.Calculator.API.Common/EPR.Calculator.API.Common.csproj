@@ -13,4 +13,14 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.coverage.exclusions">
+      <value>Models/*.*,ServiceBus/*.*</value>
+    </SonarQubeSetting>
+  </ItemGroup>
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.cpd.exclusions">
+      <Value>Models/*.*,ServiceBus/*.*</Value>
+    </SonarQubeSetting>
+  </ItemGroup>
 </Project>
