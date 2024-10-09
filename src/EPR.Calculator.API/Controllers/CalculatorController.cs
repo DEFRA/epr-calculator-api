@@ -37,7 +37,7 @@ namespace EPR.Calculator.API.Controllers
                 return new ObjectResult(message) { StatusCode = StatusCodes.Status404NotFound };
             }
 
-            // Read configuration items: service bus connection string and queue name
+            // Read configuration items: service bus connection string and queue name 
             var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
             var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
 
