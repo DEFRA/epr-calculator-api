@@ -78,7 +78,7 @@ namespace EPR.Calculator.API.UnitTests
 
             var actionResult = controller?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
-            Assert.AreEqual(200, actionResult.StatusCode);
+            Assert.AreEqual(200, actionResult.Value);
         }
 
         [TestMethod]
@@ -98,7 +98,7 @@ namespace EPR.Calculator.API.UnitTests
 
             var actionResult = controller?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
-            Assert.AreEqual(200, actionResult.StatusCode);
+            Assert.AreEqual(200, actionResult.Value);
         }     
 
         [TestCleanup]
