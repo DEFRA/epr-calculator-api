@@ -56,7 +56,7 @@ namespace EPR.Calculator.API.UnitTests
                 FinancialYear = "2024-25"
             };
 
-            dbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
                 ParameterYear = "2023-24",
@@ -65,9 +65,9 @@ namespace EPR.Calculator.API.UnitTests
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext.SaveChanges();
+            dbContext?.SaveChanges();
 
-            dbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
                 ProjectionYear = "2023-24",
@@ -76,9 +76,11 @@ namespace EPR.Calculator.API.UnitTests
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext.SaveChanges();
+            dbContext?.SaveChanges();
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(424, actionResult.StatusCode);
             Assert.AreEqual("Default parameter settings and Lapcap data not available for the financial year 2024-25.", actionResult.Value);
@@ -94,7 +96,7 @@ namespace EPR.Calculator.API.UnitTests
                 FinancialYear = "2024-25"
             };
 
-            dbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
                 ParameterYear = "2023-24",
@@ -103,9 +105,9 @@ namespace EPR.Calculator.API.UnitTests
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext.SaveChanges();
+            dbContext?.SaveChanges();
 
-            dbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
                 ProjectionYear = "2024-25",
@@ -114,9 +116,11 @@ namespace EPR.Calculator.API.UnitTests
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext.SaveChanges();
+            dbContext?.SaveChanges();
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(424, actionResult.StatusCode);
             Assert.AreEqual("Default parameter settings not available for the financial year 2024-25.", actionResult.Value);
@@ -132,7 +136,7 @@ namespace EPR.Calculator.API.UnitTests
                 FinancialYear = "2024-25"
             };
 
-            dbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
                 ParameterYear = "2024-25",
@@ -141,9 +145,9 @@ namespace EPR.Calculator.API.UnitTests
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext.SaveChanges();
+            dbContext?.SaveChanges();
 
-            dbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
                 ProjectionYear = "2023-24",
@@ -152,9 +156,11 @@ namespace EPR.Calculator.API.UnitTests
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext.SaveChanges();
+            dbContext?.SaveChanges();
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(424, actionResult.StatusCode);
             Assert.AreEqual("Lapcap data not available for the financial year 2024-25.", actionResult.Value);

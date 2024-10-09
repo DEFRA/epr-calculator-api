@@ -15,12 +15,12 @@
 
   <ItemGroup>
     <SonarQubeSetting Include="sonar.coverage.exclusions">
-      <value>Models/*.*,ServiceBus/*.*</value>
+      <value>Models/*.*</value>
     </SonarQubeSetting>
   </ItemGroup>
   <ItemGroup>
     <SonarQubeSetting Include="sonar.cpd.exclusions">
-      <Value>Models/*.*,ServiceBus/*.*</Value>
+      <Value>Models/*.*</Value>
     </SonarQubeSetting>
   </ItemGroup>
 </Project>

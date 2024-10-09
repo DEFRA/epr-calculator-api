@@ -1,7 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using EPR.Calculator.API.Common.Models;
 using Moq;
-using Moq.Protected;
 using Newtonsoft.Json;
 
 namespace EPR.Calculator.API.Common.UnitTests
