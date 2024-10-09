@@ -1,12 +1,7 @@
-﻿using EPR.Calculator.API.Controllers;
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Tests.Controllers;
-using EPR.Calculator.API.UnitTests.Helpers;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests
@@ -24,9 +19,123 @@ namespace EPR.Calculator.API.UnitTests
                 FinancialYear = "2024-25"
             };
 
-            var actionResult = await calculatorController?.Create(createCalculatorRunDto);
+            var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
             Assert.IsNotNull(actionResult);
-            // Assert.AreEqual(202, actionResult.StatusCode);
+            Assert.AreEqual(202, actionResult.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task Create_Calculator_Run_Return_404_If_No_Default_Parameter_Settings_And_Lapcap_Data()
+        {
+            var createCalculatorRunDto = new CreateCalculatorRunDto
+            {
+                CalculatorRunName = "Test calculator run",
+                CreatedBy = "Test user",
+                FinancialYear = "2024-25"
+            };
+
+            dbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            {
+                Id = 1,
+                ParameterYear = "2023-24",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext.SaveChanges();
+
+            dbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            {
+                Id = 1,
+                ProjectionYear = "2023-24",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext.SaveChanges();
+
+            var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(424, actionResult.StatusCode);
+            Assert.AreEqual("Default parameter settings and Lapcap data not available for the financial year 2024-25.", actionResult.Value);
+        }
+
+        [TestMethod]
+        public async Task Create_Calculator_Run_Return_404_If_No_Default_Parameter_Settings()
+        {
+            var createCalculatorRunDto = new CreateCalculatorRunDto
+            {
+                CalculatorRunName = "Test calculator run",
+                CreatedBy = "Test user",
+                FinancialYear = "2024-25"
+            };
+
+            dbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            {
+                Id = 1,
+                ParameterYear = "2023-24",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext.SaveChanges();
+
+            dbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            {
+                Id = 1,
+                ProjectionYear = "2024-25",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext.SaveChanges();
+
+            var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(424, actionResult.StatusCode);
+            Assert.AreEqual("Default parameter settings not available for the financial year 2024-25.", actionResult.Value);
+        }
+
+        [TestMethod]
+        public async Task Create_Calculator_Run_Return_404_If_No_Lapcap_Data()
+        {
+            var createCalculatorRunDto = new CreateCalculatorRunDto
+            {
+                CalculatorRunName = "Test calculator run",
+                CreatedBy = "Test user",
+                FinancialYear = "2024-25"
+            };
+
+            dbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            {
+                Id = 1,
+                ParameterYear = "2024-25",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext.SaveChanges();
+
+            dbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            {
+                Id = 1,
+                ProjectionYear = "2023-24",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext.SaveChanges();
+
+            var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(424, actionResult.StatusCode);
+            Assert.AreEqual("Lapcap data not available for the financial year 2024-25.", actionResult.Value);
         }
 
         [TestMethod]

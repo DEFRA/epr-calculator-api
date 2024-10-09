@@ -34,7 +34,7 @@ namespace EPR.Calculator.API.Controllers
 
             if (!string.IsNullOrWhiteSpace(message))
             {
-                return new ObjectResult(message) { StatusCode = StatusCodes.Status404NotFound };
+                return new ObjectResult(message) { StatusCode = StatusCodes.Status424FailedDependency };
             }
 
             // Read configuration items: service bus connection string and queue name 
