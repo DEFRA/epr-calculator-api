@@ -57,7 +57,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("calculatorRunByName/{name}")]
+        [Route("calculatorRunByNameExist/{name}")]
         public IActionResult GetCalculatorRunByName([FromRoute] string name)
         {
             if (!ModelState.IsValid)
@@ -65,18 +65,17 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var calculatorRun = _context.CalculatorRuns.Where(run => run.Name.ToLower() == name.ToLower());
+            var calculatorRun = _context.CalculatorRuns.Any(run => run.Name.ToLower() == name.ToLower());
 
-            if (calculatorRun.IsNullOrEmpty())
+            if (calculatorRun == false)
             {
                 return new ObjectResult("No data found for this calculator name") { StatusCode = StatusCodes.Status404NotFound };
             }
 
             try
             {
-                var currentRunDetails = CalculatorRunMapper.Map(calculatorRun.First());
 
-                return new ObjectResult(currentRunDetails) { StatusCode = StatusCodes.Status200OK };
+                return new ObjectResult(StatusCodes.Status200OK );
             }
             catch (Exception exception)
             {
