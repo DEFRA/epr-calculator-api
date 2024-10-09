@@ -68,7 +68,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRun = _context.CalculatorRuns.Any(run => run.Name.ToLower() == name.ToLower());
+                var calculatorRun = _context.CalculatorRuns.AsEnumerable().Any(run => string.Equals(run.Name, name, StringComparison.OrdinalIgnoreCase));
 
                 if (calculatorRun == false)
                 {
