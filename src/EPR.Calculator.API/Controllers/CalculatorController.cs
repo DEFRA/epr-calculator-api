@@ -74,7 +74,6 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-
                 return new ObjectResult(StatusCodes.Status200OK );
             }
             catch (Exception exception)
