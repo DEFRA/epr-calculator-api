@@ -19,7 +19,7 @@ namespace EPR.Calculator.API.Common.ServiceBus
         {
             try
             {
-                if (string.IsNullOrEmpty(_connectionString))
+                if (string.IsNullOrWhiteSpace(_connectionString))
                 {
                     throw new ArgumentNullException(_connectionString, "ServiceBusClient: Connection string not provided.");
                 }

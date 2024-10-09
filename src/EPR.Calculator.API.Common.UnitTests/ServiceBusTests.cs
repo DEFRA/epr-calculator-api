@@ -1,5 +1,8 @@
 using Azure.Messaging.ServiceBus;
 using EPR.Calculator.API.Common.Models;
+using Moq;
+using Moq.Protected;
+using Newtonsoft.Json;
 
 namespace EPR.Calculator.API.Common.UnitTests
 {
@@ -21,6 +24,34 @@ namespace EPR.Calculator.API.Common.UnitTests
             }
         }
 
-        // TO DO: Write more coverage during actual implementation
+        [TestMethod]
+        public async Task SendMessage_Succeeds()
+        {
+            Mock<ServiceBusClient> clientMock = new Mock<ServiceBusClient>();
+            Mock<ServiceBusSender> senderMock = new Mock<ServiceBusSender>();
+
+            clientMock
+                .Setup(client => client.CreateSender(It.IsAny<string>()))
+                .Returns(senderMock.Object);
+
+            senderMock
+                .Setup(sender => sender.SendMessageAsync(It.IsAny<ServiceBusMessage>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            var client = clientMock.Object;
+
+            var sender = client.CreateSender("Test queue name");
+
+            var message = new CalculatorRunMessage { CalculatorRunId = 123450, FinancialYear = "2024-25", CreatedBy = "Test User" };
+            var messageString = JsonConvert.SerializeObject(message);
+
+            var serviceBusMessage = new ServiceBusMessage(messageString);
+            await sender.SendMessageAsync(serviceBusMessage);
+
+            senderMock
+                .Verify(sender => sender.SendMessageAsync(
+                    It.Is<ServiceBusMessage>(m => (m.MessageId == serviceBusMessage.MessageId)),
+                    It.IsAny<CancellationToken>()));
+        }
     }
 }
