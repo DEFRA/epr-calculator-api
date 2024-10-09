@@ -20,11 +20,13 @@ ENV PATH="${PATH}:/root/.dotnet/tools"
 WORKDIR /src
 COPY ["EPR.Calculator.API/EPR.Calculator.API.csproj", "EPR.Calculator.API/"]
 COPY ["EPR.Calculator.API.Data/EPR.Calculator.API.Data.csproj", "EPR.Calculator.API.Data/"]
+COPY ["EPR.Calculator.API.Common/EPR.Calculator.API.Common.csproj", "EPR.Calculator.API.Common/"]
 
 RUN dotnet restore "./EPR.Calculator.API/EPR.Calculator.API.csproj"
 
 COPY --chown=dotnet:dotnet EPR.Calculator.API/. ./EPR.Calculator.API/.
 COPY --chown=dotnet:dotnet EPR.Calculator.API.Data/. ./EPR.Calculator.API.Data/.
+COPY --chown=dotnet:dotnet EPR.Calculator.API.Common/. ./EPR.Calculator.API.Common/.
 
 WORKDIR "/src/EPR.Calculator.API"
 RUN dotnet build "./EPR.Calculator.API.csproj" -c Release /p:AzureBuild=true -o /app/build
