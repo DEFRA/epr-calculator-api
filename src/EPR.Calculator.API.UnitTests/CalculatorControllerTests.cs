@@ -2,6 +2,8 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Validators;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -70,6 +72,47 @@ namespace EPR.Calculator.API.UnitTests
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(400, actionResult.StatusCode);
         }
+
+        [TestMethod]
+        public void Get_Calculator_Run_Return_400_Error_With_No_NameSupplied()
+        {
+            CalculatorRunValidator _validator = new CalculatorRunValidator();
+            string _name = string.Empty;
+            var result = _validator.Validate(_name);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("Calculator Run Name is Required", result.Errors.First().ErrorMessage);
+        }
+
+        [TestMethod]
+        public void Get_Calculator_Run_Return_Results_By_Name_Test()
+        {
+            string calculatorRunName = "Test Run";
+
+            var actionResult = controller?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(200, actionResult.Value);
+        }
+
+        [TestMethod]
+        public void Get_Calculator_Run_Return_Results_Not_found()
+        {
+            string calculatorRunName = "test 45610";
+
+            var actionResult = controller?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(404, actionResult.StatusCode);
+        }
+
+        [TestMethod]
+        public void Get_Calculator_Run_Return_Result_With_String_Comparison_CaseInsensitive()
+        {
+            string calculatorRunName = "TEST run";
+
+            var actionResult = controller?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(200, actionResult.Value);
+        }     
 
         [TestCleanup]
         public void TearDown()

@@ -1,6 +1,11 @@
-﻿using EPR.Calculator.API.Data;
+﻿using Azure.Core;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -25,7 +30,7 @@ namespace EPR.Calculator.API.Controllers
 
             if (string.IsNullOrWhiteSpace(request.FinancialYear))
             {
-                return new ObjectResult("Invalid financial year provided") { StatusCode  = StatusCodes.Status400BadRequest };
+                return new ObjectResult("Invalid financial year provided") { StatusCode = StatusCodes.Status400BadRequest };
             }
 
             try
@@ -51,6 +56,31 @@ namespace EPR.Calculator.API.Controllers
         {
             // TODO: Return the details of a particular run
             return new OkResult();
+        }
+
+        [HttpGet]
+        [Route("CheckCalcNameExists/{name}")]
+        public IActionResult GetCalculatorRunByName([FromRoute] string name)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            try
+            {
+                var calculatorRun = _context.CalculatorRuns.Count(run => EF.Functions.Like(run.Name, name));
+
+                if (calculatorRun <= 0)
+                {
+                    return new ObjectResult("No data found for this calculator name") { StatusCode = StatusCodes.Status404NotFound };
+                }
+                return new ObjectResult(StatusCodes.Status200OK);
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
         }
     }
 }
