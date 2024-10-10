@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EPR.Calculator.API.UnitTests.Helpers;
+using EPR.Calculator.API.Common.ServiceBus;
 
 namespace EPR.Calculator.API.Tests.Controllers
 {
@@ -39,7 +40,7 @@ namespace EPR.Calculator.API.Tests.Controllers
 
             dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
             dbContext.SaveChanges();
-            calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues());
+            calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), new ServiceBusClientFactory());
         }
 
         [TestMethod]

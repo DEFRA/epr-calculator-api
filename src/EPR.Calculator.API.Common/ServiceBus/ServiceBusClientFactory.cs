@@ -4,36 +4,25 @@ namespace EPR.Calculator.API.Common.ServiceBus
 {
     public class ServiceBusClientFactory : IServiceBusClientFactory
     {
-        private readonly string _connectionString;
-        private readonly int _retryCount;
-        private readonly int _retryPeriod;
-
-        public ServiceBusClientFactory(string connectionString, int retryCount, int retryPeriod)
-        {
-            _connectionString = connectionString;
-            _retryCount = retryCount;
-            _retryPeriod = retryPeriod;
-        }
-
-        public ServiceBusClient GetServiceBusClient()
+        public ServiceBusClient GetServiceBusClient(string connectionString, int retryCount, int retryPeriod)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(_connectionString))
+                if (string.IsNullOrWhiteSpace(connectionString))
                 {
-                    throw new ArgumentNullException(_connectionString, "ServiceBusClient: Connection string not provided.");
+                    throw new ArgumentNullException(connectionString, "ServiceBusClient: Connection string not provided.");
                 }
 
                 var options = new ServiceBusClientOptions();
                 options.RetryOptions = new ServiceBusRetryOptions
                 {
-                    Delay = TimeSpan.FromSeconds(_retryPeriod),
-                    MaxDelay = TimeSpan.FromSeconds(_retryPeriod),
+                    Delay = TimeSpan.FromSeconds(retryPeriod),
+                    MaxDelay = TimeSpan.FromSeconds(retryPeriod),
                     Mode = ServiceBusRetryMode.Exponential,
-                    MaxRetries = _retryCount,
+                    MaxRetries = retryCount,
                 };
 
-                return new ServiceBusClient(_connectionString, options);
+                return new ServiceBusClient(connectionString, options);
             }
             catch (Exception exception)
             {

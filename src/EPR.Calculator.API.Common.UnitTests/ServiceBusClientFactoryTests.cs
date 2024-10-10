@@ -12,8 +12,8 @@ namespace EPR.Calculator.API.Common.UnitTests
         {
             try
             {
-                var serviceBusClientFactory = new ServiceBusClientFactory(string.Empty, 1, 1);
-                serviceBusClientFactory.GetServiceBusClient();
+                var serviceBusClientFactory = new ServiceBusClientFactory();
+                serviceBusClientFactory.GetServiceBusClient(string.Empty, 1, 1);
             }
             catch (ServiceBusException exception)
             {
@@ -25,15 +25,15 @@ namespace EPR.Calculator.API.Common.UnitTests
         [TestMethod]
         public void GetServiceBusClient_ReturnErrorIfServiceBusClientNotSetupCorrectly()
         {
+            Mock<ServiceBusClient> serviceBusClientMock = new Mock<ServiceBusClient>();
+            serviceBusClientMock
+                .Setup(client => client.ToString())
+                .Returns(string.Empty);
+
             try
             {
-                Mock<ServiceBusClient> serviceBusClientMock = new Mock<ServiceBusClient>();
-                serviceBusClientMock
-                    .Setup(client => client.ToString())
-                    .Returns(string.Empty);
-
-                var serviceBusClientFactory = new ServiceBusClientFactory("Test connection string", 1, 1);
-                serviceBusClientFactory.GetServiceBusClient();
+                var serviceBusClientFactory = new ServiceBusClientFactory();
+                serviceBusClientFactory.GetServiceBusClient("Test connection string", 1, 1);
             }
             catch (ServiceBusException exception)
             {

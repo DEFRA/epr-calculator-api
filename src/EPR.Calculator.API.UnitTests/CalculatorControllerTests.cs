@@ -1,50 +1,74 @@
-﻿using EPR.Calculator.API.Data.DataModels;
+﻿using Azure.Messaging.ServiceBus;
+using EPR.Calculator.API.Common.ServiceBus;
+using EPR.Calculator.API.Controllers;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Tests.Controllers;
+using EPR.Calculator.API.UnitTests.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
     public class CalculatorControllerTests : BaseControllerTest
     {
-        //[TestMethod]
-        //public async Task Create_Calculator_Run()
-        //{
-        //    var createCalculatorRunDto = new CreateCalculatorRunDto
-        //    {
-        //        CalculatorRunName = "Test calculator run",
-        //        CreatedBy = "Test user",
-        //        FinancialYear = "2024-25"
-        //    };
+        [TestMethod]
+        public async Task Create_Calculator_Run()
+        {
+            var createCalculatorRunDto = new CreateCalculatorRunDto
+            {
+                CalculatorRunName = "Test calculator run",
+                CreatedBy = "Test user",
+                FinancialYear = "2024-25"
+            };
 
-        //    dbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
-        //    {
-        //        Id = 1,
-        //        ParameterYear = "2024-25",
-        //        CreatedBy = "Testuser",
-        //        CreatedAt = DateTime.Now,
-        //        EffectiveFrom = DateTime.Now,
-        //        EffectiveTo = null
-        //    });
-        //    dbContext.SaveChanges();
+            dbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            {
+                Id = 1,
+                ParameterYear = "2024-25",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext.SaveChanges();
 
-        //    dbContext.LapcapDataMaster.Add(new LapcapDataMaster
-        //    {
-        //        Id = 1,
-        //        ProjectionYear = "2024-25",
-        //        CreatedBy = "Testuser",
-        //        CreatedAt = DateTime.Now,
-        //        EffectiveFrom = DateTime.Now,
-        //        EffectiveTo = null
-        //    });
-        //    dbContext.SaveChanges();
+            dbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            {
+                Id = 1,
+                ProjectionYear = "2024-25",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext.SaveChanges();
 
-        //    var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
-        //    Assert.IsNotNull(actionResult);
-        //    Assert.AreEqual(202, actionResult.StatusCode);
-        //}
+            // Mock<ServiceBus.SendMessage> sm = new Mock<ServiceBus.SendMessage>();
+
+
+
+            //Mock<ServiceBusClient> serviceBusClientMock = new();
+
+            //var mockServiceBusClient = new Mock<ServiceBusClient>();
+
+            //Mock<IServiceBusClientFactory> serviceBusClientFactoryMock = new Mock<IServiceBusClientFactory>();
+            //serviceBusClientFactoryMock
+            //    .Setup(_ => _.GetServiceBusClient(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
+            //    .Returns(mockServiceBusClient.Object);
+
+
+
+
+
+
+
+            var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(202, actionResult.StatusCode);
+        }
 
         [TestMethod]
         public async Task Create_Calculator_Run_Return_404_If_No_Default_Parameter_Settings_And_Lapcap_Data()
@@ -164,6 +188,182 @@ namespace EPR.Calculator.API.UnitTests
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(424, actionResult.StatusCode);
             Assert.AreEqual("Lapcap data not available for the financial year 2024-25.", actionResult.Value);
+        }
+
+        [TestMethod]
+        public async Task Create_Calculator_Run_Return_500_If_ConnectionString_Configuration_Is_Empty()
+        {
+            var createCalculatorRunDto = new CreateCalculatorRunDto
+            {
+                CalculatorRunName = "Test calculator run",
+                CreatedBy = "Test user",
+                FinancialYear = "2024-25"
+            };
+
+            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            {
+                Id = 1,
+                ParameterYear = "2024-25",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext?.SaveChanges();
+
+            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
+            {
+                Id = 1,
+                ProjectionYear = "2024-25",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext?.SaveChanges();
+
+            var configs = ConfigurationItems.GetConfigurationValues();
+            configs.GetSection("ServiceBus").GetSection("ConnectionString").Value = string.Empty;
+
+            calculatorController = new CalculatorController(dbContext, configs, new ServiceBusClientFactory());
+
+            var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
+
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(500, actionResult.StatusCode);
+            Assert.AreEqual("Configuration item not found: ServiceBus__ConnectionString", actionResult.Value);
+        }
+
+        [TestMethod]
+        public async Task Create_Calculator_Run_Return_500_If_QueueName_Configuration_Is_Empty()
+        {
+            var createCalculatorRunDto = new CreateCalculatorRunDto
+            {
+                CalculatorRunName = "Test calculator run",
+                CreatedBy = "Test user",
+                FinancialYear = "2024-25"
+            };
+
+            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            {
+                Id = 1,
+                ParameterYear = "2024-25",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext?.SaveChanges();
+
+            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
+            {
+                Id = 1,
+                ProjectionYear = "2024-25",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext?.SaveChanges();
+
+            var configs = ConfigurationItems.GetConfigurationValues();
+            configs.GetSection("ServiceBus").GetSection("QueueName").Value = string.Empty;
+
+            calculatorController = new CalculatorController(dbContext, configs, new ServiceBusClientFactory());
+
+            var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
+
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(500, actionResult.StatusCode);
+            Assert.AreEqual("Configuration item not found: ServiceBus__QueueName", actionResult.Value);
+        }
+
+        [TestMethod]
+        public async Task Create_Calculator_Run_Return_500_If_PostMessageRetryCount_Configuration_Is_Empty()
+        {
+            var createCalculatorRunDto = new CreateCalculatorRunDto
+            {
+                CalculatorRunName = "Test calculator run",
+                CreatedBy = "Test user",
+                FinancialYear = "2024-25"
+            };
+
+            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            {
+                Id = 1,
+                ParameterYear = "2024-25",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext?.SaveChanges();
+
+            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
+            {
+                Id = 1,
+                ProjectionYear = "2024-25",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext?.SaveChanges();
+
+            var configs = ConfigurationItems.GetConfigurationValues();
+            configs.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value = string.Empty;
+
+            calculatorController = new CalculatorController(dbContext, configs, new ServiceBusClientFactory());
+
+            var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
+
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(500, actionResult.StatusCode);
+            Assert.AreEqual("Configuration item not found: ServiceBus__PostMessageRetryCount", actionResult.Value);
+        }
+
+        [TestMethod]
+        public async Task Create_Calculator_Run_Return_500_If_PostMessageRetryPeriod_Configuration_Is_Empty()
+        {
+            var createCalculatorRunDto = new CreateCalculatorRunDto
+            {
+                CalculatorRunName = "Test calculator run",
+                CreatedBy = "Test user",
+                FinancialYear = "2024-25"
+            };
+
+            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            {
+                Id = 1,
+                ParameterYear = "2024-25",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext?.SaveChanges();
+
+            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
+            {
+                Id = 1,
+                ProjectionYear = "2024-25",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext?.SaveChanges();
+
+            var configs = ConfigurationItems.GetConfigurationValues();
+            configs.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value = string.Empty;
+
+            calculatorController = new CalculatorController(dbContext, configs, new ServiceBusClientFactory());
+
+            var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
+
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(500, actionResult.StatusCode);
+            Assert.AreEqual("Configuration item not found: ServiceBus__PostMessageRetryPeriod", actionResult.Value);
         }
 
         [TestMethod]
