@@ -58,7 +58,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("calculatorRunByNameExist/{name}")]
+        [Route("calculatorRunNameExist/{name}")]
         public IActionResult GetCalculatorRunByName([FromRoute] string name)
         {
             if (!ModelState.IsValid)
@@ -68,7 +68,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRun = _context.CalculatorRuns.AsEnumerable().Any(run => string.Equals(run.Name, name, StringComparison.OrdinalIgnoreCase));
+                var calculatorRun = _context.CalculatorRuns.AsEnumerable().Any(run => string.Compare(run.Name, name, true) == 0);
 
                 if (calculatorRun == false)
                 {
