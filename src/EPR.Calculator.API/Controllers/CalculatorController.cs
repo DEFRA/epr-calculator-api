@@ -4,6 +4,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace EPR.Calculator.API.Controllers
@@ -68,9 +69,9 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRun = _context.CalculatorRuns.AsEnumerable().Any(run => string.Compare(run.Name, name, true) == 0);
+                var calculatorRun = _context.CalculatorRuns.Count(run => EF.Functions.Like(run.Name, name));
 
-                if (calculatorRun == false)
+                if (calculatorRun <= 0)
                 {
                     return new ObjectResult("No data found for this calculator name") { StatusCode = StatusCodes.Status404NotFound };
                 }
