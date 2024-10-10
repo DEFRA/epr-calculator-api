@@ -58,7 +58,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("calculatorRunNameExist/{name}")]
+        [Route("CheckCalcNameExists/{name}")]
         public IActionResult GetCalculatorRunByName([FromRoute] string name)
         {
             if (!ModelState.IsValid)
