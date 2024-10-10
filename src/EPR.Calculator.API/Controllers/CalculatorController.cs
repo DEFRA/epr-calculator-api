@@ -17,12 +17,14 @@ namespace EPR.Calculator.API.Controllers
     {
         private readonly ApplicationDBContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IAzureClientFactory<ServiceBusClient> _factory;
         private readonly IServiceBusClientFactory _serviceBusClientFactory;
 
-        public CalculatorController(ApplicationDBContext context, IConfiguration configuration, IServiceBusClientFactory serviceBusClientFactory)
+        public CalculatorController(ApplicationDBContext context, IConfiguration configuration, IServiceBusClientFactory serviceBusClientFactory, IAzureClientFactory<ServiceBusClient> factory)
         {
             _context = context;
             _configuration = configuration;
+            _factory = factory;
             _serviceBusClientFactory = serviceBusClientFactory;
         }
 
@@ -106,6 +108,13 @@ namespace EPR.Calculator.API.Controllers
                         FinancialYear = calculatorRun.Financial_Year,
                         CreatedBy = User?.Identity?.Name ?? request.CreatedBy
                     };
+
+                    var client = _factory.CreateClient("new Client");
+
+                    ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
+                    var messageString = JsonConvert.SerializeObject(message);
+                    ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
+                    await serviceBusSender.SendMessageAsync(serviceBusMessage);
 
                     await ServiceBus.SendMessage(serviceBusConnectionString, serviceBusQueueName, calculatorRunMessage, messageRetryCount, messageRetryPeriod);
 

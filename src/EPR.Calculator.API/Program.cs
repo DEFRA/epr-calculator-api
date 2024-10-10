@@ -28,6 +28,31 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+builder.Services.AddAzureClients(builder =>
+{
+    builder
+        .AddServiceBusClient("<< CONNECTION STRING >>")
+        .WithName("primary");
+
+    // Register a sender for the "primary" client.
+    builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) =>
+        provider
+            .GetService<IAzureClientFactory<ServiceBusClient>>()
+            .CreateClient("primary")
+            .CreateSender("someQueue")
+    )
+    .WithName("primary-someQueue");
+
+    // Register a sender for the "secondary" client.
+    builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) =>
+        provider
+            .GetService<IAzureClientFactory<ServiceBusClient>>()
+            .CreateClient("secondary")
+            .CreateSender("someTopic")
+    )
+    .WithName("secondary-someTopic");
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
