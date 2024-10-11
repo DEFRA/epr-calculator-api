@@ -1,5 +1,5 @@
-using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Validators;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -22,6 +22,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 var app = builder.Build();
 
@@ -32,6 +33,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.MapControllers();
 
