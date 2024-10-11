@@ -1,13 +1,10 @@
-﻿using Azure.Core;
-using Azure.Messaging.ServiceBus;
-using EPR.Calculator.API.Common.Models;
-using EPR.Calculator.API.Common.ServiceBus;
+﻿using Azure.Messaging.ServiceBus;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Azure;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using Newtonsoft.Json;
 
 namespace EPR.Calculator.API.Controllers
@@ -18,14 +15,12 @@ namespace EPR.Calculator.API.Controllers
         private readonly ApplicationDBContext _context;
         private readonly IConfiguration _configuration;
         private readonly IAzureClientFactory<ServiceBusClient> _factory;
-        private readonly IServiceBusClientFactory _serviceBusClientFactory;
 
-        public CalculatorController(ApplicationDBContext context, IConfiguration configuration, IServiceBusClientFactory serviceBusClientFactory, IAzureClientFactory<ServiceBusClient> factory)
+        public CalculatorController(ApplicationDBContext context, IConfiguration configuration, IAzureClientFactory<ServiceBusClient> factory)
         {
             _context = context;
             _configuration = configuration;
             _factory = factory;
-            _serviceBusClientFactory = serviceBusClientFactory;
         }
 
         [HttpPost]
@@ -115,20 +110,6 @@ namespace EPR.Calculator.API.Controllers
                     var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
                     ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
                     await serviceBusSender.SendMessageAsync(serviceBusMessage);
-
-                    // await ServiceBus.SendMessage(serviceBusConnectionString, serviceBusQueueName, calculatorRunMessage, messageRetryCount, messageRetryPeriod);
-
-                    // await SendMessage(serviceBusConnectionString, serviceBusQueueName, messageRetryCount, messageRetryPeriod, calculatorRunMessage);
-
-                    //await using (var serviceBusClient = this._serviceBusClientFactory.GetServiceBusClient(serviceBusConnectionString, messageRetryCount, messageRetryPeriod))
-                    //{
-                    //    var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
-                    //    ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
-
-                    //    ServiceBusSender serviceBusSender = serviceBusClient.CreateSender(serviceBusQueueName);
-
-                    //    await serviceBusSender.SendMessageAsync(serviceBusMessage);
-                    //}
 
                     // All good, commit transaction
                     transaction.Commit();

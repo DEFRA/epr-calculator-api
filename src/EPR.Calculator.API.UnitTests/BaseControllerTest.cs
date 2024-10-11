@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EPR.Calculator.API.UnitTests.Helpers;
-using EPR.Calculator.API.Common.ServiceBus;
 using Moq;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Azure;
@@ -53,7 +52,7 @@ namespace EPR.Calculator.API.Tests.Controllers
 
             dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
             dbContext.SaveChanges();
-            calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), new ServiceBusClientFactory(), mockFactory.Object);
+            calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), mockFactory.Object);
         }
 
         [TestMethod]

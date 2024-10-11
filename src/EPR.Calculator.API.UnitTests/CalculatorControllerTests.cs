@@ -1,13 +1,10 @@
-﻿using Azure.Messaging.ServiceBus;
-using EPR.Calculator.API.Common.ServiceBus;
-using EPR.Calculator.API.Controllers;
+﻿using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Tests.Controllers;
 using EPR.Calculator.API.UnitTests.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests
 {
@@ -225,7 +222,7 @@ namespace EPR.Calculator.API.UnitTests
             var configs = ConfigurationItems.GetConfigurationValues();
             configs.GetSection("ServiceBus").GetSection("ConnectionString").Value = string.Empty;
 
-            calculatorController = new CalculatorController(dbContext, configs, new ServiceBusClientFactory());
+            calculatorController = new CalculatorController(dbContext, configs);
 
             var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
 
