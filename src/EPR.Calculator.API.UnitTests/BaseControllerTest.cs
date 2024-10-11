@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Common.ServiceBus;
+using Moq;
+using Azure.Messaging.ServiceBus;
+using Microsoft.Extensions.Azure;
 
 namespace EPR.Calculator.API.Tests.Controllers
 {
@@ -38,9 +41,19 @@ namespace EPR.Calculator.API.Tests.Controllers
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(dbContext);
             lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator);
 
+            var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
+            var mockClient = new Mock<ServiceBusClient>();
+            var mockServiceBusSender = new Mock<ServiceBusSender>();
+            mockServiceBusSender.Setup(msbs => msbs.SendMessageAsync(It.IsAny<ServiceBusMessage>(), default(CancellationToken))).Returns(Task.CompletedTask);
+            mockClient.Setup(mc => mc.CreateSender(It.IsAny<string>())).Returns(mockServiceBusSender.Object);
+
+            mockFactory.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(mockClient.Object);
+
+
+
             dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
             dbContext.SaveChanges();
-            calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), new ServiceBusClientFactory());
+            calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), new ServiceBusClientFactory(), mockFactory.Object);
         }
 
         [TestMethod]

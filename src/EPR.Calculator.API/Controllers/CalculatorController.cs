@@ -116,7 +116,7 @@ namespace EPR.Calculator.API.Controllers
                     ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
                     await serviceBusSender.SendMessageAsync(serviceBusMessage);
 
-                    await ServiceBus.SendMessage(serviceBusConnectionString, serviceBusQueueName, calculatorRunMessage, messageRetryCount, messageRetryPeriod);
+                    // await ServiceBus.SendMessage(serviceBusConnectionString, serviceBusQueueName, calculatorRunMessage, messageRetryCount, messageRetryPeriod);
 
                     // await SendMessage(serviceBusConnectionString, serviceBusQueueName, messageRetryCount, messageRetryPeriod, calculatorRunMessage);
 
