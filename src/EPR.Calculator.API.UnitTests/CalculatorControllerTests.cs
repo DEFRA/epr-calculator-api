@@ -25,6 +25,7 @@ namespace EPR.Calculator.API.UnitTests
                 FinancialYear = "2024-25"
             };
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             dbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
@@ -48,6 +49,7 @@ namespace EPR.Calculator.API.UnitTests
             dbContext.SaveChanges();
 
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(202, actionResult.StatusCode);
         }
@@ -255,7 +257,9 @@ namespace EPR.Calculator.API.UnitTests
 
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
 
+#pragma warning disable CS8604 // Possible null reference argument.
             calculatorController = new CalculatorController(dbContext, configs, mockFactory.Object);
+#pragma warning restore CS8604 // Possible null reference argument.
 
             var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
 
@@ -301,7 +305,9 @@ namespace EPR.Calculator.API.UnitTests
 
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
 
+#pragma warning disable CS8604 // Possible null reference argument.
             calculatorController = new CalculatorController(dbContext, configs, mockFactory.Object);
+#pragma warning restore CS8604 // Possible null reference argument.
 
             var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
 
@@ -347,7 +353,9 @@ namespace EPR.Calculator.API.UnitTests
 
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
 
+#pragma warning disable CS8604 // Possible null reference argument.
             calculatorController = new CalculatorController(dbContext, configs, mockFactory.Object);
+#pragma warning restore CS8604 // Possible null reference argument.
 
             var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
 
@@ -431,12 +439,6 @@ namespace EPR.Calculator.API.UnitTests
             var actionResult = calculatorController?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.Value);
-        }     
-
-        [TestCleanup]
-        public void TearDown()
-        {
-            dbContext?.Database.EnsureDeleted();
         }
     }
 }
