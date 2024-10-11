@@ -15,13 +15,13 @@ namespace EPR.Calculator.API.Controllers
     {
         private readonly ApplicationDBContext _context;
         private readonly IConfiguration _configuration;
-        private readonly IAzureClientFactory<ServiceBusClient> _factory;
+        private readonly IAzureClientFactory<ServiceBusClient> _serviceBusClientFactory;
 
-        public CalculatorController(ApplicationDBContext context, IConfiguration configuration, IAzureClientFactory<ServiceBusClient> factory)
+        public CalculatorController(ApplicationDBContext context, IConfiguration configuration, IAzureClientFactory<ServiceBusClient> serviceBusClientFactory)
         {
             _context = context;
             _configuration = configuration;
-            _factory = factory;
+            _serviceBusClientFactory = serviceBusClientFactory;
         }
 
         [HttpPost]
@@ -69,6 +69,7 @@ namespace EPR.Calculator.API.Controllers
                 return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryPeriod") { StatusCode = StatusCodes.Status500InternalServerError };
             }
 
+#pragma warning disable S6966 // Awaitable method should be used
             using (var transaction = _context.Database.BeginTransaction())
             {
                 try
@@ -105,8 +106,8 @@ namespace EPR.Calculator.API.Controllers
                         CreatedBy = User?.Identity?.Name ?? request.CreatedBy
                     };
 
-                    var client = _factory.CreateClient("calculator");
-
+                    // Send message to service bus
+                    var client = _serviceBusClientFactory.CreateClient("calculator");
                     ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
                     var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
                     ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
@@ -119,26 +120,15 @@ namespace EPR.Calculator.API.Controllers
                 {
                     // Error, rollback transaction
                     transaction.Rollback();
+                    // Return error status code: Internal Server Error
                     return StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
+#pragma warning restore S6966 // Awaitable method should be used
             }
 
-            // Return ccepted status code: Accepted
+            // Return accepted status code: Accepted
             return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
         }
-
-        //private async Task SendMessage(string serviceBusConnectionString, string serviceBusQueueName, int messageRetryCount, int messageRetryPeriod, CalculatorRunMessage message)
-        //{
-        //    await using (var serviceBusClient = this._serviceBusClientFactory.GetServiceBusClient(serviceBusConnectionString, messageRetryCount, messageRetryPeriod))
-        //    {
-        //        var messageString = JsonConvert.SerializeObject(message);
-        //        ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
-
-        //        ServiceBusSender serviceBusSender = serviceBusClient.CreateSender(serviceBusQueueName);
-
-        //        await serviceBusSender.SendMessageAsync(serviceBusMessage);
-        //    }
-        //}
 
         [HttpPost]
         [Route("calculatorRuns")]
