@@ -35,6 +35,7 @@ builder.Services.AddAzureClients(builder =>
         .WithName("calculator");
 
     // Register a sender for the "calculator" client.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
     builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) =>
         provider
             .GetService<IAzureClientFactory<ServiceBusClient>>()
@@ -42,6 +43,7 @@ builder.Services.AddAzureClients(builder =>
             .CreateSender(serviceBusQueueName)
     )
     .WithName($"calculator-{serviceBusQueueName}");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 });
 
 var app = builder.Build();
