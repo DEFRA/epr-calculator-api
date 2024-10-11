@@ -28,29 +28,23 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+var serviceBusConnectionString = builder.Configuration.GetSection("ServiceBus").GetSection("ConnectionString");
+var serviceBusQueueName = builder.Configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
+
 builder.Services.AddAzureClients(builder =>
 {
     builder
-        .AddServiceBusClient("<< CONNECTION STRING >>")
-        .WithName("primary");
+        .AddServiceBusClient(serviceBusConnectionString)
+        .WithName("calculator");
 
-    // Register a sender for the "primary" client.
+    // Register a sender for the "calculator" client.
     builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) =>
         provider
             .GetService<IAzureClientFactory<ServiceBusClient>>()
-            .CreateClient("primary")
-            .CreateSender("someQueue")
+            .CreateClient("calculator")
+            .CreateSender(serviceBusQueueName)
     )
-    .WithName("primary-someQueue");
-
-    // Register a sender for the "secondary" client.
-    builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) =>
-        provider
-            .GetService<IAzureClientFactory<ServiceBusClient>>()
-            .CreateClient("secondary")
-            .CreateSender("someTopic")
-    )
-    .WithName("secondary-someTopic");
+    .WithName($"calculator-{serviceBusQueueName}");
 });
 
 var app = builder.Build();

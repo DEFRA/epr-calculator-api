@@ -109,10 +109,10 @@ namespace EPR.Calculator.API.Controllers
                         CreatedBy = User?.Identity?.Name ?? request.CreatedBy
                     };
 
-                    var client = _factory.CreateClient("new Client");
+                    var client = _factory.CreateClient("calculator");
 
                     ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
-                    var messageString = JsonConvert.SerializeObject(message);
+                    var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
                     ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
                     await serviceBusSender.SendMessageAsync(serviceBusMessage);
 
