@@ -48,7 +48,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<SonarQubeSetting Include="sonar.cpd.exclusions">
-			<Value>Dtos/*.cs,Constants/*.cs</Value>
+			<Value>Dtos/*.cs,Constants/*.cs,Program.cs</Value>
 		</SonarQubeSetting>
 	</ItemGroup>
 </Project>

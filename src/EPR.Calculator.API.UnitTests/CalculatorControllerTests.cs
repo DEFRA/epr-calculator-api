@@ -211,7 +211,9 @@ namespace EPR.Calculator.API.UnitTests
 
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
 
+#pragma warning disable CS8604 // Possible null reference argument.
             calculatorController = new CalculatorController(dbContext, configs, mockFactory.Object);
+#pragma warning restore CS8604 // Possible null reference argument.
 
             var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
 
