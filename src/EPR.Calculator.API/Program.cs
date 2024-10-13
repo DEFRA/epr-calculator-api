@@ -27,12 +27,22 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 
 var serviceBusConnectionString = builder.Configuration.GetSection("ServiceBus").GetSection("ConnectionString");
 var serviceBusQueueName = builder.Configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
+#pragma warning disable CS8604 // Possible null reference argument.
+var retryPeriod = double.Parse(builder.Configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value);
+var retryCount = int.Parse(builder.Configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value);
+#pragma warning restore CS8604 // Possible null reference argument.
 
 builder.Services.AddAzureClients(builder =>
 {
     builder
         .AddServiceBusClient(serviceBusConnectionString)
-        .WithName("calculator");
+        .WithName("calculator")
+        .ConfigureOptions(options =>
+        {
+            options.RetryOptions.Delay = TimeSpan.FromSeconds(retryPeriod);
+            options.RetryOptions.MaxDelay = TimeSpan.FromSeconds(retryPeriod);
+            options.RetryOptions.MaxRetries = retryCount;
+        });
 
     // Register a sender for the "calculator" client.
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
