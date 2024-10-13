@@ -34,11 +34,18 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var message = DataPreChecksBeforeInitialisingCalculatorRun(request.FinancialYear);
-
-            if (!string.IsNullOrWhiteSpace(message))
+            // Return failed dependency error if at least one of the dependent data not available for the financial year
+            var dataPreCheckMessage = DataPreChecksBeforeInitialisingCalculatorRun(request.FinancialYear);
+            if (!string.IsNullOrWhiteSpace(dataPreCheckMessage))
             {
-                return new ObjectResult(message) { StatusCode = StatusCodes.Status424FailedDependency };
+                return new ObjectResult(dataPreCheckMessage) { StatusCode = StatusCodes.Status424FailedDependency };
+            }
+
+            // Return bad gateway error if the calculator run name provided already exists
+            var calculatorRunNameExistsMessage = CalculatorRunNameExists(request.CalculatorRunName);
+            if (!string.IsNullOrWhiteSpace(calculatorRunNameExistsMessage))
+            {
+                return new ObjectResult(calculatorRunNameExistsMessage) { StatusCode = StatusCodes.Status400BadRequest };
             }
 
             // Read configuration items: service bus connection string and queue name 
@@ -169,6 +176,31 @@ namespace EPR.Calculator.API.Controllers
             return new OkResult();
         }
 
+        [HttpGet]
+        [Route("CheckCalcNameExists/{name}")]
+        public IActionResult GetCalculatorRunByName([FromRoute] string name)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            try
+            {
+                var calculatorRun = _context.CalculatorRuns.Count(run => EF.Functions.Like(run.Name, name));
+
+                if (calculatorRun <= 0)
+                {
+                    return new ObjectResult("No data found for this calculator name") { StatusCode = StatusCodes.Status404NotFound };
+                }
+                return new ObjectResult(StatusCodes.Status200OK);
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+        }
+
         private string DataPreChecksBeforeInitialisingCalculatorRun(string financialYear)
         {
             // Get active default parameter settings for the given financial year
@@ -201,29 +233,18 @@ namespace EPR.Calculator.API.Controllers
             return string.Empty;
         }
 
-        [HttpGet]
-        [Route("CheckCalcNameExists/{name}")]
-        public IActionResult GetCalculatorRunByName([FromRoute] string name)
+        private string CalculatorRunNameExists(string runName)
         {
-            if (!ModelState.IsValid)
+            var calculatorRun = _context.CalculatorRuns.Count(run => EF.Functions.Like(run.Name, runName));
+
+            // Return calculator run name already exists
+            if (calculatorRun > 0)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+                return $"Calculator run name already exists: {runName}";
             }
 
-            try
-            {
-                var calculatorRun = _context.CalculatorRuns.Count(run => EF.Functions.Like(run.Name, name));
-
-                if (calculatorRun <= 0)
-                {
-                    return new ObjectResult("No data found for this calculator name") { StatusCode = StatusCodes.Status404NotFound };
-                }
-                return new ObjectResult(StatusCodes.Status200OK);
-            }
-            catch (Exception exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception);
-            }
+            // All good, return empty string
+            return string.Empty;
         }
     }
 }
