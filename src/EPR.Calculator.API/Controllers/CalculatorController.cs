@@ -63,15 +63,15 @@ namespace EPR.Calculator.API.Controllers
             }
 
             // Read configuration items: message retry count and period
-            var messageRetryCountFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value, out int messageRetryCount);
-            var messageRetryPeriodFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value, out int messageRetryPeriod);
+            var messageRetryCount = this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value;
+            var messageRetryPeriod = this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value;
 
-            if (!messageRetryCountFound)
+            if (string.IsNullOrWhiteSpace(messageRetryCount))
             {
                 return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryCount") { StatusCode = StatusCodes.Status500InternalServerError };
             }
 
-            if (!messageRetryPeriodFound)
+            if (string.IsNullOrWhiteSpace(messageRetryPeriod))
             {
                 return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryPeriod") { StatusCode = StatusCodes.Status500InternalServerError };
             }
