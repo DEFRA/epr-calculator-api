@@ -62,19 +62,28 @@ namespace EPR.Calculator.API.Controllers
                 return new ObjectResult("Configuration item not found: ServiceBus__QueueName") { StatusCode = StatusCodes.Status500InternalServerError };
             }
 
-            // Read configuration items: message retry count and period
-            var messageRetryCount = this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value;
-            var messageRetryPeriod = this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value;
-
-            if (string.IsNullOrWhiteSpace(messageRetryCount))
+            try
             {
-                return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryCount") { StatusCode = StatusCodes.Status500InternalServerError };
-            }
+                // Read configuration items: message retry count and period
+                var messageRetryCount = this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value;
+                var messageRetryPeriod = this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value;
 
-            if (string.IsNullOrWhiteSpace(messageRetryPeriod))
-            {
-                return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryPeriod") { StatusCode = StatusCodes.Status500InternalServerError };
+                if (string.IsNullOrWhiteSpace(messageRetryCount))
+                {
+                    return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryCount") { StatusCode = StatusCodes.Status500InternalServerError };
+                }
+
+                if (string.IsNullOrWhiteSpace(messageRetryPeriod))
+                {
+                    throw new ArgumentNullException("Message retry period is null");
+                    // return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryPeriod") { StatusCode = StatusCodes.Status500InternalServerError };
+                }
             }
+            catch (Exception ex)
+            {
+                return new ObjectResult("Error") { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+            
 
 #pragma warning disable S6966 // Awaitable method should be used
             using (var transaction = _context.Database.BeginTransaction())
