@@ -362,8 +362,8 @@ namespace EPR.Calculator.API.UnitTests
             var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
 
             Assert.IsNotNull(actionResult);
-            Assert.AreEqual(401, actionResult.StatusCode);
-            // Assert.AreEqual("Configuration item not found: ServiceBus__PostMessageRetryPeriod", actionResult.Value);
+            Assert.AreEqual(500, actionResult.StatusCode);
+            Assert.AreEqual("Configuration item not found: ServiceBus__PostMessageRetryPeriod", actionResult.Value);
         }
 
         [TestMethod]

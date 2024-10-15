@@ -33,63 +33,54 @@ namespace EPR.Calculator.API.Controllers
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
-
-            // Return failed dependency error if at least one of the dependent data not available for the financial year
-            var dataPreCheckMessage = DataPreChecksBeforeInitialisingCalculatorRun(request.FinancialYear);
-            if (!string.IsNullOrWhiteSpace(dataPreCheckMessage))
-            {
-                return new ObjectResult(dataPreCheckMessage) { StatusCode = StatusCodes.Status424FailedDependency };
-            }
-
-            // Return bad gateway error if the calculator run name provided already exists
-            var calculatorRunNameExistsMessage = CalculatorRunNameExists(request.CalculatorRunName);
-            if (!string.IsNullOrWhiteSpace(calculatorRunNameExistsMessage))
-            {
-                return new ObjectResult(calculatorRunNameExistsMessage) { StatusCode = StatusCodes.Status400BadRequest };
-            }
-
-            // Read configuration items: service bus connection string and queue name 
-            var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
-            var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
-
-            if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
-            {
-                return new ObjectResult("Configuration item not found: ServiceBus__ConnectionString") { StatusCode = StatusCodes.Status500InternalServerError };
-            }
-
-            if (string.IsNullOrWhiteSpace(serviceBusQueueName))
-            {
-                return new ObjectResult("Configuration item not found: ServiceBus__QueueName") { StatusCode = StatusCodes.Status500InternalServerError };
-            }
-
-            try
-            {
-                // Read configuration items: message retry count and period
-                var messageRetryCount = this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value;
-                var messageRetryPeriod = this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value;
-
-                if (string.IsNullOrWhiteSpace(messageRetryCount))
-                {
-                    return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryCount") { StatusCode = StatusCodes.Status500InternalServerError };
-                }
-
-                if (string.IsNullOrWhiteSpace(messageRetryPeriod))
-                {
-                    throw new ArgumentNullException("Message retry period is null");
-                    // return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryPeriod") { StatusCode = StatusCodes.Status500InternalServerError };
-                }
-            }
-            catch (Exception ex)
-            {
-                return new ObjectResult("Error") { StatusCode = StatusCodes.Status401Unauthorized };
-            }
-            
-
+        
 #pragma warning disable S6966 // Awaitable method should be used
             using (var transaction = _context.Database.BeginTransaction())
             {
                 try
                 {
+                    // Return failed dependency error if at least one of the dependent data not available for the financial year
+                    var dataPreCheckMessage = DataPreChecksBeforeInitialisingCalculatorRun(request.FinancialYear);
+                    if (!string.IsNullOrWhiteSpace(dataPreCheckMessage))
+                    {
+                        return new ObjectResult(dataPreCheckMessage) { StatusCode = StatusCodes.Status424FailedDependency };
+                    }
+
+                    // Return bad gateway error if the calculator run name provided already exists
+                    var calculatorRunNameExistsMessage = CalculatorRunNameExists(request.CalculatorRunName);
+                    if (!string.IsNullOrWhiteSpace(calculatorRunNameExistsMessage))
+                    {
+                        return new ObjectResult(calculatorRunNameExistsMessage) { StatusCode = StatusCodes.Status400BadRequest };
+                    }
+
+                    // Read configuration items: service bus connection string and queue name 
+                    var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
+                    var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
+
+                    if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
+                    {
+                        return new ObjectResult("Configuration item not found: ServiceBus__ConnectionString") { StatusCode = StatusCodes.Status500InternalServerError };
+                    }
+
+                    if (string.IsNullOrWhiteSpace(serviceBusQueueName))
+                    {
+                        return new ObjectResult("Configuration item not found: ServiceBus__QueueName") { StatusCode = StatusCodes.Status500InternalServerError };
+                    }
+
+                    // Read configuration items: message retry count and period
+                    var messageRetryCountFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value, out int messageRetryCount);
+                    var messageRetryPeriodFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value, out int messageRetryPeriod);
+
+                    if (!messageRetryCountFound)
+                    {
+                        return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryCount") { StatusCode = StatusCodes.Status500InternalServerError };
+                    }
+
+                    if (!messageRetryPeriodFound)
+                    {
+                        return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryPeriod") { StatusCode = StatusCodes.Status500InternalServerError };
+                    }
+
                     // Get active default parameter settings master id
                     var activeDefaultParameterSettingsMasterId = _context.DefaultParameterSettings
                         .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == request.FinancialYear)?.Id;
