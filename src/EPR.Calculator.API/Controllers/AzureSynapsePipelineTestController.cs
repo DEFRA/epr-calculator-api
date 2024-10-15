@@ -36,7 +36,7 @@ namespace EPR.Calculator.API.Controllers
             #if DEBUG
                 var credentials = new DefaultAzureCredential();
             #else
-                var TokenCredential credentials = What do we need to use for credentials in prod? Managed identity maybe?
+                var credentials = new ManagedIdentityCredential();
             #endif
 
             var pipelineClient = this.PipelineClientFactory.GetPipelineRunClient(
@@ -60,8 +60,7 @@ namespace EPR.Calculator.API.Controllers
             #if DEBUG
                 var credentials = new DefaultAzureCredential();
             #else
-                // Change this to whatever credential method we need to use in production.
-                var TokenCredential credentials = new ManagedIdentityCredential();
+                var credentials = new ManagedIdentityCredential();
             #endif
 
             var pipelineClient = this.PipelineClientFactory.GetPipelineClient(
