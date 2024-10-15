@@ -1,38 +1,51 @@
 ﻿using Azure.Analytics.Synapse.Artifacts;
 using Azure.Identity;
+using EPR.Calculator.API.Utils;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Cryptography.Xml;
 
 namespace EPR.Calculator.API.Controllers
 {
     
     public class AzureSynapsePipelineTestController(IConfiguration configuration) : ControllerBase
     {
+        private PipelineClientFactory? PipelineClientFactory { get; }
+
         private string PipelineUrl { get; init; } = configuration.GetSection("AzureSynapse")["PipelineUrl"]
             ?? string.Empty;
 
         private string PipelineName { get; init; } = configuration.GetSection("AzureSynapse")["PipelineName"]
             ?? string.Empty;
 
+        [ActivatorUtilitiesConstructor]
+        public AzureSynapsePipelineTestController(IConfiguration configuration, PipelineClientFactory pipelineRunClientFactory)
+            : this(configuration)
+        {
+            ArgumentNullException.ThrowIfNull(pipelineRunClientFactory);
+
+            this.PipelineClientFactory = pipelineRunClientFactory;
+        }
+
         [Route("AzureSynapseTest")]
         [HttpGet]
-        public async Task<IActionResult> GetPipeline()
+        public async Task<IActionResult> GetPipeline(Guid runId)
         {
-#if DEBUG
-            var credentials = new DefaultAzureCredential();
-#else
-            var TokenCredential credentials = What do we need to use for credentials in prod? Managed identity maybe?
-#endif
+            if (this.PipelineClientFactory == null)
+                throw new InvalidOperationException("Pipeline client factory not initialised.");
 
-            var pipelineClient = new PipelineClient(
+            #if DEBUG
+                var credentials = new DefaultAzureCredential();
+            #else
+                var TokenCredential credentials = What do we need to use for credentials in prod? Managed identity maybe?
+            #endif
+
+            var pipelineClient = this.PipelineClientFactory.GetPipelineRunClient(
                 new Uri(this.PipelineUrl),
                 credentials);
-
             try
             {
-                var result = await pipelineClient.GetPipelineAsync(
-                this.PipelineName);
-
-                return Ok(result.Value);
+                var result = await pipelineClient.GetPipelineRunAsync(runId.ToString());
+                return Ok(result.Value.Status);
             }
             catch (Exception ex)
             {
@@ -44,20 +57,25 @@ namespace EPR.Calculator.API.Controllers
         [HttpPost]
         public async Task<IActionResult> PostPipeline()
         {
-#if DEBUG
-            var credentials = new DefaultAzureCredential();
-#else
-            var TokenCredential credentials = new ManagedIdentityCredential();
-#endif
+            #if DEBUG
+                var credentials = new DefaultAzureCredential();
+            #else
+                // Change this to whatever credential method we need to use in production.
+                var TokenCredential credentials = new ManagedIdentityCredential();
+            #endif
 
-            var pipelineClient = new PipelineClient(
+            var pipelineClient = this.PipelineClientFactory.GetPipelineClient(
                 new Uri(this.PipelineUrl),
                 credentials);
 
             try
             {
                 var result = await pipelineClient.CreatePipelineRunAsync(
-                this.PipelineName);
+                this.PipelineName,
+                parameters: new Dictionary<string,object> 
+                { 
+                    { "key", "value"},
+                });
 
                 return Ok($"RunId: {result.Value.RunId}");
             }
@@ -65,7 +83,6 @@ namespace EPR.Calculator.API.Controllers
             {
                 return BadRequest(ex);
             }
-            return Ok();
         }
     }
 }
