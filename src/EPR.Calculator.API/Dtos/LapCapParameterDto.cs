@@ -7,11 +7,13 @@ namespace EPR.Calculator.API.Dtos
     {
         public int Id { get; set; }
 
-        required public string Year { get; set; }
+        required public string ProjectionYear { get; set; }
 
         required public string CreatedBy { get; set; }
 
         required public DateTime CreatedAt { get; set; }
+
+        required public DateTime EffectiveFrom { get; set; }
 
         required public int LapcapDataMasterId { get; set; }
 

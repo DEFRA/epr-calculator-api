@@ -46,7 +46,7 @@ namespace EPR.Calculator.API.Controllers
                         CreatedBy = "Testuser",
                         EffectiveFrom = DateTime.Now,
                         EffectiveTo = null,
-                        Year = request.ParameterYear
+                        ProjectionYear = request.ParameterYear
                     };
                     this.context.LapcapDataMaster.Add(lapcapDataMaster);
 
@@ -90,7 +90,7 @@ namespace EPR.Calculator.API.Controllers
         /// <response code="404">If no data is available for the specified year.</response>
         /// <response code="500">If an internal server error occurs.</response>
         [HttpGet]
-        [Route("api/lapcapData/{parameterYear}")]
+        [Route("lapcapData/{parameterYear}")]
         public IActionResult Get([FromRoute] string parameterYear)
         {
             if (!ModelState.IsValid)
@@ -99,7 +99,7 @@ namespace EPR.Calculator.API.Controllers
             }
 
             var currentDefaultSetting = this.context.LapcapDataMaster
-                .SingleOrDefault(x => x.EffectiveTo == null && x.Year == parameterYear);
+                .SingleOrDefault(setting => setting.EffectiveTo == null && setting.ProjectionYear == parameterYear);
 
             if (currentDefaultSetting == null)
             {

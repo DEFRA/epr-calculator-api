@@ -1,6 +1,6 @@
-﻿using EPR.Calculator.API.Tests.Controllers;
-using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Tests.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -20,7 +20,7 @@ namespace EPR.Calculator.API.UnitTests
             var tempdateData = new LapCapParameterDto()
             {
                 Id = 1,
-                Year = "2024-25",
+                ProjectionYear = "2024-25",
                 LapcapDataMasterId = 1,
 
                 LapcapTempUniqueRef = "ENG-AL",
@@ -30,6 +30,7 @@ namespace EPR.Calculator.API.UnitTests
                 Country = "England",
                 Material = "Aluminium",
                 TotalCost = 20m,
+                EffectiveFrom = DateTime.Now,
             };
 
             //Act
@@ -102,7 +103,7 @@ namespace EPR.Calculator.API.UnitTests
             var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;
             Assert.IsNotNull(errors);
             Assert.AreEqual(uniqueRef, errors.First().UniqueReference);
-            Assert.AreEqual("Enter the lapcap data for England and Wood", errors.First().Message);
+            Assert.AreEqual("Enter the total costs for Wood in England", errors.First().Message);
         }
 
         [TestMethod]
@@ -120,13 +121,13 @@ namespace EPR.Calculator.API.UnitTests
             Assert.AreEqual(400, actionResult?.StatusCode);
             var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;
             Assert.IsNotNull(errors);
-            Assert.AreEqual(1, errors.Count(x => x.Message == "Expecting only One with England and Wood"));
+            Assert.AreEqual(1, errors.Count(x => x.Message == "You have entered the total costs for Wood in England more than once"));
         }
 
         public static CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
         {
             var lapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>();
-            var masterData = GetTemplateMasterData();
+            var masterData = GetLapcapTemplateMasterData();
             foreach (var templateMaster in masterData)
             {
                 if (uniqueRefsToAvoid == null || !uniqueRefsToAvoid.Contains(templateMaster.UniqueReference))

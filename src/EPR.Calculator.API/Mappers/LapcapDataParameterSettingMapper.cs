@@ -17,14 +17,15 @@ namespace EPR.Calculator.API.Mappers
                 var data = new LapCapParameterDto
                 {
                     Id = item.Id,
-                    Year = lapcapSettingMaster.Year,
+                    ProjectionYear = lapcapSettingMaster.ProjectionYear,
                     CreatedBy = lapcapSettingMaster.CreatedBy,
                     CreatedAt = lapcapSettingMaster.CreatedAt,
                     LapcapDataMasterId = lapcapSettingMaster.Id,
                     LapcapTempUniqueRef = item.UniqueReference,
                     Country = selectedTemplate.Country,
                     Material = selectedTemplate.Material,
-                    TotalCost = item.TotalCost
+                    TotalCost = item.TotalCost,
+                    EffectiveFrom = lapcapSettingMaster.EffectiveFrom
                 };
 
                 result.Add(data);

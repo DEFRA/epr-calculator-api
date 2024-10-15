@@ -10,9 +10,10 @@ namespace EPR.Calculator.API.Data.DataModels
         [Required]
         public int Id { get; set; }
 
+        [Column("projection_year")]
+        [Required]
         [StringLength(50)]
-        [Column("year")]
-        public string Year { get; set; }
+        public string ProjectionYear { get; set; }
 
         [Column("effective_from")]
         [Required]
@@ -31,5 +32,7 @@ namespace EPR.Calculator.API.Data.DataModels
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public ICollection<LapcapDataDetail> Details { get; } = new List<LapcapDataDetail>();
+
+        public ICollection<CalculatorRun>? RunDetails { get; }
     }
 }

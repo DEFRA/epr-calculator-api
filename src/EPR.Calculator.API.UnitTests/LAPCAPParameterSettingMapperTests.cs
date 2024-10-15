@@ -26,9 +26,10 @@ namespace EPR.Calculator.API.UnitTests
             var defaultParameterSettingMaster = new LapcapDataMaster
             {
                 Id = 2,
-                Year = "2024-25",
+                ProjectionYear = "2024-25",
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
             };
 
             details.ForEach(detail => defaultParameterSettingMaster.Details.Add(detail));
@@ -49,7 +50,7 @@ namespace EPR.Calculator.API.UnitTests
                 // Assert
                 var mappedItem = result.First();
                 Assert.AreEqual(detail.Id, mappedItem.Id);
-                Assert.AreEqual(defaultParameterSettingMaster.Year, mappedItem.Year);
+                Assert.AreEqual(defaultParameterSettingMaster.ProjectionYear, mappedItem.ProjectionYear);
                 Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);
                 Assert.AreEqual(defaultParameterSettingMaster.CreatedAt, mappedItem.CreatedAt);
                 Assert.AreEqual(detail.LapcapDataMasterId, mappedItem.LapcapDataMasterId);
@@ -57,6 +58,7 @@ namespace EPR.Calculator.API.UnitTests
                 Assert.AreEqual(template.Country, mappedItem.Country);
                 Assert.AreEqual(template.Material, mappedItem.Material);
                 Assert.AreEqual(detail.TotalCost, mappedItem.TotalCost);
+                Assert.AreEqual(defaultParameterSettingMaster.EffectiveFrom, mappedItem.EffectiveFrom);
             }
             else
             {

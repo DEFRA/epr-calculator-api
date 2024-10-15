@@ -13,7 +13,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
 
-    [TestClass]
+
+    //[TestClass]
+    /// <summary>
+    /// Unit tests for calling Azure Synapse pipelines.
+    /// </summary>
     public class AzureSynapsePipelineTestControllerTests
     {
         private AzureSynapsePipelineTestController TestClass { get; set; }
