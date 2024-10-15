@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.18.2" />
     <PackageReference Include="FluentValidation" Version="11.9.2" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
@@ -31,6 +32,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Azure" Version="1.7.6" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
@@ -39,14 +41,15 @@
   <ItemGroup>
     <ProjectReference Include="..\EPR.Calculator.API.Data\EPR.Calculator.API.Data.csproj" />
   </ItemGroup>
-	<ItemGroup>
-		<SonarQubeSetting Include="sonar.coverage.exclusions">
-			<Value>Dtos/*.cs,Constants/*.cs,Program.cs</Value>
-		</SonarQubeSetting>
-	</ItemGroup>
-	<ItemGroup>
-		<SonarQubeSetting Include="sonar.cpd.exclusions">
-			<Value>Dtos/*.cs,Constants/*.cs</Value>
-		</SonarQubeSetting>
-	</ItemGroup>
+
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.coverage.exclusions">
+      <Value>Dtos/*.cs,Constants/*.cs,Models/*.cs,Program.cs</Value>
+    </SonarQubeSetting>
+  </ItemGroup>
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.cpd.exclusions">
+      <Value>Dtos/*.cs,Constants/*.cs,Models/*.cs,Program.cs</Value>
+    </SonarQubeSetting>
+  </ItemGroup>
 </Project>

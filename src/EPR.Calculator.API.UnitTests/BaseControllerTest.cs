@@ -5,6 +5,10 @@ using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using EPR.Calculator.API.UnitTests.Helpers;
+using Moq;
+using Azure.Messaging.ServiceBus;
+using Microsoft.Extensions.Azure;
 
 namespace EPR.Calculator.API.Tests.Controllers
 {
@@ -14,6 +18,7 @@ namespace EPR.Calculator.API.Tests.Controllers
         protected ApplicationDBContext? dbContext;
         protected DefaultParameterSettingController? defaultParameterSettingController;
         protected LapcapDataController? lapcapDataController;
+        protected CalculatorController? calculatorController;
 
         [TestInitialize]
         public void SetUp()
@@ -34,6 +39,20 @@ namespace EPR.Calculator.API.Tests.Controllers
             defaultParameterSettingController = new DefaultParameterSettingController(dbContext, validator);
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(dbContext);
             lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator);
+
+            var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
+            var mockClient = new Mock<ServiceBusClient>();
+            var mockServiceBusSender = new Mock<ServiceBusSender>();
+            mockServiceBusSender.Setup(msbs => msbs.SendMessageAsync(It.IsAny<ServiceBusMessage>(), default(CancellationToken))).Returns(Task.CompletedTask);
+            mockClient.Setup(mc => mc.CreateSender(It.IsAny<string>())).Returns(mockServiceBusSender.Object);
+
+            mockFactory.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(mockClient.Object);
+
+
+
+            dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
+            dbContext.SaveChanges();
+            calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), mockFactory.Object);
         }
 
         [TestMethod]
@@ -391,7 +410,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             return list;
         }
         
-        protected static IEnumerable<LapcapDataTemplateMaster> GetTemplateMasterData()
+        protected static IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
         {
             var list = new List<LapcapDataTemplateMaster>();
             list.Add(new LapcapDataTemplateMaster
@@ -649,6 +668,30 @@ namespace EPR.Calculator.API.Tests.Controllers
                 Material = "Other",
                 TotalCostFrom = 0M,
                 TotalCostTo = 999999999.99M,
+            });
+            return list;
+        }
+
+        protected static IEnumerable<CalculatorRun> GetCalculatorRuns()
+        {
+            var list = new List<CalculatorRun>();
+            list.Add(new CalculatorRun
+            {
+                Id = 1,
+                CalculatorRunClassificationId = 1,
+                Name = "Test Run",
+                Financial_Year = "2024-25",
+                CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
+                CreatedBy = "Test User"
+            });
+            list.Add(new CalculatorRun
+            {
+                Id = 2,
+                CalculatorRunClassificationId = 2,
+                Name = "Test Calculated Result",
+                Financial_Year = "2024-25",
+                CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
+                CreatedBy = "Test User"
             });
             return list;
         }
