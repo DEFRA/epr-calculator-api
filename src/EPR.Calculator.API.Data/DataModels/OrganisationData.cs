@@ -6,17 +6,16 @@ using System.Diagnostics.CodeAnalysis;
 namespace EPR.Calculator.API.Data.DataModels
 {
     [ExcludeFromCodeCoverage]
-    [Table("organization_data")]
-    [PrimaryKey(nameof(OrganisationId), nameof(SubsidaryId))]
+    [Table("organisation_data")]
     public class OrganisationData
     {
         [Column("organisation_id")]
         [StringLength(400)]
-        public required string OrganisationId { get; set; }
+        public string? OrganisationId { get; set; }
 
         [Column("subsidiary_id")]
         [StringLength(400)]
-        public required string SubsidaryId { get; set; }
+        public string? SubsidaryId { get; set; }
 
         [Column("organisation_name")]
         [StringLength(400)]
