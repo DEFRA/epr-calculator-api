@@ -7,7 +7,7 @@ namespace EPR.Calculator.API.Dtos
     {
         public required int RunId { get; set; }
 
-        public required string UpdateBy { get; set; }
+        public required string UpdatedBy { get; set; }
 
         public required bool isSuccessful { get; set; }
     }
