@@ -93,8 +93,8 @@ namespace EPR.Calculator.API.Data
             .WithOne(e => e.CalculatorRunPomDataMaster)
             .HasForeignKey(e => e.CalculatorRunPomDataMasterId);
 
-            modelBuilder.Entity<OrganisationData>();
-            modelBuilder.Entity<PomData>();
+            modelBuilder.Entity<OrganisationData>().HasNoKey();
+            modelBuilder.Entity<PomData>().HasNoKey();
 
             modelBuilder.Entity<CalculatorRun>().Property(e => e.CalculatorRunPomDataMasterId).IsRequired(false);
             modelBuilder.Entity<CalculatorRun>().Property(e => e.CalculatorRunOrganisationDataMasterId).IsRequired(false);

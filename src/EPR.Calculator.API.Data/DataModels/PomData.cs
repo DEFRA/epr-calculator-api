@@ -7,16 +7,15 @@ namespace EPR.Calculator.API.Data.DataModels
 {
     [ExcludeFromCodeCoverage]
     [Table("pom_data")]
-    [PrimaryKey(nameof(OrganisationId), nameof(SubsidaryId))]
     public class PomData
     {
         [Column("organisation_id")]
         [StringLength(400)]
-        public required string OrganisationId { get; set; }
+        public string? OrganisationId { get; set; }
 
         [Column("subsidiary_id")]
         [StringLength(400)]
-        public required string SubsidaryId { get; set; }
+        public string? SubsidaryId { get; set; }
 
         [Column("submission_period")]
         [StringLength(400)]
