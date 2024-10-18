@@ -39,9 +39,7 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status422UnprocessableEntity, $"OrganisationData for {runId} is missing");
             }
 
-
-
-            return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
+            return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
         }
     }
 }
