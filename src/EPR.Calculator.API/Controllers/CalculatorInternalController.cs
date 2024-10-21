@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EPR.Calculator.API.Controllers
@@ -113,6 +114,15 @@ namespace EPR.Calculator.API.Controllers
 
                         this.context.CalculatorRunPomDataDetails.Add(calcRuntPomDataDetail);
                         calcRun.CalculatorRunPomDataMaster = calcRunPomMaster;
+                    }
+                    var runClassifications = this.context.CalculatorRunClassifications.ToList();
+                    if (!request.isSuccessful)
+                    {
+                        calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassiciations.ERROR.ToString()).Id;
+                    }
+                    else
+                    {
+                        calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassiciations.RUNNING.ToString()).Id;
                     }
                     this.context.SaveChanges();
                     transaction.Commit();
