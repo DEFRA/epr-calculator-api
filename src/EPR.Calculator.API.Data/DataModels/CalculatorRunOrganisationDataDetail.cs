@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
@@ -7,10 +6,12 @@ namespace EPR.Calculator.API.Data.DataModels
 {
     [ExcludeFromCodeCoverage]
     [Table("calculator_run_organization_data_detail")]
-    [PrimaryKey(nameof(OrganisationId), nameof(SubsidaryId))]
 
     public class CalculatorRunOrganisationDataDetail
     {
+        [Required]
+        public int Id { get; set; }
+
         [StringLength(400)]
         [Column("organisation_id")]
 

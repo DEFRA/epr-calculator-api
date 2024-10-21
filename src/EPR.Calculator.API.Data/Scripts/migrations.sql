@@ -1700,3 +1700,128 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241021110702_CalcRunPomAndOrganisationRemoveKeys'
+)
+BEGIN
+    ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT [PK_calculator_run_pom_data_detail];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241021110702_CalcRunPomAndOrganisationRemoveKeys'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT [PK_calculator_run_organization_data_detail];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241021110702_CalcRunPomAndOrganisationRemoveKeys'
+)
+BEGIN
+    ALTER TABLE [calculator_run_pom_data_detail] ADD [Id] int NOT NULL IDENTITY;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241021110702_CalcRunPomAndOrganisationRemoveKeys'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [Id] int NOT NULL IDENTITY;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241021110702_CalcRunPomAndOrganisationRemoveKeys'
+)
+BEGIN
+    ALTER TABLE [calculator_run_pom_data_detail] ADD CONSTRAINT [PK_calculator_run_pom_data_detail] PRIMARY KEY ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241021110702_CalcRunPomAndOrganisationRemoveKeys'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD CONSTRAINT [PK_calculator_run_organization_data_detail] PRIMARY KEY ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241021110702_CalcRunPomAndOrganisationRemoveKeys'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-21T12:07:01.5507348+01:00''
+    WHERE [id] = 1;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241021110702_CalcRunPomAndOrganisationRemoveKeys'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-21T12:07:01.5507355+01:00''
+    WHERE [id] = 2;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241021110702_CalcRunPomAndOrganisationRemoveKeys'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-21T12:07:01.5507360+01:00''
+    WHERE [id] = 3;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241021110702_CalcRunPomAndOrganisationRemoveKeys'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-21T12:07:01.5507365+01:00''
+    WHERE [id] = 4;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241021110702_CalcRunPomAndOrganisationRemoveKeys'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-21T12:07:01.5507370+01:00''
+    WHERE [id] = 5;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241021110702_CalcRunPomAndOrganisationRemoveKeys'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20241021110702_CalcRunPomAndOrganisationRemoveKeys', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
