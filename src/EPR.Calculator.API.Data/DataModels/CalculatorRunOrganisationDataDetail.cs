@@ -15,11 +15,11 @@ namespace EPR.Calculator.API.Data.DataModels
         [StringLength(400)]
         [Column("organisation_id")]
 
-        public required string OrganisationId { get; set; }
+        public string? OrganisationId { get; set; }
 
         [StringLength(400)]
         [Column("subsidiary_id")]
-        public required string SubsidaryId { get; set; }
+        public string? SubsidaryId { get; set; }
 
         [StringLength(400)]
         [Column("organisation_name")]
@@ -29,7 +29,7 @@ namespace EPR.Calculator.API.Data.DataModels
         public DateTime LoadTimeStamp { get; set; }
 
         [Column("calculator_run_organization_data_master_id")]
-        public int CalculatorRunOrganisationDataMasterId { get; set; }
+        public required int CalculatorRunOrganisationDataMasterId { get; set; }
 
         public required virtual CalculatorRunOrganisationDataMaster CalculatorRunOrganisationDataMaster { get; set; }
     }

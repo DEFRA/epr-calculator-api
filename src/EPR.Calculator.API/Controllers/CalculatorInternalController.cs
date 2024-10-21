@@ -2,8 +2,6 @@
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -77,6 +75,7 @@ namespace EPR.Calculator.API.Controllers
                             LoadTimeStamp = organisation.LoadTimestamp,
                             OrganisationName = organisation.OrganisationName,
                             CalculatorRunOrganisationDataMaster = calcOrganisationMaster,
+                            CalculatorRunOrganisationDataMasterId = 0
                         };
 
 
