@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241018130224_UpdateOtherMaterialsDefaultParameterMaster")]
+    partial class UpdateOtherMaterialsDefaultParameterMaster
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,35 +133,35 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2024, 10, 21, 11, 23, 14, 338, DateTimeKind.Local).AddTicks(5741),
+                            CreatedAt = new DateTime(2024, 10, 18, 14, 2, 24, 646, DateTimeKind.Local).AddTicks(3507),
                             CreatedBy = "Test User",
                             Status = "IN THE QUEUE"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2024, 10, 21, 11, 23, 14, 338, DateTimeKind.Local).AddTicks(5744),
+                            CreatedAt = new DateTime(2024, 10, 18, 14, 2, 24, 646, DateTimeKind.Local).AddTicks(3510),
                             CreatedBy = "Test User",
                             Status = "RUNNING"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2024, 10, 21, 11, 23, 14, 338, DateTimeKind.Local).AddTicks(5746),
+                            CreatedAt = new DateTime(2024, 10, 18, 14, 2, 24, 646, DateTimeKind.Local).AddTicks(3517),
                             CreatedBy = "Test User",
                             Status = "UNCLASSIFIED"
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2024, 10, 21, 11, 23, 14, 338, DateTimeKind.Local).AddTicks(5749),
+                            CreatedAt = new DateTime(2024, 10, 18, 14, 2, 24, 646, DateTimeKind.Local).AddTicks(3519),
                             CreatedBy = "Test User",
                             Status = "PLAY"
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2024, 10, 21, 11, 23, 14, 338, DateTimeKind.Local).AddTicks(5751),
+                            CreatedAt = new DateTime(2024, 10, 18, 14, 2, 24, 646, DateTimeKind.Local).AddTicks(3522),
                             CreatedBy = "Test User",
                             Status = "ERROR"
                         });
