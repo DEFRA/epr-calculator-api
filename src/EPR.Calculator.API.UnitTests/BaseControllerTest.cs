@@ -19,6 +19,7 @@ namespace EPR.Calculator.API.Tests.Controllers
         protected DefaultParameterSettingController? defaultParameterSettingController;
         protected LapcapDataController? lapcapDataController;
         protected CalculatorController? calculatorController;
+        protected CalculatorInternalController? calculatorInternalController;
 
         [TestInitialize]
         public void SetUp()
@@ -39,6 +40,8 @@ namespace EPR.Calculator.API.Tests.Controllers
             defaultParameterSettingController = new DefaultParameterSettingController(dbContext, validator);
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(dbContext);
             lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator);
+
+            calculatorInternalController = new CalculatorInternalController(dbContext, new RpdStatusDataValidator(dbContext));
 
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var mockClient = new Mock<ServiceBusClient>();
