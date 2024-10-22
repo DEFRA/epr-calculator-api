@@ -19,6 +19,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddScoped<ICreateDefaultParameterDataValidator, CreateDefaultParameterDataValidator>();
 builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
+builder.Services.AddScoped<IRpdStatusDataValidator, RpdStatusDataValidator>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>

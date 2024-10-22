@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EPR.Calculator.API.Controllers
@@ -11,10 +12,12 @@ namespace EPR.Calculator.API.Controllers
     public class CalculatorInternalController : ControllerBase
     {
         private readonly ApplicationDBContext context;
+        private readonly IRpdStatusDataValidator rpdStatusDataValidator;
 
-        public CalculatorInternalController(ApplicationDBContext context)
+        public CalculatorInternalController(ApplicationDBContext context, IRpdStatusDataValidator rpdStatusDataValidator)
         {
             this.context = context;
+            this.rpdStatusDataValidator = rpdStatusDataValidator;
         }
 
         [HttpPost]
@@ -22,35 +25,26 @@ namespace EPR.Calculator.API.Controllers
         public IActionResult UpdateRpdStatus([FromBody] UpdateRpdStatus request)
         {
             var runId = request.RunId;
-
             var calcRun = this.context.CalculatorRuns.SingleOrDefault(run => run.Id == runId);
-            if (calcRun == null)
+            var runClassifications = this.context.CalculatorRunClassifications.ToList();
+
+            var validationResult = this.rpdStatusDataValidator.IsValidRun(calcRun, runId, runClassifications);
+            if (!validationResult.isValid)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, $"Calculator Run for {runId} is missing");
+                return StatusCode(validationResult.StatusCode, validationResult.ErrorMessage);
             }
 
-            if (calcRun.CalculatorRunOrganisationDataMasterId != null)
+            if (!request.isSuccessful && calcRun != null)
             {
-                return StatusCode(StatusCodes.Status422UnprocessableEntity,
-                    $"Calculator Run for {runId} already has OrganisationDataMasterId associated with it");
+                calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassiciations.ERROR.ToString()).Id;
+                this.context.SaveChanges();
+                return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
             }
 
-            if (calcRun.CalculatorRunPomDataMasterId != null)
+            var vr = this.rpdStatusDataValidator.IsValidSuccessfulRun(runId);
+            if (!vr.isValid)
             {
-                return StatusCode(StatusCodes.Status422UnprocessableEntity,
-                    $"Calculator Run for {runId} already has PomDataMasterId associated with it");
-            }
-
-            var pomDataExists = this.context.PomData.Any();
-            if (!pomDataExists)
-            {
-                return StatusCode(StatusCodes.Status422UnprocessableEntity, $"PomData for {runId} is missing");
-            }
-
-            var organisationDataExists = this.context.OrganisationData.Any();
-            if (!organisationDataExists)
-            {
-                return StatusCode(StatusCodes.Status422UnprocessableEntity, $"OrganisationData for {runId} is missing");
+                return StatusCode(vr.StatusCode, vr.ErrorMessage);
             }
 
             using (var transaction = this.context.Database.BeginTransaction())
@@ -81,7 +75,9 @@ namespace EPR.Calculator.API.Controllers
 
 
                         this.context.CalculatorRunOrganisationDataDetails.Add(calcOrganisationDataDetail);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                         calcRun.CalculatorRunOrganisationDataMaster = calcOrganisationMaster;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                     }
 
                     var stagingPomData = this.context.PomData.ToList();
@@ -111,19 +107,16 @@ namespace EPR.Calculator.API.Controllers
                             CalculatorRunPomDataMasterId = 0
                         };
 
-
                         this.context.CalculatorRunPomDataDetails.Add(calcRuntPomDataDetail);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                         calcRun.CalculatorRunPomDataMaster = calcRunPomMaster;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                     }
-                    var runClassifications = this.context.CalculatorRunClassifications.ToList();
-                    if (!request.isSuccessful)
-                    {
-                        calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassiciations.ERROR.ToString()).Id;
-                    }
-                    else
-                    {
-                        calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassiciations.RUNNING.ToString()).Id;
-                    }
+
+
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                    calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassiciations.RUNNING.ToString()).Id;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                     this.context.SaveChanges();
                     transaction.Commit();
                     return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
