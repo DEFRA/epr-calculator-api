@@ -40,7 +40,7 @@ namespace EPR.Calculator.API.Data
 
         public DbSet<CalculatorRunOrganisationDataDetail> CalculatorRunOrganisationDataDetails { get; set; }
 
-        public DbSet<CalculatorRunOrganisationDataMaster> CalculatorRunOrganisationDataMaster {  get; set; }
+        public DbSet<CalculatorRunOrganisationDataMaster> CalculatorRunOrganisationDataMaster { get; set; }
 
         public DbSet<CalculatorRunPomDataDetail> CalculatorRunPomDataDetails { get; set; }
 
@@ -49,6 +49,18 @@ namespace EPR.Calculator.API.Data
         public DbSet<OrganisationData> OrganisationData { get; set; }
 
         public DbSet<PomData> PomData { get; set; }
+
+        public DbSet<Material> Material { get; set; }
+
+        public DbSet<ProducerDetail> ProducerDetail { get; set; }
+
+        public DbSet<CountryApportionment> CountryApportionment { get; set; }
+
+        public DbSet<ProducerReportedMaterial> ProducerReportedMaterial { get; set; }
+
+        public DbSet<CostType> CostType { get; set; }
+
+        public DbSet<Country> Country { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -83,7 +95,7 @@ namespace EPR.Calculator.API.Data
             modelBuilder.Entity<CalculatorRunOrganisationDataDetail>();
             modelBuilder.Entity<CalculatorRunOrganisationDataMaster>()
             .HasMany(e => e.Details)
-            .WithOne(e => e.CalculatorRunOrganisationDataMaster )
+            .WithOne(e => e.CalculatorRunOrganisationDataMaster)
             .HasForeignKey(e => e.CalculatorRunOrganisationDataMasterId)
             .IsRequired(true);
 
