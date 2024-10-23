@@ -121,7 +121,7 @@ namespace EPR.Calculator.API.UnitTests
             var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 1, UpdatedBy = "User1" };
             var result = this.calculatorInternalController?.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
-            Assert.AreEqual(objResult?.StatusCode, 201);
+            Assert.AreEqual(201, objResult?.StatusCode);
             var updatedRun = this.dbContext?.CalculatorRuns.Single(x => x.Id == 1);
             Assert.IsNotNull(updatedRun);
             Assert.AreEqual(5, updatedRun.CalculatorRunClassificationId);
@@ -174,7 +174,7 @@ namespace EPR.Calculator.API.UnitTests
                 var result = controller?.UpdateRpdStatus(request);
 
                 var objResult = result as ObjectResult;
-                Assert.AreEqual(objResult?.StatusCode, 201);
+                Assert.AreEqual(201, objResult?.StatusCode);
                 var calcRun = dbContext.CalculatorRuns.Single(x => x.Id == 1);
                 Assert.IsNotNull(calcRun);
                 Assert.AreEqual(2, calcRun.CalculatorRunClassificationId);
