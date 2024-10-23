@@ -21,7 +21,7 @@ namespace EPR.Calculator.API.Validators
                 {
                     isValid = false,
                     StatusCode = StatusCodes.Status400BadRequest,
-                    ErrorMessage = $"Calculator Run for {runId} is missing"
+                    ErrorMessage = $"Calculator Run {runId} is missing"
                 };
             }
 
@@ -31,7 +31,7 @@ namespace EPR.Calculator.API.Validators
                 {
                     isValid = false,
                     StatusCode = StatusCodes.Status422UnprocessableEntity,
-                    ErrorMessage = $"Calculator Run for {runId} already has OrganisationDataMasterId associated with it"
+                    ErrorMessage = $"Calculator Run {runId} already has OrganisationDataMasterId associated with it"
                 };
             }
 
@@ -41,7 +41,7 @@ namespace EPR.Calculator.API.Validators
                 {
                     isValid = false,
                     StatusCode = StatusCodes.Status422UnprocessableEntity,
-                    ErrorMessage = $"Calculator Run for {runId} already has PomDataMasterId associated with it"
+                    ErrorMessage = $"Calculator Run {runId} already has PomDataMasterId associated with it"
                 };
             }
 
@@ -55,7 +55,7 @@ namespace EPR.Calculator.API.Validators
                 {
                     isValid = false,
                     StatusCode = StatusCodes.Status422UnprocessableEntity,
-                    ErrorMessage = $"Calculator Run for {runId} classification should be RUNNING or IN THE QUEUE"
+                    ErrorMessage = $"Calculator Run {runId} classification should be RUNNING or IN THE QUEUE"
                 };
             }
 
@@ -74,7 +74,7 @@ namespace EPR.Calculator.API.Validators
                 {
                     isValid = false,
                     StatusCode = StatusCodes.Status422UnprocessableEntity,
-                    ErrorMessage = $"PomData for {runId} is missing"
+                    ErrorMessage = $"PomData {runId} is missing"
                 };
             }
 
@@ -85,7 +85,7 @@ namespace EPR.Calculator.API.Validators
                 {
                     isValid = false,
                     StatusCode = StatusCodes.Status422UnprocessableEntity,
-                    ErrorMessage = $"OrganisationData for {runId} is missing"
+                    ErrorMessage = $"OrganisationData {runId} is missing"
                 };
             }
             return new RpdStatusValidation

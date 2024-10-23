@@ -16,33 +16,12 @@ namespace EPR.Calculator.API.UnitTests
             var objResult = result as ObjectResult;
             Assert.IsNotNull(objResult);
             Assert.AreEqual(objResult.StatusCode, 400);
-            Assert.AreEqual(objResult.Value, "Calculator Run for 999 is missing");
+            Assert.AreEqual(objResult.Value, "Calculator Run 999 is missing");
         }
 
         [TestMethod]
         public void UpdateRpdStatus_With_RunId_Having_OrganisationDataMasterId()
         {
-            var calcOrganisationMaster = new CalculatorRunOrganisationDataMaster
-            {
-                CalendarYear = "2023",
-                CreatedAt = DateTime.Now,
-                CreatedBy = "Some User",
-                EffectiveFrom = DateTime.Now,
-                EffectiveTo = null,
-            };
-
-            var calcOrganisationDataDetail = new CalculatorRunOrganisationDataDetail
-            {
-                OrganisationId = "1234",
-                SubsidaryId = "4455",
-                LoadTimeStamp = DateTime.Now,
-                OrganisationName = "Organisation Name",
-                CalculatorRunOrganisationDataMaster = calcOrganisationMaster,
-                CalculatorRunOrganisationDataMasterId = 0
-            };
-
-            this.dbContext?.CalculatorRunOrganisationDataDetails.Add(calcOrganisationDataDetail);
-
             this.dbContext?.SaveChanges();
 
             var organisationMaster = this.dbContext?.CalculatorRunOrganisationDataMaster.ToList();
@@ -66,22 +45,72 @@ namespace EPR.Calculator.API.UnitTests
             var objResult = result as ObjectResult;
             Assert.IsNotNull(objResult);
             Assert.AreEqual(objResult.StatusCode, 422);
-            Assert.AreEqual(objResult.Value, "Calculator Run for 3 already has OrganisationDataMasterId associated with it");
+            Assert.AreEqual(objResult.Value, "Calculator Run 3 already has OrganisationDataMasterId associated with it");
         }
 
+        [TestMethod]
         public void UpdateRpdStatus_With_RunId_Having_PomDataMasterId()
         {
+            var pomMaster = new CalculatorRunPomDataMaster
+            {
+                CalendarYear = "2023",
+                CreatedAt = DateTime.Now,
+                CreatedBy = "Some User",
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null,
+            };
+
+            var pomDataDetail = new CalculatorRunPomDataDetail
+            {
+                OrganisationId = "1234",
+                SubsidaryId = "4455",
+                LoadTimeStamp = DateTime.Now,
+                CalculatorRunPomDataMaster = pomMaster,
+                Id = 0,
+                SubmissionPeriod = "some-period",
+                CalculatorRunPomDataMasterId = pomMaster.Id,
+            };
+
+            this.dbContext?.CalculatorRunPomDataDetails.Add(pomDataDetail);
+
+            this.dbContext?.SaveChanges();
+
+            var organisationMaster = this.dbContext?.CalculatorRunOrganisationDataMaster.ToList();
+            var calcRun = this.dbContext?.CalculatorRuns.Single(run => run.Id == 1);
+            calcRun.CalculatorRunPomDataMaster = pomMaster;
+            calcRun.CalculatorRunPomDataMasterId = pomMaster.Id;
+
+            this.dbContext?.SaveChanges();
+
+
+            var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 1, UpdatedBy = "User1" };
+            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var objResult = result as ObjectResult;
+            Assert.IsNotNull(objResult);
+            Assert.AreEqual(objResult.StatusCode, 422);
+            Assert.AreEqual(objResult.Value, "Calculator Run 1 already has PomDataMasterId associated with it");
         }
 
+        [TestMethod]
         public void UpdateRpdStatus_With_RunId_With_Incorrect_Classification()
+        {
+            var calcRun = this.dbContext.CalculatorRuns.Single(x => x.Id == 1);
+            calcRun.CalculatorRunClassificationId = 3;
+            this.dbContext.CalculatorRuns.Update(calcRun);
+
+            var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 1, UpdatedBy = "User1" };
+            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var objResult = result as ObjectResult;
+            Assert.IsNotNull(objResult);
+            Assert.AreEqual(objResult.StatusCode, 422);
+            Assert.AreEqual(objResult.Value, "Calculator Run 1 classification should be RUNNING or IN THE QUEUE");
+        }
+
+        public void UpdateRpdStatus_With_RunId_When_Not_Successful()
         {
         }
 
         public void UpdateRpdStatus_With_RunId_Having_Pom_Data_Missing()
-        {
-        }
-
-        public void UpdateRpdStatus_With_RunId_When_Not_Successful()
         {
         }
 
