@@ -21,7 +21,7 @@ namespace EPR.Calculator.API.Tests.Controllers
         protected LapcapDataController? lapcapDataController;
         protected CalculatorController? calculatorController;
         protected CalculatorInternalController? calculatorInternalController;
-        protected IOrgAndPomWrapper wrapper;
+        protected IOrgAndPomWrapper? wrapper;
 
         [TestInitialize]
         public void SetUp()

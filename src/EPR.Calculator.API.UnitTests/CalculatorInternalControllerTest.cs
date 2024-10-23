@@ -19,8 +19,8 @@ namespace EPR.Calculator.API.UnitTests
             var result = this.calculatorInternalController?.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
             Assert.IsNotNull(objResult);
-            Assert.AreEqual(objResult.StatusCode, 400);
-            Assert.AreEqual(objResult.Value, "Calculator Run 999 is missing");
+            Assert.AreEqual(400, objResult.StatusCode);
+            Assert.AreEqual("Calculator Run 999 is missing", objResult.Value);
         }
 
         [TestMethod]
@@ -48,8 +48,8 @@ namespace EPR.Calculator.API.UnitTests
             var result = this.calculatorInternalController?.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
             Assert.IsNotNull(objResult);
-            Assert.AreEqual(objResult.StatusCode, 422);
-            Assert.AreEqual(objResult.Value, "Calculator Run 3 already has OrganisationDataMasterId associated with it");
+            Assert.AreEqual(422, objResult.StatusCode);
+            Assert.AreEqual("Calculator Run 3 already has OrganisationDataMasterId associated with it", objResult.Value);
         }
 
         [TestMethod]
@@ -91,8 +91,8 @@ namespace EPR.Calculator.API.UnitTests
             var result = this.calculatorInternalController?.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
             Assert.IsNotNull(objResult);
-            Assert.AreEqual(objResult.StatusCode, 422);
-            Assert.AreEqual(objResult.Value, "Calculator Run 1 already has PomDataMasterId associated with it");
+            Assert.AreEqual(422, objResult.StatusCode);
+            Assert.AreEqual("Calculator Run 1 already has PomDataMasterId associated with it", objResult.Value);
         }
 
         [TestMethod]
@@ -106,8 +106,8 @@ namespace EPR.Calculator.API.UnitTests
             var result = this.calculatorInternalController?.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
             Assert.IsNotNull(objResult);
-            Assert.AreEqual(objResult.StatusCode, 422);
-            Assert.AreEqual(objResult.Value, "Calculator Run 1 classification should be RUNNING or IN THE QUEUE");
+            Assert.AreEqual(422, objResult.StatusCode);
+            Assert.AreEqual("Calculator Run 1 classification should be RUNNING or IN THE QUEUE", objResult.Value);
         }
 
         [TestMethod]
@@ -119,7 +119,7 @@ namespace EPR.Calculator.API.UnitTests
             Assert.AreEqual(objResult.StatusCode, 201);
             var updatedRun = this.dbContext.CalculatorRuns.Single(x => x.Id == 1);
             Assert.IsNotNull(updatedRun);
-            Assert.AreEqual(updatedRun.CalculatorRunClassificationId, 5);
+            Assert.AreEqual(5, updatedRun.CalculatorRunClassificationId);
         }
 
         [TestMethod]
@@ -128,8 +128,8 @@ namespace EPR.Calculator.API.UnitTests
             var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
             var result = this.calculatorInternalController?.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
-            Assert.AreEqual(objResult.StatusCode, 422);
-            Assert.AreEqual(objResult.Value, "PomData or Organisation Data is missing");
+            Assert.AreEqual(422, objResult.StatusCode);
+            Assert.AreEqual("PomData or Organisation Data is missing", objResult.Value);
         }
 
         [TestMethod]
@@ -170,7 +170,7 @@ namespace EPR.Calculator.API.UnitTests
             Assert.AreEqual(objResult.StatusCode, 201);
             var calcRun = dbContext.CalculatorRuns.Single(x => x.Id == 1);
             Assert.IsNotNull(calcRun);
-            Assert.AreEqual(calcRun.CalculatorRunClassificationId, 2);
+            Assert.AreEqual(2, calcRun.CalculatorRunClassificationId);
             Assert.IsNotNull(calcRun.CalculatorRunOrganisationDataMasterId);
             Assert.IsNotNull(calcRun.CalculatorRunPomDataMasterId);
         }
