@@ -1,16 +1,17 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Wrapper;
 
 namespace EPR.Calculator.API.Validators
 {
     public class RpdStatusDataValidator : IRpdStatusDataValidator
     {
-        private readonly ApplicationDBContext context;
+        private readonly IOrgAndPomWrapper wrapper;
 
-        public RpdStatusDataValidator(ApplicationDBContext context)
+        public RpdStatusDataValidator(IOrgAndPomWrapper wrapper)
         {
-            this.context = context;
+            this.wrapper = wrapper;
         }
 
         public RpdStatusValidation IsValidRun(CalculatorRun? calcRun, int runId, IEnumerable<CalculatorRunClassification> calculatorRunClassifications)
@@ -67,8 +68,8 @@ namespace EPR.Calculator.API.Validators
 
         public RpdStatusValidation IsValidSuccessfulRun(int runId)
         {
-            var pomDataExists = this.context.PomData.Any();
-            var organisationDataExists = this.context.OrganisationData.Any();
+            var pomDataExists = this.wrapper.AnyPomData();
+            var organisationDataExists = this.wrapper.AnyOrganisationData();
             if (!pomDataExists || !organisationDataExists)
             {
                 return new RpdStatusValidation

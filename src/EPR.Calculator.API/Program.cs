@@ -2,6 +2,7 @@ using Azure.Messaging.ServiceBus;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Validators;
+using EPR.Calculator.API.Wrapper;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddScoped<ICreateDefaultParameterDataValidator, CreateDefaultParameterDataValidator>();
 builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
+builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IRpdStatusDataValidator, RpdStatusDataValidator>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();

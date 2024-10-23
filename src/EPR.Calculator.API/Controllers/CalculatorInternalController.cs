@@ -3,6 +3,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Validators;
+using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EPR.Calculator.API.Controllers
@@ -13,11 +14,15 @@ namespace EPR.Calculator.API.Controllers
     {
         private readonly ApplicationDBContext context;
         private readonly IRpdStatusDataValidator rpdStatusDataValidator;
+        private readonly IOrgAndPomWrapper wrapper;
 
-        public CalculatorInternalController(ApplicationDBContext context, IRpdStatusDataValidator rpdStatusDataValidator)
+        public CalculatorInternalController(ApplicationDBContext context,
+                                            IRpdStatusDataValidator rpdStatusDataValidator,
+                                            IOrgAndPomWrapper wrapper)
         {
             this.context = context;
             this.rpdStatusDataValidator = rpdStatusDataValidator;
+            this.wrapper = wrapper;
         }
 
         [HttpPost]
@@ -51,7 +56,7 @@ namespace EPR.Calculator.API.Controllers
             {
                 try
                 {
-                    var stagingOrganisationData = this.context.OrganisationData.ToList();
+                    var stagingOrganisationData = this.wrapper.GetOrganisationData();
                     foreach (var organisation in stagingOrganisationData)
                     {
                         var calcOrganisationMaster = new CalculatorRunOrganisationDataMaster
@@ -80,7 +85,7 @@ namespace EPR.Calculator.API.Controllers
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
                     }
 
-                    var stagingPomData = this.context.PomData.ToList();
+                    var stagingPomData = this.wrapper.GetPomData();
                     foreach (var pomData in stagingPomData)
                     {
                         var calcRunPomMaster = new CalculatorRunPomDataMaster

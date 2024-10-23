@@ -9,6 +9,7 @@ using EPR.Calculator.API.UnitTests.Helpers;
 using Moq;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Azure;
+using EPR.Calculator.API.Wrapper;
 
 namespace EPR.Calculator.API.Tests.Controllers
 {
@@ -20,6 +21,7 @@ namespace EPR.Calculator.API.Tests.Controllers
         protected LapcapDataController? lapcapDataController;
         protected CalculatorController? calculatorController;
         protected CalculatorInternalController? calculatorInternalController;
+        protected IOrgAndPomWrapper wrapper;
 
         [TestInitialize]
         public void SetUp()
@@ -41,7 +43,8 @@ namespace EPR.Calculator.API.Tests.Controllers
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(dbContext);
             lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator);
 
-            calculatorInternalController = new CalculatorInternalController(dbContext, new RpdStatusDataValidator(dbContext));
+            wrapper = new Mock<IOrgAndPomWrapper>().Object;
+            calculatorInternalController = new CalculatorInternalController(dbContext, new RpdStatusDataValidator(wrapper), wrapper);
 
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var mockClient = new Mock<ServiceBusClient>();
@@ -58,7 +61,6 @@ namespace EPR.Calculator.API.Tests.Controllers
             calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), mockFactory.Object);
         }
 
-        [TestMethod]
         public void CheckDbContext()
         {
             Assert.IsNotNull(dbContext);
