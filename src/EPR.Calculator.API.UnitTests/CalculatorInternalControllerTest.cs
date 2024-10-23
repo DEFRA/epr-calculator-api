@@ -106,16 +106,26 @@ namespace EPR.Calculator.API.UnitTests
             Assert.AreEqual(objResult.Value, "Calculator Run 1 classification should be RUNNING or IN THE QUEUE");
         }
 
+        [TestMethod]
         public void UpdateRpdStatus_With_RunId_When_Not_Successful()
         {
+            var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 1, UpdatedBy = "User1" };
+            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var objResult = result as ObjectResult;
+            Assert.AreEqual(objResult.StatusCode, 201);
+            var updatedRun = this.dbContext.CalculatorRuns.Single(x => x.Id == 1);
+            Assert.IsNotNull(updatedRun);
+            Assert.AreEqual(updatedRun.CalculatorRunClassificationId, 5);
         }
 
+        [TestMethod]
         public void UpdateRpdStatus_With_RunId_Having_Pom_Data_Missing()
         {
-        }
-
-        public void UpdateRpdStatus_With_RunId_Having_Organisation_Data_Missing()
-        {
+            var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
+            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var objResult = result as ObjectResult;
+            Assert.AreEqual(objResult.StatusCode, 422);
+            Assert.AreEqual(objResult.Value, "PomData or Organisation Data is missing");
         }
     }
 }

@@ -68,26 +68,17 @@ namespace EPR.Calculator.API.Validators
         public RpdStatusValidation IsValidSuccessfulRun(int runId)
         {
             var pomDataExists = this.context.PomData.Any();
-            if (!pomDataExists)
+            var organisationDataExists = this.context.OrganisationData.Any();
+            if (!pomDataExists || !organisationDataExists)
             {
                 return new RpdStatusValidation
                 {
                     isValid = false,
                     StatusCode = StatusCodes.Status422UnprocessableEntity,
-                    ErrorMessage = $"PomData {runId} is missing"
+                    ErrorMessage = "PomData or Organisation Data is missing"
                 };
             }
 
-            var organisationDataExists = this.context.OrganisationData.Any();
-            if (!organisationDataExists)
-            {
-                return new RpdStatusValidation
-                {
-                    isValid = false,
-                    StatusCode = StatusCodes.Status422UnprocessableEntity,
-                    ErrorMessage = $"OrganisationData {runId} is missing"
-                };
-            }
             return new RpdStatusValidation
             {
                 isValid = true
