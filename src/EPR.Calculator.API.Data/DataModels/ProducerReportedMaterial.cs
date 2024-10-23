@@ -21,9 +21,11 @@ namespace EPR.Calculator.API.Data.DataModels
         public int ProducerDetailId { get; set; }
 
         [Column("packaging_type")]
+        [StringLength(400)]
         public required string PackagingType { get; set; }
 
         [Column("packaging_tonnage")]
+        [StringLength(400)]
         public required string PackagingTonnage { get; set; }
 
         public required virtual ProducerDetail ProducerDetail { get; set; }

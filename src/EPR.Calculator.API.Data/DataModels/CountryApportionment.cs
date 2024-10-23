@@ -21,6 +21,7 @@ namespace EPR.Calculator.API.Data.DataModels
         public int? Country_Id { get; set; }
 
         [Column("cost_type_id")]
+        [StringLength(250)]
         public required string CostTypeId { get; set; }
 
         [Column("calculator_run_id")]
