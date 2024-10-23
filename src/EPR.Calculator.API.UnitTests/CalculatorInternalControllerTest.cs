@@ -81,11 +81,13 @@ namespace EPR.Calculator.API.UnitTests
 
             var organisationMaster = this.dbContext?.CalculatorRunOrganisationDataMaster.ToList();
             var calcRun = this.dbContext?.CalculatorRuns.Single(run => run.Id == 1);
-            calcRun.CalculatorRunPomDataMaster = pomMaster;
-            calcRun.CalculatorRunPomDataMasterId = pomMaster.Id;
+            if (calcRun != null)
+            {
+                calcRun.CalculatorRunPomDataMaster = pomMaster;
+                calcRun.CalculatorRunPomDataMasterId = pomMaster.Id;
+            }
 
             this.dbContext?.SaveChanges();
-
 
             var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 1, UpdatedBy = "User1" };
             var result = this.calculatorInternalController?.UpdateRpdStatus(request);
@@ -98,10 +100,13 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void UpdateRpdStatus_With_RunId_With_Incorrect_Classification()
         {
-            var calcRun = this.dbContext.CalculatorRuns.Single(x => x.Id == 1);
-            calcRun.CalculatorRunClassificationId = 3;
-            this.dbContext.CalculatorRuns.Update(calcRun);
-
+            var calcRun = this.dbContext?.CalculatorRuns.Single(x => x.Id == 1);
+            if (calcRun!=null)
+            {
+                calcRun.CalculatorRunClassificationId = 3;
+                this.dbContext?.CalculatorRuns.Update(calcRun);
+            }
+            
             var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 1, UpdatedBy = "User1" };
             var result = this.calculatorInternalController?.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
@@ -116,8 +121,8 @@ namespace EPR.Calculator.API.UnitTests
             var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 1, UpdatedBy = "User1" };
             var result = this.calculatorInternalController?.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
-            Assert.AreEqual(objResult.StatusCode, 201);
-            var updatedRun = this.dbContext.CalculatorRuns.Single(x => x.Id == 1);
+            Assert.AreEqual(objResult?.StatusCode, 201);
+            var updatedRun = this.dbContext?.CalculatorRuns.Single(x => x.Id == 1);
             Assert.IsNotNull(updatedRun);
             Assert.AreEqual(5, updatedRun.CalculatorRunClassificationId);
         }
@@ -128,8 +133,8 @@ namespace EPR.Calculator.API.UnitTests
             var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
             var result = this.calculatorInternalController?.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
-            Assert.AreEqual(422, objResult.StatusCode);
-            Assert.AreEqual("PomData or Organisation Data is missing", objResult.Value);
+            Assert.AreEqual(422, objResult?.StatusCode);
+            Assert.AreEqual("PomData or Organisation Data is missing", objResult?.Value);
         }
 
         [TestMethod]
@@ -161,18 +166,22 @@ namespace EPR.Calculator.API.UnitTests
             mock.Setup(x => x.GetOrganisationData()).Returns(organisationDataList);
             mock.Setup(x => x.GetPomData()).Returns(pomDataList);
 
-            var controller = new CalculatorInternalController(dbContext, new RpdStatusDataValidator(mock.Object), mock.Object);
+            if (dbContext != null)
+            {
+                var controller = new CalculatorInternalController(dbContext, new RpdStatusDataValidator(mock.Object), mock.Object);
 
-            var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
-            var result = controller?.UpdateRpdStatus(request);
+                var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
+                var result = controller?.UpdateRpdStatus(request);
 
-            var objResult = result as ObjectResult;
-            Assert.AreEqual(objResult.StatusCode, 201);
-            var calcRun = dbContext.CalculatorRuns.Single(x => x.Id == 1);
-            Assert.IsNotNull(calcRun);
-            Assert.AreEqual(2, calcRun.CalculatorRunClassificationId);
-            Assert.IsNotNull(calcRun.CalculatorRunOrganisationDataMasterId);
-            Assert.IsNotNull(calcRun.CalculatorRunPomDataMasterId);
+                var objResult = result as ObjectResult;
+                Assert.AreEqual(objResult?.StatusCode, 201);
+                var calcRun = dbContext.CalculatorRuns.Single(x => x.Id == 1);
+                Assert.IsNotNull(calcRun);
+                Assert.AreEqual(2, calcRun.CalculatorRunClassificationId);
+                Assert.IsNotNull(calcRun.CalculatorRunOrganisationDataMasterId);
+                Assert.IsNotNull(calcRun.CalculatorRunPomDataMasterId);
+            }
+
         }
     }
 }
