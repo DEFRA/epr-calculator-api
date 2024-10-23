@@ -1705,6 +1705,60 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241018130224_UpdateOtherMaterialsDefaultParameterMaster'
+)
+BEGIN
+    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Other materials''
+    WHERE [parameter_unique_ref] = N''COMC-OT'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241018130224_UpdateOtherMaterialsDefaultParameterMaster'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20241018130224_UpdateOtherMaterialsDefaultParameterMaster', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241021102314_UpdateOtherMaterialsLateReportingTonnage'
+)
+BEGIN
+    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Other materials''
+    WHERE [parameter_unique_ref] = N''LRET-OT'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241021102314_UpdateOtherMaterialsLateReportingTonnage'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20241021102314_UpdateOtherMaterialsLateReportingTonnage', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241021110702_CalcRunPomAndOrganisationRemoveKeys'
 )
 BEGIN
