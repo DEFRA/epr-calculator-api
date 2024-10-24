@@ -57,17 +57,16 @@ namespace EPR.Calculator.API.Controllers
                 try
                 {
                     var stagingOrganisationData = this.wrapper.GetOrganisationData();
+                    var calcOrganisationMaster = new CalculatorRunOrganisationDataMaster
+                    {
+                        CalendarYear = "2023", //Take the financial year from Calc Run table and Derive the Calendar year
+                        CreatedAt = DateTime.Now,
+                        CreatedBy = request.UpdatedBy,
+                        EffectiveFrom = DateTime.Now,
+                        EffectiveTo = null,
+                    };
                     foreach (var organisation in stagingOrganisationData)
                     {
-                        var calcOrganisationMaster = new CalculatorRunOrganisationDataMaster
-                        {
-                            CalendarYear = "2023", //Take the financial year from Calc Run table and Derive the Calendar year
-                            CreatedAt = DateTime.Now,
-                            CreatedBy = request.UpdatedBy,
-                            EffectiveFrom = DateTime.Now,
-                            EffectiveTo = null,
-                        };
-
                         var calcOrganisationDataDetail = new CalculatorRunOrganisationDataDetail
                         {
                             OrganisationId = organisation.OrganisationId,
@@ -75,7 +74,6 @@ namespace EPR.Calculator.API.Controllers
                             LoadTimeStamp = organisation.LoadTimestamp,
                             OrganisationName = organisation.OrganisationName,
                             CalculatorRunOrganisationDataMaster = calcOrganisationMaster,
-                            CalculatorRunOrganisationDataMasterId = 0
                         };
 
 
@@ -86,17 +84,16 @@ namespace EPR.Calculator.API.Controllers
                     }
 
                     var stagingPomData = this.wrapper.GetPomData();
+                    var calcRunPomMaster = new CalculatorRunPomDataMaster
+                    {
+                        CalendarYear = "2024-25", //Take the financial year from Calc Run table and Derive the Calendar year
+                        CreatedAt = DateTime.Now,
+                        CreatedBy = request.UpdatedBy,
+                        EffectiveFrom = DateTime.Now,
+                        EffectiveTo = null,
+                    };
                     foreach (var pomData in stagingPomData)
                     {
-                        var calcRunPomMaster = new CalculatorRunPomDataMaster
-                        {
-                            CalendarYear = "2024-25", //Take the financial year from Calc Run table and Derive the Calendar year
-                            CreatedAt = DateTime.Now,
-                            CreatedBy = request.UpdatedBy,
-                            EffectiveFrom = DateTime.Now,
-                            EffectiveTo = null,
-                        };
-
                         var calcRuntPomDataDetail = new CalculatorRunPomDataDetail
                         {
                             OrganisationId = pomData.OrganisationId,
@@ -109,7 +106,6 @@ namespace EPR.Calculator.API.Controllers
                             PackagingMaterial = pomData.PackagingMaterial,
                             PackagingMaterialWeight = pomData.PackagingMaterialWeight,
                             CalculatorRunPomDataMaster = calcRunPomMaster,
-                            CalculatorRunPomDataMasterId = 0
                         };
 
                         this.context.CalculatorRunPomDataDetails.Add(calcRuntPomDataDetail);
