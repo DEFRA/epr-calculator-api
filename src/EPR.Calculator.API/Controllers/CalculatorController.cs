@@ -1,4 +1,5 @@
 ﻿using Azure.Messaging.ServiceBus;
+using Azure.Storage.Blobs;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Newtonsoft.Json;
+using System;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -23,6 +25,37 @@ namespace EPR.Calculator.API.Controllers
             _configuration = configuration;
             _serviceBusClientFactory = serviceBusClientFactory;
         }
+
+        [HttpPost]
+        [Route("storeResultFile")]
+        public async IActionResult StoreResultFile([FromBody] string request)
+        {
+            try
+            {
+                var blobStorageConnectionString = this._configuration.GetSection("BlobStorage").GetSection("ConnectionString").Value;
+                var blobStorageContainerName = this._configuration.GetSection("BlobStorage").GetSection("ContainerName").Value;
+
+                BlobServiceClient blobServiceClient = new BlobServiceClient(blobStorageConnectionString);
+                BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(blobStorageContainerName);
+                BlobClient blobClient = blobContainerClient.GetBlobClient(request);
+
+                using var fileStream = File.OpenRead(request);
+                await blobClient.UploadAsync(fileStream, true);
+                fileStream.Close();
+
+                return new OkResult();
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+
+
+
+
+        }
+
+
 
         [HttpPost]
         [Route("calculatorRun")]
