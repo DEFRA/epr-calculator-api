@@ -39,8 +39,7 @@ namespace EPR.Calculator.API.Data.DataModels
         public string? PackagingMaterial { get; set; }
 
         [Column("packaging_material_weight")]
-        [StringLength(400)]
-        public string? PackagingMaterialWeight { get; set; }
+        public double? PackagingMaterialWeight { get; set; }
 
         [Column("load_ts")]
         public required DateTime LoadTimeStamp { get; set; }

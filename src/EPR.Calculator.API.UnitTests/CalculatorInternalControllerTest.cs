@@ -155,7 +155,7 @@ namespace EPR.Calculator.API.UnitTests
                 PackagingType = "packtype",
                 PackagingClass = "class1",
                 PackagingMaterial = "Aluminium",
-                PackagingMaterialWeight = "200",
+                PackagingMaterialWeight = 200,
                 SubmissionPeriod = "2024-25",
             };
             var pomDataList = new List<PomData> { pomData };
