@@ -126,10 +126,11 @@ namespace EPR.Calculator.API.Controllers
                     transaction.Commit();
                     return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     transaction.Rollback();
-                    return StatusCode(StatusCodes.Status500InternalServerError, ex);
+                    // return StatusCode(StatusCodes.Status500InternalServerError, ex);
+                    throw;
                 }
             }
         }
