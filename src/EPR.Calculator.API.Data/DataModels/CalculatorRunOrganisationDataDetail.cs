@@ -14,7 +14,6 @@ namespace EPR.Calculator.API.Data.DataModels
 
         [StringLength(400)]
         [Column("organisation_id")]
-
         public string? OrganisationId { get; set; }
 
         [StringLength(400)]
