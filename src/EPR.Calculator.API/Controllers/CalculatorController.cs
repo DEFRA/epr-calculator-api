@@ -97,7 +97,7 @@ namespace EPR.Calculator.API.Controllers
                         Financial_Year = request.FinancialYear,
                         CreatedBy = request.CreatedBy,
                         CreatedAt = DateTime.Now,
-                        CalculatorRunClassificationId = (int)RunClassification.Running,
+                        CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                         DefaultParameterSettingMasterId = activeDefaultParameterSettingsMasterId,
                         LapcapDataMasterId = activeLapcapDataMasterId
                     };

@@ -1,11 +1,22 @@
-﻿namespace EPR.Calculator.API.Enums
+﻿using System.ComponentModel;
+
+namespace EPR.Calculator.API.Enums
 {
     public enum RunClassification
     {
-        InTheQueue = 1,
-        Running = 2,
-        Unclassified = 3,
-        Play = 4,
-        Error = 5
+        [Description("IN THE QUEUE")]
+        INTHEQUEUE = 1,
+
+        [Description("RUNNING")]
+        RUNNING = 2,
+
+        [Description("UNCLASSIFIED")]
+        UNCLASSIFIED = 3,
+
+        [Description("PLAY")]
+        PLAY = 4,
+
+        [Description("ERROR")]
+        ERROR = 5
     }
 }
