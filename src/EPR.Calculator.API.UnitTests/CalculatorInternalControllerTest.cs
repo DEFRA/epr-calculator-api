@@ -66,7 +66,7 @@ namespace EPR.Calculator.API.UnitTests
 
             var pomDataDetail = new CalculatorRunPomDataDetail
             {
-                OrganisationId = "1234",
+                OrganisationId = 1234,
                 SubsidaryId = "4455",
                 LoadTimeStamp = DateTime.Now,
                 CalculatorRunPomDataMaster = pomMaster,
@@ -144,13 +144,13 @@ namespace EPR.Calculator.API.UnitTests
             {
                 LoadTimestamp = DateTime.UtcNow,
                 OrganisationName = "OrgName",
-                OrganisationId = "OrgId1",
+                OrganisationId = 1345,
                 SubsidaryId = "Sub1d1"
             };
             var pomData = new PomData
             {
                 LoadTimeStamp = DateTime.Now,
-                OrganisationId = "OrgId1",
+                OrganisationId = 1567,
                 SubsidaryId = "Sub1d1",
                 PackagingType = "packtype",
                 PackagingClass = "class1",

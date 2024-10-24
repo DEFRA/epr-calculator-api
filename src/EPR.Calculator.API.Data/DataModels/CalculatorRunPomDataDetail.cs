@@ -12,8 +12,7 @@ namespace EPR.Calculator.API.Data.DataModels
         public int Id { get; set; }
 
         [Column("organisation_id")]
-        [StringLength(400)]
-        public string? OrganisationId { get; set; }
+        public int? OrganisationId { get; set; }
 
         [Column("subsidiary_id")]
         [StringLength(400)]
