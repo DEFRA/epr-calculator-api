@@ -25,11 +25,10 @@ namespace EPR.Calculator.API.Data.DataModels
         public required string PackagingType { get; set; }
 
         [Column("packaging_tonnage")]
-        [StringLength(400)]
-        public required string PackagingTonnage { get; set; }
+        public required decimal PackagingTonnage { get; set; }
 
-        //public required virtual ProducerDetail ProducerDetail { get; set; }
+        public required virtual ProducerDetail ProducerDetail { get; set; }
 
-        //public required virtual Material Material { get; set; }
+        public required virtual Material Material { get; set; }
     }
 }

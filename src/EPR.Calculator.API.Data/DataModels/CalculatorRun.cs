@@ -62,8 +62,8 @@ namespace EPR.Calculator.API.Data.DataModels
 
         public DefaultParameterSettingMaster? DefaultParameterSettingMaster { get; set; }
 
-        //public ICollection<ProducerDetail> ProducerDetails { get; } = new List<ProducerDetail>();
+        public ICollection<ProducerDetail> ProducerDetails { get; } = new List<ProducerDetail>();
 
-        //public ICollection<CountryApportionment> CountryApportionments { get; } = new List<CountryApportionment>();
+        public ICollection<CountryApportionment> CountryApportionments { get; } = new List<CountryApportionment>();
     }
 }

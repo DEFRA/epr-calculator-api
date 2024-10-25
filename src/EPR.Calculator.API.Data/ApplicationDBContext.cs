@@ -87,18 +87,6 @@ namespace EPR.Calculator.API.Data
             modelBuilder.Entity<ProducerDetail>();
             modelBuilder.Entity<ProducerReportedMaterial>();
 
-            //modelBuilder.Entity<Country>()
-            //.HasMany(e => e.CountryApportionments)
-            //.WithOne(e => e.Country)
-            //.HasForeignKey(e => e.CountryId)
-            //.IsRequired(true);
-
-            //modelBuilder.Entity<CostType>()
-            //.HasMany(e => e.CountryApportionments)
-            //.WithOne(e => e.CostType)
-            //.HasForeignKey(e => e.CostTypeId)
-            //.IsRequired(true);
-
             modelBuilder.Entity<LapcapDataTemplateMaster>()
             .HasMany(e => e.Details)
             .WithOne(e => e.LapcapDataTemplateMaster)
@@ -158,6 +146,36 @@ namespace EPR.Calculator.API.Data
             .HasMany(e => e.RunDetails)
             .WithOne(e => e.DefaultParameterSettingMaster)
             .HasForeignKey(e => e.DefaultParameterSettingMasterId);
+
+            modelBuilder.Entity<CalculatorRun>()
+            .HasMany(e => e.CountryApportionments)
+            .WithOne(e => e.CalculatorRun)
+            .HasForeignKey(e => e.CalculatorRunId);
+
+            modelBuilder.Entity<CalculatorRun>()
+            .HasMany(e => e.ProducerDetails)
+            .WithOne(e => e.CalculatorRun)
+            .HasForeignKey(e => e.CalculatorRunId);
+
+            modelBuilder.Entity<Material>()
+            .HasMany(e => e.ProducerReportedMaterials)
+            .WithOne(e => e.Material)
+            .HasForeignKey(e => e.MaterialId);
+
+            modelBuilder.Entity<ProducerDetail>()
+            .HasMany(e => e.ProducerReportedMaterials)
+            .WithOne(e => e.ProducerDetail)
+            .HasForeignKey(e => e.ProducerDetailId);
+
+            modelBuilder.Entity<CostType>()
+            .HasMany(e => e.CountryApportionments)
+            .WithOne(e => e.CostType)
+            .HasForeignKey(e => e.CostTypeId);
+
+            modelBuilder.Entity<Country>()
+            .HasMany(e => e.CountryApportionments)
+            .WithOne(e => e.Country)
+            .HasForeignKey(e => e.CountryId);
 
             Seeder.Initialize(modelBuilder);
         }

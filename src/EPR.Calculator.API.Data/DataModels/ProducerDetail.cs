@@ -17,7 +17,8 @@ namespace EPR.Calculator.API.Data.DataModels
         public int ProducerId { get; set; }
 
         [Column("subsidiary_id")]
-        public int? SubsidiaryId { get; set; }
+        [StringLength(400)]
+        public string? SubsidiaryId { get; set; }
 
         [Column("producer_name")]
         [StringLength(400)]
@@ -26,8 +27,8 @@ namespace EPR.Calculator.API.Data.DataModels
         [Column("calculator_run_id")]
         public required int CalculatorRunId { get; set; }
 
-        //public ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = new List<ProducerReportedMaterial>();
+        public ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = new List<ProducerReportedMaterial>();
 
-       // public required virtual CalculatorRun CalculatorRun { get; set; }
+       public required virtual CalculatorRun CalculatorRun { get; set; }
     }
 }
