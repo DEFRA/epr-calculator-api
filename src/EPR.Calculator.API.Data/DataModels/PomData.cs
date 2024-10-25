@@ -10,8 +10,7 @@ namespace EPR.Calculator.API.Data.DataModels
     public class PomData
     {
         [Column("organisation_id")]
-        [StringLength(400)]
-        public string? OrganisationId { get; set; }
+        public int? OrganisationId { get; set; }
 
         [Column("subsidiary_id")]
         [StringLength(400)]
@@ -34,12 +33,10 @@ namespace EPR.Calculator.API.Data.DataModels
         public string? PackagingClass { get; set; }
 
         [Column("packaging_material")]
-        [StringLength(400)]
         public string? PackagingMaterial { get; set; }
 
         [Column("packaging_material_weight")]
-        [StringLength(400)]
-        public string? PackagingMaterialWeight { get; set; }
+        public double? PackagingMaterialWeight { get; set; }
 
         [Column("load_ts")]
         public required DateTime LoadTimeStamp { get; set; }

@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241024125526_OrganisationIDToInt")]
+    partial class OrganisationIDToInt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,35 +133,35 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2024, 10, 24, 14, 43, 19, 961, DateTimeKind.Local).AddTicks(7112),
+                            CreatedAt = new DateTime(2024, 10, 24, 13, 55, 26, 589, DateTimeKind.Local).AddTicks(5014),
                             CreatedBy = "Test User",
                             Status = "IN THE QUEUE"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2024, 10, 24, 14, 43, 19, 961, DateTimeKind.Local).AddTicks(7118),
+                            CreatedAt = new DateTime(2024, 10, 24, 13, 55, 26, 589, DateTimeKind.Local).AddTicks(5017),
                             CreatedBy = "Test User",
                             Status = "RUNNING"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2024, 10, 24, 14, 43, 19, 961, DateTimeKind.Local).AddTicks(7123),
+                            CreatedAt = new DateTime(2024, 10, 24, 13, 55, 26, 589, DateTimeKind.Local).AddTicks(5019),
                             CreatedBy = "Test User",
                             Status = "UNCLASSIFIED"
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2024, 10, 24, 14, 43, 19, 961, DateTimeKind.Local).AddTicks(7128),
+                            CreatedAt = new DateTime(2024, 10, 24, 13, 55, 26, 589, DateTimeKind.Local).AddTicks(5022),
                             CreatedBy = "Test User",
                             Status = "PLAY"
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2024, 10, 24, 14, 43, 19, 961, DateTimeKind.Local).AddTicks(7132),
+                            CreatedAt = new DateTime(2024, 10, 24, 13, 55, 26, 589, DateTimeKind.Local).AddTicks(5024),
                             CreatedBy = "Test User",
                             Status = "ERROR"
                         });
@@ -273,8 +276,9 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("packaging_material");
 
-                    b.Property<double?>("PackagingMaterialWeight")
-                        .HasColumnType("float")
+                    b.Property<string>("PackagingMaterialWeight")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
                         .HasColumnName("packaging_material_weight");
 
                     b.Property<string>("PackagingType")
@@ -1176,11 +1180,13 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("packaging_class");
 
                     b.Property<string>("PackagingMaterial")
-                        .HasColumnType("nvarchar(max)")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
                         .HasColumnName("packaging_material");
 
-                    b.Property<double?>("PackagingMaterialWeight")
-                        .HasColumnType("float")
+                    b.Property<string>("PackagingMaterialWeight")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
                         .HasColumnName("packaging_material_weight");
 
                     b.Property<string>("PackagingType")
