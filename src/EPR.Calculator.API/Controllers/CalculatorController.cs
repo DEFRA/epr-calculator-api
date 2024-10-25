@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Newtonsoft.Json;
 using System;
+using System.Text;
+using System.IO;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -26,22 +28,45 @@ namespace EPR.Calculator.API.Controllers
             _serviceBusClientFactory = serviceBusClientFactory;
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("storeResultFile")]
-        public async IActionResult StoreResultFile([FromBody] string request)
+        public IActionResult StoreResultFile()
         {
             try
             {
-                var blobStorageConnectionString = this._configuration.GetSection("BlobStorage").GetSection("ConnectionString").Value;
-                var blobStorageContainerName = this._configuration.GetSection("BlobStorage").GetSection("ContainerName").Value;
+                var calculatorRuns = _context.CalculatorRuns;
 
-                BlobServiceClient blobServiceClient = new BlobServiceClient(blobStorageConnectionString);
-                BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(blobStorageContainerName);
-                BlobClient blobClient = blobContainerClient.GetBlobClient(request);
+                var csvContent = new StringBuilder();
 
-                using var fileStream = File.OpenRead(request);
-                await blobClient.UploadAsync(fileStream, true);
-                fileStream.Close();
+                var properties = typeof(CalculatorRun).GetProperties();
+
+                csvContent.AppendLine(string.Join(",", properties.Select(p => p.Name)));
+
+                foreach (var calculatorRun in calculatorRuns)
+                {
+                    var values = properties.Select(p => p.GetValue(calculatorRun, null)?.ToString() ?? string.Empty);
+                    csvContent.AppendLine(string.Join(",", values));
+                }
+
+                System.IO.File.WriteAllText("result.csv", csvContent.ToString());
+
+                var content = System.IO.File.ReadAllText("result.csv");
+
+                //foreach (var calculatorRun in calculatorRuns)
+                //{
+                //    sb.AppendLine(JsonConvert.SerializeObject()
+                //}
+
+                //var blobStorageConnectionString = this._configuration.GetSection("BlobStorage").GetSection("ConnectionString").Value;
+                //var blobStorageContainerName = this._configuration.GetSection("BlobStorage").GetSection("ContainerName").Value;
+
+                //BlobServiceClient blobServiceClient = new BlobServiceClient(blobStorageConnectionString);
+                //BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(blobStorageContainerName);
+                //BlobClient blobClient = blobContainerClient.GetBlobClient(request);
+
+                //using var fileStream = File.OpenRead(request);
+                //await blobClient.UploadAsync(fileStream, true);
+                //fileStream.Close();
 
                 return new OkResult();
             }
@@ -49,13 +74,7 @@ namespace EPR.Calculator.API.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
-
-
-
-
         }
-
-
 
         [HttpPost]
         [Route("calculatorRun")]
