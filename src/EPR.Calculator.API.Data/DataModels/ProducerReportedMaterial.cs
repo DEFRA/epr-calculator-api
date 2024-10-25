@@ -28,8 +28,8 @@ namespace EPR.Calculator.API.Data.DataModels
         [StringLength(400)]
         public required string PackagingTonnage { get; set; }
 
-        public required virtual ProducerDetail ProducerDetail { get; set; }
+        //public required virtual ProducerDetail ProducerDetail { get; set; }
 
-        public required virtual Material Material { get; set; }
+        //public required virtual Material Material { get; set; }
     }
 }

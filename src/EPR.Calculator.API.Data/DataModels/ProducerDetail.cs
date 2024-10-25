@@ -26,6 +26,8 @@ namespace EPR.Calculator.API.Data.DataModels
         [Column("calculator_run_id")]
         public required int CalculatorRunId { get; set; }
 
-        public required virtual CalculatorRun CalculatorRun { get; set; }
+        //public ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = new List<ProducerReportedMaterial>();
+
+       // public required virtual CalculatorRun CalculatorRun { get; set; }
     }
 }

@@ -18,7 +18,7 @@ namespace EPR.Calculator.API.Data.DataModels
         public decimal Apportionment { get; set; }
 
         [Column("country_id")]
-        public int? Country_Id { get; set; }
+        public int? CountryId { get; set; }
 
         [Column("cost_type_id")]
         [StringLength(250)]
@@ -27,10 +27,10 @@ namespace EPR.Calculator.API.Data.DataModels
         [Column("calculator_run_id")]
         public required int CalculatorRunId { get; set; }
 
-        public required virtual Country Country { get; set; }
+        //public required virtual Country Country { get; set; }
 
-        public required virtual CostType CostType { get; set; }
+        //public required virtual CostType CostType { get; set; }
 
-        public required virtual CalculatorRun CalculatorRun { get; set; }
+        //public required virtual CalculatorRun CalculatorRun { get; set; }
     }
 }

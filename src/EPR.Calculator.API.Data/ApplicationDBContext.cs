@@ -80,6 +80,32 @@ namespace EPR.Calculator.API.Data
             modelBuilder.Entity<LapcapDataMaster>();
             modelBuilder.Entity<LapcapDataDetail>();
 
+            modelBuilder.Entity<Material>();
+            modelBuilder.Entity<Country>();
+            modelBuilder.Entity<CostType>();
+            modelBuilder.Entity<CountryApportionment>();
+            modelBuilder.Entity<ProducerDetail>();
+            modelBuilder.Entity<ProducerReportedMaterial>();
+
+            //modelBuilder.Entity<Country>()
+            //.HasMany(e => e.CountryApportionments)
+            //.WithOne(e => e.Country)
+            //.HasForeignKey(e => e.CountryId)
+            //.IsRequired(true);
+
+            //modelBuilder.Entity<CostType>()
+            //.HasMany(e => e.CountryApportionments)
+            //.WithOne(e => e.CostType)
+            //.HasForeignKey(e => e.CostTypeId)
+            //.IsRequired(true);
+
+            modelBuilder.Entity<LapcapDataTemplateMaster>()
+            .HasMany(e => e.Details)
+            .WithOne(e => e.LapcapDataTemplateMaster)
+            .HasForeignKey(e => e.UniqueReference)
+            .IsRequired(true);
+
+
             modelBuilder.Entity<LapcapDataMaster>()
             .HasMany(e => e.Details)
             .WithOne(e => e.LapcapDataMaster)
