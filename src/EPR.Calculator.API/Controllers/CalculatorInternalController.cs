@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
@@ -41,7 +42,7 @@ namespace EPR.Calculator.API.Controllers
 
             if (!request.isSuccessful && calcRun != null)
             {
-                calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassiciations.ERROR.ToString()).Id;
+                calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.ERROR.ToString()).Id;
                 this.context.SaveChanges();
                 return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
             }
@@ -116,7 +117,7 @@ namespace EPR.Calculator.API.Controllers
 
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-                    calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassiciations.RUNNING.ToString()).Id;
+                    calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
                     this.context.SaveChanges();
                     transaction.Commit();

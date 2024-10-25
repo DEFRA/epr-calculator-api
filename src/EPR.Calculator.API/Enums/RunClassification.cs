@@ -1,18 +1,22 @@
 ﻿using System.ComponentModel;
 
-namespace EPR.Calculator.API.Models
+namespace EPR.Calculator.API.Enums
 {
-    public enum RunClassiciations
+    public enum RunClassification
     {
         [Description("IN THE QUEUE")]
         INTHEQUEUE = 1,
+
         [Description("RUNNING")]
-        RUNNING,
+        RUNNING = 2,
+
         [Description("UNCLASSIFIED")]
-        UNCLASSIFIED,
+        UNCLASSIFIED = 3,
+
         [Description("PLAY")]
-        PLAY,
+        PLAY = 4,
+
         [Description("ERROR")]
-        ERROR
+        ERROR = 5
     }
 }

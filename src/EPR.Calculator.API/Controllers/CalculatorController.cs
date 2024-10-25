@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -96,7 +97,7 @@ namespace EPR.Calculator.API.Controllers
                         Financial_Year = request.FinancialYear,
                         CreatedBy = request.CreatedBy,
                         CreatedAt = DateTime.Now,
-                        CalculatorRunClassificationId = 1,
+                        CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                         DefaultParameterSettingMasterId = activeDefaultParameterSettingsMasterId,
                         LapcapDataMasterId = activeLapcapDataMasterId
                     };
