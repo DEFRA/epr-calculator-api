@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using System;
 using System.Text;
 using System.IO;
+using EPR.Calculator.API.Utils;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -44,7 +45,7 @@ namespace EPR.Calculator.API.Controllers
 
                 foreach (var calculatorRun in calculatorRuns)
                 {
-                    var values = properties.Select(p => p.GetValue(calculatorRun, null)?.ToString() ?? string.Empty);
+                    var values = properties.Select(p => CsvSanitiser.SanitiseData(p.GetValue(calculatorRun, null)));
                     csvContent.AppendLine(string.Join(",", values));
                 }
 
