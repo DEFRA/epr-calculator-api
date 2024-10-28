@@ -31,7 +31,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("storeResultFile")]
-        public IActionResult StoreResultFile()
+        public async Task<IActionResult> StoreResultFile()
         {
             try
             {
@@ -41,7 +41,7 @@ namespace EPR.Calculator.API.Controllers
 
                 var properties = typeof(CalculatorRun).GetProperties();
 
-                csvContent.AppendLine(string.Join(",", properties.Select(p => p.Name)));
+                csvContent.AppendLine(string.Join(",", properties.Select(p => CsvSanitiser.SanitiseData(p.Name))));
 
                 foreach (var calculatorRun in calculatorRuns)
                 {
@@ -51,23 +51,16 @@ namespace EPR.Calculator.API.Controllers
 
                 System.IO.File.WriteAllText("result.csv", csvContent.ToString());
 
-                var content = System.IO.File.ReadAllText("result.csv");
+                var blobStorageConnectionString = this._configuration.GetSection("BlobStorage").GetSection("ConnectionString").Value;
+                var blobStorageContainerName = this._configuration.GetSection("BlobStorage").GetSection("ContainerName").Value;
 
-                //foreach (var calculatorRun in calculatorRuns)
-                //{
-                //    sb.AppendLine(JsonConvert.SerializeObject()
-                //}
+                BlobServiceClient blobServiceClient = new BlobServiceClient(blobStorageConnectionString);
+                BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(blobStorageContainerName);
+                BlobClient blobClient = blobContainerClient.GetBlobClient("result.csv");
 
-                //var blobStorageConnectionString = this._configuration.GetSection("BlobStorage").GetSection("ConnectionString").Value;
-                //var blobStorageContainerName = this._configuration.GetSection("BlobStorage").GetSection("ContainerName").Value;
-
-                //BlobServiceClient blobServiceClient = new BlobServiceClient(blobStorageConnectionString);
-                //BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(blobStorageContainerName);
-                //BlobClient blobClient = blobContainerClient.GetBlobClient(request);
-
-                //using var fileStream = File.OpenRead(request);
-                //await blobClient.UploadAsync(fileStream, true);
-                //fileStream.Close();
+                using var fileStream = System.IO.File.OpenRead("result.csv");
+                await blobClient.UploadAsync(fileStream, true);
+                fileStream.Close();
 
                 return new OkResult();
             }
