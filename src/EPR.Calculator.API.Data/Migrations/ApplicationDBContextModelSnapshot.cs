@@ -130,35 +130,35 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2024, 10, 21, 11, 23, 14, 338, DateTimeKind.Local).AddTicks(5741),
+                            CreatedAt = new DateTime(2024, 10, 24, 14, 43, 19, 961, DateTimeKind.Local).AddTicks(7112),
                             CreatedBy = "Test User",
                             Status = "IN THE QUEUE"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2024, 10, 21, 11, 23, 14, 338, DateTimeKind.Local).AddTicks(5744),
+                            CreatedAt = new DateTime(2024, 10, 24, 14, 43, 19, 961, DateTimeKind.Local).AddTicks(7118),
                             CreatedBy = "Test User",
                             Status = "RUNNING"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2024, 10, 21, 11, 23, 14, 338, DateTimeKind.Local).AddTicks(5746),
+                            CreatedAt = new DateTime(2024, 10, 24, 14, 43, 19, 961, DateTimeKind.Local).AddTicks(7123),
                             CreatedBy = "Test User",
                             Status = "UNCLASSIFIED"
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2024, 10, 21, 11, 23, 14, 338, DateTimeKind.Local).AddTicks(5749),
+                            CreatedAt = new DateTime(2024, 10, 24, 14, 43, 19, 961, DateTimeKind.Local).AddTicks(7128),
                             CreatedBy = "Test User",
                             Status = "PLAY"
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2024, 10, 21, 11, 23, 14, 338, DateTimeKind.Local).AddTicks(5751),
+                            CreatedAt = new DateTime(2024, 10, 24, 14, 43, 19, 961, DateTimeKind.Local).AddTicks(7132),
                             CreatedBy = "Test User",
                             Status = "ERROR"
                         });
@@ -288,7 +288,12 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("submission_period");
 
-                    b.HasKey("OrganisationId", "SubsidaryId");
+                    b.Property<string>("SubsidaryId")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("subsidiary_id");
+
+                    b.HasKey("Id");
 
                     b.HasKey("Id");
 
