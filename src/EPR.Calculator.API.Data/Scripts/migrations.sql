@@ -2257,3 +2257,403 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    CREATE TABLE [cost_type] (
+        [id] int NOT NULL IDENTITY,
+        [code] nvarchar(400) NOT NULL,
+        [name] nvarchar(400) NOT NULL,
+        [description] nvarchar(2000) NULL,
+        CONSTRAINT [PK_cost_type] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    CREATE TABLE [country] (
+        [id] int NOT NULL IDENTITY,
+        [code] nvarchar(400) NOT NULL,
+        [name] nvarchar(400) NOT NULL,
+        [description] nvarchar(2000) NULL,
+        CONSTRAINT [PK_country] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    CREATE TABLE [material] (
+        [id] int NOT NULL IDENTITY,
+        [code] nvarchar(400) NOT NULL,
+        [name] nvarchar(400) NOT NULL,
+        [description] nvarchar(2000) NULL,
+        CONSTRAINT [PK_material] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    CREATE TABLE [producer_detail] (
+        [id] int NOT NULL IDENTITY,
+        [producer_id] int NOT NULL,
+        [subsidiary_id] nvarchar(400) NULL,
+        [producer_name] nvarchar(400) NULL,
+        [calculator_run_id] int NOT NULL,
+        CONSTRAINT [PK_producer_detail] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_producer_detail_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    CREATE TABLE [country_apportionment] (
+        [id] int NOT NULL IDENTITY,
+        [apportionment] decimal(18,2) NOT NULL,
+        [country_id] int NOT NULL,
+        [cost_type_id] int NOT NULL,
+        [calculator_run_id] int NOT NULL,
+        CONSTRAINT [PK_country_apportionment] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_country_apportionment_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE,
+        CONSTRAINT [FK_country_apportionment_cost_type_cost_type_id] FOREIGN KEY ([cost_type_id]) REFERENCES [cost_type] ([id]) ON DELETE CASCADE,
+        CONSTRAINT [FK_country_apportionment_country_country_id] FOREIGN KEY ([country_id]) REFERENCES [country] ([id]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    CREATE TABLE [producer_reported_material] (
+        [id] int NOT NULL IDENTITY,
+        [material_id] int NOT NULL,
+        [producer_detail_id] int NOT NULL,
+        [packaging_type] nvarchar(400) NOT NULL,
+        [packaging_tonnage] decimal(18,2) NOT NULL,
+        CONSTRAINT [PK_producer_reported_material] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_producer_reported_material_material_material_id] FOREIGN KEY ([material_id]) REFERENCES [material] ([id]) ON DELETE CASCADE,
+        CONSTRAINT [FK_producer_reported_material_producer_detail_producer_detail_id] FOREIGN KEY ([producer_detail_id]) REFERENCES [producer_detail] ([id]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-25T15:04:19.9291118+01:00''
+    WHERE [id] = 1;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-25T15:04:19.9291125+01:00''
+    WHERE [id] = 2;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-25T15:04:19.9291130+01:00''
+    WHERE [id] = 3;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-25T15:04:19.9291135+01:00''
+    WHERE [id] = 4;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-25T15:04:19.9291140+01:00''
+    WHERE [id] = 5;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    CREATE INDEX [IX_country_apportionment_calculator_run_id] ON [country_apportionment] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    CREATE INDEX [IX_country_apportionment_cost_type_id] ON [country_apportionment] ([cost_type_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    CREATE INDEX [IX_country_apportionment_country_id] ON [country_apportionment] ([country_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    CREATE INDEX [IX_producer_detail_calculator_run_id] ON [producer_detail] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    CREATE INDEX [IX_producer_reported_material_material_id] ON [producer_reported_material] ([material_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    CREATE INDEX [IX_producer_reported_material_producer_detail_id] ON [producer_reported_material] ([producer_detail_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20241025140420_CalculationResultsTables', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241028092305_CreateMasterDataForCalcResultsTables'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'code', N'name', N'description') AND [object_id] = OBJECT_ID(N'[cost_type]'))
+        SET IDENTITY_INSERT [cost_type] ON;
+    EXEC(N'INSERT INTO [cost_type] ([id], [code], [name], [description])
+    VALUES (1, N''1'', N''Fee for LA Disposal Costs'', N''Fee for LA Disposal Costs''),
+    (2, N''4'', N''LA Data Prep Charge'', N''LA Data Prep Charge'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'code', N'name', N'description') AND [object_id] = OBJECT_ID(N'[cost_type]'))
+        SET IDENTITY_INSERT [cost_type] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241028092305_CreateMasterDataForCalcResultsTables'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'code', N'name', N'description') AND [object_id] = OBJECT_ID(N'[country]'))
+        SET IDENTITY_INSERT [country] ON;
+    EXEC(N'INSERT INTO [country] ([id], [code], [name], [description])
+    VALUES (1, N''ENG'', N''England'', N''England''),
+    (2, N''WLS'', N''Wales'', N''Wales''),
+    (3, N''SCT'', N''Scotland'', N''Scotland''),
+    (4, N''NIR'', N''Northern Ireland'', N''Northern Ireland'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'code', N'name', N'description') AND [object_id] = OBJECT_ID(N'[country]'))
+        SET IDENTITY_INSERT [country] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241028092305_CreateMasterDataForCalcResultsTables'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'code', N'name', N'description') AND [object_id] = OBJECT_ID(N'[material]'))
+        SET IDENTITY_INSERT [material] ON;
+    EXEC(N'INSERT INTO [material] ([id], [code], [name], [description])
+    VALUES (1, N''AL'', N''Aluminum'', N''Aluminum''),
+    (2, N''FC'', N''Fiber composite'', N''Fiber composite''),
+    (3, N''GL'', N''Glass'', N''Glass''),
+    (4, N''PC'', N''Paper or card'', N''Paper or card''),
+    (5, N''PL'', N''Plastic'', N''Plastic''),
+    (6, N''ST'', N''Steel'', N''Steel''),
+    (7, N''WD'', N''Wood'', N''Wood''),
+    (8, N''OT'', N''Other materials'', N''Other materials'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'code', N'name', N'description') AND [object_id] = OBJECT_ID(N'[material]'))
+        SET IDENTITY_INSERT [material] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241028092305_CreateMasterDataForCalcResultsTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20241028092305_CreateMasterDataForCalcResultsTables', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
+)
+BEGIN
+    ALTER TABLE [pom_data] ADD [submission_period_desc] nvarchar(max) NOT NULL DEFAULT N'';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [submission_period_desc] nvarchar(max) NOT NULL DEFAULT N'';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
+)
+BEGIN
+    ALTER TABLE [calculator_run_pom_data_detail] ADD [submission_period_desc] nvarchar(max) NOT NULL DEFAULT N'';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [submission_period_desc] nvarchar(max) NOT NULL DEFAULT N'';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-28T11:43:13.4928134+00:00''
+    WHERE [id] = 1;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-28T11:43:13.4928137+00:00''
+    WHERE [id] = 2;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-28T11:43:13.4928139+00:00''
+    WHERE [id] = 3;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-28T11:43:13.4928141+00:00''
+    WHERE [id] = 4;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-10-28T11:43:13.4928143+00:00''
+    WHERE [id] = 5;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
