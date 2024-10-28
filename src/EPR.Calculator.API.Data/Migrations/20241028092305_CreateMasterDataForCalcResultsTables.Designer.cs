@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241028092305_CreateMasterDataForCalcResultsTables")]
+    partial class CreateMasterDataForCalcResultsTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,35 +133,35 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2024, 10, 28, 11, 43, 13, 492, DateTimeKind.Local).AddTicks(8134),
+                            CreatedAt = new DateTime(2024, 10, 28, 9, 23, 4, 741, DateTimeKind.Local).AddTicks(9985),
                             CreatedBy = "Test User",
                             Status = "IN THE QUEUE"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2024, 10, 28, 11, 43, 13, 492, DateTimeKind.Local).AddTicks(8137),
+                            CreatedAt = new DateTime(2024, 10, 28, 9, 23, 4, 741, DateTimeKind.Local).AddTicks(9991),
                             CreatedBy = "Test User",
                             Status = "RUNNING"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2024, 10, 28, 11, 43, 13, 492, DateTimeKind.Local).AddTicks(8139),
+                            CreatedAt = new DateTime(2024, 10, 28, 9, 23, 4, 741, DateTimeKind.Local).AddTicks(9995),
                             CreatedBy = "Test User",
                             Status = "UNCLASSIFIED"
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2024, 10, 28, 11, 43, 13, 492, DateTimeKind.Local).AddTicks(8141),
+                            CreatedAt = new DateTime(2024, 10, 28, 9, 23, 4, 742, DateTimeKind.Local),
                             CreatedBy = "Test User",
                             Status = "PLAY"
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2024, 10, 28, 11, 43, 13, 492, DateTimeKind.Local).AddTicks(8143),
+                            CreatedAt = new DateTime(2024, 10, 28, 9, 23, 4, 742, DateTimeKind.Local).AddTicks(4),
                             CreatedBy = "Test User",
                             Status = "ERROR"
                         });
@@ -189,11 +192,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("organisation_name");
-
-                    b.Property<string>("SubmissionPeriodDesc")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("submission_period_desc");
 
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)
@@ -292,11 +290,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("submission_period");
-
-                    b.Property<string>("SubmissionPeriodDesc")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("submission_period_desc");
 
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)
@@ -1286,11 +1279,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("organisation_name");
 
-                    b.Property<string>("SubmissionPeriodDesc")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("submission_period_desc");
-
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
@@ -1337,11 +1325,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("submission_period");
-
-                    b.Property<string>("SubmissionPeriodDesc")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("submission_period_desc");
 
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)

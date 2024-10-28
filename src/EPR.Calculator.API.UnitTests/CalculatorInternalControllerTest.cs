@@ -73,6 +73,7 @@ namespace EPR.Calculator.API.UnitTests
                 Id = 0,
                 SubmissionPeriod = "some-period",
                 CalculatorRunPomDataMasterId = pomMaster.Id,
+                SubmissionPeriodDesc= "some-period-desc",
             };
 
             this.dbContext?.CalculatorRunPomDataDetails.Add(pomDataDetail);
@@ -145,7 +146,8 @@ namespace EPR.Calculator.API.UnitTests
                 LoadTimestamp = DateTime.UtcNow,
                 OrganisationName = "OrgName",
                 OrganisationId = 1345,
-                SubsidaryId = "Sub1d1"
+                SubsidaryId = "Sub1d1",
+                SubmissionPeriodDesc = "some-period-desc"
             };
             var pomData = new PomData
             {
@@ -157,6 +159,7 @@ namespace EPR.Calculator.API.UnitTests
                 PackagingMaterial = "Aluminium",
                 PackagingMaterialWeight = 200,
                 SubmissionPeriod = "2024-25",
+                SubmissionPeriodDesc = "November 2024 to June 2025"
             };
             var pomDataList = new List<PomData> { pomData };
             var organisationDataList = new List<OrganisationData> { organisation };
