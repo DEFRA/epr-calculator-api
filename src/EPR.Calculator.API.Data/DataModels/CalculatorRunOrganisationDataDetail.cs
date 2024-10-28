@@ -23,6 +23,9 @@ namespace EPR.Calculator.API.Data.DataModels
         [Column("organisation_name")]
         public required string OrganisationName { get; set; }
 
+        [Column("submission_period_desc")]
+        public required string SubmissionPeriodDesc { get; set; }
+
         [Column("load_ts")]
         public DateTime LoadTimeStamp { get; set; }
 

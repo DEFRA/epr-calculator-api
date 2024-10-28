@@ -38,6 +38,9 @@ namespace EPR.Calculator.API.Data.DataModels
         [Column("packaging_material_weight")]
         public double? PackagingMaterialWeight { get; set; }
 
+        [Column("submission_period_desc")]
+        public required string SubmissionPeriodDesc { get; set; }        
+
         [Column("load_ts")]
         public required DateTime LoadTimeStamp { get; set; }
     }

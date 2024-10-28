@@ -74,6 +74,7 @@ namespace EPR.Calculator.API.Controllers
                             SubsidaryId = organisation.SubsidaryId,
                             LoadTimeStamp = organisation.LoadTimestamp,
                             OrganisationName = organisation.OrganisationName,
+                            SubmissionPeriodDesc = organisation.SubmissionPeriodDesc,
                             CalculatorRunOrganisationDataMaster = calcOrganisationMaster,
                         };
 
@@ -106,6 +107,7 @@ namespace EPR.Calculator.API.Controllers
                             PackagingClass = pomData.PackagingClass,
                             PackagingMaterial = pomData.PackagingMaterial,
                             PackagingMaterialWeight = pomData.PackagingMaterialWeight,
+                            SubmissionPeriodDesc = pomData.SubmissionPeriodDesc,
                             CalculatorRunPomDataMaster = calcRunPomMaster,
                         };
 
