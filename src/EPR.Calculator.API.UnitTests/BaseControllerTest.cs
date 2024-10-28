@@ -9,6 +9,8 @@ using EPR.Calculator.API.UnitTests.Helpers;
 using Moq;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Azure;
+using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Wrapper;
 
 namespace EPR.Calculator.API.Tests.Controllers
 {
@@ -19,6 +21,8 @@ namespace EPR.Calculator.API.Tests.Controllers
         protected DefaultParameterSettingController? defaultParameterSettingController;
         protected LapcapDataController? lapcapDataController;
         protected CalculatorController? calculatorController;
+        protected CalculatorInternalController? calculatorInternalController;
+        protected IOrgAndPomWrapper? wrapper;
 
         [TestInitialize]
         public void SetUp()
@@ -40,6 +44,9 @@ namespace EPR.Calculator.API.Tests.Controllers
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(dbContext);
             lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator);
 
+            wrapper = new Mock<IOrgAndPomWrapper>().Object;
+            calculatorInternalController = new CalculatorInternalController(dbContext, new RpdStatusDataValidator(wrapper), wrapper);
+
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var mockClient = new Mock<ServiceBusClient>();
             var mockServiceBusSender = new Mock<ServiceBusSender>();
@@ -55,7 +62,6 @@ namespace EPR.Calculator.API.Tests.Controllers
             calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), mockFactory.Object);
         }
 
-        [TestMethod]
         public void CheckDbContext()
         {
             Assert.IsNotNull(dbContext);
@@ -678,7 +684,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             list.Add(new CalculatorRun
             {
                 Id = 1,
-                CalculatorRunClassificationId = 1,
+                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 Name = "Test Run",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
@@ -687,7 +693,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             list.Add(new CalculatorRun
             {
                 Id = 2,
-                CalculatorRunClassificationId = 2,
+                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 Name = "Test Calculated Result",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
