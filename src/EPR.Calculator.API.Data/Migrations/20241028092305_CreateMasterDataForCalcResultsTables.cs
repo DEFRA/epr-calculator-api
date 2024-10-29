@@ -36,7 +36,7 @@ namespace EPR.Calculator.API.Data.Migrations
                values: new object[,]
                {
                    {"1", "AL","Aluminum","Aluminum" },
-                   {"2", "FC","Fiber composite","Fiber composite" },
+                   {"2", "FC","Fibre composite","Fibre composite" },
                    {"3", "GL","Glass","Glass",},
                    {"4", "PC","Paper or card","Paper or card" },
                    {"5", "PL","Plastic","Plastic" },
