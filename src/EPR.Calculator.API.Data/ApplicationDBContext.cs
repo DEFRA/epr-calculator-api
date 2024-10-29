@@ -40,7 +40,7 @@ namespace EPR.Calculator.API.Data
 
         public DbSet<CalculatorRunOrganisationDataDetail> CalculatorRunOrganisationDataDetails { get; set; }
 
-        public DbSet<CalculatorRunOrganisationDataMaster> CalculatorRunOrganisationDataMaster {  get; set; }
+        public DbSet<CalculatorRunOrganisationDataMaster> CalculatorRunOrganisationDataMaster { get; set; }
 
         public DbSet<CalculatorRunPomDataDetail> CalculatorRunPomDataDetails { get; set; }
 
@@ -49,6 +49,18 @@ namespace EPR.Calculator.API.Data
         public DbSet<OrganisationData> OrganisationData { get; set; }
 
         public DbSet<PomData> PomData { get; set; }
+
+        public DbSet<Material> Material { get; set; }
+
+        public DbSet<ProducerDetail> ProducerDetail { get; set; }
+
+        public DbSet<CountryApportionment> CountryApportionment { get; set; }
+
+        public DbSet<ProducerReportedMaterial> ProducerReportedMaterial { get; set; }
+
+        public DbSet<CostType> CostType { get; set; }
+
+        public DbSet<Country> Country { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -68,6 +80,20 @@ namespace EPR.Calculator.API.Data
             modelBuilder.Entity<LapcapDataMaster>();
             modelBuilder.Entity<LapcapDataDetail>();
 
+            modelBuilder.Entity<Material>();
+            modelBuilder.Entity<Country>();
+            modelBuilder.Entity<CostType>();
+            modelBuilder.Entity<CountryApportionment>();
+            modelBuilder.Entity<ProducerDetail>();
+            modelBuilder.Entity<ProducerReportedMaterial>();
+
+            modelBuilder.Entity<LapcapDataTemplateMaster>()
+            .HasMany(e => e.Details)
+            .WithOne(e => e.LapcapDataTemplateMaster)
+            .HasForeignKey(e => e.UniqueReference)
+            .IsRequired(true);
+
+
             modelBuilder.Entity<LapcapDataMaster>()
             .HasMany(e => e.Details)
             .WithOne(e => e.LapcapDataMaster)
@@ -83,7 +109,7 @@ namespace EPR.Calculator.API.Data
             modelBuilder.Entity<CalculatorRunOrganisationDataDetail>();
             modelBuilder.Entity<CalculatorRunOrganisationDataMaster>()
             .HasMany(e => e.Details)
-            .WithOne(e => e.CalculatorRunOrganisationDataMaster )
+            .WithOne(e => e.CalculatorRunOrganisationDataMaster)
             .HasForeignKey(e => e.CalculatorRunOrganisationDataMasterId)
             .IsRequired(true);
 
@@ -120,6 +146,36 @@ namespace EPR.Calculator.API.Data
             .HasMany(e => e.RunDetails)
             .WithOne(e => e.DefaultParameterSettingMaster)
             .HasForeignKey(e => e.DefaultParameterSettingMasterId);
+
+            modelBuilder.Entity<CalculatorRun>()
+            .HasMany(e => e.CountryApportionments)
+            .WithOne(e => e.CalculatorRun)
+            .HasForeignKey(e => e.CalculatorRunId);
+
+            modelBuilder.Entity<CalculatorRun>()
+            .HasMany(e => e.ProducerDetails)
+            .WithOne(e => e.CalculatorRun)
+            .HasForeignKey(e => e.CalculatorRunId);
+
+            modelBuilder.Entity<Material>()
+            .HasMany(e => e.ProducerReportedMaterials)
+            .WithOne(e => e.Material)
+            .HasForeignKey(e => e.MaterialId);
+
+            modelBuilder.Entity<ProducerDetail>()
+            .HasMany(e => e.ProducerReportedMaterials)
+            .WithOne(e => e.ProducerDetail)
+            .HasForeignKey(e => e.ProducerDetailId);
+
+            modelBuilder.Entity<CostType>()
+            .HasMany(e => e.CountryApportionments)
+            .WithOne(e => e.CostType)
+            .HasForeignKey(e => e.CostTypeId);
+
+            modelBuilder.Entity<Country>()
+            .HasMany(e => e.CountryApportionments)
+            .WithOne(e => e.Country)
+            .HasForeignKey(e => e.CountryId);
 
             Seeder.Initialize(modelBuilder);
         }
