@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
@@ -17,12 +18,15 @@ namespace EPR.Calculator.API.Controllers
         private readonly ApplicationDBContext context;
         private readonly IConfiguration _configuration;
         private readonly IAzureClientFactory<ServiceBusClient> _serviceBusClientFactory;
+        private readonly BlobStorageService _blobStorageService;
 
-        public CalculatorController(ApplicationDBContext context, IConfiguration configuration, IAzureClientFactory<ServiceBusClient> serviceBusClientFactory)
+
+        public CalculatorController(ApplicationDBContext context, IConfiguration configuration, IAzureClientFactory<ServiceBusClient> serviceBusClientFactory, BlobStorageService blobStorageService)
         {
             this.context = context;
             _configuration = configuration;
             _serviceBusClientFactory = serviceBusClientFactory;
+            _blobStorageService = blobStorageService;
         }
 
         [HttpPost]
@@ -246,6 +250,19 @@ namespace EPR.Calculator.API.Controllers
 
             // All good, return empty string
             return string.Empty;
+        }
+
+        [HttpGet]
+        [Route("ResultFile")]
+        public async Task<IActionResult> GetResultFile()
+        {
+            var resultFileContent = await _blobStorageService.GetResultFileContentAsync();
+            if (resultFileContent == null)
+            {
+                return NotFound("Result file not found.");
+            }
+
+            return Ok(resultFileContent);
         }
     }
 }

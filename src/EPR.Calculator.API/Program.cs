@@ -1,6 +1,8 @@
 using Azure.Messaging.ServiceBus;
+using Azure.Storage.Blobs;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Exceptions;
+using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using FluentValidation;
@@ -35,6 +37,22 @@ var serviceBusQueueName = builder.Configuration.GetSection("ServiceBus").GetSect
 var retryPeriod = double.Parse(builder.Configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value);
 var retryCount = int.Parse(builder.Configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value);
 #pragma warning restore CS8604 // Possible null reference argument.
+
+builder.Services.Configure<BlobStorageSettings>(
+    builder.Configuration.GetSection("AzureBlobStorage"));
+
+builder.Services.AddSingleton<BlobServiceClient>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetSection("AzureBlobStorage:ConnectionString").Value;
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        throw new ArgumentNullException("AzureBlobStorage:ConnectionString", "Azure Blob Storage connection string is not configured.");
+    }
+    return new BlobServiceClient(connectionString);
+});
+
+builder.Services.AddScoped<BlobStorageService>();
 
 builder.Services.AddAzureClients(builder =>
 {

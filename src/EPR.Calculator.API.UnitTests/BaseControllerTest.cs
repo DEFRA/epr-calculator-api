@@ -11,6 +11,9 @@ using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Azure;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Wrapper;
+using EPR.Calculator.API.Services;
+using Azure.Storage.Blobs.Specialized;
+using Azure.Storage.Blobs;
 
 namespace EPR.Calculator.API.Tests.Controllers
 {
@@ -54,12 +57,9 @@ namespace EPR.Calculator.API.Tests.Controllers
             mockClient.Setup(mc => mc.CreateSender(It.IsAny<string>())).Returns(mockServiceBusSender.Object);
 
             mockFactory.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(mockClient.Object);
-
-
-
             dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
             dbContext.SaveChanges();
-            calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), mockFactory.Object);
+            calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), mockFactory.Object, null);
         }
 
         public void CheckDbContext()
