@@ -130,7 +130,8 @@ namespace EPR.Calculator.API.Tests.Controllers
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
                 ParameterYear = "2024-25",
-                SchemeParameterTemplateValues = schemeParameterTemplateValues
+                SchemeParameterTemplateValues = schemeParameterTemplateValues,
+                ParameterFileName = "TestFileName"
             };
             var actionResult = defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
             return actionResult;
