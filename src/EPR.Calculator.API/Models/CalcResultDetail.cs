@@ -2,13 +2,13 @@
 {
     public class CalcResultDetail
     {
-        public required string RunName { get; set; }
+        public string RunName { get; set; } = string.Empty;
         public int RunId { get; set; }
         public DateTime RunDdate { get; set; }
-        public required string RunBy { get; set; }
-        public required string FinancialYear { get; set; }
-        public required string RpdFile { get; set; }
-        public required string LapcapFile { get; set; }
-        public required string ParametersFile { get; set; }
+        public string RunBy { get; set; } = string.Empty;
+        public string FinancialYear { get; set; } = string.Empty;
+        public string RpdFile { get; set; } = string.Empty;
+        public string LapcapFile { get; set; } = string.Empty;
+        public string ParametersFile { get; set; } = string.Empty;
     }
 }

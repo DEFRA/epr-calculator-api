@@ -5,9 +5,9 @@ namespace EPR.Calculator.API.Models
 
     public class CalcResultParameterCostDetail
     {
-        public required string Material { get; set; }
-        public required decimal Cost { get; set; }
-        public required string Country { get; set; }
+        public string Material { get; set; } = string.Empty;
+        public decimal Cost { get; set; }
+        public string Country { get; set; } = string.Empty;
         public CalcResultFormatterType CalcResultFormatterType { get; set; }
         public int OrderId { get; set; }
     }

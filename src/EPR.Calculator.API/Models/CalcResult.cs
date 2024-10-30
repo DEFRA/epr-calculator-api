@@ -2,14 +2,14 @@
 {
     public class CalcResult
     {
-        public required CalcResultDetail CalcResultDetail { get; set; }
+        public CalcResultDetail CalcResultDetail { get; set; }
 
-        public required CalcResultLapcapData CalcResultLapcapData { get; set; }
+        public CalcResultLapcapData CalcResultLapcapData { get; set; }
 
-        public required CalcResultLateReportingTonnage CalcResultLateReportingTonnageDetail { get; set; }
+        public CalcResultLateReportingTonnage CalcResultLateReportingTonnageDetail { get; set; }
 
-        public required CalcResultParameterCommunicationCost CalcResultParameterCommunicationCost { get; set; }
+        public CalcResultParameterCommunicationCost CalcResultParameterCommunicationCost { get; set; }
 
-        public required CalcResultParameterOtherCost CalcResultParameterOtherCost { get; set; }
+        public CalcResultParameterOtherCost CalcResultParameterOtherCost { get; set; }
     }
 }

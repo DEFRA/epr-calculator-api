@@ -2,6 +2,6 @@
 {
     public class CalcResultLateReportingTonnage
     {
-        public required IEnumerable<CalcResultLateReportingTonnageDetail> CalcResultLateReportingTonnageDetails { get; set; } = new List<CalcResultLateReportingTonnageDetail>();
+        public required IEnumerable<CalcResultLateReportingTonnageDetail>? CalcResultLateReportingTonnageDetails { get; set; } = new List<CalcResultLateReportingTonnageDetail>();
     }
 }
