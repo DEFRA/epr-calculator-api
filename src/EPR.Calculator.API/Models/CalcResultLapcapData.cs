@@ -2,6 +2,7 @@
 {
     public class CalcResultLapcapData
     {
-        public required IEnumerable<CalcResultLapcapDataDetail> CalcResultLapcapDataDetails { get; set; }
+        public required IEnumerable<CalcResultParameterCostDetail> CalcResultLapcapDataDetails { get; set; } =
+            new List<CalcResultParameterCostDetail>();
     }
 }
