@@ -6,11 +6,9 @@ namespace EPR.Calculator.API.Builder
 {
     public class CalcResultBuilder : ICalcResultBuilder
     {
-        private readonly ApplicationDBContext context;
         private readonly ICalcResultDetailBuilder calcResultDetailBuilder;
-        public CalcResultBuilder(ApplicationDBContext context, ICalcResultDetailBuilder calcResultDetailBuilder) 
+        public CalcResultBuilder(ICalcResultDetailBuilder calcResultDetailBuilder) 
         {
-            this.context = context;
             this.calcResultDetailBuilder = calcResultDetailBuilder;
         }
 
@@ -18,6 +16,7 @@ namespace EPR.Calculator.API.Builder
         {
             var calcResult = new CalcResult();
             calcResult.CalcResultDetail = this.calcResultDetailBuilder.Construct(resultsRequestDto);
+
             return calcResult;
         }
     }

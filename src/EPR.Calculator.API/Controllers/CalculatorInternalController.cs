@@ -143,8 +143,8 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpPost]
-        [Route("writeResults")]
-        public IActionResult WriteResultsToFile([FromBody] CalcResultsRequestDto resultsRequestDto)
+        [Route("prepareCalcResults")]
+        public IActionResult PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
             var results = this.builder.Build(resultsRequestDto);
             this.exporter.Export(results);
