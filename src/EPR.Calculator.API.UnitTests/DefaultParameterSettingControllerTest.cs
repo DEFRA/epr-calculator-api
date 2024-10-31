@@ -168,7 +168,7 @@ namespace EPR.Calculator.API.Tests.Controllers
 
             CreateDefaultParameterSettingValidator _validator = new CreateDefaultParameterSettingValidator();
             CreateDefaultParameterSettingDto _parameter = new CreateDefaultParameterSettingDto()
-            { ParameterFileName = "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww", ParameterYear = "2024-25", SchemeParameterTemplateValues = schemeParameterTemplateValues };
+            { ParameterFileName = new string('A', 257), ParameterYear = "2024-25", SchemeParameterTemplateValues = schemeParameterTemplateValues };
             var result = _validator.Validate(_parameter);
 
             Assert.IsNotNull(result);
