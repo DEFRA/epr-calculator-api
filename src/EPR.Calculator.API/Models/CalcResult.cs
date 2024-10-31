@@ -15,7 +15,5 @@
         public CalcResultOnePlusFourApportionment CalcResultOnePlusFourApportionment {  get; set; }
 
         public CalcResultLaDisposalCostData CalcResultLaDisposalCostData { get; set; }
-
-        public CalcResultSummary CalcResultSummary { get; set; }
     }
 }

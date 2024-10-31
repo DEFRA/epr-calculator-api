@@ -16,5 +16,7 @@ namespace EPR.Calculator.API.Models
         public string CategoryName { get; set; } = string.Empty;
         public CalcResultFormatterType CalcResultFormatterType { get; set; }
         public int OrderId { get; set; }
+
+        public int Precision { get; set; }
     }
 }
