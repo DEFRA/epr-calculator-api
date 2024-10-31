@@ -30,6 +30,8 @@ namespace EPR.Calculator.API.Controllers
             this.context = context;
             this.rpdStatusDataValidator = rpdStatusDataValidator;
             this.wrapper = wrapper;
+            this.builder = builder;
+            this.exporter = exporter;
         }
 
         [HttpPost]
