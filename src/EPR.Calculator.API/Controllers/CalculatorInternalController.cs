@@ -5,6 +5,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Mvc;
@@ -144,9 +145,18 @@ namespace EPR.Calculator.API.Controllers
         [Route("writeResults")]
         public IActionResult WriteResultsToFile([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
-            var results = this.builder.Build(resultsRequestDto);
-            this.exporter.Export(results);
-            return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+            try
+            {
+                TransposePomAndOrgDataService.Transpose(context, resultsRequestDto.RunId);
+
+                var results = this.builder.Build(resultsRequestDto);
+                this.exporter.Export(results);
+                return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+            }
+            catch(Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
         }
     }
 }
