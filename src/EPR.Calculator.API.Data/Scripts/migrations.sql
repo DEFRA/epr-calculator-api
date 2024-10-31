@@ -2525,7 +2525,7 @@ BEGIN
         SET IDENTITY_INSERT [material] ON;
     EXEC(N'INSERT INTO [material] ([id], [code], [name], [description])
     VALUES (1, N''AL'', N''Aluminum'', N''Aluminum''),
-    (2, N''FC'', N''Fiber composite'', N''Fiber composite''),
+    (2, N''FC'', N''Fibre composite'', N''Fibre composite''),
     (3, N''GL'', N''Glass'', N''Glass''),
     (4, N''PC'', N''Paper or card'', N''Paper or card''),
     (5, N''PL'', N''Plastic'', N''Plastic''),
