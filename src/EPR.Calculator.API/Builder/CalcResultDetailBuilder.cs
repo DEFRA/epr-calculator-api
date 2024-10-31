@@ -14,7 +14,7 @@ namespace EPR.Calculator.API.Builder
 
         public CalcResultDetail Construct(CalcResultsRequestDto resultsRequestDto)
         {
-            return new CalcResultDetail(); 
+            return new CalcResultDetail();
         }
     }
 }
