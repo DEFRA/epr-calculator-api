@@ -11,5 +11,11 @@
         public CalcResultParameterCommunicationCost CalcResultParameterCommunicationCost { get; set; }
 
         public CalcResultParameterOtherCost CalcResultParameterOtherCost { get; set; }
+
+        public CalcResultOnePlusFourApportionment CalcResultOnePlusFourApportionment {  get; set; }
+
+        public CalcResultLaDisposalCostData CalcResultLaDisposalCostData { get; set; }
+
+        public CalcResultSummary CalcResultSummary { get; set; }
     }
 }

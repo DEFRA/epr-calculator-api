@@ -5,9 +5,15 @@ namespace EPR.Calculator.API.Models
 
     public class CalcResultParameterCostDetail
     {
-        public string Material { get; set; } = string.Empty;
+        /// <summary>
+        /// KeyName can be a Material name or Cost name
+        /// </summary>
+        public string KeyName { get; set; } = string.Empty;
         public decimal Cost { get; set; }
-        public string Country { get; set; } = string.Empty;
+        /// <summary>
+        /// Category Name can be the Country name
+        /// </summary>
+        public string CategoryName { get; set; } = string.Empty;
         public CalcResultFormatterType CalcResultFormatterType { get; set; }
         public int OrderId { get; set; }
     }
