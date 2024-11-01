@@ -2,7 +2,7 @@
 {
     public class CalcResultLapcapDataDetails
     {
-        public string Key { get; set; }
+        public string Name { get; set; }
 
         public string EnglandDisposalCost { get; set; }
 
@@ -14,6 +14,6 @@
 
         public string TotalDisposalCost { get; set; }
 
-        public bool isHeader { get; set; } = false;
+        public int OrderId { get; set; }
     }
 }

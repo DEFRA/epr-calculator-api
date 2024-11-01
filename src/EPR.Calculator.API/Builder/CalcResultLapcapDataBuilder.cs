@@ -18,48 +18,52 @@ namespace EPR.Calculator.API.Builder
 
             data.AddRange([
                 new CalcResultLapcapDataDetails {
-                    Key = "Material",
+                    Name = "Material",
                     EnglandDisposalCost = "England LA Disposal Cost",
                     WalesDisposalCost = "Wales LA Disposal Cost",
                     ScotlandDisposalCost = "Scotland LA Disposal Cost",
                     NorthernIrelandDisposalCost = "Northern Ireland LA Disposal Cost",
                     TotalDisposalCost = "1 LA Disposal Cost Total",
-                    isHeader = true
+                    OrderId = 1
                 },
                 new CalcResultLapcapDataDetails { 
-                    Key = "Aluminium",
+                    Name = "Aluminium",
                     EnglandDisposalCost = "£5,000.00",
                     WalesDisposalCost = "£1,750.00",
                     ScotlandDisposalCost = "£2,000.00",
                     NorthernIrelandDisposalCost = "£1,250.00",
-                    TotalDisposalCost = "£10,000.00"
+                    TotalDisposalCost = "£10,000.00",
+                    OrderId = 2
                 },
                 new CalcResultLapcapDataDetails
                 {
-                    Key = "Fibre composite",
+                    Name = "Fibre composite",
                     EnglandDisposalCost = "£7,500.00",
                     WalesDisposalCost = "£2,100.00",
                     ScotlandDisposalCost = "£3,400.00",
                     NorthernIrelandDisposalCost = "£1,750.00",
-                    TotalDisposalCost = "£14,700.00"
+                    TotalDisposalCost = "£14,700.00",
+                    OrderId = 3
                 },
                 new CalcResultLapcapDataDetails
                 {
-                    Key = "Total",
+                    Name = "Total",
                     EnglandDisposalCost = "£109,800.00",
                     WalesDisposalCost = "£24,750.00",
                     ScotlandDisposalCost = "£49,300.00",
                     NorthernIrelandDisposalCost = "£19,300.00",
-                    TotalDisposalCost = "£203,150.00"
+                    TotalDisposalCost = "£203,150.00",
+                    OrderId = 4
                 },
                 new CalcResultLapcapDataDetails
                 {
-                    Key = "1 Country Apportionment %s",
+                    Name = "1 Country Apportionment %s",
                     EnglandDisposalCost = "54.04873246%",
                     WalesDisposalCost = "12.18311592%",
                     ScotlandDisposalCost = "24.26778243%",
                     NorthernIrelandDisposalCost = "9.50036919%",
-                    TotalDisposalCost = "100.00000000%"
+                    TotalDisposalCost = "100.00000000%",
+                    OrderId = 5
                 }
             ]);
 
