@@ -2,7 +2,7 @@
 {
     public class CalcResultLateReportingTonnageDetail
     {
-        public required string Material { get; set; }
-        public required decimal MaterialTonnage { get; set; }
+        public required string Name { get; set; }
+        public required decimal TotalLateReportingTonnage { get; set; }
     }
 }
