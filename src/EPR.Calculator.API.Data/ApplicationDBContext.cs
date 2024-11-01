@@ -50,17 +50,17 @@ namespace EPR.Calculator.API.Data
 
         public DbSet<PomData> PomData { get; set; }
 
-        public DbSet<Material> Material { get; set; }
+        public virtual DbSet<Material> Material { get; set; }
 
         public DbSet<ProducerDetail> ProducerDetail { get; set; }
 
-        public DbSet<CountryApportionment> CountryApportionment { get; set; }
+        public virtual DbSet<CountryApportionment> CountryApportionment { get; set; }
 
         public DbSet<ProducerReportedMaterial> ProducerReportedMaterial { get; set; }
 
         public DbSet<CostType> CostType { get; set; }
 
-        public DbSet<Country> Country { get; set; }
+        public virtual DbSet<Country> Country { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
