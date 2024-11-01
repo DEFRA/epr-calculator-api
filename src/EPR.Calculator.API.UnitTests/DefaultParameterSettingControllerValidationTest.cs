@@ -17,7 +17,8 @@ namespace EPR.Calculator.API.UnitTests
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
                 ParameterYear = "",
-                SchemeParameterTemplateValues = schemeParameterTemplateValues
+                SchemeParameterTemplateValues = schemeParameterTemplateValues,
+                ParameterFileName = "TestFileName"
             };
 
             defaultParameterSettingController?.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
@@ -38,7 +39,8 @@ namespace EPR.Calculator.API.UnitTests
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
                 ParameterYear = "",
-                SchemeParameterTemplateValues = schemeParameterTemplateValues
+                SchemeParameterTemplateValues = schemeParameterTemplateValues,
+                ParameterFileName = "TestFileName"
             };
 
             var actionResult = defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
@@ -65,7 +67,8 @@ namespace EPR.Calculator.API.UnitTests
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
                 ParameterYear = "",
-                SchemeParameterTemplateValues = schemeParameterTemplateValues
+                SchemeParameterTemplateValues = schemeParameterTemplateValues,
+                ParameterFileName = "TestFileName"
             };
 
             var actionResult = defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;

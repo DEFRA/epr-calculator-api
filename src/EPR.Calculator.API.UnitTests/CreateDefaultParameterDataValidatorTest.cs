@@ -114,7 +114,8 @@ namespace EPR.Calculator.API.UnitTests
             var dto = new CreateDefaultParameterSettingDto
             {
                 ParameterYear = "2024-25",
-                SchemeParameterTemplateValues = schemeParameterTemplateValues
+                SchemeParameterTemplateValues = schemeParameterTemplateValues,
+                ParameterFileName = "TestFileName"
             };
             var vr = this.validator?.Validate(dto);
             Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Enter the")) == this.data.Count);
@@ -138,7 +139,8 @@ namespace EPR.Calculator.API.UnitTests
             var dto = new CreateDefaultParameterSettingDto
             {
                 ParameterYear = "2024-25",
-                SchemeParameterTemplateValues = schemeParameterTemplateValues
+                SchemeParameterTemplateValues = schemeParameterTemplateValues,
+                ParameterFileName = "TestFileName"
             };
             var vr = this.validator?.Validate(dto);
             Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Expecting only One with Parameter Type")) == 1);
@@ -162,7 +164,8 @@ namespace EPR.Calculator.API.UnitTests
             var dto = new CreateDefaultParameterSettingDto
             {
                 ParameterYear = "2024-25",
-                SchemeParameterTemplateValues = schemeParameterTemplateValues
+                SchemeParameterTemplateValues = schemeParameterTemplateValues,
+                ParameterFileName = "TestFileName"
             };
             var vr = this.validator?.Validate(dto);
             Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium can only include numbers, commas and decimal points")) == 1);
@@ -189,7 +192,8 @@ namespace EPR.Calculator.API.UnitTests
             var dto = new CreateDefaultParameterSettingDto
             {
                 ParameterYear = "2024-25",
-                SchemeParameterTemplateValues = schemeParameterTemplateValues
+                SchemeParameterTemplateValues = schemeParameterTemplateValues,
+                ParameterFileName = "TestFileName"
             };
 
             var vr = this.validator?.Validate(dto);

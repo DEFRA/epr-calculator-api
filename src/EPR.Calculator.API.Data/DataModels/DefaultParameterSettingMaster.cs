@@ -30,6 +30,11 @@ namespace EPR.Calculator.API.Data.DataModels
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
+        [Column("parameter_filename")]
+        [Required]
+        [StringLength(256)]
+        public string ParameterFileName { get; set; } = string.Empty;
+
         public ICollection<DefaultParameterSettingDetail> Details { get; } = new List<DefaultParameterSettingDetail>();
 
         public ICollection<CalculatorRun>? RunDetails { get; }

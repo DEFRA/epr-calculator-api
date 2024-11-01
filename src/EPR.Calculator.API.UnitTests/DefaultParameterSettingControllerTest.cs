@@ -102,6 +102,81 @@ namespace EPR.Calculator.API.Tests.Controllers
             Assert.AreEqual("Parameter Year is required", result.Errors.First().ErrorMessage);
         }
 
+        [TestMethod]
+        public void Create_Default_Parameter_Setting_With_No_FileName()
+        {
+            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
+            foreach (var item in DefaultParameterUniqueReferences.UniqueReferences)
+            {
+                if (item == "MATT-AD" || item == "MATT-PD" || item == "TONT-AD" || item == "TONT-PD")
+                {
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = "-90",
+                        ParameterUniqueReferenceId = item
+                    });
+                }
+                else
+                {
+
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = "90",
+                        ParameterUniqueReferenceId = item
+                    });
+
+                }
+            }
+           
+
+            CreateDefaultParameterSettingValidator _validator = new CreateDefaultParameterSettingValidator();
+            CreateDefaultParameterSettingDto  _parameter =  new CreateDefaultParameterSettingDto()
+            { ParameterFileName = string.Empty, ParameterYear="2024-25", SchemeParameterTemplateValues = schemeParameterTemplateValues  };
+            var result = _validator.Validate(_parameter);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual("FileName is required", result.Errors.First().ErrorMessage);
+        }
+
+
+        [TestMethod]
+        public void Create_Default_Parameter_Setting_With_Max_FileName_Length()
+        {
+            var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
+            foreach (var item in DefaultParameterUniqueReferences.UniqueReferences)
+            {
+                if (item == "MATT-AD" || item == "MATT-PD" || item == "TONT-AD" || item == "TONT-PD")
+                {
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = "-90",
+                        ParameterUniqueReferenceId = item
+                    });
+                }
+                else
+                {
+
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = "90",
+                        ParameterUniqueReferenceId = item
+                    });
+
+                }
+            }
+
+
+            CreateDefaultParameterSettingValidator _validator = new CreateDefaultParameterSettingValidator();
+            CreateDefaultParameterSettingDto _parameter = new CreateDefaultParameterSettingDto()
+            { ParameterFileName = new string('A', 257), ParameterYear = "2024-25", SchemeParameterTemplateValues = schemeParameterTemplateValues };
+            var result = _validator.Validate(_parameter);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(ErrorMessages.MaxFileNameLength, result.Errors.First().ErrorMessage);
+        }
+
+
+
         // Private Methods
         public ObjectResult? DataPostCall()
         {
@@ -130,7 +205,8 @@ namespace EPR.Calculator.API.Tests.Controllers
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
                 ParameterYear = "2024-25",
-                SchemeParameterTemplateValues = schemeParameterTemplateValues
+                SchemeParameterTemplateValues = schemeParameterTemplateValues,
+                ParameterFileName = "TestFileName"
             };
             var actionResult = defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
             return actionResult;
