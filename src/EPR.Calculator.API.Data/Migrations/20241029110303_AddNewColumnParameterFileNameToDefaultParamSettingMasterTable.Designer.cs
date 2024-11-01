@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241029110303_AddNewColumnParameterFileNameToDefaultParamSettingMasterTable")]
+    partial class AddNewColumnParameterFileNameToDefaultParamSettingMasterTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -941,12 +944,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<DateTime?>("EffectiveTo")
                         .HasColumnType("datetime2")
                         .HasColumnName("effective_to");
-
-                    b.Property<string>("LapcapFileName")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasColumnName("lapcap_filename");
 
                     b.Property<string>("ProjectionYear")
                         .IsRequired()
