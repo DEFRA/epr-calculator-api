@@ -65,11 +65,18 @@ namespace EPR.Calculator.API.Tests.Controllers
 
             mockFactory.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(mockClient.Object);
 
-
-
             dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
             dbContext.SaveChanges();
             calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), mockFactory.Object);
+
+            dbContext.Material.AddRange(GetMaterials());
+            dbContext.SaveChanges();
+
+            dbContext.PomData.AddRange(GetPomData());
+            dbContext.SaveChanges();
+
+            dbContext.OrganisationData.AddRange(GetOrganisationData());
+            dbContext.SaveChanges();
         }
 
         public void CheckDbContext()
@@ -708,6 +715,101 @@ namespace EPR.Calculator.API.Tests.Controllers
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
                 CreatedBy = "Test User"
+            });
+            return list;
+        }
+
+        protected static IEnumerable<Material> GetMaterials()
+        {
+            var list = new List<Material>();
+            list.Add(new Material
+            {
+                Id = 1,
+                Code = "AL",
+                Name = "Aluminium",
+                Description = "Aluminium"
+            });
+            list.Add(new Material
+            {
+                Id = 2,
+                Code = "FC",
+                Name = "Fibre composite",
+                Description = "Fibre composite"
+            });
+            list.Add(new Material
+            {
+                Id = 3,
+                Code = "GL",
+                Name = "Glass",
+                Description = "Glass"
+            });
+            list.Add(new Material
+            {
+                Id = 4,
+                Code = "PC",
+                Name = "Paper or card",
+                Description = "Paper or card"
+            });
+            list.Add(new Material
+            {
+                Id = 5,
+                Code = "PL",
+                Name = "Plastic",
+                Description = "Plastic"
+            });
+            list.Add(new Material
+            {
+                Id = 6,
+                Code = "ST",
+                Name = "Steel",
+                Description = "Steel"
+            });
+            list.Add(new Material
+            {
+                Id = 7,
+                Code = "WD",
+                Name = "Wood",
+                Description = "Wood"
+            });
+            list.Add(new Material
+            {
+                Id = 8,
+                Code = "OT",
+                Name = "Other materials",
+                Description = "Other materials"
+            });
+            return list;
+        }
+
+        protected static IEnumerable<PomData> GetPomData()
+        {
+            var list = new List<PomData>();
+            list.Add(new PomData
+            {
+                OrganisationId = 1,
+                SubsidaryId = "SUBSID1",
+                SubmissionPeriod = "2023-P3",
+                PackagingActivity = null,
+                PackagingType = "CW",
+                PackagingClass = "O1",
+                PackagingMaterial = "PC",
+                PackagingMaterialWeight = 1000,
+                LoadTimeStamp = DateTime.Now,
+                SubmissionPeriodDesc = "July to December 2023"
+            });
+            return list;
+        }
+
+        protected static IEnumerable<OrganisationData> GetOrganisationData()
+        {
+            var list = new List<OrganisationData>();
+            list.Add(new OrganisationData
+            {
+                OrganisationId = 1,
+                SubsidaryId = "SUBSID1",
+                OrganisationName = "UPU LIMITED",
+                LoadTimestamp = DateTime.Now,
+                SubmissionPeriodDesc = "January to June 2023"
             });
             return list;
         }

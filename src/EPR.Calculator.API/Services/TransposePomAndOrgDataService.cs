@@ -49,7 +49,6 @@ namespace EPR.Calculator.API.Services
                                     producerDetails.Add(producerDetail);
 
                                     context.ProducerDetail.Add(producerDetail);
-                                    context.SaveChanges();
 
                                     var material = materials.Single(m => m.Code == pom.PackagingMaterial);
 
