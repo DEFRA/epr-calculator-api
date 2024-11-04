@@ -11,6 +11,9 @@ using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Azure;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Wrapper;
+using EPR.Calculator.API.Builder;
+using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Exporter;
 
 namespace EPR.Calculator.API.Tests.Controllers
 {
@@ -44,8 +47,15 @@ namespace EPR.Calculator.API.Tests.Controllers
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(dbContext);
             lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator);
 
+             
             wrapper = new Mock<IOrgAndPomWrapper>().Object;
-            calculatorInternalController = new CalculatorInternalController(dbContext, new RpdStatusDataValidator(wrapper), wrapper);
+            calculatorInternalController = new CalculatorInternalController(
+                dbContext,
+                new RpdStatusDataValidator(wrapper),
+                wrapper, 
+                new Mock<ICalcResultBuilder>().Object,
+                new Mock<ICalcResultsExporter<CalcResult>>().Object
+            );
 
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var mockClient = new Mock<ServiceBusClient>();

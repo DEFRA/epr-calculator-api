@@ -1,5 +1,8 @@
-﻿using EPR.Calculator.API.Controllers;
+﻿using EPR.Calculator.API.Builder;
+using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Exporter;
+using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Tests.Controllers;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
@@ -171,7 +174,13 @@ namespace EPR.Calculator.API.UnitTests
 
             if (dbContext != null)
             {
-                var controller = new CalculatorInternalController(dbContext, new RpdStatusDataValidator(mock.Object), mock.Object);
+                var controller = new CalculatorInternalController(
+                    dbContext,
+                    new RpdStatusDataValidator(mock.Object),
+                    mock.Object,
+                    new Mock<ICalcResultBuilder>().Object,
+                    new Mock<ICalcResultsExporter<CalcResult>>().Object
+                );
 
                 var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
                 var result = controller?.UpdateRpdStatus(request);
