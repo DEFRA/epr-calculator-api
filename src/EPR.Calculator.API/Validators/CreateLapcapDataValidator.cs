@@ -11,7 +11,6 @@ namespace EPR.Calculator.API.Validators
             RuleFor(x => x.ParameterYear).NotEmpty().WithMessage((ErrorMessages.YearRequired));
             RuleFor(x => x.LapcapDataTemplateValues).NotNull().Must(x => x.Count() == LapcapDataUniqueReferences.UniqueReferences.Length)
                 .WithMessage((ErrorMessages.LapcapDataTemplateValuesMissing));
-
         }
     }
 }
