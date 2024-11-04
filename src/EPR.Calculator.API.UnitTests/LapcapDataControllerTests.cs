@@ -31,7 +31,6 @@ namespace EPR.Calculator.API.UnitTests
                 Material = "Aluminium",
                 TotalCost = 20m,
                 EffectiveFrom = DateTime.Now,
-                LapcapFileName  =   "Some Filename"
             };
 
             //Act
