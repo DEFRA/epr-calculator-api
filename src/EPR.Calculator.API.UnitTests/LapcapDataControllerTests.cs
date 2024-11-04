@@ -31,6 +31,7 @@ namespace EPR.Calculator.API.UnitTests
                 Material = "Aluminium",
                 TotalCost = 20m,
                 EffectiveFrom = DateTime.Now,
+                LapcapFileName  =   "Some Filename"
             };
 
             //Act
@@ -143,7 +144,9 @@ namespace EPR.Calculator.API.UnitTests
             var createDefaultParameterDto = new CreateLapcapDataDto
             {
                 ParameterYear = "2024-25",
-                LapcapDataTemplateValues = lapcapDataTemplateValues
+                LapcapDataTemplateValues = lapcapDataTemplateValues,
+                LapcapFileName  = "Some Filename"
+
             };
             return createDefaultParameterDto;
         }

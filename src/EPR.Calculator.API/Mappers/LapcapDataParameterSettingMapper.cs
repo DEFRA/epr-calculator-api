@@ -25,7 +25,7 @@ namespace EPR.Calculator.API.Mappers
                     Country = selectedTemplate.Country,
                     Material = selectedTemplate.Material,
                     TotalCost = item.TotalCost,
-                    EffectiveFrom = lapcapSettingMaster.EffectiveFrom
+                    EffectiveFrom = lapcapSettingMaster.EffectiveFrom,
                 };
 
                 result.Add(data);
