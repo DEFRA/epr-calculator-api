@@ -2524,7 +2524,7 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'code', N'name', N'description') AND [object_id] = OBJECT_ID(N'[material]'))
         SET IDENTITY_INSERT [material] ON;
     EXEC(N'INSERT INTO [material] ([id], [code], [name], [description])
-    VALUES (1, N''AL'', N''Aluminum'', N''Aluminum''),
+    VALUES (1, N''AL'', N''Aluminium'', N''Aluminium''),
     (2, N''FC'', N''Fibre composite'', N''Fibre composite''),
     (3, N''GL'', N''Glass'', N''Glass''),
     (4, N''PC'', N''Paper or card'', N''Paper or card''),
@@ -2731,6 +2731,86 @@ IF NOT EXISTS (
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
     VALUES (N'20241029110303_AddNewColumnParameterFileNameToDefaultParamSettingMasterTable', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241104130025_AddNewColumnLapcapFileNameToLapcapDataMaster'
+)
+BEGIN
+    ALTER TABLE [lapcap_data_master] ADD [lapcap_filename] nvarchar(256) NOT NULL DEFAULT N'';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241104130025_AddNewColumnLapcapFileNameToLapcapDataMaster'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-11-04T13:00:24.9889020+00:00''
+    WHERE [id] = 1;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241104130025_AddNewColumnLapcapFileNameToLapcapDataMaster'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-11-04T13:00:24.9889023+00:00''
+    WHERE [id] = 2;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241104130025_AddNewColumnLapcapFileNameToLapcapDataMaster'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-11-04T13:00:24.9889025+00:00''
+    WHERE [id] = 3;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241104130025_AddNewColumnLapcapFileNameToLapcapDataMaster'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-11-04T13:00:24.9889027+00:00''
+    WHERE [id] = 4;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241104130025_AddNewColumnLapcapFileNameToLapcapDataMaster'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-11-04T13:00:24.9889029+00:00''
+    WHERE [id] = 5;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241104130025_AddNewColumnLapcapFileNameToLapcapDataMaster'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20241104130025_AddNewColumnLapcapFileNameToLapcapDataMaster', N'8.0.7');
 END;
 GO
 
