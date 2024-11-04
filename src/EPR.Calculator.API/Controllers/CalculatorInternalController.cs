@@ -31,6 +31,8 @@ namespace EPR.Calculator.API.Controllers
             this.context = context;
             this.rpdStatusDataValidator = rpdStatusDataValidator;
             this.wrapper = wrapper;
+            this.builder = builder;
+            this.exporter = exporter;
         }
 
         [HttpPost]
@@ -142,21 +144,12 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpPost]
-        [Route("writeResults")]
-        public IActionResult WriteResultsToFile([FromBody] CalcResultsRequestDto resultsRequestDto)
+        [Route("prepareCalcResults")]
+        public IActionResult PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
-            try
-            {
-                TransposePomAndOrgDataService.Transpose(context, resultsRequestDto.RunId);
-
-                var results = this.builder.Build(resultsRequestDto);
-                this.exporter.Export(results);
-                return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
-            }
-            catch(Exception exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception);
-            }
+            var results = this.builder.Build(resultsRequestDto);
+            this.exporter.Export(results);
+            return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
         }
     }
 }
