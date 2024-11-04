@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
@@ -173,6 +174,7 @@ namespace EPR.Calculator.API.Controllers
         [Route("calculatorRuns/{id}")]
         public IActionResult GetCalculatorRun()
         {
+            TransposePomAndOrgDataService.Transpose(context, 58);
             // TODO: Return the details of a particular run
             return new OkResult();
         }

@@ -9,69 +9,75 @@ namespace EPR.Calculator.API.Services
         {
             var materials = context.Material.ToList();
 
-            var pomDataMaster = context.CalculatorRunPomDataMaster.Single(pdm => pdm.Id == runId);
-
-            var pomDataDetails = context.CalculatorRunPomDataDetails.Where(pdd => pdd.CalculatorRunPomDataMasterId == pomDataMaster.Id).ToList();
-
             var calculatorRun = context.CalculatorRuns.Single(cr => cr.Id == runId);
 
-            var producerDetails = new List<ProducerDetail>();
-
-            var producerReportedMaterials = new List<ProducerReportedMaterial>();
-
-            using (var transaction = context.Database.BeginTransaction())
+            if (calculatorRun.CalculatorRunPomDataMasterId != null)
             {
-                try
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    foreach (var pom in pomDataDetails)
+                    try
                     {
-                        if (pom.OrganisationId != null)
+                        var producerDetails = new List<ProducerDetail>();
+                        var producerReportedMaterials = new List<ProducerReportedMaterial>();
+
+                        var pomDataDetails = DataService.GetPomDataDetails(context, (int)calculatorRun.CalculatorRunPomDataMasterId);
+
+                        foreach (var pom in pomDataDetails)
                         {
-                            var organisationDataMaster = context.CalculatorRunOrganisationDataMaster.Single(odm => odm.Id == runId);
-
-                            var organisationDataDetails = context.CalculatorRunOrganisationDataDetails.Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id).ToList();
-
-                            var producerName = organisationDataDetails.Single(odd => odd.OrganisationId == pom.OrganisationId).OrganisationName;
-
-                            var producerDetail = new ProducerDetail
+                            if (pom.OrganisationId.HasValue)
                             {
-                                CalculatorRunId = runId,
-                                ProducerId = pom.OrganisationId,
-                                SubsidiaryId = pom.SubsidaryId,
-                                ProducerName = producerName,
-                                CalculatorRun = calculatorRun
-                            };
+                                var organisationDataMaster = context.CalculatorRunOrganisationDataMaster.Single(odm => odm.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);
 
-                            producerDetails.Add(producerDetail);
+                                var organisationDataDetails = context.CalculatorRunOrganisationDataDetails.Where
+                                    (
+                                        odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id
+                                    ).ToList();
 
-                            context.ProducerDetail.Add(producerDetail);
-                            context.SaveChanges();
+                                var producerName = organisationDataDetails.Single(odd => odd.OrganisationId == pom.OrganisationId)?.OrganisationName;
 
-                            var material = materials.Single(m => m.Code == pom.PackagingMaterial);
+                                if (producerName != null)
+                                {
+                                    var producerDetail = new ProducerDetail
+                                    {
+                                        CalculatorRunId = runId,
+                                        ProducerId = pom.OrganisationId.Value,
+                                        SubsidiaryId = pom.SubsidaryId,
+                                        ProducerName = producerName,
+                                        CalculatorRun = calculatorRun
+                                    };
 
-                            var producerReportedMaterial = new ProducerReportedMaterial
-                            {
-                                MaterialId = material.Id,
-                                Material = material,
-                                ProducerDetailId = producerDetail.Id,
-                                ProducerDetail = producerDetail,
-                                PackagingType = pom.PackagingType,
-                                PackagingTonnage = (decimal)pom.PackagingMaterialWeight / 1000,
-                            };
+                                    producerDetails.Add(producerDetail);
 
-                            producerReportedMaterials.Add(producerReportedMaterial);
+                                    context.ProducerDetail.Add(producerDetail);
+                                    context.SaveChanges();
+
+                                    var material = materials.Single(m => m.Code == pom.PackagingMaterial);
+
+                                    var producerReportedMaterial = new ProducerReportedMaterial
+                                    {
+                                        MaterialId = material.Id,
+                                        Material = material,
+                                        ProducerDetailId = producerDetail.Id,
+                                        ProducerDetail = producerDetail,
+                                        PackagingType = pom.PackagingType,
+                                        PackagingTonnage = (decimal)pom.PackagingMaterialWeight / 1000,
+                                    };
+
+                                    producerReportedMaterials.Add(producerReportedMaterial);
+                                }
+                            }
                         }
+
+                        context.ProducerReportedMaterial.AddRange(producerReportedMaterials);
+                        context.SaveChanges();
+
+                        transaction.Commit();
                     }
-
-                    context.ProducerReportedMaterial.AddRange(producerReportedMaterials);
-                    context.SaveChanges();
-
-                    transaction.Commit();
-                }
-                catch (Exception exception)
-                {
-                    // Error, rollback transaction
-                    transaction.Rollback();
+                    catch (Exception exception)
+                    {
+                        // Error, rollback transaction
+                        transaction.Rollback();
+                    }
                 }
             }
         }
