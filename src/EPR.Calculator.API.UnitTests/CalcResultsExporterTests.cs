@@ -49,7 +49,7 @@ namespace EPR.Calculator.API.UnitTests
             _calcResultsExporter.Export(calcResult);
 
             _blobStorageServiceMock.Verify(service => service.UploadResultFileContentAsync(
-                $"{calcResult.CalcResultDetail.RunId}-{DateTime.Now:yyyy-MM-dd-HHmm}",
+                $"{calcResult.CalcResultDetail.RunId}-{DateTime.Now:yyyy-MM-dd-HHmm}.csv",
                 It.Is<StringBuilder>(content => content.ToString() == expectedCsvContent.ToString())
             ), Times.Once);
         }
@@ -106,7 +106,7 @@ namespace EPR.Calculator.API.UnitTests
             _calcResultsExporter.Export(calcResult);
 
             _blobStorageServiceMock.Verify(service => service.UploadResultFileContentAsync(
-                $"{calcResult.CalcResultDetail.RunId}-{DateTime.Now:yyyy-MM-dd-HHmm}",
+                $"{calcResult.CalcResultDetail.RunId}-{DateTime.Now:yyyy-MM-dd-HHmm}.csv",
                 It.Is<StringBuilder>(content => content.ToString() == expectedCsvContent.ToString())
             ), Times.Once);
         }
@@ -131,7 +131,7 @@ namespace EPR.Calculator.API.UnitTests
             _calcResultsExporter.Export(calcResult);
 
             _blobStorageServiceMock.Verify(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<StringBuilder>()), Times.Once);
-            var expectedFileName = $"{calcResult.CalcResultDetail.RunId}-{DateTime.Now:yyyy-MM-dd-HHmm}";
+            var expectedFileName = $"{calcResult.CalcResultDetail.RunId}-{DateTime.Now:yyyy-MM-dd-HHmm}.csv";
             _blobStorageServiceMock.Verify(x => x.UploadResultFileContentAsync(expectedFileName, It.IsAny<StringBuilder>()), Times.Once);
         }
     }
