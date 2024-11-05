@@ -34,14 +34,14 @@ namespace EPR.Calculator.API.Services
             }
         }
 
-        public void UploadResultFileContentAsync(string fileName, StringBuilder csvContent)
+        public async Task UploadResultFileContentAsync(string fileName, StringBuilder csvContent)
         {
             try
             {
                 File.WriteAllText(fileName, csvContent.ToString());
-                var blobClient = _containerClient.GetBlobClient(fileName);
+                BlobClient blobClient = _containerClient.GetBlobClient(fileName);
                 using var fileStream = File.OpenRead(fileName);
-                blobClient.UploadAsync(fileStream, true);
+                await blobClient.UploadAsync(fileStream, true);
             }
             catch (Exception ex)
             {
