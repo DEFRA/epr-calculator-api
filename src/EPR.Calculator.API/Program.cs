@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using FluentValidation;
@@ -29,6 +30,7 @@ builder.Services.AddScoped<ICalcResultDetailBuilder, CalcResultDetailBuilder>();
 builder.Services.AddScoped<ICalcResultBuilder, CalcResultBuilder>();
 builder.Services.AddScoped<ICalcResultsExporter<CalcResult>, CalcResultsExporter>();
 builder.Services.AddScoped<ICalcResultLapcapDataBuilder, CalcResultLapcapDataBuilder>();
+builder.Services.AddScoped<ITransposePomAndOrgDataService, TransposePomAndOrgDataService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>

@@ -21,18 +21,21 @@ namespace EPR.Calculator.API.Controllers
         private readonly IOrgAndPomWrapper wrapper;
         private readonly ICalcResultBuilder builder;
         private readonly ICalcResultsExporter<CalcResult> exporter;
+        private readonly ITransposePomAndOrgDataService transposePomAndOrgDataService; 
 
         public CalculatorInternalController(ApplicationDBContext context,
                                             IRpdStatusDataValidator rpdStatusDataValidator,
                                             IOrgAndPomWrapper wrapper,
                                             ICalcResultBuilder builder,
-                                            ICalcResultsExporter<CalcResult> exporter)
+                                            ICalcResultsExporter<CalcResult> exporter,
+                                            ITransposePomAndOrgDataService transposePomAndOrgDataService)
         {
             this.context = context;
             this.rpdStatusDataValidator = rpdStatusDataValidator;
             this.wrapper = wrapper;
             this.builder = builder;
             this.exporter = exporter;
+            this.transposePomAndOrgDataService = transposePomAndOrgDataService;
         }
 
         [HttpPost]
@@ -147,7 +150,7 @@ namespace EPR.Calculator.API.Controllers
         [Route("prepareCalcResults")]
         public IActionResult PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
-            TransposePomAndOrgDataService.Transpose(context, resultsRequestDto.RunId);
+            this.transposePomAndOrgDataService.Transpose(resultsRequestDto.RunId);
             var results = this.builder.Build(resultsRequestDto);
             this.exporter.Export(results);
             return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };

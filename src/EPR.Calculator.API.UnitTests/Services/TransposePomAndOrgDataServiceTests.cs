@@ -1,7 +1,9 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Tests.Controllers;
+using EPR.Calculator.API.Wrapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Services
 {
@@ -21,7 +23,31 @@ namespace EPR.Calculator.API.UnitTests.Services
                 CalculatorRun = new CalculatorRun()
             };
 
-            TransposePomAndOrgDataService.Transpose(dbContext, 1);
+            var pomDataList = new List<PomData>();
+            pomDataList.Add(new PomData
+            {
+                OrganisationId = 1,
+                SubsidaryId = "SUBSID1",
+                SubmissionPeriod = "2023-P3",
+                PackagingActivity = null,
+                PackagingType = "CW",
+                PackagingClass = "O1",
+                PackagingMaterial = "PC",
+                PackagingMaterialWeight = 1000,
+                LoadTimeStamp = DateTime.Now,
+                SubmissionPeriodDesc = "July to December 2023"
+            });
+
+#
+            var mockWrapper = new Mock<IOrgAndPomWrapper>();
+
+            mockWrapper.Setup(x => x.GetPomData()).Returns(pomDataList);
+
+            var service = new TransposePomAndOrgDataService(dbContext, mockWrapper.Object);
+
+            service.Transpose(1);
+
+
 
             var producerDetail = dbContext.ProducerDetail.FirstOrDefault();
             Assert.AreEqual(expectedResult, producerDetail);

@@ -1,26 +1,40 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Wrapper;
 
 namespace EPR.Calculator.API.Services
 {
-    public static class TransposePomAndOrgDataService
-    {
-        public static void Transpose(ApplicationDBContext context, int runId)
-        {
-            var materials = context.Material.ToList();
 
-            var calculatorRun = context.CalculatorRuns.Single(cr => cr.Id == runId);
+    public class TransposePomAndOrgDataService : ITransposePomAndOrgDataService
+    {
+        private readonly ApplicationDBContext context;
+        private readonly IOrgAndPomWrapper wrapper;
+
+        public TransposePomAndOrgDataService(ApplicationDBContext context, IOrgAndPomWrapper wrapper)
+        {
+            this.context = context;
+            this.wrapper = wrapper;
+        }
+
+        public void Transpose(int runId)
+        {
+            var materials = this.context.Material.ToList();
+
+            var calculatorRun = this.context.CalculatorRuns.Single(cr => cr.Id == runId);
 
             if (calculatorRun.CalculatorRunPomDataMasterId != null)
             {
-                using (var transaction = context.Database.BeginTransaction())
+                using (var transaction = this.context.Database.BeginTransaction())
                 {
                     try
                     {
                         var producerDetails = new List<ProducerDetail>();
                         var producerReportedMaterials = new List<ProducerReportedMaterial>();
 
-                        var pomDataDetails = DataService.GetPomDataDetails(context, (int)calculatorRun.CalculatorRunPomDataMasterId);
+                        var allPomDataDetails = this.wrapper.GetPomData();
+
+                        //John To add
+                        var pomDataDetails = allPomDataDetails;
 
                         foreach (var pom in pomDataDetails)
                         {
