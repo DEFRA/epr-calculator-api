@@ -65,7 +65,7 @@ namespace EPR.Calculator.API.Exporter
         }
         private static string GetResultFileName(int runId)
         {
-            return $"{runId}-{DateTime.Now:yyyy-MM-dd-HHmm}";
+            return $"{runId}-{DateTime.Now:yyyy-MM-dd-HHmm}.csv";
         }
     }
 }
