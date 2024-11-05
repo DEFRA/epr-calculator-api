@@ -61,17 +61,20 @@ namespace EPR.Calculator.API.Services
 
                                     var material = materials.Single(m => m.Code == pom.PackagingMaterial);
 
-                                    var producerReportedMaterial = new ProducerReportedMaterial
+                                    if (pom.PackagingType != null && pom.PackagingMaterialWeight != null)
                                     {
-                                        MaterialId = material.Id,
-                                        Material = material,
-                                        ProducerDetailId = producerDetail.Id,
-                                        ProducerDetail = producerDetail,
-                                        PackagingType = pom.PackagingType ?? " ",
-                                        PackagingTonnage = (decimal)pom.PackagingMaterialWeight / 1000,
-                                    };
+                                        var producerReportedMaterial = new ProducerReportedMaterial
+                                        {
+                                            MaterialId = material.Id,
+                                            Material = material,
+                                            ProducerDetailId = producerDetail.Id,
+                                            ProducerDetail = producerDetail,
+                                            PackagingType = pom.PackagingType ?? " ",
+                                            PackagingTonnage = (decimal)pom.PackagingMaterialWeight / 1000,
+                                        };
 
-                                    producerReportedMaterials.Add(producerReportedMaterial);
+                                        producerReportedMaterials.Add(producerReportedMaterial);
+                                    }
                                 }
                             }
                         }
@@ -81,10 +84,12 @@ namespace EPR.Calculator.API.Services
 
                         transaction.Commit();
                     }
-                    catch (Exception exception)
+                    catch (Exception)
                     {
                         // Error, rollback transaction
                         transaction.Rollback();
+                        // TO DO: Decide upon the exception later during the complete integration
+                        throw;
                     }
                 }
             }
