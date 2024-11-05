@@ -1,6 +1,9 @@
 using Azure.Messaging.ServiceBus;
+using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Exceptions;
+using EPR.Calculator.API.Exporter;
+using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using FluentValidation;
@@ -22,6 +25,10 @@ builder.Services.AddScoped<ICreateDefaultParameterDataValidator, CreateDefaultPa
 builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
 builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IRpdStatusDataValidator, RpdStatusDataValidator>();
+builder.Services.AddScoped<ICalcResultDetailBuilder, CalcResultDetailBuilder>();
+builder.Services.AddScoped<ICalcResultBuilder, CalcResultBuilder>();
+builder.Services.AddScoped<ICalcResultsExporter<CalcResult>, CalcResultsExporter>();
+builder.Services.AddScoped<ICalcResultLapcapDataBuilder, CalcResultLapcapDataBuilder>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>

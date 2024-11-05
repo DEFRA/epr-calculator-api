@@ -1,7 +1,9 @@
-﻿using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Builder;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
@@ -16,14 +18,20 @@ namespace EPR.Calculator.API.Controllers
         private readonly ApplicationDBContext context;
         private readonly IRpdStatusDataValidator rpdStatusDataValidator;
         private readonly IOrgAndPomWrapper wrapper;
+        private readonly ICalcResultBuilder builder;
+        private readonly ICalcResultsExporter<CalcResult> exporter;
 
         public CalculatorInternalController(ApplicationDBContext context,
                                             IRpdStatusDataValidator rpdStatusDataValidator,
-                                            IOrgAndPomWrapper wrapper)
+                                            IOrgAndPomWrapper wrapper,
+                                            ICalcResultBuilder builder,
+                                            ICalcResultsExporter<CalcResult> exporter)
         {
             this.context = context;
             this.rpdStatusDataValidator = rpdStatusDataValidator;
             this.wrapper = wrapper;
+            this.builder = builder;
+            this.exporter = exporter;
         }
 
         [HttpPost]
@@ -132,6 +140,15 @@ namespace EPR.Calculator.API.Controllers
                     throw;
                 }
             }
+        }
+
+        [HttpPost]
+        [Route("prepareCalcResults")]
+        public IActionResult PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
+        {
+            var results = this.builder.Build(resultsRequestDto);
+            this.exporter.Export(results);
+            return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
         }
     }
 }
