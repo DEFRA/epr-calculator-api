@@ -60,6 +60,16 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow(" ")]
+        public void FinancialYearAsString_NullOrEmptyString_ShouldThrowArgumentException(string financialYear)
+        {
+            var exception = Assert.ThrowsException<ArgumentException>(() => FinancialYear.FinancialYearAsString(financialYear));
+            Assert.AreEqual("Financial year cannot be null or empty (Parameter 'value')", exception.Message);
+        }
+
+        [TestMethod]
         [DataRow("2024-25", "2023")]
         [DataRow("2023-24", "2022")]
         [DataRow("2022-23", "2021")]
