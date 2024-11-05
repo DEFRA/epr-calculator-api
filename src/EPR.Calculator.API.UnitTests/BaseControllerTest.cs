@@ -73,12 +73,6 @@ namespace EPR.Calculator.API.Tests.Controllers
 
             dbContext.Material.AddRange(GetMaterials());
             dbContext.SaveChanges();
-
-            //dbContext.CalculatorRunPomDataDetails.AddRange(GetCalculatorRunPomDataDetails());
-            //dbContext.SaveChanges();
-
-            //dbContext.CalculatorRunOrganisationDataDetails.AddRange(GetCalculatorRunOrganisationDataDetails());
-            //dbContext.SaveChanges();
         }
 
         public void CheckDbContext()
