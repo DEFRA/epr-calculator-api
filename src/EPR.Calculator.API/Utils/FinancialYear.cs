@@ -14,7 +14,7 @@ namespace EPR.Calculator.API.Utils
         /// Converts the financial year to the previous calendar year.
         /// </summary>
         /// <returns>The previous calendar year as a <see cref="DateTime"/>.</returns>
-        public DateTime ToCalendarYear() => new (this.value.Year - 1, 1, 1);
+        public DateTime ToCalendarYear() => new(this.value.Year - 1, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         /// <summary>
         /// Parses a financial year from a string.
