@@ -1,7 +1,7 @@
-﻿using EPR.Calculator.API.Models;
+﻿using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
-using System;
 using System.Text;
 
 namespace EPR.Calculator.API.Exporter
@@ -9,6 +9,14 @@ namespace EPR.Calculator.API.Exporter
     public class CalcResultsExporter : ICalcResultsExporter<CalcResult>
     {
         private readonly IBlobStorageService _blobStorageService;
+        private const string RunName = "Run Name";
+        private const string RunId = "Run Id";
+        private const string RunDate = "Run Date";
+        private const string Runby = "Run by";
+        private const string FinancialYear = "Financial Year";
+        private const string LapcapFile = "Lapcap File";
+        private const string ParametersFile = "Parameters File";
+
         public CalcResultsExporter(IBlobStorageService blobStorageService)
         {
             _blobStorageService = blobStorageService;
@@ -16,13 +24,7 @@ namespace EPR.Calculator.API.Exporter
         public void Export(CalcResult results)
         {
             var csvContent = new StringBuilder();
-            AppendCsvLine(csvContent, "Run Name", results.CalcResultDetail.RunName);
-            AppendCsvLine(csvContent, "Run Id", results.CalcResultDetail.RunId.ToString());
-            AppendCsvLine(csvContent, "Run Date", results.CalcResultDetail.RunDate.ToString("dd/MM/yyyy HH:mm"));
-            AppendCsvLine(csvContent, "Run by", results.CalcResultDetail.RunBy);
-            AppendCsvLine(csvContent, "Financial Year", results.CalcResultDetail.FinancialYear);
-            AppendFileInfo(csvContent, "Lapcap File", results.CalcResultDetail.LapcapFile);
-            AppendFileInfo(csvContent, "Parameters File", results.CalcResultDetail.ParametersFile);
+            LoadCalcResultDetail(results, csvContent);
             var fileName = GetResultFileName(results.CalcResultDetail.RunId);
             try
             {
@@ -32,6 +34,17 @@ namespace EPR.Calculator.API.Exporter
             {
                 Console.WriteLine($"Error writing file: {ex.Message}");
             }
+        }
+
+        private static void LoadCalcResultDetail(CalcResult results, StringBuilder csvContent)
+        {
+            AppendCsvLine(csvContent, RunName, results.CalcResultDetail.RunName);
+            AppendCsvLine(csvContent, RunId, results.CalcResultDetail.RunId.ToString());
+            AppendCsvLine(csvContent, RunDate, results.CalcResultDetail.RunDate.ToString(CalculationResults.DateFormat));
+            AppendCsvLine(csvContent, Runby, results.CalcResultDetail.RunBy);
+            AppendCsvLine(csvContent, FinancialYear, results.CalcResultDetail.FinancialYear);
+            AppendFileInfo(csvContent, LapcapFile, results.CalcResultDetail.LapcapFile);
+            AppendFileInfo(csvContent, ParametersFile, results.CalcResultDetail.ParametersFile);
         }
 
         private static void AppendFileInfo(StringBuilder csvContent, string label, string filePath)
