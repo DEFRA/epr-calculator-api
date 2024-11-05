@@ -14,6 +14,7 @@ using EPR.Calculator.API.Wrapper;
 using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Exporter;
+using EPR.Calculator.API.Services;
 
 namespace EPR.Calculator.API.Tests.Controllers
 {
@@ -54,7 +55,8 @@ namespace EPR.Calculator.API.Tests.Controllers
                 new RpdStatusDataValidator(wrapper),
                 wrapper, 
                 new Mock<ICalcResultBuilder>().Object,
-                new Mock<ICalcResultsExporter<CalcResult>>().Object
+                new Mock<ICalcResultsExporter<CalcResult>>().Object,
+                new Mock<ITransposePomAndOrgDataService>().Object
             );
 
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
@@ -72,11 +74,11 @@ namespace EPR.Calculator.API.Tests.Controllers
             dbContext.Material.AddRange(GetMaterials());
             dbContext.SaveChanges();
 
-            dbContext.PomData.AddRange(GetPomData());
-            dbContext.SaveChanges();
+            //dbContext.CalculatorRunPomDataDetails.AddRange(GetCalculatorRunPomDataDetails());
+            //dbContext.SaveChanges();
 
-            dbContext.OrganisationData.AddRange(GetOrganisationData());
-            dbContext.SaveChanges();
+            //dbContext.CalculatorRunOrganisationDataDetails.AddRange(GetCalculatorRunOrganisationDataDetails());
+            //dbContext.SaveChanges();
         }
 
         public void CheckDbContext()
@@ -716,6 +718,28 @@ namespace EPR.Calculator.API.Tests.Controllers
                 CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
                 CreatedBy = "Test User"
             });
+            list.Add(new CalculatorRun
+            {
+                Id = 3,
+                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                Name = "Test Run",
+                Financial_Year = "2024-25",
+                CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
+                CreatedBy = "Test User",
+                CalculatorRunOrganisationDataMasterId = 1,
+                CalculatorRunPomDataMasterId = 1,
+            });
+            list.Add(new CalculatorRun
+            {
+                Id = 4,
+                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                Name = "Test Calculated Result",
+                Financial_Year = "2024-25",
+                CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
+                CreatedBy = "Test User",
+                CalculatorRunOrganisationDataMasterId = 2,
+                CalculatorRunPomDataMasterId = 2,
+            });
             return list;
         }
 
@@ -781,11 +805,26 @@ namespace EPR.Calculator.API.Tests.Controllers
             return list;
         }
 
-        protected static IEnumerable<PomData> GetPomData()
+        protected static IEnumerable<CalculatorRunPomDataMaster> GetCalculatorRunPomDataMaster()
         {
-            var list = new List<PomData>();
-            list.Add(new PomData
+            var list = new List<CalculatorRunPomDataMaster>();
+            list.Add(new CalculatorRunPomDataMaster
             {
+                Id = 1,
+                CalendarYear = "2024-25",
+                EffectiveFrom = DateTime.Now,
+                CreatedBy = "Test user",
+                CreatedAt  = DateTime.Now
+            });
+            return list;
+        }
+
+        protected static IEnumerable<CalculatorRunPomDataDetail> GetCalculatorRunPomDataDetails()
+        {
+            var list = new List<CalculatorRunPomDataDetail>();
+            list.Add(new CalculatorRunPomDataDetail
+            {
+                Id= 1,
                 OrganisationId = 1,
                 SubsidaryId = "SUBSID1",
                 SubmissionPeriod = "2023-P3",
@@ -795,21 +834,39 @@ namespace EPR.Calculator.API.Tests.Controllers
                 PackagingMaterial = "PC",
                 PackagingMaterialWeight = 1000,
                 LoadTimeStamp = DateTime.Now,
-                SubmissionPeriodDesc = "July to December 2023"
+                CalculatorRunPomDataMasterId = 1,
+                SubmissionPeriodDesc = "July to December 2023",
+                CalculatorRunPomDataMaster = BaseControllerTest.GetCalculatorRunPomDataMaster().ToList()[0]
             });
             return list;
         }
 
-        protected static IEnumerable<OrganisationData> GetOrganisationData()
+        protected static IEnumerable<CalculatorRunOrganisationDataMaster> GetCalculatorRunOrganisationDataMaster()
         {
-            var list = new List<OrganisationData>();
-            list.Add(new OrganisationData
+            var list = new List<CalculatorRunOrganisationDataMaster>();
+            list.Add(new CalculatorRunOrganisationDataMaster
             {
+                CalendarYear = "2024-25",
+                EffectiveFrom = DateTime.Now,
+                CreatedBy = "Test user",
+                CreatedAt = DateTime.Now
+            });
+            return list;
+        }
+
+        protected static IEnumerable<CalculatorRunOrganisationDataDetail> GetCalculatorRunOrganisationDataDetails()
+        {
+            var list = new List<CalculatorRunOrganisationDataDetail>();
+            list.Add(new CalculatorRunOrganisationDataDetail
+            {
+                Id = 1,
                 OrganisationId = 1,
                 SubsidaryId = "SUBSID1",
                 OrganisationName = "UPU LIMITED",
-                LoadTimestamp = DateTime.Now,
-                SubmissionPeriodDesc = "January to June 2023"
+                LoadTimeStamp= DateTime.Now,
+                CalculatorRunOrganisationDataMasterId = 1,
+                SubmissionPeriodDesc = "January to June 2023",
+                CalculatorRunOrganisationDataMaster = BaseControllerTest.GetCalculatorRunOrganisationDataMaster().ToList()[0]
             });
             return list;
         }

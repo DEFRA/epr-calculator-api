@@ -8,12 +8,10 @@ namespace EPR.Calculator.API.Services
     public class TransposePomAndOrgDataService : ITransposePomAndOrgDataService
     {
         private readonly ApplicationDBContext context;
-        private readonly IOrgAndPomWrapper wrapper;
 
-        public TransposePomAndOrgDataService(ApplicationDBContext context, IOrgAndPomWrapper wrapper)
+        public TransposePomAndOrgDataService(ApplicationDBContext context)
         {
             this.context = context;
-            this.wrapper = wrapper;
         }
 
         public void Transpose(int runId)
@@ -31,10 +29,7 @@ namespace EPR.Calculator.API.Services
                         var producerDetails = new List<ProducerDetail>();
                         var producerReportedMaterials = new List<ProducerReportedMaterial>();
 
-                        var allPomDataDetails = this.wrapper.GetPomData();
-
-                        //John To add
-                        var pomDataDetails = allPomDataDetails;
+                        var pomDataDetails = context.CalculatorRunPomDataDetails.Where(pdd => pdd.CalculatorRunPomDataMasterId == (int)calculatorRun.CalculatorRunPomDataMasterId).ToList();
 
                         foreach (var pom in pomDataDetails)
                         {

@@ -10,6 +10,16 @@ namespace EPR.Calculator.API.UnitTests.Services
     [TestClass]
     public class TransposePomAndOrgDataServiceTests : BaseControllerTest
     {
+        [TestInitialize]
+        public void Setup()
+        {
+            dbContext.CalculatorRunPomDataDetails.AddRange(GetCalculatorRunPomDataDetails());
+            dbContext.SaveChanges();
+
+            dbContext.CalculatorRunOrganisationDataDetails.AddRange(GetCalculatorRunOrganisationDataDetails());
+            dbContext.SaveChanges();
+        }
+
         [TestMethod]
         public void Transpose_Should_Return_Correct_Producer_Detail()
         {
@@ -23,34 +33,13 @@ namespace EPR.Calculator.API.UnitTests.Services
                 CalculatorRun = new CalculatorRun()
             };
 
-            var pomDataList = new List<PomData>();
-            pomDataList.Add(new PomData
-            {
-                OrganisationId = 1,
-                SubsidaryId = "SUBSID1",
-                SubmissionPeriod = "2023-P3",
-                PackagingActivity = null,
-                PackagingType = "CW",
-                PackagingClass = "O1",
-                PackagingMaterial = "PC",
-                PackagingMaterialWeight = 1000,
-                LoadTimeStamp = DateTime.Now,
-                SubmissionPeriodDesc = "July to December 2023"
-            });
-
-#
-            var mockWrapper = new Mock<IOrgAndPomWrapper>();
-
-            mockWrapper.Setup(x => x.GetPomData()).Returns(pomDataList);
-
-            var service = new TransposePomAndOrgDataService(dbContext, mockWrapper.Object);
-
-            service.Transpose(1);
-
-
+            var service = new TransposePomAndOrgDataService(dbContext);
+            service.Transpose(3);
 
             var producerDetail = dbContext.ProducerDetail.FirstOrDefault();
-            Assert.AreEqual(expectedResult, producerDetail);
+            Assert.AreEqual(expectedResult.ProducerId, producerDetail.ProducerId);
+            Assert.AreEqual(expectedResult.ProducerName, producerDetail.ProducerName);
+            Assert.AreEqual(expectedResult.SubsidiaryId, producerDetail.SubsidiaryId);
         }
 
         [TestMethod]
@@ -63,11 +52,12 @@ namespace EPR.Calculator.API.UnitTests.Services
                 ProducerDetailId = 1,
                 PackagingType = "CW",
                 PackagingTonnage = 1,
-                Material = new Material{
-                    Id = 1,
-                    Code = "AL",
-                    Name = "Aluminium",
-                    Description = "Aluminium"
+                Material = new Material
+                {
+                    Id = 4,
+                    Code = "PC",
+                    Name = "Paper or card",
+                    Description = "Paper or card"
                 },
                 ProducerDetail = new ProducerDetail
                 {
@@ -80,10 +70,15 @@ namespace EPR.Calculator.API.UnitTests.Services
                 }
             };
 
-            TransposePomAndOrgDataService.Transpose(dbContext, 1);
+            var service = new TransposePomAndOrgDataService(dbContext);
+            service.Transpose(3);
 
             var producerReportedMaterial = dbContext.ProducerReportedMaterial.FirstOrDefault();
-            Assert.AreEqual(expectedResult, producerReportedMaterial);
+            Assert.AreEqual(expectedResult.ProducerDetailId, producerReportedMaterial.ProducerDetailId);
+            Assert.AreEqual(expectedResult.Material.Code, producerReportedMaterial.Material.Code);
+            Assert.AreEqual(expectedResult.Material.Name, producerReportedMaterial.Material.Name);
+            Assert.AreEqual(expectedResult.ProducerDetail.ProducerId, producerReportedMaterial.ProducerDetail.ProducerId);
+            Assert.AreEqual(expectedResult.ProducerDetail.ProducerName, producerReportedMaterial.ProducerDetail.ProducerName);
         }
     }
 }

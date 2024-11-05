@@ -21,7 +21,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly IOrgAndPomWrapper wrapper;
         private readonly ICalcResultBuilder builder;
         private readonly ICalcResultsExporter<CalcResult> exporter;
-        private readonly ITransposePomAndOrgDataService transposePomAndOrgDataService; 
+        private readonly ITransposePomAndOrgDataService transposePomAndOrgDataService;
 
         public CalculatorInternalController(ApplicationDBContext context,
                                             IRpdStatusDataValidator rpdStatusDataValidator,
