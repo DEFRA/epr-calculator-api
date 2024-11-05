@@ -31,6 +31,7 @@ builder.Services.AddScoped<IRpdStatusDataValidator, RpdStatusDataValidator>();
 builder.Services.AddScoped<ICalcResultDetailBuilder, CalcResultDetailBuilder>();
 builder.Services.AddScoped<ICalcResultBuilder, CalcResultBuilder>();
 builder.Services.AddScoped<ICalcResultsExporter<CalcResult>, CalcResultsExporter>();
+builder.Services.AddScoped<ICalcResultLapcapDataBuilder, CalcResultLapcapDataBuilder>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();

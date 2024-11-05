@@ -18,6 +18,8 @@ namespace EPR.Calculator.API.UnitTests
         private Mock<ICalcResultBuilder> mockCalcResultBuilder;
         private Mock<ICalcResultsExporter<CalcResult>> mockExporter;
         private Mock<ICalcResultDetailBuilder> mockDetailBuilder;
+        private Mock<ICalcResultLapcapDataBuilder> mockLapcapBuilder;
+
         private Mock<ApplicationDBContext> mockContext;
         private CalculatorInternalController controller;
         private CalcResultBuilder calcResultBuilder;
@@ -41,7 +43,8 @@ namespace EPR.Calculator.API.UnitTests
             );
 
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();
-            calcResultBuilder = new CalcResultBuilder(mockDetailBuilder.Object);
+            mockLapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
+            calcResultBuilder = new CalcResultBuilder(mockDetailBuilder.Object, mockLapcapBuilder.Object);
 
             mockContext = new Mock<ApplicationDBContext>();
             detailBuilder = new CalcResultDetailBuilder(mockContext.Object);

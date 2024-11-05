@@ -215,7 +215,8 @@ namespace EPR.Calculator.API.UnitTests
             var mockBlobStorageService = new Mock<IBlobStorageService>();
             var CalcResultsExporter = new CalcResultsExporter(mockBlobStorageService.Object);
             var CalcResultDetailBuilder = new CalcResultDetailBuilder(dbContext);
-            var calcResultBuilder = new CalcResultBuilder(CalcResultDetailBuilder);
+            var CalcResultLapcapDataBuilder = new CalcResultLapcapDataBuilder(dbContext);
+            var calcResultBuilder = new CalcResultBuilder(CalcResultDetailBuilder, CalcResultLapcapDataBuilder);
             if (dbContext != null)
             {
                 var controller = new CalculatorInternalController(
