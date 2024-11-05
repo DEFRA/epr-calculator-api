@@ -67,7 +67,7 @@ namespace EPR.Calculator.API.Services
                                         Material = material,
                                         ProducerDetailId = producerDetail.Id,
                                         ProducerDetail = producerDetail,
-                                        PackagingType = pom.PackagingType,
+                                        PackagingType = pom.PackagingType ?? " ",
                                         PackagingTonnage = (decimal)pom.PackagingMaterialWeight / 1000,
                                     };
 

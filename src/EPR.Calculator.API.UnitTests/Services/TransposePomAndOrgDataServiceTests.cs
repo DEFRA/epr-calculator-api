@@ -13,11 +13,13 @@ namespace EPR.Calculator.API.UnitTests.Services
         [TestInitialize]
         public void Setup()
         {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             dbContext.CalculatorRunPomDataDetails.AddRange(GetCalculatorRunPomDataDetails());
             dbContext.SaveChanges();
 
             dbContext.CalculatorRunOrganisationDataDetails.AddRange(GetCalculatorRunOrganisationDataDetails());
             dbContext.SaveChanges();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
         [TestMethod]
@@ -33,10 +35,13 @@ namespace EPR.Calculator.API.UnitTests.Services
                 CalculatorRun = new CalculatorRun()
             };
 
+#pragma warning disable CS8604 // Possible null reference argument.
             var service = new TransposePomAndOrgDataService(dbContext);
+#pragma warning restore CS8604 // Possible null reference argument.
             service.Transpose(3);
 
             var producerDetail = dbContext.ProducerDetail.FirstOrDefault();
+            Assert.IsNotNull(producerDetail);
             Assert.AreEqual(expectedResult.ProducerId, producerDetail.ProducerId);
             Assert.AreEqual(expectedResult.ProducerName, producerDetail.ProducerName);
             Assert.AreEqual(expectedResult.SubsidiaryId, producerDetail.SubsidiaryId);
@@ -70,10 +75,13 @@ namespace EPR.Calculator.API.UnitTests.Services
                 }
             };
 
+#pragma warning disable CS8604 // Possible null reference argument.
             var service = new TransposePomAndOrgDataService(dbContext);
+#pragma warning restore CS8604 // Possible null reference argument.
             service.Transpose(3);
 
             var producerReportedMaterial = dbContext.ProducerReportedMaterial.FirstOrDefault();
+            Assert.IsNotNull(producerReportedMaterial);
             Assert.AreEqual(expectedResult.ProducerDetailId, producerReportedMaterial.ProducerDetailId);
             Assert.AreEqual(expectedResult.Material.Code, producerReportedMaterial.Material.Code);
             Assert.AreEqual(expectedResult.Material.Name, producerReportedMaterial.Material.Name);
