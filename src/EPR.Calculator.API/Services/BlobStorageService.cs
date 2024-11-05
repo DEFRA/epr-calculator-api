@@ -42,7 +42,6 @@ namespace EPR.Calculator.API.Services
                 var blobClient = _containerClient.GetBlobClient(fileName);
                 using var fileStream = File.OpenRead(fileName);
                 blobClient.UploadAsync(fileStream, true);
-                fileStream.Close();
             }
             catch (Exception ex)
             {

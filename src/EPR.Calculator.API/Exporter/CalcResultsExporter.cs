@@ -32,7 +32,7 @@ namespace EPR.Calculator.API.Exporter
             }
             catch (IOException ex)
             {
-                Console.WriteLine($"Error writing file: {ex.Message}");
+                throw new IOException($"File upload failed: {ex.Message}", ex);
             }
         }
 

@@ -74,16 +74,10 @@ namespace EPR.Calculator.API.UnitTests
             _blobStorageServiceMock
                 .Setup(service => service.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<StringBuilder>()))
                 .Throws(new IOException("Simulated IO error"));
-
-            using (var consoleOutput = new StringWriter())
-            {
-                Console.SetOut(consoleOutput);
-
-                _calcResultsExporter.Export(calcResult);
-
-                StringAssert.Contains(consoleOutput.ToString(), "Error writing file: Simulated IO error");
-            }
+            var exception = Assert.ThrowsException<IOException>(() => _calcResultsExporter.Export(calcResult));
+            Assert.AreEqual("File upload failed: Simulated IO error", exception.Message);
         }
+
 
         [TestMethod]
         public void AppendFileInfo_ShouldNotAppendIfFilePartsAreInvalid()
