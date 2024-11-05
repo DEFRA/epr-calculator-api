@@ -143,7 +143,9 @@ namespace EPR.Calculator.API.UnitTests
             var createDefaultParameterDto = new CreateLapcapDataDto
             {
                 ParameterYear = "2024-25",
-                LapcapDataTemplateValues = lapcapDataTemplateValues
+                LapcapDataTemplateValues = lapcapDataTemplateValues,
+                LapcapFileName = "SomeTestFileName"
+
             };
             return createDefaultParameterDto;
         }
