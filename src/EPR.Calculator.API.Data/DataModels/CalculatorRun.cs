@@ -10,7 +10,7 @@ namespace EPR.Calculator.API.Data.DataModels
     {
         [Column("id")]
         [Required]
-        public int Id { get; set; }
+        public virtual int Id { get; set; }
 
         [Column("calculator_run_classification_id")]
         [Required]
@@ -60,7 +60,7 @@ namespace EPR.Calculator.API.Data.DataModels
 
         public LapcapDataMaster? LapcapDataMaster { get; set; }
 
-        public DefaultParameterSettingMaster? DefaultParameterSettingMaster { get; set; }
+        public virtual DefaultParameterSettingMaster? DefaultParameterSettingMaster { get; set; }
 
         public ICollection<ProducerDetail> ProducerDetails { get; } = new List<ProducerDetail>();
 

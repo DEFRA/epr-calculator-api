@@ -7,7 +7,7 @@ namespace EPR.Calculator.API.Data.DataModels
     [Table("default_parameter_setting_master")]
     public class DefaultParameterSettingMaster
     {
-        public int Id { get; set; }
+        public virtual int Id { get; set; }
 
         [Column("parameter_year")]
         [Required]
@@ -35,7 +35,7 @@ namespace EPR.Calculator.API.Data.DataModels
         [StringLength(256)]
         public string ParameterFileName { get; set; } = string.Empty;
 
-        public ICollection<DefaultParameterSettingDetail> Details { get; } = new List<DefaultParameterSettingDetail>();
+        public virtual ICollection<DefaultParameterSettingDetail> Details { get; } = new List<DefaultParameterSettingDetail>();
 
         public ICollection<CalculatorRun>? RunDetails { get; }
     }
