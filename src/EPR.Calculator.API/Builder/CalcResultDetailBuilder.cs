@@ -37,7 +37,7 @@ namespace EPR.Calculator.API.Builder
                 if (item.CalculatorRunPomDataMaster != null)
                     results.RpdFilePOM = item.CalculatorRunPomDataMaster.CreatedAt.ToString(CalculationResults.DateFormat);
                 if (item.LapcapDataMaster != null)
-                    results.LapcapFile = FormatFileData("TestFileName1", item.LapcapDataMaster.CreatedAt, item.LapcapDataMaster.CreatedBy);
+                    results.LapcapFile = FormatFileData(item.LapcapDataMaster.LapcapFileName, item.LapcapDataMaster.CreatedAt, item.LapcapDataMaster.CreatedBy);
                 if (item.DefaultParameterSettingMaster != null)
                     results.ParametersFile = FormatFileData(item.DefaultParameterSettingMaster.ParameterFileName, item.DefaultParameterSettingMaster.CreatedAt, item.DefaultParameterSettingMaster.CreatedBy);
             }
