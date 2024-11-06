@@ -3,8 +3,6 @@
     using System.Globalization;
     using System.Text;
     using EPR.Calculator.API.Data;
-    using EPR.Calculator.API.Data.DataModels;
-    using Microsoft.EntityFrameworkCore;
 
     /// <summary>
     /// Generates the CommsCost report.
@@ -43,7 +41,7 @@
         private IEnumerable<string> Headers2 { get; } =
         [
             "Total",
-            "Producer Reported  Household Packaging Waste Tonnage",
+            "Producer Reported Household Packaging Waste Tonnage",
             "Late Reporting Tonnage",
             "Producer Reported Household Tonnage + Late Reporting Tonnage",
             "Comms Cost - by Material Price Per Tonne",
@@ -102,25 +100,9 @@
             return records;
         }
 
-        private IEnumerable<MaterialDetails> GetMaterialDetails()
-            => DBContext.Material.Select(material => new MaterialDetails
-            {
-                Id = material.Id,
-                Name = material.Name,
-                Code = material.Code,
-            });
-
-        private decimal GetLateReportingTonnage(int runId, string materialCode)
-        {
-            var parametersMaster = DBContext.CalculatorRuns
-                .Single(run => run.Id == runId)
-                .DefaultParameterSettingMaster
-                ?? throw new InvalidOperationException("No parameters found.");
-            return parametersMaster.Details
-                .Single(d => d.ParameterUniqueReferenceId == $"LRET-{materialCode}")
-                .ParameterValue;
-        }
-
+        /// <summary>
+        /// Retrieve the materials data from the database.
+        /// </summary>
         private IEnumerable<MaterialDetails> GetMaterialDetails(int runId)
         {
             // TODO: The DefaultParameterSettingMaster can be null
@@ -142,11 +124,13 @@
                     {
                         Id = m.Id,
                         Name = m.Name,
-                        Code = m.Code,
                         LateReportingTonnage = p.ParameterValue
                     });
         }
 
+        /// <summary>
+        /// Gather the material data and total values together into a finished record object.
+        /// </summary>
         private CommsCostReportRecord BuildRecord(
             MaterialDetails material,
             IDictionary<int, decimal> totalValues)
@@ -159,6 +143,9 @@
                 LateTonnageReporting = material.LateReportingTonnage,
             };
 
+        /// <summary>
+        /// Apply the country apportionments to the total value to get the per-country values.
+        /// </summary>
         private static IDictionary<int, decimal> CalculatePerCountryValue(
             IEnumerable<CountryDetails> countries,
             decimal totalCost) => countries.ToDictionary(
@@ -166,6 +153,9 @@
                 country => (totalCost/100) * country.Apportionment);
 
 
+        /// <summary>
+        /// A record in the CommsCost report.
+        /// </summary>
         private sealed record CommsCostReportRecord
         {
             /// <summary>
@@ -196,6 +186,9 @@
             /// </summary>
             public decimal PRHPAWTPlusLatTonRep => ProdRepHoPaWaT + LateTonnageReporting;
 
+            /// <summary>
+            /// The price per ton.
+            /// </summary>
             public decimal PricePerTon => Total / PRHPAWTPlusLatTonRep;
 
             /// <inheritdoc/>
@@ -226,7 +219,7 @@
         }
 
         /// <summary>
-        /// For fetching only the required values from the country table.
+        /// For selecting only the required values from the country table.
         /// </summary>
         private struct CountryDetails
         {
@@ -238,18 +231,13 @@
         }
 
         /// <summary>
-        /// For fetching only the required values from the materials table.
+        /// For selecting only the required values from the materials table.
         /// </summary>
         private struct MaterialDetails
         {
             public int Id { get; init; }
 
             public string Name { get; init; }
-
-            /// <summary>
-            /// The code used as part of the key for retrieving the parameters.
-            /// </summary>
-            public string Code { get; init; }
 
             public decimal LateReportingTonnage { get; init; }
         }
