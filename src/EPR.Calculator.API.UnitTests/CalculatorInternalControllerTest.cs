@@ -181,7 +181,8 @@ namespace EPR.Calculator.API.UnitTests
                     new RpdStatusDataValidator(mock.Object),
                     mock.Object,
                     new Mock<ICalcResultBuilder>().Object,
-                    new Mock<ICalcResultsExporter<CalcResult>>().Object
+                    new Mock<ICalcResultsExporter<CalcResult>>().Object,
+                    new Mock<ITransposePomAndOrgDataService>().Object
                 );
 
                 var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
