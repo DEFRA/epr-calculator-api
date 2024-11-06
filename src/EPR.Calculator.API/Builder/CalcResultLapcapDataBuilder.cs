@@ -1,6 +1,8 @@
 ﻿using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
+using Microsoft.Azure.Amqp.Framing;
 using Microsoft.Extensions.Hosting;
 
 namespace EPR.Calculator.API.Builder
@@ -47,28 +49,61 @@ namespace EPR.Calculator.API.Builder
                                TotalCost = lapcapDetail.TotalCost
                            }).ToList();
 
-            var countries = results.Select(x => x.Country).Distinct().ToList();
-            var materials = results.Select(x => x.Material).Distinct().OrderBy(x => x).ToList();
+            var materials = context.Material.Select(x => x.Name).ToList();
 
             foreach (var material in materials)
             {
                 var detail = new CalcResultLapcapDataDetails
                 {
                     Name = material,
-                    EnglandDisposalCost = GetMaterialDisposalCostPerCountry(countries.Single(x => x.Equals("England", StringComparison.CurrentCultureIgnoreCase)), material, results),
-                    NorthernIrelandDisposalCost = GetMaterialDisposalCostPerCountry(countries.Single(x => x.Equals("NI", StringComparison.CurrentCultureIgnoreCase)), material, results),
-                    ScotlandDisposalCost = GetMaterialDisposalCostPerCountry(countries.Single(x => x.Equals("Scotland", StringComparison.CurrentCultureIgnoreCase)), material, results),
-                    WalesDisposalCost = GetMaterialDisposalCostPerCountry(countries.Single(x => x.Equals("Wales", StringComparison.CurrentCultureIgnoreCase)), material, results),
+                    EnglandCost = GetMaterialDisposalCostPerCountry("England", material, results),
+                    NorthernIrelandCost = GetMaterialDisposalCostPerCountry("NI", material, results),
+                    ScotlandCost = GetMaterialDisposalCostPerCountry("Scotland", material, results),
+                    WalesCost = GetMaterialDisposalCostPerCountry("Wales", material, results),
                     OrderId = ++orderId,
-                    TotalDisposalCost = GetTotalMaterialDisposalCost(material, results)
+                    TotalCost = GetTotalMaterialDisposalCost(material, results)
                 };
+
                 data.Add(detail);
             }
+
+            var totalDetail = new CalcResultLapcapDataDetails
+            {
+                Name = "Total",
+                EnglandCost = data.Sum(x => x.EnglandCost),
+                NorthernIrelandCost = data.Sum(x => x.NorthernIrelandCost),
+                ScotlandCost = data.Sum(x => x.ScotlandCost),
+                WalesCost = data.Sum(x => x.WalesCost),
+                TotalCost = data.Sum(x => x.TotalCost)
+            };
+            data.Add(totalDetail);
+
+
+            var countryAppPercent = new CalcResultLapcapDataDetails
+            {
+                Name = "1 Country Apportionment",
+                EnglandCost = (totalDetail.EnglandCost / totalDetail.TotalCost) * 100,
+                NorthernIrelandCost = (totalDetail.NorthernIrelandCost / totalDetail.TotalCost) * 100,
+                ScotlandCost = (totalDetail.ScotlandCost / totalDetail.TotalCost) * 100,
+                WalesCost = (totalDetail.WalesCost / totalDetail.TotalCost) * 100,
+            };
+            data.Add(countryAppPercent);
+
+
+            foreach (var dataItem in data)
+            {
+                dataItem.EnglandDisposalCost = dataItem.EnglandCost.ToString("C");
+                dataItem.NorthernIrelandDisposalCost = dataItem.NorthernIrelandCost.ToString("C");
+                dataItem.ScotlandDisposalCost = dataItem.ScotlandCost.ToString("C");
+                dataItem.WalesDisposalCost = dataItem.WalesCost.ToString("C");
+                dataItem.TotalDisposalCost = dataItem.TotalCost.ToString("C");
+            }
+
 
             return new CalcResultLapcapData { Name = "LAPCAP Data", CalcResultLapcapDataDetails = data };
         }
 
-        internal static string GetMaterialDisposalCostPerCountry(string country, string material, IEnumerable<ResultsClass> results)
+        internal static decimal GetMaterialDisposalCostPerCountry(string country, string material, IEnumerable<ResultsClass> results)
         {
             var date = DateTime.Today;
             var newDateTime = date.AddYears(-1);
@@ -76,16 +111,13 @@ namespace EPR.Calculator.API.Builder
             var totalSum = results.Where(x => x.Country.Equals(country, StringComparison.OrdinalIgnoreCase) &&
                 x.Material.Equals(material, StringComparison.OrdinalIgnoreCase))
                 .Sum(x => x.TotalCost);
-            return totalSum.ToString("C");
+            return totalSum;
         }
 
-        internal static string GetTotalMaterialDisposalCost(string material, IEnumerable<ResultsClass> results)
+        internal static decimal GetTotalMaterialDisposalCost(string material, IEnumerable<ResultsClass> results)
         {
-            var date = DateTime.Today;
-            var newDateTime = date.AddYears(-1);
-
             var totalSum = results.Where(x => x.Material.Equals(material, StringComparison.OrdinalIgnoreCase)).Sum(x => x.TotalCost);
-            return totalSum.ToString("C");
+            return totalSum;
         }
     }
 }
