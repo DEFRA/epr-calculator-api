@@ -31,6 +31,11 @@ namespace EPR.Calculator.API.Data.DataModels
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
+        [Column("lapcap_filename")]
+        [Required]
+        [StringLength(256)]
+        public string LapcapFileName { get; set; } = string.Empty;
+
         public ICollection<LapcapDataDetail> Details { get; } = new List<LapcapDataDetail>();
 
         public ICollection<CalculatorRun>? RunDetails { get; }
