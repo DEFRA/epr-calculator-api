@@ -55,7 +55,7 @@ namespace EPR.Calculator.API.Services
 
                                 // Proceed further only if the organisation name has a value
                                 // TO DO: We have to record if the organisation name is null in a separate table post Dec 2024
-                                if (producerName != null)
+                                if (!string.IsNullOrWhiteSpace(producerName))
                                 {
                                     var producerDetail = new ProducerDetail
                                     {
