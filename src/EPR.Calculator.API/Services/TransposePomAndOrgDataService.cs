@@ -1,6 +1,6 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Wrapper;
+using EPR.Calculator.API.Dtos;
 
 namespace EPR.Calculator.API.Services
 {
@@ -14,11 +14,11 @@ namespace EPR.Calculator.API.Services
             this.context = context;
         }
 
-        public void Transpose(int runId)
+        public void Transpose(CalcResultsRequestDto resultsRequestDto)
         {
             var materials = this.context.Material.ToList();
 
-            var calculatorRun = this.context.CalculatorRuns.Single(cr => cr.Id == runId);
+            var calculatorRun = this.context.CalculatorRuns.Single(cr => cr.Id == resultsRequestDto.RunId);
 
             if (calculatorRun.CalculatorRunPomDataMasterId != null)
             {
@@ -48,7 +48,7 @@ namespace EPR.Calculator.API.Services
                                 {
                                     var producerDetail = new ProducerDetail
                                     {
-                                        CalculatorRunId = runId,
+                                        CalculatorRunId = resultsRequestDto.RunId,
                                         ProducerId = pom.OrganisationId.Value,
                                         SubsidiaryId = pom.SubsidaryId,
                                         ProducerName = producerName,

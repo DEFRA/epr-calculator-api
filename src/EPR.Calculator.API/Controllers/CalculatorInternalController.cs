@@ -150,7 +150,7 @@ namespace EPR.Calculator.API.Controllers
         [Route("prepareCalcResults")]
         public IActionResult PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
-            this.transposePomAndOrgDataService.Transpose(resultsRequestDto.RunId);
+            this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
             var results = this.builder.Build(resultsRequestDto);
             this.exporter.Export(results);
             return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };

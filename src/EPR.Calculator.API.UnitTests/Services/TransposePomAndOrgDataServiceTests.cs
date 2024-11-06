@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Tests.Controllers;
 using EPR.Calculator.API.Wrapper;
@@ -38,7 +39,9 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning disable CS8604 // Possible null reference argument.
             var service = new TransposePomAndOrgDataService(dbContext);
 #pragma warning restore CS8604 // Possible null reference argument.
-            service.Transpose(3);
+
+            var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
+            service.Transpose(resultsRequestDto);
 
             var producerDetail = dbContext.ProducerDetail.FirstOrDefault();
             Assert.IsNotNull(producerDetail);
@@ -78,7 +81,9 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning disable CS8604 // Possible null reference argument.
             var service = new TransposePomAndOrgDataService(dbContext);
 #pragma warning restore CS8604 // Possible null reference argument.
-            service.Transpose(3);
+
+            var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
+            service.Transpose(resultsRequestDto);
 
             var producerReportedMaterial = dbContext.ProducerReportedMaterial.FirstOrDefault();
             Assert.IsNotNull(producerReportedMaterial);
