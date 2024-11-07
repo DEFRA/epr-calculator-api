@@ -64,6 +64,12 @@ namespace EPR.Calculator.API.Builder
                     TotalCost = GetTotalMaterialDisposalCost(material, results)
                 };
 
+                detail.EnglandDisposalCost = detail.EnglandCost.ToString("C");
+                detail.NorthernIrelandDisposalCost = detail.NorthernIrelandCost.ToString("C");
+                detail.ScotlandDisposalCost = detail.ScotlandCost.ToString("C");
+                detail.WalesDisposalCost = detail.WalesCost.ToString("C");
+                detail.TotalDisposalCost = detail.TotalCost.ToString("C");
+
                 data.Add(detail);
             }
 
@@ -77,6 +83,11 @@ namespace EPR.Calculator.API.Builder
                 TotalCost = data.Sum(x => x.TotalCost),
                 OrderId = ++orderId
             };
+            totalDetail.EnglandDisposalCost = totalDetail.EnglandCost.ToString("C");
+            totalDetail.NorthernIrelandDisposalCost = totalDetail.NorthernIrelandCost.ToString("C");
+            totalDetail.ScotlandDisposalCost = totalDetail.ScotlandCost.ToString("C");
+            totalDetail.WalesDisposalCost = totalDetail.WalesCost.ToString("C");
+            totalDetail.TotalDisposalCost = totalDetail.TotalCost.ToString("C");
             data.Add(totalDetail);
 
 
@@ -87,19 +98,15 @@ namespace EPR.Calculator.API.Builder
                 NorthernIrelandCost = (totalDetail.NorthernIrelandCost / totalDetail.TotalCost) * 100,
                 ScotlandCost = (totalDetail.ScotlandCost / totalDetail.TotalCost) * 100,
                 WalesCost = (totalDetail.WalesCost / totalDetail.TotalCost) * 100,
+                TotalCost = 100,
                 OrderId = ++orderId
             };
+            countryAppPercent.EnglandDisposalCost = $"{countryAppPercent.EnglandCost}%";
+            countryAppPercent.NorthernIrelandDisposalCost = $"{countryAppPercent.NorthernIrelandCost}%";
+            countryAppPercent.ScotlandDisposalCost = $"{countryAppPercent.ScotlandCost}%";
+            countryAppPercent.WalesDisposalCost = $"{countryAppPercent.WalesCost}%";
+            countryAppPercent.TotalDisposalCost = $"{countryAppPercent.TotalCost}%";
             data.Add(countryAppPercent);
-
-
-            foreach (var dataItem in data.Where(x => x.OrderId != 1))
-            {
-                dataItem.EnglandDisposalCost = dataItem.EnglandCost.ToString("C");
-                dataItem.NorthernIrelandDisposalCost = dataItem.NorthernIrelandCost.ToString("C");
-                dataItem.ScotlandDisposalCost = dataItem.ScotlandCost.ToString("C");
-                dataItem.WalesDisposalCost = dataItem.WalesCost.ToString("C");
-                dataItem.TotalDisposalCost = dataItem.TotalCost.ToString("C");
-            }
 
 
             return new CalcResultLapcapData { Name = "LAPCAP Data", CalcResultLapcapDataDetails = data };
