@@ -14,6 +14,8 @@ namespace EPR.Calculator.API.Exporter
         private const string RunDate = "Run Date";
         private const string Runby = "Run by";
         private const string FinancialYear = "Financial Year";
+        private const string RPDFileORG = "RPD File - ORG";
+        private const string RPDFilePOM = "RPD File - POM";
         private const string LapcapFile = "Lapcap File";
         private const string ParametersFile = "Parameters File";
 
@@ -25,7 +27,11 @@ namespace EPR.Calculator.API.Exporter
         {
             var csvContent = new StringBuilder();
             LoadCalcResultDetail(results, csvContent);
-            PrepareLapcapData(results.CalcResultLapcapData, csvContent);
+            if(results.CalcResultLapcapData != null)
+            {
+                PrepareLapcapData(results.CalcResultLapcapData, csvContent);
+            }
+            
 
             var fileName = GetResultFileName(results.CalcResultDetail.RunId);
             try
@@ -45,8 +51,14 @@ namespace EPR.Calculator.API.Exporter
             AppendCsvLine(csvContent, RunDate, results.CalcResultDetail.RunDate.ToString(CalculationResults.DateFormat));
             AppendCsvLine(csvContent, Runby, results.CalcResultDetail.RunBy);
             AppendCsvLine(csvContent, FinancialYear, results.CalcResultDetail.FinancialYear);
+            AppendRPDFileInfo(csvContent, RPDFileORG, RPDFilePOM, results.CalcResultDetail.RpdFileORG, results.CalcResultDetail.RpdFilePOM);
             AppendFileInfo(csvContent, LapcapFile, results.CalcResultDetail.LapcapFile);
             AppendFileInfo(csvContent, ParametersFile, results.CalcResultDetail.ParametersFile);
+        }
+
+        private static void AppendRPDFileInfo(StringBuilder csvContent, string rPDFileORG, string rPDFilePOM, string rpdFileORGValue, string rpdFilePOMValue)
+        {
+            csvContent.AppendLine($"{rPDFileORG},{CsvSanitiser.SanitiseData(rpdFileORGValue)},{rPDFilePOM},{CsvSanitiser.SanitiseData(rpdFilePOMValue)}");
         }
 
         private static void AppendFileInfo(StringBuilder csvContent, string label, string filePath)
@@ -65,6 +77,7 @@ namespace EPR.Calculator.API.Exporter
         {
             csvContent.AppendLine($"{label},{CsvSanitiser.SanitiseData(value)}");
         }
+
         private static string GetResultFileName(int runId)
         {
             return $"{runId}-{DateTime.Now:yyyy-MM-dd-HHmm}.csv";
