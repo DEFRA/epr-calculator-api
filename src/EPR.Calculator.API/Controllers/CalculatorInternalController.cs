@@ -5,6 +5,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Mvc;
@@ -68,7 +69,7 @@ namespace EPR.Calculator.API.Controllers
                     var stagingOrganisationData = this.wrapper.GetOrganisationData();
                     var calcOrganisationMaster = new CalculatorRunOrganisationDataMaster
                     {
-                        CalendarYear = "2023", //Take the financial year from Calc Run table and Derive the Calendar year
+                        CalendarYear = Util.GetCalendarYear("2024-25"), //Take the financial year from Calc Run table and Derive the Calendar year
                         CreatedAt = DateTime.Now,
                         CreatedBy = request.UpdatedBy,
                         EffectiveFrom = DateTime.Now,
