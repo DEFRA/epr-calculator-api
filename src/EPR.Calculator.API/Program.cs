@@ -1,5 +1,7 @@
 using Azure.Messaging.ServiceBus;
+using Azure.Storage.Blobs;
 using EPR.Calculator.API.Builder;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Exporter;
@@ -30,12 +32,27 @@ builder.Services.AddScoped<ICalcResultDetailBuilder, CalcResultDetailBuilder>();
 builder.Services.AddScoped<ICalcResultBuilder, CalcResultBuilder>();
 builder.Services.AddScoped<ICalcResultsExporter<CalcResult>, CalcResultsExporter>();
 builder.Services.AddScoped<ICalcResultLapcapDataBuilder, CalcResultLapcapDataBuilder>();
+builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<ITransposePomAndOrgDataService, TransposePomAndOrgDataService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+builder.Services.Configure<BlobStorageSettings>(
+    builder.Configuration.GetSection("AzureBlobStorage"));
+
+builder.Services.AddSingleton<BlobServiceClient>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetSection("AzureBlobStorage:ConnectionString").Value;
+    if (string.IsNullOrEmpty(connectionString))
+    {
+        throw new ArgumentNullException("AzureBlobStorage:ConnectionString", "Azure Blob Storage connection string is not configured.");
+    }
+    return new BlobServiceClient(connectionString);
 });
 
 var serviceBusConnectionString = builder.Configuration.GetSection("ServiceBus").GetSection("ConnectionString");

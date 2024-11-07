@@ -52,7 +52,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     RunDate = DateTime.UtcNow,
                     RunBy = "TestValue887677417",
                     FinancialYear = "TestValue2028236729",
-                    RpdFile = "TestValue1468463827",
+                    RpdFileORG = "TestValue1468463827",
+                    RpdFilePOM = "TestValue1468463837",
                     LapcapFile = "TestValue1811770456",
                     ParametersFile = "TestValue1028165412"
                 },
