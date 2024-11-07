@@ -7,7 +7,8 @@
         public DateTime RunDate { get; set; }
         public string RunBy { get; set; } = string.Empty;
         public string FinancialYear { get; set; } = string.Empty;
-        public string RpdFile { get; set; } = string.Empty;
+        public string RpdFileORG { get; set; } = string.Empty;
+        public string RpdFilePOM { get; set; } = string.Empty;
         public string LapcapFile { get; set; } = string.Empty;
         public string ParametersFile { get; set; } = string.Empty;
     }

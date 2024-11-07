@@ -8,6 +8,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using EPR.Calculator.API.Dtos;
     using EPR.Calculator.API.Exporter;
     using EPR.Calculator.API.Models;
+    using EPR.Calculator.API.Services;
     using EPR.Calculator.API.Validators;
     using EPR.Calculator.API.Wrapper;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -22,6 +23,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private Mock<IOrgAndPomWrapper> _wrapper;
         private Mock<ICalcResultBuilder> _builder;
         private Mock<ICalcResultsExporter<CalcResult>> _exporter;
+        private Mock<ITransposePomAndOrgDataService> _transposePomAndOrgDataService;
 
         [TestInitialize]
         public void SetUp()
@@ -31,7 +33,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             _wrapper = new Mock<IOrgAndPomWrapper>();
             _builder = new Mock<ICalcResultBuilder>();
             _exporter = new Mock<ICalcResultsExporter<CalcResult>>();
-            _testClass = new CalculatorInternalController(_context, _rpdStatusDataValidator.Object, _wrapper.Object, _builder.Object, _exporter.Object);
+            _transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
+            _testClass = new CalculatorInternalController(_context, _rpdStatusDataValidator.Object, _wrapper.Object, _builder.Object, _exporter.Object, _transposePomAndOrgDataService.Object);
         }
 
         [TestMethod]
@@ -49,7 +52,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     RunDate = DateTime.UtcNow,
                     RunBy = "TestValue887677417",
                     FinancialYear = "TestValue2028236729",
-                    RpdFile = "TestValue1468463827",
+                    RpdFileORG = "TestValue1468463827",
+                    RpdFilePOM = "TestValue1468463837",
                     LapcapFile = "TestValue1811770456",
                     ParametersFile = "TestValue1028165412"
                 },

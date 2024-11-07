@@ -1,8 +1,10 @@
 ﻿using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Tests.Controllers;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
@@ -179,7 +181,8 @@ namespace EPR.Calculator.API.UnitTests
                     new RpdStatusDataValidator(mock.Object),
                     mock.Object,
                     new Mock<ICalcResultBuilder>().Object,
-                    new Mock<ICalcResultsExporter<CalcResult>>().Object
+                    new Mock<ICalcResultsExporter<CalcResult>>().Object,
+                    new Mock<ITransposePomAndOrgDataService>().Object
                 );
 
                 var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
@@ -194,6 +197,91 @@ namespace EPR.Calculator.API.UnitTests
                 Assert.IsNotNull(calcRun.CalculatorRunPomDataMasterId);
             }
 
+        }
+
+        [TestMethod]
+        public void Construct_ShouldReturnCalcResultDetail()
+        {
+            var mock = new Mock<IOrgAndPomWrapper>();
+            dbContext.LapcapDataMaster.RemoveRange(dbContext.LapcapDataMaster);
+            dbContext.SaveChanges();
+            dbContext.LapcapDataMaster.AddRange(GetLapcapMasterData().ToList());
+            dbContext.SaveChanges();
+
+            dbContext.DefaultParameterSettings.RemoveRange(dbContext.DefaultParameterSettings);
+            dbContext.SaveChanges();
+            dbContext.DefaultParameterSettings.AddRange(GetDefaultParameterSettingsMasterData().ToList());
+            dbContext.SaveChanges();
+
+            var mockBlobStorageService = new Mock<IBlobStorageService>();
+            var CalcResultsExporter = new CalcResultsExporter(mockBlobStorageService.Object);
+            var CalcResultDetailBuilder = new CalcResultDetailBuilder(dbContext);
+            var CalcResultLapcapDataBuilder = new CalcResultLapcapDataBuilder(dbContext);
+            var calcResultBuilder = new CalcResultBuilder(CalcResultDetailBuilder, CalcResultLapcapDataBuilder);
+            var transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
+            if (dbContext != null)
+            {
+                var controller = new CalculatorInternalController(
+                    dbContext,
+                    new RpdStatusDataValidator(mock.Object),
+                    mock.Object,
+                    calcResultBuilder,
+                    CalcResultsExporter,
+                    transposePomAndOrgDataService.Object
+                );
+                var calResult = controller.PrepareCalcResults(new CalcResultsRequestDto() { RunId = 1 });
+                var objResult = calResult as ObjectResult;
+                Assert.IsNotNull(calResult);
+                Assert.AreEqual(201, objResult?.StatusCode);
+            }
+        }
+
+        protected static IEnumerable<DefaultParameterSettingMaster> GetDefaultParameterSettingsMasterData()
+        {
+            var list = new List<DefaultParameterSettingMaster>
+            {
+                new() {
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = "Test User1",
+                    EffectiveFrom = DateTime.Now,
+                    EffectiveTo = DateTime.Now,
+                    Id = 1,
+                },
+                new() {
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = "Test User2",
+                    EffectiveFrom = DateTime.Now,
+                    EffectiveTo = DateTime.Now,
+                    Id = 2,
+                }
+            };
+
+            return list;
+        }
+
+        protected static IEnumerable<LapcapDataMaster> GetLapcapMasterData()
+        {
+            var list = new List<LapcapDataMaster>
+            {
+                new() {
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = "Test User1",
+                    EffectiveFrom = DateTime.Now,
+                    EffectiveTo = DateTime.Now,
+                    Id = 1,
+                    ProjectionYear = "2024-25",
+                },
+                new() {
+                    CreatedAt = DateTime.Now,
+                    CreatedBy = "Test User2",
+                    EffectiveFrom = DateTime.Now,
+                    EffectiveTo = DateTime.Now,
+                    Id = 2,
+                    ProjectionYear = "2024-25",
+                }
+            };
+
+            return list;
         }
     }
 }
