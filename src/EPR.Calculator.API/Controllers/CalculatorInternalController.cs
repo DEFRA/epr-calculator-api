@@ -62,7 +62,7 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(vr.StatusCode, vr.ErrorMessage);
             }
 
-            string financialYear = calcRun?.financialYear ?? string.Empty;
+            string financialYear = calcRun?.FinancialYear ?? string.Empty;
 
             using (var transaction = this.context.Database.BeginTransaction())
             {

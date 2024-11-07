@@ -38,7 +38,7 @@ namespace EPR.Calculator.API.UnitTests
                 CalculatorRunClassificationId = 1,
                 CreatedAt = DateTime.Now,
                 CreatedBy = "Some User",
-                financialYear = "2024-25",
+                FinancialYear = "2024-25",
                 Name = "CalculationRun1-Test",
                 DefaultParameterSettingMasterId = 1,
                 LapcapDataMasterId = 1,
@@ -202,7 +202,7 @@ namespace EPR.Calculator.API.UnitTests
         {
             CalculatorRun? calcRun = null;
 
-            string financialYear = calcRun?.financialYear ?? string.Empty;
+            string financialYear = calcRun?.FinancialYear ?? string.Empty;
 
             Assert.AreEqual(string.Empty, financialYear);
         }
@@ -212,10 +212,10 @@ namespace EPR.Calculator.API.UnitTests
         {
             CalculatorRun calcRun = new()
             {
-                financialYear = "2024-25"
+                FinancialYear = "2024-25"
             };
 
-            string fy = calcRun?.financialYear ?? string.Empty;
+            string fy = calcRun?.FinancialYear ?? string.Empty;
 
             Assert.AreEqual("2024-25", fy);
         }
