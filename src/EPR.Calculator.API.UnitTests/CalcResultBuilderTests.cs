@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.Builder;
+using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

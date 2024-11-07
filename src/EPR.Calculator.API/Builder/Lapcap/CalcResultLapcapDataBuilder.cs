@@ -5,18 +5,15 @@ using EPR.Calculator.API.Models;
 using Microsoft.Azure.Amqp.Framing;
 using Microsoft.Extensions.Hosting;
 
-namespace EPR.Calculator.API.Builder
+namespace EPR.Calculator.API.Builder.Lapcap
 {
-    internal class ResultsClass
-    {
-        public string Material { get; set; }
-        public string Country { get; set; }
-        public decimal TotalCost { get; set; }
-    }
-
     public class CalcResultLapcapDataBuilder : ICalcResultLapcapDataBuilder
     {
         private readonly ApplicationDBContext context;
+        public const string LapcapHeader = "LAPCAP Data";
+        public const string CountryApportionment = "1 Country Apportionment";
+        public const string Total = "Total";
+        public const int HundredPercent = 100;
         public CalcResultLapcapDataBuilder(ApplicationDBContext context)
         {
             this.context = context;
@@ -28,13 +25,13 @@ namespace EPR.Calculator.API.Builder
             var data = new List<CalcResultLapcapDataDetails>();
             data.Add(new CalcResultLapcapDataDetails
             {
-                Name = "Material",
-                EnglandDisposalCost = "England LA Disposal Cost",
-                WalesDisposalCost = "Wales LA Disposal Cost",
-                ScotlandDisposalCost = "Scotland LA Disposal Cost",
-                NorthernIrelandDisposalCost = "Northern Ireland LA Disposal Cost",
+                Name = LapcapHeaderConstants.Name,
+                EnglandDisposalCost = LapcapHeaderConstants.EnglandDisposalCost,
+                WalesDisposalCost = LapcapHeaderConstants.WalesDisposalCost,
+                ScotlandDisposalCost = LapcapHeaderConstants.ScotlandDisposalCost,
+                NorthernIrelandDisposalCost = LapcapHeaderConstants.NorthernIrelandDisposalCost,
                 OrderId = orderId,
-                TotalDisposalCost = "1 LA Disposal Cost Total"
+                TotalDisposalCost = LapcapHeaderConstants.TotalDisposalCost
             });
 
             var results = (from run in context.CalculatorRuns
@@ -56,10 +53,10 @@ namespace EPR.Calculator.API.Builder
                 var detail = new CalcResultLapcapDataDetails
                 {
                     Name = material,
-                    EnglandCost = GetMaterialDisposalCostPerCountry("England", material, results),
-                    NorthernIrelandCost = GetMaterialDisposalCostPerCountry("NI", material, results),
-                    ScotlandCost = GetMaterialDisposalCostPerCountry("Scotland", material, results),
-                    WalesCost = GetMaterialDisposalCostPerCountry("Wales", material, results),
+                    EnglandCost = GetMaterialDisposalCostPerCountry(CountryConstants.England, material, results),
+                    NorthernIrelandCost = GetMaterialDisposalCostPerCountry(CountryConstants.NI, material, results),
+                    ScotlandCost = GetMaterialDisposalCostPerCountry(CountryConstants.Scotland, material, results),
+                    WalesCost = GetMaterialDisposalCostPerCountry(CountryConstants.Wales, material, results),
                     OrderId = ++orderId,
                     TotalCost = GetTotalMaterialDisposalCost(material, results)
                 };
@@ -75,7 +72,7 @@ namespace EPR.Calculator.API.Builder
 
             var totalDetail = new CalcResultLapcapDataDetails
             {
-                Name = "Total",
+                Name = Total,
                 EnglandCost = data.Sum(x => x.EnglandCost),
                 NorthernIrelandCost = data.Sum(x => x.NorthernIrelandCost),
                 ScotlandCost = data.Sum(x => x.ScotlandCost),
@@ -93,12 +90,12 @@ namespace EPR.Calculator.API.Builder
 
             var countryAppPercent = new CalcResultLapcapDataDetails
             {
-                Name = "1 Country Apportionment",
-                EnglandCost = (totalDetail.EnglandCost / totalDetail.TotalCost) * 100,
-                NorthernIrelandCost = (totalDetail.NorthernIrelandCost / totalDetail.TotalCost) * 100,
-                ScotlandCost = (totalDetail.ScotlandCost / totalDetail.TotalCost) * 100,
-                WalesCost = (totalDetail.WalesCost / totalDetail.TotalCost) * 100,
-                TotalCost = 100,
+                Name = CountryApportionment,
+                EnglandCost = CalculateApportionment(totalDetail.EnglandCost, totalDetail.TotalCost),
+                NorthernIrelandCost = CalculateApportionment(totalDetail.NorthernIrelandCost, totalDetail.TotalCost),
+                ScotlandCost = CalculateApportionment(totalDetail.ScotlandCost, totalDetail.TotalCost),
+                WalesCost = CalculateApportionment(totalDetail.WalesCost, totalDetail.TotalCost),
+                TotalCost = HundredPercent,
                 OrderId = ++orderId
             };
             countryAppPercent.EnglandDisposalCost = $"{countryAppPercent.EnglandCost}%";
@@ -109,7 +106,16 @@ namespace EPR.Calculator.API.Builder
             data.Add(countryAppPercent);
 
 
-            return new CalcResultLapcapData { Name = "LAPCAP Data", CalcResultLapcapDataDetails = data };
+            return new CalcResultLapcapData { Name = LapcapHeader, CalcResultLapcapDataDetails = data };
+        }
+
+        internal static decimal CalculateApportionment(decimal countryCost, decimal totalCost)
+        {
+            if (totalCost != 0)
+            {
+                return (countryCost / totalCost) * 100;
+            }
+            return 0;
         }
 
         internal static decimal GetMaterialDisposalCostPerCountry(string country, string material, IEnumerable<ResultsClass> results)
