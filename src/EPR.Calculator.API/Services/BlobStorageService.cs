@@ -10,7 +10,7 @@ namespace EPR.Calculator.API.Services
 
         public BlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration)
         {
-            var settings = configuration.GetSection("AzureBlobStorage").Get<BlobStorageSettings>() ?? throw new ArgumentNullException("AzureBlobStorage settings are missing in configuration.");
+            var settings = configuration.GetSection("BlobStorage").Get<BlobStorageSettings>() ?? throw new ArgumentNullException("BlobStorage settings are missing in configuration.");
             _containerClient = blobServiceClient.GetBlobContainerClient(settings.ContainerName ?? throw new ArgumentNullException("Container name is missing in configuration."));
             _blobClient = _containerClient.GetBlobClient(settings.CsvFileName ?? throw new ArgumentNullException("CSV file name is missing in configuration."));
         }
