@@ -74,7 +74,8 @@ namespace EPR.Calculator.API.Builder
                 NorthernIrelandCost = data.Sum(x => x.NorthernIrelandCost),
                 ScotlandCost = data.Sum(x => x.ScotlandCost),
                 WalesCost = data.Sum(x => x.WalesCost),
-                TotalCost = data.Sum(x => x.TotalCost)
+                TotalCost = data.Sum(x => x.TotalCost),
+                OrderId = ++orderId
             };
             data.Add(totalDetail);
 
@@ -86,11 +87,12 @@ namespace EPR.Calculator.API.Builder
                 NorthernIrelandCost = (totalDetail.NorthernIrelandCost / totalDetail.TotalCost) * 100,
                 ScotlandCost = (totalDetail.ScotlandCost / totalDetail.TotalCost) * 100,
                 WalesCost = (totalDetail.WalesCost / totalDetail.TotalCost) * 100,
+                OrderId = ++orderId
             };
             data.Add(countryAppPercent);
 
 
-            foreach (var dataItem in data)
+            foreach (var dataItem in data.Where(x => x.OrderId != 1))
             {
                 dataItem.EnglandDisposalCost = dataItem.EnglandCost.ToString("C");
                 dataItem.NorthernIrelandDisposalCost = dataItem.NorthernIrelandCost.ToString("C");
