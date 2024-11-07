@@ -7,7 +7,7 @@ namespace EPR.Calculator.API.Data.DataModels
     [Table("default_parameter_setting_master")]
     public class DefaultParameterSettingMaster
     {
-        public virtual int Id { get; set; }
+        public int Id { get; set; }
 
         [Column("parameter_year")]
         [Required]

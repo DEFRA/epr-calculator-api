@@ -56,7 +56,7 @@ namespace EPR.Calculator.API.Data
 
         public virtual DbSet<CountryApportionment> CountryApportionment { get; set; }
 
-        public DbSet<ProducerReportedMaterial> ProducerReportedMaterial { get; set; }
+        public virtual DbSet<ProducerReportedMaterial> ProducerReportedMaterial { get; set; }
 
         public DbSet<CostType> CostType { get; set; }
 

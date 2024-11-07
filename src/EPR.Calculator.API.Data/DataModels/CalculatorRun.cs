@@ -10,7 +10,7 @@ namespace EPR.Calculator.API.Data.DataModels
     {
         [Column("id")]
         [Required]
-        public virtual int Id { get; set; }
+        public int Id { get; set; }
 
         [Column("calculator_run_classification_id")]
         [Required]

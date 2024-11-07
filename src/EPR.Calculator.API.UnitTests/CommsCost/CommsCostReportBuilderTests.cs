@@ -1,7 +1,6 @@
 ﻿namespace EPR.Calculator.API.UnitTests.CommsCost
 {
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using AutoFixture;
     using EPR.Calculator.API.CommsCost;
@@ -41,21 +40,13 @@
         public void BuildReport()
         {
             // Arrange
-            var totalValues = new Dictionary<int, decimal>
-            {
-                {0, 2870.00M},
-                {1, 7600.00M},
-                {2, 4800.00M},
-            };
 
             // Act
-            var result = this.TestClass.BuildReport(this.RunId, totalValues);
+            var result = this.TestClass.BuildReport(this.RunId);
 
             // Assert
             Assert.AreEqual(Resources.ExpectedCommsCostReportExample, result);
 
-            // Write the report out so we can examine it in Excel.
-            File.WriteAllText("C:\\Users\\a898212\\OneDrive - Eviden\\Documents\\CommsCost\\CommsCostReport.csv", result);
         }
 
         /// <summary>
@@ -65,15 +56,85 @@
         {
             var mockDb = new Mock<ApplicationDBContext>();
 
-            // material table.
-            var materialData = new[]
+            // producer_reported_material table.
+            var aluminiumData = new[]
             {
-                new Material{Id = 0, Code = "AL", Name = "Aluminium"},
-                new Material{Id = 1, Code = "FC", Name = "Fibre composite"},
-                new Material{Id = 2, Code = "GL", Name = "Glass"},
+                new ProducerReportedMaterial
+                {
+                    Id = Fixture.Create<int>(),
+                    Material = Fixture.Create<Material>(),
+                    PackagingType = "HH",
+                    PackagingTonnage = 5000,
+                    ProducerDetail = Fixture.Create<ProducerDetail>(),
+                },
+                new ProducerReportedMaterial
+                {
+                    Id = Fixture.Create<int>(),
+                    Material = Fixture.Create<Material>(),
+                    PackagingType = "HH",
+                    PackagingTonnage = 1980,
+                    ProducerDetail = Fixture.Create<ProducerDetail>(),
+                },
             };
+            var fibreCompositeData = new[]
+            {
+                new ProducerReportedMaterial
+                {
+                    Id = Fixture.Create<int>(),
+                    Material = Fixture.Create<Material>(),
+                    PackagingType = "HH",
+                    PackagingTonnage = 11850,
+                    ProducerDetail = Fixture.Create<ProducerDetail>(),
+                },
+            };
+            var glassData = new[]
+            {
+                new ProducerReportedMaterial
+                {
+                    Id = Fixture.Create<int>(),
+                    Material = Fixture.Create<Material>(),
+                    PackagingType = "HH",
+                    PackagingTonnage = 2000,
+                    ProducerDetail = Fixture.Create<ProducerDetail>(),
+                },
+                new ProducerReportedMaterial
+                {
+                    Id = Fixture.Create<int>(),
+                    Material = Fixture.Create<Material>(),
+                    PackagingType = "HH",
+                    PackagingTonnage = 2000,
+                    ProducerDetail = Fixture.Create<ProducerDetail>(),
+                },
+                new ProducerReportedMaterial
+                {
+                    Id = Fixture.Create<int>(),
+                    Material = Fixture.Create<Material>(),
+                    PackagingType = "HH",
+                    PackagingTonnage = 900,
+                    ProducerDetail = Fixture.Create<ProducerDetail>(),
+                }
+            };
+
+            // material table.
+            var aluminium = new Mock<Material>();
+            aluminium.Object.Id = Fixture.Create<int>();
+            aluminium.Object.Code = "AL";
+            aluminium.Object.Name = "Aluminium";
+            aluminium.Setup(a => a.ProducerReportedMaterials).Returns(aluminiumData);
+            var fiberComposite = new Mock<Material>();
+            fiberComposite.Object.Id = Fixture.Create<int>();
+            fiberComposite.Object.Code = "FC";
+            fiberComposite.Object.Name = "Fibre composite";
+            fiberComposite.Setup(a => a.ProducerReportedMaterials).Returns(fibreCompositeData);
+            var glass = new Mock<Material>();
+            glass.Object.Id = Fixture.Create<int>();
+            glass.Object.Code = "GL";
+            glass.Object.Name = "Glass";
+            glass.Setup(a => a.ProducerReportedMaterials).Returns(glassData);
+
+            var materials = new[]{aluminium.Object, fiberComposite.Object, glass.Object};
             mockDb.Setup(db => db.Material)
-                .Returns(CreateMockTable(materialData.AsQueryable()));
+                .Returns(CreateMockTable(materials.AsQueryable()));
 
             // country table.
             var countryData = new[]
@@ -91,23 +152,41 @@
             // default_parameter_setting_detail
             var parameterDetails = new[]
             {
-                this.Fixture.Build<DefaultParameterSettingDetail>()
+                                this.Fixture.Build<DefaultParameterSettingDetail>()
                 .With(record => record.Id, 0)
-                .With(record => record.ParameterValue, 8000.000M)
-                .With(record => record.ParameterUniqueReferenceId, "LRET-AL")
-                .With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
+                .With(record => record.ParameterValue, 2870)
+                .With(record => record.ParameterUniqueReferenceId, "COMC-AL")
+                //.With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
                 .Create(),
                 this.Fixture.Build<DefaultParameterSettingDetail>()
                 .With(record => record.Id, 1)
-                .With(record => record.ParameterValue, 7000.000M)
-                .With(record => record.ParameterUniqueReferenceId, "LRET-FC")
-                .With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
+                .With(record => record.ParameterValue, 7600)
+                .With(record => record.ParameterUniqueReferenceId, "COMC-FC")
+                //.With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
                 .Create(),
                 this.Fixture.Build<DefaultParameterSettingDetail>()
                 .With(record => record.Id, 2)
-                .With(record => record.ParameterValue, 6000.000M)
+                .With(record => record.ParameterValue, 4800)
+                .With(record => record.ParameterUniqueReferenceId, "COMC-GL")
+                //.With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
+                .Create(),
+                this.Fixture.Build<DefaultParameterSettingDetail>()
+                .With(record => record.Id, 0)
+                .With(record => record.ParameterValue, 8000)
+                .With(record => record.ParameterUniqueReferenceId, "LRET-AL")
+                //.With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
+                .Create(),
+                this.Fixture.Build<DefaultParameterSettingDetail>()
+                .With(record => record.Id, 1)
+                .With(record => record.ParameterValue, 7000)
+                .With(record => record.ParameterUniqueReferenceId, "LRET-FC")
+                //.With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
+                .Create(),
+                this.Fixture.Build<DefaultParameterSettingDetail>()
+                .With(record => record.Id, 2)
+                .With(record => record.ParameterValue, 6000)
                 .With(record => record.ParameterUniqueReferenceId, "LRET-GL")
-                .With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
+                //.With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
                 .Create(),
             }.ToArray();
             mockDb.Setup(db => db.DefaultParameterSettingDetail)
@@ -115,7 +194,7 @@
 
             // default_parameter_setting_master table.
             var pmRecord = new Mock<DefaultParameterSettingMaster>();
-            pmRecord.Setup(pm => pm.Id).Returns(parameterMasterId);
+            pmRecord.Object.Id = parameterMasterId;
             pmRecord.Setup(pm => pm.Details).Returns(parameterDetails);
             var parametersMaster = new[] { pmRecord.Object };
             mockDb.Setup(db => db.DefaultParameterSettings)
@@ -123,7 +202,7 @@
 
             //// calculator_run table.
             var caclulatorRun = new Mock<CalculatorRun>();
-            caclulatorRun.Setup(cr => cr.Id).Returns(runId);
+            caclulatorRun.Object.Id = runId;
             caclulatorRun.Setup(cr => cr.DefaultParameterSettingMaster).Returns(pmRecord.Object);
             var calculatorRuns = new[] { caclulatorRun.Object };
 
@@ -152,7 +231,6 @@
             };
             mockDb.Setup(db => db.CountryApportionment)
                 .Returns(CreateMockTable(countryApportmentData.AsQueryable()));
-
 
             return mockDb;
         }

@@ -3,6 +3,7 @@
     using System.Globalization;
     using System.Text;
     using EPR.Calculator.API.Data;
+    using EPR.Calculator.API.Data.DataModels;
 
     /// <summary>
     /// Generates the CommsCost report.
@@ -11,21 +12,14 @@
     public class CommsCostReportBuilder(ApplicationDBContext DBContext)
     {
         /// <summary>
-        /// The database field for ProdRepHoPaWaT isn't implemented yet,
-        /// so this method is a placeholder that returns a bunch of sample values
-        /// and will be eventually replaced by data from the database.
-        /// </summary>
-        IDictionary<int, decimal> TempProdRepHoPaWaT { get; } = new Dictionary<int, decimal>
-        {
-            {0, 6980.000M},
-            {1, 11850.000M},
-            {2, 4900.000M},
-        };
-
-        /// <summary>
         /// The delimiter to use between fields in the report.
         /// </summary>
         private const char Delimiter = ',';
+
+        /// <summary>
+        /// The key used to identify household records in the producer_reported_material table.
+        /// </summary>
+        private const string HouseHoldIndicator = "HH";
 
         /// <summary>
         /// Headers for the report - these go before the headers for each country.
@@ -48,20 +42,6 @@
         ];
 
         /// <summary>
-        /// The country details we need for calculating the results.
-        /// </summary>
-        private IEnumerable<CountryDetails> Countries
-            => from country in DBContext.Country
-            join app in DBContext.CountryApportionment
-            on country.Id equals app.CountryId
-            select new CountryDetails
-            {
-                Id = country.Id,
-                Name = country.Name,
-                Apportionment = app.Apportionment,
-            };
-
-        /// <summary>
         /// Generate the CommsCost report.
         /// </summary>
         /// <param name="totalValues">The total values, indexed by material ID.</param>
@@ -69,35 +49,27 @@
         /// The late reporting tonnage values, indexed by material ID.
         /// </param>
         /// <returns></returns>
-        public string BuildReport(
-            int runId,
-            IDictionary<int, decimal> totalValues)
+        public string BuildReport(int runId)
         {
-            var byMaterialRecords = GetByMaterialThenCountry(runId, totalValues);
+            var countries = GetCountryDetails();
+            var materials = GetMaterialDetails(runId);
+            var records = materials.Select(material => new CommsCostReportRecord(material, countries));
 
             var builder = new StringBuilder();
+
+            // Append the column headers to the report.
             builder.AppendJoin(Delimiter, Headers1);
             builder.Append(Delimiter);
-            builder.AppendJoin(Delimiter, Countries.Select(c => c.Name));
+            builder.AppendJoin(Delimiter, countries.Select(c => c.Name));
             builder.Append(Delimiter);
             builder.AppendJoin(Delimiter, Headers2);
             builder.Append(Environment.NewLine);
-            builder.AppendJoin(Environment.NewLine, byMaterialRecords);
+
+            // Append the records to the report.
+            builder.AppendJoin(Environment.NewLine, records);
             var report = builder.ToString();
 
             return report;
-        }
-
-        private IEnumerable<CommsCostReportRecord> GetByMaterialThenCountry(
-            int runId,
-            IDictionary<int, decimal> totalValues)
-        {
-            var materials = GetMaterialDetails(runId);
-
-            var records = materials.Select(material
-                => BuildRecord(material, totalValues));
-
-            return records;
         }
 
         /// <summary>
@@ -105,70 +77,81 @@
         /// </summary>
         private IEnumerable<MaterialDetails> GetMaterialDetails(int runId)
         {
-            // TODO: The DefaultParameterSettingMaster can be null
-            // - check what we should do when it is - are there default values to use instead?
-            // Will throw an exception for now.
             var parameters = DBContext.CalculatorRuns
                 .Single(run => run.Id == runId)
                 .DefaultParameterSettingMaster?.Details
                 ?? throw new InvalidOperationException("No parameters found.");
 
-            // join the material and parameter tables using the material code
-            // and select all the values we need.
+            // Select the materials details from the database.
             return DBContext.Material
-                .Join(
-                    parameters,
-                    material => $"LRET-{material.Code}",
-                    parameter => parameter.ParameterUniqueReferenceId,
-                    (m,p)=> new MaterialDetails
-                    {
-                        Id = m.Id,
-                        Name = m.Name,
-                        LateReportingTonnage = p.ParameterValue
-                    });
+                .Select((material, parameter) => new MaterialDetails
+                {
+                    Id = material.Id,
+                    Name = material.Name,
+                    TotalValue = parameters.Single(
+                        p => p.ParameterUniqueReferenceId == $"COMC-{material.Code}").ParameterValue,
+                    LateReportingTonnage = parameters.Single(
+                        p => p.ParameterUniqueReferenceId == $"LRET-{material.Code}").ParameterValue,
+                    ProdRepHoPaWaT = CalculateProdRepHoPaWaT(material)
+                });
         }
 
         /// <summary>
-        /// Gather the material data and total values together into a finished record object.
+        /// Retrieve the country details from the database.
         /// </summary>
-        private CommsCostReportRecord BuildRecord(
-            MaterialDetails material,
-            IDictionary<int, decimal> totalValues)
-            => new CommsCostReportRecord
-            {
-                Material = DBContext.Material.Single(m => m.Id == material.Id).Name,
-                Total = totalValues[material.Id],
-                PerCountryValues = CalculatePerCountryValue(Countries, totalValues[material.Id]),
-                ProdRepHoPaWaT = TempProdRepHoPaWaT[material.Id],
-                LateTonnageReporting = material.LateReportingTonnage,
-            };
+        private IEnumerable<CountryDetails> GetCountryDetails()
+            => from country in DBContext.Country
+               join app in DBContext.CountryApportionment
+               on country.Id equals app.CountryId
+               select new CountryDetails
+               {
+                   Id = country.Id,
+                   Name = country.Name,
+                   Apportionment = app.Apportionment,
+               };
 
         /// <summary>
-        /// Apply the country apportionments to the total value to get the per-country values.
+        /// Calculates the Producer Reported Household Packaging Waste Tonnage
+        /// by summing the household tonnage reported for the given material by all the producers.
         /// </summary>
-        private static IDictionary<int, decimal> CalculatePerCountryValue(
-            IEnumerable<CountryDetails> countries,
-            decimal totalCost) => countries.ToDictionary(
-                country => country.Id,
-                country => (totalCost/100) * country.Apportionment);
-
+        private static decimal CalculateProdRepHoPaWaT(Material material)
+            => material.ProducerReportedMaterials
+                .Where(m => m.PackagingType == HouseHoldIndicator)
+                .Sum(m => m.PackagingTonnage);
 
         /// <summary>
         /// A record in the CommsCost report.
         /// </summary>
+        /// <remarks>
+        /// Currently only used internally to <see cref="CommsCostReportBuilder"/>,
+        /// since the report is returned as a string.
+        /// We could return these records directly instead,
+        /// if another class needs to have controll over the formatting.
+        /// </remarks>
         private sealed record CommsCostReportRecord
         {
+            public CommsCostReportRecord(MaterialDetails material, IEnumerable<CountryDetails> countries)
+            {
+                Material = material.Name;
+                Total = material.TotalValue;
+                PerCountryValues = countries.ToDictionary(
+                    country => country.Id,
+                    country => (material.TotalValue / 100) * country.Apportionment);
+                ProdRepHoPaWaT = material.ProdRepHoPaWaT;
+                LateTonnageReporting = material.LateReportingTonnage;
+            }
+
             /// <summary>
             /// Gets the material this record is for.
             /// </summary>
-            public required string Material { get; init; }
+            public string Material { get; }
 
             /// <summary>
             /// Gets a dictionary of the values for each country.
             /// </summary>
-            public required IDictionary<int, decimal> PerCountryValues { get; init; }
+            public IDictionary<int, decimal> PerCountryValues { get; }
 
-            public required decimal Total {  get; init; }
+            public decimal Total { get; }
 
             /// <summary>
             /// Gets the Producer Reported Household Packaging Waste Tonnage.
@@ -176,9 +159,9 @@
             /// <remarks>
             /// TODO: Give this field a better name.
             /// </remarks>
-            public required decimal ProdRepHoPaWaT { get; init; }
+            public decimal ProdRepHoPaWaT { get; }
 
-            public required decimal LateTonnageReporting { get; init; }
+            public decimal LateTonnageReporting { get; }
 
             /// <summary>
             /// Gets the sum of the Producer Reported Household Packaging Waste Tonnage
@@ -219,7 +202,7 @@
         }
 
         /// <summary>
-        /// For selecting only the required values from the country table.
+        /// For use in database selects, to only retrieve the neccesary values.
         /// </summary>
         private struct CountryDetails
         {
@@ -231,7 +214,7 @@
         }
 
         /// <summary>
-        /// For selecting only the required values from the materials table.
+        /// For use in database selects, to only retrieve the neccesary values.
         /// </summary>
         private struct MaterialDetails
         {
@@ -239,7 +222,11 @@
 
             public string Name { get; init; }
 
+            public decimal TotalValue { get; init; }
+
             public decimal LateReportingTonnage { get; init; }
+
+            public decimal ProdRepHoPaWaT { get; init; }
         }
     }
 }

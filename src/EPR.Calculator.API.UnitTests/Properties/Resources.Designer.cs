@@ -61,10 +61,10 @@ namespace EPR.Calculator.API.UnitTests.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 2a Comms Costs - by Material,England,Wales,Scotland,Northern Ireland,Total,Producer Reported  Household Packaging Waste Tonnage,Late Reporting Tonnage,Producer Reported Household Tonnage + Late Reporting Tonnage,Comms Cost - by Material Price Per Tonne
+        ///   Looks up a localized string similar to 2a Comms Costs - by Material,England,Wales,Scotland,Northern Ireland,Total,Producer Reported Household Packaging Waste Tonnage,Late Reporting Tonnage,Producer Reported Household Tonnage + Late Reporting Tonnage,Comms Cost - by Material Price Per Tonne
         ///Aluminium,£1506.56,£380.23,£698.19,£285.02,£2870.00,6980.000,8000.000,14980.000,£0.1916
         ///Fibre composite,£3989.48,£1006.89,£1848.86,£754.77,£7600.00,11850.000,7000.000,18850.000,£0.4032
-        ///Glass,£2519.67,£635.93,£1167.70,£476.70,£4800.00,4900.000,6000.000,1090 [rest of string was truncated]&quot;;.
+        ///Glass,£2519.67,£635.93,£1167.70,£476.70,£4800.00,4900.000,6000.000,10900 [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ExpectedCommsCostReportExample {
             get {
