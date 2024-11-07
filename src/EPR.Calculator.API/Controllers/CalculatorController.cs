@@ -94,7 +94,7 @@ namespace EPR.Calculator.API.Controllers
                     var calculatorRun = new CalculatorRun
                     {
                         Name = request.CalculatorRunName,
-                        FinancialYear = request.FinancialYear,
+                        Financial_Year = request.FinancialYear,
                         CreatedBy = request.CreatedBy,
                         CreatedAt = DateTime.Now,
                         CalculatorRunClassificationId = (int)RunClassification.RUNNING,
@@ -110,7 +110,7 @@ namespace EPR.Calculator.API.Controllers
                     var calculatorRunMessage = new CalculatorRunMessage
                     {
                         CalculatorRunId = calculatorRun.Id,
-                        FinancialYear = calculatorRun.FinancialYear,
+                        FinancialYear = calculatorRun.Financial_Year,
                         CreatedBy = User?.Identity?.Name ?? request.CreatedBy
                     };
 
@@ -154,7 +154,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRuns = context.CalculatorRuns.Where(run => run.FinancialYear == request.FinancialYear).OrderByDescending(run => run.CreatedAt).ToList();
+                var calculatorRuns = context.CalculatorRuns.Where(run => run.Financial_Year == request.FinancialYear).OrderByDescending(run => run.CreatedAt).ToList();
 
                 if (calculatorRuns.Count == 0)
                 {
