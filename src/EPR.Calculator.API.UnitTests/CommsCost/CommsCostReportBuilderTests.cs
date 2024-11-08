@@ -46,9 +46,6 @@
 
             // Assert
             Assert.AreEqual(Resources.ExpectedCommsCostReportExample, result.ToString());
-
-            // Write the report out so we can examine it in Excel.
-            File.WriteAllText("C:\\Users\\a898212\\OneDrive - Eviden\\Documents\\CommsCost\\CommsCostReport.csv", result.ToString());
         }
 
         /// <summary>
