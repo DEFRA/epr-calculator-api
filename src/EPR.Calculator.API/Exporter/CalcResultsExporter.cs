@@ -94,11 +94,11 @@ namespace EPR.Calculator.API.Exporter
             foreach (var lapcapData in lapcapDataDetails)
             {
                 csvContent.Append($"{CsvSanitiser.SanitiseData(lapcapData.Name)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(lapcapData.EnglandDisposalCost)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(lapcapData.WalesDisposalCost)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(lapcapData.ScotlandDisposalCost)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(lapcapData.NorthernIrelandDisposalCost)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(lapcapData.TotalDisposalCost)}");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.EnglandDisposalCost)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.WalesDisposalCost)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.ScotlandDisposalCost)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.NorthernIrelandDisposalCost)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.TotalDisposalCost)}\"");
                 csvContent.AppendLine();
             }
         }

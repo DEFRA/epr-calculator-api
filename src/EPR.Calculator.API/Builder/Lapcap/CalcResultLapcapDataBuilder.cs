@@ -4,6 +4,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.Azure.Amqp.Framing;
 using Microsoft.Extensions.Hosting;
+using System.Globalization;
 
 namespace EPR.Calculator.API.Builder.Lapcap
 {
@@ -98,11 +99,11 @@ namespace EPR.Calculator.API.Builder.Lapcap
                 TotalCost = HundredPercent,
                 OrderId = ++orderId
             };
-            countryAppPercent.EnglandDisposalCost = $"{countryAppPercent.EnglandCost}%";
-            countryAppPercent.NorthernIrelandDisposalCost = $"{countryAppPercent.NorthernIrelandCost}%";
-            countryAppPercent.ScotlandDisposalCost = $"{countryAppPercent.ScotlandCost}%";
-            countryAppPercent.WalesDisposalCost = $"{countryAppPercent.WalesCost}%";
-            countryAppPercent.TotalDisposalCost = $"{countryAppPercent.TotalCost}%";
+            countryAppPercent.EnglandDisposalCost = $"{countryAppPercent.EnglandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
+            countryAppPercent.NorthernIrelandDisposalCost = $"{countryAppPercent.NorthernIrelandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
+            countryAppPercent.ScotlandDisposalCost = $"{countryAppPercent.ScotlandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
+            countryAppPercent.WalesDisposalCost = $"{countryAppPercent.WalesCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
+            countryAppPercent.TotalDisposalCost = $"{countryAppPercent.TotalCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
             data.Add(countryAppPercent);
 
 
@@ -113,7 +114,8 @@ namespace EPR.Calculator.API.Builder.Lapcap
         {
             if (totalCost != 0)
             {
-                return (countryCost / totalCost) * 100;
+                var total = (countryCost / totalCost);
+                return total * 100;
             }
             return 0;
         }
