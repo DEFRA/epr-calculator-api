@@ -1,5 +1,6 @@
 ﻿using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Builder.Lapcap;
+using EPR.Calculator.API.CommsCost;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -12,14 +13,19 @@ namespace EPR.Calculator.API.UnitTests
     {
         private Mock<ICalcResultDetailBuilder> mockCalcResultDetailBuilder;
         private Mock<ICalcResultLapcapDataBuilder> mockLapcapBuilder;
+        private Mock<ICommsCostReportBuilder> mockCommsCostReportBuilder;
         private CalcResultBuilder calcResultBuilder;
-
+        
         [TestInitialize]
         public void Setup()
         {
             mockCalcResultDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             mockLapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
-            calcResultBuilder = new CalcResultBuilder(mockCalcResultDetailBuilder.Object, mockLapcapBuilder.Object);
+            mockCommsCostReportBuilder = new Mock<ICommsCostReportBuilder>();
+            calcResultBuilder = new CalcResultBuilder(
+                mockCalcResultDetailBuilder.Object,
+                mockLapcapBuilder.Object,
+                mockCommsCostReportBuilder.Object);
         }
 
         [TestMethod]

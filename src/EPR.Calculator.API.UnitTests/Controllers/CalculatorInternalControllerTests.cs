@@ -2,7 +2,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq.Expressions;
+    using AutoFixture;
     using EPR.Calculator.API.Builder;
+    using EPR.Calculator.API.CommsCost;
     using EPR.Calculator.API.Controllers;
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Dtos;
@@ -17,6 +20,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     [TestClass]
     public class CalculatorInternalControllerTests
     {
+        private Fixture Fixture { get; } = new Fixture();
+
         private CalculatorInternalController _testClass;
         private ApplicationDBContext _context;
         private Mock<IRpdStatusDataValidator> _rpdStatusDataValidator;
@@ -93,27 +98,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                         }
                     }
                 },
-                CalcResultLateReportingTonnageDetail = new CalcResultLateReportingTonnage
-                {
-                    Name = "TestValue2008053382",
-                    CalcResultLateReportingTonnageDetails = new[] {
-                        new CalcResultLateReportingTonnageDetail
-                        {
-                            Name = "TestValue2143215974",
-                            TotalLateReportingTonnage = 1142363418.57M
-                        },
-                        new CalcResultLateReportingTonnageDetail
-                        {
-                            Name = "TestValue950828146",
-                            TotalLateReportingTonnage = 2103732562.14M
-                        },
-                        new CalcResultLateReportingTonnageDetail
-                        {
-                            Name = "TestValue1995738811",
-                            TotalLateReportingTonnage = 940670239.41M
-                        }
-                    }
-                },
+                CalcResultLateReportingTonnageDetail = Fixture.Create<CommsCostReport>(),
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost
                 {
                     Name = "TestValue384507152",

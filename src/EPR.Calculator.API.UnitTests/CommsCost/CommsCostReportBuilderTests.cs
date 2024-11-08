@@ -42,7 +42,7 @@
             // Arrange
 
             // Act
-            var result = this.TestClass.BuildReport(this.RunId);
+            var result = this.TestClass.Construct(this.RunId);
 
             // Assert
             Assert.AreEqual(Resources.ExpectedCommsCostReportExample, result.ToString());

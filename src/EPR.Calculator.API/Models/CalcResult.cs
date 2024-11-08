@@ -1,4 +1,6 @@
-﻿namespace EPR.Calculator.API.Models
+﻿using EPR.Calculator.API.CommsCost;
+
+namespace EPR.Calculator.API.Models
 {
     public class CalcResult
     {
@@ -6,7 +8,7 @@
 
         public CalcResultLapcapData CalcResultLapcapData { get; set; }
 
-        public CalcResultLateReportingTonnage CalcResultLateReportingTonnageDetail { get; set; }
+        public CommsCostReport CalcResultLateReportingTonnageDetail { get; set; }
 
         public CalcResultParameterCommunicationCost CalcResultParameterCommunicationCost { get; set; }
 

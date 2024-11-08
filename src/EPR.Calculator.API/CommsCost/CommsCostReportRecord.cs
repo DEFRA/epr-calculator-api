@@ -4,7 +4,7 @@ namespace EPR.Calculator.API.CommsCost
 {
     public class CommsCostReportRecord
     {
-        internal CommsCostReportRecord(MaterialDetails material, IEnumerable<CountryDetails> countries)
+        public CommsCostReportRecord(MaterialDetails material, IEnumerable<CountryDetails> countries)
         {
             Material = material.Name;
             Total = material.TotalValue;

@@ -31,6 +31,8 @@ namespace EPR.Calculator.API.Exporter
             {
                 PrepareLapcapData(results.CalcResultLapcapData, csvContent);
             }
+
+            csvContent.AppendLine(results.CalcResultLateReportingTonnageDetail.ToString());
             
 
             var fileName = GetResultFileName(results.CalcResultDetail.RunId);

@@ -3,16 +3,16 @@
     /// <summary>
     /// For use in database selects, to only retrieve the values neccesary for generating the CommsCost report.
     /// </summary>
-    internal struct MaterialDetails
+    public record MaterialDetails
     {
-        public int Id { get; init; }
+        public required int Id { get; init; }
 
-        public string Name { get; init; }
+        public required string Name { get; init; }
 
-        public decimal TotalValue { get; init; }
+        public required decimal TotalValue { get; init; }
 
-        public decimal LateReportingTonnage { get; init; }
+        public required decimal LateReportingTonnage { get; init; }
 
-        public decimal ProdRepHoPaWaT { get; init; }
+        public required decimal ProdRepHoPaWaT { get; init; }
     }
 }
