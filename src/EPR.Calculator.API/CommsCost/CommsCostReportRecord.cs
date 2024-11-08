@@ -53,7 +53,8 @@ namespace EPR.Calculator.API.CommsCost
         {
             // Duplicate the currency format, and remove the commas seperating thousands,
             // otherwise they'll break our CSV file!
-            var currencyFormat = (NumberFormatInfo)CultureInfo.CurrentCulture.NumberFormat.Clone();
+            var culture = CultureInfo.CreateSpecificCulture("en-GB");
+            var currencyFormat = (NumberFormatInfo)culture.NumberFormat.Clone();
             currencyFormat.CurrencyGroupSeparator = string.Empty;
             currencyFormat.NumberDecimalDigits = 2;
 
@@ -68,7 +69,7 @@ namespace EPR.Calculator.API.CommsCost
                     ProdRepHoPaWaT.ToString("F3"),
                     LateTonnageReporting.ToString("F3"),
                     (ProdRepHoPaWaT + LateTonnageReporting).ToString("F3"),
-                    PricePerTon.ToString("C4"),
+                    PricePerTon.ToString("C4", culture),
                 ]);
 
             return string.Join(CommsCostReport.Delimiter, fields);
