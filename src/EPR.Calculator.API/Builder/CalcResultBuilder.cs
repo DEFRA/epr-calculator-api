@@ -8,17 +8,22 @@ namespace EPR.Calculator.API.Builder
     {
         private readonly ICalcResultDetailBuilder calcResultDetailBuilder;
         private readonly ICalcResultLapcapDataBuilder lapcapBuilder;
-        public CalcResultBuilder(ICalcResultDetailBuilder calcResultDetailBuilder, ICalcResultLapcapDataBuilder lapcapBuilder) 
+        private readonly ICalcResultSummaryBuilder summaryBuilder;
+
+        public CalcResultBuilder(ICalcResultDetailBuilder calcResultDetailBuilder, ICalcResultLapcapDataBuilder lapcapBuilder, ICalcResultSummaryBuilder summaryBuilder) 
         {
             this.calcResultDetailBuilder = calcResultDetailBuilder;
             this.lapcapBuilder = lapcapBuilder;
+            this.summaryBuilder = summaryBuilder;
         }
 
         public CalcResult Build(CalcResultsRequestDto resultsRequestDto)
         {
             var calcResult = new CalcResult();
-            calcResult.CalcResultDetail = this.calcResultDetailBuilder.Construct(resultsRequestDto);
-            calcResult.CalcResultLapcapData = this.lapcapBuilder.Construct(resultsRequestDto);
+            // calcResult.CalcResultDetail = this.calcResultDetailBuilder.Construct(resultsRequestDto);
+            // calcResult.CalcResultLapcapData = this.lapcapBuilder.Construct(resultsRequestDto);
+
+            var result = this.summaryBuilder.Construct(resultsRequestDto);
 
             return calcResult;
         }

@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Mvc;
@@ -34,12 +35,14 @@ namespace EPR.Calculator.API.UnitTests
             mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
             mockExporter = new Mock<ICalcResultsExporter<CalcResult>>();
             wrapper = new Mock<IOrgAndPomWrapper>().Object;
+
             controller = new CalculatorInternalController(
                dbContext,
                new RpdStatusDataValidator(wrapper),
                wrapper,
                mockCalcResultBuilder.Object,
-               mockExporter.Object
+               mockExporter.Object,
+               new Mock<ITransposePomAndOrgDataService>().Object
             );
 
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();

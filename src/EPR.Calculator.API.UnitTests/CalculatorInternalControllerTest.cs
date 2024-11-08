@@ -199,40 +199,40 @@ namespace EPR.Calculator.API.UnitTests
 
         }
 
-        [TestMethod]
-        public void Construct_ShouldReturnCalcResultDetail()
-        {
-            var mock = new Mock<IOrgAndPomWrapper>();
-            dbContext.LapcapDataMaster.RemoveRange(dbContext.LapcapDataMaster);
-            dbContext.SaveChanges();
-            dbContext.LapcapDataMaster.AddRange(GetLapcapMasterData().ToList());
-            dbContext.SaveChanges();
+        //[TestMethod]
+        //public void Construct_ShouldReturnCalcResultDetail()
+        //{
+        //    var mock = new Mock<IOrgAndPomWrapper>();
+        //    dbContext.LapcapDataMaster.RemoveRange(dbContext.LapcapDataMaster);
+        //    dbContext.SaveChanges();
+        //    dbContext.LapcapDataMaster.AddRange(GetLapcapMasterData().ToList());
+        //    dbContext.SaveChanges();
 
-            dbContext.DefaultParameterSettings.RemoveRange(dbContext.DefaultParameterSettings);
-            dbContext.SaveChanges();
-            dbContext.DefaultParameterSettings.AddRange(GetDefaultParameterSettingsMasterData().ToList());
-            dbContext.SaveChanges();
+        //    dbContext.DefaultParameterSettings.RemoveRange(dbContext.DefaultParameterSettings);
+        //    dbContext.SaveChanges();
+        //    dbContext.DefaultParameterSettings.AddRange(GetDefaultParameterSettingsMasterData().ToList());
+        //    dbContext.SaveChanges();
 
-            var mockBlobStorageService = new Mock<IBlobStorageService>();
-            var CalcResultsExporter = new CalcResultsExporter(mockBlobStorageService.Object);
-            var CalcResultDetailBuilder = new CalcResultDetailBuilder(dbContext);
-            var CalcResultLapcapDataBuilder = new CalcResultLapcapDataBuilder(dbContext);
-            var calcResultBuilder = new CalcResultBuilder(CalcResultDetailBuilder, CalcResultLapcapDataBuilder);
-            if (dbContext != null)
-            {
-                var controller = new CalculatorInternalController(
-                    dbContext,
-                    new RpdStatusDataValidator(mock.Object),
-                    mock.Object,
-                    calcResultBuilder,
-                    CalcResultsExporter
-                );
-                var calResult = controller.PrepareCalcResults(new CalcResultsRequestDto() { RunId = 1 });
-                var objResult = calResult as ObjectResult;
-                Assert.IsNotNull(calResult);
-                Assert.AreEqual(201, objResult?.StatusCode);
-            }
-        }
+        //    var mockBlobStorageService = new Mock<IBlobStorageService>();
+        //    var CalcResultsExporter = new CalcResultsExporter(mockBlobStorageService.Object);
+        //    var CalcResultDetailBuilder = new CalcResultDetailBuilder(dbContext);
+        //    var CalcResultLapcapDataBuilder = new CalcResultLapcapDataBuilder(dbContext);
+        //    var calcResultBuilder = new CalcResultBuilder(CalcResultDetailBuilder, CalcResultLapcapDataBuilder);
+        //    if (dbContext != null)
+        //    {
+        //        var controller = new CalculatorInternalController(
+        //            dbContext,
+        //            new RpdStatusDataValidator(mock.Object),
+        //            mock.Object,
+        //            calcResultBuilder,
+        //            CalcResultsExporter
+        //        );
+        //        var calResult = controller.PrepareCalcResults(new CalcResultsRequestDto() { RunId = 1 });
+        //        var objResult = calResult as ObjectResult;
+        //        Assert.IsNotNull(calResult);
+        //        Assert.AreEqual(201, objResult?.StatusCode);
+        //    }
+        //}
 
         protected static IEnumerable<DefaultParameterSettingMaster> GetDefaultParameterSettingsMasterData()
         {

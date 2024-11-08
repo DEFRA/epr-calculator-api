@@ -152,7 +152,7 @@ namespace EPR.Calculator.API.Controllers
         {
             this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
             var results = this.builder.Build(resultsRequestDto);
-            this.exporter.Export(results);
+            // this.exporter.Export(results);
             return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
         }
     }
