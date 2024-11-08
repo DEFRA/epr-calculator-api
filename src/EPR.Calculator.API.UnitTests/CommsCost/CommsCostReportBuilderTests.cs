@@ -25,7 +25,7 @@
             this.TestClass = new CommsCostReportBuilder(this.Context.Object);
         }
 
-        private int RunId { get; } 
+        private int RunId { get; }
 
         private Mock<ApplicationDBContext> Context { get; }
 
@@ -45,8 +45,10 @@
             var result = this.TestClass.BuildReport(this.RunId);
 
             // Assert
-            Assert.AreEqual(Resources.ExpectedCommsCostReportExample, result);
+            Assert.AreEqual(Resources.ExpectedCommsCostReportExample, result.ToString());
 
+            // Write the report out so we can examine it in Excel.
+            File.WriteAllText("C:\\Users\\a898212\\OneDrive - Eviden\\Documents\\CommsCost\\CommsCostReport.csv", result.ToString());
         }
 
         /// <summary>
@@ -132,7 +134,7 @@
             glass.Object.Name = "Glass";
             glass.Setup(a => a.ProducerReportedMaterials).Returns(glassData);
 
-            var materials = new[]{aluminium.Object, fiberComposite.Object, glass.Object};
+            var materials = new[] { aluminium.Object, fiberComposite.Object, glass.Object };
             mockDb.Setup(db => db.Material)
                 .Returns(CreateMockTable(materials.AsQueryable()));
 
@@ -207,7 +209,7 @@
             var calculatorRuns = new[] { caclulatorRun.Object };
 
             mockDb.Setup(db => db.CalculatorRuns)
-                .Returns(CreateMockTable(calculatorRuns.AsQueryable()));        
+                .Returns(CreateMockTable(calculatorRuns.AsQueryable()));
 
             // country_apportionment table.
             var countryApportmentData = new[]
