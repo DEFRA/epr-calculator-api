@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Tests.Controllers;
@@ -197,6 +198,27 @@ namespace EPR.Calculator.API.UnitTests
 
         }
 
+        [TestMethod]
+        public void PrepareCalcResults_ShouldReturnCreatedStatus()
+        {
+            var requestDto = new CalcResultsRequestDto() { RunId = 1};
+            var calcResult = new CalcResult();
+
+            var mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
+            var controller = new CalculatorInternalController(
+               dbContext,
+               new RpdStatusDataValidator(wrapper),
+               wrapper,
+               new Mock<ICalcResultBuilder>().Object,
+               new Mock<ICalcResultsExporter<CalcResult>>().Object
+            );
+
+            mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
+            var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(201, result.StatusCode);
+        }
+        
         [TestMethod]
         public void FinancialYear_ShouldBeEmpty_WhenCalcRunIsNull()
         {
