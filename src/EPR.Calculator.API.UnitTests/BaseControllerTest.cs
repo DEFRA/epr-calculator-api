@@ -87,7 +87,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             dbContext?.Database.EnsureDeleted();
         }
 
-        protected static IEnumerable<DefaultParameterTemplateMaster> GetDefaultParameterTemplateMasterData()
+        public static IEnumerable<DefaultParameterTemplateMaster> GetDefaultParameterTemplateMasterData()
         {
             var list = new List<DefaultParameterTemplateMaster>();
             list.Add(new DefaultParameterTemplateMaster
@@ -429,7 +429,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             return list;
         }
         
-        protected static IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
+        public static IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
         {
             var list = new List<LapcapDataTemplateMaster>();
             list.Add(new LapcapDataTemplateMaster
