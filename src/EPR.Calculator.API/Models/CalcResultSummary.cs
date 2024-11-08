@@ -2,12 +2,12 @@
 {
     public class CalcResultSummary
     {
-        public string ProducerId { get; set; }
+        public int ProducerId { get; set; }
 
         public string SubsidiaryId { get; set; }
 
         public string ProducerName { get; set; }
 
-        public Dictionary<int, IEnumerable<CalcResultSummaryMaterialCost>> MaterialCostSummary { get; set; }
+        public Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryMaterialCost>> MaterialCostSummary { get; set; }
     }
 }

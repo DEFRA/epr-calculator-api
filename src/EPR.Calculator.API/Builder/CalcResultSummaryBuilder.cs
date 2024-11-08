@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 
@@ -24,12 +25,43 @@ namespace EPR.Calculator.API.Builder
 
             var materialCostSummary = new Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryMaterialCost>>();
 
-            foreach ( var producer in producerDetailList)
+            var resultSummary = new List<CalcResultSummary>();
+
+            foreach (var producer in producerDetailList)
             {
-                materialCostSummary.Add(materials[0], new List<CalcResultSummaryMaterialCost>());
+                foreach (var material in materials)
+                {
+                    var costSummary = new List<CalcResultSummaryMaterialCost>();
+
+                    costSummary.Add(new CalcResultSummaryMaterialCost
+                    {
+                        HouseholdPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material),
+                        ManagedConsumerWasteTonnage = GetManagedConsumerWasteTonnage(producer, material)
+                    });
+
+                    materialCostSummary.Add(material, costSummary);
+                }
+
+                resultSummary.Add(new CalcResultSummary
+                {
+                    ProducerId = producer.Id,
+                    ProducerName = producer.ProducerName,
+                    SubsidiaryId = producer.SubsidiaryId,
+                    MaterialCostSummary = materialCostSummary
+                });
             }
 
             return result;
+        }
+
+        private decimal GetHouseholdPackagingWasteTonnage(ProducerDetail producer, MaterialDetail material)
+        {
+            return 10.00m;
+        }
+
+        private decimal GetManagedConsumerWasteTonnage(ProducerDetail producer, MaterialDetail material)
+        {
+            return 10.00m;
         }
     }
 }
