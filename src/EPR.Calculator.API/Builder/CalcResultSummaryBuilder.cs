@@ -29,14 +29,23 @@ namespace EPR.Calculator.API.Builder
 
             foreach (var producer in producerDetailList)
             {
+                var costSummary = new List<CalcResultSummaryMaterialCost>();
+
                 foreach (var material in materials)
                 {
-                    var costSummary = new List<CalcResultSummaryMaterialCost>();
-
                     costSummary.Add(new CalcResultSummaryMaterialCost
                     {
                         HouseholdPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material),
-                        ManagedConsumerWasteTonnage = GetManagedConsumerWasteTonnage(producer, material)
+                        ManagedConsumerWasteTonnage = GetManagedConsumerWasteTonnage(producer, material),
+                        NetReportedTonnage = GetNetReportedTonnage(producer, material),
+                        PricePerTonnage = GetPricePerTonnage(producer, material),
+                        ProducerDisposalFee = GetProducerDisposalFee(producer, material),
+                        BadDebtProvision = GetBadDebtProvision(producer, material),
+                        ProducerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material),
+                        EnglandWithBadDebtProvision = GetEnglandWithBadDebtProvision(producer, material),
+                        WalesWithBadDebtProvision = GetWalesWithBadDebtProvision(producer, material),
+                        ScotlandWithBadDebtProvision = GetScotlandWithBadDebtProvision(producer, material),
+                        NorthernIrelandWithBadDebtProvision = GetNorthernIrelandWithBadDebtProvision(producer, material)
                     });
 
                     materialCostSummary.Add(material, costSummary);
@@ -49,6 +58,8 @@ namespace EPR.Calculator.API.Builder
                     SubsidiaryId = producer.SubsidiaryId,
                     MaterialCostSummary = materialCostSummary
                 });
+
+                materialCostSummary.Clear();
             }
 
             return result;
@@ -60,6 +71,51 @@ namespace EPR.Calculator.API.Builder
         }
 
         private decimal GetManagedConsumerWasteTonnage(ProducerDetail producer, MaterialDetail material)
+        {
+            return 10.00m;
+        }
+
+        private decimal GetNetReportedTonnage(ProducerDetail producer, MaterialDetail material)
+        {
+            return 10.00m;
+        }
+
+        private decimal GetPricePerTonnage(ProducerDetail producer, MaterialDetail material)
+        {
+            return 10.00m;
+        }
+
+        private decimal GetProducerDisposalFee(ProducerDetail producer, MaterialDetail material)
+        {
+            return 10.00m;
+        }
+
+        private decimal GetBadDebtProvision(ProducerDetail producer, MaterialDetail material)
+        {
+            return 10.00m;
+        }
+
+        private decimal GetProducerDisposalFeeWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
+        {
+            return 10.00m;
+        }
+
+        private decimal GetEnglandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
+        {
+            return 10.00m;
+        }
+
+        private decimal GetWalesWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
+        {
+            return 10.00m;
+        }
+
+        private decimal GetScotlandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
+        {
+            return 10.00m;
+        }
+
+        private decimal GetNorthernIrelandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
         {
             return 10.00m;
         }
