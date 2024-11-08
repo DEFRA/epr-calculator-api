@@ -33,7 +33,9 @@ namespace EPR.Calculator.API.UnitTests
                     RunBy = "Tester",
                     FinancialYear = "2023-24",
                     LapcapFile = "Lapcap.csv,2023-10-01,John Doe",
-                    ParametersFile = "Params.csv,2023-10-02,Jane Doe"
+                    ParametersFile = "Params.csv,2023-10-02,Jane Doe",
+                    RpdFileORG = "04/11/2024 12:06",
+                    RpdFilePOM = "04/11/2024 12:07",
                 }
             };
 
@@ -43,6 +45,7 @@ namespace EPR.Calculator.API.UnitTests
             expectedCsvContent.AppendLine("Run Date,10/10/2023 14:30");
             expectedCsvContent.AppendLine("Run by,Tester");
             expectedCsvContent.AppendLine("Financial Year,2023-24");
+            expectedCsvContent.AppendLine("RPD File - ORG,04/11/2024 12:06,RPD File - POM,04/11/2024 12:07");
             expectedCsvContent.AppendLine("Lapcap File,Lapcap.csv,2023-10-01,John Doe");
             expectedCsvContent.AppendLine("Parameters File,Params.csv,2023-10-02,Jane Doe");
 
@@ -92,7 +95,9 @@ namespace EPR.Calculator.API.UnitTests
                     RunBy = "Tester",
                     FinancialYear = "2023-24",
                     LapcapFile = "InvalidFileInfo",
-                    ParametersFile = "InvalidFileInfo"
+                    ParametersFile = "InvalidFileInfo",
+                    RpdFileORG = "04/11/2024 12:06",
+                    RpdFilePOM = "04/11/2024 12:07",
                 }
             };
 
@@ -102,6 +107,7 @@ namespace EPR.Calculator.API.UnitTests
             expectedCsvContent.AppendLine("Run Date," + calcResult.CalcResultDetail.RunDate.ToString("dd/MM/yyyy HH:mm"));
             expectedCsvContent.AppendLine("Run by,Tester");
             expectedCsvContent.AppendLine("Financial Year,2023-24");
+            expectedCsvContent.AppendLine("RPD File - ORG,04/11/2024 12:06,RPD File - POM,04/11/2024 12:07");
 
             _calcResultsExporter.Export(calcResult);
 

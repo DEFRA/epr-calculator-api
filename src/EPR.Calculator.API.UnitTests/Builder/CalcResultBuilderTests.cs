@@ -2,6 +2,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
 {
     using System;
     using EPR.Calculator.API.Builder;
+    using EPR.Calculator.API.Builder.Lapcap;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
 

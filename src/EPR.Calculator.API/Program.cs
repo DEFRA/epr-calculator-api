@@ -1,6 +1,7 @@
 using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.Builder;
+using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Exceptions;
@@ -43,15 +44,15 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 });
 
 builder.Services.Configure<BlobStorageSettings>(
-    builder.Configuration.GetSection("AzureBlobStorage"));
+    builder.Configuration.GetSection("BlobStorage"));
 
 builder.Services.AddSingleton<BlobServiceClient>(provider =>
 {
     var configuration = provider.GetRequiredService<IConfiguration>();
-    var connectionString = configuration.GetSection("AzureBlobStorage:ConnectionString").Value;
+    var connectionString = configuration.GetSection("BlobStorage:ConnectionString").Value;
     if (string.IsNullOrEmpty(connectionString))
     {
-        throw new ArgumentNullException("AzureBlobStorage:ConnectionString", "Azure Blob Storage connection string is not configured.");
+        throw new ArgumentNullException("BlobStorage:ConnectionString", "Blob Storage connection string is not configured.");
     }
     return new BlobServiceClient(connectionString);
 });
