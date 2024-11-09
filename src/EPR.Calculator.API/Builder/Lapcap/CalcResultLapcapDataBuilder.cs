@@ -62,11 +62,11 @@ namespace EPR.Calculator.API.Builder.Lapcap
                     TotalCost = GetTotalMaterialDisposalCost(material, results)
                 };
 
-                detail.EnglandDisposalCost = detail.EnglandCost.ToString("C");
-                detail.NorthernIrelandDisposalCost = detail.NorthernIrelandCost.ToString("C");
-                detail.ScotlandDisposalCost = detail.ScotlandCost.ToString("C");
-                detail.WalesDisposalCost = detail.WalesCost.ToString("C");
-                detail.TotalDisposalCost = detail.TotalCost.ToString("C");
+                detail.EnglandDisposalCost = detail.EnglandCost.ToString("C", CultureInfo.CurrentCulture);
+                detail.NorthernIrelandDisposalCost = detail.NorthernIrelandCost.ToString("C", CultureInfo.CurrentCulture);
+                detail.ScotlandDisposalCost = detail.ScotlandCost.ToString("C", CultureInfo.CurrentCulture);
+                detail.WalesDisposalCost = detail.WalesCost.ToString("C", CultureInfo.CurrentCulture);
+                detail.TotalDisposalCost = detail.TotalCost.ToString("C", CultureInfo.CurrentCulture);
 
                 data.Add(detail);
             }
@@ -81,11 +81,11 @@ namespace EPR.Calculator.API.Builder.Lapcap
                 TotalCost = data.Sum(x => x.TotalCost),
                 OrderId = ++orderId
             };
-            totalDetail.EnglandDisposalCost = totalDetail.EnglandCost.ToString("C");
-            totalDetail.NorthernIrelandDisposalCost = totalDetail.NorthernIrelandCost.ToString("C");
-            totalDetail.ScotlandDisposalCost = totalDetail.ScotlandCost.ToString("C");
-            totalDetail.WalesDisposalCost = totalDetail.WalesCost.ToString("C");
-            totalDetail.TotalDisposalCost = totalDetail.TotalCost.ToString("C");
+            totalDetail.EnglandDisposalCost = totalDetail.EnglandCost.ToString("C", CultureInfo.CurrentCulture);
+            totalDetail.NorthernIrelandDisposalCost = totalDetail.NorthernIrelandCost.ToString("C", CultureInfo.CurrentCulture);
+            totalDetail.ScotlandDisposalCost = totalDetail.ScotlandCost.ToString("C", CultureInfo.CurrentCulture);
+            totalDetail.WalesDisposalCost = totalDetail.WalesCost.ToString("C", CultureInfo.CurrentCulture);
+            totalDetail.TotalDisposalCost = totalDetail.TotalCost.ToString("C", CultureInfo.CurrentCulture);
             data.Add(totalDetail);
 
 
