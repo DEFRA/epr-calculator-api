@@ -62,6 +62,8 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(vr.StatusCode, vr.ErrorMessage);
             }
 
+            string financialYear = calcRun?.Financial_Year ?? string.Empty;
+
             using (var transaction = this.context.Database.BeginTransaction())
             {
                 try
@@ -69,7 +71,7 @@ namespace EPR.Calculator.API.Controllers
                     var stagingOrganisationData = this.wrapper.GetOrganisationData();
                     var calcOrganisationMaster = new CalculatorRunOrganisationDataMaster
                     {
-                        CalendarYear = Util.GetCalendarYear("2024-25"), //Take the financial year from Calc Run table and Derive the Calendar year
+                        CalendarYear = Util.GetCalendarYear(financialYear),
                         CreatedAt = DateTime.Now,
                         CreatedBy = request.UpdatedBy,
                         EffectiveFrom = DateTime.Now,
@@ -97,7 +99,7 @@ namespace EPR.Calculator.API.Controllers
                     var stagingPomData = this.wrapper.GetPomData();
                     var calcRunPomMaster = new CalculatorRunPomDataMaster
                     {
-                        CalendarYear = "2024-25", //Take the financial year from Calc Run table and Derive the Calendar year
+                        CalendarYear = Util.GetCalendarYear(financialYear),
                         CreatedAt = DateTime.Now,
                         CreatedBy = request.UpdatedBy,
                         EffectiveFrom = DateTime.Now,
