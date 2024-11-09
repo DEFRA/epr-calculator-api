@@ -8,6 +8,10 @@
 
         public string ProducerName { get; set; }
 
+        public int Level { get; set; }
+
+        public int Order {  get; set; }
+
         public Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryMaterialCost>> MaterialCostSummary { get; set; }
     }
 }

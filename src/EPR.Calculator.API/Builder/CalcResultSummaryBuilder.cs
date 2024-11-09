@@ -8,12 +8,13 @@ namespace EPR.Calculator.API.Builder
     public class CalcResultSummaryBuilder : ICalcResultSummaryBuilder
     {
         private readonly ApplicationDBContext context;
+
         public CalcResultSummaryBuilder(ApplicationDBContext context)
         {
             this.context = context;
         }
 
-        public CalcResultSummary Construct(CalcResultsRequestDto resultsRequestDto)
+        public CalcResultSummary Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult)
         {
             var result = new CalcResultSummary();
 

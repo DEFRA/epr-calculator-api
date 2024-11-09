@@ -5,6 +5,6 @@ namespace EPR.Calculator.API.Builder
 {
     public interface ICalcResultSummaryBuilder
     {
-        public CalcResultSummary Construct(CalcResultsRequestDto resultsRequestDto);
+        public CalcResultSummary Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult);
     }
 }
