@@ -28,6 +28,8 @@ namespace EPR.Calculator.API.Builder
 
             var resultSummary = new List<CalcResultSummary>();
 
+            var headerRecords = GetHeaderRecords();
+
             foreach (var producer in producerDetailList)
             {
                 var costSummary = new List<CalcResultSummaryMaterialCost>();
@@ -119,6 +121,15 @@ namespace EPR.Calculator.API.Builder
         private decimal GetNorthernIrelandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
         {
             return 10.00m;
+        }
+
+        private IEnumerable<CalcResultSummary> GetHeaderRecords()
+        {
+            var resultSummaryHeaders = new List<CalcResultSummary>();
+
+
+
+            return resultSummaryHeaders;
         }
     }
 }
