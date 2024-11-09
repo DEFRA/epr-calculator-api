@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using System.Globalization;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.Builder.Lapcap
 {
@@ -49,6 +50,10 @@ namespace EPR.Calculator.API.Builder.Lapcap
 
             var materials = context.Material.Select(x => x.Name).OrderBy(x => x).ToList();
 
+            var countries = context.Country.ToList();
+
+            var costTypeId = context.CostType.Single(x => x.Name == "Fee for LA Disposal Costs").Id;
+
             foreach (var material in materials)
             {
                 var detail = new CalcResultLapcapDataDetails
@@ -89,7 +94,7 @@ namespace EPR.Calculator.API.Builder.Lapcap
             data.Add(totalDetail);
 
 
-            var countryAppPercent = new CalcResultLapcapDataDetails
+            var countryApportionment = new CalcResultLapcapDataDetails
             {
                 Name = CountryApportionment,
                 EnglandCost = CalculateApportionment(totalDetail.EnglandCost, totalDetail.TotalCost),
@@ -99,13 +104,46 @@ namespace EPR.Calculator.API.Builder.Lapcap
                 TotalCost = HundredPercent,
                 OrderId = ++orderId
             };
-            countryAppPercent.EnglandDisposalCost = $"{countryAppPercent.EnglandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
-            countryAppPercent.NorthernIrelandDisposalCost = $"{countryAppPercent.NorthernIrelandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
-            countryAppPercent.ScotlandDisposalCost = $"{countryAppPercent.ScotlandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
-            countryAppPercent.WalesDisposalCost = $"{countryAppPercent.WalesCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
-            countryAppPercent.TotalDisposalCost = $"{countryAppPercent.TotalCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
-            data.Add(countryAppPercent);
+            countryApportionment.EnglandDisposalCost = $"{countryApportionment.EnglandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
+            countryApportionment.NorthernIrelandDisposalCost = $"{countryApportionment.NorthernIrelandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
+            countryApportionment.ScotlandDisposalCost = $"{countryApportionment.ScotlandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
+            countryApportionment.WalesDisposalCost = $"{countryApportionment.WalesCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
+            countryApportionment.TotalDisposalCost = $"{countryApportionment.TotalCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
+            data.Add(countryApportionment);
 
+            context.CountryApportionment.Add(new CountryApportionment
+            {
+                CalculatorRunId = resultsRequestDto.RunId,
+                CountryId = countries.Single(x => x.Name == "England").Id,
+                CostTypeId = costTypeId,
+                Apportionment = countryApportionment.EnglandCost
+            });
+
+            context.CountryApportionment.Add(new CountryApportionment
+            {
+                CalculatorRunId = resultsRequestDto.RunId,
+                CountryId = countries.Single(x => x.Name == "Wales").Id,
+                CostTypeId = costTypeId,
+                Apportionment = countryApportionment.WalesCost
+            });
+
+            context.CountryApportionment.Add(new CountryApportionment
+            {
+                CalculatorRunId = resultsRequestDto.RunId,
+                CountryId = countries.Single(x => x.Name == "Northern Ireland").Id,
+                CostTypeId = costTypeId,
+                Apportionment = countryApportionment.NorthernIrelandCost
+            });
+
+            context.CountryApportionment.Add(new CountryApportionment
+            {
+                CalculatorRunId = resultsRequestDto.RunId,
+                CountryId = countries.Single(x => x.Name == "Scotland").Id,
+                CostTypeId = costTypeId,
+                Apportionment = countryApportionment.ScotlandCost
+            });
+
+            context.SaveChanges();
 
             return new CalcResultLapcapData { Name = LapcapHeader, CalcResultLapcapDataDetails = data };
         }
