@@ -64,6 +64,13 @@ namespace EPR.Calculator.API.UnitTests.Builder
             };
             details.ForEach(detail => detail.LapcapDataMaster = lapcapDataMaster);
 
+            dbContext.Country.Add(new Country { Code = "En", Name = "England", Description = "England" });
+            dbContext.Country.Add(new Country { Code = "Wa", Name = "Wales", Description = "Wales" });
+            dbContext.Country.Add(new Country { Code = "Sc", Name = "Scotland", Description = "Scotland" });
+            dbContext.Country.Add(new Country { Code = "NI", Name = "Northern Ireland", Description = "Northern Ireland" });
+
+            dbContext.CostType.Add(new CostType { Code = "1", Name = "Fee for LA Disposal Costs", Description = "Fee for LA Disposal Costs" });
+
             dbContext.LapcapDataMaster.Add(lapcapDataMaster);
             dbContext.LapcapDataDetail.AddRange(details);
             dbContext.SaveChanges();
@@ -124,6 +131,35 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("30.00000000%", countryApp.ScotlandDisposalCost);
             Assert.AreEqual("10.00000000%", countryApp.NorthernIrelandDisposalCost);
             Assert.AreEqual("100.00000000%", countryApp.TotalDisposalCost);
+
+            var countryAppList = dbContext.CountryApportionment.Where(x => x.CalculatorRunId == run.Id);
+            Assert.IsNotNull(countryAppList);
+            Assert.AreEqual(4, countryAppList.Count());
+
+            var englandApp = countryAppList.Single(x => x.CountryId == 1);
+            Assert.IsNotNull(englandApp);
+            Assert.AreEqual(englandApp.CalculatorRunId, run.Id);
+            Assert.AreEqual(englandApp.CostTypeId, 1);
+            Assert.AreEqual(englandApp.Apportionment, countryApp.EnglandCost);
+
+            var walesApp = countryAppList.Single(x => x.CountryId == 2);
+            Assert.IsNotNull(walesApp);
+            Assert.AreEqual(walesApp.CalculatorRunId, run.Id);
+            Assert.AreEqual(walesApp.CostTypeId, 1);
+            Assert.AreEqual(walesApp.Apportionment, countryApp.WalesCost);
+
+            var scotlandApp = countryAppList.Single(x => x.CountryId == 3);
+            Assert.IsNotNull(scotlandApp);
+            Assert.AreEqual(scotlandApp.CalculatorRunId, run.Id);
+            Assert.AreEqual(scotlandApp.CostTypeId, 1);
+            Assert.AreEqual(scotlandApp.Apportionment, countryApp.ScotlandCost);
+
+            var niApp = countryAppList.Single(x => x.CountryId == 4);
+            Assert.IsNotNull(niApp);
+            Assert.AreEqual(niApp.CalculatorRunId, run.Id);
+            Assert.AreEqual(niApp.CostTypeId, 1);
+            Assert.AreEqual(niApp.Apportionment, countryApp.NorthernIrelandCost);
+
         }
 
         public static List<LapcapDataDetail> GetLapcapDetails()
