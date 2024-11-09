@@ -47,7 +47,7 @@ namespace EPR.Calculator.API.Builder.Lapcap
                                TotalCost = lapcapDetail.TotalCost
                            }).ToList();
 
-            var materials = context.Material.Select(x => x.Name).ToList();
+            var materials = context.Material.Select(x => x.Name).OrderBy(x => x).ToList();
 
             foreach (var material in materials)
             {
