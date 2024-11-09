@@ -1,9 +1,6 @@
 ﻿using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
-using Microsoft.Azure.Amqp.Framing;
-using Microsoft.Extensions.Hosting;
 using System.Globalization;
 
 namespace EPR.Calculator.API.Builder.Lapcap
@@ -23,6 +20,8 @@ namespace EPR.Calculator.API.Builder.Lapcap
         public CalcResultLapcapData Construct(CalcResultsRequestDto resultsRequestDto)
         {
             var culture = CultureInfo.CreateSpecificCulture("en-GB");
+            culture.NumberFormat.CurrencySymbol = "£";
+            culture.NumberFormat.CurrencyPositivePattern = 0;
             var orderId = 1;
             var data = new List<CalcResultLapcapDataDetails>();
             data.Add(new CalcResultLapcapDataDetails
