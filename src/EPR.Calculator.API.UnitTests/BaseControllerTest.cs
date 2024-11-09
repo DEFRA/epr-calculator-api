@@ -71,6 +71,8 @@ namespace EPR.Calculator.API.Tests.Controllers
             dbContext.SaveChanges();
             calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), mockFactory.Object);
 
+            dbContext.Material.RemoveRange(dbContext.Material.ToList());
+            dbContext.SaveChanges();
             dbContext.Material.AddRange(GetMaterials());
             dbContext.SaveChanges();
         }
