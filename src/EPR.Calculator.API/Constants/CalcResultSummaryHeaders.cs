@@ -17,6 +17,5 @@
         public static readonly string WalesWithBadDebtProvision = "Wales with Bad Debt Provision";
         public static readonly string ScotlandWithBadDebtProvision = "Scotland with Bad Debt Provision";
         public static readonly string NorthernIrelandWithBadDebtProvision = "Northern Ireland with Bad Debt Provision";
-
     }
 }

@@ -2,13 +2,13 @@
 {
     public class CalcResultSummary
     {
-        public int ProducerId { get; set; }
+        public string ProducerId { get; set; }
 
         public string SubsidiaryId { get; set; }
 
         public string ProducerName { get; set; }
 
-        public int Level { get; set; }
+        public string Level { get; set; }
 
         public int Order {  get; set; }
 
