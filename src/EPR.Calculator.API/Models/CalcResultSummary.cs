@@ -8,7 +8,7 @@
 
         public string ProducerName { get; set; }
 
-        public string Level { get; set; }
+        public int Level { get; set; }
 
         public int Order {  get; set; }
 

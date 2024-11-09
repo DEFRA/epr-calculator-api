@@ -2,26 +2,26 @@
 {
     public class CalcResultSummaryMaterialCost
     {
-        public string HouseholdPackagingWasteTonnage { get; set; }
+        public decimal HouseholdPackagingWasteTonnage { get; set; }
 
-        public string ManagedConsumerWasteTonnage { get; set; }
+        public decimal ManagedConsumerWasteTonnage { get; set; }
 
-        public string NetReportedTonnage { get; set; }
+        public decimal NetReportedTonnage { get; set; }
 
-        public string PricePerTonnage { get; set; }
+        public decimal PricePerTonnage { get; set; }
 
-        public string ProducerDisposalFee { get; set; }
+        public decimal ProducerDisposalFee { get; set; }
 
-        public string BadDebtProvision { get; set; }
+        public decimal BadDebtProvision { get; set; }
 
-        public string ProducerDisposalFeeWithBadDebtProvision { get; set; }
+        public decimal ProducerDisposalFeeWithBadDebtProvision { get; set; }
 
-        public string EnglandWithBadDebtProvision { get; set; }
+        public decimal EnglandWithBadDebtProvision { get; set; }
 
-        public string WalesWithBadDebtProvision { get; set; }
+        public decimal WalesWithBadDebtProvision { get; set; }
 
-        public string ScotlandWithBadDebtProvision { get; set; }
+        public decimal ScotlandWithBadDebtProvision { get; set; }
 
-        public string NorthernIrelandWithBadDebtProvision { get; set; }
+        public decimal NorthernIrelandWithBadDebtProvision { get; set; }
     }
 }

@@ -44,14 +44,14 @@ namespace EPR.Calculator.API.Builder
                         HouseholdPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material),
                         ManagedConsumerWasteTonnage = GetManagedConsumerWasteTonnage(producer, material),
                         NetReportedTonnage = GetNetReportedTonnage(producer, material),
-                        PricePerTonnage = GetPricePerTonnage(producer, material),
-                        ProducerDisposalFee = GetProducerDisposalFee(producer, material),
-                        BadDebtProvision = GetBadDebtProvision(producer, material),
-                        ProducerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material),
-                        EnglandWithBadDebtProvision = GetEnglandWithBadDebtProvision(producer, material),
-                        WalesWithBadDebtProvision = GetWalesWithBadDebtProvision(producer, material),
-                        ScotlandWithBadDebtProvision = GetScotlandWithBadDebtProvision(producer, material),
-                        NorthernIrelandWithBadDebtProvision = GetNorthernIrelandWithBadDebtProvision(producer, material)
+                        PricePerTonnage = GetPricePerTonne(producer, material, calcResult),
+                        ProducerDisposalFee = GetProducerDisposalFee(producer, material, calcResult),
+                        BadDebtProvision = GetBadDebtProvision(producer, material, calcResult),
+                        ProducerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult),
+                        EnglandWithBadDebtProvision = GetEnglandWithBadDebtProvision(producer, material, calcResult),
+                        WalesWithBadDebtProvision = GetWalesWithBadDebtProvision(producer, material, calcResult),
+                        ScotlandWithBadDebtProvision = GetScotlandWithBadDebtProvision(producer, material, calcResult),
+                        NorthernIrelandWithBadDebtProvision = GetNorthernIrelandWithBadDebtProvision(producer, material, calcResult)
                     });
 
                     materialCostSummary.Add(material, costSummary);
@@ -62,7 +62,7 @@ namespace EPR.Calculator.API.Builder
                     ProducerId = producer.Id.ToString(),
                     ProducerName = producer.ProducerName,
                     SubsidiaryId = producer.SubsidiaryId,
-                    Level = "1",
+                    Level = 1,
                     Order = 2,
                     MaterialCostSummary = materialCostSummary
                 });
@@ -71,62 +71,88 @@ namespace EPR.Calculator.API.Builder
             return result;
         }
 
-        private string GetHouseholdPackagingWasteTonnage(ProducerDetail producer, MaterialDetail material)
+        private decimal GetHouseholdPackagingWasteTonnage(ProducerDetail producer, MaterialDetail material)
         {
-            return string.Empty;
+            return producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material.Code == material.Code && p.PackagingType == "HH").PackagingTonnage;
         }
 
-        private string GetManagedConsumerWasteTonnage(ProducerDetail producer, MaterialDetail material)
+        private decimal GetManagedConsumerWasteTonnage(ProducerDetail producer, MaterialDetail material)
         {
-            return string.Empty;
+            return producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material.Code == material.Code && p.PackagingType == "CW").PackagingTonnage;
         }
 
-        private string GetNetReportedTonnage(ProducerDetail producer, MaterialDetail material)
+        private decimal GetNetReportedTonnage(ProducerDetail producer, MaterialDetail material)
         {
-            return string.Empty;
+            var householdPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material);
+            var managedConsumerWasteTonnage = GetManagedConsumerWasteTonnage(producer, material);
+            return householdPackagingWasteTonnage - managedConsumerWasteTonnage;
         }
 
-        private string GetPricePerTonnage(ProducerDetail producer, MaterialDetail material)
+        private decimal GetPricePerTonne(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
-            return string.Empty;
+            return 10m;
         }
 
-        private string GetProducerDisposalFee(ProducerDetail producer, MaterialDetail material)
+        private decimal GetProducerDisposalFee(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
-            return string.Empty;
+            var netReportedTonnage = GetNetReportedTonnage(producer, material);
+            var pricePerTonne = GetPricePerTonne(producer, material, calcResult);
+
+            return netReportedTonnage * pricePerTonne;
         }
 
-        private string GetBadDebtProvision(ProducerDetail producer, MaterialDetail material)
+        private decimal GetBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
-            return string.Empty;
+            var producerDisposalFee = GetProducerDisposalFee(producer, material, calcResult);
+
+
+            return producerDisposalFee * 6;
         }
 
-        private string GetProducerDisposalFeeWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
+        private decimal GetProducerDisposalFeeWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
-            return string.Empty;
+            var producerDisposalFee = GetProducerDisposalFee(producer, material, calcResult);
+
+            return producerDisposalFee * (1 + 6);
         }
 
-        private string GetEnglandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
+        private decimal GetEnglandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
-            return string.Empty;
+            var producerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult);
+
+            // producerDisposalFeeWithBadDebtProvision * LAPCAP Data B12
+
+            return 10m;
         }
 
-        private string GetWalesWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
+        private decimal GetWalesWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
-            return string.Empty;
+            var producerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult);
+
+            // producerDisposalFeeWithBadDebtProvision * LAPCAP Data C12
+
+            return 10m;
         }
 
-        private string GetScotlandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
+        private decimal GetScotlandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
-            return string.Empty;
+            var producerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult);
+
+            // producerDisposalFeeWithBadDebtProvision * LAPCAP Data D12
+
+            return 10m;
         }
 
-        private string GetNorthernIrelandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
+        private decimal GetNorthernIrelandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
-            return string.Empty;
+            var producerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult);
+
+            // producerDisposalFeeWithBadDebtProvision * LAPCAP Data E12
+
+            return 10m;
         }
 
-        private IEnumerable<CalcResultSummary> GetHeaderRecords(List<MaterialDetail> materials)
+        /* private IEnumerable<CalcResultSummary> GetHeaderRecords(List<MaterialDetail> materials)
         {
             var resultSummaryHeaders = new List<CalcResultSummary>();
 
@@ -197,6 +223,6 @@ namespace EPR.Calculator.API.Builder
             });
 
             return resultSummaryHeaders;
-        }
+        } */
     }
 }
