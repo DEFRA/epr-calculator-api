@@ -22,7 +22,7 @@ namespace EPR.Calculator.API.Builder.Lapcap
 
         public CalcResultLapcapData Construct(CalcResultsRequestDto resultsRequestDto)
         {
-            var culture = CultureInfo.CreateSpecificCulture("eb-GB");
+            var culture = CultureInfo.CreateSpecificCulture("en-GB");
             var orderId = 1;
             var data = new List<CalcResultLapcapDataDetails>();
             data.Add(new CalcResultLapcapDataDetails
