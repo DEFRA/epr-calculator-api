@@ -2,12 +2,19 @@
 {
     public class CalcResultSummary
     {
-        public int ProducerId { get; set; }
+        public string ProducerId { get; set; }
 
         public string SubsidiaryId { get; set; }
 
         public string ProducerName { get; set; }
 
+        public string Level { get; set; }
+
+        public int Order {  get; set; }
+
         public Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryMaterialCost>> MaterialCostSummary { get; set; }
+
+        public Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryMaterialCostHeaders>> MaterialCostSummaryHeaders { get; set; }
+
     }
 }

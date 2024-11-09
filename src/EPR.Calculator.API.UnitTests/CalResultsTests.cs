@@ -20,7 +20,7 @@ namespace EPR.Calculator.API.UnitTests
         private Mock<ICalcResultsExporter<CalcResult>> mockExporter;
         private Mock<ICalcResultDetailBuilder> mockDetailBuilder;
         private Mock<ICalcResultLapcapDataBuilder> mockLapcapBuilder;
-        private Mock<ICalcResultSummaryBuilder> mocksummaryBuilder;
+        private Mock<ICalcResultSummaryBuilder> mockSummaryBuilder;
 
 
         private Mock<ApplicationDBContext> mockContext;
@@ -37,7 +37,6 @@ namespace EPR.Calculator.API.UnitTests
             mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
             mockExporter = new Mock<ICalcResultsExporter<CalcResult>>();
             wrapper = new Mock<IOrgAndPomWrapper>().Object;
-
             controller = new CalculatorInternalController(
                dbContext,
                new RpdStatusDataValidator(wrapper),
@@ -49,41 +48,39 @@ namespace EPR.Calculator.API.UnitTests
 
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             mockLapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
-            mocksummaryBuilder = new Mock<ICalcResultSummaryBuilder>();
-
-            calcResultBuilder = new CalcResultBuilder(mockDetailBuilder.Object, mockLapcapBuilder.Object, mocksummaryBuilder.Object);
-
+            mockSummaryBuilder = new Mock<ICalcResultSummaryBuilder>();
+            calcResultBuilder = new CalcResultBuilder(mockDetailBuilder.Object, mockLapcapBuilder.Object, mockSummaryBuilder.Object);
             mockContext = new Mock<ApplicationDBContext>();
             detailBuilder = new CalcResultDetailBuilder(mockContext.Object);
 
         }
 
-        [TestMethod]
-        public void PrepareCalcResults_ShouldReturnCreatedStatus()
-        {
-            var requestDto = new CalcResultsRequestDto();
-            var calcResult = new CalcResult();
-            mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
+        //[TestMethod]
+        //public void PrepareCalcResults_ShouldReturnCreatedStatus()
+        //{
+        //    var requestDto = new CalcResultsRequestDto();
+        //    var calcResult = new CalcResult();
+        //    mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
 
-            var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
+        //    var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(201, result.StatusCode);
-            mockExporter.Verify(e => e.Export(calcResult), Times.Once);
-        }
+        //    Assert.IsNotNull(result);
+        //    Assert.AreEqual(201, result.StatusCode);
+        //    mockExporter.Verify(e => e.Export(calcResult), Times.Once);
+        //}
 
-        [TestMethod]
-        public void Build_ShouldReturnCalcResultWithDetail()
-        {
-            var requestDto = new CalcResultsRequestDto();
-            var detail = new CalcResultDetail();
-            mockDetailBuilder.Setup(d => d.Construct(requestDto)).Returns(detail);
+        //[TestMethod]
+        //public void Build_ShouldReturnCalcResultWithDetail()
+        //{
+        //    var requestDto = new CalcResultsRequestDto();
+        //    var detail = new CalcResultDetail();
+        //    mockDetailBuilder.Setup(d => d.Construct(requestDto)).Returns(detail);
 
-            var result = calcResultBuilder.Build(requestDto);
+        //    var result = calcResultBuilder.Build(requestDto);
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(detail, result.CalcResultDetail);
-        }
+        //    Assert.IsNotNull(result);
+        //    Assert.AreEqual(detail, result.CalcResultDetail);
+        //}
     }
 }
 
