@@ -16,7 +16,7 @@ namespace EPR.Calculator.API.Builder
 
         public CalcResultDetail Construct(CalcResultsRequestDto resultsRequestDto)
         {
-            var calcResultDetail = context.CalculatorRuns
+            var calcResultDetails = context.CalculatorRuns
                 .Include(o => o.CalculatorRunOrganisationDataMaster)
                 .Include(o => o.CalculatorRunPomDataMaster)
                 .Include(o => o.DefaultParameterSettingMaster)
@@ -24,22 +24,22 @@ namespace EPR.Calculator.API.Builder
                 .ToListAsync();
 
             var results = new CalcResultDetail();
-
-            foreach (var item in calcResultDetail.Result)
+            var calcResultDetail = calcResultDetails.Result.Find(x => x.Id == resultsRequestDto.RunId);
+            if (calcResultDetail != null)
             {
-                results.RunId = item.Id;
-                results.RunName = item.Name;
-                results.RunBy = item.CreatedBy;
-                results.RunDate = item.CreatedAt;
-                results.FinancialYear = item.Financial_Year;
-                if (item.CalculatorRunOrganisationDataMaster != null)
-                    results.RpdFileORG = item.CalculatorRunOrganisationDataMaster.CreatedAt.ToString(CalculationResults.DateFormat);
-                if (item.CalculatorRunPomDataMaster != null)
-                    results.RpdFilePOM = item.CalculatorRunPomDataMaster.CreatedAt.ToString(CalculationResults.DateFormat);
-                if (item.LapcapDataMaster != null)
-                    results.LapcapFile = FormatFileData(item.LapcapDataMaster.LapcapFileName, item.LapcapDataMaster.CreatedAt, item.LapcapDataMaster.CreatedBy);
-                if (item.DefaultParameterSettingMaster != null)
-                    results.ParametersFile = FormatFileData(item.DefaultParameterSettingMaster.ParameterFileName, item.DefaultParameterSettingMaster.CreatedAt, item.DefaultParameterSettingMaster.CreatedBy);
+                results.RunId = calcResultDetail.Id;
+                results.RunName = calcResultDetail.Name;
+                results.RunBy = calcResultDetail.CreatedBy;
+                results.RunDate = calcResultDetail.CreatedAt;
+                results.FinancialYear = calcResultDetail.Financial_Year;
+                if (calcResultDetail.CalculatorRunOrganisationDataMaster != null)
+                    results.RpdFileORG = calcResultDetail.CalculatorRunOrganisationDataMaster.CreatedAt.ToString(CalculationResults.DateFormat);
+                if (calcResultDetail.CalculatorRunPomDataMaster != null)
+                    results.RpdFilePOM = calcResultDetail.CalculatorRunPomDataMaster.CreatedAt.ToString(CalculationResults.DateFormat);
+                if (calcResultDetail.LapcapDataMaster != null)
+                    results.LapcapFile = FormatFileData(calcResultDetail.LapcapDataMaster.LapcapFileName, calcResultDetail.LapcapDataMaster.CreatedAt, calcResultDetail.LapcapDataMaster.CreatedBy);
+                if (calcResultDetail.DefaultParameterSettingMaster != null)
+                    results.ParametersFile = FormatFileData(calcResultDetail.DefaultParameterSettingMaster.ParameterFileName, calcResultDetail.DefaultParameterSettingMaster.CreatedAt, calcResultDetail.DefaultParameterSettingMaster.CreatedBy);
             }
             return results;
         }
