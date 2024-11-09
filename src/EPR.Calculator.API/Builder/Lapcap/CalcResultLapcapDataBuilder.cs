@@ -22,6 +22,7 @@ namespace EPR.Calculator.API.Builder.Lapcap
 
         public CalcResultLapcapData Construct(CalcResultsRequestDto resultsRequestDto)
         {
+            var culture = CultureInfo.CreateSpecificCulture("eb-GB");
             var orderId = 1;
             var data = new List<CalcResultLapcapDataDetails>();
             data.Add(new CalcResultLapcapDataDetails
@@ -62,11 +63,11 @@ namespace EPR.Calculator.API.Builder.Lapcap
                     TotalCost = GetTotalMaterialDisposalCost(material, results)
                 };
 
-                detail.EnglandDisposalCost = detail.EnglandCost.ToString("C", CultureInfo.CurrentCulture);
-                detail.NorthernIrelandDisposalCost = detail.NorthernIrelandCost.ToString("C", CultureInfo.CurrentCulture);
-                detail.ScotlandDisposalCost = detail.ScotlandCost.ToString("C", CultureInfo.CurrentCulture);
-                detail.WalesDisposalCost = detail.WalesCost.ToString("C", CultureInfo.CurrentCulture);
-                detail.TotalDisposalCost = detail.TotalCost.ToString("C", CultureInfo.CurrentCulture);
+                detail.EnglandDisposalCost = detail.EnglandCost.ToString("C", culture);
+                detail.NorthernIrelandDisposalCost = detail.NorthernIrelandCost.ToString("C", culture);
+                detail.ScotlandDisposalCost = detail.ScotlandCost.ToString("C", culture);
+                detail.WalesDisposalCost = detail.WalesCost.ToString("C", culture);
+                detail.TotalDisposalCost = detail.TotalCost.ToString("C", culture);
 
                 data.Add(detail);
             }
@@ -81,11 +82,11 @@ namespace EPR.Calculator.API.Builder.Lapcap
                 TotalCost = data.Sum(x => x.TotalCost),
                 OrderId = ++orderId
             };
-            totalDetail.EnglandDisposalCost = totalDetail.EnglandCost.ToString("C", CultureInfo.CurrentCulture);
-            totalDetail.NorthernIrelandDisposalCost = totalDetail.NorthernIrelandCost.ToString("C", CultureInfo.CurrentCulture);
-            totalDetail.ScotlandDisposalCost = totalDetail.ScotlandCost.ToString("C", CultureInfo.CurrentCulture);
-            totalDetail.WalesDisposalCost = totalDetail.WalesCost.ToString("C", CultureInfo.CurrentCulture);
-            totalDetail.TotalDisposalCost = totalDetail.TotalCost.ToString("C", CultureInfo.CurrentCulture);
+            totalDetail.EnglandDisposalCost = totalDetail.EnglandCost.ToString("C", culture);
+            totalDetail.NorthernIrelandDisposalCost = totalDetail.NorthernIrelandCost.ToString("C", culture);
+            totalDetail.ScotlandDisposalCost = totalDetail.ScotlandCost.ToString("C", culture);
+            totalDetail.WalesDisposalCost = totalDetail.WalesCost.ToString("C", culture);
+            totalDetail.TotalDisposalCost = totalDetail.TotalCost.ToString("C", culture);
             data.Add(totalDetail);
 
 
