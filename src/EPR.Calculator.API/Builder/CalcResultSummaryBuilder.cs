@@ -19,13 +19,67 @@ namespace EPR.Calculator.API.Builder
         {
             var result = new CalcResultSummary();
 
+            result.ResultSummaryHeader = new CalcResultSummaryHeader
+            {
+                Name = "Calculation Result",
+                ColumnIndex = 0
+            };
+
+            result.ProducerDisposalFeesHeader = new CalcResultSummaryHeader
+            {
+                Name = "1 Producer Disposal Fees with Bad Debt Provision",
+                ColumnIndex = 4
+            };
+
             var materialsFromDb = this.context.Material.ToList();
 
             var materials = Mappers.MaterialMapper.Map(materialsFromDb);
 
+            var materialsBreakdownHeader = new List<CalcResultSummaryHeader>();
+            var columnIndex = 4;
+
+            foreach (var material in materials)
+            {
+                materialsBreakdownHeader.Add(new CalcResultSummaryHeader {
+                    Name = $"{material.Name} Breakdown",
+                    ColumnIndex = columnIndex
+                });
+                columnIndex = columnIndex + 11;
+            }
+
+            result.MaterialBreakdownHeaders = materialsBreakdownHeader;
+
+            var columnHeaders = new List<string>();
+
+            columnHeaders.AddRange([
+                CalcResultSummaryHeaders.ProducerId,
+                CalcResultSummaryHeaders.SubsidiaryId,
+                CalcResultSummaryHeaders.ProducerOrSubsidiaryName,
+                CalcResultSummaryHeaders.Level
+            ]);
+
+            foreach (var material in materials)
+            {
+                columnHeaders.AddRange([
+                    CalcResultSummaryHeaders.ReportedHouseholdPackagingWasteTonnage,
+                    CalcResultSummaryHeaders.ReportedSelfManagedConsumerWasteTonnage,
+                    CalcResultSummaryHeaders.NetReportedTonnage,
+                    CalcResultSummaryHeaders.PricePerTonne,
+                    CalcResultSummaryHeaders.ProducerDisposalFee,
+                    CalcResultSummaryHeaders.BadDebtProvision,
+                    CalcResultSummaryHeaders.ProducerDisposalFeeWithBadDebtProvision,
+                    CalcResultSummaryHeaders.EnglandWithBadDebtProvision,
+                    CalcResultSummaryHeaders.WalesWithBadDebtProvision,
+                    CalcResultSummaryHeaders.ScotlandWithBadDebtProvision,
+                    CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision
+                ]);
+            }
+
+            result.ColumnHeaders = columnHeaders;
+
             var producerDetailList = this.context.ProducerDetail.ToList();
 
-            var resultSummary = new List<CalcResultSummary>();
+            var resultSummary = new List<CalcResultSummaryProducerDisposalFees>();
 
             // var headerRecords = GetHeaderRecords(materials);
 
@@ -33,13 +87,13 @@ namespace EPR.Calculator.API.Builder
 
             foreach (var producer in producerDetailList)
             {
-                var costSummary = new List<CalcResultSummaryMaterialCost>();
+                var costSummary = new List<CalcResultSummaryProducerDisposalFeesByMaterial>();
 
-                var materialCostSummary = new Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryMaterialCost>>();
+                var materialCostSummary = new Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>>();
 
                 foreach (var material in materials)
                 {
-                    costSummary.Add(new CalcResultSummaryMaterialCost
+                    costSummary.Add(new CalcResultSummaryProducerDisposalFeesByMaterial
                     {
                         HouseholdPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material),
                         ManagedConsumerWasteTonnage = GetManagedConsumerWasteTonnage(producer, material),
@@ -57,14 +111,14 @@ namespace EPR.Calculator.API.Builder
                     materialCostSummary.Add(material, costSummary);
                 }
 
-                resultSummary.Add(new CalcResultSummary
+                resultSummary.Add(new CalcResultSummaryProducerDisposalFees
                 {
                     ProducerId = producer.Id.ToString(),
                     ProducerName = producer.ProducerName,
                     SubsidiaryId = producer.SubsidiaryId,
                     Level = 1,
                     Order = 2,
-                    MaterialCostSummary = materialCostSummary
+                    ProducerDisposalFeesByMaterial = materialCostSummary
                 });
             }
 
