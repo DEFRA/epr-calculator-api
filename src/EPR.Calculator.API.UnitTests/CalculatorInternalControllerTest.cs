@@ -211,7 +211,8 @@ namespace EPR.Calculator.API.UnitTests
                new RpdStatusDataValidator(wrapper),
                wrapper,
                new Mock<ICalcResultBuilder>().Object,
-               new Mock<ICalcResultsExporter<CalcResult>>().Object
+               new Mock<ICalcResultsExporter<CalcResult>>().Object,
+               new Mock<ITransposePomAndOrgDataService>().Object
             );
 
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
