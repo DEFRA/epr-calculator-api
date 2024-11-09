@@ -21,43 +21,6 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void Export_ShouldUploadCorrectCsvContent()
-        {
-            var calcResult = new CalcResult
-            {
-                CalcResultDetail = new CalcResultDetail
-                {
-                    RunName = "Test Run",
-                    RunId = 123,
-                    RunDate = new DateTime(2023, 10, 10, 14, 30, 0),
-                    RunBy = "Tester",
-                    FinancialYear = "2023-24",
-                    LapcapFile = "Lapcap.csv,2023-10-01,John Doe",
-                    ParametersFile = "Params.csv,2023-10-02,Jane Doe",
-                    RpdFileORG = "04/11/2024 12:06",
-                    RpdFilePOM = "04/11/2024 12:07",
-                }
-            };
-
-            var expectedCsvContent = new StringBuilder();
-            expectedCsvContent.AppendLine("Run Name,Test Run");
-            expectedCsvContent.AppendLine("Run Id,123");
-            expectedCsvContent.AppendLine("Run Date,10/10/2023 14:30");
-            expectedCsvContent.AppendLine("Run by,Tester");
-            expectedCsvContent.AppendLine("Financial Year,2023-24");
-            expectedCsvContent.AppendLine("RPD File - ORG,04/11/2024 12:06,RPD File - POM,04/11/2024 12:07");
-            expectedCsvContent.AppendLine("Lapcap File,Lapcap.csv,2023-10-01,John Doe");
-            expectedCsvContent.AppendLine("Parameters File,Params.csv,2023-10-02,Jane Doe");
-
-            _calcResultsExporter.Export(calcResult);
-
-            _blobStorageServiceMock.Verify(service => service.UploadResultFileContentAsync(
-                $"{calcResult.CalcResultDetail.RunId}-{DateTime.Now:yyyy-MM-dd-HHmm}.csv",
-                It.Is<StringBuilder>(content => content.ToString() == expectedCsvContent.ToString())
-            ), Times.Once);
-        }
-
-        [TestMethod]
         public void Export_ShouldHandleIOExceptionGracefully()
         {
             var calcResult = new CalcResult

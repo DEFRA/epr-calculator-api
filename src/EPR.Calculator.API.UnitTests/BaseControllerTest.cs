@@ -696,7 +696,6 @@ namespace EPR.Calculator.API.Tests.Controllers
             var list = new List<CalculatorRun>();
             list.Add(new CalculatorRun
             {
-                Id = 1,
                 CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 Name = "Test Run",
                 Financial_Year = "2024-25",
@@ -705,7 +704,6 @@ namespace EPR.Calculator.API.Tests.Controllers
             });
             list.Add(new CalculatorRun
             {
-                Id = 2,
                 CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 Name = "Test Calculated Result",
                 Financial_Year = "2024-25",
@@ -714,7 +712,6 @@ namespace EPR.Calculator.API.Tests.Controllers
             });
             list.Add(new CalculatorRun
             {
-                Id = 3,
                 CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 Name = "Test Run",
                 Financial_Year = "2024-25",
@@ -725,7 +722,6 @@ namespace EPR.Calculator.API.Tests.Controllers
             });
             list.Add(new CalculatorRun
             {
-                Id = 4,
                 CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 Name = "Test Calculated Result",
                 Financial_Year = "2024-25",
