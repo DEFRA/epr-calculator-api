@@ -19,7 +19,7 @@ namespace EPR.Calculator.API.UnitTests
         public void SetUp()
         {
             var options = new DbContextOptionsBuilder<ApplicationDBContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) 
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
             _context = new ApplicationDBContext(options);
@@ -66,7 +66,7 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void Construct_AllPropertiesPresent_ReturnsCorrectData()
         {
-            var result = _builder.Construct(new CalcResultsRequestDto());
+            var result = _builder.Construct(new CalcResultsRequestDto() { RunId = 1 });
 
             Assert.AreEqual(1, result.RunId);
             Assert.AreEqual("TestRun", result.RunName);
@@ -97,7 +97,7 @@ namespace EPR.Calculator.API.UnitTests
             _context.CalculatorRuns.Add(calculatorRun);
             _context.SaveChangesAsync();
 
-            var result = _builder.Construct(new CalcResultsRequestDto());
+            var result = _builder.Construct(new CalcResultsRequestDto() { RunId = 2 });
 
             Assert.AreEqual(2, result.RunId);
             Assert.AreEqual("RunWithMissingProps", result.RunName);

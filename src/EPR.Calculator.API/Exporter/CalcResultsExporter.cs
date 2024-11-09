@@ -16,7 +16,7 @@ namespace EPR.Calculator.API.Exporter
         private const string FinancialYear = "Financial Year";
         private const string RPDFileORG = "RPD File - ORG";
         private const string RPDFilePOM = "RPD File - POM";
-        private const string LapcapFile = "Lapcap File";
+        private const string LapcapFile = "LAPCAP File";
         private const string ParametersFile = "Parameters File";
 
         public CalcResultsExporter(IBlobStorageService blobStorageService)
