@@ -1,7 +1,7 @@
 namespace EPR.Calculator.API.UnitTests.Builder
 {
     using System;
-    using EPR.Calculator.API.Builder;
+    using EPR.Calculator.API.Builder.LaDisposalCost;
     using EPR.Calculator.API.Constants;
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Data.DataModels;
@@ -63,11 +63,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
             dbContext.ProducerDetail.Add(producer);
 
-            dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial { Material = material, PackagingTonnage = 1000.00m, PackagingType = "CW", MaterialId = 1, ProducerDetail = producer });
-            dbContext.SaveChanges();
+            dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial { Material = material, PackagingTonnage = 1000.00m, PackagingType = "CW", MaterialId = 1, ProducerDetail = producer });            
+            
 
-            dbContext.Material.Add(new Material { Name = aluminium, Code = "AL", Description = "Some" });
-            //dbContext.CalculatorRuns.Add(run);
             dbContext.SaveChanges();
 
             var resultsDto = new CalcResultsRequestDto { RunId = 1 };

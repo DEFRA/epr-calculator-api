@@ -1,7 +1,7 @@
 ﻿using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 
-namespace EPR.Calculator.API.Builder
+namespace EPR.Calculator.API.Builder.LaDisposalCost
 {
     public interface ICalcRunLaDisposalCostBuilder
     {

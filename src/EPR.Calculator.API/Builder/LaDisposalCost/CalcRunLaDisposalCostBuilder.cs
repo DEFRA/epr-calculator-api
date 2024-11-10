@@ -8,14 +8,14 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
 using System.Globalization;
 
-namespace EPR.Calculator.API.Builder
+namespace EPR.Calculator.API.Builder.LaDisposalCost
 {
     public class CalcRunLaDisposalCostBuilder : ICalcRunLaDisposalCostBuilder
     {
         internal class ProducerData
         {
             public string Material { get; set; }
-            public decimal Tonnage { get; set; }            
+            public decimal Tonnage { get; set; }
         }
 
 
@@ -30,26 +30,26 @@ namespace EPR.Calculator.API.Builder
 
 
         public CalcResultLaDisposalCostData Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult)
-        {           
+        {
 
             var laDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>();
-            var OrderId = 1;           
+            var OrderId = 1;
 
             producerData = (from run in context.CalculatorRuns
                             join producerDetail in context.ProducerDetail on run.Id equals producerDetail.CalculatorRunId
-                           join  producerMaterial in context.ProducerReportedMaterial on producerDetail.Id equals producerMaterial.ProducerDetailId
-                           join material in context.Material on producerMaterial.MaterialId equals material.Id
-                           where run.Id == resultsRequestDto.RunId                           
-                           select new ProducerData
-                           {
-                               Material = material.Name,
-                               Tonnage = producerMaterial.PackagingTonnage
-                           }).ToList();
+                            join producerMaterial in context.ProducerReportedMaterial on producerDetail.Id equals producerMaterial.ProducerDetailId
+                            join material in context.Material on producerMaterial.MaterialId equals material.Id
+                            where run.Id == resultsRequestDto.RunId
+                            select new ProducerData
+                            {
+                                Material = material.Name,
+                                Tonnage = producerMaterial.PackagingTonnage
+                            }).ToList();
 
             var lapcapDetails = calcResult?.CalcResultLapcapData?.CalcResultLapcapDataDetails?.Where(t => t.OrderId != 1 && t.Name != "1 Country Apportionment").ToList();
 
 
-            foreach (var details  in lapcapDetails)
+            foreach (var details in lapcapDetails)
             {
                 var laDiposalDetail = new CalcResultLaDisposalCostDataDetail()
                 {
@@ -61,7 +61,7 @@ namespace EPR.Calculator.API.Builder
                     Total = details.TotalDisposalCost,
                     ProducerReportedHouseholdPackagingWasteTonnage = GetTonnageDataByMaterial(details.Name),
                     OrderId = ++OrderId
-                };                     
+                };
                 laDisposalCostDetails.Add(laDiposalDetail);
 
             }
@@ -69,7 +69,7 @@ namespace EPR.Calculator.API.Builder
 
             foreach (var details in laDisposalCostDetails)
             {
-                details.LateReportingTonnage = GetLateReportingTonnageDataByMaterial(details.Name,calcResult?.CalcResultLateReportingTonnageData?.CalcResultLateReportingTonnageDetails?.ToList());
+                details.LateReportingTonnage = GetLateReportingTonnageDataByMaterial(details.Name, calcResult?.CalcResultLateReportingTonnageData?.CalcResultLateReportingTonnageDetails?.ToList());
 
                 details.ProducerReportedHouseholdTonnagePlusLateReportingTonnage = GetProducerReportedHouseholdTonnagePlusLateReportingTonnage(details);
                 if (details.Name == CommonConstants.Total) continue;
@@ -80,14 +80,14 @@ namespace EPR.Calculator.API.Builder
             var header = GetHeader();
             laDisposalCostDetails.Insert(0, header);
 
-            return new CalcResultLaDisposalCostData() { Name = CommonConstants.LADisposalCostData, CalcResultLaDisposalCostDetails = laDisposalCostDetails.AsEnumerable() };             
-            
+            return new CalcResultLaDisposalCostData() { Name = CommonConstants.LADisposalCostData, CalcResultLaDisposalCostDetails = laDisposalCostDetails.AsEnumerable() };
+
         }
 
 
         private string GetTonnageDataByMaterial(string material)
         {
-            return producerData.Where(t => t.Material== material).Sum(t => t.Tonnage).ToString();
+            return producerData.Where(t => t.Material == material).Sum(t => t.Tonnage).ToString();
         }
 
         private string GetLateReportingTonnageDataByMaterial(string material, List<CalcResultLateReportingTonnageDetail> details)
@@ -105,7 +105,7 @@ namespace EPR.Calculator.API.Builder
         {
             var HouseholdTonnagePlusLateReportingTonnage = GetDecimalValue(detail.ProducerReportedHouseholdTonnagePlusLateReportingTonnage);
             if (HouseholdTonnagePlusLateReportingTonnage == 0) return "0";
-            var value = Math.Round((ConvertCurrencyToDecimal(detail.Total) / HouseholdTonnagePlusLateReportingTonnage), 4);
+            var value = Math.Round(ConvertCurrencyToDecimal(detail.Total) / HouseholdTonnagePlusLateReportingTonnage, 4);
             var culture = CultureInfo.CreateSpecificCulture("en-GB");
             culture.NumberFormat.CurrencySymbol = "£";
             culture.NumberFormat.CurrencyPositivePattern = 0;
