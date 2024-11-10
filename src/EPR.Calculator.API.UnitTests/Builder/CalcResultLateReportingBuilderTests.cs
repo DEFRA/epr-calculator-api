@@ -35,7 +35,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             {
                 new DefaultParameterTemplateMaster
                 {
-                    ParameterUniqueReferenceId = "LRET-AL",
+                    ParameterUniqueReferenceId = "LRET-AL1",
                     ParameterCategory = "Aluminium",
                     ParameterType = "Late Reporting Tonnage",
                     ValidRangeFrom = 0.000M,
@@ -43,7 +43,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 },
                 new DefaultParameterTemplateMaster
                 {
-                    ParameterUniqueReferenceId = "LRET-FC",
+                    ParameterUniqueReferenceId = "LRET-FC1",
                     ParameterCategory = "Fibre composite",
                     ParameterType = "Late Reporting Tonnage",
                     ValidRangeFrom = 0.000M,
@@ -55,14 +55,14 @@ namespace EPR.Calculator.API.UnitTests.Builder
             {
                 new DefaultParameterSettingDetail
                 {
-                    DefaultParameterSettingMasterId = 1,
-                    ParameterUniqueReferenceId = "LRET-AL",
+                    DefaultParameterSettingMasterId = 111,
+                    ParameterUniqueReferenceId = "LRET-AL1",
                     ParameterValue = 100.000M
                 },
                 new DefaultParameterSettingDetail
                 {
-                    DefaultParameterSettingMasterId = 1,
-                    ParameterUniqueReferenceId = "LRET-FC",
+                    DefaultParameterSettingMasterId = 111,
+                    ParameterUniqueReferenceId = "LRET-FC1",
                     ParameterValue = 200.000M
                 }
             });
@@ -76,7 +76,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
                 CreatedBy = "Test User",
                 LapcapDataMasterId = 2,
-                DefaultParameterSettingMasterId = 1
+                DefaultParameterSettingMasterId = 111
             });
 
             dbContext.SaveChanges();

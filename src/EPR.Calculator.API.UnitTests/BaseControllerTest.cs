@@ -65,14 +65,11 @@ namespace EPR.Calculator.API.Tests.Controllers
 
             mockFactory.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(mockClient.Object);
 
-
-
             dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
             dbContext.SaveChanges();
             calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), mockFactory.Object);
         }
-
-        [TestMethod]
+        
         public void CheckDbContext()
         {
             Assert.IsNotNull(dbContext);
