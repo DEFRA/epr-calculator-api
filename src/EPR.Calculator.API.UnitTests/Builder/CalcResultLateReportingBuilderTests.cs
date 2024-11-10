@@ -29,13 +29,14 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
             dbContext.DefaultParameterTemplateMasterList.RemoveRange(dbContext.DefaultParameterTemplateMasterList);
             dbContext.DefaultParameterSettingDetail.RemoveRange(dbContext.DefaultParameterSettingDetail);
+            dbContext.CalculatorRuns.RemoveRange(dbContext.CalculatorRuns);
             dbContext.SaveChanges();
 
             dbContext.DefaultParameterTemplateMasterList.AddRange(new List<DefaultParameterTemplateMaster>
             {
                 new DefaultParameterTemplateMaster
                 {
-                    ParameterUniqueReferenceId = "LRET-AL1",
+                    ParameterUniqueReferenceId = "LRET-AL",
                     ParameterCategory = "Aluminium",
                     ParameterType = "Late Reporting Tonnage",
                     ValidRangeFrom = 0.000M,
@@ -43,7 +44,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 },
                 new DefaultParameterTemplateMaster
                 {
-                    ParameterUniqueReferenceId = "LRET-FC1",
+                    ParameterUniqueReferenceId = "LRET-FC",
                     ParameterCategory = "Fibre composite",
                     ParameterType = "Late Reporting Tonnage",
                     ValidRangeFrom = 0.000M,
@@ -55,14 +56,14 @@ namespace EPR.Calculator.API.UnitTests.Builder
             {
                 new DefaultParameterSettingDetail
                 {
-                    DefaultParameterSettingMasterId = 111,
-                    ParameterUniqueReferenceId = "LRET-AL1",
+                    DefaultParameterSettingMasterId = 1,
+                    ParameterUniqueReferenceId = "LRET-AL",
                     ParameterValue = 100.000M
                 },
                 new DefaultParameterSettingDetail
                 {
-                    DefaultParameterSettingMasterId = 111,
-                    ParameterUniqueReferenceId = "LRET-FC1",
+                    DefaultParameterSettingMasterId = 1,
+                    ParameterUniqueReferenceId = "LRET-FC",
                     ParameterValue = 200.000M
                 }
             });
@@ -76,7 +77,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
                 CreatedBy = "Test User",
                 LapcapDataMasterId = 2,
-                DefaultParameterSettingMasterId = 111
+                DefaultParameterSettingMasterId = 1
             });
 
             dbContext.SaveChanges();
