@@ -1,10 +1,12 @@
 ﻿using EPR.Calculator.API.Builder;
+using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Mvc;
@@ -36,12 +38,14 @@ namespace EPR.Calculator.API.UnitTests
             mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
             mockExporter = new Mock<ICalcResultsExporter<CalcResult>>();
             wrapper = new Mock<IOrgAndPomWrapper>().Object;
+            var transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
             controller = new CalculatorInternalController(
                dbContext,
                new RpdStatusDataValidator(wrapper),
                wrapper,
                mockCalcResultBuilder.Object,
-               mockExporter.Object
+               mockExporter.Object,
+               transposePomAndOrgDataService.Object
             );
 
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();
