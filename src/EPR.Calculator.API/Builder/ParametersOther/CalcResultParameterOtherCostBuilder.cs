@@ -7,6 +7,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
     public class CalcResultParameterOtherCostBuilder : ICalcResultParameterOtherCostBuilder
     {
         private const string SchemeAdminOperatingCost = "Scheme administrator operating costs";
+        private const string LaPrepCharge = "Local authority data preparation costs";
         private readonly ApplicationDBContext context;
         public CalcResultParameterOtherCostBuilder(ApplicationDBContext context) 
         {
@@ -31,15 +32,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
 
             var other = new CalcResultParameterOtherCost();
 
-            other.SaOperatingCost = GetOtherSaOperatingCost(schemeAdminCosts);
-
-            return other;
-        }
-
-        private static IEnumerable<CalcResultParameterOtherCostDetail> GetOtherSaOperatingCost(IEnumerable<DefaultParamResultsClass> schemeAdminCosts)
-        {
-            var details = new List<CalcResultParameterOtherCostDetail>();
-
+            var saDetails = new List<CalcResultParameterOtherCostDetail>();
             var header = new CalcResultParameterOtherCostDetail
             {
                 England = "England",
@@ -47,20 +40,32 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 Scotland = "Scotland",
                 NorthernIreland = "Northern Ireland"
             };
-            details.Add(header);
+            saDetails.Add(header);
 
-            var saOperatingCost = new CalcResultParameterOtherCostDetail
+            saDetails.Add(GetLaPrepCharge("3 SA Operating Costs", 2, schemeAdminCosts));
+            other.SaOperatingCost = saDetails;
+
+            var lapPrepCharges = results.Where(x => x.ParameterType == LaPrepCharge);
+            var laDataPrepCharges = new List<CalcResultParameterOtherCostDetail>();
+            laDataPrepCharges.Add(GetLaPrepCharge("4 LA Data Prep Charge", 1, lapPrepCharges));
+            other.Details = laDataPrepCharges;
+
+            return other;
+        }
+
+        private static CalcResultParameterOtherCostDetail GetLaPrepCharge(string name, int orderId, IEnumerable<DefaultParamResultsClass> lapPrepCharges)
+        {
+            var otherCostDetail = new CalcResultParameterOtherCostDetail
             {
-                Name = "3 SA Operating Costs",
-                EnglandValue = schemeAdminCosts.Single(cost => cost.ParameterCategory == "England").ParameterValue,
-                NorthernIrelandValue = schemeAdminCosts.Single(cost => cost.ParameterCategory == "Northern Ireland").ParameterValue,
-                ScotlandValue = schemeAdminCosts.Single(cost => cost.ParameterCategory == "Scotland").ParameterValue,
-                WalesValue = schemeAdminCosts.Single(cost => cost.ParameterCategory == "Wales").ParameterValue,
-                OrderId = 2
+                Name = name,
+                EnglandValue = lapPrepCharges.Single(cost => cost.ParameterCategory == "England").ParameterValue,
+                NorthernIrelandValue = lapPrepCharges.Single(cost => cost.ParameterCategory == "Northern Ireland").ParameterValue,
+                ScotlandValue = lapPrepCharges.Single(cost => cost.ParameterCategory == "Scotland").ParameterValue,
+                WalesValue = lapPrepCharges.Single(cost => cost.ParameterCategory == "Wales").ParameterValue,
+                OrderId = orderId
             };
-            saOperatingCost.TotalValue = saOperatingCost.EnglandValue + saOperatingCost.ScotlandValue + saOperatingCost.WalesValue + saOperatingCost.NorthernIrelandValue;
-            details.Add(saOperatingCost);
-            return details;
+            otherCostDetail.TotalValue = otherCostDetail.EnglandValue + otherCostDetail.ScotlandValue + otherCostDetail.WalesValue + otherCostDetail.NorthernIrelandValue;
+            return otherCostDetail;
         }
     }
 }
