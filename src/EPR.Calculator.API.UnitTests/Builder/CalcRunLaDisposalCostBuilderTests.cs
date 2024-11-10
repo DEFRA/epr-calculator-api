@@ -100,11 +100,6 @@ namespace EPR.Calculator.API.UnitTests.Builder
                             ScotlandDisposalCost = "£300.00",
                             NorthernIrelandDisposalCost = "£400.00",
                             TotalDisposalCost = "£1000.00",
-                            EnglandCost = 1,
-                            WalesCost = 2,
-                            ScotlandCost = 3,
-                            NorthernIrelandCost = 4,
-                            TotalCost = 10,
                             OrderId = 2
                         } }
                 }

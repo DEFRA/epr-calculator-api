@@ -37,7 +37,7 @@ builder.Services.AddScoped<ICalcResultLapcapDataBuilder, CalcResultLapcapDataBui
 builder.Services.AddScoped<ICalcResultLateReportingBuilder, CalcResultLateReportingBuilder>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<ITransposePomAndOrgDataService, TransposePomAndOrgDataService>();
-builder.Services.AddScoped<ICalcRunLaDisposalCostBuilder, CalcRunLaDisposalCostBuillder>();
+builder.Services.AddScoped<ICalcRunLaDisposalCostBuilder, CalcRunLaDisposalCostBuilder>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>

@@ -12,11 +12,12 @@ namespace EPR.Calculator.API.Builder
         private readonly ICalcResultDetailBuilder calcResultDetailBuilder;
         private readonly ICalcResultLapcapDataBuilder lapcapBuilder;
         private readonly ICalcResultLateReportingBuilder lateReportingBuilder;
-
-        public CalcResultBuilder(ICalcResultDetailBuilder calcResultDetailBuilder, ICalcResultLapcapDataBuilder lapcapBuilder,
-            ICalcResultLateReportingBuilder lateReportingBuilder) 
         private readonly ICalcRunLaDisposalCostBuilder laDisposalCostBuilder;
-        public CalcResultBuilder(ICalcResultDetailBuilder calcResultDetailBuilder, ICalcResultLapcapDataBuilder lapcapBuilder, ICalcRunLaDisposalCostBuilder calcRunLaDisposalCostBuilder) 
+
+        public CalcResultBuilder(ICalcResultDetailBuilder calcResultDetailBuilder,
+            ICalcResultLapcapDataBuilder lapcapBuilder,
+            ICalcResultLateReportingBuilder lateReportingBuilder,
+            ICalcRunLaDisposalCostBuilder calcRunLaDisposalCostBuilder) 
         {
             this.calcResultDetailBuilder = calcResultDetailBuilder;
             this.lapcapBuilder = lapcapBuilder;

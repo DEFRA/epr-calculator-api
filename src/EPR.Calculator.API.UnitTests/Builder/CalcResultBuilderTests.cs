@@ -22,15 +22,14 @@ namespace EPR.Calculator.API.UnitTests.Builder
             this.calcResultDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             this.lapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
             this.mockLateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
-            this.testClass = new CalcResultBuilder(calcResultDetailBuilder.Object, lapcapBuilder.Object, mockLateReportingBuilder.Object);
-            this.testClass = new CalcResultBuilder(calcResultDetailBuilder.Object, lapcapBuilder.Object, runLaDisposalCostBuilder.Object);
+            this.testClass = new CalcResultBuilder(calcResultDetailBuilder.Object, lapcapBuilder.Object, mockLateReportingBuilder.Object, runLaDisposalCostBuilder.Object);
         }
 
         [TestMethod]
         public void CanConstruct()
         {
             // Act
-            var instance = new CalcResultBuilder(calcResultDetailBuilder.Object, lapcapBuilder.Object, mockLateReportingBuilder.Object);
+            var instance = new CalcResultBuilder(calcResultDetailBuilder.Object, lapcapBuilder.Object, mockLateReportingBuilder.Object, runLaDisposalCostBuilder.Object);
 
             // Assert
             Assert.IsNotNull(instance);
