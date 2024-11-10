@@ -54,33 +54,33 @@ namespace EPR.Calculator.API.Controllers
                         return new ObjectResult(calculatorRunNameExistsMessage) { StatusCode = StatusCodes.Status400BadRequest };
                     }
 
-                    // Read configuration items: service bus connection string and queue name 
-                    var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
-                    var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
+                    //// Read configuration items: service bus connection string and queue name 
+                    //var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
+                    //var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
 
-                    if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
-                    {
-                        return new ObjectResult("Configuration item not found: ServiceBus__ConnectionString") { StatusCode = StatusCodes.Status500InternalServerError };
-                    }
+                    //if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
+                    //{
+                    //    return new ObjectResult("Configuration item not found: ServiceBus__ConnectionString") { StatusCode = StatusCodes.Status500InternalServerError };
+                    //}
 
-                    if (string.IsNullOrWhiteSpace(serviceBusQueueName))
-                    {
-                        return new ObjectResult("Configuration item not found: ServiceBus__QueueName") { StatusCode = StatusCodes.Status500InternalServerError };
-                    }
+                    //if (string.IsNullOrWhiteSpace(serviceBusQueueName))
+                    //{
+                    //    return new ObjectResult("Configuration item not found: ServiceBus__QueueName") { StatusCode = StatusCodes.Status500InternalServerError };
+                    //}
 
-                    // Read configuration items: message retry count and period
-                    var messageRetryCountFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value, out int messageRetryCount);
-                    var messageRetryPeriodFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value, out int messageRetryPeriod);
+                    //// Read configuration items: message retry count and period
+                    //var messageRetryCountFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value, out int messageRetryCount);
+                    //var messageRetryPeriodFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value, out int messageRetryPeriod);
 
-                    if (!messageRetryCountFound)
-                    {
-                        return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryCount") { StatusCode = StatusCodes.Status500InternalServerError };
-                    }
+                    //if (!messageRetryCountFound)
+                    //{
+                    //    return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryCount") { StatusCode = StatusCodes.Status500InternalServerError };
+                    //}
 
-                    if (!messageRetryPeriodFound)
-                    {
-                        return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryPeriod") { StatusCode = StatusCodes.Status500InternalServerError };
-                    }
+                    //if (!messageRetryPeriodFound)
+                    //{
+                    //    return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryPeriod") { StatusCode = StatusCodes.Status500InternalServerError };
+                    //}
 
                     // Get active default parameter settings master id
                     var activeDefaultParameterSettingsMasterId = this.context.DefaultParameterSettings
@@ -114,12 +114,12 @@ namespace EPR.Calculator.API.Controllers
                         CreatedBy = User?.Identity?.Name ?? request.CreatedBy
                     };
 
-                    // Send message to service bus
-                    var client = _serviceBusClientFactory.CreateClient("calculator");
-                    ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
-                    var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
-                    ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
-                    await serviceBusSender.SendMessageAsync(serviceBusMessage);
+                    //// Send message to service bus
+                    //var client = _serviceBusClientFactory.CreateClient("calculator");
+                    //ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
+                    //var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
+                    //ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
+                    //await serviceBusSender.SendMessageAsync(serviceBusMessage);
 
                     // All good, commit transaction
                     transaction.Commit();
