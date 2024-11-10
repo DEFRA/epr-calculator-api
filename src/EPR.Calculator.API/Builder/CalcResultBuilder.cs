@@ -23,7 +23,7 @@ namespace EPR.Calculator.API.Builder
             // calcResult.CalcResultDetail = this.calcResultDetailBuilder.Construct(resultsRequestDto);
             // calcResult.CalcResultLapcapData = this.lapcapBuilder.Construct(resultsRequestDto);
 
-            var result = this.summaryBuilder.Construct(resultsRequestDto, calcResult);
+            calcResult.CalcResultSummary = this.summaryBuilder.Construct(resultsRequestDto, calcResult);
 
             return calcResult;
         }
