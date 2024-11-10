@@ -101,9 +101,7 @@ namespace EPR.Calculator.API.Builder
                 foreach (var material in materials)
                 {
                     var hhPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material);
-
                     decimal BadDebtProvision = 0.00M;
-                    decimal Apportionment = 0.00M;
                     decimal PriceperTonne = GetPriceperTonne_FromParamOthers(producer, material); // by Tim
                     decimal ProducerTotalCostWithoutBadDebtProvision = GetProducerTotalCostWithoutBadDebtProvision(hhPackagingWasteTonnage, PriceperTonne);
                     decimal BadDebtProvisionCost = GetBadDebtProvision1(ProducerTotalCostWithoutBadDebtProvision, BadDebtProvision);
@@ -126,16 +124,15 @@ namespace EPR.Calculator.API.Builder
 
                     feesCommsCostSummary.Add(new CalcResultFeesCommsCostSummary
                     {
-                        HouseholdPackagingWasteTonnage = hhPackagingWasteTonnage, // parametr D4 John doing
+                        HouseholdPackagingWasteTonnage = hhPackagingWasteTonnage,
                         PriceperTonne = PriceperTonne,
-                        ProducerTotalCostWithoutBadDebtProvision = ProducerTotalCostWithoutBadDebtProvision, //Done
-                        BadDebtProvision = BadDebtProvisionCost,  //Done
-                        ProducerTotalCostwithBadDebtProvision = ProducerTotalCostwithBadDebtProvision,//Done
-
-                        EnglandWithBadDebtProvision = GetEnglandWithBadDebtProvision1(ProducerTotalCostwithBadDebtProvision, Apportionment), //Done
-                        WalesWithBadDebtProvision = GetWalesWithBadDebtProvision1(ProducerTotalCostwithBadDebtProvision, Apportionment), //Done
-                        ScotlandWithBadDebtProvision = GetScotlandWithBadDebtProvision1(ProducerTotalCostwithBadDebtProvision, Apportionment), //Done
-                        NorthernIrelandWithBadDebtProvision = GetNorthernIrelandWithBadDebtProvision1(ProducerTotalCostwithBadDebtProvision, Apportionment) //Done
+                        ProducerTotalCostWithoutBadDebtProvision = ProducerTotalCostWithoutBadDebtProvision,
+                        BadDebtProvision = BadDebtProvisionCost,
+                        ProducerTotalCostwithBadDebtProvision = ProducerTotalCostwithBadDebtProvision,
+                        EnglandWithBadDebtProvision = GetEnglandWithBadDebtProvisionFor2aComms(ProducerTotalCostwithBadDebtProvision, calcResult),
+                        WalesWithBadDebtProvision = GetWalesWithBadDebtProvisionFor2aComms(ProducerTotalCostwithBadDebtProvision, calcResult),
+                        ScotlandWithBadDebtProvision = GetScotlandWithBadDebtProvisionFor2aComms(ProducerTotalCostwithBadDebtProvision, calcResult),
+                        NorthernIrelandWithBadDebtProvision = GetNorthernIrelandWithBadDebtProvisionFor2aComms(ProducerTotalCostwithBadDebtProvision, calcResult)
                     });
 
                     materialCostSummary.Add(material, costSummary);
@@ -245,52 +242,47 @@ namespace EPR.Calculator.API.Builder
             throw new NotImplementedException(); // Tim PR
         }
 
-        private decimal GetProducerTotalCostWithoutBadDebtProvision(decimal HHPackagingWasteTonnage, decimal PriceperTonne)
+        private static decimal GetProducerTotalCostWithoutBadDebtProvision(decimal HHPackagingWasteTonnage, decimal PriceperTonne)
         {
             return HHPackagingWasteTonnage * PriceperTonne;
         }
 
-        private decimal GetBadDebtProvision1(decimal ProducerTotalCostWithoutBadDebtProvision, decimal BadDebtProvision)
+        private static decimal GetBadDebtProvision1(decimal ProducerTotalCostWithoutBadDebtProvision, decimal BadDebtProvision)
         {
             //Formula:  F5*'Params - Other'!$B$10
             return ProducerTotalCostWithoutBadDebtProvision * BadDebtProvision;
 
         }
 
-        private decimal GetProducerTotalCostwithBadDebtProvision(decimal ProducerTotalCostWithoutBadDebtProvision, decimal BadDebtProvision)
+        private static decimal GetProducerTotalCostwithBadDebtProvision(decimal ProducerTotalCostWithoutBadDebtProvision, decimal BadDebtProvision)
         {
             // Formula: F5*(1+'Params - Other'!$B$10) --uday (Build the calculator - Params - Other - 3)
             return ProducerTotalCostWithoutBadDebtProvision * (1 + BadDebtProvision);
         }
 
-        private decimal GetEnglandWithBadDebtProvision1(decimal ProducerTotalCostwithBadDebtProvision, decimal Apportionment)
+        private static decimal GetEnglandWithBadDebtProvisionFor2aComms(decimal ProducerTotalCostwithBadDebtProvision, CalcResult calcResult)
         {
             // Formula: H5*'1 + 4 Apportionment %s'!$C$6
-            // Rekha ( Build the calculator - 1 + 4 Apportionment %s - 4 )
-            return ProducerTotalCostwithBadDebtProvision * (1 + Apportionment);
+            return ProducerTotalCostwithBadDebtProvision * (1 + Convert.ToDecimal(calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.First().EnglandDisposalTotal));
         }
 
-        private decimal GetWalesWithBadDebtProvision1(decimal ProducerTotalCostwithBadDebtProvision, decimal Apportionment)
+        private static decimal GetWalesWithBadDebtProvisionFor2aComms(decimal ProducerTotalCostwithBadDebtProvision, CalcResult calcResult)
         {
             // Formula: H5*'1 + 4 Apportionment %s'!$D$6
-            // Rekha ( Build the calculator - 1 + 4 Apportionment %s - 4 )
-            return ProducerTotalCostwithBadDebtProvision * (1 + Apportionment);
-
+            return ProducerTotalCostwithBadDebtProvision * (1 + Convert.ToDecimal(calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.First().WalesDisposalTotal));
         }
 
-        private decimal GetScotlandWithBadDebtProvision1(decimal ProducerTotalCostwithBadDebtProvision, decimal Apportionment)
+        private static decimal GetScotlandWithBadDebtProvisionFor2aComms(decimal ProducerTotalCostwithBadDebtProvision, CalcResult calcResult)
         {
             // Formula: H5*'1 + 4 Apportionment %s'!$E$6
-            // Rekha ( Build the calculator - 1 + 4 Apportionment %s - 4 )
-            return ProducerTotalCostwithBadDebtProvision * (1 + Apportionment);
+            return ProducerTotalCostwithBadDebtProvision * (1 + Convert.ToDecimal(calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.First().ScotlandDisposalTotal));
 
         }
 
-        private decimal GetNorthernIrelandWithBadDebtProvision1(decimal ProducerTotalCostwithBadDebtProvision, decimal Apportionment)
+        private static decimal GetNorthernIrelandWithBadDebtProvisionFor2aComms(decimal ProducerTotalCostwithBadDebtProvision, CalcResult calcResult)
         {
             // Formula: H5*'1 + 4 Apportionment %s'!$F$6
-            // Rekha ( Build the calculator - 1 + 4 Apportionment %s - 4 )
-            return ProducerTotalCostwithBadDebtProvision * (1 + Apportionment);
+            return ProducerTotalCostwithBadDebtProvision * (1 + Convert.ToDecimal(calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.First().NorthernIrelandDisposalTotal));
 
         }
     }
