@@ -40,12 +40,12 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
 
         [TestMethod]
-        public void ConstructTest_For_Aluminuim()
+        public void ConstructTest_For_Aluminium()
         {
             const string aluminium = "Aluminium";
             var run = new CalculatorRun
             {
-                Id = 1,
+                Id = 2,
                 CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 Name = "Test Run",
                 Financial_Year = "2024-25",
@@ -54,19 +54,16 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 LapcapDataMasterId = 2
             };
 
-            var material = new Material()
-            { Code = "AL", Name = "Aluminium", Description = "Aluminium" };
+            var material = new Material() { Code = "AL", Name = "Aluminium", Description = "Aluminium" };
 
-            var producer = new ProducerDetail { CalculatorRunId = 1, ProducerId = 1, ProducerName = "Producer Name", CalculatorRun = run };
+            var producer = new ProducerDetail { CalculatorRunId = 2, ProducerId = 1, ProducerName = "Producer Name", CalculatorRun = run };
 
-            dbContext.CostType.Add(new CostType { Code = "1", Name = "Fee for LA Disposal Costs", Description = "Fee for LA Disposal Costs" });
-
-            dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial { Material = material, PackagingTonnage = 1000.00m, PackagingType = "CW", MaterialId = 1, ProducerDetail = producer });         
+            dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial { Material = material, PackagingTonnage = 1000.00m, PackagingType = "CW", MaterialId = 2, ProducerDetail = producer });         
             
 
             dbContext.SaveChanges();
 
-            var resultsDto = new CalcResultsRequestDto { RunId = 1 };
+            var resultsDto = new CalcResultsRequestDto { RunId = 2 };
             var calcResult = new CalcResult
             {
                 CalcResultDetail = new CalcResultDetail
