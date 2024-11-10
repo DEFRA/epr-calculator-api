@@ -64,9 +64,6 @@ namespace EPR.Calculator.API.UnitTests.Builder
             dbContext.ProducerDetail.Add(producer);
 
             dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial { Material = material, PackagingTonnage = 1000.00m, PackagingType = "CW", MaterialId = 1, ProducerDetail = producer });
-
-           // dbContext.LapcapDataMaster.Add(lapcapDataMaster);
-           
             dbContext.SaveChanges();
 
             dbContext.Material.Add(new Material { Name = aluminium, Code = "AL", Description = "Some" });
@@ -102,7 +99,20 @@ namespace EPR.Calculator.API.UnitTests.Builder
                             TotalDisposalCost = "£1000.00",
                             OrderId = 2
                         } }
-                }
+                },
+                 CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage { 
+                     Name = "Late Reporting Tonnage",                     
+                     CalcResultLateReportingTonnageDetails = new[]
+                     {
+                         new CalcResultLateReportingTonnageDetail()
+                         {
+                              Name = "Aluminium",
+                               TotalLateReportingTonnage = 8000.00m
+                         }
+                     }               
+                 
+                 }
+
             };
 
 

@@ -21,6 +21,7 @@ namespace EPR.Calculator.API.Builder
 
         private readonly ApplicationDBContext context;
         private List<ProducerData> producerData;
+
         public CalcRunLaDisposalCostBuilder(ApplicationDBContext context)
         {
             this.context = context;
@@ -68,7 +69,7 @@ namespace EPR.Calculator.API.Builder
 
             foreach (var details in laDisposalCostDetails)
             {
-                details.LateReportingTonnage = GetLateReportingTonnageDataByMaterial(details.Name);
+                details.LateReportingTonnage = GetLateReportingTonnageDataByMaterial(details.Name,calcResult?.CalcResultLateReportingTonnageData?.CalcResultLateReportingTonnageDetails?.ToList());
 
                 details.ProducerReportedHouseholdTonnagePlusLateReportingTonnage = GetProducerReportedHouseholdTonnagePlusLateReportingTonnage(details);
                 if (details.Name == CommonConstants.Total) continue;
@@ -103,10 +104,8 @@ namespace EPR.Calculator.API.Builder
             return producerData.Where(t => t.Material== material).Sum(t => t.Tonnage).ToString();
         }
 
-        private string GetLateReportingTonnageDataByMaterial(string material)
+        private string GetLateReportingTonnageDataByMaterial(string material, List<CalcResultLateReportingTonnageDetail> details)
         {
-            var details = GetLateReportingTonnage();
-
             return details.Where(t => t.Name == material).Sum(t => t.TotalLateReportingTonnage).ToString();
         }
 
@@ -115,26 +114,6 @@ namespace EPR.Calculator.API.Builder
             var value = GetDecimalValue(detail.LateReportingTonnage) + GetDecimalValue(detail.ProducerReportedHouseholdPackagingWasteTonnage);
             return value.ToString();
         }
-
-
-        private List<CalcResultLateReportingTonnageDetail> GetLateReportingTonnage()
-        {
-            
-           var details = new List<CalcResultLateReportingTonnageDetail>
-           {
-               new() { Name = "Aluminium", TotalLateReportingTonnage = 8000.00M },
-               new() { Name = "Fibre composite", TotalLateReportingTonnage = 7000.00M },
-               new() { Name = "Glass", TotalLateReportingTonnage = 6000.00M },
-               new() { Name = "Paper or card", TotalLateReportingTonnage = 5000.00M },
-               new() { Name = "Plastic", TotalLateReportingTonnage = 4000.00M },
-               new() { Name = "Steel", TotalLateReportingTonnage = 3000.00M },
-               new() { Name = "Wood", TotalLateReportingTonnage = 2000.00M },
-               new() { Name = "Wood", TotalLateReportingTonnage = 2000.00M },
-               new() { Name = "Other materials", TotalLateReportingTonnage = 1000.00M }
-           };
-            return details;
-        }
-
 
         private string CalculateDisposalCostPricePerTonne(CalcResultLaDisposalCostDataDetail detail)
         {
