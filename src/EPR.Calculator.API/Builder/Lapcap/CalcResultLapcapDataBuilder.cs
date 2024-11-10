@@ -1,10 +1,8 @@
 ﻿using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
-using Microsoft.Azure.Amqp.Framing;
-using Microsoft.Extensions.Hosting;
 using System.Globalization;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.Builder.Lapcap
 {
@@ -22,6 +20,9 @@ namespace EPR.Calculator.API.Builder.Lapcap
 
         public CalcResultLapcapData Construct(CalcResultsRequestDto resultsRequestDto)
         {
+            var culture = CultureInfo.CreateSpecificCulture("en-GB");
+            culture.NumberFormat.CurrencySymbol = "£";
+            culture.NumberFormat.CurrencyPositivePattern = 0;
             var orderId = 1;
             var data = new List<CalcResultLapcapDataDetails>();
             data.Add(new CalcResultLapcapDataDetails
@@ -49,6 +50,10 @@ namespace EPR.Calculator.API.Builder.Lapcap
 
             var materials = context.Material.Select(x => x.Name).ToList();
 
+            var countries = context.Country.ToList();
+
+            var costTypeId = context.CostType.Single(x => x.Name == "Fee for LA Disposal Costs").Id;
+
             foreach (var material in materials)
             {
                 var detail = new CalcResultLapcapDataDetails
@@ -62,11 +67,11 @@ namespace EPR.Calculator.API.Builder.Lapcap
                     TotalCost = GetTotalMaterialDisposalCost(material, results)
                 };
 
-                detail.EnglandDisposalCost = detail.EnglandCost.ToString("C");
-                detail.NorthernIrelandDisposalCost = detail.NorthernIrelandCost.ToString("C");
-                detail.ScotlandDisposalCost = detail.ScotlandCost.ToString("C");
-                detail.WalesDisposalCost = detail.WalesCost.ToString("C");
-                detail.TotalDisposalCost = detail.TotalCost.ToString("C");
+                detail.EnglandDisposalCost = detail.EnglandCost.ToString("C", culture);
+                detail.NorthernIrelandDisposalCost = detail.NorthernIrelandCost.ToString("C", culture);
+                detail.ScotlandDisposalCost = detail.ScotlandCost.ToString("C", culture);
+                detail.WalesDisposalCost = detail.WalesCost.ToString("C", culture);
+                detail.TotalDisposalCost = detail.TotalCost.ToString("C", culture);
 
                 data.Add(detail);
             }
@@ -81,15 +86,15 @@ namespace EPR.Calculator.API.Builder.Lapcap
                 TotalCost = data.Sum(x => x.TotalCost),
                 OrderId = ++orderId
             };
-            totalDetail.EnglandDisposalCost = totalDetail.EnglandCost.ToString("C");
-            totalDetail.NorthernIrelandDisposalCost = totalDetail.NorthernIrelandCost.ToString("C");
-            totalDetail.ScotlandDisposalCost = totalDetail.ScotlandCost.ToString("C");
-            totalDetail.WalesDisposalCost = totalDetail.WalesCost.ToString("C");
-            totalDetail.TotalDisposalCost = totalDetail.TotalCost.ToString("C");
+            totalDetail.EnglandDisposalCost = totalDetail.EnglandCost.ToString("C", culture);
+            totalDetail.NorthernIrelandDisposalCost = totalDetail.NorthernIrelandCost.ToString("C", culture);
+            totalDetail.ScotlandDisposalCost = totalDetail.ScotlandCost.ToString("C", culture);
+            totalDetail.WalesDisposalCost = totalDetail.WalesCost.ToString("C", culture);
+            totalDetail.TotalDisposalCost = totalDetail.TotalCost.ToString("C", culture);
             data.Add(totalDetail);
 
 
-            var countryAppPercent = new CalcResultLapcapDataDetails
+            var countryApportionment = new CalcResultLapcapDataDetails
             {
                 Name = CountryApportionment,
                 EnglandCost = CalculateApportionment(totalDetail.EnglandCost, totalDetail.TotalCost),
@@ -99,13 +104,46 @@ namespace EPR.Calculator.API.Builder.Lapcap
                 TotalCost = HundredPercent,
                 OrderId = ++orderId
             };
-            countryAppPercent.EnglandDisposalCost = $"{countryAppPercent.EnglandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
-            countryAppPercent.NorthernIrelandDisposalCost = $"{countryAppPercent.NorthernIrelandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
-            countryAppPercent.ScotlandDisposalCost = $"{countryAppPercent.ScotlandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
-            countryAppPercent.WalesDisposalCost = $"{countryAppPercent.WalesCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
-            countryAppPercent.TotalDisposalCost = $"{countryAppPercent.TotalCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
-            data.Add(countryAppPercent);
+            countryApportionment.EnglandDisposalCost = $"{countryApportionment.EnglandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
+            countryApportionment.NorthernIrelandDisposalCost = $"{countryApportionment.NorthernIrelandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
+            countryApportionment.ScotlandDisposalCost = $"{countryApportionment.ScotlandCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
+            countryApportionment.WalesDisposalCost = $"{countryApportionment.WalesCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
+            countryApportionment.TotalDisposalCost = $"{countryApportionment.TotalCost.ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%";
+            data.Add(countryApportionment);
 
+            context.CountryApportionment.Add(new CountryApportionment
+            {
+                CalculatorRunId = resultsRequestDto.RunId,
+                CountryId = countries.Single(x => x.Name == "England").Id,
+                CostTypeId = costTypeId,
+                Apportionment = countryApportionment.EnglandCost
+            });
+
+            context.CountryApportionment.Add(new CountryApportionment
+            {
+                CalculatorRunId = resultsRequestDto.RunId,
+                CountryId = countries.Single(x => x.Name == "Wales").Id,
+                CostTypeId = costTypeId,
+                Apportionment = countryApportionment.WalesCost
+            });
+
+            context.CountryApportionment.Add(new CountryApportionment
+            {
+                CalculatorRunId = resultsRequestDto.RunId,
+                CountryId = countries.Single(x => x.Name == "Northern Ireland").Id,
+                CostTypeId = costTypeId,
+                Apportionment = countryApportionment.NorthernIrelandCost
+            });
+
+            context.CountryApportionment.Add(new CountryApportionment
+            {
+                CalculatorRunId = resultsRequestDto.RunId,
+                CountryId = countries.Single(x => x.Name == "Scotland").Id,
+                CostTypeId = costTypeId,
+                Apportionment = countryApportionment.ScotlandCost
+            });
+
+            context.SaveChanges();
 
             return new CalcResultLapcapData { Name = LapcapHeader, CalcResultLapcapDataDetails = data };
         }

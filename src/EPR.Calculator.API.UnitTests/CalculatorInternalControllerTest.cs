@@ -6,6 +6,7 @@ using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Tests.Controllers;
+using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Mvc;
@@ -45,7 +46,7 @@ namespace EPR.Calculator.API.UnitTests
                 LapcapDataMasterId = 1,
                 CalculatorRunOrganisationDataMasterId = 1,
             });
-            
+
             this.dbContext?.SaveChanges();
 
 
@@ -78,7 +79,7 @@ namespace EPR.Calculator.API.UnitTests
                 Id = 0,
                 SubmissionPeriod = "some-period",
                 CalculatorRunPomDataMasterId = pomMaster.Id,
-                SubmissionPeriodDesc= "some-period-desc",
+                SubmissionPeriodDesc = "some-period-desc",
             };
 
             this.dbContext?.CalculatorRunPomDataDetails.Add(pomDataDetail);
@@ -107,12 +108,12 @@ namespace EPR.Calculator.API.UnitTests
         public void UpdateRpdStatus_With_RunId_With_Incorrect_Classification()
         {
             var calcRun = this.dbContext?.CalculatorRuns.Single(x => x.Id == 1);
-            if (calcRun!=null)
+            if (calcRun != null)
             {
                 calcRun.CalculatorRunClassificationId = 3;
                 this.dbContext?.CalculatorRuns.Update(calcRun);
             }
-            
+
             var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 1, UpdatedBy = "User1" };
             var result = this.calculatorInternalController?.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
@@ -219,6 +220,57 @@ namespace EPR.Calculator.API.UnitTests
             var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(201, result.StatusCode);
+        }
+        
+        [TestMethod]
+        public void FinancialYear_ShouldBeEmpty_WhenCalcRunIsNull()
+        {
+            CalculatorRun? calcRun = null;
+
+            string financialYear = calcRun?.Financial_Year ?? string.Empty;
+
+            Assert.AreEqual(string.Empty, financialYear);
+        }
+
+        [TestMethod]
+        public void FinancialYear_ShouldReturnValue_WhenCalcRunIsNotNull()
+        {
+            CalculatorRun calcRun = new()
+            {
+                Financial_Year = "2024-25"
+            };
+
+            string fy = calcRun?.Financial_Year ?? string.Empty;
+
+            Assert.AreEqual("2024-25", fy);
+        }
+
+        [TestMethod]
+        public void GetCalendarYear_FromValidFinancialYear()
+        {
+            string financialYear = "2024-25";
+
+            string result = Util.GetCalendarYear(financialYear);
+
+            Assert.AreEqual("2023", result);
+        }
+
+        [TestMethod]
+        public void GetCalendarYear_InvalidFinancialYear_ThrowsException()
+        {
+            string financialYear = "InvalidYear";
+
+            var exception = Assert.ThrowsException<FormatException>(() => Util.GetCalendarYear(financialYear));
+            Assert.AreEqual("Financial year format is invalid. Expected format is 'YYYY-YY'.", exception.Message);
+        }
+
+        [TestMethod]
+        public void GetCalendarYear_EmptyFinancialYear_ThrowsException()
+        {
+            string financialYear = ""; 
+            
+            var exception = Assert.ThrowsException<ArgumentException>(() => Util.GetCalendarYear(financialYear));
+            Assert.AreEqual("Financial year cannot be null or empty (Parameter 'financialYear')", exception.Message);
         }
     }
 }
