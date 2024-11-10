@@ -34,19 +34,20 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                                ParameterType = defaultTemplate.ParameterType,
                            }).ToList();
 
-            var schemeAdminCosts = results.Where(x => x.ParameterCategory == SchemeAdminOperatingCost);
+            var schemeAdminCosts = results.Where(x => x.ParameterType == SchemeAdminOperatingCost);
 
             var other = new CalcResultParameterOtherCost();
+            other.Name = "Parameters - Other";
 
             var saDetails = new List<CalcResultParameterOtherCostDetail>();
-            var header = new CalcResultParameterOtherCostDetail
+            var saOperatinCostHeader = new CalcResultParameterOtherCostDetail
             {
                 England = "England",
                 Wales = "Wales",
                 Scotland = "Scotland",
                 NorthernIreland = "Northern Ireland"
             };
-            saDetails.Add(header);
+            saDetails.Add(saOperatinCostHeader);
 
             saDetails.Add(GetPrepCharge(SaOperatingCostHeader, 2, schemeAdminCosts));
             other.SaOperatingCost = saDetails;
@@ -64,6 +65,68 @@ namespace EPR.Calculator.API.Builder.ParametersOther
 
             var badDebtValue = results.Single(x => x.ParameterType == BadDebtProvision).ParameterValue;
             other.BadDebtProvision = new KeyValuePair<string, string> (BadDebtProvisionHeader, $"{badDebtValue}%");
+
+            var materialityHeader = new CalcResultMateriality();
+            materialityHeader.SevenMateriality = "7 Materiality";
+            materialityHeader.Amount = "Amount £s";
+            materialityHeader.Percentage = "%";
+
+            var materialities = new List<CalcResultMateriality>();
+            materialities.Add(materialityHeader);
+
+            var materialityResults = results.Where(x => x.ParameterType == "Materiality threshold");
+
+            var amountIncrease = materialityResults.Single(x => x.ParameterCategory == "Amount Increase");
+            var amountDecrease = materialityResults.Single(x => x.ParameterCategory == "Amount Decrease");
+            var percentageDecrease = materialityResults.Single(x => x.ParameterCategory == "Percent Decrease");
+            var precentageIncrease = materialityResults.Single(x => x.ParameterCategory == "Percent Increase");
+
+            var materialityIncrease = new CalcResultMateriality
+            {
+                SevenMateriality = "Increase",
+                AmountValue = amountIncrease.ParameterValue,
+                PercentageValue = precentageIncrease.ParameterValue
+            };
+            materialities.Add (materialityIncrease);
+
+            var materialityDecrease = new CalcResultMateriality
+            {
+                SevenMateriality = "Decrease",
+                AmountValue = amountDecrease.ParameterValue,
+                PercentageValue = percentageDecrease.ParameterValue
+            };
+            materialities.Add(materialityDecrease);
+            other.Materiality = materialities;
+
+            materialities.Add(new CalcResultMateriality
+            {
+                SevenMateriality = "8 Tonnage Change",
+                Percentage = "%",
+                Amount = "Amount £s"
+            });
+
+            var tonnageResults = results.Where(x => x.ParameterType == "Tonnage change threshold");
+            var tonIncrease = tonnageResults.Single(x => x.ParameterCategory == "Amount Increase");
+            var tonDecrease = tonnageResults.Single(x => x.ParameterCategory == "Amount Decrease");
+            var tonPercentageDecrease = tonnageResults.Single(x => x.ParameterCategory == "Percent Decrease");
+            var tonPrecentageIncrease = tonnageResults.Single(x => x.ParameterCategory == "Percent Increase");
+
+            var tonnageIncrease = new CalcResultMateriality
+            {
+                SevenMateriality = "Increase",
+                AmountValue = tonIncrease.ParameterValue,
+                PercentageValue = tonDecrease.ParameterValue
+            };
+            materialities.Add(tonnageIncrease);
+
+            var tonnageDecrease = new CalcResultMateriality
+            {
+                SevenMateriality = "Decrease",
+                AmountValue = tonPrecentageIncrease.ParameterValue,
+                PercentageValue = tonPercentageDecrease.ParameterValue
+            };
+            materialities.Add(tonnageIncrease);
+            other.Materiality = materialities;
 
             return other;
         }

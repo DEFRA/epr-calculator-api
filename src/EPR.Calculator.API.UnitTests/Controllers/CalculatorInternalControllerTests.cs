@@ -282,19 +282,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     },
                     BadDebtProvision = new KeyValuePair<string, string>(),
                     Materiality = new[] {
-                        new CalcResultParameterOtherCostDetail5
+                        new CalcResultMateriality
                         {
                             SevenMateriality = "TestValue20436873",
                             Amount = "TestValue1953396941",
                             Percentage = "TestValue1921759094"
                         },
-                        new CalcResultParameterOtherCostDetail5
+                        new CalcResultMateriality
                         {
                             SevenMateriality = "TestValue115520746",
                             Amount = "TestValue1036547761",
                             Percentage = "TestValue466450553"
                         },
-                        new CalcResultParameterOtherCostDetail5
+                        new CalcResultMateriality
                         {
                             SevenMateriality = "TestValue1068863021",
                             Amount = "TestValue119755880",
