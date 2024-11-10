@@ -76,7 +76,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             dbContext.Material.AddRange(GetMaterials());
             dbContext.SaveChanges();
         }
-
+        
         public void CheckDbContext()
         {
             Assert.IsNotNull(dbContext);

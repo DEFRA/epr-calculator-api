@@ -93,7 +93,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                         }
                     }
                 },
-                CalcResultLateReportingTonnageDetail = new CalcResultLateReportingTonnage
+                CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
                 {
                     Name = "TestValue2008053382",
                     CalcResultLateReportingTonnageDetails = new[] {

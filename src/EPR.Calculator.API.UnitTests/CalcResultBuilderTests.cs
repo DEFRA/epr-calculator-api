@@ -1,5 +1,6 @@
 ﻿using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Builder.Lapcap;
+using EPR.Calculator.API.Builder.LateReportingTonnages;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -12,6 +13,7 @@ namespace EPR.Calculator.API.UnitTests
     {
         private Mock<ICalcResultDetailBuilder> mockCalcResultDetailBuilder;
         private Mock<ICalcResultLapcapDataBuilder> mockLapcapBuilder;
+        private Mock<ICalcResultLateReportingBuilder> mockLateReportingBuilder;
         private CalcResultBuilder calcResultBuilder;
         private Mock<ICalcRunLaDisposalCostBuilder> calcRunLaDisposalCostBuilder;
 
@@ -20,6 +22,8 @@ namespace EPR.Calculator.API.UnitTests
         {
             mockCalcResultDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             mockLapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
+            mockLateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
+            calcResultBuilder = new CalcResultBuilder(mockCalcResultDetailBuilder.Object, mockLapcapBuilder.Object, mockLateReportingBuilder.Object);
             calcResultBuilder = new CalcResultBuilder(mockCalcResultDetailBuilder.Object, mockLapcapBuilder.Object, calcRunLaDisposalCostBuilder.Object);
         }
 

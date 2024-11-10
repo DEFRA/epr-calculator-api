@@ -12,20 +12,20 @@ namespace EPR.Calculator.API.Tests.Controllers
         public void Check_TheResult_Parmeter_Are_Equal_IsNotNullOf_ResultSet_WithDefaultSchemeParametersDto_WithCorrectYear()
         {
             var details = new List<DefaultParameterSettingDetail>
-                {
+            {
                 new DefaultParameterSettingDetail
-                    {Id=1, DefaultParameterSettingMasterId = 2, ParameterUniqueReferenceId="BADEBT-P", ParameterValue=30.99m }
-                };
+                    {Id=150, DefaultParameterSettingMasterId = 200, ParameterUniqueReferenceId="BADEBT-P", ParameterValue=30.99m }
+            };
             var detail = new DefaultParameterSettingDetail
             {
-                Id = 1,
-                DefaultParameterSettingMasterId =2,
+                Id = 150,
+                DefaultParameterSettingMasterId = 200,
                 ParameterUniqueReferenceId = "BADEBT-P",
                 ParameterValue = 30.99m,
             };
             var defaultParameterSettingMaster = new DefaultParameterSettingMaster
             {
-                Id = 2,
+                Id = 200,
                 ParameterYear = "2024-25",
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,

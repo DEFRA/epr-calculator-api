@@ -1,5 +1,6 @@
 ﻿using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Builder.Lapcap;
+using EPR.Calculator.API.Builder.LateReportingTonnages;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
@@ -21,6 +22,7 @@ namespace EPR.Calculator.API.UnitTests
         private Mock<ICalcResultsExporter<CalcResult>> mockExporter;
         private Mock<ICalcResultDetailBuilder> mockDetailBuilder;
         private Mock<ICalcResultLapcapDataBuilder> mockLapcapBuilder;
+        private Mock<ICalcResultLateReportingBuilder> mocklateReportingBuilder;
         private Mock<ICalcRunLaDisposalCostBuilder> runLaDisposalCostBuilder;
 
         private Mock<ApplicationDBContext> mockContext;
@@ -49,6 +51,8 @@ namespace EPR.Calculator.API.UnitTests
 
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             mockLapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
+            mocklateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
+            calcResultBuilder = new CalcResultBuilder(mockDetailBuilder.Object, mockLapcapBuilder.Object, mocklateReportingBuilder.Object);
             calcResultBuilder = new CalcResultBuilder(mockDetailBuilder.Object, mockLapcapBuilder.Object, runLaDisposalCostBuilder.Object);
 
             mockContext = new Mock<ApplicationDBContext>();

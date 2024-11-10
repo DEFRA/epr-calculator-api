@@ -1,8 +1,10 @@
 ﻿using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Data.Migrations;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
 using System.Text;
+using System.Threading.Channels;
 
 namespace EPR.Calculator.API.Exporter
 {
@@ -32,6 +34,12 @@ namespace EPR.Calculator.API.Exporter
                 PrepareLapcapData(results.CalcResultLapcapData, csvContent);
             }
             
+
+
+            if (results.CalcResultLateReportingTonnageData != null)
+            {
+                PrepareLateReportingData(results.CalcResultLateReportingTonnageData, csvContent);
+            }
 
             var fileName = GetResultFileName(results.CalcResultDetail.RunId);
             try
@@ -99,6 +107,24 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.ScotlandDisposalCost)}\",");
                 csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.NorthernIrelandDisposalCost)}\",");
                 csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.TotalDisposalCost)}\"");
+                csvContent.AppendLine();
+            }
+        }
+
+        private static void PrepareLateReportingData(CalcResultLateReportingTonnage calcResultLateReportingData, StringBuilder csvContent)
+        {
+            csvContent.AppendLine();
+            csvContent.AppendLine();
+
+            csvContent.AppendLine(calcResultLateReportingData.Name);
+            csvContent.Append($"{calcResultLateReportingData.MaterialHeading},");
+            csvContent.Append(calcResultLateReportingData.TonnageHeading);
+            csvContent.AppendLine();
+
+            foreach (var lateReportingData in calcResultLateReportingData.CalcResultLateReportingTonnageDetails)
+            {
+                csvContent.Append($"{CsvSanitiser.SanitiseData(lateReportingData.Name)},");
+                csvContent.Append(CsvSanitiser.SanitiseData(lateReportingData.TotalLateReportingTonnage));
                 csvContent.AppendLine();
             }
         }
