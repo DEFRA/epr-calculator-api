@@ -61,9 +61,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
             dbContext.CostType.Add(new CostType { Code = "1", Name = "Fee for LA Disposal Costs", Description = "Fee for LA Disposal Costs" });
 
-            dbContext.ProducerDetail.Add(producer);
-
-            dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial { Material = material, PackagingTonnage = 1000.00m, PackagingType = "CW", MaterialId = 1, ProducerDetail = producer });            
+            dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial { Material = material, PackagingTonnage = 1000.00m, PackagingType = "CW", MaterialId = 1, ProducerDetail = producer });         
             
 
             dbContext.SaveChanges();
