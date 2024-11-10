@@ -19,24 +19,84 @@ namespace EPR.Calculator.API.Builder
         {
             var result = new CalcResultSummary();
 
+            result.ResultSummaryHeader = new CalcResultSummaryHeader
+            {
+                Name = "Calculation Result",
+                ColumnIndex = 0
+            };
+
+            result.ProducerDisposalFeesHeader = new CalcResultSummaryHeader
+            {
+                Name = "1 Producer Disposal Fees with Bad Debt Provision",
+                ColumnIndex = 4
+            };
+
             var materialsFromDb = this.context.Material.ToList();
 
             var materials = Mappers.MaterialMapper.Map(materialsFromDb);
 
+            var materialsBreakdownHeader = new List<CalcResultSummaryHeader>();
+            var columnIndex = 4;
+
+            foreach (var material in materials)
+            {
+                materialsBreakdownHeader.Add(new CalcResultSummaryHeader
+                {
+                    Name = $"{material.Name} Breakdown",
+                    ColumnIndex = columnIndex
+                });
+                columnIndex = columnIndex + 11;
+            }
+
+            result.MaterialBreakdownHeaders = materialsBreakdownHeader;
+
+            var columnHeaders = new List<string>();
+
+            columnHeaders.AddRange([
+                CalcResultSummaryHeaders.ProducerId,
+                CalcResultSummaryHeaders.SubsidiaryId,
+                CalcResultSummaryHeaders.ProducerOrSubsidiaryName,
+                CalcResultSummaryHeaders.Level
+            ]);
+
+            foreach (var material in materials)
+            {
+                columnHeaders.AddRange([
+                    CalcResultSummaryHeaders.ReportedHouseholdPackagingWasteTonnage,
+                    CalcResultSummaryHeaders.ReportedSelfManagedConsumerWasteTonnage,
+                    CalcResultSummaryHeaders.NetReportedTonnage,
+                    CalcResultSummaryHeaders.PricePerTonne,
+                    CalcResultSummaryHeaders.ProducerDisposalFee,
+                    CalcResultSummaryHeaders.BadDebtProvision,
+                    CalcResultSummaryHeaders.ProducerDisposalFeeWithBadDebtProvision,
+                    CalcResultSummaryHeaders.EnglandWithBadDebtProvision,
+                    CalcResultSummaryHeaders.WalesWithBadDebtProvision,
+                    CalcResultSummaryHeaders.ScotlandWithBadDebtProvision,
+                    CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision,
+                    // 2a comms headers
+                    CalcResultSummaryHeaders.ReportedHouseholdPackagingWasteTonnage,
+                    CalcResultSummaryHeaders.PricePerTonne,
+                    CalcResultSummaryHeaders.ProducerTotalCostWithoutBadDebtProvision,
+                    CalcResultSummaryHeaders.BadDebtProvision,
+                    CalcResultSummaryHeaders.ProducerTotalCostwithBadDebtProvision,
+                    CalcResultSummaryHeaders.EnglandWithBadDebtProvision,
+                    CalcResultSummaryHeaders.WalesWithBadDebtProvision,
+                    CalcResultSummaryHeaders.ScotlandWithBadDebtProvision,
+                    CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision,
+                ]);
+            }
+
+            result.ColumnHeaders = columnHeaders;
+
             var producerDetailList = this.context.ProducerDetail.ToList();
 
-            var resultSummary = new List<CalcResultSummary>();
-
-            // var headerRecords = GetHeaderRecords(materials);
-
-            // resultSummary.AddRange(headerRecords);
+            var resultSummary = new List<CalcResultSummaryProducerDisposalFees>();
 
             foreach (var producer in producerDetailList)
             {
-                var costSummary = new List<CalcResultSummaryMaterialCost>();
+                var costSummary = new List<CalcResultSummaryProducerDisposalFeesByMaterial>();
                 var feesCommsCostSummary = new List<CalcResultFeesCommsCostSummary>();
-
-                var materialCostSummary = new Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryMaterialCost>>();
+                var materialCostSummary = new Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>>();
 
                 foreach (var material in materials)
                 {
@@ -44,25 +104,26 @@ namespace EPR.Calculator.API.Builder
 
                     decimal BadDebtProvision = 0.00M;
                     decimal Apportionment = 0.00M;
-                    decimal PriceperTonne = GetPriceperTonne(producer, material); // by Tim
+                    decimal PriceperTonne = GetPriceperTonne_FromParamOthers(producer, material); // by Tim
                     decimal ProducerTotalCostWithoutBadDebtProvision = GetProducerTotalCostWithoutBadDebtProvision(hhPackagingWasteTonnage, PriceperTonne);
                     decimal BadDebtProvisionCost = GetBadDebtProvision1(ProducerTotalCostWithoutBadDebtProvision, BadDebtProvision);
                     decimal ProducerTotalCostwithBadDebtProvision = GetProducerTotalCostwithBadDebtProvision(ProducerTotalCostWithoutBadDebtProvision, BadDebtProvision);
 
-                    costSummary.Add(new CalcResultSummaryMaterialCost
+                    costSummary.Add(new CalcResultSummaryProducerDisposalFeesByMaterial
                     {
                         HouseholdPackagingWasteTonnage = hhPackagingWasteTonnage,
                         ManagedConsumerWasteTonnage = GetManagedConsumerWasteTonnage(producer, material),
                         NetReportedTonnage = GetNetReportedTonnage(producer, material),
-                        PricePerTonnage = GetPricePerTonnage(producer, material),
-                        ProducerDisposalFee = GetProducerDisposalFee(producer, material),
-                        BadDebtProvision = GetBadDebtProvision(producer, material),
-                        ProducerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material),
-                        EnglandWithBadDebtProvision = GetEnglandWithBadDebtProvision(producer, material),
-                        WalesWithBadDebtProvision = GetWalesWithBadDebtProvision(producer, material),
-                        ScotlandWithBadDebtProvision = GetScotlandWithBadDebtProvision(producer, material),
-                        NorthernIrelandWithBadDebtProvision = GetNorthernIrelandWithBadDebtProvision(producer, material)
+                        PricePerTonnage = GetPricePerTonne(producer, material, calcResult),
+                        ProducerDisposalFee = GetProducerDisposalFee(producer, material, calcResult),
+                        BadDebtProvision = GetBadDebtProvision(producer, material, calcResult),
+                        ProducerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult),
+                        EnglandWithBadDebtProvision = GetEnglandWithBadDebtProvision(producer, material, calcResult),
+                        WalesWithBadDebtProvision = GetWalesWithBadDebtProvision(producer, material, calcResult),
+                        ScotlandWithBadDebtProvision = GetScotlandWithBadDebtProvision(producer, material, calcResult),
+                        NorthernIrelandWithBadDebtProvision = GetNorthernIrelandWithBadDebtProvision(producer, material, calcResult)
                     });
+
                     feesCommsCostSummary.Add(new CalcResultFeesCommsCostSummary
                     {
                         HouseholdPackagingWasteTonnage = hhPackagingWasteTonnage, // parametr D4 John doing
@@ -80,21 +141,106 @@ namespace EPR.Calculator.API.Builder
                     materialCostSummary.Add(material, costSummary);
                 }
 
-                resultSummary.Add(new CalcResultSummary
+                resultSummary.Add(new CalcResultSummaryProducerDisposalFees
                 {
                     ProducerId = producer.Id.ToString(),
                     ProducerName = producer.ProducerName,
                     SubsidiaryId = producer.SubsidiaryId,
-                    Level = "1",
+                    Level = 1,
                     Order = 2,
-                    MaterialCostSummary = materialCostSummary
+                    ProducerDisposalFeesByMaterial = materialCostSummary
                 });
             }
 
             return result;
         }
 
-        private decimal GetPriceperTonne(ProducerDetail producer, MaterialDetail material)
+        private decimal GetHouseholdPackagingWasteTonnage(ProducerDetail producer, MaterialDetail material)
+        {
+            // return producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material.Code == material.Code && p.PackagingType == "HH").PackagingTonnage;
+
+            return 0.0m;
+        }
+
+        private decimal GetManagedConsumerWasteTonnage(ProducerDetail producer, MaterialDetail material)
+        {
+            // return producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material.Code == material.Code && p.PackagingType == "CW").PackagingTonnage;
+
+            return 0.0m;
+        }
+
+        private decimal GetNetReportedTonnage(ProducerDetail producer, MaterialDetail material)
+        {
+            var householdPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material);
+            var managedConsumerWasteTonnage = GetManagedConsumerWasteTonnage(producer, material);
+            return householdPackagingWasteTonnage - managedConsumerWasteTonnage;
+        }
+
+        private decimal GetPricePerTonne(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        {
+            return 10m;
+        }
+
+        private decimal GetProducerDisposalFee(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        {
+            var netReportedTonnage = GetNetReportedTonnage(producer, material);
+            var pricePerTonne = GetPricePerTonne(producer, material, calcResult);
+
+            return netReportedTonnage * pricePerTonne;
+        }
+
+        private decimal GetBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        {
+            var producerDisposalFee = GetProducerDisposalFee(producer, material, calcResult);
+
+
+            return producerDisposalFee * 6;
+        }
+
+        private decimal GetProducerDisposalFeeWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        {
+            var producerDisposalFee = GetProducerDisposalFee(producer, material, calcResult);
+
+            return producerDisposalFee * (1 + 6);
+        }
+
+        private decimal GetEnglandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        {
+            var producerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult);
+
+            // producerDisposalFeeWithBadDebtProvision * LAPCAP Data B12
+
+            return 10m;
+        }
+
+        private decimal GetWalesWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        {
+            var producerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult);
+
+            // producerDisposalFeeWithBadDebtProvision * LAPCAP Data C12
+
+            return 10m;
+        }
+
+        private decimal GetScotlandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        {
+            var producerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult);
+
+            // producerDisposalFeeWithBadDebtProvision * LAPCAP Data D12
+
+            return 10m;
+        }
+
+        private decimal GetNorthernIrelandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        {
+            var producerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult);
+
+            // producerDisposalFeeWithBadDebtProvision * LAPCAP Data E12
+
+            return 10m;
+        }
+
+        private decimal GetPriceperTonne_FromParamOthers(ProducerDetail producer, MaterialDetail material)
         {
             throw new NotImplementedException(); // Tim PR
         }
@@ -110,13 +256,13 @@ namespace EPR.Calculator.API.Builder
             return ProducerTotalCostWithoutBadDebtProvision * BadDebtProvision;
 
         }
-        
+
         private decimal GetProducerTotalCostwithBadDebtProvision(decimal ProducerTotalCostWithoutBadDebtProvision, decimal BadDebtProvision)
         {
             // Formula: F5*(1+'Params - Other'!$B$10) --uday (Build the calculator - Params - Other - 3)
-            return ProducerTotalCostWithoutBadDebtProvision * ( 1 + BadDebtProvision );
+            return ProducerTotalCostWithoutBadDebtProvision * (1 + BadDebtProvision);
         }
-        
+
         private decimal GetEnglandWithBadDebtProvision1(decimal ProducerTotalCostwithBadDebtProvision, decimal Apportionment)
         {
             // Formula: H5*'1 + 4 Apportionment %s'!$C$6
@@ -131,7 +277,7 @@ namespace EPR.Calculator.API.Builder
             return ProducerTotalCostwithBadDebtProvision * (1 + Apportionment);
 
         }
-        
+
         private decimal GetScotlandWithBadDebtProvision1(decimal ProducerTotalCostwithBadDebtProvision, decimal Apportionment)
         {
             // Formula: H5*'1 + 4 Apportionment %s'!$E$6
@@ -146,135 +292,6 @@ namespace EPR.Calculator.API.Builder
             // Rekha ( Build the calculator - 1 + 4 Apportionment %s - 4 )
             return ProducerTotalCostwithBadDebtProvision * (1 + Apportionment);
 
-        }
-
-        private decimal GetHouseholdPackagingWasteTonnage(ProducerDetail producer, MaterialDetail material)
-        {
-            return 0.00M;
-        }
-
-        private decimal GetManagedConsumerWasteTonnage(ProducerDetail producer, MaterialDetail material)
-        {
-            return 0.00M;
-        }
-
-        private decimal GetNetReportedTonnage(ProducerDetail producer, MaterialDetail material)
-        {
-            return 0.00M;
-        }
-
-        private decimal GetPricePerTonnage(ProducerDetail producer, MaterialDetail material)
-        {
-            return 0.00M;
-        }
-
-        private decimal GetProducerDisposalFee(ProducerDetail producer, MaterialDetail material)
-        {
-            return 0.00M;
-        }
-
-        private decimal GetBadDebtProvision(ProducerDetail producer, MaterialDetail material)
-        {
-            return 0.00M;
-        }
-
-        private decimal GetProducerDisposalFeeWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
-        {
-            return 0.00M;
-        }
-
-        private decimal GetEnglandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
-        {
-            return 0.00M;
-        }
-
-        private decimal GetWalesWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
-        {
-            return 0.00M;
-        }
-
-        private decimal GetScotlandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
-        {
-            return 0.00M;
-        }
-
-        private decimal GetNorthernIrelandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material)
-        {
-            return 0.00M;
-        }
-
-        private IEnumerable<CalcResultSummary> GetHeaderRecords(List<MaterialDetail> materials)
-        {
-            var resultSummaryHeaders = new List<CalcResultSummary>();
-
-            var materialCostSummaryHeaders = new Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryMaterialCostHeaders>>();
-
-            var costSummaryHeaders = new List<CalcResultSummaryMaterialCostHeaders>();
-            var feesCommsCostSummaryHeaders = new List<CalcResultSummaryMaterialCostHeaders>();
-
-            // First header record
-            foreach (var material in materials)
-            {
-                costSummaryHeaders.Add(new CalcResultSummaryMaterialCostHeaders
-                {
-                    HouseholdPackagingWasteTonnage = $"{material.Name} Breakdown",
-                    ManagedConsumerWasteTonnage = string.Empty,
-                    NetReportedTonnage = string.Empty,
-                    PricePerTonnage = string.Empty,
-                    ProducerDisposalFee = string.Empty,
-                    BadDebtProvision = string.Empty,
-                    ProducerDisposalFeeWithBadDebtProvision = string.Empty,
-                    EnglandWithBadDebtProvision = string.Empty,
-                    WalesWithBadDebtProvision = string.Empty,
-                    ScotlandWithBadDebtProvision = string.Empty,
-                    NorthernIrelandWithBadDebtProvision = string.Empty
-                });
-
-                materialCostSummaryHeaders.Add(material, costSummaryHeaders);
-            }
-
-            resultSummaryHeaders.Add(new CalcResultSummary
-            {
-                ProducerId = string.Empty,
-                SubsidiaryId = string.Empty,
-                ProducerName = string.Empty,
-                Level = string.Empty,
-                Order = 0,
-                MaterialCostSummaryHeaders = materialCostSummaryHeaders
-            });
-
-            // Second header record
-            foreach (var material in materials)
-            {
-                costSummaryHeaders.Add(new CalcResultSummaryMaterialCostHeaders
-                {
-                    HouseholdPackagingWasteTonnage = CalcResultSummaryHeaders.ReportedHouseholdPackagingWasteTonnage,
-                    ManagedConsumerWasteTonnage = CalcResultSummaryHeaders.ReportedSelfManagedConsumerWasteTonnage,
-                    NetReportedTonnage = CalcResultSummaryHeaders.NetReportedTonnage,
-                    PricePerTonnage = CalcResultSummaryHeaders.PricePerTonne,
-                    ProducerDisposalFee = CalcResultSummaryHeaders.ProducerDisposalFee,
-                    BadDebtProvision = CalcResultSummaryHeaders.BadDebtProvision,
-                    ProducerDisposalFeeWithBadDebtProvision = CalcResultSummaryHeaders.ProducerDisposalFeeWithBadDebtProvision,
-                    EnglandWithBadDebtProvision = CalcResultSummaryHeaders.EnglandWithBadDebtProvision,
-                    WalesWithBadDebtProvision = CalcResultSummaryHeaders.WalesWithBadDebtProvision,
-                    ScotlandWithBadDebtProvision = CalcResultSummaryHeaders.ScotlandWithBadDebtProvision,
-                    NorthernIrelandWithBadDebtProvision = CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision
-                });
-
-                materialCostSummaryHeaders.Add(material, costSummaryHeaders);
-            }
-
-            resultSummaryHeaders.Add(new CalcResultSummary
-            {
-                ProducerId = CalcResultSummaryHeaders.ProducerId,
-                SubsidiaryId = CalcResultSummaryHeaders.SubsidiaryId,
-                ProducerName = CalcResultSummaryHeaders.ProducerOrSubsidiaryName,
-                Level = CalcResultSummaryHeaders.Level,
-                Order = 2,
-                MaterialCostSummaryHeaders = materialCostSummaryHeaders
-            });
-
-            return resultSummaryHeaders;
         }
     }
 }

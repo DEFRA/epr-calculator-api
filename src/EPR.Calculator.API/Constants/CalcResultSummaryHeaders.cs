@@ -17,7 +17,7 @@
         public static readonly string WalesWithBadDebtProvision = "Wales with Bad Debt Provision";
         public static readonly string ScotlandWithBadDebtProvision = "Scotland with Bad Debt Provision";
         public static readonly string NorthernIrelandWithBadDebtProvision = "Northern Ireland with Bad Debt Provision";
-        public static readonly string ProducerTotalCostWithoutBadDebtProvision = "Northern Ireland with Bad Debt Provision";
-        public static readonly string ProducerTotalCostwithBadDebtProvision = "Northern Ireland with Bad Debt Provision";
+        public static readonly string ProducerTotalCostWithoutBadDebtProvision = "Producer Total Cost w/o Bad Debt Provision";
+        public static readonly string ProducerTotalCostwithBadDebtProvision = "Producer Total Cost with Bad Deb tProvision";
     }
 }

@@ -26,7 +26,8 @@ namespace EPR.Calculator.API.Exporter
         public void Export(CalcResult results)
         {
             var csvContent = new StringBuilder();
-            LoadCalcResultDetail(results, csvContent);
+            // LoadCalcResultDetail(results, csvContent);
+            PrepareSummaryData(results.CalcResultSummary, csvContent);
             var fileName = GetResultFileName(results.CalcResultDetail.RunId);
             try
             {
@@ -75,6 +76,43 @@ namespace EPR.Calculator.API.Exporter
         private static string GetResultFileName(int runId)
         {
             return $"{runId}-{DateTime.Now:yyyy-MM-dd-HHmm}.csv";
+        }
+
+        private static void PrepareSummaryData(CalcResultSummary resultSummary, StringBuilder csvContent)
+        {
+            // Add empty lines
+            csvContent.AppendLine();
+            csvContent.AppendLine();
+
+            // Add result summary header
+            csvContent.AppendLine(resultSummary.ResultSummaryHeader.Name);
+
+            // Add producer disposal fees header
+            for (var  i = 0; i < resultSummary.ProducerDisposalFeesHeader.ColumnIndex; i++)
+            {
+                csvContent.Append(",");
+            }
+            csvContent.AppendLine(resultSummary.ProducerDisposalFeesHeader.Name);
+
+            // Add material breakdown header
+            var indexCounter = 0;
+            foreach (var item in resultSummary.MaterialBreakdownHeaders)
+            {
+                for (var i = indexCounter; i < item.ColumnIndex; i++)
+                {
+                    csvContent.Append(",");
+                }
+                csvContent.Append(item.Name);
+                indexCounter = item.ColumnIndex;
+            }
+            csvContent.AppendLine();
+
+            // Add column header
+            foreach (var item in resultSummary.ColumnHeaders)
+            {
+                csvContent.Append($"{item},");
+            }
+            csvContent.AppendLine();
         }
     }
 }
