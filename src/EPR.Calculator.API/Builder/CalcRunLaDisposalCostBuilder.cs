@@ -46,7 +46,7 @@ namespace EPR.Calculator.API.Builder
                                Tonnage = producerMaterial.PackagingTonnage
                            }).ToList();
 
-            var lapcapDetails = calcResult.CalcResultLapcapData.CalcResultLapcapDataDetails.Where(t => t.OrderId != 1 && t.Name != "1 Country Apportionment").ToList();
+            var lapcapDetails = calcResult?.CalcResultLapcapData?.CalcResultLapcapDataDetails?.Where(t => t.OrderId != 1 && t.Name != "1 Country Apportionment").ToList();
 
 
             foreach (var details  in lapcapDetails)
@@ -77,21 +77,7 @@ namespace EPR.Calculator.API.Builder
             }
 
 
-            var header = new CalcResultLaDisposalCostDataDetail()
-            {
-                Name = CommonConstants.Material,
-                England = CommonConstants.England,
-                Wales = CommonConstants.Wales,
-                Scotland = CommonConstants.Scotland,
-                NorthernIreland = CommonConstants.NorthernIreland,
-                Total = CommonConstants.Total,
-                ProducerReportedHouseholdPackagingWasteTonnage = CommonConstants.ProducerReportedHouseholdPackagingWasteTonnage,
-                LateReportingTonnage = CommonConstants.LateReportingTonnage,
-                ProducerReportedHouseholdTonnagePlusLateReportingTonnage = CommonConstants.ProduceLateTonnage,
-                DisposalCostPricePerTonne = CommonConstants.DisposalCostPricePerTonne,
-                OrderId = 1
-            };
-
+            var header = GetHeader();
             laDisposalCostDetails.Insert(0, header);
 
             return new CalcResultLaDisposalCostData() { Name = CommonConstants.LADisposalCostData, CalcResultLaDisposalCostDetails = laDisposalCostDetails.AsEnumerable() };             
@@ -117,11 +103,32 @@ namespace EPR.Calculator.API.Builder
 
         private string CalculateDisposalCostPricePerTonne(CalcResultLaDisposalCostDataDetail detail)
         {
-            var value = Math.Round(ConvertCurrencyToDecimal(detail.Total) / GetDecimalValue(detail.ProducerReportedHouseholdTonnagePlusLateReportingTonnage), 4);
+            var HouseholdTonnagePlusLateReportingTonnage = GetDecimalValue(detail.ProducerReportedHouseholdTonnagePlusLateReportingTonnage);
+            if (HouseholdTonnagePlusLateReportingTonnage == 0) return "0";
+            var value = Math.Round((ConvertCurrencyToDecimal(detail.Total) / HouseholdTonnagePlusLateReportingTonnage), 4);
             var culture = CultureInfo.CreateSpecificCulture("en-GB");
             culture.NumberFormat.CurrencySymbol = "£";
             culture.NumberFormat.CurrencyPositivePattern = 0;
             return value.ToString("C", culture);
+        }
+
+
+        private CalcResultLaDisposalCostDataDetail GetHeader()
+        {
+            return new CalcResultLaDisposalCostDataDetail()
+            {
+                Name = CommonConstants.Material,
+                England = CommonConstants.England,
+                Wales = CommonConstants.Wales,
+                Scotland = CommonConstants.Scotland,
+                NorthernIreland = CommonConstants.NorthernIreland,
+                Total = CommonConstants.Total,
+                ProducerReportedHouseholdPackagingWasteTonnage = CommonConstants.ProducerReportedHouseholdPackagingWasteTonnage,
+                LateReportingTonnage = CommonConstants.LateReportingTonnage,
+                ProducerReportedHouseholdTonnagePlusLateReportingTonnage = CommonConstants.ProduceLateTonnage,
+                DisposalCostPricePerTonne = CommonConstants.DisposalCostPricePerTonne,
+                OrderId = 1
+            };
         }
 
 
