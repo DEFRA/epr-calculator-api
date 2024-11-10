@@ -55,11 +55,13 @@ namespace EPR.Calculator.API.UnitTests.Builder
             };
 
             var material = new Material() { Code = "AL", Name = "Aluminium", Description = "Aluminium" };
+            var plastic = new Material() { Code = "PL", Name = "Plastic", Description = "Plastic" };
 
             var producer = new ProducerDetail { CalculatorRunId = 2, ProducerId = 1, ProducerName = "Producer Name", CalculatorRun = run };
-
-            dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial { Material = material, PackagingTonnage = 1000.00m, PackagingType = "CW", MaterialId = 1, ProducerDetail = producer });         
             
+
+            dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial { Material = material, PackagingTonnage = 1000.00m, PackagingType = "CW", MaterialId = 1, ProducerDetail = producer });
+            dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial { Material = plastic, PackagingTonnage = 1000.00m, PackagingType = "CW", MaterialId = 2, ProducerDetail = producer });
 
             dbContext.SaveChanges();
 
@@ -91,8 +93,29 @@ namespace EPR.Calculator.API.UnitTests.Builder
                             NorthernIrelandDisposalCost = "£400.00",
                             TotalDisposalCost = "£1000.00",
                             OrderId = 2
-                        } }
-                },
+                        } ,
+                    new CalcResultLapcapDataDetails
+                    {
+                        Name = "Plastic",
+                        EnglandDisposalCost = "£200.00",
+                        WalesDisposalCost = "£300.00",
+                        ScotlandDisposalCost = "£400.00",
+                        NorthernIrelandDisposalCost = "500.00",
+                        TotalDisposalCost = "£1400.00",
+                        OrderId = 3
+                    },
+                        new CalcResultLapcapDataDetails
+                    {
+                        Name = "Total",
+                        EnglandDisposalCost = "£300.00",
+                        WalesDisposalCost = "£500.00",
+                        ScotlandDisposalCost = "£700.00",
+                        NorthernIrelandDisposalCost = "£900.00",
+                        TotalDisposalCost = "£2400.00",
+                        OrderId = 4
+                    }
+                }
+            },
                  CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage { 
                      Name = "Late Reporting Tonnage",                     
                      CalcResultLateReportingTonnageDetails = new[]
@@ -101,6 +124,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
                          {
                               Name = "Aluminium",
                                TotalLateReportingTonnage = 8000.00m
+                         },
+                          new CalcResultLateReportingTonnageDetail()
+                         {
+                              Name = "Plastic",
+                               TotalLateReportingTonnage = 2000.00m
                          }
                      }               
                  
@@ -114,7 +142,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
             Assert.IsNotNull(lapcapDisposalCostResults);
             Assert.AreEqual(lapcapDisposalCostResults.Name, CommonConstants.LADisposalCostData);
-            Assert.AreEqual(lapcapDisposalCostResults?.CalcResultLaDisposalCostDetails?.Count(), 2);
+            Assert.AreEqual(lapcapDisposalCostResults?.CalcResultLaDisposalCostDetails?.Count(), 4);
 
             var headerRow = lapcapDisposalCostResults?.CalcResultLaDisposalCostDetails?.Single(x => x.OrderId == 1);
             Assert.IsNotNull(headerRow);
@@ -140,7 +168,20 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("£1000.00", aluminiumRow.Total);
             Assert.AreEqual("1000.00", aluminiumRow.ProducerReportedHouseholdPackagingWasteTonnage);
             Assert.AreEqual("8000.00", aluminiumRow.LateReportingTonnage);
-            Assert.AreEqual("9000.00", aluminiumRow.ProducerReportedHouseholdTonnagePlusLateReportingTonnage);            
+            Assert.AreEqual("9000.00", aluminiumRow.ProducerReportedHouseholdTonnagePlusLateReportingTonnage);
+
+            var totalRow = lapcapDisposalCostResults?.CalcResultLaDisposalCostDetails?.Single(x => x.Name == "Total");
+            Assert.IsNotNull(aluminiumRow);
+            Assert.AreEqual("Total", totalRow?.Name);
+            Assert.AreEqual("£300.00", totalRow?.England);
+            Assert.AreEqual("£500.00", totalRow?.Wales);
+            Assert.AreEqual("£700.00", totalRow?.Scotland);
+            Assert.AreEqual("£900.00", totalRow?.NorthernIreland);
+            Assert.AreEqual("£2400.00", totalRow?.Total);
+            Assert.AreEqual("2000.00", totalRow?.ProducerReportedHouseholdPackagingWasteTonnage);
+            Assert.AreEqual("10000.00", totalRow?.LateReportingTonnage);
+            Assert.AreEqual("12000.00", totalRow?.ProducerReportedHouseholdTonnagePlusLateReportingTonnage);
+            Assert.IsNull(totalRow?.DisposalCostPricePerTonne);
         }
     }
 }

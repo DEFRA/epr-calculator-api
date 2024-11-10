@@ -87,12 +87,12 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
 
         private string GetTonnageDataByMaterial(string material)
         {
-            return producerData.Where(t => t.Material == material).Sum(t => t.Tonnage).ToString();
+            return material == "Total"? producerData.Sum(t=>t.Tonnage).ToString()  : producerData.Where(t => t.Material == material).Sum(t => t.Tonnage).ToString();
         }
 
         private string GetLateReportingTonnageDataByMaterial(string material, List<CalcResultLateReportingTonnageDetail> details)
         {
-            return details.Where(t => t.Name == material).Sum(t => t.TotalLateReportingTonnage).ToString();
+            return material == "Total" ? details.Sum(t=>t.TotalLateReportingTonnage).ToString() : details.Where(t => t.Name == material).Sum(t => t.TotalLateReportingTonnage).ToString();
         }
 
         private string GetProducerReportedHouseholdTonnagePlusLateReportingTonnage(CalcResultLaDisposalCostDataDetail detail)
