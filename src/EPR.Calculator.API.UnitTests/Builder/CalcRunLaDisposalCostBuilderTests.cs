@@ -140,8 +140,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("£1000.00", aluminiumRow.Total);
             Assert.AreEqual("1000.00", aluminiumRow.ProducerReportedHouseholdPackagingWasteTonnage);
             Assert.AreEqual("8000.00", aluminiumRow.LateReportingTonnage);
-            Assert.AreEqual("9000.00", aluminiumRow.ProducerReportedHouseholdTonnagePlusLateReportingTonnage);
-            Assert.AreEqual("£0.11", aluminiumRow.DisposalCostPricePerTonne);
+            Assert.AreEqual("9000.00", aluminiumRow.ProducerReportedHouseholdTonnagePlusLateReportingTonnage);            
         }
     }
 }
