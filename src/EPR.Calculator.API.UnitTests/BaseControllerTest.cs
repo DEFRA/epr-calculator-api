@@ -71,10 +71,12 @@ namespace EPR.Calculator.API.Tests.Controllers
             dbContext.SaveChanges();
             calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), mockFactory.Object);
 
+            dbContext.Material.RemoveRange(dbContext.Material.ToList());
+            dbContext.SaveChanges();
             dbContext.Material.AddRange(GetMaterials());
             dbContext.SaveChanges();
         }
-
+        
         public void CheckDbContext()
         {
             Assert.IsNotNull(dbContext);
@@ -87,7 +89,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             dbContext?.Database.EnsureDeleted();
         }
 
-        protected static IEnumerable<DefaultParameterTemplateMaster> GetDefaultParameterTemplateMasterData()
+        public static IEnumerable<DefaultParameterTemplateMaster> GetDefaultParameterTemplateMasterData()
         {
             var list = new List<DefaultParameterTemplateMaster>();
             list.Add(new DefaultParameterTemplateMaster
@@ -429,7 +431,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             return list;
         }
         
-        protected static IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
+        public static IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
         {
             var list = new List<LapcapDataTemplateMaster>();
             list.Add(new LapcapDataTemplateMaster
@@ -696,7 +698,6 @@ namespace EPR.Calculator.API.Tests.Controllers
             var list = new List<CalculatorRun>();
             list.Add(new CalculatorRun
             {
-                Id = 1,
                 CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 Name = "Test Run",
                 Financial_Year = "2024-25",
@@ -705,7 +706,6 @@ namespace EPR.Calculator.API.Tests.Controllers
             });
             list.Add(new CalculatorRun
             {
-                Id = 2,
                 CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 Name = "Test Calculated Result",
                 Financial_Year = "2024-25",
@@ -714,7 +714,6 @@ namespace EPR.Calculator.API.Tests.Controllers
             });
             list.Add(new CalculatorRun
             {
-                Id = 3,
                 CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 Name = "Test Run",
                 Financial_Year = "2024-25",
@@ -725,7 +724,6 @@ namespace EPR.Calculator.API.Tests.Controllers
             });
             list.Add(new CalculatorRun
             {
-                Id = 4,
                 CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 Name = "Test Calculated Result",
                 Financial_Year = "2024-25",
