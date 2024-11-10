@@ -10,7 +10,7 @@ using System.Globalization;
 
 namespace EPR.Calculator.API.Builder
 {
-    public class CalcRunLaDisposalCostBuillder : ICalcRunLaDisposalCostBuilder
+    public class CalcRunLaDisposalCostBuilder : ICalcRunLaDisposalCostBuilder
     {
         internal class ProducerData
         {
@@ -21,7 +21,7 @@ namespace EPR.Calculator.API.Builder
 
         private readonly ApplicationDBContext context;
         private List<ProducerData> producerData;
-        public CalcRunLaDisposalCostBuillder(ApplicationDBContext context)
+        public CalcRunLaDisposalCostBuilder(ApplicationDBContext context)
         {
             this.context = context;
             producerData = new List<ProducerData>();
@@ -32,7 +32,7 @@ namespace EPR.Calculator.API.Builder
         {           
 
             var laDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>();
-           
+            var OrderId = 1;           
 
             producerData = (from run in context.CalculatorRuns
                             join producerDetail in context.ProducerDetail on run.Id equals producerDetail.CalculatorRunId
@@ -58,9 +58,11 @@ namespace EPR.Calculator.API.Builder
                     Scotland = details.ScotlandDisposalCost,
                     NorthernIreland = details.NorthernIrelandDisposalCost,
                     Total = details.TotalDisposalCost,
-                    ProducerReportedHouseholdPackagingWasteTonnage = GetTonnageDataByMaterial(details.Name)
-                };
+                    ProducerReportedHouseholdPackagingWasteTonnage = GetTonnageDataByMaterial(details.Name),
+                    OrderId = ++OrderId
+                };                     
                 laDisposalCostDetails.Add(laDiposalDetail);
+
             }
 
 
@@ -85,12 +87,13 @@ namespace EPR.Calculator.API.Builder
                 ProducerReportedHouseholdPackagingWasteTonnage = CommonConstants.ProducerReportedHouseholdPackagingWasteTonnage,
                 LateReportingTonnage = CommonConstants.LateReportingTonnage,
                 ProducerReportedHouseholdTonnagePlusLateReportingTonnage = CommonConstants.ProduceLateTonnage,
-                DisposalCostPricePerTonne = CommonConstants.DisposalCostPricePerTonne
+                DisposalCostPricePerTonne = CommonConstants.DisposalCostPricePerTonne,
+                OrderId = 1
             };
 
             laDisposalCostDetails.Insert(0, header);
 
-            return new CalcResultLaDisposalCostData() { Name = CommonConstants.LADisposalCostData, CalcResultLaDisposalCostDetails = (IEnumerable<CalcResultParameterCostDetail>)laDisposalCostDetails.AsEnumerable() };             
+            return new CalcResultLaDisposalCostData() { Name = CommonConstants.LADisposalCostData, CalcResultLaDisposalCostDetails = laDisposalCostDetails.AsEnumerable() };             
             
         }
 
@@ -135,8 +138,11 @@ namespace EPR.Calculator.API.Builder
 
         private string CalculateDisposalCostPricePerTonne(CalcResultLaDisposalCostDataDetail detail)
         {
-            var value = Math.Round(ConverCurrencyToDecimal(detail.Total)/ GetDecimalValue(detail.ProducerReportedHouseholdTonnagePlusLateReportingTonnage), 4);
-            return value.ToString("C");
+            var value = Math.Round(ConvertCurrencyToDecimal(detail.Total) / GetDecimalValue(detail.ProducerReportedHouseholdTonnagePlusLateReportingTonnage), 4);
+            var culture = CultureInfo.CreateSpecificCulture("en-GB");
+            culture.NumberFormat.CurrencySymbol = "£";
+            culture.NumberFormat.CurrencyPositivePattern = 0;
+            return value.ToString("C", culture);
         }
 
 
@@ -145,7 +151,7 @@ namespace EPR.Calculator.API.Builder
             return decimal.Parse(value, CultureInfo.InvariantCulture);
         }
 
-        private decimal ConverCurrencyToDecimal(string currency)
+        private decimal ConvertCurrencyToDecimal(string currency)
         {
             decimal amount;
             decimal.TryParse(currency, NumberStyles.Currency, CultureInfo.GetCultureInfo("en-GB"), out amount);

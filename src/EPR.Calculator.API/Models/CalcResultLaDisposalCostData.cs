@@ -3,6 +3,6 @@
     public class CalcResultLaDisposalCostData
     {
         public string Name { get; set; }
-        public IEnumerable<CalcResultParameterCostDetail> CalcResultLaDisposalCostDetails { get; set; } = new List<CalcResultParameterCostDetail>();
+        public IEnumerable<CalcResultLaDisposalCostDataDetail> CalcResultLaDisposalCostDetails { get; set; } = new List<CalcResultLaDisposalCostDataDetail>();
     }
 }
