@@ -1,9 +1,9 @@
 ﻿using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 
-namespace EPR.Calculator.API.Builder
+namespace EPR.Calculator.API.Builder.LateReportingTonnages
 {
-    public interface ICalcResultParamsLateReportingBuilder
+    public interface ICalcResultLateReportingBuilder
     {
         public CalcResultLateReportingTonnage Construct(CalcResultsRequestDto resultsRequestDto);
     }

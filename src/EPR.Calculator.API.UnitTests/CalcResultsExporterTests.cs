@@ -61,6 +61,18 @@ namespace EPR.Calculator.API.UnitTests
                     ParametersFile = "InvalidFileInfo",
                     RpdFileORG = "04/11/2024 12:06",
                     RpdFilePOM = "04/11/2024 12:07",
+                },
+                CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
+                {
+                    Name = "Late Reporting Tonnages",
+                    MaterialHeading = "Material",
+                    TonnageHeading = "Tonnage",
+                    CalcResultLateReportingTonnageDetails = new List<CalcResultLateReportingTonnageDetail>
+                    {
+                        new CalcResultLateReportingTonnageDetail { Name = "Aluminium", TotalLateReportingTonnage = 100.000M },
+                        new CalcResultLateReportingTonnageDetail { Name = "Fibre composite", TotalLateReportingTonnage = 200.000M },
+                        new CalcResultLateReportingTonnageDetail { Name = "Total", TotalLateReportingTonnage = 300.000M }
+                    }
                 }
             };
 
@@ -71,6 +83,14 @@ namespace EPR.Calculator.API.UnitTests
             expectedCsvContent.AppendLine("Run by,Tester");
             expectedCsvContent.AppendLine("Financial Year,2023-24");
             expectedCsvContent.AppendLine("RPD File - ORG,04/11/2024 12:06,RPD File - POM,04/11/2024 12:07");
+
+            expectedCsvContent.AppendLine();
+            expectedCsvContent.AppendLine();
+            expectedCsvContent.AppendLine("Late Reporting Tonnages");
+            expectedCsvContent.AppendLine("Material,Tonnage");
+            expectedCsvContent.AppendLine("Aluminium,100.000");
+            expectedCsvContent.AppendLine("Fibre composite,200.000");
+            expectedCsvContent.AppendLine("Total,300.000");
 
             _calcResultsExporter.Export(calcResult);
 
@@ -94,6 +114,18 @@ namespace EPR.Calculator.API.UnitTests
                     FinancialYear = "2024",
                     LapcapFile = "lapcap.csv,2024-11-01,Tester",
                     ParametersFile = "params.csv,2024-11-01,Tester"
+                },
+                CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
+                {
+                    Name = "Late Reporting Tonnages",
+                    MaterialHeading = "Material",
+                    TonnageHeading = "Tonnage",
+                    CalcResultLateReportingTonnageDetails = new List<CalcResultLateReportingTonnageDetail>
+                    {
+                        new CalcResultLateReportingTonnageDetail { Name = "Aluminium", TotalLateReportingTonnage = 100.000M },
+                        new CalcResultLateReportingTonnageDetail { Name = "Fibre composite", TotalLateReportingTonnage = 200.000M },
+                        new CalcResultLateReportingTonnageDetail { Name = "Total", TotalLateReportingTonnage = 300.000M }
+                    }
                 }
             };
 

@@ -1,8 +1,10 @@
 ﻿using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Data.Migrations;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
 using System.Text;
+using System.Threading.Channels;
 
 namespace EPR.Calculator.API.Exporter
 {
@@ -27,6 +29,12 @@ namespace EPR.Calculator.API.Exporter
         {
             var csvContent = new StringBuilder();
             LoadCalcResultDetail(results, csvContent);
+
+            if (results.CalcResultLateReportingTonnageData != null)
+            {
+                PrepareLateReportingData(results.CalcResultLateReportingTonnageData, csvContent);
+            }
+
             var fileName = GetResultFileName(results.CalcResultDetail.RunId);
             try
             {
@@ -75,6 +83,24 @@ namespace EPR.Calculator.API.Exporter
         private static string GetResultFileName(int runId)
         {
             return $"{runId}-{DateTime.Now:yyyy-MM-dd-HHmm}.csv";
+        }
+
+        private static void PrepareLateReportingData(CalcResultLateReportingTonnage calcResultLateReportingData, StringBuilder csvContent)
+        {
+            csvContent.AppendLine();
+            csvContent.AppendLine();
+
+            csvContent.AppendLine(calcResultLateReportingData.Name);
+            csvContent.Append($"{calcResultLateReportingData.MaterialHeading},");
+            csvContent.Append(calcResultLateReportingData.TonnageHeading);
+            csvContent.AppendLine();
+
+            foreach (var lateReportingData in calcResultLateReportingData.CalcResultLateReportingTonnageDetails)
+            {
+                csvContent.Append($"{CsvSanitiser.SanitiseData(lateReportingData.Name)},");
+                csvContent.Append(CsvSanitiser.SanitiseData(lateReportingData.TotalLateReportingTonnage));
+                csvContent.AppendLine();
+            }
         }
     }
 }
