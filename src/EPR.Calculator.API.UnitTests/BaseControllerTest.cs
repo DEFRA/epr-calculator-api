@@ -72,6 +72,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), mockFactory.Object);
         }
 
+        [TestMethod]
         public void CheckDbContext()
         {
             Assert.IsNotNull(dbContext);
