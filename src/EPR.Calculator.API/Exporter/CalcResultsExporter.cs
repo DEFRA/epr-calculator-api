@@ -46,7 +46,10 @@ namespace EPR.Calculator.API.Exporter
                 PrepareLaDisposalCostData(results.CalcResultLaDisposalCostData, csvContent);
             }
 
-            PrepareSummaryData(results.CalcResultSummary, csvContent);
+            if (results.CalcResultSummary != null)
+            {
+                PrepareSummaryData(results.CalcResultSummary, csvContent);
+            }
 
             var fileName = GetResultFileName(results.CalcResultDetail.RunId);
             try
@@ -166,11 +169,27 @@ namespace EPR.Calculator.API.Exporter
             csvContent.AppendLine();
             csvContent.AppendLine();
 
+            // Add headers
+            CalcResultsExporter.PrepareSummaryDataHeader(resultSummary, csvContent);
+
+            // Add data
+            //foreach (var producer in resultSummary.ProducerDisposalFees)
+            //{
+            //    csvContent.Append($"{producer.}");
+            //    foreach (var material in producer.ProducerDisposalFeesByMaterial)
+            //    {
+            //        var abc = material.Value;
+            //    }
+            //}
+        }
+
+        private static void PrepareSummaryDataHeader(CalcResultSummary resultSummary, StringBuilder csvContent)
+        {
             // Add result summary header
             csvContent.AppendLine(resultSummary.ResultSummaryHeader.Name);
 
             // Add producer disposal fees header
-            for (var  i = 0; i < resultSummary.ProducerDisposalFeesHeader.ColumnIndex; i++)
+            for (var i = 0; i < resultSummary.ProducerDisposalFeesHeader.ColumnIndex; i++)
             {
                 csvContent.Append(",");
             }

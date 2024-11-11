@@ -5,6 +5,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
     using EPR.Calculator.API.Builder.LaDisposalCost;
     using EPR.Calculator.API.Builder.Lapcap;
     using EPR.Calculator.API.Builder.LateReportingTonnages;
+    using EPR.Calculator.API.Builder.Summary;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
 

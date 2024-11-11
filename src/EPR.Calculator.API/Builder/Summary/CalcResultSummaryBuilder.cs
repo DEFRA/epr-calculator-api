@@ -5,7 +5,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using System.Globalization;
 
-namespace EPR.Calculator.API.Builder
+namespace EPR.Calculator.API.Builder.Summary
 {
     public class CalcResultSummaryBuilder : ICalcResultSummaryBuilder
     {
@@ -32,7 +32,7 @@ namespace EPR.Calculator.API.Builder
                 ColumnIndex = 4
             };
 
-            var materialsFromDb = this.context.Material.ToList();
+            var materialsFromDb = context.Material.ToList();
 
             var materials = Mappers.MaterialMapper.Map(materialsFromDb);
 
@@ -41,7 +41,8 @@ namespace EPR.Calculator.API.Builder
 
             foreach (var material in materials)
             {
-                materialsBreakdownHeader.Add(new CalcResultSummaryHeader {
+                materialsBreakdownHeader.Add(new CalcResultSummaryHeader
+                {
                     Name = $"{material.Name} Breakdown",
                     ColumnIndex = columnIndex
                 });
@@ -78,7 +79,7 @@ namespace EPR.Calculator.API.Builder
 
             result.ColumnHeaders = columnHeaders;
 
-            var producerDetailList = this.context.ProducerDetail.ToList();
+            var producerDetailList = context.ProducerDetail.ToList();
 
             var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
 

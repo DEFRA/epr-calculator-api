@@ -4,6 +4,7 @@ using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Builder.LaDisposalCost;
 using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
+using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Exceptions;
