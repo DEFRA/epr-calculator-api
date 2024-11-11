@@ -6,6 +6,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.Azure.Amqp.Framing;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace EPR.Calculator.API.Builder
 {
@@ -40,9 +41,9 @@ namespace EPR.Calculator.API.Builder
 
             // Calculate apportionment for the fifth row
             var items = data.First(x => x.OrderId == 3);
+
             var apportionmentData = CalculateApportionment(items, orderId++);
             data.Add(apportionmentData);
-
 
             return new CalcResultOnePlusFourApportionment { Name = "1 + 4 Apportionment %s", CalcResultOnePlusFourApportionmentDetails = data };
         }
@@ -106,14 +107,18 @@ namespace EPR.Calculator.API.Builder
 
         private CalcResultOnePlusFourApportionmentDetail CalculateApportionment(CalcResultOnePlusFourApportionmentDetail apportionmentData, int orderId)
         {
+            var culture = CultureInfo.CreateSpecificCulture("en-GB");
+            culture.NumberFormat.CurrencySymbol = "£";
+            culture.NumberFormat.CurrencyPositivePattern = 0;
+
             return new CalcResultOnePlusFourApportionmentDetail
             {
                 Name = OnePlus4ApportionmentColumnHeaders.OnePluseFourApportionment,
-                Total = $"{CalcResultLapcapDataBuilder.CalculateApportionment(apportionmentData.AllTotal, apportionmentData.AllTotal).ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%",
-                EnglandDisposalTotal = $"{CalcResultLapcapDataBuilder.CalculateApportionment(apportionmentData.EnglandTotal, apportionmentData.AllTotal).ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%",
-                WalesDisposalTotal = $"{CalcResultLapcapDataBuilder.CalculateApportionment(apportionmentData.WalesTotal, apportionmentData.AllTotal).ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%",
-                ScotlandDisposalTotal = $"{CalcResultLapcapDataBuilder.CalculateApportionment(apportionmentData.ScotlandTotal, apportionmentData.AllTotal).ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%",
-                NorthernIrelandDisposalTotal = $"{CalcResultLapcapDataBuilder.CalculateApportionment(apportionmentData.NorthernIrelandTotal, apportionmentData.AllTotal).ToString("N", new NumberFormatInfo { NumberDecimalDigits = 8 })}%",
+                Total = CalcResultLapcapDataBuilder.CalculateApportionment(apportionmentData.AllTotal, apportionmentData.AllTotal).ToString("C", culture),
+                EnglandDisposalTotal = CalcResultLapcapDataBuilder.CalculateApportionment(apportionmentData.EnglandTotal, apportionmentData.AllTotal).ToString("C", culture),
+                WalesDisposalTotal = CalcResultLapcapDataBuilder.CalculateApportionment(apportionmentData.WalesTotal, apportionmentData.AllTotal).ToString("C", culture),
+                ScotlandDisposalTotal = CalcResultLapcapDataBuilder.CalculateApportionment(apportionmentData.ScotlandTotal, apportionmentData.AllTotal).ToString("C", culture),
+                NorthernIrelandDisposalTotal = CalcResultLapcapDataBuilder.CalculateApportionment(apportionmentData.NorthernIrelandTotal, apportionmentData.AllTotal).ToString("C", culture),
                 OrderId = orderId,
             };
         }
