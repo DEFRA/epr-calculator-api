@@ -130,6 +130,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
                          {
                               Name = "Plastic",
                                TotalLateReportingTonnage = 2000.00m
+                         },
+                           new CalcResultLateReportingTonnageDetail()
+                         {
+                              Name = "Total",
+                               TotalLateReportingTonnage = 10000.00m
                          }
                      }               
                  
