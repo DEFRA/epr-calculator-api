@@ -8,13 +8,13 @@ namespace EPR.Calculator.API.Builder.ParametersOther
 {
     public class CalcResultParameterOtherCostBuilder : ICalcResultParameterOtherCostBuilder
     {
-        private const string SchemeAdminOperatingCost = "Scheme administrator operating costs";
-        private const string LaPrepCharge = "Local authority data preparation costs";
+        public const string SchemeAdminOperatingCost = "Scheme administrator operating costs";
+        public const string LaPrepCharge = "Local authority data preparation costs";
         private const string SaOperatingCostHeader = "3 SA Operating Costs";
         private const string LaDataPrepChargeHeader = "4 LA Data Prep Charge";
-        private const string SchemeSetupCost = "Scheme setup costs";
+        public const string SchemeSetupCost = "Scheme setup costs";
         private const string SchemeSetupYearlyCostHeader = "5 Scheme set up cost Yearly Cost";
-        private const string BadDebtProvision = "Bad debt provision";
+        public const string BadDebtProvision = "Bad debt provision";
         private const string BadDebtProvisionHeader = "6 Bad debt provision";
         private readonly ApplicationDBContext context;
         public CalcResultParameterOtherCostBuilder(ApplicationDBContext context) 
@@ -187,13 +187,15 @@ namespace EPR.Calculator.API.Builder.ParametersOther
 
         private static CalcResultParameterOtherCostDetail GetCountryApportionment(CalcResultParameterOtherCostDetail laDataPrep)
         {
+            var total = laDataPrep.EnglandValue + laDataPrep.NorthernIrelandValue + laDataPrep.WalesValue +
+                        laDataPrep.ScotlandValue;
             var otherCostDetail = new CalcResultParameterOtherCostDetail
             {
                 Name = "4 Country Apportionment",
-                EnglandValue = (laDataPrep.EnglandValue / laDataPrep.TotalValue) * 100,
-                NorthernIrelandValue = (laDataPrep.NorthernIrelandValue / laDataPrep.TotalValue) * 100,
-                ScotlandValue = (laDataPrep.ScotlandValue / laDataPrep.TotalValue) * 100,
-                WalesValue = (laDataPrep.WalesValue / laDataPrep.TotalValue) * 100,
+                EnglandValue = (laDataPrep.EnglandValue / total) * 100,
+                NorthernIrelandValue = (laDataPrep.NorthernIrelandValue / total) * 100,
+                ScotlandValue = (laDataPrep.ScotlandValue / total) * 100,
+                WalesValue = (laDataPrep.WalesValue / total) * 100,
                 OrderId = 2,
                 TotalValue = 100M
             };
