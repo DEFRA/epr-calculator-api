@@ -104,10 +104,10 @@ namespace EPR.Calculator.API.Builder.Summary
                 foreach (var material in materials)
                 {
                     var hhPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material);
-                    decimal BadDebtProvision = 0.00M;
+                    decimal BadDebtProvision = Convert.ToDecimal(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Trim('%'));
                     decimal PriceperTonne = GetPriceperTonne_FromParamOthers(producer, material); // by Tim
                     decimal ProducerTotalCostWithoutBadDebtProvision = GetProducerTotalCostWithoutBadDebtProvision(hhPackagingWasteTonnage, PriceperTonne);
-                    decimal BadDebtProvisionCost = GetBadDebtProvision1(ProducerTotalCostWithoutBadDebtProvision, BadDebtProvision);
+                    decimal BadDebtProvisionCost = GetBadDebtProvisionForTwoAcommsCost(ProducerTotalCostWithoutBadDebtProvision, BadDebtProvision);
                     decimal ProducerTotalCostwithBadDebtProvision = GetProducerTotalCostwithBadDebtProvision(ProducerTotalCostWithoutBadDebtProvision, BadDebtProvision);
 
                     costSummary.Add(new CalcResultSummaryProducerDisposalFeesByMaterial
@@ -381,17 +381,17 @@ namespace EPR.Calculator.API.Builder.Summary
             return 0.01M; //HHPackagingWasteTonnage * PriceperTonne;
         }
 
-        private static decimal GetBadDebtProvision1(decimal ProducerTotalCostWithoutBadDebtProvision, decimal BadDebtProvision)
+        private static decimal GetBadDebtProvisionForTwoAcommsCost(decimal ProducerTotalCostWithoutBadDebtProvision, decimal BadDebtProvision)
         {
             //Formula:  F5*'Params - Other'!$B$10
-            return 0.01M; //ProducerTotalCostWithoutBadDebtProvision * BadDebtProvision;
+            return 0.01M * BadDebtProvision; //ProducerTotalCostWithoutBadDebtProvision * BadDebtProvision;
 
         }
 
         private static decimal GetProducerTotalCostwithBadDebtProvision(decimal ProducerTotalCostWithoutBadDebtProvision, decimal BadDebtProvision)
         {
             // Formula: F5*(1+'Params - Other'!$B$10) --uday (Build the calculator - Params - Other - 3)
-            return 0.01M; //ProducerTotalCostWithoutBadDebtProvision * (1 + BadDebtProvision);
+            return ProducerTotalCostWithoutBadDebtProvision * (1 + BadDebtProvision);
         }
 
         private static decimal GetEnglandWithBadDebtProvisionFor2aComms(decimal ProducerTotalCostwithBadDebtProvision, CalcResult calcResult)
