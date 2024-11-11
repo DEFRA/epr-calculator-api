@@ -96,7 +96,7 @@ namespace EPR.Calculator.API.Builder.Summary
                         HouseholdPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material),
                         ManagedConsumerWasteTonnage = GetManagedConsumerWasteTonnage(producer, material),
                         NetReportedTonnage = GetNetReportedTonnage(producer, material),
-                        PricePerTonnage = GetPricePerTonne(material, calcResult),
+                        PricePerTonne = GetPricePerTonne(material, calcResult),
                         ProducerDisposalFee = GetProducerDisposalFee(producer, material, calcResult),
                         BadDebtProvision = GetBadDebtProvision(producer, material, calcResult),
                         ProducerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult),

@@ -173,14 +173,31 @@ namespace EPR.Calculator.API.Exporter
             CalcResultsExporter.PrepareSummaryDataHeader(resultSummary, csvContent);
 
             // Add data
-            //foreach (var producer in resultSummary.ProducerDisposalFees)
-            //{
-            //    csvContent.Append($"{producer.}");
-            //    foreach (var material in producer.ProducerDisposalFeesByMaterial)
-            //    {
-            //        var abc = material.Value;
-            //    }
-            //}
+            foreach (var producer in resultSummary.ProducerDisposalFees)
+            {
+                csvContent.Append($"{producer.ProducerId},");
+                csvContent.Append($"{producer.SubsidiaryId},");
+                csvContent.Append($"{producer.ProducerName},");
+                csvContent.Append($"{producer.Level},");
+
+                foreach (var materialDisposalFees in producer.ProducerDisposalFeesByMaterial)
+                {
+                    foreach (var disposalFee in materialDisposalFees.Value)
+                    {
+                        csvContent.Append($"{disposalFee.HouseholdPackagingWasteTonnage},");
+                        csvContent.Append($"{disposalFee.ManagedConsumerWasteTonnage},");
+                        csvContent.Append($"{disposalFee.NetReportedTonnage},");
+                        csvContent.Append($"{disposalFee.PricePerTonne},");
+                        csvContent.Append($"{disposalFee.ProducerDisposalFee},");
+                        csvContent.Append($"{disposalFee.BadDebtProvision},");
+                        csvContent.Append($"{disposalFee.ProducerDisposalFeeWithBadDebtProvision},");
+                        csvContent.Append($"{disposalFee.EnglandWithBadDebtProvision},");
+                        csvContent.Append($"{disposalFee.WalesWithBadDebtProvision},");
+                        csvContent.Append($"{disposalFee.ScotlandWithBadDebtProvision},");
+                        csvContent.Append($"{disposalFee.NorthernIrelandWithBadDebtProvision},");
+                    }
+                }
+            }
         }
 
         private static void PrepareSummaryDataHeader(CalcResultSummary resultSummary, StringBuilder csvContent)

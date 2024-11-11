@@ -8,7 +8,7 @@
 
         public decimal NetReportedTonnage { get; set; }
 
-        public decimal PricePerTonnage { get; set; }
+        public decimal PricePerTonne { get; set; }
 
         public decimal ProducerDisposalFee { get; set; }
 
