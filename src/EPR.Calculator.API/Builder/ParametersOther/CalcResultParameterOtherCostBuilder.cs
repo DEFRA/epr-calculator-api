@@ -157,6 +157,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
             otherCostDetail.NorthernIreland = $"{otherCostDetail.NorthernIrelandValue}%";
             otherCostDetail.Scotland = $"{otherCostDetail.ScotlandValue}%";
             otherCostDetail.Wales = $"{otherCostDetail.WalesValue}%";
+            otherCostDetail.Total = $"{otherCostDetail.TotalValue}%";
 
             return otherCostDetail;
         }
