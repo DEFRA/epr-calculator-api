@@ -13,6 +13,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
     [TestClass]
     public class CalcResultBuilderTests
     {
+        private CalcResultBuilder testClass;
         private Mock<ICalcResultDetailBuilder> calcResultDetailBuilder;
         private Mock<ICalcResultLapcapDataBuilder> lapcapBuilder;
         private Mock<ICalcResultSummaryBuilder> summaryBuilder;
@@ -30,7 +31,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             this.mockLateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
             this.runLaDisposalCostBuilder = new Mock<ICalcRunLaDisposalCostBuilder>();
             this.mockOnePlusFourApportionmentBuilder = new Mock<ICalcResultOnePlusFourApportionmentBuilder>();
-            mockICalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
+            this.mockICalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
             this.testClass = new CalcResultBuilder(calcResultDetailBuilder.Object, lapcapBuilder.Object, mockLateReportingBuilder.Object, runLaDisposalCostBuilder.Object, summaryBuilder.Object, mockOnePlusFourApportionmentBuilder.Object, mockICalcResultParameterOtherCostBuilder.Object);
         }
 

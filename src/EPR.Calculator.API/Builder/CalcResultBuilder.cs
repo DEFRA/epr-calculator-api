@@ -25,7 +25,8 @@ namespace EPR.Calculator.API.Builder
             ICalcResultLateReportingBuilder lateReportingBuilder,
             ICalcRunLaDisposalCostBuilder calcRunLaDisposalCostBuilder,
             ICalcResultSummaryBuilder summaryBuilder, 
-            ICalcResultOnePlusFourApportionmentBuilder lapcapplusFourApportionmentBuilder, ICalcResultParameterOtherCostBuilder calcResultParameterOtherCostBuilder) 
+            ICalcResultOnePlusFourApportionmentBuilder lapcapplusFourApportionmentBuilder, 
+            ICalcResultParameterOtherCostBuilder calcResultParameterOtherCostBuilder) 
         
         {
             this.calcResultDetailBuilder = calcResultDetailBuilder;
