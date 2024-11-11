@@ -19,6 +19,7 @@ namespace EPR.Calculator.API.UnitTests
         private Mock<ICalcResultLateReportingBuilder> mockLateReportingBuilder;
         private CalcResultBuilder calcResultBuilder;
         private Mock<ICalcRunLaDisposalCostBuilder> mockCalcRunLaDisposalCostBuilder;
+        private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockOnePlusFourApportionmentBuilder;
 
         [TestInitialize]
         public void Setup()
@@ -28,7 +29,7 @@ namespace EPR.Calculator.API.UnitTests
             mockSummaryBuilder = new Mock<ICalcResultSummaryBuilder>();
             mockLateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
             mockCalcRunLaDisposalCostBuilder = new Mock<ICalcRunLaDisposalCostBuilder>();
-            calcResultBuilder = new CalcResultBuilder(mockCalcResultDetailBuilder.Object, mockLapcapBuilder.Object, mockLateReportingBuilder.Object, mockCalcRunLaDisposalCostBuilder.Object, mockSummaryBuilder.Object);            
+            calcResultBuilder = new CalcResultBuilder(mockCalcResultDetailBuilder.Object, mockLapcapBuilder.Object, mockLateReportingBuilder.Object, mockCalcRunLaDisposalCostBuilder.Object, mockSummaryBuilder.Object, mockOnePlusFourApportionmentBuilder.Object);            
         }
 
         //[TestMethod]

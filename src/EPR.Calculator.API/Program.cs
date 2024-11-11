@@ -41,6 +41,7 @@ builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<ITransposePomAndOrgDataService, TransposePomAndOrgDataService>();
 builder.Services.AddScoped<ICalcResultLateReportingBuilder, CalcResultLateReportingBuilder>();
 builder.Services.AddScoped<ICalcRunLaDisposalCostBuilder, CalcRunLaDisposalCostBuilder>();
+builder.Services.AddScoped<ICalcResultOnePlusFourApportionmentBuilder, CalcResultOnePlusFourApportionmentBuilder>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>

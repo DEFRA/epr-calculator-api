@@ -16,20 +16,23 @@ namespace EPR.Calculator.API.Builder
         private readonly ICalcResultSummaryBuilder summaryBuilder;
         private readonly ICalcResultLateReportingBuilder lateReportingBuilder;
         private readonly ICalcRunLaDisposalCostBuilder laDisposalCostBuilder;
+        private readonly ICalcResultOnePlusFourApportionmentBuilder lapcapplusFourApportionmentBuilder;
 
         public CalcResultBuilder(ICalcResultDetailBuilder calcResultDetailBuilder,
             ICalcResultLapcapDataBuilder lapcapBuilder,
             ICalcResultLateReportingBuilder lateReportingBuilder,
             ICalcRunLaDisposalCostBuilder calcRunLaDisposalCostBuilder,
-            ICalcResultSummaryBuilder summaryBuilder) 
+            ICalcResultSummaryBuilder summaryBuilder, 
+            ICalcResultOnePlusFourApportionmentBuilder lapcapplusFourApportionmentBuilder) 
+        
         {
             this.calcResultDetailBuilder = calcResultDetailBuilder;
             this.lapcapBuilder = lapcapBuilder;
             this.laDisposalCostBuilder = calcRunLaDisposalCostBuilder;
             this.lateReportingBuilder = lateReportingBuilder;
             this.summaryBuilder = summaryBuilder;
+            this.lapcapplusFourApportionmentBuilder = lapcapplusFourApportionmentBuilder;
         }
-
         public CalcResult Build(CalcResultsRequestDto resultsRequestDto)
         {
             var calcResult = new CalcResult();
@@ -38,7 +41,10 @@ namespace EPR.Calculator.API.Builder
             calcResult.CalcResultLapcapData = this.lapcapBuilder.Construct(resultsRequestDto);
             calcResult.CalcResultLateReportingTonnageData = this.lateReportingBuilder.Construct(resultsRequestDto);
             calcResult.CalcResultLaDisposalCostData = this.laDisposalCostBuilder.Construct(resultsRequestDto, calcResult);
+            calcResult.CalcResultOnePlusFourApportionment = this.lapcapplusFourApportionmentBuilder.Construct(resultsRequestDto, calcResult);
             calcResult.CalcResultSummary = this.summaryBuilder.Construct(resultsRequestDto, calcResult);
+
+            
 
             return calcResult;
         }

@@ -18,6 +18,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
         private Mock<ICalcResultSummaryBuilder> summaryBuilder;
         private Mock<ICalcResultLateReportingBuilder> mockLateReportingBuilder;
         private Mock<ICalcRunLaDisposalCostBuilder> runLaDisposalCostBuilder;
+        private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockOnePlusFourApportionmentBuilder;
 
         [TestInitialize]
         public void SetUp()
@@ -27,14 +28,16 @@ namespace EPR.Calculator.API.UnitTests.Builder
             this.summaryBuilder = new Mock<ICalcResultSummaryBuilder>();
             this.mockLateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
             this.runLaDisposalCostBuilder = new Mock<ICalcRunLaDisposalCostBuilder>();
-            this.testClass = new CalcResultBuilder(calcResultDetailBuilder.Object, lapcapBuilder.Object, mockLateReportingBuilder.Object, runLaDisposalCostBuilder.Object, summaryBuilder.Object);
+            this.mockOnePlusFourApportionmentBuilder = new Mock<ICalcResultOnePlusFourApportionmentBuilder>();
+
+            this.testClass = new CalcResultBuilder(calcResultDetailBuilder.Object, lapcapBuilder.Object, mockLateReportingBuilder.Object, runLaDisposalCostBuilder.Object, summaryBuilder.Object, mockOnePlusFourApportionmentBuilder.Object);
         }
 
         [TestMethod]
         public void CanConstruct()
         {
             // Act
-            var instance = new CalcResultBuilder(calcResultDetailBuilder.Object, lapcapBuilder.Object, mockLateReportingBuilder.Object, runLaDisposalCostBuilder.Object, summaryBuilder.Object);
+            var instance = new CalcResultBuilder(calcResultDetailBuilder.Object, lapcapBuilder.Object, mockLateReportingBuilder.Object, runLaDisposalCostBuilder.Object, summaryBuilder.Object, mockOnePlusFourApportionmentBuilder.Object);
 
             // Assert
             Assert.IsNotNull(instance);

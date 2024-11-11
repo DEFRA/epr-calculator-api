@@ -19,6 +19,7 @@ namespace EPR.Calculator.API.Exporter
         private const string LapcapFile = "LAPCAP File";
         private const string ParametersFile = "Parameters File";
         private const string LaDisposalCostFile = "LA Disposal cost File";
+        private const string CountryApportionmentFile = "Country Apportionment File";
 
 
         public CalcResultsExporter(IBlobStorageService blobStorageService)
@@ -37,6 +38,12 @@ namespace EPR.Calculator.API.Exporter
             if (results.CalcResultLateReportingTonnageData != null)
             {
                 PrepareLateReportingData(results.CalcResultLateReportingTonnageData, csvContent);
+            }
+
+            //Rekha Chnages
+            if (results.CalcResultOnePlusFourApportionment != null)
+            {
+                PrepareOnePluseFourApportionment(results.CalcResultOnePlusFourApportionment, csvContent);
             }
 
             if (results.CalcResultLaDisposalCostData != null)
@@ -70,6 +77,7 @@ namespace EPR.Calculator.API.Exporter
             AppendRPDFileInfo(csvContent, RPDFileORG, RPDFilePOM, results.CalcResultDetail.RpdFileORG, results.CalcResultDetail.RpdFilePOM);
             AppendFileInfo(csvContent, LapcapFile, results.CalcResultDetail.LapcapFile);
             AppendFileInfo(csvContent, ParametersFile, results.CalcResultDetail.ParametersFile);
+            AppendFileInfo(csvContent, CountryApportionmentFile, results.CalcResultDetail.CountryApportionmentFile);
         }
 
         private static void AppendRPDFileInfo(StringBuilder csvContent, string rPDFileORG, string rPDFilePOM, string rpdFileORGValue, string rpdFilePOMValue)
@@ -255,6 +263,25 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"{item},");
             }
             csvContent.AppendLine();
+        }
+        private static void PrepareOnePluseFourApportionment(CalcResultOnePlusFourApportionment calcResult1Plus4Apportionment, StringBuilder csvContent)
+        {
+            csvContent.AppendLine();
+            csvContent.AppendLine();
+
+            csvContent.AppendLine(calcResult1Plus4Apportionment.Name);
+            var lapcapDataDetails = calcResult1Plus4Apportionment.CalcResultOnePlusFourApportionmentDetails.OrderBy(x => x.OrderId);
+
+            foreach (var lapcapData in lapcapDataDetails)
+            {
+                csvContent.Append($"{CsvSanitiser.SanitiseData(lapcapData.Name)},");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.Total)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.EnglandDisposalTotal)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.WalesDisposalTotal)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.ScotlandDisposalTotal)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.NorthernIrelandDisposalTotal)}\",");
+                csvContent.AppendLine();
+            }
         }
     }
 }
