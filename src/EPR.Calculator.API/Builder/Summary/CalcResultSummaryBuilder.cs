@@ -102,7 +102,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             result.ColumnHeaders = columnHeaders;
 
-            var producerDetailList = context.ProducerDetail.Where(pd => pd.CalculatorRunId == resultsRequestDto.RunId);
+            var producerDetailList = context.ProducerDetail.Where(pd => pd.CalculatorRunId == resultsRequestDto.RunId).ToList();
 
             var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
 
