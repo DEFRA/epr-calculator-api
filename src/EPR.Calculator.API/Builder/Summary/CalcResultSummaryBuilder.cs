@@ -3,6 +3,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Utils;
 using System.Globalization;
 
 namespace EPR.Calculator.API.Builder.Summary
@@ -15,7 +16,6 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int ProducerDisposalFeesHeaderColumnIndex = 4;
         private const int MaterialsBreakdownHeaderInitialColumnIndex = 4;
         private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
-        private const string OneCountryApportionment = "1 Country Apportionment";
 
         public CalcResultSummaryBuilder(ApplicationDBContext context)
         {
@@ -28,13 +28,13 @@ namespace EPR.Calculator.API.Builder.Summary
 
             result.ResultSummaryHeader = new CalcResultSummaryHeader
             {
-                Name = "Calculation Result",
+                Name = CalcResultSummaryHeaders.CalculationResult,
                 ColumnIndex = ResultSummaryHeaderColumnIndex
             };
 
             result.ProducerDisposalFeesHeader = new CalcResultSummaryHeader
             {
-                Name = "1 Producer Disposal Fees with Bad Debt Provision",
+                Name = CalcResultSummaryHeaders.OneProducerDisposalFeesWithBadDebtProvision,
                 ColumnIndex = ProducerDisposalFeesHeaderColumnIndex
             };
 
@@ -54,6 +54,13 @@ namespace EPR.Calculator.API.Builder.Summary
                 });
                 columnIndex = columnIndex + MaterialsBreakdownHeaderIncrementalColumnIndex;
             }
+
+            // Add disposal fee summary header
+            materialsBreakdownHeader.Add(new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.DisposalFeeSummary,
+                ColumnIndex = columnIndex
+            });
 
             result.MaterialBreakdownHeaders = materialsBreakdownHeader;
 
@@ -83,11 +90,23 @@ namespace EPR.Calculator.API.Builder.Summary
                 ]);
             }
 
+            columnHeaders.AddRange([
+                CalcResultSummaryHeaders.TotalProducerDisposalFee,
+                CalcResultSummaryHeaders.BadDebtProvision,
+                CalcResultSummaryHeaders.TotalProducerDisposalFeeWithBadDebtProvision,
+                CalcResultSummaryHeaders.EnglandTotal,
+                CalcResultSummaryHeaders.WalesTotal,
+                CalcResultSummaryHeaders.ScotlandTotal,
+                CalcResultSummaryHeaders.NorthernIrelandTotal
+            ]);
+
             result.ColumnHeaders = columnHeaders;
 
-            var producerDetailList = context.ProducerDetail.ToList();
+            var producerDetailList = context.ProducerDetail.Where(pd => pd.CalculatorRunId == resultsRequestDto.RunId);
 
             var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
+
+            var producerDisposalFeesByCountry = new List<CalcResultSummaryProducerDisposalFeesByCountry>();
 
             foreach (var producer in producerDetailList)
             {
@@ -123,9 +142,22 @@ namespace EPR.Calculator.API.Builder.Summary
                     Level = producer.SubsidiaryId == null ? 1 : 2,
                     ProducerDisposalFeesByMaterial = materialCostSummary
                 });
+
+                producerDisposalFeesByCountry.Add(new CalcResultSummaryProducerDisposalFeesByCountry
+                {
+                    TotalProducerDisposalFee = GetTotalProducerDisposalFee(materialCostSummary),
+                    BadDebtProvision = GetTotalBadDebtProvision(materialCostSummary),
+                    TotalProducerDisposalFeeWithBadDebtProvision = GetTotalProducerDisposalFeeWithBadDebtProvision(materialCostSummary),
+                    EnglandTotal = GetEnglandTotal(materialCostSummary),
+                    WalesTotal = GetWalesTotal(materialCostSummary),
+                    ScotlandTotal = GetScotlandTotal(materialCostSummary),
+                    NorthernIrelandTotal = GetNorthernIrelandTotal(materialCostSummary)
+                });
             }
 
             result.ProducerDisposalFees = producerDisposalFees;
+
+            result.ProducerDisposalFeesByCountry = producerDisposalFeesByCountry;
 
             return result;
         }
@@ -261,7 +293,112 @@ namespace EPR.Calculator.API.Builder.Summary
 
         private static CalcResultLapcapDataDetails? GetCountryApportionmentPercentage(CalcResult calcResult)
         {
-            return calcResult.CalcResultLapcapData.CalcResultLapcapDataDetails?.FirstOrDefault(la => la.Name == OneCountryApportionment);
+            return calcResult.CalcResultLapcapData.CalcResultLapcapDataDetails?.FirstOrDefault(la => la.Name == CalcResultSummaryHeaders.OneCountryApportionment);
+        }
+
+        private static decimal GetTotalProducerDisposalFee(Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> materialCostSummary)
+        {
+            decimal totalProducerDisposalFee = 0;
+
+            foreach (var material in materialCostSummary)
+            {
+                foreach (var fee in material.Value)
+                {
+                    totalProducerDisposalFee += fee.ProducerDisposalFee;
+                }
+            }
+
+            return totalProducerDisposalFee;
+        }
+
+        private static decimal GetTotalBadDebtProvision(Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> materialCostSummary)
+        {
+            decimal totalBadDebtProvision = 0;
+
+            foreach (var material in materialCostSummary)
+            {
+                foreach (var fee in material.Value)
+                {
+                    totalBadDebtProvision += fee.BadDebtProvision;
+                }
+            }
+
+            return totalBadDebtProvision;
+        }
+
+        private static decimal GetTotalProducerDisposalFeeWithBadDebtProvision(Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> materialCostSummary)
+        {
+            decimal totalProducerDisposalFeeWithBadDebtProvision = 0;
+
+            foreach (var material in materialCostSummary)
+            {
+                foreach (var fee in material.Value)
+                {
+                    totalProducerDisposalFeeWithBadDebtProvision += fee.ProducerDisposalFeeWithBadDebtProvision;
+                }
+            }
+
+            return totalProducerDisposalFeeWithBadDebtProvision;
+        }
+
+        private static decimal GetEnglandTotal(Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> materialCostSummary)
+        {
+            decimal totalEngland = 0;
+
+            foreach (var material in materialCostSummary)
+            {
+                foreach (var fee in material.Value)
+                {
+                    totalEngland += fee.EnglandWithBadDebtProvision;
+                }
+            }
+
+            return totalEngland;
+        }
+
+        private static decimal GetWalesTotal(Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> materialCostSummary)
+        {
+            decimal totalWales = 0;
+
+            foreach (var material in materialCostSummary)
+            {
+                foreach (var fee in material.Value)
+                {
+                    totalWales += fee.WalesWithBadDebtProvision;
+                }
+            }
+
+            return totalWales;
+        }
+
+        private static decimal GetScotlandTotal(Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> materialCostSummary)
+        {
+            decimal totalScotland = 0;
+
+            foreach (var material in materialCostSummary)
+            {
+                foreach (var fee in material.Value)
+                {
+                    totalScotland += fee.ScotlandWithBadDebtProvision;
+                }
+            }
+
+            return totalScotland;
+        }
+
+        private static decimal GetNorthernIrelandTotal(Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> materialCostSummary)
+        {
+            decimal totalNorthernIreland = 0;
+
+            foreach (var material in materialCostSummary)
+            {
+                foreach (var fee in material.Value)
+                {
+                    totalNorthernIreland += fee.NorthernIrelandWithBadDebtProvision;
+                }
+            }
+
+            return totalNorthernIreland;
         }
     }
 }
