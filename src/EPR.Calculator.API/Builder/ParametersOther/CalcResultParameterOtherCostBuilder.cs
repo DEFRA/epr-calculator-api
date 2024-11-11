@@ -67,7 +67,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
             other.Details = laDataPrepCharges;
 
             var schemeSetUpCharges = results.Where(x => x.ParameterType == SchemeSetupCost);
-            var schemeSetupCharge = GetPrepCharge(SchemeSetupYearlyCostHeader, 1, lapPrepCharges);
+            var schemeSetupCharge = GetPrepCharge(SchemeSetupYearlyCostHeader, 1, schemeSetUpCharges);
             other.SchemeSetupCost = schemeSetupCharge;
 
             var badDebtValue = results.Single(x => x.ParameterType == BadDebtProvision).ParameterValue;
@@ -95,7 +95,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 PercentageValue = precentageIncrease.ParameterValue
             };
             materialityIncrease.Amount = materialityIncrease.AmountValue.ToString("C", culture);
-            materialityIncrease.Percentage = $"{materialityIncrease.PercentageValue}%";
+            materialityIncrease.Percentage = $"{materialityIncrease.PercentageValue:0.00}%";
             materialities.Add (materialityIncrease);
 
             var materialityDecrease = new CalcResultMateriality
@@ -105,7 +105,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 PercentageValue = percentageDecrease.ParameterValue
             };
             materialityDecrease.Amount = materialityDecrease.AmountValue.ToString("C", culture);
-            materialityDecrease.Percentage = $"{materialityDecrease.PercentageValue}%";
+            materialityDecrease.Percentage = $"{materialityDecrease.PercentageValue:0.00}%";
             materialities.Add(materialityDecrease);
             other.Materiality = materialities;
 
@@ -127,8 +127,8 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 SevenMateriality = "Increase",
                 AmountValue = tonIncrease.ParameterValue,
                 PercentageValue = tonPrecentageIncrease.ParameterValue,
-                Amount = $"{tonIncrease.ParameterValue}",
-                Percentage = $"{tonPrecentageIncrease.ParameterValue}%"
+                Amount = $"{tonIncrease.ParameterValue:0.00}",
+                Percentage = $"{tonPrecentageIncrease.ParameterValue:0.00}%"
             };
             materialities.Add(tonnageIncrease);
 
@@ -137,8 +137,8 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 SevenMateriality = "Decrease",
                 AmountValue = tonDecrease.ParameterValue,
                 PercentageValue = tonPercentageDecrease.ParameterValue,
-                Amount = $"{tonDecrease.ParameterValue}",
-                Percentage = $"{tonPercentageDecrease.ParameterValue}%"
+                Amount = $"{tonDecrease.ParameterValue:0.00}",
+                Percentage = $"{tonPercentageDecrease.ParameterValue:0.00}%"
             };
             materialities.Add(tonnageDecrease);
             other.Materiality = materialities;
@@ -158,11 +158,11 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 OrderId = 2,
                 TotalValue = 100M
             };
-            otherCostDetail.England = $"{otherCostDetail.EnglandValue}%";
-            otherCostDetail.NorthernIreland = $"{otherCostDetail.NorthernIrelandValue}%";
-            otherCostDetail.Scotland = $"{otherCostDetail.ScotlandValue}%";
-            otherCostDetail.Wales = $"{otherCostDetail.WalesValue}%";
-            otherCostDetail.Total = $"{otherCostDetail.TotalValue}%";
+            otherCostDetail.England = $"{otherCostDetail.EnglandValue:0.00000000}%";
+            otherCostDetail.NorthernIreland = $"{otherCostDetail.NorthernIrelandValue:0.00000000}%";
+            otherCostDetail.Scotland = $"{otherCostDetail.ScotlandValue:0.00000000}%";
+            otherCostDetail.Wales = $"{otherCostDetail.WalesValue:0.00000000}%";
+            otherCostDetail.Total = $"{otherCostDetail.TotalValue:0.00000000}%";
 
             return otherCostDetail;
         }
