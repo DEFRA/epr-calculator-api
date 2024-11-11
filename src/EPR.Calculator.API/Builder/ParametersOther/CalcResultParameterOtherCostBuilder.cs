@@ -72,7 +72,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
             other.SchemeSetupCost = schemeSetupCharge;
 
             var badDebtValue = results.Single(x => x.ParameterType == BadDebtProvision).ParameterValue;
-            other.BadDebtProvision = new KeyValuePair<string, string> (BadDebtProvisionHeader, $"{badDebtValue}%");
+            other.BadDebtProvision = new KeyValuePair<string, string> (BadDebtProvisionHeader, $"{badDebtValue:0.00}%");
 
             var materialityHeader = new CalcResultMateriality();
             materialityHeader.SevenMateriality = "7 Materiality";
@@ -128,7 +128,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 SevenMateriality = "Increase",
                 AmountValue = tonIncrease.ParameterValue,
                 PercentageValue = tonPrecentageIncrease.ParameterValue,
-                Amount = $"{tonIncrease.ParameterValue:0.00}",
+                Amount = $"{tonIncrease.ParameterValue.ToString("C", culture)}",
                 Percentage = $"{tonPrecentageIncrease.ParameterValue:0.00}%"
             };
             materialities.Add(tonnageIncrease);
@@ -138,7 +138,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 SevenMateriality = "Decrease",
                 AmountValue = tonDecrease.ParameterValue,
                 PercentageValue = tonPercentageDecrease.ParameterValue,
-                Amount = $"{tonDecrease.ParameterValue:0.00}",
+                Amount = $"{tonDecrease.ParameterValue.ToString("C", culture)}",
                 Percentage = $"{tonPercentageDecrease.ParameterValue:0.00}%"
             };
             materialities.Add(tonnageDecrease);
