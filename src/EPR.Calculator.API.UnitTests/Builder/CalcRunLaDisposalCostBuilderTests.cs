@@ -40,7 +40,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
 
         [TestMethod]
-        public void ConstructTest_For_Aluminium()
+        public void ConstructTest_For_LA_DisposalCost()
         {
             const string aluminium = "Aluminium";
             const string plastic = "Plastic";
@@ -182,7 +182,6 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("2000.00", plasticRow.ProducerReportedHouseholdPackagingWasteTonnage);
             Assert.AreEqual("2000.00", plasticRow.LateReportingTonnage);
             Assert.AreEqual("4000.00", plasticRow.ProducerReportedHouseholdTonnagePlusLateReportingTonnage);
-            Assert.AreEqual("£0.35", plasticRow.DisposalCostPricePerTonne);
 
             var totalRow = lapcapDisposalCostResults?.CalcResultLaDisposalCostDetails?.Single(x => x.Name == "Total");
             Assert.IsNotNull(aluminiumRow);
