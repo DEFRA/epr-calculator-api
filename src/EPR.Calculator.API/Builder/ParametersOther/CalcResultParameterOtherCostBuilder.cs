@@ -1,8 +1,8 @@
 ﻿using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace EPR.Calculator.API.Builder.ParametersOther
 {
@@ -63,7 +63,8 @@ namespace EPR.Calculator.API.Builder.ParametersOther
             var laDataPrepCharges = new List<CalcResultParameterOtherCostDetail>();
             var laDataPrep = GetPrepCharge(LaDataPrepChargeHeader, 1, lapPrepCharges);
             laDataPrepCharges.Add(laDataPrep);
-            laDataPrepCharges.Add(GetCountryApportionment(laDataPrep));
+            var countryApportionment = GetCountryApportionment(laDataPrep);
+            laDataPrepCharges.Add(countryApportionment);
             other.Details = laDataPrepCharges;
 
             var schemeSetUpCharges = results.Where(x => x.ParameterType == SchemeSetupCost);
@@ -142,6 +143,44 @@ namespace EPR.Calculator.API.Builder.ParametersOther
             };
             materialities.Add(tonnageDecrease);
             other.Materiality = materialities;
+
+            var countries = context.Country.ToList();
+
+            var costTypeId = context.CostType.Single(x => x.Name == "LA Data Prep Charge").Id;
+
+            context.CountryApportionment.Add(new CountryApportionment
+            {
+                CalculatorRunId = resultsRequestDto.RunId,
+                CountryId = countries.Single(x => x.Name == "England").Id,
+                CostTypeId = costTypeId,
+                Apportionment = laDataPrep.EnglandValue
+            });
+
+            context.CountryApportionment.Add(new CountryApportionment
+            {
+                CalculatorRunId = resultsRequestDto.RunId,
+                CountryId = countries.Single(x => x.Name == "Wales").Id,
+                CostTypeId = costTypeId,
+                Apportionment = laDataPrep.WalesValue
+            });
+
+            context.CountryApportionment.Add(new CountryApportionment
+            {
+                CalculatorRunId = resultsRequestDto.RunId,
+                CountryId = countries.Single(x => x.Name == "Northern Ireland").Id,
+                CostTypeId = costTypeId,
+                Apportionment = laDataPrep.NorthernIrelandValue
+            });
+
+            context.CountryApportionment.Add(new CountryApportionment
+            {
+                CalculatorRunId = resultsRequestDto.RunId,
+                CountryId = countries.Single(x => x.Name == "Scotland").Id,
+                CostTypeId = costTypeId,
+                Apportionment = laDataPrep.ScotlandValue
+            });
+
+            context.SaveChanges();
 
             return other;
         }
