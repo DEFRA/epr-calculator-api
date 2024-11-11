@@ -116,7 +116,7 @@ namespace EPR.Calculator.API.Builder.Lapcap
                 CalculatorRunId = resultsRequestDto.RunId,
                 CountryId = countries.Single(x => x.Name == "England").Id,
                 CostTypeId = costTypeId,
-                Apportionment = countryApportionment.EnglandCost
+                Apportionment = totalDetail.EnglandCost
             });
 
             context.CountryApportionment.Add(new CountryApportionment
@@ -124,7 +124,7 @@ namespace EPR.Calculator.API.Builder.Lapcap
                 CalculatorRunId = resultsRequestDto.RunId,
                 CountryId = countries.Single(x => x.Name == "Wales").Id,
                 CostTypeId = costTypeId,
-                Apportionment = countryApportionment.WalesCost
+                Apportionment = totalDetail.WalesCost
             });
 
             context.CountryApportionment.Add(new CountryApportionment
@@ -132,7 +132,7 @@ namespace EPR.Calculator.API.Builder.Lapcap
                 CalculatorRunId = resultsRequestDto.RunId,
                 CountryId = countries.Single(x => x.Name == "Northern Ireland").Id,
                 CostTypeId = costTypeId,
-                Apportionment = countryApportionment.NorthernIrelandCost
+                Apportionment = totalDetail.NorthernIrelandCost
             });
 
             context.CountryApportionment.Add(new CountryApportionment
@@ -140,7 +140,7 @@ namespace EPR.Calculator.API.Builder.Lapcap
                 CalculatorRunId = resultsRequestDto.RunId,
                 CountryId = countries.Single(x => x.Name == "Scotland").Id,
                 CostTypeId = costTypeId,
-                Apportionment = countryApportionment.ScotlandCost
+                Apportionment = totalDetail.ScotlandCost
             });
 
             context.SaveChanges();
