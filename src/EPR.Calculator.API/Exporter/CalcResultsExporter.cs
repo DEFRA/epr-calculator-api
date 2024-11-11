@@ -80,6 +80,18 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"{CsvSanitiser.SanitiseData(laDataPrep.NorthernIreland)},");
                 csvContent.AppendLine($"{CsvSanitiser.SanitiseData(laDataPrep.Total)}");
             }
+            csvContent.AppendLine();
+            var schemeCost = otherCost.SchemeSetupCost;
+            csvContent.Append($"{CsvSanitiser.SanitiseData(schemeCost.Name)},");
+            csvContent.Append($"{CsvSanitiser.SanitiseData(schemeCost.England)},");
+            csvContent.Append($"{CsvSanitiser.SanitiseData(schemeCost.Wales)},");
+            csvContent.Append($"{CsvSanitiser.SanitiseData(schemeCost.Scotland)},");
+            csvContent.Append($"{CsvSanitiser.SanitiseData(schemeCost.NorthernIreland)},");
+            csvContent.AppendLine($"{CsvSanitiser.SanitiseData(schemeCost.Total)}");
+
+            csvContent.AppendLine();
+            csvContent.Append($"{CsvSanitiser.SanitiseData(otherCost.BadDebtProvision.Key)},");
+            csvContent.AppendLine($"{CsvSanitiser.SanitiseData(otherCost.BadDebtProvision.Value)}");
         }
 
         private static void LoadCalcResultDetail(CalcResult results, StringBuilder csvContent)
