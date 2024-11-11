@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
 using EPR.Calculator.API.Builder.Summary;
+using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
@@ -11,6 +12,7 @@ namespace EPR.Calculator.API.Builder
 {
     public class CalcResultBuilder : ICalcResultBuilder
     {
+        private readonly ICalcResultParameterOtherCostBuilder calcResultParameterOtherCostBuilder;
         private readonly ICalcResultDetailBuilder calcResultDetailBuilder;
         private readonly ICalcResultLapcapDataBuilder lapcapBuilder;
         private readonly ICalcResultSummaryBuilder summaryBuilder;
@@ -23,7 +25,7 @@ namespace EPR.Calculator.API.Builder
             ICalcResultLateReportingBuilder lateReportingBuilder,
             ICalcRunLaDisposalCostBuilder calcRunLaDisposalCostBuilder,
             ICalcResultSummaryBuilder summaryBuilder, 
-            ICalcResultOnePlusFourApportionmentBuilder lapcapplusFourApportionmentBuilder) 
+            ICalcResultOnePlusFourApportionmentBuilder lapcapplusFourApportionmentBuilder, ICalcResultParameterOtherCostBuilder calcResultParameterOtherCostBuilder) 
         
         {
             this.calcResultDetailBuilder = calcResultDetailBuilder;
@@ -32,6 +34,7 @@ namespace EPR.Calculator.API.Builder
             this.lateReportingBuilder = lateReportingBuilder;
             this.summaryBuilder = summaryBuilder;
             this.lapcapplusFourApportionmentBuilder = lapcapplusFourApportionmentBuilder;
+            this.calcResultParameterOtherCostBuilder = calcResultParameterOtherCostBuilder;
         }
         public CalcResult Build(CalcResultsRequestDto resultsRequestDto)
         {
@@ -42,7 +45,9 @@ namespace EPR.Calculator.API.Builder
             calcResult.CalcResultLateReportingTonnageData = this.lateReportingBuilder.Construct(resultsRequestDto);
             calcResult.CalcResultLaDisposalCostData = this.laDisposalCostBuilder.Construct(resultsRequestDto, calcResult);
             calcResult.CalcResultOnePlusFourApportionment = this.lapcapplusFourApportionmentBuilder.Construct(resultsRequestDto, calcResult);
+            calcResult.CalcResultParameterOtherCost = this.calcResultParameterOtherCostBuilder.Construct(resultsRequestDto);
             calcResult.CalcResultSummary = this.summaryBuilder.Construct(resultsRequestDto, calcResult);
+
 
             
 
