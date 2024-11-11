@@ -93,7 +93,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                         }
                     }
                 },
-                CalcResultLateReportingTonnageDetail = new CalcResultLateReportingTonnage
+                CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
                 {
                     Name = "TestValue2008053382",
                     CalcResultLateReportingTonnageDetails = new[] {
@@ -380,39 +380,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                             NorthernIrelandDisposalTotal = "TestValue1185358720",
                             TotalDisposalTotal = "TestValue1036905338",
                             OrderId = 214124936
-                        }
-                    }
-                },
-                CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData
-                {
-                    Name = "TestValue873636594",
-                    CalcResultLaDisposalCostDetails = new[] {
-                        new CalcResultParameterCostDetail
-                        {
-                            KeyName = "TestValue937334742",
-                            Cost = 716867220.96M,
-                            CategoryName = "TestValue1298861039",
-                            CalcResultFormatterType = CalcResultFormatterType.None,
-                            OrderId = 1222747754,
-                            Precision = 324680133
-                        },
-                        new CalcResultParameterCostDetail
-                        {
-                            KeyName = "TestValue1615476659",
-                            Cost = 1270001246.58M,
-                            CategoryName = "TestValue1316282835",
-                            CalcResultFormatterType = CalcResultFormatterType.Percentage,
-                            OrderId = 519356024,
-                            Precision = 1084171620
-                        },
-                        new CalcResultParameterCostDetail
-                        {
-                            KeyName = "TestValue1526980830",
-                            Cost = 224658357.66M,
-                            CategoryName = "TestValue1791641390",
-                            CalcResultFormatterType = CalcResultFormatterType.None,
-                            OrderId = 1949639824,
-                            Precision = 1132782434
                         }
                     }
                 }

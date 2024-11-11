@@ -2,7 +2,7 @@
 
 namespace EPR.Calculator.API.Models
 {
-    public class CalcResultFeesCommsCostSummary
+    public class CalcResultSummaryTwoACommsCostByMaterial
     {
         public decimal HouseholdPackagingWasteTonnage { get; set; }
 

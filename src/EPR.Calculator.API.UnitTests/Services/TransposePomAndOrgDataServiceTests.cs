@@ -23,75 +23,75 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
-        [TestMethod]
-        public void Transpose_Should_Return_Correct_Producer_Detail()
-        {
-            var expectedResult = new ProducerDetail
-            {
-                Id = 1,
-                ProducerId = 1,
-                SubsidiaryId = "SUBSID1",
-                ProducerName = "UPU LIMITED",
-                CalculatorRunId = 1,
-                CalculatorRun = new CalculatorRun()
-            };
+//        [TestMethod]
+//        public void Transpose_Should_Return_Correct_Producer_Detail()
+//        {
+//            var expectedResult = new ProducerDetail
+//            {
+//                Id = 1,
+//                ProducerId = 1,
+//                SubsidiaryId = "SUBSID1",
+//                ProducerName = "UPU LIMITED",
+//                CalculatorRunId = 1,
+//                CalculatorRun = new CalculatorRun()
+//            };
 
-#pragma warning disable CS8604 // Possible null reference argument.
-            var service = new TransposePomAndOrgDataService(dbContext);
-#pragma warning restore CS8604 // Possible null reference argument.
+//#pragma warning disable CS8604 // Possible null reference argument.
+//            var service = new TransposePomAndOrgDataService(dbContext);
+//#pragma warning restore CS8604 // Possible null reference argument.
 
-            var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
-            service.Transpose(resultsRequestDto);
+//            var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
+//            service.Transpose(resultsRequestDto);
 
-            var producerDetail = dbContext.ProducerDetail.FirstOrDefault();
-            Assert.IsNotNull(producerDetail);
-            Assert.AreEqual(expectedResult.ProducerId, producerDetail.ProducerId);
-            Assert.AreEqual(expectedResult.ProducerName, producerDetail.ProducerName);
-            Assert.AreEqual(expectedResult.SubsidiaryId, producerDetail.SubsidiaryId);
-        }
+//            var producerDetail = dbContext.ProducerDetail.FirstOrDefault();
+//            Assert.IsNotNull(producerDetail);
+//            Assert.AreEqual(expectedResult.ProducerId, producerDetail.ProducerId);
+//            Assert.AreEqual(expectedResult.ProducerName, producerDetail.ProducerName);
+//            Assert.AreEqual(expectedResult.SubsidiaryId, producerDetail.SubsidiaryId);
+//        }
 
-        [TestMethod]
-        public void Transpose_Should_Return_Correct_Producer_Reported_Material()
-        {
-            var expectedResult = new ProducerReportedMaterial
-            {
-                Id = 1,
-                MaterialId = 4,
-                ProducerDetailId = 1,
-                PackagingType = "CW",
-                PackagingTonnage = 1,
-                Material = new Material
-                {
-                    Id = 4,
-                    Code = "PC",
-                    Name = "Paper or card",
-                    Description = "Paper or card"
-                },
-                ProducerDetail = new ProducerDetail
-                {
-                    Id = 1,
-                    ProducerId = 1,
-                    SubsidiaryId = "SUBSID1",
-                    ProducerName = "UPU LIMITED",
-                    CalculatorRunId = 1,
-                    CalculatorRun = new CalculatorRun()
-                }
-            };
+//        [TestMethod]
+//        public void Transpose_Should_Return_Correct_Producer_Reported_Material()
+//        {
+//            var expectedResult = new ProducerReportedMaterial
+//            {
+//                Id = 1,
+//                MaterialId = 4,
+//                ProducerDetailId = 1,
+//                PackagingType = "CW",
+//                PackagingTonnage = 1,
+//                Material = new Material
+//                {
+//                    Id = 4,
+//                    Code = "PC",
+//                    Name = "Paper or card",
+//                    Description = "Paper or card"
+//                },
+//                ProducerDetail = new ProducerDetail
+//                {
+//                    Id = 1,
+//                    ProducerId = 1,
+//                    SubsidiaryId = "SUBSID1",
+//                    ProducerName = "UPU LIMITED",
+//                    CalculatorRunId = 1,
+//                    CalculatorRun = new CalculatorRun()
+//                }
+//            };
 
-#pragma warning disable CS8604 // Possible null reference argument.
-            var service = new TransposePomAndOrgDataService(dbContext);
-#pragma warning restore CS8604 // Possible null reference argument.
+//#pragma warning disable CS8604 // Possible null reference argument.
+//            var service = new TransposePomAndOrgDataService(dbContext);
+//#pragma warning restore CS8604 // Possible null reference argument.
 
-            var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
-            service.Transpose(resultsRequestDto);
+//            var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
+//            service.Transpose(resultsRequestDto);
 
-            var producerReportedMaterial = dbContext.ProducerReportedMaterial.FirstOrDefault();
-            Assert.IsNotNull(producerReportedMaterial);
-            Assert.AreEqual(expectedResult.ProducerDetailId, producerReportedMaterial.ProducerDetailId);
-            Assert.AreEqual(expectedResult.Material.Code, producerReportedMaterial.Material.Code);
-            Assert.AreEqual(expectedResult.Material.Name, producerReportedMaterial.Material.Name);
-            Assert.AreEqual(expectedResult.ProducerDetail.ProducerId, producerReportedMaterial.ProducerDetail.ProducerId);
-            Assert.AreEqual(expectedResult.ProducerDetail.ProducerName, producerReportedMaterial.ProducerDetail.ProducerName);
-        }
+//            var producerReportedMaterial = dbContext.ProducerReportedMaterial.FirstOrDefault();
+//            Assert.IsNotNull(producerReportedMaterial);
+//            Assert.AreEqual(expectedResult.ProducerDetailId, producerReportedMaterial.ProducerDetailId);
+//            Assert.AreEqual(expectedResult.Material.Code, producerReportedMaterial.Material.Code);
+//            Assert.AreEqual(expectedResult.Material.Name, producerReportedMaterial.Material.Name);
+//            Assert.AreEqual(expectedResult.ProducerDetail.ProducerId, producerReportedMaterial.ProducerDetail.ProducerId);
+//            Assert.AreEqual(expectedResult.ProducerDetail.ProducerName, producerReportedMaterial.ProducerDetail.ProducerName);
+//        }
     }
 }

@@ -18,6 +18,8 @@ namespace EPR.Calculator.API.Exporter
         private const string RPDFilePOM = "RPD File - POM";
         private const string LapcapFile = "LAPCAP File";
         private const string ParametersFile = "Parameters File";
+        private const string LaDisposalCostFile = "LA Disposal cost File";
+
 
         public CalcResultsExporter(IBlobStorageService blobStorageService)
         {
@@ -26,8 +28,27 @@ namespace EPR.Calculator.API.Exporter
         public void Export(CalcResult results)
         {
             var csvContent = new StringBuilder();
-            // LoadCalcResultDetail(results, csvContent);
-            PrepareSummaryData(results.CalcResultSummary, csvContent);
+            LoadCalcResultDetail(results, csvContent);
+            if (results.CalcResultLapcapData != null)
+            {
+                PrepareLapcapData(results.CalcResultLapcapData, csvContent);
+            }
+
+            if (results.CalcResultLateReportingTonnageData != null)
+            {
+                PrepareLateReportingData(results.CalcResultLateReportingTonnageData, csvContent);
+            }
+
+            if (results.CalcResultLaDisposalCostData != null)
+            {
+                PrepareLaDisposalCostData(results.CalcResultLaDisposalCostData, csvContent);
+            }
+
+            if (results.CalcResultSummary != null)
+            {
+                PrepareSummaryData(results.CalcResultSummary, csvContent);
+            }
+
             var fileName = GetResultFileName(results.CalcResultDetail.RunId);
             try
             {
@@ -78,23 +99,144 @@ namespace EPR.Calculator.API.Exporter
             return $"{runId}-{DateTime.Now:yyyy-MM-dd-HHmm}.csv";
         }
 
+        private static void PrepareLapcapData(CalcResultLapcapData calcResultLapcapData, StringBuilder csvContent)
+        {
+            csvContent.AppendLine();
+            csvContent.AppendLine();
+
+            csvContent.AppendLine(calcResultLapcapData.Name);
+            var lapcapDataDetails = calcResultLapcapData.CalcResultLapcapDataDetails.OrderBy(x => x.OrderId);
+
+            foreach (var lapcapData in lapcapDataDetails)
+            {
+                csvContent.Append($"{CsvSanitiser.SanitiseData(lapcapData.Name)},");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.EnglandDisposalCost)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.WalesDisposalCost)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.ScotlandDisposalCost)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.NorthernIrelandDisposalCost)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.TotalDisposalCost)}\"");
+                csvContent.AppendLine();
+            }
+        }
+
+        private static void PrepareLateReportingData(CalcResultLateReportingTonnage calcResultLateReportingData, StringBuilder csvContent)
+        {
+            csvContent.AppendLine();
+            csvContent.AppendLine();
+
+            csvContent.AppendLine(calcResultLateReportingData.Name);
+            csvContent.Append($"{calcResultLateReportingData.MaterialHeading},");
+            csvContent.Append(calcResultLateReportingData.TonnageHeading);
+            csvContent.AppendLine();
+
+            foreach (var lateReportingData in calcResultLateReportingData.CalcResultLateReportingTonnageDetails)
+            {
+                csvContent.Append($"{CsvSanitiser.SanitiseData(lateReportingData.Name)},");
+                csvContent.Append(CsvSanitiser.SanitiseData(lateReportingData.TotalLateReportingTonnage));
+                csvContent.AppendLine();
+            }
+        }
+
+        private static void PrepareLaDisposalCostData(CalcResultLaDisposalCostData calcResultLaDisposalCostData, StringBuilder csvContent)
+        {
+            csvContent.AppendLine();
+            csvContent.AppendLine();
+
+            csvContent.AppendLine(calcResultLaDisposalCostData.Name);
+            var lapcapDataDetails = calcResultLaDisposalCostData.CalcResultLaDisposalCostDetails.OrderBy(x => x.OrderId);
+
+            foreach (var lapcapData in lapcapDataDetails)
+            {
+                csvContent.Append($"{CsvSanitiser.SanitiseData(lapcapData.Name)},");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.England)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.Wales)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.Scotland)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.NorthernIreland)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.Total)}\"");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.ProducerReportedHouseholdPackagingWasteTonnage)}\"");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.LateReportingTonnage)}\"");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.ProducerReportedHouseholdTonnagePlusLateReportingTonnage)}\"");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.DisposalCostPricePerTonne)}\"");
+                csvContent.AppendLine();
+            }
+        }
+
         private static void PrepareSummaryData(CalcResultSummary resultSummary, StringBuilder csvContent)
         {
             // Add empty lines
             csvContent.AppendLine();
             csvContent.AppendLine();
 
+            // Add headers
+            CalcResultsExporter.PrepareSummaryDataHeader(resultSummary, csvContent);
+
+            // Add data
+            foreach (var producer in resultSummary.ProducerDisposalFees)
+            {
+                csvContent.Append($"{producer.ProducerId},");
+                csvContent.Append($"{producer.SubsidiaryId},");
+                csvContent.Append($"{producer.ProducerName},");
+                csvContent.Append($"{producer.Level},");
+
+                foreach (var materialDisposalFees in producer.ProducerDisposalFeesByMaterial)
+                {
+                    foreach (var disposalFee in materialDisposalFees.Value)
+                    {
+                        csvContent.Append($"{disposalFee.HouseholdPackagingWasteTonnage},");
+                        csvContent.Append($"{disposalFee.ManagedConsumerWasteTonnage},");
+                        csvContent.Append($"{disposalFee.NetReportedTonnage},");
+                        csvContent.Append($"{disposalFee.PricePerTonne},");
+                        csvContent.Append($"{disposalFee.ProducerDisposalFee},");
+                        csvContent.Append($"{disposalFee.BadDebtProvision},");
+                        csvContent.Append($"{disposalFee.ProducerDisposalFeeWithBadDebtProvision},");
+                        csvContent.Append($"{disposalFee.EnglandWithBadDebtProvision},");
+                        csvContent.Append($"{disposalFee.WalesWithBadDebtProvision},");
+                        csvContent.Append($"{disposalFee.ScotlandWithBadDebtProvision},");
+                        csvContent.Append($"{disposalFee.NorthernIrelandWithBadDebtProvision},");
+                    }
+                }
+
+                foreach (var materialDisposalFees in producer.TwoACommsCostByMaterial)
+                {
+                    foreach (var disposalFee in materialDisposalFees.Value)
+                    {
+                        csvContent.Append($"{disposalFee.HouseholdPackagingWasteTonnage},");
+                        csvContent.Append($"{disposalFee.PriceperTonne},");
+                        csvContent.Append($"{disposalFee.ProducerTotalCostWithoutBadDebtProvision},");
+                        csvContent.Append($"{disposalFee.BadDebtProvision},");
+                        csvContent.Append($"{disposalFee.ProducerTotalCostwithBadDebtProvision},");
+                        csvContent.Append($"{disposalFee.EnglandWithBadDebtProvision},");
+                        csvContent.Append($"{disposalFee.WalesWithBadDebtProvision},");
+                        csvContent.Append($"{disposalFee.ScotlandWithBadDebtProvision},");
+                        csvContent.Append($"{disposalFee.NorthernIrelandWithBadDebtProvision},");
+                    }
+                }
+                csvContent.AppendLine();
+            }
+        }
+
+        private static void PrepareSummaryDataHeader(CalcResultSummary resultSummary, StringBuilder csvContent)
+        {
             // Add result summary header
             csvContent.AppendLine(resultSummary.ResultSummaryHeader.Name);
 
             // Add producer disposal fees header
-            for (var  i = 0; i < resultSummary.ProducerDisposalFeesHeader.ColumnIndex; i++)
+            for (var i = 0; i < resultSummary.ProducerDisposalFeesHeader.ColumnIndex; i++)
             {
                 csvContent.Append(",");
             }
-            csvContent.AppendLine(resultSummary.ProducerDisposalFeesHeader.Name);
 
-            // Add material breakdown header
+            StringBuilder lineBuilder = new StringBuilder();
+            lineBuilder.Append(resultSummary.ProducerDisposalFeesHeader.Name);
+
+            for (int i = 0; i < 95; i++)
+            {
+                lineBuilder.Append(",");
+            }
+
+            lineBuilder.Append(resultSummary.TwoACommsCostHeader.Name);
+
+            csvContent.AppendLine(lineBuilder.ToString());
             var indexCounter = 0;
             foreach (var item in resultSummary.MaterialBreakdownHeaders)
             {
