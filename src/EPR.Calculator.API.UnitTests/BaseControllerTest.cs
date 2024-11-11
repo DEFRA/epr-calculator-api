@@ -859,7 +859,7 @@ namespace EPR.Calculator.API.Tests.Controllers
                 OrganisationName = "UPU LIMITED",
                 LoadTimeStamp= DateTime.Now,
                 CalculatorRunOrganisationDataMasterId = 1,
-                SubmissionPeriodDesc = "January to June 2023",
+                SubmissionPeriodDesc = "July to December 2023",
                 CalculatorRunOrganisationDataMaster = BaseControllerTest.GetCalculatorRunOrganisationDataMaster().ToList()[0]
             });
             return list;
