@@ -1,6 +1,8 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace EPR.Calculator.API.Builder.ParametersOther
 {
@@ -22,6 +24,9 @@ namespace EPR.Calculator.API.Builder.ParametersOther
 
         public CalcResultParameterOtherCost Construct(CalcResultsRequestDto resultsRequestDto)
         {
+            var culture = CultureInfo.CreateSpecificCulture("en-GB");
+            culture.NumberFormat.CurrencySymbol = "£";
+            culture.NumberFormat.CurrencyPositivePattern = 0;
             var results = (from run in context.CalculatorRuns
                            join defaultMaster in context.DefaultParameterSettings on run.DefaultParameterSettingMasterId equals defaultMaster.Id
                            join defaultDetail in context.DefaultParameterSettingDetail on defaultMaster.Id equals defaultDetail.DefaultParameterSettingMasterId
@@ -49,7 +54,8 @@ namespace EPR.Calculator.API.Builder.ParametersOther
             };
             saDetails.Add(saOperatinCostHeader);
 
-            saDetails.Add(GetPrepCharge(SaOperatingCostHeader, 2, schemeAdminCosts));
+            var saOperatingCost = GetPrepCharge(SaOperatingCostHeader, 2, schemeAdminCosts);
+            saDetails.Add(saOperatingCost);
             other.SaOperatingCost = saDetails;
 
             var lapPrepCharges = results.Where(x => x.ParameterType == LaPrepCharge);
@@ -87,6 +93,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 AmountValue = amountIncrease.ParameterValue,
                 PercentageValue = precentageIncrease.ParameterValue
             };
+            materialityIncrease.Amount = materialityIncrease.AmountValue.ToString("C", culture);
             materialities.Add (materialityIncrease);
 
             var materialityDecrease = new CalcResultMateriality
@@ -95,6 +102,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 AmountValue = amountDecrease.ParameterValue,
                 PercentageValue = percentageDecrease.ParameterValue
             };
+            materialityDecrease.Amount = materialityDecrease.AmountValue.ToString("C", culture);
             materialities.Add(materialityDecrease);
             other.Materiality = materialities;
 
@@ -115,7 +123,8 @@ namespace EPR.Calculator.API.Builder.ParametersOther
             {
                 SevenMateriality = "Increase",
                 AmountValue = tonIncrease.ParameterValue,
-                PercentageValue = tonDecrease.ParameterValue
+                PercentageValue = tonDecrease.ParameterValue,
+                Amount = $"{tonIncrease.ParameterValue}%"
             };
             materialities.Add(tonnageIncrease);
 
@@ -143,12 +152,19 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 OrderId = 2,
                 TotalValue = 100M
             };
-            
+            otherCostDetail.England = $"{otherCostDetail.EnglandValue}%";
+            otherCostDetail.NorthernIreland = $"{otherCostDetail.NorthernIrelandValue}%";
+            otherCostDetail.Scotland = $"{otherCostDetail.ScotlandValue}%";
+            otherCostDetail.Wales = $"{otherCostDetail.WalesValue}%";
+
             return otherCostDetail;
         }
 
         private static CalcResultParameterOtherCostDetail GetPrepCharge(string name, int orderId, IEnumerable<DefaultParamResultsClass> lapPrepCharges)
         {
+            var culture = CultureInfo.CreateSpecificCulture("en-GB");
+            culture.NumberFormat.CurrencySymbol = "£";
+            culture.NumberFormat.CurrencyPositivePattern = 0;
             var otherCostDetail = new CalcResultParameterOtherCostDetail
             {
                 Name = name,
@@ -159,6 +175,12 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 OrderId = orderId
             };
             otherCostDetail.TotalValue = otherCostDetail.EnglandValue + otherCostDetail.ScotlandValue + otherCostDetail.WalesValue + otherCostDetail.NorthernIrelandValue;
+            otherCostDetail.England = otherCostDetail.EnglandValue.ToString("C", culture);
+            otherCostDetail.Wales = otherCostDetail.WalesValue.ToString("C", culture);
+            otherCostDetail.NorthernIreland = otherCostDetail.NorthernIrelandValue.ToString("C", culture);
+            otherCostDetail.Scotland = otherCostDetail.ScotlandValue.ToString("C", culture);
+            otherCostDetail.Total = otherCostDetail.TotalValue.ToString("C", culture);
+            
             return otherCostDetail;
         }
     }
