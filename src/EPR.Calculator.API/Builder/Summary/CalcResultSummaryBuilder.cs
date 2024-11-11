@@ -11,6 +11,12 @@ namespace EPR.Calculator.API.Builder.Summary
     {
         private readonly ApplicationDBContext context;
 
+        private const int ResultSummaryHeaderColumnIndex = 0;
+        private const int ProducerDisposalFeesHeaderColumnIndex = 4;
+        private const int MaterialsBreakdownHeaderInitialColumnIndex = 4;
+        private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
+        private const string OneCountryApportionment = "1 Country Apportionment";
+
         public CalcResultSummaryBuilder(ApplicationDBContext context)
         {
             this.context = context;
@@ -23,13 +29,13 @@ namespace EPR.Calculator.API.Builder.Summary
             result.ResultSummaryHeader = new CalcResultSummaryHeader
             {
                 Name = "Calculation Result",
-                ColumnIndex = 0
+                ColumnIndex = ResultSummaryHeaderColumnIndex
             };
 
             result.ProducerDisposalFeesHeader = new CalcResultSummaryHeader
             {
                 Name = "1 Producer Disposal Fees with Bad Debt Provision",
-                ColumnIndex = 4
+                ColumnIndex = ProducerDisposalFeesHeaderColumnIndex
             };
 
             var materialsFromDb = context.Material.ToList();
@@ -37,7 +43,7 @@ namespace EPR.Calculator.API.Builder.Summary
             var materials = Mappers.MaterialMapper.Map(materialsFromDb);
 
             var materialsBreakdownHeader = new List<CalcResultSummaryHeader>();
-            var columnIndex = 4;
+            var columnIndex = MaterialsBreakdownHeaderInitialColumnIndex;
 
             foreach (var material in materials)
             {
@@ -46,7 +52,7 @@ namespace EPR.Calculator.API.Builder.Summary
                     Name = $"{material.Name} Breakdown",
                     ColumnIndex = columnIndex
                 });
-                columnIndex = columnIndex + 11;
+                columnIndex = columnIndex + MaterialsBreakdownHeaderIncrementalColumnIndex;
             }
 
             result.MaterialBreakdownHeaders = materialsBreakdownHeader;
@@ -114,8 +120,7 @@ namespace EPR.Calculator.API.Builder.Summary
                     ProducerId = producer.Id.ToString(),
                     ProducerName = producer.ProducerName ?? string.Empty,
                     SubsidiaryId = producer.SubsidiaryId ?? string.Empty,
-                    Level = 1,
-                    Order = 2,
+                    Level = producer.SubsidiaryId == null ? 1 : 2,
                     ProducerDisposalFeesByMaterial = materialCostSummary
                 });
             }
@@ -125,21 +130,21 @@ namespace EPR.Calculator.API.Builder.Summary
             return result;
         }
 
-        private decimal GetHouseholdPackagingWasteTonnage(ProducerDetail producer, MaterialDetail material)
+        private static decimal GetHouseholdPackagingWasteTonnage(ProducerDetail producer, MaterialDetail material)
         {
             var householdPackagingMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material.Code == material.Code && p.PackagingType == "HH");
 
             return householdPackagingMaterial != null ? householdPackagingMaterial.PackagingTonnage : 0;
         }
 
-        private decimal GetManagedConsumerWasteTonnage(ProducerDetail producer, MaterialDetail material)
+        private static decimal GetManagedConsumerWasteTonnage(ProducerDetail producer, MaterialDetail material)
         {
             var consumerWastePackagingMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material.Code == material.Code && p.PackagingType == "CW");
 
             return consumerWastePackagingMaterial != null ? consumerWastePackagingMaterial.PackagingTonnage : 0;
         }
 
-        private decimal GetNetReportedTonnage(ProducerDetail producer, MaterialDetail material)
+        private static decimal GetNetReportedTonnage(ProducerDetail producer, MaterialDetail material)
         {
             var householdPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material);
             var managedConsumerWasteTonnage = GetManagedConsumerWasteTonnage(producer, material);
@@ -166,7 +171,7 @@ namespace EPR.Calculator.API.Builder.Summary
             return isParseSuccessful ? value : 0;
         }
 
-        private decimal GetProducerDisposalFee(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        private static decimal GetProducerDisposalFee(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
             var netReportedTonnage = GetNetReportedTonnage(producer, material);
             var pricePerTonne = GetPricePerTonne(material, calcResult);
@@ -179,7 +184,7 @@ namespace EPR.Calculator.API.Builder.Summary
             return netReportedTonnage * pricePerTonne;
         }
 
-        private decimal GetBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        private static decimal GetBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
             var producerDisposalFee = GetProducerDisposalFee(producer, material, calcResult);
 
@@ -187,19 +192,18 @@ namespace EPR.Calculator.API.Builder.Summary
             return producerDisposalFee * 6;
         }
 
-        private decimal GetProducerDisposalFeeWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        private static decimal GetProducerDisposalFeeWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
             var producerDisposalFee = GetProducerDisposalFee(producer, material, calcResult);
 
             return producerDisposalFee * (1 + 6);
         }
 
-        private decimal GetEnglandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        private static decimal GetEnglandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
             var producerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult);
 
-            var countryApportionmentPercentage = calcResult.CalcResultLapcapData.CalcResultLapcapDataDetails?.FirstOrDefault(la => la.Name == "1 Country Apportionment");
-
+            var countryApportionmentPercentage = GetCountryApportionmentPercentage(calcResult);
             if (countryApportionmentPercentage == null)
             {
                 return 0;
@@ -210,12 +214,11 @@ namespace EPR.Calculator.API.Builder.Summary
             return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * value : 0;
         }
 
-        private decimal GetWalesWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        private static decimal GetWalesWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
             var producerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult);
 
-            var countryApportionmentPercentage = calcResult.CalcResultLapcapData.CalcResultLapcapDataDetails?.FirstOrDefault(la => la.Name == "1 Country Apportionment");
-
+            var countryApportionmentPercentage = GetCountryApportionmentPercentage(calcResult);
             if (countryApportionmentPercentage == null)
             {
                 return 0;
@@ -226,12 +229,11 @@ namespace EPR.Calculator.API.Builder.Summary
             return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * value : 0;
         }
 
-        private decimal GetScotlandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        private static decimal GetScotlandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
             var producerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult);
 
-            var countryApportionmentPercentage = calcResult.CalcResultLapcapData.CalcResultLapcapDataDetails?.FirstOrDefault(la => la.Name == "1 Country Apportionment");
-
+            var countryApportionmentPercentage = GetCountryApportionmentPercentage(calcResult);
             if (countryApportionmentPercentage == null)
             {
                 return 0;
@@ -242,12 +244,11 @@ namespace EPR.Calculator.API.Builder.Summary
             return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * value : 0;
         }
 
-        private decimal GetNorthernIrelandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
+        private static decimal GetNorthernIrelandWithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
             var producerDisposalFeeWithBadDebtProvision = GetProducerDisposalFeeWithBadDebtProvision(producer, material, calcResult);
 
-            var countryApportionmentPercentage = calcResult.CalcResultLapcapData.CalcResultLapcapDataDetails?.FirstOrDefault(la => la.Name == "1 Country Apportionment");
-
+            var countryApportionmentPercentage = GetCountryApportionmentPercentage(calcResult);
             if (countryApportionmentPercentage == null)
             {
                 return 0;
@@ -256,6 +257,11 @@ namespace EPR.Calculator.API.Builder.Summary
             var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.NorthernIrelandDisposalCost, NumberStyles.Currency, CultureInfo.CurrentCulture.NumberFormat, out decimal value);
 
             return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * value : 0;
+        }
+
+        private static CalcResultLapcapDataDetails? GetCountryApportionmentPercentage(CalcResult calcResult)
+        {
+            return calcResult.CalcResultLapcapData.CalcResultLapcapDataDetails?.FirstOrDefault(la => la.Name == OneCountryApportionment);
         }
     }
 }
