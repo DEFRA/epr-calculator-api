@@ -95,6 +95,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 PercentageValue = precentageIncrease.ParameterValue
             };
             materialityIncrease.Amount = materialityIncrease.AmountValue.ToString("C", culture);
+            materialityIncrease.Percentage = $"{materialityIncrease.PercentageValue}%";
             materialities.Add (materialityIncrease);
 
             var materialityDecrease = new CalcResultMateriality
@@ -104,6 +105,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 PercentageValue = percentageDecrease.ParameterValue
             };
             materialityDecrease.Amount = materialityDecrease.AmountValue.ToString("C", culture);
+            materialityDecrease.Percentage = $"{materialityDecrease.PercentageValue}%";
             materialities.Add(materialityDecrease);
             other.Materiality = materialities;
 
@@ -124,18 +126,21 @@ namespace EPR.Calculator.API.Builder.ParametersOther
             {
                 SevenMateriality = "Increase",
                 AmountValue = tonIncrease.ParameterValue,
-                PercentageValue = tonDecrease.ParameterValue,
-                Amount = $"{tonIncrease.ParameterValue}%"
+                PercentageValue = tonPrecentageIncrease.ParameterValue,
+                Amount = $"{tonIncrease.ParameterValue}",
+                Percentage = $"{tonPrecentageIncrease.ParameterValue}%"
             };
             materialities.Add(tonnageIncrease);
 
             var tonnageDecrease = new CalcResultMateriality
             {
                 SevenMateriality = "Decrease",
-                AmountValue = tonPrecentageIncrease.ParameterValue,
-                PercentageValue = tonPercentageDecrease.ParameterValue
+                AmountValue = tonDecrease.ParameterValue,
+                PercentageValue = tonPercentageDecrease.ParameterValue,
+                Amount = $"{tonDecrease.ParameterValue}",
+                Percentage = $"{tonPercentageDecrease.ParameterValue}%"
             };
-            materialities.Add(tonnageIncrease);
+            materialities.Add(tonnageDecrease);
             other.Materiality = materialities;
 
             return other;

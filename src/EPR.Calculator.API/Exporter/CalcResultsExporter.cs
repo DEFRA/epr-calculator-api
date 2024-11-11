@@ -92,6 +92,15 @@ namespace EPR.Calculator.API.Exporter
             csvContent.AppendLine();
             csvContent.Append($"{CsvSanitiser.SanitiseData(otherCost.BadDebtProvision.Key)},");
             csvContent.AppendLine($"{CsvSanitiser.SanitiseData(otherCost.BadDebtProvision.Value)}");
+
+            csvContent.AppendLine();
+            var materiality = otherCost.Materiality;
+            foreach (var material in materiality)
+            {
+                csvContent.Append($"{CsvSanitiser.SanitiseData(material.SevenMateriality)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(material.Amount)},");
+                csvContent.AppendLine($"{CsvSanitiser.SanitiseData(material.Percentage)}");
+            }
         }
 
         private static void LoadCalcResultDetail(CalcResult results, StringBuilder csvContent)
