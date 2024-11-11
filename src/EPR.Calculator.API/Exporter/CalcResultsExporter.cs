@@ -27,9 +27,14 @@ namespace EPR.Calculator.API.Exporter
         {
             var csvContent = new StringBuilder();
             LoadCalcResultDetail(results, csvContent);
-            if(results.CalcResultLapcapData != null)
+            if(results?.CalcResultLapcapData != null)
             {
                 PrepareLapcapData(results.CalcResultLapcapData, csvContent);
+            }
+
+            if (results?.CalcResultParameterOtherCost != null)
+            {
+                PrepareOtherCosts(results.CalcResultParameterOtherCost, csvContent);
             }
             
 
@@ -42,6 +47,27 @@ namespace EPR.Calculator.API.Exporter
             {
                 throw new IOException($"File upload failed: {ex.Message}", ex);
             }
+        }
+
+        private static void PrepareOtherCosts(CalcResultParameterOtherCost otherCost, StringBuilder csvContent)
+        {
+            csvContent.AppendLine();
+            csvContent.AppendLine();
+
+            csvContent.AppendLine(otherCost.Name);
+
+            var saOperatinCosts = otherCost.SaOperatingCost.OrderBy(x => x.OrderId);
+
+            foreach (var saOperatingCost in saOperatinCosts)
+            {
+                csvContent.Append($"{CsvSanitiser.SanitiseData(saOperatingCost.Name)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(saOperatingCost.England)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(saOperatingCost.Wales)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(saOperatingCost.Scotland)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(saOperatingCost.NorthernIreland)},");
+                csvContent.AppendLine($"{CsvSanitiser.SanitiseData(saOperatingCost.Total)}");
+            }
+            csvContent.AppendLine();    
         }
 
         private static void LoadCalcResultDetail(CalcResult results, StringBuilder csvContent)

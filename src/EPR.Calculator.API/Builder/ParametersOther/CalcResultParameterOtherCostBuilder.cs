@@ -50,7 +50,8 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 England = "England",
                 Wales = "Wales",
                 Scotland = "Scotland",
-                NorthernIreland = "Northern Ireland"
+                NorthernIreland = "Northern Ireland",
+                Total = "Total"
             };
             saDetails.Add(saOperatinCostHeader);
 
