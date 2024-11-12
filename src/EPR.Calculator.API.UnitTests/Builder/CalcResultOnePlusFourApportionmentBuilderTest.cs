@@ -47,6 +47,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
             var resultsDto = new CalcResultsRequestDto { RunId = 6 };
             var calcResult = new CalcResult
             {
+
+
                 CalcResultLapcapData = new CalcResultLapcapData
                 {
                     Name = "LAPCAP Data",
@@ -54,45 +56,73 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     {
                         new CalcResultLapcapDataDetails
                         {
-                            Name = "1 Fee for LA Disposal Costs",
-                            EnglandDisposalCost = "£100.00",
-                            WalesDisposalCost = "£200.00",
-                            ScotlandDisposalCost = "£300.00",
-                            NorthernIrelandDisposalCost = "£400.00",
-                            TotalDisposalCost = "£1000.00",
-                            OrderId = 1
+                            Name = "Total",
+                            EnglandDisposalCost = "£13,280.45",
+                            WalesDisposalCost = "£210.28",
+                            ScotlandDisposalCost = "£161.07",
+                            NorthernIrelandDisposalCost = "£91.00",
+                            TotalDisposalCost = "£13,742.80",
+                             EnglandCost = 13280.45m,
+                             WalesCost=210.28m,
+                             ScotlandCost=91.00m,
+                             NorthernIrelandCost =91.00m,
+                             TotalCost=13742.80m
                         } ,
                     }
                 },
 
                 CalcResultParameterOtherCost = new CalcResultParameterOtherCost
                 {
-                    Name = "",
+                    Name = "4 LA Data Prep Charge",
                     Details = new[]
                     {
                         new CalcResultParameterOtherCostDetail
                         {
                             Name = "4 LA Data Prep Charge",
-                            England= "£100.00",
-                            Wales = "£200.00",
-                            Scotland = "£300.00",
-                            NorthernIreland = "£400.00",
-                            Total = "£1000.00",
-                            OrderId = 2
+                            England= "£115.45",
+                            Wales = "£114.00",
+                            Scotland = "£117.00",
+                            NorthernIreland = "£19.00",
+                            Total = "£365.45",
+                            EnglandValue= 115.45m,
+                             WalesValue=114.00m,
+                             ScotlandValue=117.00m,
+                             NorthernIrelandValue =19.00m,
+                             TotalValue=365.45m
                         } ,
                     }
-
                 }
             };
 
-            new CalcResultOnePlusFourApportionmentDetail 
+            var resultCalc = builder.Construct(resultsDto, calcResult);
+            // Assert
+            Assert.IsNotNull(calcResult);
+            Assert.AreEqual("1 + 4 Apportionment %s", resultCalc.Name);
+            Assert.AreEqual(5, resultCalc.CalcResultOnePlusFourApportionmentDetails.Count());
 
+            // Check header row
+            var headerRow = resultCalc.CalcResultOnePlusFourApportionmentDetails.FirstOrDefault();
+            Assert.AreEqual(OnePlus4ApportionmentRowHeaders.Name, headerRow.Name);
+            Assert.AreEqual(OnePlus4ApportionmentRowHeaders.Total, headerRow.Total);
 
-            var lapcapDisposalCostResults = builder.Construct(resultsDto, calcResult);
+            // Check disposal cost row
+            var disposalRow = resultCalc.CalcResultOnePlusFourApportionmentDetails.Single(x=>x.Name== "1 Fee for LA Disposal Costs");
+            Assert.AreEqual("£13,742.80", disposalRow.Total);
+            Assert.AreEqual("£13,280.45", disposalRow.EnglandDisposalTotal);
 
-            //Assert
+            // Check data preparation charge row
+            var prepchargeRow = resultCalc.CalcResultOnePlusFourApportionmentDetails.Single(x => x.Name == "4 LA Data Prep Charge");
+            Assert.AreEqual("£365.45", prepchargeRow.Total);
+            Assert.AreEqual("£115.45", prepchargeRow.EnglandDisposalTotal);
 
+            // Check total row
+            var totalRow = resultCalc.CalcResultOnePlusFourApportionmentDetails.Single(x => x.OrderId==3); ;
+            Assert.AreEqual("£14,108.25", totalRow.Total); // 13,742.80 + 365.45
+
+            // Check apportionment row
+            var apportionmentRow = resultCalc.CalcResultOnePlusFourApportionmentDetails.Single(x => x.OrderId == 4); ;
+            Assert.AreEqual("100.00000000%", apportionmentRow.Total);
+            Assert.AreEqual("94.95082664%", apportionmentRow.EnglandDisposalTotal);
         }
-
     }
 }
