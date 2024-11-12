@@ -51,6 +51,7 @@ namespace EPR.Calculator.API.UnitTests
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             mockLapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
             mockICalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
+            
             calcResultBuilder = new CalcResultBuilder(mockDetailBuilder.Object,
                                                     mockLapcapBuilder.Object,
                                                     mockICalcResultParameterOtherCostBuilder.Object);

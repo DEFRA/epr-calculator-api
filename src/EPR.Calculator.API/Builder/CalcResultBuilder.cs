@@ -29,7 +29,6 @@ namespace EPR.Calculator.API.Builder
             calcResult.CalcResultDetail = this.calcResultDetailBuilder.Construct(resultsRequestDto);
             calcResult.CalcResultLapcapData = this.lapcapBuilder.Construct(resultsRequestDto);
             calcResult.CalcResultParameterOtherCost = this.calcResultParameterOtherCostBuilder.Construct(resultsRequestDto);
-
             calcResult.CalcResultOnePlusFourApportionment = this.lapcapplusFourApportionmentBuilder.Construct(resultsRequestDto, calcResult);
 
             return calcResult;
