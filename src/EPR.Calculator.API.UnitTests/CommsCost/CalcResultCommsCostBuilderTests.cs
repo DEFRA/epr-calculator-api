@@ -212,18 +212,22 @@
             var countryApportmentData = new[]
             {
                 this.Fixture.Build<CountryApportionment>()
+                    .With(record => record.CalculatorRunId, caclulatorRun.Object.Id)
                     .With(record => record.CountryId, 0)
                     .With(record => record.Apportionment, 52.49321928M)
                     .Create(),
                 this.Fixture.Build<CountryApportionment>()
+                    .With(record => record.CalculatorRunId, caclulatorRun.Object.Id)
                     .With(record => record.CountryId, 1)
                     .With(record => record.Apportionment, 13.24848738M)
                     .Create(),
                 this.Fixture.Build<CountryApportionment>()
+                    .With(record => record.CalculatorRunId, caclulatorRun.Object.Id)
                     .With(record => record.CountryId, 2)
                     .With(record => record.Apportionment, 24.32714375M)
                     .Create(),
                 this.Fixture.Build<CountryApportionment>()
+                    .With(record => record.CalculatorRunId, caclulatorRun.Object.Id)
                     .With(record => record.CountryId, 3)
                     .With(record => record.Apportionment, 9.93114959M)
                     .Create(),

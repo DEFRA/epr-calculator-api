@@ -39,7 +39,8 @@ namespace EPR.Calculator.API.Exporter
                 PrepareLateReportingData(results.CalcResultLateReportingTonnageData, csvContent);
             }
 
-            // csvContent.AppendLine(results.CalcResultCommsCostReportDetail.ToString());
+            csvContent.AppendLine();
+            csvContent.AppendLine(results.CalcResultCommsCostReportDetail.ToString());
 
             if (results?.CalcResultParameterOtherCost != null)
             {

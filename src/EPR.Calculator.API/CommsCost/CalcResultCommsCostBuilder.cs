@@ -28,7 +28,7 @@
         /// <returns></returns>
         public CalcResultCommsCost Construct(int runId)
         {
-            var countries = GetCountryDetails();
+            var countries = GetCountryDetails(runId);
             var materials = GetMaterialDetails(runId);
             var records = materials.Select(material => new CalcResultCommsCostRecord(material, countries));
 
@@ -56,21 +56,28 @@
             {
                 throw new InvalidOperationException("No parameter details found.");
             }
-                
+
 
             // Select the materials details from the database.
-            return DBContext.Material
-                .Select((material, parameter) => new MaterialDetails
-                {
-                    Id = material.Id,
-                    Name = material.Name,
-                    TotalValue = parameters.Single(
-                        p => p.ParameterUniqueReferenceId == $"COMC-{material.Code}").ParameterValue,
-                    LateReportingTonnage = parameters.Single(
-                        p => p.ParameterUniqueReferenceId == $"LRET-{material.Code}").ParameterValue,
-                    ProdRepHoPaWaT = CalculateProdRepHoPaWaT(material)
-                });
+            try
+            {
+                return DBContext.Material.ToList()
+                    .Select((material, parameter) => new MaterialDetails
+                    {
+                        Id = material.Id,
+                        Name = material.Name,
+                        TotalValue = parameters.Single(
+                            p => p.ParameterUniqueReferenceId == $"COMC-{material.Code}").ParameterValue,
+                        LateReportingTonnage = parameters.Single(
+                            p => p.ParameterUniqueReferenceId == $"LRET-{material.Code}").ParameterValue,
+                        ProdRepHoPaWaT = CalculateProdRepHoPaWaT(material)
+                    });
             }
+            catch(Exception ex)
+            {
+                throw new InvalidOperationException("Could not retrieve material data, see inner exception.", ex);
+            }
+        }
 
         /// <summary>
         /// Retrieve the country details from the database.
