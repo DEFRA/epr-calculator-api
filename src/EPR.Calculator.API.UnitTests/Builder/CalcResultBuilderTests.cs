@@ -1,3 +1,6 @@
+using EPR.Calculator.API.Builder.LateReportingTonnages;
+using EPR.Calculator.API.CommsCost;
+
 namespace EPR.Calculator.API.UnitTests.Builder
 {
     using System;
@@ -12,14 +15,18 @@ namespace EPR.Calculator.API.UnitTests.Builder
     {
         private Mock<ICalcResultDetailBuilder> calcResultDetailBuilder;
         private Mock<ICalcResultLapcapDataBuilder> lapcapBuilder;
-        private Mock<ICalcResultParameterOtherCostBuilder> mockICalcResultParameterOtherCostBuilder;
+        private Mock<ICalcResultCommsCostBuilder> commsCostReportBuilder;
+        private Mock<ICalcResultLateReportingBuilder> mockLateReportingBuilder;
+        private Mock<ICalcResultParameterOtherCostBuilder> calcResultParameterOtherCostBuilder;
 
         [TestInitialize]
         public void SetUp()
         {
             this.calcResultDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             this.lapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
-            mockICalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
+            this.commsCostReportBuilder = new Mock<ICalcResultCommsCostBuilder>();
+            this.mockLateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
+            this.calcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
         }
 
         [TestMethod]
@@ -29,7 +36,10 @@ namespace EPR.Calculator.API.UnitTests.Builder
             var instance = new CalcResultBuilder(
                 calcResultDetailBuilder.Object,
                 lapcapBuilder.Object,
-                mockICalcResultParameterOtherCostBuilder.Object);
+                commsCostReportBuilder.Object,
+                mockLateReportingBuilder.Object,
+                calcResultParameterOtherCostBuilder.Object
+                );
 
             // Assert
             Assert.IsNotNull(instance);
