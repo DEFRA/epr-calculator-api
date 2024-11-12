@@ -47,7 +47,6 @@ namespace EPR.Calculator.API.UnitTests.Builder
         {
             var run = new CalculatorRun
             {
-                Id = 1,
                 CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 Name = "Test Run",
                 Financial_Year = "2024-25",
