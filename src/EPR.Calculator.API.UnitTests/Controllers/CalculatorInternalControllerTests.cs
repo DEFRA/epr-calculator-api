@@ -232,39 +232,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CalcResultParameterOtherCost = new CalcResultParameterOtherCost
                 {
                     Name = "TestValue1902710147",
-                    CalcResultParameterCommunicationCostDetails1 = new[] {
+                    SaOperatingCost = new[] {
                         new CalcResultParameterOtherCostDetail
                         {
-                            Name = "TestValue1903928028",
-                            England = "TestValue326560834",
-                            Wales = "TestValue210962167",
-                            Scotland = "TestValue1135236797",
-                            NorthernIreland = "TestValue367778577",
-                            Total = "TestValue1608736613",
-                            OrderId = 1551597643
-                        },
-                        new CalcResultParameterOtherCostDetail
-                        {
-                            Name = "TestValue173966944",
-                            England = "TestValue1180419728",
-                            Wales = "TestValue2100256493",
-                            Scotland = "TestValue670954530",
-                            NorthernIreland = "TestValue1375420925",
-                            Total = "TestValue935375183",
-                            OrderId = 1313038898
-                        },
-                        new CalcResultParameterOtherCostDetail
-                        {
-                            Name = "TestValue248451812",
-                            England = "TestValue1601631800",
-                            Wales = "TestValue1233261280",
-                            Scotland = "TestValue704573910",
-                            NorthernIreland = "TestValue1422759478",
-                            Total = "TestValue458226108",
-                            OrderId = 404263300
+                        Name = "TestValue248451812",
+                        England = "TestValue1601631800",
+                        Wales = "TestValue1233261280",
+                        Scotland = "TestValue704573910",
+                        NorthernIreland = "TestValue1422759478",
+                        Total = "TestValue458226108",
+                        OrderId = 404263300
                         }
                     },
-                    CalcResultParameterCommunicationCostDetails2 = new[] {
+                    Details = new[] {
                         new CalcResultParameterOtherCostDetail
                         {
                             Name = "TestValue1709252156",
@@ -296,53 +276,31 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                             OrderId = 2137471720
                         }
                     },
-                    CalcResultParameterCommunicationCostDetails3 = new[] {
-                        new CalcResultParameterOtherCostDetail
-                        {
-                            Name = "TestValue894073467",
-                            England = "TestValue743248036",
-                            Wales = "TestValue498383751",
-                            Scotland = "TestValue1414381785",
-                            NorthernIreland = "TestValue1432360696",
-                            Total = "TestValue1689198307",
-                            OrderId = 1393543154
-                        },
-                        new CalcResultParameterOtherCostDetail
-                        {
-                            Name = "TestValue1735232539",
-                            England = "TestValue2086893656",
-                            Wales = "TestValue1788966664",
-                            Scotland = "TestValue1703053729",
-                            NorthernIreland = "TestValue82037162",
-                            Total = "TestValue1498446847",
-                            OrderId = 194675871
-                        },
-                        new CalcResultParameterOtherCostDetail
-                        {
-                            Name = "TestValue2052603863",
-                            England = "TestValue752109903",
-                            Wales = "TestValue18782142",
-                            Scotland = "TestValue1516270676",
-                            NorthernIreland = "TestValue526160370",
-                            Total = "TestValue2006123279",
-                            OrderId = 1923346784
-                        }
+                    SchemeSetupCost = new CalcResultParameterOtherCostDetail
+                    {
+                        Name = "TestValue894073467",
+                        England = "TestValue743248036",
+                        Wales = "TestValue498383751",
+                        Scotland = "TestValue1414381785",
+                        NorthernIreland = "TestValue1432360696",
+                        Total = "TestValue1689198307",
+                        OrderId = 1393543154
                     },
-                    CalcResultParameterCommunicationCostDetails4 = new KeyValuePair<string, string>(),
-                    CalcResultParameterCommunicationCostDetails5 = new[] {
-                        new CalcResultParameterOtherCostDetail5
+                    BadDebtProvision = new KeyValuePair<string, string>(),
+                    Materiality = new[] {
+                        new CalcResultMateriality
                         {
                             SevenMateriality = "TestValue20436873",
                             Amount = "TestValue1953396941",
                             Percentage = "TestValue1921759094"
                         },
-                        new CalcResultParameterOtherCostDetail5
+                        new CalcResultMateriality
                         {
                             SevenMateriality = "TestValue115520746",
                             Amount = "TestValue1036547761",
                             Percentage = "TestValue466450553"
                         },
-                        new CalcResultParameterOtherCostDetail5
+                        new CalcResultMateriality
                         {
                             SevenMateriality = "TestValue1068863021",
                             Amount = "TestValue119755880",
