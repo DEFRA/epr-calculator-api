@@ -22,23 +22,23 @@ namespace EPR.Calculator.API.Services
 
             if (calculatorRun.CalculatorRunPomDataMasterId != null)
             {
+                // Get the calculator run organisation data master record based on the CalculatorRunOrganisationDataMasterId
+                // from the calculator run table
+                var organisationDataMaster = context.CalculatorRunOrganisationDataMaster.Single(odm => odm.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);
+
+                // Get the calculator run organisation data details as we need the organisation name
+                var organisationDataDetails = context.CalculatorRunOrganisationDataDetails.Where
+                    (
+                        odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id
+                    ).ToList();
+
+                // Get the calculator run pom data master record based on the CalculatorRunPomDataMasterId
+                var pomDataMaster = context.CalculatorRunPomDataMaster.Single(pdm => pdm.Id == calculatorRun.CalculatorRunPomDataMasterId);
+
                 using (var transaction = this.context.Database.BeginTransaction())
                 {
                     try
                     {
-                        // Get the calculator run organisation data master record based on the CalculatorRunOrganisationDataMasterId
-                        // from the calculator run table
-                        var organisationDataMaster = context.CalculatorRunOrganisationDataMaster.Single(odm => odm.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);
-
-                        // Get the calculator run organisation data details as we need the organisation name
-                        var organisationDataDetails = context.CalculatorRunOrganisationDataDetails.Where
-                            (
-                                odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id
-                            ).ToList();
-
-                        // Get the calculator run pom data master record based on the CalculatorRunPomDataMasterId
-                        var pomDataMaster = context.CalculatorRunPomDataMaster.Single(pdm => pdm.Id == calculatorRun.CalculatorRunPomDataMasterId);
-
                         foreach (var organisation in organisationDataDetails)
                         {
                             // Initialise the producerReportedMaterials
@@ -47,7 +47,7 @@ namespace EPR.Calculator.API.Services
                             // Get the calculator run pom data details related to the calculator run pom data master
                             var calculatorRunPomDataDetails = context.CalculatorRunPomDataDetails.Where
                                 (
-                                    pdd => pdd.CalculatorRunPomDataMasterId == pomDataMaster.Id && pdd.OrganisationId == organisation.OrganisationId
+                                    pdd => pdd.CalculatorRunPomDataMasterId == pomDataMaster.Id && pdd.OrganisationId == organisation.OrganisationId && pdd.SubsidaryId == organisation.SubsidaryId
                                 ).ToList();
 
                             // Proceed further only if there is any pom data based on the pom data master id and organisation id
