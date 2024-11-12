@@ -40,7 +40,7 @@ namespace EPR.Calculator.API.Exporter
             }
 
             csvContent.AppendLine();
-            csvContent.AppendLine(results.CalcResultCommsCostReportDetail.ToString());
+            // csvContent.AppendLine(results.CalcResultCommsCostReportDetail.ToString());
 
             if (results?.CalcResultParameterOtherCost != null)
             {
