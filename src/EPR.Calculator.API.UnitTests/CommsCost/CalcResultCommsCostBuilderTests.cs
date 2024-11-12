@@ -155,37 +155,37 @@
                 .With(record => record.Id, 0)
                 .With(record => record.ParameterValue, 2870)
                 .With(record => record.ParameterUniqueReferenceId, "COMC-AL")
-                //.With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
+                .With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
                 .Create(),
                 this.Fixture.Build<DefaultParameterSettingDetail>()
                 .With(record => record.Id, 1)
                 .With(record => record.ParameterValue, 7600)
                 .With(record => record.ParameterUniqueReferenceId, "COMC-FC")
-                //.With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
+                .With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
                 .Create(),
                 this.Fixture.Build<DefaultParameterSettingDetail>()
                 .With(record => record.Id, 2)
                 .With(record => record.ParameterValue, 4800)
                 .With(record => record.ParameterUniqueReferenceId, "COMC-GL")
-                //.With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
+                .With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
                 .Create(),
                 this.Fixture.Build<DefaultParameterSettingDetail>()
                 .With(record => record.Id, 0)
                 .With(record => record.ParameterValue, 8000)
                 .With(record => record.ParameterUniqueReferenceId, "LRET-AL")
-                //.With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
+                .With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
                 .Create(),
                 this.Fixture.Build<DefaultParameterSettingDetail>()
                 .With(record => record.Id, 1)
                 .With(record => record.ParameterValue, 7000)
                 .With(record => record.ParameterUniqueReferenceId, "LRET-FC")
-                //.With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
+                .With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
                 .Create(),
                 this.Fixture.Build<DefaultParameterSettingDetail>()
                 .With(record => record.Id, 2)
                 .With(record => record.ParameterValue, 6000)
                 .With(record => record.ParameterUniqueReferenceId, "LRET-GL")
-                //.With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
+                .With(record => record.DefaultParameterSettingMasterId, parameterMasterId)
                 .Create(),
             }.ToArray();
             mockDb.Setup(db => db.DefaultParameterSettingDetail)
