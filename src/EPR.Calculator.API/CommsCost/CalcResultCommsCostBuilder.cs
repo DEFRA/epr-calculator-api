@@ -46,10 +46,17 @@
         /// </summary>
         private IEnumerable<MaterialDetails> GetMaterialDetails(int runId)
         {
-            var parameters = DBContext.CalculatorRuns
+            var masterParameterId = DBContext.CalculatorRuns
                 .Single(run => run.Id == runId)
-                .DefaultParameterSettingMaster?.Details
-                ?? throw new InvalidOperationException("No parameters found.");
+                .DefaultParameterSettingMaster?.Id 
+                ?? throw new InvalidOperationException("No master parameter record found.");
+            var parameters = DBContext.DefaultParameterSettingDetail
+               .Where(p => p.DefaultParameterSettingMasterId == masterParameterId);
+            if(!parameters.Any())
+            {
+                throw new InvalidOperationException("No parameter details found.");
+            }
+                
 
             // Select the materials details from the database.
             return DBContext.Material
