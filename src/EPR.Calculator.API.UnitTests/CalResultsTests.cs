@@ -1,7 +1,9 @@
 ﻿using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Builder.LaDisposalCost;
 using EPR.Calculator.API.Builder.Lapcap;
+using EPR.Calculator.API.CommsCost;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
+using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
@@ -23,7 +25,10 @@ namespace EPR.Calculator.API.UnitTests
         private Mock<ICalcResultsExporter<CalcResult>> mockExporter;
         private Mock<ICalcResultDetailBuilder> mockDetailBuilder;
         private Mock<ICalcResultLapcapDataBuilder> mockLapcapBuilder;
+        private Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
         private Mock<ICalcResultLateReportingBuilder> mocklateReportingBuilder;
+        private Mock<ICalcResultParameterOtherCostBuilder> mockICalcResultParameterOtherCostBuilder;
+        private Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
         private Mock<ICalcRunLaDisposalCostBuilder> mockLaDisposalCostBuilder;
 
         private Mock<ApplicationDBContext> mockContext;
@@ -52,9 +57,18 @@ namespace EPR.Calculator.API.UnitTests
 
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             mockLapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
+            mockCommsCostReportBuilder = new Mock<ICalcResultCommsCostBuilder>();
             mocklateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
             mockLaDisposalCostBuilder = new Mock<ICalcRunLaDisposalCostBuilder>();
-            calcResultBuilder = new CalcResultBuilder(mockDetailBuilder.Object, mockLapcapBuilder.Object, mocklateReportingBuilder.Object, mockLaDisposalCostBuilder.Object);
+            mockCalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
+            calcResultBuilder = new CalcResultBuilder(
+                mockDetailBuilder.Object,
+                mockLapcapBuilder.Object,
+                mockCommsCostReportBuilder.Object,
+                mocklateReportingBuilder.Object,
+                mockCalcResultParameterOtherCostBuilder.Object,
+                mockLaDisposalCostBuilder.Object);
+
             mockContext = new Mock<ApplicationDBContext>();
             detailBuilder = new CalcResultDetailBuilder(mockContext.Object);
 
