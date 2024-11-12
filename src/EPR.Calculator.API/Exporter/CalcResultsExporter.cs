@@ -30,7 +30,7 @@ namespace EPR.Calculator.API.Exporter
         {
             var csvContent = new StringBuilder();
             LoadCalcResultDetail(results, csvContent);
-            if(results?.CalcResultLapcapData != null)
+            if (results?.CalcResultLapcapData != null)
             {
                 PrepareLapcapData(results.CalcResultLapcapData, csvContent);
             }
@@ -245,38 +245,36 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"{producer.ProducerName},");
                 csvContent.Append($"{producer.Level},");
 
-                foreach (var materialDisposalFees in producer.ProducerDisposalFeesByMaterial)
+                var allFees = producer.ProducerDisposalFeesByMaterial.Values.SelectMany(fees => fees);
+
+                foreach (var disposalFee in allFees)
                 {
-                    foreach (var disposalFee in materialDisposalFees.Value)
-                    {
-                        csvContent.Append($"{disposalFee.HouseholdPackagingWasteTonnage},");
-                        csvContent.Append($"{disposalFee.ManagedConsumerWasteTonnage},");
-                        csvContent.Append($"{disposalFee.NetReportedTonnage},");
-                        csvContent.Append($"{disposalFee.PricePerTonne},");
-                        csvContent.Append($"{disposalFee.ProducerDisposalFee},");
-                        csvContent.Append($"{disposalFee.BadDebtProvision},");
-                        csvContent.Append($"{disposalFee.ProducerDisposalFeeWithBadDebtProvision},");
-                        csvContent.Append($"{disposalFee.EnglandWithBadDebtProvision},");
-                        csvContent.Append($"{disposalFee.WalesWithBadDebtProvision},");
-                        csvContent.Append($"{disposalFee.ScotlandWithBadDebtProvision},");
-                        csvContent.Append($"{disposalFee.NorthernIrelandWithBadDebtProvision},");
-                    }
+                    csvContent.Append($"{disposalFee.HouseholdPackagingWasteTonnage},");
+                    csvContent.Append($"{disposalFee.ManagedConsumerWasteTonnage},");
+                    csvContent.Append($"{disposalFee.NetReportedTonnage},");
+                    csvContent.Append($"{disposalFee.PricePerTonne},");
+                    csvContent.Append($"{disposalFee.ProducerDisposalFee},");
+                    csvContent.Append($"{disposalFee.BadDebtProvision},");
+                    csvContent.Append($"{disposalFee.ProducerDisposalFeeWithBadDebtProvision},");
+                    csvContent.Append($"{disposalFee.EnglandWithBadDebtProvision},");
+                    csvContent.Append($"{disposalFee.WalesWithBadDebtProvision},");
+                    csvContent.Append($"{disposalFee.ScotlandWithBadDebtProvision},");
+                    csvContent.Append($"{disposalFee.NorthernIrelandWithBadDebtProvision},");
                 }
 
-                foreach (var materialDisposalFees in producer.TwoACommsCostByMaterial)
+                var allFees1 = producer.TwoACommsCostByMaterial.Values.SelectMany(fees => fees);
+
+                foreach (var disposalFee in allFees1)
                 {
-                    foreach (var disposalFee in materialDisposalFees.Value)
-                    {
-                        csvContent.Append($"{disposalFee.HouseholdPackagingWasteTonnage},");
-                        csvContent.Append($"{disposalFee.PriceperTonne},");
-                        csvContent.Append($"{disposalFee.ProducerTotalCostWithoutBadDebtProvision},");
-                        csvContent.Append($"{disposalFee.BadDebtProvision},");
-                        csvContent.Append($"{disposalFee.ProducerTotalCostwithBadDebtProvision},");
-                        csvContent.Append($"{disposalFee.EnglandWithBadDebtProvision},");
-                        csvContent.Append($"{disposalFee.WalesWithBadDebtProvision},");
-                        csvContent.Append($"{disposalFee.ScotlandWithBadDebtProvision},");
-                        csvContent.Append($"{disposalFee.NorthernIrelandWithBadDebtProvision},");
-                    }
+                    csvContent.Append($"{disposalFee.HouseholdPackagingWasteTonnage},");
+                    csvContent.Append($"{disposalFee.PriceperTonne},");
+                    csvContent.Append($"{disposalFee.ProducerTotalCostWithoutBadDebtProvision},");
+                    csvContent.Append($"{disposalFee.BadDebtProvision},");
+                    csvContent.Append($"{disposalFee.ProducerTotalCostwithBadDebtProvision},");
+                    csvContent.Append($"{disposalFee.EnglandWithBadDebtProvision},");
+                    csvContent.Append($"{disposalFee.WalesWithBadDebtProvision},");
+                    csvContent.Append($"{disposalFee.ScotlandWithBadDebtProvision},");
+                    csvContent.Append($"{disposalFee.NorthernIrelandWithBadDebtProvision},");
                 }
                 csvContent.AppendLine();
             }
