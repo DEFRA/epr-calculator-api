@@ -26,9 +26,6 @@ namespace EPR.Calculator.API.Services
                 {
                     try
                     {
-                        // Initialise the producerReportedMaterials
-                        var producerReportedMaterials = new List<ProducerReportedMaterial>();
-
                         // Get the calculator run organisation data master record based on the CalculatorRunOrganisationDataMasterId
                         // from the calculator run table
                         var organisationDataMaster = context.CalculatorRunOrganisationDataMaster.Single(odm => odm.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);
@@ -44,6 +41,9 @@ namespace EPR.Calculator.API.Services
 
                         foreach (var organisation in organisationDataDetails)
                         {
+                            // Initialise the producerReportedMaterials
+                            var producerReportedMaterials = new List<ProducerReportedMaterial>();
+
                             // Get the calculator run pom data details related to the calculator run pom data master
                             var calculatorRunPomDataDetails = context.CalculatorRunPomDataDetails.Where
                                 (
@@ -75,9 +75,6 @@ namespace EPR.Calculator.API.Services
                                     // Add producer detail record to the database context
                                     context.ProducerDetail.Add(producerDetail);
 
-                                    // Apply the database changes
-                                    context.SaveChanges();
-
                                     // Loop through the calculator run pom data details and
                                     // populate the producerDetails and producerReportedMaterials
                                     foreach (var pom in calculatorRunPomDataDetails)
@@ -96,7 +93,6 @@ namespace EPR.Calculator.API.Services
                                                 {
                                                     MaterialId = material.Id,
                                                     Material = material,
-                                                    ProducerDetailId = producerDetail.Id,
                                                     ProducerDetail = producerDetail,
                                                     PackagingType = pom.PackagingType,
                                                     PackagingTonnage = (decimal)pom.PackagingMaterialWeight / 1000,
@@ -110,12 +106,12 @@ namespace EPR.Calculator.API.Services
 
                                     // Add the list of producer reported materials to the database context
                                     context.ProducerReportedMaterial.AddRange(producerReportedMaterials);
-
-                                    // Apply the database changes
-                                    context.SaveChanges();
                                 }
                             }
                         }
+
+                        // Apply the database changes
+                        context.SaveChanges();
 
                         // Success, commit transaction
                         transaction.Commit();
