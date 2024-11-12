@@ -187,7 +187,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
         private static decimal GetPricePerTonne(MaterialDetail material, CalcResult calcResult)
         {
-            var laDisposalCostDataDetail = calcResult.CalcResultLaDisposalCostData.CalcResultLaDisposalCostDetails.FirstOrDefault(la => la.Material == material.Name);
+            var laDisposalCostDataDetail = calcResult.CalcResultLaDisposalCostData.CalcResultLaDisposalCostDetails.FirstOrDefault(la => la.Name == material.Name);
 
             if (laDisposalCostDataDetail == null)
             {
