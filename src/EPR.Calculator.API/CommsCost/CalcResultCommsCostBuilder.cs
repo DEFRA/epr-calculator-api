@@ -9,7 +9,7 @@
     /// Generates the CommsCost report.
     /// </summary>
     /// <param name="DBContext">The database context.</param>
-    public class CommsCostReportBuilder(ApplicationDBContext DBContext) : ICommsCostReportBuilder
+    public class CalcResultCommsCostBuilder(ApplicationDBContext DBContext) : ICalcResultCommsCostBuilder
     {
         /// <summary>
         /// The key used to identify household records in the producer_reported_material table.
@@ -26,13 +26,13 @@
         /// The late reporting tonnage values, indexed by material ID.
         /// </param>
         /// <returns></returns>
-        public CommsCostReport Construct(int runId)
+        public CalcResultCommsCost Construct(int runId)
         {
             var countries = GetCountryDetails();
             var materials = GetMaterialDetails(runId);
-            var records = materials.Select(material => new CommsCostReportRecord(material, countries));
+            var records = materials.Select(material => new CalcResultCommsCostRecord(material, countries));
 
-            var report = new CommsCostReport
+            var report = new CalcResultCommsCost
             {
                 Records = records,
                 CountryNames = countries.Select(c => c.Name)

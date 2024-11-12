@@ -5,7 +5,7 @@ namespace EPR.Calculator.API.CommsCost
     /// <summary>
     /// The CommsCost report.
     /// </summary>
-    public class CommsCostReport
+    public class CalcResultCommsCost
     {
         /// <summary>
         /// The delimiter to use between fields in the report.
@@ -32,7 +32,7 @@ namespace EPR.Calculator.API.CommsCost
             "Comms Cost - by Material Price Per Tonne",
         ];
 
-        public required IEnumerable<CommsCostReportRecord> Records { get; init; }
+        public required IEnumerable<CalcResultCommsCostRecord> Records { get; init; }
 
         public required IEnumerable<string> CountryNames { get; init; }
 

@@ -8,7 +8,7 @@ namespace EPR.Calculator.API.Models
 
         public CalcResultLapcapData CalcResultLapcapData { get; set; }
 
-        public CommsCostReport CalcResultLateReportingTonnageDetail { get; set; }
+        public CalcResultCommsCost CalcResultLateReportingTonnageDetail { get; set; }
 
         public CalcResultParameterCommunicationCost CalcResultParameterCommunicationCost { get; set; }
 

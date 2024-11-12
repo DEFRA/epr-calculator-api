@@ -2,9 +2,9 @@
 
 namespace EPR.Calculator.API.CommsCost
 {
-    public class CommsCostReportRecord
+    public class CalcResultCommsCostRecord
     {
-        public CommsCostReportRecord(MaterialDetails material, IEnumerable<CountryDetails> countries)
+        public CalcResultCommsCostRecord(MaterialDetails material, IEnumerable<CountryDetails> countries)
         {
             Material = material.Name;
             Total = material.TotalValue;
@@ -72,7 +72,7 @@ namespace EPR.Calculator.API.CommsCost
                     PricePerTon.ToString("C4", culture),
                 ]);
 
-            return string.Join(CommsCostReport.Delimiter, fields);
+            return string.Join(CalcResultCommsCost.Delimiter, fields);
         }
     }
 }

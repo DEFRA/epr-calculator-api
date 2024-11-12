@@ -98,7 +98,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                         }
                     }
                 },
-                CalcResultLateReportingTonnageDetail = Fixture.Create<CommsCostReport>(),
+                CalcResultLateReportingTonnageDetail = Fixture.Create<CalcResultCommsCost>(),
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost
                 {
                     Name = "TestValue384507152",

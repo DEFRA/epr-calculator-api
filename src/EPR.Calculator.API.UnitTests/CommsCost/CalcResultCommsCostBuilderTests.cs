@@ -12,17 +12,17 @@
     using Moq;
 
     /// <summary>
-    /// Unit tests for the <see cref="CommsCostReportBuilder"/> class.
+    /// Unit tests for the <see cref="CalcResultCommsCostBuilder"/> class.
     /// </summary>
     [TestClass]
-    public class CommsCostReportBuilderTests
+    public class CalcResultCommsCostBuilderTests
     {
-        public CommsCostReportBuilderTests()
+        public CalcResultCommsCostBuilderTests()
         {
             this.Fixture = new Fixture();
             this.RunId = Fixture.Create<int>();
             this.Context = CreateMockDatabase(RunId);
-            this.TestClass = new CommsCostReportBuilder(this.Context.Object);
+            this.TestClass = new CalcResultCommsCostBuilder(this.Context.Object);
         }
 
         private int RunId { get; }
@@ -31,10 +31,10 @@
 
         private Fixture Fixture { get; }
 
-        private CommsCostReportBuilder TestClass { get; }
+        private CalcResultCommsCostBuilder TestClass { get; }
 
         /// <summary>
-        /// Test building the ComsCost report.
+        /// Test building the CommsCost report.
         /// </summary>
         [TestMethod]
         public void BuildReport()

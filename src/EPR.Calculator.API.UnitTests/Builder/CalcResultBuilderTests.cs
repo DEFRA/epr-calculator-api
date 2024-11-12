@@ -13,14 +13,14 @@ namespace EPR.Calculator.API.UnitTests.Builder
         private CalcResultBuilder testClass;
         private Mock<ICalcResultDetailBuilder> calcResultDetailBuilder;
         private Mock<ICalcResultLapcapDataBuilder> lapcapBuilder;
-        private Mock<ICommsCostReportBuilder> commsCostReportBuilder;
+        private Mock<ICalcResultCommsCostBuilder> commsCostReportBuilder;
 
         [TestInitialize]
         public void SetUp()
         {
             this.calcResultDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             this.lapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
-            this.commsCostReportBuilder = new Mock<ICommsCostReportBuilder>();
+            this.commsCostReportBuilder = new Mock<ICalcResultCommsCostBuilder>();
             this.testClass = new CalcResultBuilder(
                 calcResultDetailBuilder.Object,
                 lapcapBuilder.Object,

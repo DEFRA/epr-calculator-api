@@ -10,12 +10,12 @@ namespace EPR.Calculator.API.Builder
     {
         private readonly ICalcResultDetailBuilder calcResultDetailBuilder;
         private readonly ICalcResultLapcapDataBuilder lapcapBuilder;
-        private readonly ICommsCostReportBuilder commsCostReportBuilder;
+        private readonly ICalcResultCommsCostBuilder commsCostReportBuilder;
 
         public CalcResultBuilder(
             ICalcResultDetailBuilder calcResultDetailBuilder,
             ICalcResultLapcapDataBuilder lapcapBuilder,
-            ICommsCostReportBuilder commsCostReportBuilder) 
+            ICalcResultCommsCostBuilder commsCostReportBuilder) 
         {
             this.calcResultDetailBuilder = calcResultDetailBuilder;
             this.lapcapBuilder = lapcapBuilder;

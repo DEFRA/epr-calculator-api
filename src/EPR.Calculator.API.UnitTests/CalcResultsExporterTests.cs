@@ -28,7 +28,7 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void Export_ShouldHandleIOExceptionGracefully()
         {
-            var commsCost = Fixture.Create<CommsCostReport>();
+            var commsCost = Fixture.Create<CalcResultCommsCost>();
 
             var calcResult = new CalcResult
             {
@@ -56,7 +56,7 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void AppendFileInfo_ShouldNotAppendIfFilePartsAreInvalid()
         {
-            var commsCost = Fixture.Create<CommsCostReport>();
+            var commsCost = Fixture.Create<CalcResultCommsCost>();
 
             var calcResult = new CalcResult
             {
@@ -107,7 +107,7 @@ namespace EPR.Calculator.API.UnitTests
                     LapcapFile = "lapcap.csv,2024-11-01,Tester",
                     ParametersFile = "params.csv,2024-11-01,Tester"
                 },
-                CalcResultLateReportingTonnageDetail = Fixture.Create<CommsCostReport>(),
+                CalcResultLateReportingTonnageDetail = Fixture.Create<CalcResultCommsCost>(),
             };
 
             _calcResultsExporter.Export(calcResult);
