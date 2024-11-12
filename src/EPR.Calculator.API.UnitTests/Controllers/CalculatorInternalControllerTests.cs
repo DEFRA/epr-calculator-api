@@ -98,7 +98,28 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                         }
                     }
                 },
-                CalcResultLateReportingTonnageDetail = Fixture.Create<CalcResultCommsCost>(),
+                CalcResultCommsCostReportDetail = Fixture.Create<CalcResultCommsCost>(),
+                CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
+                {
+                    Name = "TestValue2008053382",
+                    CalcResultLateReportingTonnageDetails = new[] {
+                        new CalcResultLateReportingTonnageDetail
+                        {
+                            Name = "TestValue2143215974",
+                            TotalLateReportingTonnage = 1142363418.57M
+                        },
+                        new CalcResultLateReportingTonnageDetail
+                        {
+                            Name = "TestValue950828146",
+                            TotalLateReportingTonnage = 2103732562.14M
+                        },
+                        new CalcResultLateReportingTonnageDetail
+                        {
+                            Name = "TestValue1995738811",
+                            TotalLateReportingTonnage = 940670239.41M
+                        }
+                    }
+                },
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost
                 {
                     Name = "TestValue384507152",

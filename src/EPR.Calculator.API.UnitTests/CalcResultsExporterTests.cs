@@ -42,7 +42,7 @@ namespace EPR.Calculator.API.UnitTests
                     LapcapFile = "Lapcap.csv,2023-10-01,John Doe",
                     ParametersFile = "Params.csv,2023-10-02,Jane Doe"
                 },
-                CalcResultLateReportingTonnageDetail = commsCost,
+                CalcResultCommsCostReportDetail = commsCost,
             };
 
             _blobStorageServiceMock
@@ -72,7 +72,19 @@ namespace EPR.Calculator.API.UnitTests
                     RpdFileORG = "04/11/2024 12:06",
                     RpdFilePOM = "04/11/2024 12:07",
                 },
-                CalcResultLateReportingTonnageDetail = commsCost,
+                CalcResultCommsCostReportDetail = commsCost,
+                CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
+                {
+                    Name = "Late Reporting Tonnages",
+                    MaterialHeading = "Material",
+                    TonnageHeading = "Tonnage",
+                    CalcResultLateReportingTonnageDetails = new List<CalcResultLateReportingTonnageDetail>
+                    {
+                        new CalcResultLateReportingTonnageDetail { Name = "Aluminium", TotalLateReportingTonnage = 100.000M },
+                        new CalcResultLateReportingTonnageDetail { Name = "Fibre composite", TotalLateReportingTonnage = 200.000M },
+                        new CalcResultLateReportingTonnageDetail { Name = "Total", TotalLateReportingTonnage = 300.000M }
+                    }
+                }
             };
 
             var expectedCsvContent = new StringBuilder();
@@ -83,6 +95,14 @@ namespace EPR.Calculator.API.UnitTests
             expectedCsvContent.AppendLine("Financial Year,2023-24");
             expectedCsvContent.AppendLine("RPD File - ORG,04/11/2024 12:06,RPD File - POM,04/11/2024 12:07");
             expectedCsvContent.AppendLine(commsCost.ToString());
+
+            expectedCsvContent.AppendLine();
+            expectedCsvContent.AppendLine();
+            expectedCsvContent.AppendLine("Late Reporting Tonnages");
+            expectedCsvContent.AppendLine("Material,Tonnage");
+            expectedCsvContent.AppendLine("Aluminium,100.000");
+            expectedCsvContent.AppendLine("Fibre composite,200.000");
+            expectedCsvContent.AppendLine("Total,300.000");
 
             _calcResultsExporter.Export(calcResult);
 
@@ -107,7 +127,19 @@ namespace EPR.Calculator.API.UnitTests
                     LapcapFile = "lapcap.csv,2024-11-01,Tester",
                     ParametersFile = "params.csv,2024-11-01,Tester"
                 },
-                CalcResultLateReportingTonnageDetail = Fixture.Create<CalcResultCommsCost>(),
+                CalcResultCommsCostReportDetail = Fixture.Create<CalcResultCommsCost>(),
+                CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
+                {
+                    Name = "Late Reporting Tonnages",
+                    MaterialHeading = "Material",
+                    TonnageHeading = "Tonnage",
+                    CalcResultLateReportingTonnageDetails = new List<CalcResultLateReportingTonnageDetail>
+                    {
+                        new CalcResultLateReportingTonnageDetail { Name = "Aluminium", TotalLateReportingTonnage = 100.000M },
+                        new CalcResultLateReportingTonnageDetail { Name = "Fibre composite", TotalLateReportingTonnage = 200.000M },
+                        new CalcResultLateReportingTonnageDetail { Name = "Total", TotalLateReportingTonnage = 300.000M }
+                    }
+                }
             };
 
             _calcResultsExporter.Export(calcResult);
