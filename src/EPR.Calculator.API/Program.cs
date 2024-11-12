@@ -41,6 +41,7 @@ builder.Services.AddScoped<ICalcResultOnePlusFourApportionmentBuilder, CalcResul
 builder.Services.AddScoped<ICalcResultParameterOtherCostBuilder, CalcResultParameterOtherCostBuilder>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 
+
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
@@ -61,36 +62,36 @@ builder.Services.AddSingleton<BlobServiceClient>(provider =>
     return new BlobServiceClient(connectionString);
 });
 
-//var serviceBusConnectionString = builder.Configuration.GetSection("ServiceBus").GetSection("ConnectionString");
-//var serviceBusQueueName = builder.Configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
-//#pragma warning disable CS8604 // Possible null reference argument.
-//var retryPeriod = double.Parse(builder.Configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value);
-//var retryCount = int.Parse(builder.Configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value);
-//#pragma warning restore CS8604 // Possible null reference argument.
+var serviceBusConnectionString = builder.Configuration.GetSection("ServiceBus").GetSection("ConnectionString");
+var serviceBusQueueName = builder.Configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
+#pragma warning disable CS8604 // Possible null reference argument.
+var retryPeriod = double.Parse(builder.Configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value);
+var retryCount = int.Parse(builder.Configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value);
+#pragma warning restore CS8604 // Possible null reference argument.
 
-//builder.Services.AddAzureClients(builder =>
-//{
-//    builder
-//        .AddServiceBusClient(serviceBusConnectionString)
-//        .WithName("calculator")
-//        .ConfigureOptions(options =>
-//        {
-//            options.RetryOptions.Delay = TimeSpan.FromSeconds(retryPeriod);
-//            options.RetryOptions.MaxDelay = TimeSpan.FromSeconds(retryPeriod);
-//            options.RetryOptions.MaxRetries = retryCount;
-//        });
+builder.Services.AddAzureClients(builder =>
+{
+    builder
+        .AddServiceBusClient(serviceBusConnectionString)
+        .WithName("calculator")
+        .ConfigureOptions(options =>
+        {
+            options.RetryOptions.Delay = TimeSpan.FromSeconds(retryPeriod);
+            options.RetryOptions.MaxDelay = TimeSpan.FromSeconds(retryPeriod);
+            options.RetryOptions.MaxRetries = retryCount;
+        });
 
-//    // Register a sender for the "calculator" client.
-//#pragma warning disable CS8602 // Dereference of a possibly null reference.
-//    builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) =>
-//        provider
-//            .GetService<IAzureClientFactory<ServiceBusClient>>()
-//            .CreateClient("calculator")
-//            .CreateSender(serviceBusQueueName)
-//    )
-//    .WithName($"calculator-{serviceBusQueueName}");
-//#pragma warning restore CS8602 // Dereference of a possibly null reference.
-//});
+    // Register a sender for the "calculator" client.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+    builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) =>
+        provider
+            .GetService<IAzureClientFactory<ServiceBusClient>>()
+            .CreateClient("calculator")
+            .CreateSender(serviceBusQueueName)
+    )
+    .WithName($"calculator-{serviceBusQueueName}");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+});
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
