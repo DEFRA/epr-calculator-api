@@ -70,15 +70,16 @@
                         p => p.ParameterUniqueReferenceId == $"LRET-{material.Code}").ParameterValue,
                     ProdRepHoPaWaT = CalculateProdRepHoPaWaT(material)
                 });
-        }
+            }
 
         /// <summary>
         /// Retrieve the country details from the database.
         /// </summary>
-        private IEnumerable<CountryDetails> GetCountryDetails()
+        private IEnumerable<CountryDetails> GetCountryDetails(int runId)
             => from country in DBContext.Country
                join app in DBContext.CountryApportionment
                on country.Id equals app.CountryId
+               where app.CalculatorRunId == runId
                select new CountryDetails
                {
                    Id = country.Id,
