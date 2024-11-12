@@ -11,14 +11,17 @@ namespace EPR.Calculator.API.Builder
         private readonly ICalcResultParameterOtherCostBuilder calcResultParameterOtherCostBuilder;
         private readonly ICalcResultDetailBuilder calcResultDetailBuilder;
         private readonly ICalcResultLapcapDataBuilder lapcapBuilder;
+        private readonly ICalcResultOnePlusFourApportionmentBuilder lapcapplusFourApportionmentBuilder;
         public CalcResultBuilder(
             ICalcResultDetailBuilder calcResultDetailBuilder, 
             ICalcResultLapcapDataBuilder lapcapBuilder,
-            ICalcResultParameterOtherCostBuilder calcResultParameterOtherCostBuilder) 
+            ICalcResultParameterOtherCostBuilder calcResultParameterOtherCostBuilder,
+            ICalcResultOnePlusFourApportionmentBuilder calcResultOnePlusFourApportionmentBuilder) 
         {
             this.calcResultDetailBuilder = calcResultDetailBuilder;
             this.lapcapBuilder = lapcapBuilder;
             this.calcResultParameterOtherCostBuilder = calcResultParameterOtherCostBuilder;
+            this.lapcapplusFourApportionmentBuilder = calcResultOnePlusFourApportionmentBuilder;
         }
         public CalcResult Build(CalcResultsRequestDto resultsRequestDto)
         {

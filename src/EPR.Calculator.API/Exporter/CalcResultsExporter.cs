@@ -34,7 +34,7 @@ namespace EPR.Calculator.API.Exporter
             }
 
             //Rekha Chnages
-            if (results.CalcResultOnePlusFourApportionment != null)
+            if (results?.CalcResultOnePlusFourApportionment != null)
             {
                 PrepareOnePluseFourApportionment(results.CalcResultOnePlusFourApportionment, csvContent);
             }
