@@ -838,7 +838,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             var list = new List<CalculatorRunOrganisationDataMaster>();
             list.Add(new CalculatorRunOrganisationDataMaster
             {
-                Id= 1,
+                Id = 1,
                 CalendarYear = "2024-25",
                 EffectiveFrom = DateTime.Now,
                 CreatedBy = "Test user",
