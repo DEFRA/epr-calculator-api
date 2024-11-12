@@ -110,13 +110,11 @@ namespace EPR.Calculator.API.Builder.Summary
 
             foreach (var producer in producerDetailList)
             {
-                var costSummary = new List<CalcResultSummaryProducerDisposalFeesByMaterial>();
-
-                var materialCostSummary = new Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>>();
+                var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
 
                 foreach (var material in materials)
                 {
-                    costSummary.Add(new CalcResultSummaryProducerDisposalFeesByMaterial
+                    materialCostSummary.Add(material, new CalcResultSummaryProducerDisposalFeesByMaterial
                     {
                         HouseholdPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material),
                         ManagedConsumerWasteTonnage = GetManagedConsumerWasteTonnage(producer, material),
@@ -130,8 +128,6 @@ namespace EPR.Calculator.API.Builder.Summary
                         ScotlandWithBadDebtProvision = GetScotlandWithBadDebtProvision(producer, material, calcResult),
                         NorthernIrelandWithBadDebtProvision = GetNorthernIrelandWithBadDebtProvision(producer, material, calcResult)
                     });
-
-                    materialCostSummary.Add(material, costSummary);
                 }
 
                 producerDisposalFees.Add(new CalcResultSummaryProducerDisposalFees
@@ -296,106 +292,85 @@ namespace EPR.Calculator.API.Builder.Summary
             return calcResult.CalcResultLapcapData.CalcResultLapcapDataDetails?.FirstOrDefault(la => la.Name == CalcResultSummaryHeaders.OneCountryApportionment);
         }
 
-        private static decimal GetTotalProducerDisposalFee(Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> materialCostSummary)
+        private static decimal GetTotalProducerDisposalFee(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
         {
             decimal totalProducerDisposalFee = 0;
 
             foreach (var material in materialCostSummary)
             {
-                foreach (var fee in material.Value)
-                {
-                    totalProducerDisposalFee += fee.ProducerDisposalFee;
-                }
+                totalProducerDisposalFee += material.Value.ProducerDisposalFee;
             }
 
             return totalProducerDisposalFee;
         }
 
-        private static decimal GetTotalBadDebtProvision(Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> materialCostSummary)
+        private static decimal GetTotalBadDebtProvision(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
         {
             decimal totalBadDebtProvision = 0;
 
             foreach (var material in materialCostSummary)
             {
-                foreach (var fee in material.Value)
-                {
-                    totalBadDebtProvision += fee.BadDebtProvision;
-                }
+                totalBadDebtProvision += material.Value.BadDebtProvision;
             }
 
             return totalBadDebtProvision;
         }
 
-        private static decimal GetTotalProducerDisposalFeeWithBadDebtProvision(Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> materialCostSummary)
+        private static decimal GetTotalProducerDisposalFeeWithBadDebtProvision(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
         {
             decimal totalProducerDisposalFeeWithBadDebtProvision = 0;
 
             foreach (var material in materialCostSummary)
             {
-                foreach (var fee in material.Value)
-                {
-                    totalProducerDisposalFeeWithBadDebtProvision += fee.ProducerDisposalFeeWithBadDebtProvision;
-                }
+                totalProducerDisposalFeeWithBadDebtProvision += material.Value.ProducerDisposalFeeWithBadDebtProvision;
             }
 
             return totalProducerDisposalFeeWithBadDebtProvision;
         }
 
-        private static decimal GetEnglandTotal(Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> materialCostSummary)
+        private static decimal GetEnglandTotal(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
         {
             decimal totalEngland = 0;
 
             foreach (var material in materialCostSummary)
             {
-                foreach (var fee in material.Value)
-                {
-                    totalEngland += fee.EnglandWithBadDebtProvision;
-                }
+                totalEngland += material.Value.EnglandWithBadDebtProvision;
             }
 
             return totalEngland;
         }
 
-        private static decimal GetWalesTotal(Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> materialCostSummary)
+        private static decimal GetWalesTotal(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
         {
             decimal totalWales = 0;
 
             foreach (var material in materialCostSummary)
             {
-                foreach (var fee in material.Value)
-                {
-                    totalWales += fee.WalesWithBadDebtProvision;
-                }
+                totalWales += material.Value.WalesWithBadDebtProvision;
             }
 
             return totalWales;
         }
 
-        private static decimal GetScotlandTotal(Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> materialCostSummary)
+        private static decimal GetScotlandTotal(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
         {
             decimal totalScotland = 0;
 
             foreach (var material in materialCostSummary)
             {
-                foreach (var fee in material.Value)
-                {
-                    totalScotland += fee.ScotlandWithBadDebtProvision;
-                }
+                totalScotland += material.Value.ScotlandWithBadDebtProvision;
             }
 
             return totalScotland;
         }
 
-        private static decimal GetNorthernIrelandTotal(Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> materialCostSummary)
+        private static decimal GetNorthernIrelandTotal(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
         {
             decimal totalNorthernIreland = 0;
 
             foreach (var material in materialCostSummary)
             {
-                foreach (var fee in material.Value)
-                {
-                    totalNorthernIreland += fee.NorthernIrelandWithBadDebtProvision;
-                }
+                totalNorthernIreland += material.Value.NorthernIrelandWithBadDebtProvision;
             }
 
             return totalNorthernIreland;

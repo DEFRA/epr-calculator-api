@@ -10,6 +10,6 @@
 
         public int Level { get; set; }
 
-        public required Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> ProducerDisposalFeesByMaterial { get; set; }
+        public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
     }
 }
