@@ -29,20 +29,17 @@ namespace EPR.Calculator.API.Exporter
         {
             var csvContent = new StringBuilder();
             LoadCalcResultDetail(results, csvContent);
-            if(results?.CalcResultLapcapData != null)
+            if (results?.CalcResultLapcapData != null)
             {
                 PrepareLapcapData(results.CalcResultLapcapData, csvContent);
             }
-
-            csvContent.AppendLine(results.CalcResultCommsCostReportDetail.ToString());
-            
-
 
             if (results.CalcResultLateReportingTonnageData != null)
             {
                 PrepareLateReportingData(results.CalcResultLateReportingTonnageData, csvContent);
             }
 
+            // csvContent.AppendLine(results.CalcResultCommsCostReportDetail.ToString());
 
             if (results?.CalcResultParameterOtherCost != null)
             {

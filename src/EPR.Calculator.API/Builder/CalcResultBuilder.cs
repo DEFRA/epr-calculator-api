@@ -34,10 +34,9 @@ namespace EPR.Calculator.API.Builder
         {
             var calcResult = new CalcResult();
             calcResult.CalcResultDetail = this.calcResultDetailBuilder.Construct(resultsRequestDto);
-            calcResult.CalcResultLapcapData = this.lapcapBuilder.Construct(resultsRequestDto);
-            calcResult.CalcResultCommsCostReportDetail = commsCostReportBuilder
-                .Construct(resultsRequestDto.RunId);
+            calcResult.CalcResultLapcapData = this.lapcapBuilder.Construct(resultsRequestDto); ;
             calcResult.CalcResultLateReportingTonnageData = this.lateReportingBuilder.Construct(resultsRequestDto);
+            // calcResult.CalcResultCommsCostReportDetail = commsCostReportBuilder.Construct(resultsRequestDto.RunId);
             calcResult.CalcResultParameterOtherCost = this.calcResultParameterOtherCostBuilder.Construct(resultsRequestDto);
 
             return calcResult;
