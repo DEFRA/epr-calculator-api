@@ -75,27 +75,27 @@ namespace EPR.Calculator.API.Services
                                     // Add producer detail record to the database context
                                     context.ProducerDetail.Add(producerDetail);
 
-                                    // Loop through the calculator run pom data details and
-                                    // populate the producerDetails and producerReportedMaterials
-                                    foreach (var pom in calculatorRunPomDataDetails)
+                                    foreach (var material in materials)
                                     {
-                                        // Proceed further only if the organisation id has a value
-                                        // TO DO: We have to record if the organisation id is null in a separate table post Dec 2024
-                                        if (pom.OrganisationId.HasValue)
+                                        var pomDataDetailsByMaterial = calculatorRunPomDataDetails.Where(pdd => pdd.PackagingMaterial == material.Code).GroupBy(pdd => pdd.PackagingType);
+
+                                        foreach (var pomData in pomDataDetailsByMaterial)
                                         {
-                                            var material = materials.Single(m => m.Code == pom.PackagingMaterial);
+                                            var pom = pomData.AsEnumerable();
+                                            var packagingType = pom.FirstOrDefault()?.PackagingType;
+                                            var totalPackagingMaterialWeight = pom.Sum(x => x.PackagingMaterialWeight);
 
                                             // Proceed further only if the packaging type and packaging material weight is not null
                                             // TO DO: We have to record if the packaging type or packaging material weight is null in a separate table post Dec 2024
-                                            if (pom.PackagingType != null && pom.PackagingMaterialWeight != null)
+                                            if (packagingType != null && totalPackagingMaterialWeight != null)
                                             {
                                                 var producerReportedMaterial = new ProducerReportedMaterial
                                                 {
                                                     MaterialId = material.Id,
                                                     Material = material,
                                                     ProducerDetail = producerDetail,
-                                                    PackagingType = pom.PackagingType,
-                                                    PackagingTonnage = (decimal)pom.PackagingMaterialWeight / 1000,
+                                                    PackagingType = packagingType,
+                                                    PackagingTonnage = (decimal)totalPackagingMaterialWeight / 1000,
                                                 };
 
                                                 // Populate the producer reported material list
