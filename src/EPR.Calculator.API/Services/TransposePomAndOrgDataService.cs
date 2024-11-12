@@ -54,11 +54,10 @@ namespace EPR.Calculator.API.Services
                             // TO DO: We have to record if there is no pom data in a separate table post Dec 2024
                             if (calculatorRunPomDataDetails.Count > 0)
                             {
-                                // Get the latest submission period
-                                var latestSubmissionPeriodDescription = calculatorRunPomDataDetails.OrderByDescending(pdd => pdd.SubmissionPeriod).First().SubmissionPeriodDesc;
+                                var organisations = organisationDataDetails.Where(odd => odd.OrganisationName == organisation.OrganisationName).OrderByDescending(odd => odd.SubmissionPeriodDesc);
 
                                 // Get the producer based on the latest submission period
-                                var producer = organisationDataDetails.Find(od => od.SubmissionPeriodDesc == latestSubmissionPeriodDescription);
+                                var producer = organisations.FirstOrDefault();
 
                                 // Proceed further only if the organisation is not null and organisation id not null
                                 // TO DO: We have to record if the organisation name is null in a separate table post Dec 2024
