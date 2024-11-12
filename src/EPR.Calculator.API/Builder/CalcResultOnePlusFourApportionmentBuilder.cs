@@ -5,6 +5,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.Azure.Amqp.Framing;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using System.Globalization;
 
 namespace EPR.Calculator.API.Builder
@@ -105,6 +106,10 @@ namespace EPR.Calculator.API.Builder
 
         private CalcResultOnePlusFourApportionmentDetail CreateTotalRow(CalcResultLapcapDataDetails totalLACost, CalcResultParameterOtherCostDetail dataPrepCharge, int orderId)
         {
+            var culture = CultureInfo.CreateSpecificCulture("en-GB");
+            culture.NumberFormat.CurrencySymbol = "£";
+            culture.NumberFormat.CurrencyPositivePattern = 0;
+
             return new CalcResultOnePlusFourApportionmentDetail
             {
                 Name = OnePlus4ApportionmentColumnHeaders.TotalOnePlusFour,
@@ -113,11 +118,11 @@ namespace EPR.Calculator.API.Builder
                 ScotlandTotal = totalLACost.ScotlandCost + dataPrepCharge.ScotlandValue,
                 NorthernIrelandTotal = totalLACost.NorthernIrelandCost + dataPrepCharge.NorthernIrelandValue,
                 AllTotal = totalLACost.TotalCost + dataPrepCharge.TotalValue,
-                Total = (totalLACost.TotalCost + dataPrepCharge.TotalValue).ToString("C"),
-                EnglandDisposalTotal = (totalLACost.EnglandCost + dataPrepCharge.EnglandValue).ToString("C"),
-                WalesDisposalTotal = (totalLACost.WalesCost + dataPrepCharge.WalesValue).ToString("C"),
-                ScotlandDisposalTotal = (totalLACost.ScotlandCost + dataPrepCharge.ScotlandValue).ToString("C"),
-                NorthernIrelandDisposalTotal = (totalLACost.NorthernIrelandCost + dataPrepCharge.NorthernIrelandValue).ToString("C"),
+                Total = (totalLACost.TotalCost + dataPrepCharge.TotalValue).ToString("C", culture),
+                EnglandDisposalTotal = (totalLACost.EnglandCost + dataPrepCharge.EnglandValue).ToString("C", culture),
+                WalesDisposalTotal = (totalLACost.WalesCost + dataPrepCharge.WalesValue).ToString("C", culture),
+                ScotlandDisposalTotal = (totalLACost.ScotlandCost + dataPrepCharge.ScotlandValue).ToString("C", culture),
+                NorthernIrelandDisposalTotal = (totalLACost.NorthernIrelandCost + dataPrepCharge.NorthernIrelandValue).ToString("C", culture),
                 OrderId = orderId,
             };
         }
