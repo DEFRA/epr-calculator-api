@@ -12,9 +12,8 @@
 
         public int Order { get; set; }
 
-        public Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryProducerDisposalFeesByMaterial>> ProducerDisposalFeesByMaterial { get; set; }
+        public Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
 
-        public Dictionary<MaterialDetail, IEnumerable<CalcResultSummaryTwoACommsCostByMaterial>> TwoACommsCostByMaterial { get; set; }
-
+        public Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> CommsCostByMaterial { get; set; }
     }
 }
