@@ -12,12 +12,6 @@ namespace EPR.Calculator.API.Builder
 {
     public class CalcResultOnePlusFourApportionmentBuilder : ICalcResultOnePlusFourApportionmentBuilder
     {
-        private readonly ApplicationDBContext context;
-        public CalcResultOnePlusFourApportionmentBuilder(ApplicationDBContext context)
-        {
-            this.context = context;
-        }
-
         public CalcResultOnePlusFourApportionment Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult)
         {
             const string totalLabel = "Total";

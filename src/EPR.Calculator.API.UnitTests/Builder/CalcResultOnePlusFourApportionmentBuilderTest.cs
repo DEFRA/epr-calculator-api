@@ -16,30 +16,8 @@ using System.Threading.Tasks;
 namespace EPR.Calculator.API.UnitTests.Builder
 {
     [TestClass]
-    public class CalcResultOnePlusFourApportionmentBuilderTest
+    public class CalcResultOnePlusFourApportionmentBuilderTest : CalcResultOnePlusFourApportionmentBuilder
     {
-        private CalcResultOnePlusFourApportionmentBuilder builder;
-        private ApplicationDBContext dbContext;
-
-        [TestInitialize]
-        public void DataSetup()
-        {
-            var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-                                    .UseInMemoryDatabase(databaseName: "PayCal")
-                                    .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-            .Options;
-
-            dbContext = new ApplicationDBContext(dbContextOptions);
-            dbContext.Database.EnsureCreated();
-            dbContext.DefaultParameterTemplateMasterList.RemoveRange(dbContext.DefaultParameterTemplateMasterList);
-            dbContext.SaveChanges();
-            dbContext.DefaultParameterTemplateMasterList.AddRange(BaseControllerTest.GetDefaultParameterTemplateMasterData().ToList());
-            // dbContext.LapcapDataTemplateMaster.AddRange(BaseControllerTest.GetLapcapTemplateMasterData().ToList());
-            dbContext.SaveChanges();
-
-            builder = new CalcResultOnePlusFourApportionmentBuilder(dbContext);
-        }
-
         [TestMethod]
         public void Construct_ShouldReturnCorrectApportionment()
         {
@@ -94,7 +72,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 }
             };
 
-            var resultCalc = builder.Construct(resultsDto, calcResult);
+            var resultCalc = Construct(resultsDto, calcResult);
             // Assert
             Assert.IsNotNull(calcResult);
             Assert.AreEqual("1 + 4 Apportionment %s", resultCalc.Name);
@@ -102,27 +80,42 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
             // Check header row
             var headerRow = resultCalc.CalcResultOnePlusFourApportionmentDetails.FirstOrDefault();
-            Assert.AreEqual(OnePlus4ApportionmentRowHeaders.Name, headerRow.Name);
-            Assert.AreEqual(OnePlus4ApportionmentRowHeaders.Total, headerRow.Total);
+            Assert.AreEqual(OnePlus4ApportionmentRowHeaders.Name, headerRow?.Name);
+            Assert.AreEqual(OnePlus4ApportionmentRowHeaders.Total, headerRow?.Total);
 
             // Check disposal cost row
-            var disposalRow = resultCalc.CalcResultOnePlusFourApportionmentDetails.Single(x=>x.Name== "1 Fee for LA Disposal Costs");
-            Assert.AreEqual("£13,742.80", disposalRow.Total);
+            var disposalRow = resultCalc.CalcResultOnePlusFourApportionmentDetails.Single(x => x.Name == "1 Fee for LA Disposal Costs");
             Assert.AreEqual("£13,280.45", disposalRow.EnglandDisposalTotal);
+            Assert.AreEqual("£210.28", disposalRow.WalesDisposalTotal);
+            Assert.AreEqual("£161.07", disposalRow.ScotlandDisposalTotal);
+            Assert.AreEqual("£91.00", disposalRow.NorthernIrelandDisposalTotal);
+            Assert.AreEqual("£13,742.80", disposalRow.Total);
 
             // Check data preparation charge row
             var prepchargeRow = resultCalc.CalcResultOnePlusFourApportionmentDetails.Single(x => x.Name == "4 LA Data Prep Charge");
-            Assert.AreEqual("£365.45", prepchargeRow.Total);
             Assert.AreEqual("£115.45", prepchargeRow.EnglandDisposalTotal);
+            Assert.AreEqual("£114.00", prepchargeRow.WalesDisposalTotal);
+            Assert.AreEqual("£117.00", prepchargeRow.ScotlandDisposalTotal);
+            Assert.AreEqual("£19.00", prepchargeRow.NorthernIrelandDisposalTotal);
+            Assert.AreEqual("£365.45", prepchargeRow.Total);
 
             // Check total row
-            var totalRow = resultCalc.CalcResultOnePlusFourApportionmentDetails.Single(x => x.OrderId==3); ;
+            var totalRow = resultCalc.CalcResultOnePlusFourApportionmentDetails.Single(x => x.OrderId == 3);
+            Assert.AreEqual("Total of 1 + 4", totalRow.Name);
             Assert.AreEqual("£14,108.25", totalRow.Total); // 13,742.80 + 365.45
+            Assert.AreEqual("£13,395.90", totalRow.EnglandDisposalTotal); // 13,280.45 + 115.45
+            Assert.AreEqual("£324.28", totalRow.WalesDisposalTotal); // 210 + 114.00
+            Assert.AreEqual("£208.00", totalRow.ScotlandDisposalTotal); // 161.07 + 117.00
+            Assert.AreEqual("£110.00", totalRow.NorthernIrelandDisposalTotal); // 91.00 + 19.00
 
             // Check apportionment row
-            var apportionmentRow = resultCalc.CalcResultOnePlusFourApportionmentDetails.Single(x => x.OrderId == 4); ;
+            var apportionmentRow = resultCalc.CalcResultOnePlusFourApportionmentDetails.Single(x => x.OrderId == 4);
+            Assert.AreEqual("1 + 4 Apportionment %s", totalRow.Name);
             Assert.AreEqual("100.00000000%", apportionmentRow.Total);
             Assert.AreEqual("94.95082664%", apportionmentRow.EnglandDisposalTotal);
+            Assert.AreEqual("2.29851328%", apportionmentRow.WalesDisposalTotal);
+            Assert.AreEqual("1.47431467%", apportionmentRow.ScotlandDisposalTotal);
+            Assert.AreEqual("0.77968564%", apportionmentRow.NorthernIrelandDisposalTotal);
         }
     }
 }
