@@ -181,11 +181,11 @@ namespace EPR.Calculator.API.Exporter
             foreach (var lapcapData in lapcapDataDetails)
             {
                 csvContent.Append($"{CsvSanitiser.SanitiseData(lapcapData.Name)},");
-                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.Total)}\",");
                 csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.EnglandDisposalTotal)}\",");
                 csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.WalesDisposalTotal)}\",");
                 csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.ScotlandDisposalTotal)}\",");
                 csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.NorthernIrelandDisposalTotal)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.Total)}\",");
                 csvContent.AppendLine();
             }
         }
