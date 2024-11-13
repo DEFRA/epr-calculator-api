@@ -32,9 +32,15 @@ namespace EPR.Calculator.API.UnitTests.Builder
             this.summaryBuilder = new Mock<ICalcResultSummaryBuilder>();
             this.mockLateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
             this.runLaDisposalCostBuilder = new Mock<ICalcRunLaDisposalCostBuilder>();
-            this.testClass = new CalcResultBuilder(calcResultDetailBuilder.Object, lapcapBuilder.Object, mockLateReportingBuilder.Object, runLaDisposalCostBuilder.Object, summaryBuilder.Object);
             this.commsCostReportBuilder = new Mock<ICalcResultCommsCostBuilder>();
             this.calcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
+            //this.testClass = new CalcResultBuilder(
+            //    calcResultDetailBuilder.Object,
+            //    lapcapBuilder.Object,
+            //    commsCostReportBuilder.Object,
+            //    mockLateReportingBuilder.Object,
+            //    calcResultParameterOtherCostBuilder.Object,
+            //    summaryBuilder.Object);
         }
 
         [TestMethod]
@@ -46,8 +52,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 lapcapBuilder.Object,
                 commsCostReportBuilder.Object,
                 mockLateReportingBuilder.Object,
-                calcResultParameterOtherCostBuilder.Object
-                );
+                calcResultParameterOtherCostBuilder.Object,
+                summaryBuilder.Object);
 
             // Assert
             Assert.IsNotNull(instance);
