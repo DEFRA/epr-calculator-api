@@ -36,6 +36,7 @@ namespace EPR.Calculator.API.UnitTests
         private CalcResultsExporter exporter;
         protected ApplicationDBContext? dbContext;
         protected IOrgAndPomWrapper? wrapper;
+        private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockICalcResultOnePlusFourApportionmentBuilder;
 
         [TestInitialize]
         public void Setup()
@@ -58,12 +59,14 @@ namespace EPR.Calculator.API.UnitTests
             mockCommsCostReportBuilder = new Mock<ICalcResultCommsCostBuilder>();
             mocklateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
             mockCalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
+            mockICalcResultOnePlusFourApportionmentBuilder = new Mock<ICalcResultOnePlusFourApportionmentBuilder>();
             calcResultBuilder = new CalcResultBuilder(
                 mockDetailBuilder.Object,
                 mockLapcapBuilder.Object,
+                mockCalcResultParameterOtherCostBuilder.Object,
+                mockICalcResultOnePlusFourApportionmentBuilder.Object,
                 mockCommsCostReportBuilder.Object,
-                mocklateReportingBuilder.Object,
-                mockCalcResultParameterOtherCostBuilder.Object);
+                mocklateReportingBuilder.Object);
 
             mockContext = new Mock<ApplicationDBContext>();
             detailBuilder = new CalcResultDetailBuilder(mockContext.Object);

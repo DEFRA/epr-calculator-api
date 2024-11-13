@@ -15,6 +15,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
     {
         private Mock<ICalcResultDetailBuilder> calcResultDetailBuilder;
         private Mock<ICalcResultLapcapDataBuilder> lapcapBuilder;
+        private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockOnePlusFourApportionmentBuilder;
+        private Mock<ICalcResultParameterOtherCostBuilder> mockICalcResultParameterOtherCostBuilder;
         private Mock<ICalcResultCommsCostBuilder> commsCostReportBuilder;
         private Mock<ICalcResultLateReportingBuilder> mockLateReportingBuilder;
         private Mock<ICalcResultParameterOtherCostBuilder> calcResultParameterOtherCostBuilder;
@@ -24,6 +26,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
         {
             this.calcResultDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             this.lapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
+            this.mockICalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
+            this.mockOnePlusFourApportionmentBuilder=new Mock<ICalcResultOnePlusFourApportionmentBuilder> ();
             this.commsCostReportBuilder = new Mock<ICalcResultCommsCostBuilder>();
             this.mockLateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
             this.calcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
@@ -36,10 +40,10 @@ namespace EPR.Calculator.API.UnitTests.Builder
             var instance = new CalcResultBuilder(
                 calcResultDetailBuilder.Object,
                 lapcapBuilder.Object,
+                mockICalcResultParameterOtherCostBuilder.Object,
+                mockOnePlusFourApportionmentBuilder.Object,
                 commsCostReportBuilder.Object,
-                mockLateReportingBuilder.Object,
-                calcResultParameterOtherCostBuilder.Object
-                );
+                mockLateReportingBuilder.Object);
 
             // Assert
             Assert.IsNotNull(instance);
