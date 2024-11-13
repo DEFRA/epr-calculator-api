@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.Builder.CommsCost;
+using EPR.Calculator.API.Builder.Detail;
 using EPR.Calculator.API.Builder.LaDisposalCost;
 using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.LateReportingTonnages;

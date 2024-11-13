@@ -9,6 +9,7 @@ using EPR.Calculator.API.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using EPR.Calculator.API.Builder.CommsCost;
+using EPR.Calculator.API.Builder.Detail;
 
 namespace EPR.Calculator.API.UnitTests
 {

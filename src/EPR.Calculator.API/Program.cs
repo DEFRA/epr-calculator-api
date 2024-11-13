@@ -20,6 +20,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using EPR.Calculator.API.Builder.CommsCost;
+using EPR.Calculator.API.Builder.Detail;
 
 var builder = WebApplication.CreateBuilder(args);
 
