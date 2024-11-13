@@ -27,10 +27,11 @@ namespace EPR.Calculator.API.Services
                 var organisationDataMaster = context.CalculatorRunOrganisationDataMaster.Single(odm => odm.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);
 
                 // Get the calculator run organisation data details as we need the organisation name
-                var organisationDataDetails = context.CalculatorRunOrganisationDataDetails.Where
-                    (
-                        odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id
-                    ).ToList();
+                var organisationDataDetails = context.CalculatorRunOrganisationDataDetails
+                    .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id)
+                    .GroupBy(odd => new { odd.OrganisationId, odd.SubsidaryId, odd.SubmissionPeriodDesc })
+                    .Select(odd => odd.First())
+                    .ToList();
 
                 // Get the calculator run pom data master record based on the CalculatorRunPomDataMasterId
                 var pomDataMaster = context.CalculatorRunPomDataMaster.Single(pdm => pdm.Id == calculatorRun.CalculatorRunPomDataMasterId);
@@ -47,7 +48,10 @@ namespace EPR.Calculator.API.Services
                             // Get the calculator run pom data details related to the calculator run pom data master
                             var calculatorRunPomDataDetails = context.CalculatorRunPomDataDetails.Where
                                 (
-                                    pdd => pdd.CalculatorRunPomDataMasterId == pomDataMaster.Id && pdd.OrganisationId == organisation.OrganisationId && pdd.SubsidaryId == organisation.SubsidaryId
+                                    pdd => pdd.CalculatorRunPomDataMasterId == pomDataMaster.Id &&
+                                    pdd.OrganisationId == organisation.OrganisationId &&
+                                    pdd.SubsidaryId == organisation.SubsidaryId &&
+                                    pdd.SubmissionPeriodDesc == organisation.SubmissionPeriodDesc
                                 ).ToList();
 
                             // Proceed further only if there is any pom data based on the pom data master id and organisation id
@@ -95,7 +99,7 @@ namespace EPR.Calculator.API.Services
                                                     Material = material,
                                                     ProducerDetail = producerDetail,
                                                     PackagingType = packagingType,
-                                                    PackagingTonnage = (decimal)totalPackagingMaterialWeight / 1000,
+                                                    PackagingTonnage = Math.Round((decimal)(totalPackagingMaterialWeight / 1000), 3),
                                                 };
 
                                                 // Populate the producer reported material list
