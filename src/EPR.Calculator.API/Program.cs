@@ -1,6 +1,7 @@
 using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.Builder;
+using EPR.Calculator.API.Builder.LaDisposalCost;
 using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
@@ -45,6 +46,7 @@ builder.Services.AddScoped<ICalcResultParameterOtherCostBuilder, CalcResultParam
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 
 builder.Services.AddScoped<ICalcResultCommsCostBuilder, CalcResultCommsCostBuilder>();
+builder.Services.AddScoped<ICalcRunLaDisposalCostBuilder, CalcRunLaDisposalCostBuilder>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>

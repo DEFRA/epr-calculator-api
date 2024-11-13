@@ -1,10 +1,8 @@
 ﻿using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Data.Migrations;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
 using System.Text;
-using System.Threading.Channels;
 
 namespace EPR.Calculator.API.Exporter
 {
@@ -20,7 +18,9 @@ namespace EPR.Calculator.API.Exporter
         private const string RPDFilePOM = "RPD File - POM";
         private const string LapcapFile = "LAPCAP File";
         private const string ParametersFile = "Parameters File";
+        private const string LaDisposalCostFile = "LA Disposal cost File";
         private const string CountryApportionmentFile = "Country Apportionment File";
+
 
         public CalcResultsExporter(IBlobStorageService blobStorageService)
         {
@@ -40,7 +40,6 @@ namespace EPR.Calculator.API.Exporter
                 PrepareLateReportingData(results.CalcResultLateReportingTonnageData, csvContent);
             }
 
-
             if (results?.CalcResultParameterOtherCost != null)
             {
                 PrepareOtherCosts(results.CalcResultParameterOtherCost, csvContent);
@@ -50,10 +49,12 @@ namespace EPR.Calculator.API.Exporter
             {
                 PrepareOnePluseFourApportionment(results.CalcResultOnePlusFourApportionment, csvContent);
             }
-
             csvContent.AppendLine();
             // csvContent.AppendLine(results.CalcResultCommsCostReportDetail.ToString());
-
+            if (results?.CalcResultLaDisposalCostData != null)
+            {
+                PrepareLaDisposalCostData(results.CalcResultLaDisposalCostData, csvContent);
+            }
 
             var fileName = GetResultFileName(results.CalcResultDetail.RunId);
             try
@@ -216,5 +217,32 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.AppendLine();
             }
         }
+
+        private static void PrepareLaDisposalCostData(CalcResultLaDisposalCostData calcResultLaDisposalCostData, StringBuilder csvContent)
+        {
+            csvContent.AppendLine();
+            csvContent.AppendLine();
+
+            csvContent.AppendLine(calcResultLaDisposalCostData.Name);
+            var lapcapDataDetails = calcResultLaDisposalCostData.CalcResultLaDisposalCostDetails.OrderBy(x => x.OrderId);
+
+            foreach (var lapcapData in lapcapDataDetails)
+            {
+                csvContent.Append($"{CsvSanitiser.SanitiseData(lapcapData.Name)},");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.England)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.Wales)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.Scotland)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.NorthernIreland)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.Total)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.ProducerReportedHouseholdPackagingWasteTonnage)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.LateReportingTonnage)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.ProducerReportedHouseholdTonnagePlusLateReportingTonnage)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.DisposalCostPricePerTonne)}\",");
+                csvContent.AppendLine();
+            }
+        }
+
+
+
     }
 }

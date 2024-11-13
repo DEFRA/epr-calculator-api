@@ -5,6 +5,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
 {
     using System;
     using EPR.Calculator.API.Builder;
+    using EPR.Calculator.API.Builder.LaDisposalCost;
     using EPR.Calculator.API.Builder.Lapcap;
     using EPR.Calculator.API.Builder.ParametersOther;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -19,7 +20,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
         private Mock<ICalcResultParameterOtherCostBuilder> mockICalcResultParameterOtherCostBuilder;
         private Mock<ICalcResultCommsCostBuilder> commsCostReportBuilder;
         private Mock<ICalcResultLateReportingBuilder> mockLateReportingBuilder;
-        private Mock<ICalcResultParameterOtherCostBuilder> calcResultParameterOtherCostBuilder;
+        private Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
+        private Mock<ICalcRunLaDisposalCostBuilder> mockRunLaDisposalCostBuilder;
 
         [TestInitialize]
         public void SetUp()
@@ -30,7 +32,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
             this.mockOnePlusFourApportionmentBuilder=new Mock<ICalcResultOnePlusFourApportionmentBuilder> ();
             this.commsCostReportBuilder = new Mock<ICalcResultCommsCostBuilder>();
             this.mockLateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
-            this.calcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
+            this.mockCalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
+            this.mockRunLaDisposalCostBuilder = new Mock<ICalcRunLaDisposalCostBuilder>();
         }
 
         [TestMethod]
@@ -43,7 +46,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 mockICalcResultParameterOtherCostBuilder.Object,
                 mockOnePlusFourApportionmentBuilder.Object,
                 commsCostReportBuilder.Object,
-                mockLateReportingBuilder.Object);
+                mockLateReportingBuilder.Object,
+                mockRunLaDisposalCostBuilder.Object);
 
             // Assert
             Assert.IsNotNull(instance);
