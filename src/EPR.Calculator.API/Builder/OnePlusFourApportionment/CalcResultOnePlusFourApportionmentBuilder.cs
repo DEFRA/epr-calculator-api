@@ -1,14 +1,10 @@
-﻿using EPR.Calculator.API.Builder.Lapcap;
+﻿using System.Globalization;
+using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
-using Microsoft.Azure.Amqp.Framing;
-using Microsoft.VisualStudio.TestPlatform.Utilities;
-using System.Globalization;
 
-namespace EPR.Calculator.API.Builder
+namespace EPR.Calculator.API.Builder.OnePlusFourApportionment
 {
     public class CalcResultOnePlusFourApportionmentBuilder : ICalcResultOnePlusFourApportionmentBuilder
     {
