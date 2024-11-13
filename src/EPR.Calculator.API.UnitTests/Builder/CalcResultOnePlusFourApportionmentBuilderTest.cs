@@ -110,7 +110,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
             // Check apportionment row
             var apportionmentRow = resultCalc.CalcResultOnePlusFourApportionmentDetails.Single(x => x.OrderId == 4);
-            Assert.AreEqual("1 + 4 Apportionment %s", totalRow.Name);
+            Assert.AreEqual("1 + 4 Apportionment %s", apportionmentRow.Name);
             Assert.AreEqual("100.00000000%", apportionmentRow.Total);
             Assert.AreEqual("94.95082664%", apportionmentRow.EnglandDisposalTotal);
             Assert.AreEqual("2.29851328%", apportionmentRow.WalesDisposalTotal);

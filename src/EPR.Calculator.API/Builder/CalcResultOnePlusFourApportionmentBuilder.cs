@@ -46,11 +46,11 @@ namespace EPR.Calculator.API.Builder
             return new CalcResultOnePlusFourApportionmentDetail
             {
                 Name = OnePlus4ApportionmentRowHeaders.Name,
-                Total = OnePlus4ApportionmentRowHeaders.Total,
                 EnglandDisposalTotal = OnePlus4ApportionmentRowHeaders.EnglandDisposalCost,
                 WalesDisposalTotal = OnePlus4ApportionmentRowHeaders.WalesDisposalCost,
                 ScotlandDisposalTotal = OnePlus4ApportionmentRowHeaders.ScotlandDisposalCost,
                 NorthernIrelandDisposalTotal = OnePlus4ApportionmentRowHeaders.NorthernIrelandDisposalCost,
+                Total = OnePlus4ApportionmentRowHeaders.Total,
                 OrderId = orderId,
             };
         }
