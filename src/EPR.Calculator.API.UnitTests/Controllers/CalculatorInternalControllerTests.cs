@@ -5,7 +5,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using System.Linq.Expressions;
     using AutoFixture;
     using EPR.Calculator.API.Builder;
-    using EPR.Calculator.API.CommsCost;
+    using EPR.Calculator.API.Builder.CommsCost;
     using EPR.Calculator.API.Controllers;
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Dtos;

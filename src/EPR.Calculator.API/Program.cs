@@ -6,7 +6,6 @@ using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
 using EPR.Calculator.API.Builder.OnePlusFourApportionment;
-using EPR.Calculator.API.CommsCost;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Exceptions;
@@ -20,7 +19,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
-using EPR.Calculator.API.CommsCost;
+using EPR.Calculator.API.Builder.CommsCost;
 
 var builder = WebApplication.CreateBuilder(args);
 

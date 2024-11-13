@@ -1,11 +1,11 @@
 using EPR.Calculator.API.Builder.LateReportingTonnages;
 using EPR.Calculator.API.Builder.OnePlusFourApportionment;
-using EPR.Calculator.API.CommsCost;
 
 namespace EPR.Calculator.API.UnitTests.Builder
 {
     using System;
     using EPR.Calculator.API.Builder;
+    using EPR.Calculator.API.Builder.CommsCost;
     using EPR.Calculator.API.Builder.LaDisposalCost;
     using EPR.Calculator.API.Builder.Lapcap;
     using EPR.Calculator.API.Builder.ParametersOther;

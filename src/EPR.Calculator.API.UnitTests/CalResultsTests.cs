@@ -1,7 +1,6 @@
 ﻿using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Builder.LaDisposalCost;
 using EPR.Calculator.API.Builder.Lapcap;
-using EPR.Calculator.API.CommsCost;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
 using EPR.Calculator.API.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.Builder.ParametersOther;
@@ -16,6 +15,7 @@ using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using EPR.Calculator.API.Builder.CommsCost;
 
 namespace EPR.Calculator.API.UnitTests
 {

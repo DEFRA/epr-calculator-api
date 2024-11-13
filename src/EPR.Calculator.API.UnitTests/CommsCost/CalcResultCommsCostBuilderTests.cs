@@ -3,7 +3,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using AutoFixture;
-    using EPR.Calculator.API.CommsCost;
+    using EPR.Calculator.API.Builder.CommsCost;
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.UnitTests.Properties;

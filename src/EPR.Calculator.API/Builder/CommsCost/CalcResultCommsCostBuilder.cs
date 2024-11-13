@@ -1,4 +1,4 @@
-﻿namespace EPR.Calculator.API.CommsCost
+﻿namespace EPR.Calculator.API.Builder.CommsCost
 {
     using System.Globalization;
     using System.Text;
@@ -48,11 +48,11 @@
         {
             var masterParameterId = DBContext.CalculatorRuns
                 .Single(run => run.Id == runId)
-                .DefaultParameterSettingMaster?.Id 
+                .DefaultParameterSettingMaster?.Id
                 ?? throw new InvalidOperationException("No master parameter record found.");
             var parameters = DBContext.DefaultParameterSettingDetail
                .Where(p => p.DefaultParameterSettingMasterId == masterParameterId);
-            if(!parameters.Any())
+            if (!parameters.Any())
             {
                 throw new InvalidOperationException("No parameter details found.");
             }
@@ -73,7 +73,7 @@
                         ProdRepHoPaWaT = CalculateProdRepHoPaWaT(material)
                     });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new InvalidOperationException("Could not retrieve material data, see inner exception.", ex);
             }

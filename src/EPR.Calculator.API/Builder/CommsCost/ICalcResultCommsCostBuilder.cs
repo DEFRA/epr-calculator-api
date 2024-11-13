@@ -1,4 +1,4 @@
-﻿namespace EPR.Calculator.API.CommsCost
+﻿namespace EPR.Calculator.API.Builder.CommsCost
 {
     public interface ICalcResultCommsCostBuilder
     {
