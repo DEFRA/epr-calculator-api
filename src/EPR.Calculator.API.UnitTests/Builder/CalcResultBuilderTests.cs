@@ -20,11 +20,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
     {
         private Mock<ICalcResultDetailBuilder> calcResultDetailBuilder;
         private Mock<ICalcResultLapcapDataBuilder> lapcapBuilder;
-        private Mock<ICalcResultLateReportingBuilder> mockLateReportingBuilder;
+        private Mock<ICalcResultLateReportingBuilder> lateReportingBuilder;
         private Mock<ICalcRunLaDisposalCostBuilder> runLaDisposalCostBuilder;
         private Mock<ICalcResultCommsCostBuilder> commsCostReportBuilder;
         private Mock<ICalcResultParameterOtherCostBuilder> calcResultParameterOtherCostBuilder;
-        private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockOnePlusFourApportionmentBuilder;
+        private Mock<ICalcResultOnePlusFourApportionmentBuilder> onePlusFourApportionmentBuilder;
         private Mock<ICalcResultSummaryBuilder> summaryBuilder;
 
         [TestInitialize]
@@ -32,11 +32,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
         {
             this.calcResultDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             this.lapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
-            this.mockOnePlusFourApportionmentBuilder=new Mock<ICalcResultOnePlusFourApportionmentBuilder> ();
+            this.onePlusFourApportionmentBuilder=new Mock<ICalcResultOnePlusFourApportionmentBuilder> ();
             this.commsCostReportBuilder = new Mock<ICalcResultCommsCostBuilder>();
-            this.mockLateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
+            this.lateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
             this.calcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
-            this.mockRunLaDisposalCostBuilder = new Mock<ICalcRunLaDisposalCostBuilder>();
+            this.runLaDisposalCostBuilder = new Mock<ICalcRunLaDisposalCostBuilder>();
         }
 
         [TestMethod]
@@ -46,12 +46,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
             var instance = new CalcResultBuilder(
                 calcResultDetailBuilder.Object,
                 lapcapBuilder.Object,
-                mockICalcResultParameterOtherCostBuilder.Object,
-                mockOnePlusFourApportionmentBuilder.Object,
-                commsCostReportBuilder.Object,
-                mockLateReportingBuilder.Object,
                 calcResultParameterOtherCostBuilder.Object,
-                mockRunLaDisposalCostBuilder.Object,
+                onePlusFourApportionmentBuilder.Object,
+                commsCostReportBuilder.Object,
+                lateReportingBuilder.Object,
+                runLaDisposalCostBuilder.Object,
                 summaryBuilder.Object);
 
             // Assert

@@ -29,7 +29,6 @@ namespace EPR.Calculator.API.Builder
             ICalcResultOnePlusFourApportionmentBuilder calcResultOnePlusFourApportionmentBuilder,
             ICalcResultCommsCostBuilder commsCostReportBuilder,
             ICalcResultLateReportingBuilder lateReportingBuilder,
-            ICalcResultParameterOtherCostBuilder calcResultParameterOtherCostBuilder,
             ICalcRunLaDisposalCostBuilder calcRunLaDisposalCostBuilder,
             ICalcResultSummaryBuilder summaryBuilder)
         {

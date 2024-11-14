@@ -25,7 +25,7 @@ namespace EPR.Calculator.API.UnitTests
         private Mock<ICalcResultSummaryBuilder> mockSummaryBuilder;
         private CalcResultBuilder calcResultBuilder;
         
-        private Mock<ICalcResultParameterOtherCostBuilder> mockICalcResultParameterOtherCostBuilder;
+        private Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
         private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockOnePlusFourApportionmentBuilder;
 
         [TestInitialize]
@@ -38,17 +38,16 @@ namespace EPR.Calculator.API.UnitTests
             mockCalcRunLaDisposalCostBuilder = new Mock<ICalcRunLaDisposalCostBuilder>();
             mockCommsCostReportBuilder = new Mock<ICalcResultCommsCostBuilder>();
             mockLateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
-            mockICalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
-            mockICalcResultOnePlusFourApportionmentBuilder = new Mock<ICalcResultOnePlusFourApportionmentBuilder>();
+            mockCalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
+            mockOnePlusFourApportionmentBuilder = new Mock<ICalcResultOnePlusFourApportionmentBuilder>();
             mockCalcRunLaDisposalCostBuilder = new Mock<ICalcRunLaDisposalCostBuilder>();
             calcResultBuilder = new CalcResultBuilder(
                 mockCalcResultDetailBuilder.Object,
                 mockLapcapBuilder.Object,
-                mockICalcResultParameterOtherCostBuilder.Object,
-                mockICalcResultOnePlusFourApportionmentBuilder.Object,
+                mockCalcResultParameterOtherCostBuilder.Object,
+                mockOnePlusFourApportionmentBuilder.Object,
                 mockCommsCostReportBuilder.Object,
                 mockLateReportingBuilder.Object,
-                mockICalcResultParameterOtherCostBuilder.Object,
                 mockCalcRunLaDisposalCostBuilder.Object,
                 mockSummaryBuilder.Object);
         }
