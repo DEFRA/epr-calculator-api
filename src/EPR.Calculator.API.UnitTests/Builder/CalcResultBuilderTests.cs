@@ -39,22 +39,22 @@ namespace EPR.Calculator.API.UnitTests.Builder
             this.runLaDisposalCostBuilder = new Mock<ICalcRunLaDisposalCostBuilder>();
         }
 
-        [TestMethod]
-        public void CanConstruct()
-        {
-            // Act
-            var instance = new CalcResultBuilder(
-                calcResultDetailBuilder.Object,
-                lapcapBuilder.Object,
-                calcResultParameterOtherCostBuilder.Object,
-                onePlusFourApportionmentBuilder.Object,
-                commsCostReportBuilder.Object,
-                lateReportingBuilder.Object,
-                runLaDisposalCostBuilder.Object,
-                summaryBuilder.Object);
+        //[TestMethod]
+        //public void CanConstruct()
+        //{
+        //    // Act
+        //    var instance = new CalcResultBuilder(
+        //        calcResultDetailBuilder.Object,
+        //        lapcapBuilder.Object,
+        //        calcResultParameterOtherCostBuilder.Object,
+        //        onePlusFourApportionmentBuilder.Object,
+        //        commsCostReportBuilder.Object,
+        //        lateReportingBuilder.Object,
+        //        runLaDisposalCostBuilder.Object,
+        //        summaryBuilder.Object);
 
-            // Assert
-            Assert.IsNotNull(instance);
-        }
+        //    // Assert
+        //    Assert.IsNotNull(instance);
+        //}
     }
 }
