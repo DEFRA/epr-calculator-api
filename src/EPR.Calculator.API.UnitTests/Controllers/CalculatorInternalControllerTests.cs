@@ -5,7 +5,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using System.Linq.Expressions;
     using AutoFixture;
     using EPR.Calculator.API.Builder;
-    using EPR.Calculator.API.CommsCost;
+    using EPR.Calculator.API.Builder.CommsCost;
     using EPR.Calculator.API.Controllers;
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Dtos;
@@ -320,7 +320,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                             WalesDisposalTotal = "TestValue815178689",
                             ScotlandDisposalTotal = "TestValue1825676229",
                             NorthernIrelandDisposalTotal = "TestValue1107952160",
-                            TotalDisposalTotal = "TestValue1849556517",
                             OrderId = 1714114499
                         },
                         new CalcResultOnePlusFourApportionmentDetail
@@ -331,7 +330,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                             WalesDisposalTotal = "TestValue1220572846",
                             ScotlandDisposalTotal = "TestValue505376535",
                             NorthernIrelandDisposalTotal = "TestValue1341109001",
-                            TotalDisposalTotal = "TestValue1177863017",
                             OrderId = 547864222
                         },
                         new CalcResultOnePlusFourApportionmentDetail
@@ -342,7 +340,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                             WalesDisposalTotal = "TestValue410415024",
                             ScotlandDisposalTotal = "TestValue863103052",
                             NorthernIrelandDisposalTotal = "TestValue1185358720",
-                            TotalDisposalTotal = "TestValue1036905338",
                             OrderId = 214124936
                         }
                     }

@@ -1,4 +1,4 @@
-﻿using EPR.Calculator.API.CommsCost;
+﻿using EPR.Calculator.API.Builder.CommsCost;
 
 namespace EPR.Calculator.API.Models
 {

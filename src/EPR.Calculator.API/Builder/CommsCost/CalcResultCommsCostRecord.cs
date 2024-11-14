@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace EPR.Calculator.API.CommsCost
+namespace EPR.Calculator.API.Builder.CommsCost
 {
     public class CalcResultCommsCostRecord
     {
@@ -10,7 +10,7 @@ namespace EPR.Calculator.API.CommsCost
             Total = material.TotalValue;
             PerCountryValues = countries.ToDictionary(
                 country => country.Id,
-                country => (material.TotalValue / 100) * country.Apportionment);
+                country => material.TotalValue / 100 * country.Apportionment);
             ProdRepHoPaWaT = material.ProdRepHoPaWaT;
             LateTonnageReporting = material.LateReportingTonnage;
         }

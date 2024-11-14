@@ -1,4 +1,4 @@
-﻿namespace EPR.Calculator.API.CommsCost
+﻿namespace EPR.Calculator.API.Builder.CommsCost
 {
     /// <summary>
     /// For use in database selects, to only retrieve the values neccesary for generating the CommsCost report.

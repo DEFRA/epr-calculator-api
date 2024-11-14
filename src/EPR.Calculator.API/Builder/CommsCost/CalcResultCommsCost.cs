@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace EPR.Calculator.API.CommsCost
+namespace EPR.Calculator.API.Builder.CommsCost
 {
     /// <summary>
     /// The CommsCost report.
