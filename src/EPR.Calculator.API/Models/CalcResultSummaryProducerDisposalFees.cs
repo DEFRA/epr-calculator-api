@@ -11,5 +11,7 @@
         public int Level { get; set; }
 
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
+
+        public Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> CommsCostByMaterial { get; set; }
     }
 }

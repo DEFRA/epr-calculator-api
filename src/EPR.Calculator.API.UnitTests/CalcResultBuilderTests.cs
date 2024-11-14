@@ -23,10 +23,10 @@ namespace EPR.Calculator.API.UnitTests
         private Mock<ICalcRunLaDisposalCostBuilder> mockCalcRunLaDisposalCostBuilder;
         private Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
         private Mock<ICalcResultSummaryBuilder> mockSummaryBuilder;
-        private CalcResultBuilder calcResultBuilder;
-        
         private Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
         private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockOnePlusFourApportionmentBuilder;
+
+        private CalcResultBuilder calcResultBuilder;
 
         [TestInitialize]
         public void Setup()
