@@ -8,7 +8,9 @@
 
         public required string ProducerName { get; set; }
 
-        public int Level { get; set; }
+        public string Level { get; set; }
+
+        public bool isTotalRow { get; set; } = false;
 
         public decimal TotalProducerDisposalFee { get; set; }
 
