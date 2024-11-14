@@ -289,6 +289,14 @@ namespace EPR.Calculator.API.Exporter
                     csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.NorthernIrelandWithBadDebtProvision)},");
                 }
 
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.TotalProducerDisposalFee)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.BadDebtProvision)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.TotalProducerDisposalFeeWithBadDebtProvision)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.EnglandTotal)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.WalesTotal)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.ScotlandTotal)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.NorthernIrelandTotal)},");
+
                 csvContent.AppendLine();
             }
         }

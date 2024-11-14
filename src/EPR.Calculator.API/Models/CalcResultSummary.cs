@@ -11,7 +11,5 @@
         public IEnumerable<string> ColumnHeaders { get; set; }
 
         public IEnumerable<CalcResultSummaryProducerDisposalFees> ProducerDisposalFees { get; set; }
-
-        public IEnumerable<CalcResultSummaryProducerDisposalFeesByCountry> ProducerDisposalFeesByCountry { get; set; }
     }
 }

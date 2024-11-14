@@ -106,8 +106,6 @@ namespace EPR.Calculator.API.Builder.Summary
 
             var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
 
-            var producerDisposalFeesByCountry = new List<CalcResultSummaryProducerDisposalFeesByCountry>();
-
             foreach (var producer in producerDetailList)
             {
                 var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
@@ -132,28 +130,22 @@ namespace EPR.Calculator.API.Builder.Summary
 
                 producerDisposalFees.Add(new CalcResultSummaryProducerDisposalFees
                 {
-                    ProducerId = producer.Id.ToString(),
+                    ProducerId = producer.ProducerId.ToString(),
                     ProducerName = producer.ProducerName ?? string.Empty,
                     SubsidiaryId = producer.SubsidiaryId ?? string.Empty,
                     Level = producer.SubsidiaryId == null ? 1 : 2,
-                    ProducerDisposalFeesByMaterial = materialCostSummary
-                });
-
-                producerDisposalFeesByCountry.Add(new CalcResultSummaryProducerDisposalFeesByCountry
-                {
                     TotalProducerDisposalFee = GetTotalProducerDisposalFee(materialCostSummary),
                     BadDebtProvision = GetTotalBadDebtProvision(materialCostSummary),
                     TotalProducerDisposalFeeWithBadDebtProvision = GetTotalProducerDisposalFeeWithBadDebtProvision(materialCostSummary),
                     EnglandTotal = GetEnglandTotal(materialCostSummary),
                     WalesTotal = GetWalesTotal(materialCostSummary),
                     ScotlandTotal = GetScotlandTotal(materialCostSummary),
-                    NorthernIrelandTotal = GetNorthernIrelandTotal(materialCostSummary)
+                    NorthernIrelandTotal = GetNorthernIrelandTotal(materialCostSummary),
+                    ProducerDisposalFeesByMaterial = materialCostSummary
                 });
             }
 
             result.ProducerDisposalFees = producerDisposalFees;
-
-            result.ProducerDisposalFeesByCountry = producerDisposalFeesByCountry;
 
             return result;
         }
