@@ -6,7 +6,6 @@ using EPR.Calculator.API.Builder.CommsCost;
 using EPR.Calculator.API.Builder.Detail;
 using EPR.Calculator.API.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.Builder.ParametersOther;
-using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 
@@ -22,7 +21,6 @@ namespace EPR.Calculator.API.Builder
         private readonly ICalcResultCommsCostBuilder commsCostReportBuilder;
         private readonly ICalcResultLateReportingBuilder lateReportingBuilder;
         private readonly ICalcRunLaDisposalCostBuilder laDisposalCostBuilder;
-        private readonly ICalcResultOnePlusFourApportionmentBuilder lapcapplusFourApportionmentBuilder;
 
         public CalcResultBuilder(
             ICalcResultDetailBuilder calcResultDetailBuilder,

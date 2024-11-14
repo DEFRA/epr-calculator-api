@@ -33,7 +33,6 @@ namespace EPR.Calculator.API.UnitTests
         private Mock<ICalcRunLaDisposalCostBuilder> mockLaDisposalCostBuilder;
         private Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
         private Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
-        private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockICalcResultOnePlusFourApportionmentBuilder;
 
         private Mock<ApplicationDBContext> mockContext;
         private CalculatorInternalController controller;
@@ -42,6 +41,7 @@ namespace EPR.Calculator.API.UnitTests
         private CalcResultsExporter exporter;
         protected ApplicationDBContext? dbContext;
         protected IOrgAndPomWrapper? wrapper;
+        private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockICalcResultOnePlusFourApportionmentBuilder;
 
         [TestInitialize]
         public void Setup()

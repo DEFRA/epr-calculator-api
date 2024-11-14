@@ -15,19 +15,5 @@
         public decimal ScotlandTotal { get; set; }
 
         public decimal NorthernIrelandTotal { get; set; }
-
-        public decimal TotalProducerCommsFee { get; set; }
-
-        public decimal BadDebtProvisionForComms { get; set; }
-
-        public decimal TotalProducerCommsFeeWithBadDebtProvision { get; set; }
-
-        public decimal EnglandTotalForComms { get; set; }
-
-        public decimal WalesTotalForComms { get; set; }
-
-        public decimal ScotlandTotalForComms { get; set; }
-
-        public decimal NorthernIrelandTotalForComms { get; set; }
     }
 }

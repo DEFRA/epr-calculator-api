@@ -40,13 +40,7 @@ namespace EPR.Calculator.API.Exporter
                 PrepareLateReportingData(results.CalcResultLateReportingTonnageData, csvContent);
             }
 
-            //Rekha Chnages
-            if (results.CalcResultOnePlusFourApportionment != null)
-            {
-                PrepareOnePluseFourApportionment(results.CalcResultOnePlusFourApportionment, csvContent);
-            }
-
-            if (results.CalcResultLaDisposalCostData != null)
+            if(results.CalcResultLaDisposalCostData != null)
             {
                 PrepareLaDisposalCostData(results.CalcResultLaDisposalCostData, csvContent);
             }
@@ -273,7 +267,6 @@ namespace EPR.Calculator.API.Exporter
             CalcResultsExporter.PrepareSummaryDataHeader(resultSummary, csvContent);
 
             // Add data
-
             foreach (var producer in resultSummary.ProducerDisposalFees)
             {
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.ProducerId)},");
@@ -296,39 +289,6 @@ namespace EPR.Calculator.API.Exporter
                     csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.NorthernIrelandWithBadDebtProvision)},");
                 }
 
-                csvContent.Append($",");
-                csvContent.Append($",");
-                csvContent.Append($",");
-                csvContent.Append($",");
-                csvContent.Append($",");
-                csvContent.Append($",");
-                csvContent.Append($",");
-
-                foreach (var disposalFee in producer.CommsCostByMaterial)
-                {
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.HouseholdPackagingWasteTonnage)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.PriceperTonne)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.ProducerTotalCostWithoutBadDebtProvision)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.BadDebtProvision)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.ProducerTotalCostwithBadDebtProvision)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.EnglandWithBadDebtProvision)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.WalesWithBadDebtProvision)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.ScotlandWithBadDebtProvision)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.NorthernIrelandWithBadDebtProvision)},");
-                }
-
-                var filteredList = resultSummary.ProducerCommsFeesByCountry
-                    .Where(x => x.ProducerId == producer.ProducerId)
-                    .ToList();
-
-                csvContent.Append($"{CsvSanitiser.SanitiseData(filteredList[0].TotalProducerCommsFee)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(filteredList[0].TotalProducerCommsFeeWithBadDebtProvision)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(filteredList[0].BadDebtProvision)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(filteredList[0].EnglandTotal)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(filteredList[0].WalesTotal)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(filteredList[0].ScotlandTotal)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(filteredList[0].NorthernIrelandTotal)},");
-
                 csvContent.AppendLine();
             }
         }
@@ -345,17 +305,7 @@ namespace EPR.Calculator.API.Exporter
             }
             csvContent.AppendLine(CsvSanitiser.SanitiseData(resultSummary.ProducerDisposalFeesHeader.Name));
 
-            StringBuilder lineBuilder = new StringBuilder();
-            lineBuilder.Append(resultSummary.ProducerDisposalFeesHeader.Name);
-
-            for (int i = 0; i < 99; i++)
-            {
-                lineBuilder.Append(",");
-            }
-
-            lineBuilder.Append(CsvSanitiser.SanitiseData(resultSummary.CommsCostHeader.Name));
-
-            csvContent.AppendLine(lineBuilder.ToString());
+            // Add material breakdown header
             var indexCounter = 0;
             foreach (var item in resultSummary.MaterialBreakdownHeaders)
             {
@@ -374,26 +324,6 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"{CsvSanitiser.SanitiseData(item)},");
             }
             csvContent.AppendLine();
-        }
-
-        private static void PrepareOnePluseFourApportionment(CalcResultOnePlusFourApportionment calcResult1Plus4Apportionment, StringBuilder csvContent)
-        {
-            csvContent.AppendLine();
-            csvContent.AppendLine();
-
-            csvContent.AppendLine(calcResult1Plus4Apportionment.Name);
-            var lapcapDataDetails = calcResult1Plus4Apportionment.CalcResultOnePlusFourApportionmentDetails.OrderBy(x => x.OrderId);
-
-            foreach (var lapcapData in lapcapDataDetails)
-            {
-                csvContent.Append($"{CsvSanitiser.SanitiseData(lapcapData.Name)},");
-                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.Total)}\",");
-                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.EnglandDisposalTotal)}\",");
-                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.WalesDisposalTotal)}\",");
-                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.ScotlandDisposalTotal)}\",");
-                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.NorthernIrelandDisposalTotal)}\",");
-                csvContent.AppendLine();
-            }
         }
     }
 }
