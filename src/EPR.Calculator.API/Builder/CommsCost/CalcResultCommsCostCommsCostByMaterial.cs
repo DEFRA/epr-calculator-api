@@ -6,8 +6,8 @@ public class CalcResultCommsCostCommsCostByMaterial : CalcResultCommsCostOnePlus
     public string LateReportingTonnage { get; set; }
     public string ProducerReportedLateReportingTonnage { get; set; }
     public string CommsCostByMaterialPricePerTonne { get; set; }
-    public string ProducerReportedWasteTonnageValue { get; set; }
-    public string LateReportingTonnageValue { get; set; }
-    public string ProducerReportedLateReportingTonnageValue { get; set; }
-    public string CommsCostByMaterialPricePerTonneValue { get; set; }
+    public decimal ProducerReportedWasteTonnageValue { get; set; }
+    public decimal LateReportingTonnageValue { get; set; }
+    public decimal ProducerReportedLateReportingTonnageValue { get; set; }
+    public decimal CommsCostByMaterialPricePerTonneValue { get; set; }
 }
