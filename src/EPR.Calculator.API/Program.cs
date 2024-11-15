@@ -1,9 +1,13 @@
 using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.Builder;
+using EPR.Calculator.API.Builder.CommsCost;
+using EPR.Calculator.API.Builder.Detail;
 using EPR.Calculator.API.Builder.LaDisposalCost;
 using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
+using EPR.Calculator.API.Builder.OnePlusFourApportionment;
+using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
@@ -41,6 +45,10 @@ builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<ITransposePomAndOrgDataService, TransposePomAndOrgDataService>();
 builder.Services.AddScoped<ICalcResultLateReportingBuilder, CalcResultLateReportingBuilder>();
 builder.Services.AddScoped<ICalcRunLaDisposalCostBuilder, CalcRunLaDisposalCostBuilder>();
+builder.Services.AddScoped<ICalcResultOnePlusFourApportionmentBuilder, CalcResultOnePlusFourApportionmentBuilder>();
+builder.Services.AddScoped<ICalcResultParameterOtherCostBuilder, CalcResultParameterOtherCostBuilder>();
+
+builder.Services.AddScoped<ICalcResultCommsCostBuilder, CalcResultCommsCostBuilder>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>

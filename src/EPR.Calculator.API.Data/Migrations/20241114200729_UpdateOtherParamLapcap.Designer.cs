@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20241109153803_ApportionmentPrecision")]
-    partial class ApportionmentPrecision
+    [Migration("20241114200729_UpdateOtherParamLapcap")]
+    partial class UpdateOtherParamLapcap
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -109,10 +109,6 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasMaxLength(400)
@@ -133,35 +129,30 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2024, 11, 9, 15, 38, 2, 577, DateTimeKind.Local).AddTicks(4099),
                             CreatedBy = "Test User",
                             Status = "IN THE QUEUE"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2024, 11, 9, 15, 38, 2, 577, DateTimeKind.Local).AddTicks(4106),
                             CreatedBy = "Test User",
                             Status = "RUNNING"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2024, 11, 9, 15, 38, 2, 577, DateTimeKind.Local).AddTicks(4112),
                             CreatedBy = "Test User",
                             Status = "UNCLASSIFIED"
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2024, 11, 9, 15, 38, 2, 577, DateTimeKind.Local).AddTicks(4116),
                             CreatedBy = "Test User",
                             Status = "PLAY"
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2024, 11, 9, 15, 38, 2, 577, DateTimeKind.Local).AddTicks(4121),
                             CreatedBy = "Test User",
                             Status = "ERROR"
                         });
@@ -421,8 +412,8 @@ namespace EPR.Calculator.API.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Apportionment")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("decimal(18,8)")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)")
                         .HasColumnName("apportionment");
 
                     b.Property<int>("CalculatorRunId")

@@ -37,6 +37,12 @@ namespace EPR.Calculator.API.UnitTests.Builder
             builder = new CalcResultLapcapDataBuilder(dbContext);
         }
 
+        [TestCleanup]
+        public void TearDown()
+        {
+            dbContext?.Database.EnsureDeleted();
+        }
+
         [TestMethod]
         public void ConstructTest_For_Aluminuim_Plastic()
         {
@@ -140,25 +146,25 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.IsNotNull(englandApp);
             Assert.AreEqual(englandApp.CalculatorRunId, run.Id);
             Assert.AreEqual(englandApp.CostTypeId, 1);
-            Assert.AreEqual(englandApp.Apportionment, countryApp.EnglandCost);
+            Assert.AreEqual(englandApp.Apportionment, totalRow.EnglandCost);
 
             var walesApp = countryAppList.Single(x => x.CountryId == 2);
             Assert.IsNotNull(walesApp);
             Assert.AreEqual(walesApp.CalculatorRunId, run.Id);
             Assert.AreEqual(walesApp.CostTypeId, 1);
-            Assert.AreEqual(walesApp.Apportionment, countryApp.WalesCost);
+            Assert.AreEqual(walesApp.Apportionment, totalRow.WalesCost);
 
             var scotlandApp = countryAppList.Single(x => x.CountryId == 3);
             Assert.IsNotNull(scotlandApp);
             Assert.AreEqual(scotlandApp.CalculatorRunId, run.Id);
             Assert.AreEqual(scotlandApp.CostTypeId, 1);
-            Assert.AreEqual(scotlandApp.Apportionment, countryApp.ScotlandCost);
+            Assert.AreEqual(scotlandApp.Apportionment, totalRow.ScotlandCost);
 
             var niApp = countryAppList.Single(x => x.CountryId == 4);
             Assert.IsNotNull(niApp);
             Assert.AreEqual(niApp.CalculatorRunId, run.Id);
             Assert.AreEqual(niApp.CostTypeId, 1);
-            Assert.AreEqual(niApp.Apportionment, countryApp.NorthernIrelandCost);
+            Assert.AreEqual(niApp.Apportionment, totalRow.NorthernIrelandCost);
 
         }
 

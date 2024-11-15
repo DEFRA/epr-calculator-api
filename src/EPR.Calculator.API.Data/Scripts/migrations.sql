@@ -2822,81 +2822,54 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20241109153803_ApportionmentPrecision'
+    WHERE [MigrationId] = N'20241114200611_RemoveCreateAtCalculatorRunClassification'
 )
 BEGIN
     DECLARE @var18 sysname;
     SELECT @var18 = [d].[name]
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[country_apportionment]') AND [c].[name] = N'apportionment');
-    IF @var18 IS NOT NULL EXEC(N'ALTER TABLE [country_apportionment] DROP CONSTRAINT [' + @var18 + '];');
-    ALTER TABLE [country_apportionment] ALTER COLUMN [apportionment] decimal(18,8) NOT NULL;
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_classification]') AND [c].[name] = N'created_at');
+    IF @var18 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_classification] DROP CONSTRAINT [' + @var18 + '];');
+    ALTER TABLE [calculator_run_classification] DROP COLUMN [created_at];
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20241109153803_ApportionmentPrecision'
-)
-BEGIN
-    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-11-09T15:38:02.5774099+00:00''
-    WHERE [id] = 1;
-    SELECT @@ROWCOUNT');
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20241109153803_ApportionmentPrecision'
-)
-BEGIN
-    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-11-09T15:38:02.5774106+00:00''
-    WHERE [id] = 2;
-    SELECT @@ROWCOUNT');
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20241109153803_ApportionmentPrecision'
-)
-BEGIN
-    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-11-09T15:38:02.5774112+00:00''
-    WHERE [id] = 3;
-    SELECT @@ROWCOUNT');
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20241109153803_ApportionmentPrecision'
-)
-BEGIN
-    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-11-09T15:38:02.5774116+00:00''
-    WHERE [id] = 4;
-    SELECT @@ROWCOUNT');
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20241109153803_ApportionmentPrecision'
-)
-BEGIN
-    EXEC(N'UPDATE [calculator_run_classification] SET [created_at] = ''2024-11-09T15:38:02.5774121+00:00''
-    WHERE [id] = 5;
-    SELECT @@ROWCOUNT');
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20241109153803_ApportionmentPrecision'
+    WHERE [MigrationId] = N'20241114200611_RemoveCreateAtCalculatorRunClassification'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241109153803_ApportionmentPrecision', N'8.0.7');
+    VALUES (N'20241114200611_RemoveCreateAtCalculatorRunClassification', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241114200729_UpdateOtherParamLapcap'
+)
+BEGIN
+    update dbo.lapcap_data_template_master 
+    set material = 'Other materials'
+    where material like 'Other'
+
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241114200729_UpdateOtherParamLapcap'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20241114200729_UpdateOtherParamLapcap', N'8.0.7');
 END;
 GO
 
