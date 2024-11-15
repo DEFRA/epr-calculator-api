@@ -15,7 +15,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
         public const string SchemeSetupCost = "Scheme setup costs";
         private const string SchemeSetupYearlyCostHeader = "5 Scheme set up cost Yearly Cost";
         public const string BadDebtProvision = "Bad debt provision";
-        private const string BadDebtProvisionHeader = "6 Bad debt provision";
+        private const string BadDebtProvisionHeader = "6 Bad Debt Provision";
         private readonly ApplicationDBContext context;
         public CalcResultParameterOtherCostBuilder(ApplicationDBContext context) 
         {

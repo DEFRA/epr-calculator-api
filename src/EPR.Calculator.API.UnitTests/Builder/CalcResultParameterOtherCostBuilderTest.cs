@@ -123,7 +123,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual(20, counteyAppLa.ScotlandValue);
             Assert.AreEqual(30, counteyAppLa.WalesValue);
 
-            Assert.AreEqual("6 Bad debt provision", otherCost.BadDebtProvision.Key);
+            Assert.AreEqual("6 Bad Debt Provision", otherCost.BadDebtProvision.Key);
             Assert.AreEqual("10.00%", otherCost.BadDebtProvision.Value);
 
             var schemeSetup = otherCost.SchemeSetupCost;
