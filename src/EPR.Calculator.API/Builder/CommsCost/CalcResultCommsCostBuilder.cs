@@ -48,8 +48,20 @@ namespace EPR.Calculator.API.Builder.CommsCost
 
             var list = new List<CalcResultCommsCostCommsCostByMaterial>();
 
-            foreach (var materialDefault in materialDefaults)
+            var header = new CalcResultCommsCostCommsCostByMaterial()
             {
+                Name = "2a Comms Costs - by Material",
+                England = "England",
+                Wales = "Wales",
+                Scotland = "Scotland",
+                NorthernIreland = "Northern Ireland",
+                Total = "Total"
+            };
+            list.Add(header);
+
+            foreach (var materialName in materialNames)
+            {
+                var materialDefault = materialDefaults.Single(m => m.ParameterCategory == materialName);
                 var commsCost = new CalcResultCommsCostCommsCostByMaterial
                 {
                     EnglandValue = apportionmentDetail.EnglandTotal * materialDefault.ParameterValue,
@@ -70,7 +82,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 list.Add(commsCost);
             }
 
-            new CalcResultCommsCostCommsCostByMaterial
+            var totalRow = new CalcResultCommsCostCommsCostByMaterial
             {
                 EnglandValue = list.Sum(x => x.EnglandValue),
                 WalesValue = list.Sum(x => x.WalesValue),
@@ -78,6 +90,16 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 ScotlandValue = list.Sum(x => x.ScotlandValue),
                 TotalValue = list.Sum(x => x.TotalValue),
             };
+
+            totalRow.Name = "Total";
+            totalRow.England = $"{totalRow.EnglandValue.ToString("C", culture)}";
+            totalRow.Wales = $"{totalRow.WalesValue.ToString("C", culture)}";
+            totalRow.NorthernIreland = $"{totalRow.NorthernIrelandValue.ToString("C", culture)}";
+            totalRow.Scotland = $"{totalRow.ScotlandValue.ToString("C", culture)}";
+
+            totalRow.Total = $"{totalRow.TotalValue.ToString("C", culture)}";
+
+            list.Add(totalRow);
             result.CalcResultCommsCostCommsCostByMaterial = list;
 
 
@@ -92,10 +114,21 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 ScotlandValue = commsCostByUk.ParameterValue * apportionmentDetail.ScotlandTotal,
                 NorthernIrelandValue = commsCostByUk.ParameterValue * apportionmentDetail.NorthernIrelandTotal,
                 TotalValue = commsCostByUk.ParameterValue * apportionmentDetail.AllTotal,
-                Name = "2b Comms Costs - UK wide"
+                Name = "2b Comms Costs - UK wide",
+                OrderId = 2
             };
 
+
             var commsCostByCountryList = new List<CalcResultCommsCostOnePlusFourApportionment>();
+            commsCostByCountryList.Add(new CalcResultCommsCostCommsCostByMaterial()
+            {
+                England = "England",
+                Wales = "Wales",
+                Scotland = "Scotland",
+                NorthernIreland = "Northern Ireland",
+                Total = "Total",
+                OrderId = 1
+            });
             commsCostByCountryList.Add(ukCost);
 
             var englandValue =
@@ -118,10 +151,22 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 ScotlandValue = scotlandValue,
                 NorthernIrelandValue = niValue,
                 TotalValue = englandValue + walesValue + scotlandValue + niValue,
-                Name = "2b Comms Costs - UK wide"
+                Name = "2c Comms Costs - by Country",
+                OrderId = 3
             };
 
             commsCostByCountryList.Add(countryCost);
+
+            foreach (var calcResultCountry in commsCostByCountryList.Where(x => x.OrderId != 1))
+            {
+                calcResultCountry.England = $"{calcResultCountry.EnglandValue.ToString("C", culture)}";
+                calcResultCountry.Wales = $"{calcResultCountry.WalesValue.ToString("C", culture)}";
+                calcResultCountry.NorthernIreland = $"{calcResultCountry.NorthernIrelandValue.ToString("C", culture)}";
+                calcResultCountry.Scotland = $"{calcResultCountry.ScotlandValue.ToString("C", culture)}";
+
+                calcResultCountry.Total = $"{calcResultCountry.TotalValue.ToString("C", culture)}";
+            }
+
             result.CommsCostByCountry = commsCostByCountryList;
 
             return result;
@@ -136,6 +181,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 Wales = "Wales",
                 Scotland = "Scotland",
                 NorthernIreland = "Northern Ireland",
+                Total = "Total"
             };
 
             var commsApportionments = new List<CalcResultCommsCostOnePlusFourApportionment>();
@@ -148,6 +194,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 Wales = apportionmentDetail.WalesDisposalTotal,
                 Scotland = apportionmentDetail.ScotlandDisposalTotal,
                 NorthernIreland = apportionmentDetail.NorthernIrelandDisposalTotal,
+                Total = apportionmentDetail.Total,
             };
 
             commsApportionments.Add(commsApportionment);
