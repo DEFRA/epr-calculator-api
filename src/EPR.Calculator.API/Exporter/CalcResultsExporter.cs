@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Builder.CommsCost;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
@@ -50,7 +51,12 @@ namespace EPR.Calculator.API.Exporter
                 PrepareOnePluseFourApportionment(results.CalcResultOnePlusFourApportionment, csvContent);
             }
             csvContent.AppendLine();
-            // csvContent.AppendLine(results.CalcResultCommsCostReportDetail.ToString());
+
+            //if (results?.CalcResultCommsCostReportDetail != null)
+            //{
+            //    PrepareCommsCost(results.CalcResultCommsCostReportDetail, csvContent);
+            //}
+
             if (results?.CalcResultLaDisposalCostData != null)
             {
                 PrepareLaDisposalCostData(results.CalcResultLaDisposalCostData, csvContent);
@@ -64,6 +70,37 @@ namespace EPR.Calculator.API.Exporter
             catch (IOException ex)
             {
                 throw new IOException($"File upload failed: {ex.Message}", ex);
+            }
+        }
+
+        private void PrepareCommsCost(CalcResultCommsCost communicationCost, StringBuilder csvContent)
+        {
+            csvContent.AppendLine();
+            csvContent.AppendLine();
+            csvContent.AppendLine(communicationCost.Name);
+
+            var onePlusFourApportionments = communicationCost.CalcResultCommsCostOnePlusFourApportionment;
+
+            foreach (var onePlusFourApportionment in onePlusFourApportionments)
+            {
+                csvContent.Append($"{CsvSanitiser.SanitiseData(onePlusFourApportionment.Name)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(onePlusFourApportionment.England)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(onePlusFourApportionment.Wales)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(onePlusFourApportionment.Scotland)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(onePlusFourApportionment.NorthernIreland)},");
+                csvContent.AppendLine($"{CsvSanitiser.SanitiseData(onePlusFourApportionment.Total)}");
+            }
+            csvContent.AppendLine();
+            var commsCostByMaterials = communicationCost.CalcResultCommsCostCommsCostByMaterial;
+
+            foreach (var commsCostByMaterial in commsCostByMaterials)
+            {
+                csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.Name)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.England)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.Wales)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.Scotland)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.NorthernIreland)},");
+                csvContent.AppendLine($"{CsvSanitiser.SanitiseData(commsCostByMaterial.Total)}");
             }
         }
 

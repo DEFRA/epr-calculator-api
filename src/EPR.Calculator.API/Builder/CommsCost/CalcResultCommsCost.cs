@@ -8,6 +8,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
     /// </summary>
     public class CalcResultCommsCost
     {
+        public string Name { get; set; }
         public IEnumerable<CalcResultCommsCostOnePlusFourApportionment> CalcResultCommsCostOnePlusFourApportionment { get; set; }
         public IEnumerable<CalcResultCommsCostCommsCostByMaterial> CalcResultCommsCostCommsCostByMaterial { get; set; }
         public IEnumerable<CalcResultCommsCostOnePlusFourApportionment> CommsCostByCountry { get; set; }
