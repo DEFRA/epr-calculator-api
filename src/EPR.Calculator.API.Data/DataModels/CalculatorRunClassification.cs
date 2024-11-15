@@ -22,10 +22,6 @@ namespace EPR.Calculator.API.Data.DataModels
         [Required]
         public string CreatedBy { get; set; } = string.Empty;
 
-        [Column("created_at")]
-        [Required]
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-
         public ICollection<CalculatorRun> CalculatorRunDetails { get; } = new List<CalculatorRun>();
     }
 }

@@ -38,6 +38,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
             builder = new CalcRunLaDisposalCostBuilder(dbContext);           
         }
 
+        [TestCleanup]
+        public void TearDown()
+        {
+            dbContext?.Database.EnsureDeleted();
+        }
 
         [TestMethod]
         public void ConstructTest_For_LA_DisposalCost()

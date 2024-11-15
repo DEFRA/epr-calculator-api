@@ -192,10 +192,10 @@ namespace EPR.Calculator.API.Builder.ParametersOther
             var otherCostDetail = new CalcResultParameterOtherCostDetail
             {
                 Name = "4 Country Apportionment",
-                EnglandValue = (laDataPrep.EnglandValue / total) * 100,
-                NorthernIrelandValue = (laDataPrep.NorthernIrelandValue / total) * 100,
-                ScotlandValue = (laDataPrep.ScotlandValue / total) * 100,
-                WalesValue = (laDataPrep.WalesValue / total) * 100,
+                EnglandValue = total != 0 ? ((laDataPrep.EnglandValue / total) * 100) : 0M,
+                NorthernIrelandValue = total != 0 ? (laDataPrep.NorthernIrelandValue / total) * 100 : 0M,
+                ScotlandValue = total != 0 ? (laDataPrep.ScotlandValue / total) * 100 : 0M,
+                WalesValue = total != 0 ? (laDataPrep.WalesValue / total) * 100 : 0M,
                 OrderId = 2,
                 TotalValue = 100M
             };
