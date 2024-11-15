@@ -1,11 +1,7 @@
 ﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json.Linq;
 using System.Globalization;
 
 namespace EPR.Calculator.API.Builder.LaDisposalCost
@@ -39,7 +35,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
                             join producerDetail in context.ProducerDetail on run.Id equals producerDetail.CalculatorRunId
                             join producerMaterial in context.ProducerReportedMaterial on producerDetail.Id equals producerMaterial.ProducerDetailId
                             join material in context.Material on producerMaterial.MaterialId equals material.Id
-                            where run.Id == resultsRequestDto.RunId
+                            where run.Id == resultsRequestDto.RunId && producerMaterial.PackagingType.ToLower() == CommonConstants.Household.ToLower()
                             select new ProducerData
                             {
                                 Material = material.Name,
