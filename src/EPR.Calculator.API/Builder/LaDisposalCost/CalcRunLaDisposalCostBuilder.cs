@@ -33,15 +33,17 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
             var OrderId = 1;
 
             producerData = (from run in context.CalculatorRuns
-                            join producerDetail in context.ProducerDetail on run.Id equals producerDetail.CalculatorRunId
-                            join producerMaterial in context.ProducerReportedMaterial on producerDetail.Id equals producerMaterial.ProducerDetailId
-                            join material in context.Material on producerMaterial.MaterialId equals material.Id
-                            where run.Id == resultsRequestDto.RunId && producerMaterial.PackagingType != null && producerMaterial.PackagingType.Equals(CommonConstants.Household, StringComparison.OrdinalIgnoreCase)
-                            select new ProducerData
-                            {
-                                Material = material.Name,
-                                Tonnage = producerMaterial.PackagingTonnage
-                            }).ToList();
+                join producerDetail in context.ProducerDetail on run.Id equals producerDetail.CalculatorRunId
+                join producerMaterial in context.ProducerReportedMaterial on producerDetail.Id equals producerMaterial
+                    .ProducerDetailId
+                join material in context.Material on producerMaterial.MaterialId equals material.Id
+                where run.Id == resultsRequestDto.RunId && producerMaterial.PackagingType != null &&
+                      producerMaterial.PackagingType == CommonConstants.Household
+                select new ProducerData
+                {
+                    Material = material.Name,
+                    Tonnage = producerMaterial.PackagingTonnage
+                }).ToList();
 
             var lapcapDetails = calcResult?.CalcResultLapcapData?.CalcResultLapcapDataDetails
                 ?.Where(t => t.OrderId != 1 && t.Name != CalcResultLapcapDataBuilder.CountryApportionment).ToList();
