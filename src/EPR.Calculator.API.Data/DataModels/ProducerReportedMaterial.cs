@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
@@ -25,6 +26,7 @@ namespace EPR.Calculator.API.Data.DataModels
         public required string PackagingType { get; set; }
 
         [Column("packaging_tonnage")]
+        [Precision(18, 3)]
         public required decimal PackagingTonnage { get; set; }
 
         public required virtual ProducerDetail ProducerDetail { get; set; }
