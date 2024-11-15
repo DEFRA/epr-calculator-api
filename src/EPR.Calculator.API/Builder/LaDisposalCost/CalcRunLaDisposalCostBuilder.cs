@@ -35,7 +35,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
                             join producerDetail in context.ProducerDetail on run.Id equals producerDetail.CalculatorRunId
                             join producerMaterial in context.ProducerReportedMaterial on producerDetail.Id equals producerMaterial.ProducerDetailId
                             join material in context.Material on producerMaterial.MaterialId equals material.Id
-                            where run.Id == resultsRequestDto.RunId && producerMaterial.PackagingType.ToLower() == CommonConstants.Household.ToLower()
+                            where run.Id == resultsRequestDto.RunId && producerMaterial.PackagingType != null && producerMaterial.PackagingType.Equals(CommonConstants.Household, StringComparison.OrdinalIgnoreCase)
                             select new ProducerData
                             {
                                 Material = material.Name,
