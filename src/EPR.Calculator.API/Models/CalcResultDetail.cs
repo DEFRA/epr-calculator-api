@@ -11,6 +11,5 @@
         public string RpdFilePOM { get; set; } = string.Empty;
         public string LapcapFile { get; set; } = string.Empty;
         public string ParametersFile { get; set; } = string.Empty;
-        public string CountryApportionmentFile { get; set; } = string.Empty;
     }
 }
