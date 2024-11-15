@@ -28,7 +28,8 @@ namespace EPR.Calculator.API.Services
 
                 // Get the calculator run organisation data details as we need the organisation name
                 var organisationDataDetails = context.CalculatorRunOrganisationDataDetails
-                    .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id)
+                    .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id && odd.OrganisationName != null)
+                    .OrderBy(odd => odd.OrganisationName)
                     .GroupBy(odd => new { odd.OrganisationId, odd.SubsidaryId })
                     .Select(odd => odd.First())
                     .ToList();
