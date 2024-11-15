@@ -131,7 +131,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
             var countryApp = lapcapResults?.CalcResultLapcapDataDetails?.Single(x => x.OrderId == 5);
             Assert.IsNotNull(countryApp);
-            Assert.AreEqual("1 Country Apportionment", countryApp.Name);
+            Assert.AreEqual(CalcResultLapcapDataBuilder.CountryApportionment, countryApp.Name);
             Assert.AreEqual("40.00000000%", countryApp.EnglandDisposalCost);
             Assert.AreEqual("20.00000000%", countryApp.WalesDisposalCost);
             Assert.AreEqual("30.00000000%", countryApp.ScotlandDisposalCost);

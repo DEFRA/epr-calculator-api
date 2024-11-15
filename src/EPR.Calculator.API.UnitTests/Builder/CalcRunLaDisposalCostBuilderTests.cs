@@ -66,7 +66,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
             var producer = new ProducerDetail { CalculatorRunId = 2, ProducerId = 1, ProducerName = "Producer Name", CalculatorRun = run };
             
 
-            dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial { Material = material, PackagingTonnage = 1000.00m, PackagingType = "CW", MaterialId = 1, ProducerDetail = producer });
+            dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial { Material = material, PackagingTonnage = 1000.00m, PackagingType = "HH", MaterialId = 1, ProducerDetail = producer });
+            dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial { Material = plasticMaterial, PackagingTonnage = 2000.00m, PackagingType = "HH", MaterialId = 2, ProducerDetail = producer });
             dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial { Material = plasticMaterial, PackagingTonnage = 2000.00m, PackagingType = "CW", MaterialId = 2, ProducerDetail = producer });
 
             dbContext.SaveChanges();
