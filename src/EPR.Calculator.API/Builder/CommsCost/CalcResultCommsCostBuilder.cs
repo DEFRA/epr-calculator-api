@@ -1,17 +1,12 @@
-﻿using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Models;
 using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace EPR.Calculator.API.Builder.CommsCost
 {
     public class CalcResultCommsCostBuilder(ApplicationDBContext context) : ICalcResultCommsCostBuilder
     {
-        /// <summary>
-        /// The key used to identify household records in the producer_reported_material table.
-        /// </summary>
-        private const string HouseHoldIndicator = "HH";
-
         public CalcResultCommsCost Construct(int runId, CalcResultOnePlusFourApportionment apportionment)
         {
             var culture = CultureInfo.CreateSpecificCulture("en-GB");
@@ -25,7 +20,8 @@ namespace EPR.Calculator.API.Builder.CommsCost
             CalculateApportionment(apportionmentDetail, result);
             result.Name = "Parameters - Comms Costs";
 
-            var materialNames = context.Material.Select(x => x.Name).ToList();
+            var materials = context.Material.ToList();
+            var materialNames = materials.Select(x => x.Name).ToList();
 
             var allDefaultResults =
                 (from run in context.CalculatorRuns
@@ -45,6 +41,16 @@ namespace EPR.Calculator.API.Builder.CommsCost
             var materialDefaults = allDefaultResults.Where(x =>
                 x.ParameterType == "Communication costs by material" && materialNames.Contains(x.ParameterCategory));
 
+            var producerReportedMaterials = (from run in context.CalculatorRuns
+                join pd in context.ProducerDetail on run.Id equals pd.CalculatorRunId
+                join mat in context.ProducerReportedMaterial on pd.Id equals mat.ProducerDetailId
+                where run.Id == runId && mat.PackagingType == CommonConstants.Household
+                select new
+                {
+                    mat.MaterialId,
+                    mat.PackagingTonnage
+                }).ToList();
+
 
             var list = new List<CalcResultCommsCostCommsCostByMaterial>();
 
@@ -62,6 +68,19 @@ namespace EPR.Calculator.API.Builder.CommsCost
             foreach (var materialName in materialNames)
             {
                 var commsCost = GetCommsCost(materialDefaults, materialName, apportionmentDetail, culture);
+                var currentMaterial = materials.Single(x => x.Name == materialName);
+                var producerReportedTon = producerReportedMaterials.Where(x => x.MaterialId == currentMaterial.Id)
+                    .Sum(x => x.PackagingTonnage);
+                var lateReportingTonnage = allDefaultResults.Single(x =>
+                    x.ParameterType == "Late reporting tonnage" && x.ParameterCategory == materialName);
+
+                commsCost.ProducerReportedWasteTonnageValue = producerReportedTon;
+                commsCost.LateReportingTonnageValue = lateReportingTonnage.ParameterValue;
+                commsCost.ProducerReportedLateReportingTonnageValue = commsCost.ProducerReportedWasteTonnageValue +
+                                                                      commsCost.LateReportingTonnageValue;
+                commsCost.CommsCostByMaterialPricePerTonneValue =
+                    commsCost.TotalValue / commsCost.ProducerReportedLateReportingTonnageValue;
+
                 list.Add(commsCost);
             }
 
