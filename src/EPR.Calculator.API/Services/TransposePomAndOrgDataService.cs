@@ -29,7 +29,7 @@ namespace EPR.Calculator.API.Services
                 // Get the calculator run organisation data details as we need the organisation name
                 var organisationDataDetails = context.CalculatorRunOrganisationDataDetails
                     .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id)
-                    .GroupBy(odd => new { odd.OrganisationId, odd.SubsidaryId, odd.SubmissionPeriodDesc })
+                    .GroupBy(odd => new { odd.OrganisationId, odd.SubsidaryId })
                     .Select(odd => odd.First())
                     .ToList();
 
@@ -50,8 +50,7 @@ namespace EPR.Calculator.API.Services
                                 (
                                     pdd => pdd.CalculatorRunPomDataMasterId == pomDataMaster.Id &&
                                     pdd.OrganisationId == organisation.OrganisationId &&
-                                    pdd.SubsidaryId == organisation.SubsidaryId &&
-                                    pdd.SubmissionPeriodDesc == organisation.SubmissionPeriodDesc
+                                    pdd.SubsidaryId == organisation.SubsidaryId
                                 ).ToList();
 
                             // Proceed further only if there is any pom data based on the pom data master id and organisation id
