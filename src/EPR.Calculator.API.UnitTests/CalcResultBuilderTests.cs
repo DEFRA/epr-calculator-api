@@ -1,6 +1,4 @@
 ﻿using EPR.Calculator.API.Builder;
-using EPR.Calculator.API.Builder.Lapcap;
-using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,22 +12,13 @@ namespace EPR.Calculator.API.UnitTests
         private Mock<ICalcResultDetailBuilder> mockCalcResultDetailBuilder;
         private Mock<ICalcResultLapcapDataBuilder> mockLapcapBuilder;
         private CalcResultBuilder calcResultBuilder;
-        private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockOnePlusFourApportionmentBuilder;
-        private Mock<ICalcResultParameterOtherCostBuilder> mockICalcResultParameterOtherCostBuilder;
-        private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockICalcResultOnePlusFourApportionmentBuilder;
-
 
         [TestInitialize]
         public void Setup()
         {
             mockCalcResultDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             mockLapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
-            mockICalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
-            mockICalcResultOnePlusFourApportionmentBuilder = new Mock<ICalcResultOnePlusFourApportionmentBuilder>();
-            calcResultBuilder = new CalcResultBuilder(
-                mockCalcResultDetailBuilder.Object,
-                mockLapcapBuilder.Object,
-                mockICalcResultParameterOtherCostBuilder.Object, mockICalcResultOnePlusFourApportionmentBuilder.Object);
+            calcResultBuilder = new CalcResultBuilder(mockCalcResultDetailBuilder.Object, mockLapcapBuilder.Object);
         }
 
         [TestMethod]

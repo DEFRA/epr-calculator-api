@@ -141,13 +141,13 @@ namespace EPR.Calculator.API.UnitTests
             {
                 CalculatorRunName = "Test calculator run",
                 CreatedBy = "Test user",
-                FinancialYear = "2027-28"
+                FinancialYear = "2024-25"
             };
 
             dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2027-28",
+                ParameterYear = "2024-25",
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -171,7 +171,7 @@ namespace EPR.Calculator.API.UnitTests
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(424, actionResult.StatusCode);
-            Assert.AreEqual("Lapcap data not available for the financial year 2027-28.", actionResult.Value);
+            Assert.AreEqual("Lapcap data not available for the financial year 2024-25.", actionResult.Value);
         }
 
         [TestMethod]

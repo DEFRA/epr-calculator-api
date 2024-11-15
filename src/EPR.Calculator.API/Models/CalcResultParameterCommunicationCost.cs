@@ -8,8 +8,8 @@ namespace EPR.Calculator.API.Models
         public IEnumerable<CalcResultParameterCommunicationCostDetail1> CalcResultParameterCommunicationCostDetails { get; set; } = 
             new List<CalcResultParameterCommunicationCostDetail1>();
         public IEnumerable<CalcResultParameterCommunicationCostDetail2> CalcResultParameterCommunicationCostDetails2 { get; set; } =
-            new List<CalcResultParameterCommunicationCostDetail2>();
+    new List<CalcResultParameterCommunicationCostDetail2>();
         public IEnumerable<CalcResultParameterCommunicationCostDetail3> CalcResultParameterCommunicationCostDetails3 { get; set; } =
-            new List<CalcResultParameterCommunicationCostDetail3>();
+    new List<CalcResultParameterCommunicationCostDetail3>();
     }
 }
