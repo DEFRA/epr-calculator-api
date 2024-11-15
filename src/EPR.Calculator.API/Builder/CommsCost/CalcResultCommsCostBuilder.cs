@@ -54,7 +54,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 England = "England",
                 Wales = "Wales",
                 Scotland = "Scotland",
-                NorthernIreland = "Nothern Ireland",
+                NorthernIreland = "Northern Ireland",
                 Total = "Total"
             };
             list.Add(header);
@@ -125,7 +125,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 England = "England",
                 Wales = "Wales",
                 Scotland = "Scotland",
-                NorthernIreland = "Nothern Ireland",
+                NorthernIreland = "Northern Ireland",
                 Total = "Total",
                 OrderId = 1
             });
@@ -151,7 +151,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 ScotlandValue = scotlandValue,
                 NorthernIrelandValue = niValue,
                 TotalValue = englandValue + walesValue + scotlandValue + niValue,
-                Name = "2b Comms Costs - UK wide",
+                Name = "2c Comms Costs - by Country",
                 OrderId = 3
             };
 
@@ -181,6 +181,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 Wales = "Wales",
                 Scotland = "Scotland",
                 NorthernIreland = "Northern Ireland",
+                Total = "Total"
             };
 
             var commsApportionments = new List<CalcResultCommsCostOnePlusFourApportionment>();
@@ -193,6 +194,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 Wales = apportionmentDetail.WalesDisposalTotal,
                 Scotland = apportionmentDetail.ScotlandDisposalTotal,
                 NorthernIreland = apportionmentDetail.NorthernIrelandDisposalTotal,
+                Total = apportionmentDetail.Total,
             };
 
             commsApportionments.Add(commsApportionment);

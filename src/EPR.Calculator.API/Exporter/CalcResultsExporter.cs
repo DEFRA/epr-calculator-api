@@ -102,6 +102,18 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.NorthernIreland)},");
                 csvContent.AppendLine($"{CsvSanitiser.SanitiseData(commsCostByMaterial.Total)}");
             }
+
+            csvContent.AppendLine();
+            var countryList = communicationCost.CommsCostByCountry;
+            foreach (var country in countryList)
+            {
+                csvContent.Append($"{CsvSanitiser.SanitiseData(country.Name)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(country.England)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(country.Wales)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(country.Scotland)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(country.NorthernIreland)},");
+                csvContent.AppendLine($"{CsvSanitiser.SanitiseData(country.Total)}");
+            }
         }
 
         private static void PrepareOtherCosts(CalcResultParameterOtherCost otherCost, StringBuilder csvContent)
