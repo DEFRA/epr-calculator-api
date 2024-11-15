@@ -838,6 +838,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             var list = new List<CalculatorRunOrganisationDataMaster>();
             list.Add(new CalculatorRunOrganisationDataMaster
             {
+                Id = 1,
                 CalendarYear = "2024-25",
                 EffectiveFrom = DateTime.Now,
                 CreatedBy = "Test user",
@@ -857,7 +858,7 @@ namespace EPR.Calculator.API.Tests.Controllers
                 OrganisationName = "UPU LIMITED",
                 LoadTimeStamp= DateTime.Now,
                 CalculatorRunOrganisationDataMasterId = 1,
-                SubmissionPeriodDesc = "January to June 2023",
+                SubmissionPeriodDesc = "July to December 2023",
                 CalculatorRunOrganisationDataMaster = BaseControllerTest.GetCalculatorRunOrganisationDataMaster().ToList()[0]
             });
             return list;

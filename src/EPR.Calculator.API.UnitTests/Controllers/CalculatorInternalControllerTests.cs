@@ -2,7 +2,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq.Expressions;
+    using AutoFixture;
     using EPR.Calculator.API.Builder;
+    using EPR.Calculator.API.Builder.CommsCost;
     using EPR.Calculator.API.Controllers;
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Dtos;
@@ -17,6 +20,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     [TestClass]
     public class CalculatorInternalControllerTests
     {
+        private Fixture Fixture { get; } = new Fixture();
+
         private CalculatorInternalController _testClass;
         private ApplicationDBContext _context;
         private Mock<IRpdStatusDataValidator> _rpdStatusDataValidator;
@@ -93,6 +98,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                         }
                     }
                 },
+                CalcResultCommsCostReportDetail = Fixture.Create<CalcResultCommsCost>(),
                 CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
                 {
                     Name = "TestValue2008053382",

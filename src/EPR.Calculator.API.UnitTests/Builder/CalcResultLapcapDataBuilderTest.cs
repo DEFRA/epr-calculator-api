@@ -37,6 +37,12 @@ namespace EPR.Calculator.API.UnitTests.Builder
             builder = new CalcResultLapcapDataBuilder(dbContext);
         }
 
+        [TestCleanup]
+        public void TearDown()
+        {
+            dbContext?.Database.EnsureDeleted();
+        }
+
         [TestMethod]
         public void ConstructTest_For_Aluminuim_Plastic()
         {

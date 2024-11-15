@@ -22,15 +22,15 @@ namespace EPR.Calculator.API.Data
             }
         }
 
-        public DbSet<DefaultParameterSettingMaster> DefaultParameterSettings { get; set; }
+        public virtual DbSet<DefaultParameterSettingMaster> DefaultParameterSettings { get; set; }
 
-        public DbSet<DefaultParameterSettingDetail> DefaultParameterSettingDetail { get; set; }
+        public virtual DbSet<DefaultParameterSettingDetail> DefaultParameterSettingDetail { get; set; }
 
         public DbSet<DefaultParameterTemplateMaster> DefaultParameterTemplateMasterList { get; set; }
 
         public DbSet<CalculatorRunClassification> CalculatorRunClassifications { get; set; }
 
-        public DbSet<CalculatorRun> CalculatorRuns { get; set; }
+        public virtual DbSet<CalculatorRun> CalculatorRuns { get; set; }
 
         public DbSet<LapcapDataTemplateMaster> LapcapDataTemplateMaster { get; set; }
 
@@ -50,17 +50,17 @@ namespace EPR.Calculator.API.Data
 
         public DbSet<PomData> PomData { get; set; }
 
-        public DbSet<Material> Material { get; set; }
+        public virtual DbSet<Material> Material { get; set; }
 
         public DbSet<ProducerDetail> ProducerDetail { get; set; }
 
-        public DbSet<CountryApportionment> CountryApportionment { get; set; }
+        public virtual DbSet<CountryApportionment> CountryApportionment { get; set; }
 
-        public DbSet<ProducerReportedMaterial> ProducerReportedMaterial { get; set; }
+        public virtual DbSet<ProducerReportedMaterial> ProducerReportedMaterial { get; set; }
 
         public DbSet<CostType> CostType { get; set; }
 
-        public DbSet<Country> Country { get; set; }
+        public virtual DbSet<Country> Country { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -4,7 +4,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace EPR.Calculator.API.Builder
+namespace EPR.Calculator.API.Builder.Detail
 {
     public class CalcResultDetailBuilder : ICalcResultDetailBuilder
     {

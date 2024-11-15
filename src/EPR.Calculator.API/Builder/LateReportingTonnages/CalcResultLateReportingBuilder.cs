@@ -22,11 +22,11 @@ namespace EPR.Calculator.API.Builder.LateReportingTonnages
         public CalcResultLateReportingTonnage Construct(CalcResultsRequestDto resultsRequestDto)
         {
             var result = (from run in context.CalculatorRuns
-                          join detail in context.DefaultParameterSettingDetail
-                          on run.DefaultParameterSettingMasterId equals detail.DefaultParameterSettingMasterId
-                          join template in context.DefaultParameterTemplateMasterList
-                          on detail.ParameterUniqueReferenceId equals template.ParameterUniqueReferenceId
-                          where run.Id == resultsRequestDto.RunId && template.ParameterType == "Late Reporting Tonnage" && detail.ParameterUniqueReferenceId.StartsWith("LRET")
+                          join master in context.DefaultParameterSettings
+                          on run.DefaultParameterSettingMasterId equals master.Id
+                          join detail in context.DefaultParameterSettingDetail on master.Id equals detail.DefaultParameterSettingMasterId
+                          join template in context.DefaultParameterTemplateMasterList on detail.ParameterUniqueReferenceId equals template.ParameterUniqueReferenceId
+                          where run.Id == resultsRequestDto.RunId && template.ParameterType == TonnageHeading
                           select new CalcResultLateReportingTonnageDetail
                           {
                               Name = template.ParameterCategory,
@@ -44,7 +44,7 @@ namespace EPR.Calculator.API.Builder.LateReportingTonnages
                 Name = LateReportingHeader, 
                 MaterialHeading = MaterialHeading,
                 TonnageHeading = TonnageHeading,  
-                CalcResultLateReportingTonnageDetails = result 
+                CalcResultLateReportingTonnageDetails = result
             };
         }
     }

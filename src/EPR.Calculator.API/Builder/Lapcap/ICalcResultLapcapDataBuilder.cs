@@ -7,8 +7,4 @@ namespace EPR.Calculator.API.Builder.Lapcap
     {
         public CalcResultLapcapData Construct(CalcResultsRequestDto resultsRequestDto);
     }
-    public interface ICalcResultOnePlusFourApportionmentBuilder
-    {
-        public CalcResultOnePlusFourApportionment Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult);
-    }
 }

@@ -16,7 +16,7 @@ namespace EPR.Calculator.API.Data.DataModels
 
         [Column("apportionment")]
         [Required]
-        [Precision(18, 8)]
+        [Precision(18, 2)]
         public decimal Apportionment { get; set; }
 
         [Column("country_id")]

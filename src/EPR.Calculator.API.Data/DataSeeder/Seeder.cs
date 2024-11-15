@@ -352,36 +352,31 @@ namespace EPR.Calculator.API.Data.DataSeeder
             {
                 Id = 1,
                 Status = "IN THE QUEUE",
-                CreatedBy = "Test User",
-                CreatedAt = DateTime.Now
+                CreatedBy = "Test User"
             },
             new CalculatorRunClassification
             {
                 Id = 2,
                 Status = "RUNNING",
-                CreatedBy = "Test User",
-                CreatedAt = DateTime.Now
+                CreatedBy = "Test User"
             },
             new CalculatorRunClassification
             {
                 Id = 3,
                 Status = "UNCLASSIFIED",
-                CreatedBy = "Test User",
-                CreatedAt = DateTime.Now
+                CreatedBy = "Test User"
             },
             new CalculatorRunClassification
             {
                 Id = 4,
                 Status = "PLAY",
-                CreatedBy = "Test User",
-                CreatedAt = DateTime.Now
+                CreatedBy = "Test User"
             },
             new CalculatorRunClassification
             {
                 Id = 5,
                 Status = "ERROR",
-                CreatedBy = "Test User",
-                CreatedAt = DateTime.Now
+                CreatedBy = "Test User"
             });
         }
 
