@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Builder.Lapcap;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
@@ -42,7 +43,8 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
                                 Tonnage = producerMaterial.PackagingTonnage
                             }).ToList();
 
-            var lapcapDetails = calcResult?.CalcResultLapcapData?.CalcResultLapcapDataDetails?.Where(t => t.OrderId != 1 && t.Name != "1 Country Apportionment").ToList();
+            var lapcapDetails = calcResult?.CalcResultLapcapData?.CalcResultLapcapDataDetails
+                ?.Where(t => t.OrderId != 1 && t.Name != CalcResultLapcapDataBuilder.CountryApportionment).ToList();
 
 
             foreach (var details in lapcapDetails)

@@ -114,10 +114,21 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 ScotlandValue = commsCostByUk.ParameterValue * apportionmentDetail.ScotlandTotal,
                 NorthernIrelandValue = commsCostByUk.ParameterValue * apportionmentDetail.NorthernIrelandTotal,
                 TotalValue = commsCostByUk.ParameterValue * apportionmentDetail.AllTotal,
-                Name = "2b Comms Costs - UK wide"
+                Name = "2b Comms Costs - UK wide",
+                OrderId = 2
             };
 
+
             var commsCostByCountryList = new List<CalcResultCommsCostOnePlusFourApportionment>();
+            commsCostByCountryList.Add(new CalcResultCommsCostCommsCostByMaterial()
+            {
+                England = "England",
+                Wales = "Wales",
+                Scotland = "Scotland",
+                NorthernIreland = "Nothern Ireland",
+                Total = "Total",
+                OrderId = 1
+            });
             commsCostByCountryList.Add(ukCost);
 
             var englandValue =
@@ -140,10 +151,22 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 ScotlandValue = scotlandValue,
                 NorthernIrelandValue = niValue,
                 TotalValue = englandValue + walesValue + scotlandValue + niValue,
-                Name = "2b Comms Costs - UK wide"
+                Name = "2b Comms Costs - UK wide",
+                OrderId = 3
             };
 
             commsCostByCountryList.Add(countryCost);
+
+            foreach (var calcResultCountry in commsCostByCountryList.Where(x => x.OrderId != 1))
+            {
+                calcResultCountry.England = $"{calcResultCountry.EnglandValue.ToString("C", culture)}";
+                calcResultCountry.Wales = $"{calcResultCountry.WalesValue.ToString("C", culture)}";
+                calcResultCountry.NorthernIreland = $"{calcResultCountry.NorthernIrelandValue.ToString("C", culture)}";
+                calcResultCountry.Scotland = $"{calcResultCountry.ScotlandValue.ToString("C", culture)}";
+
+                calcResultCountry.Total = $"{calcResultCountry.TotalValue.ToString("C", culture)}";
+            }
+
             result.CommsCostByCountry = commsCostByCountryList;
 
             return result;
