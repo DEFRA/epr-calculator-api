@@ -1,4 +1,4 @@
-﻿using EPR.Calculator.API.Builder;
+﻿using EPR.Calculator.API.Builder.Detail;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;

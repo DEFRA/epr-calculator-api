@@ -10,7 +10,7 @@ using Moq;
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
-    public class CalcResultSummaryTests
+    public class CalcResultSummaryBuilderTests
     {
         private DbContextOptions<ApplicationDBContext> _dbContextOptions;
         private ApplicationDBContext _context;
@@ -347,7 +347,7 @@ namespace EPR.Calculator.API.UnitTests
             _context.Material.Add(new Material { Id = 1, Name = "Material1", Code = "123" });
             _context.ProducerDetail.Add(new ProducerDetail { Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test" } });
             _context.SaveChanges();
-            
+
             var result = _calcResultsService.Construct(requestDto, calcResult);
 
             Assert.IsNotNull(result);
