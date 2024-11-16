@@ -1,5 +1,6 @@
 ﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using System.Globalization;
 
@@ -7,8 +8,9 @@ namespace EPR.Calculator.API.Builder.CommsCost
 {
     public class CalcResultCommsCostBuilder(ApplicationDBContext context) : ICalcResultCommsCostBuilder
     {
-        public CalcResultCommsCost Construct(int runId, CalcResultOnePlusFourApportionment apportionment)
+        public CalcResultCommsCost Construct(CalcResultsRequestDto resultsRequestDto, CalcResultOnePlusFourApportionment apportionment)
         {
+            var runId = resultsRequestDto.RunId;
             var culture = CultureInfo.CreateSpecificCulture("en-GB");
             culture.NumberFormat.CurrencySymbol = "£";
             culture.NumberFormat.CurrencyPositivePattern = 0;
