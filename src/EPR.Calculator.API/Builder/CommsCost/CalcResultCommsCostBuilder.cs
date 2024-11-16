@@ -54,14 +54,18 @@ namespace EPR.Calculator.API.Builder.CommsCost
 
             var list = new List<CalcResultCommsCostCommsCostByMaterial>();
 
-            var header = new CalcResultCommsCostCommsCostByMaterial()
+            var header = new CalcResultCommsCostCommsCostByMaterial
             {
                 Name = "2a Comms Costs - by Material",
                 England = "England",
                 Wales = "Wales",
                 Scotland = "Scotland",
                 NorthernIreland = "Northern Ireland",
-                Total = "Total"
+                Total = "Total",
+                ProducerReportedHouseholdPackagingWasteTonnage = "Producer Reported Household Packaging Waste Tonnage",
+                LateReportingTonnage = "Late Reporting Tonnage",
+                ProducerReportedHouseholdPlusLateReportingTonnage = "Producer Reported Household Tonnage + Late Reporting Tonnage",
+                CommsCostByMaterialPricePerTonne = "Comms Cost - by Material Price Per Tonne"
             };
             list.Add(header);
 
@@ -74,12 +78,20 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 var lateReportingTonnage = allDefaultResults.Single(x =>
                     x.ParameterType == "Late reporting tonnage" && x.ParameterCategory == materialName);
 
-                commsCost.ProducerReportedWasteTonnageValue = producerReportedTon;
+                commsCost.ProducerReportedHouseholdPackagingWasteTonnageValue = producerReportedTon;
                 commsCost.LateReportingTonnageValue = lateReportingTonnage.ParameterValue;
-                commsCost.ProducerReportedLateReportingTonnageValue = commsCost.ProducerReportedWasteTonnageValue +
-                                                                      commsCost.LateReportingTonnageValue;
+                commsCost.ProducerReportedHouseholdPlusLateReportingTonnageValue =
+                    commsCost.ProducerReportedHouseholdPackagingWasteTonnageValue +
+                    commsCost.LateReportingTonnageValue;
                 commsCost.CommsCostByMaterialPricePerTonneValue =
-                    commsCost.TotalValue / commsCost.ProducerReportedLateReportingTonnageValue;
+                    commsCost.TotalValue / commsCost.ProducerReportedHouseholdPlusLateReportingTonnageValue;
+
+                commsCost.ProducerReportedHouseholdPackagingWasteTonnage =
+                    $"{commsCost.ProducerReportedHouseholdPackagingWasteTonnageValue:##.000}";
+                commsCost.LateReportingTonnage = $"{commsCost.LateReportingTonnageValue:##.000}";
+                commsCost.ProducerReportedHouseholdPlusLateReportingTonnage =
+                    $"{commsCost.ProducerReportedHouseholdPlusLateReportingTonnageValue:##.000}";
+                commsCost.CommsCostByMaterialPricePerTonne = $"{commsCost.CommsCostByMaterialPricePerTonneValue:##.000}";
 
                 list.Add(commsCost);
             }
@@ -123,12 +135,19 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 NorthernIrelandValue = list.Sum(x => x.NorthernIrelandValue),
                 ScotlandValue = list.Sum(x => x.ScotlandValue),
                 TotalValue = list.Sum(x => x.TotalValue),
+                ProducerReportedHouseholdPackagingWasteTonnageValue = list.Sum(x => x.ProducerReportedHouseholdPackagingWasteTonnageValue),
+                ProducerReportedHouseholdPlusLateReportingTonnageValue = list.Sum(x => x.ProducerReportedHouseholdPlusLateReportingTonnageValue),
+                LateReportingTonnageValue = list.Sum(x => x.LateReportingTonnageValue),
             };
             totalRow.Name = "Total";
             totalRow.England = $"{totalRow.EnglandValue.ToString("C", culture)}";
             totalRow.Wales = $"{totalRow.WalesValue.ToString("C", culture)}";
             totalRow.NorthernIreland = $"{totalRow.NorthernIrelandValue.ToString("C", culture)}";
             totalRow.Scotland = $"{totalRow.ScotlandValue.ToString("C", culture)}";
+
+            totalRow.ProducerReportedHouseholdPackagingWasteTonnage = $"{totalRow.ProducerReportedHouseholdPackagingWasteTonnageValue:##.000}";
+            totalRow.LateReportingTonnage = $"{totalRow.LateReportingTonnageValue:##.000}";
+            totalRow.ProducerReportedHouseholdPlusLateReportingTonnage = $"{totalRow.ProducerReportedHouseholdPlusLateReportingTonnageValue:##.000}";
 
             totalRow.Total = $"{totalRow.TotalValue.ToString("C", culture)}";
             return totalRow;

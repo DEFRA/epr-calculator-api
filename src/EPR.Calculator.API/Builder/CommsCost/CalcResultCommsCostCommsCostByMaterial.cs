@@ -2,12 +2,12 @@
 
 public class CalcResultCommsCostCommsCostByMaterial : CalcResultCommsCostOnePlusFourApportionment
 {
-    public string ProducerReportedWasteTonnage { get; set; }
+    public string ProducerReportedHouseholdPackagingWasteTonnage { get; set; }
     public string LateReportingTonnage { get; set; }
-    public string ProducerReportedLateReportingTonnage { get; set; }
+    public string ProducerReportedHouseholdPlusLateReportingTonnage { get; set; }
     public string CommsCostByMaterialPricePerTonne { get; set; }
-    public decimal ProducerReportedWasteTonnageValue { get; set; }
+    public decimal ProducerReportedHouseholdPackagingWasteTonnageValue { get; set; }
     public decimal LateReportingTonnageValue { get; set; }
-    public decimal ProducerReportedLateReportingTonnageValue { get; set; }
+    public decimal ProducerReportedHouseholdPlusLateReportingTonnageValue { get; set; }
     public decimal CommsCostByMaterialPricePerTonneValue { get; set; }
 }
