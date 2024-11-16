@@ -27,10 +27,10 @@ namespace EPR.Calculator.API.Data.DataModels
 
         [Column("packaging_tonnage")]
         [Precision(18, 3)]
-        public required decimal PackagingTonnage { get; set; }
+        public decimal PackagingTonnage { get; set; }
 
-        public required virtual ProducerDetail ProducerDetail { get; set; }
+        public virtual ProducerDetail ProducerDetail { get; set; }
 
-        public required virtual Material Material { get; set; }
+        public virtual Material Material { get; set; }
     }
 }
