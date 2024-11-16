@@ -1,9 +1,7 @@
 ﻿using AutoFixture;
-using EPR.Calculator.API.Builder.CommsCost;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
-using EPR.Calculator.API.UnitTests.Properties;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System.Text;
