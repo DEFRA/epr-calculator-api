@@ -52,10 +52,10 @@ namespace EPR.Calculator.API.Exporter
             }
             csvContent.AppendLine();
 
-            //if (results?.CalcResultCommsCostReportDetail != null)
-            //{
-            //    PrepareCommsCost(results.CalcResultCommsCostReportDetail, csvContent);
-            //}
+            if (results?.CalcResultCommsCostReportDetail != null)
+            {
+                PrepareCommsCost(results.CalcResultCommsCostReportDetail, csvContent);
+            }
 
             if (results?.CalcResultLaDisposalCostData != null)
             {

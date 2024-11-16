@@ -44,7 +44,12 @@ builder.Services.AddScoped<ICalcResultLateReportingBuilder, CalcResultLateReport
 builder.Services.AddScoped<ITransposePomAndOrgDataService, TransposePomAndOrgDataService>();
 builder.Services.AddScoped<ICalcResultOnePlusFourApportionmentBuilder, CalcResultOnePlusFourApportionmentBuilder>();
 builder.Services.AddScoped<ICalcResultParameterOtherCostBuilder, CalcResultParameterOtherCostBuilder>();
-builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+#if DEBUG
+    builder.Services.AddScoped<IBlobStorageService, LocalFileStorageService>();
+#else
+    builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+#endif
+
 
 builder.Services.AddScoped<ICalcResultCommsCostBuilder, CalcResultCommsCostBuilder>();
 builder.Services.AddScoped<ICalcRunLaDisposalCostBuilder, CalcRunLaDisposalCostBuilder>();

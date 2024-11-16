@@ -64,7 +64,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 {
                     mat.MaterialId,
                     mat.PackagingTonnage
-                }).ToList();
+                }).Distinct().ToList();
 
 
             var list = new List<CalcResultCommsCostCommsCostByMaterial>();
@@ -109,7 +109,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 commsCost.ProducerReportedHouseholdPlusLateReportingTonnage =
                     $"{commsCost.ProducerReportedHouseholdPlusLateReportingTonnageValue:##.000}";
                 commsCost.CommsCostByMaterialPricePerTonne =
-                    $"{commsCost.CommsCostByMaterialPricePerTonneValue:##.000}";
+                    $"{commsCost.CommsCostByMaterialPricePerTonneValue:##.0000}";
 
                 list.Add(commsCost);
             }
@@ -175,10 +175,10 @@ namespace EPR.Calculator.API.Builder.CommsCost
             var materialDefault = materialDefaults.Single(m => m.ParameterCategory == materialName);
             var commsCost = new CalcResultCommsCostCommsCostByMaterial
             {
-                EnglandValue = apportionmentDetail.EnglandTotal * materialDefault.ParameterValue,
-                WalesValue = apportionmentDetail.WalesTotal * materialDefault.ParameterValue,
-                NorthernIrelandValue = apportionmentDetail.NorthernIrelandTotal * materialDefault.ParameterValue,
-                ScotlandValue = apportionmentDetail.ScotlandTotal * materialDefault.ParameterValue,
+                EnglandValue = apportionmentDetail.EnglandTotal * materialDefault.ParameterValue / 100,
+                WalesValue = apportionmentDetail.WalesTotal * materialDefault.ParameterValue / 100,
+                NorthernIrelandValue = apportionmentDetail.NorthernIrelandTotal * materialDefault.ParameterValue / 100,
+                ScotlandValue = apportionmentDetail.ScotlandTotal * materialDefault.ParameterValue / 100,
                 Name = materialDefault.ParameterCategory,
             };
             commsCost.England = $"{commsCost.EnglandValue.ToString(CurrencyFormat, culture)}";

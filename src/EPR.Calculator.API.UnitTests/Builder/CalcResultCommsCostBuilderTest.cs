@@ -91,6 +91,73 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual(dataApp.Scotland, "20%");
             Assert.AreEqual(dataApp.Total, "100%");
 
+
+            var materialCosts = result.CalcResultCommsCostCommsCostByMaterial.ToList();
+            Assert.IsNotNull(materialCosts);
+            Assert.AreEqual(10, materialCosts.Count());
+
+            var materialHeader = materialCosts.First();
+
+            Assert.IsNotNull(materialHeader);
+
+            Assert.AreEqual("2a Comms Costs - by Material", materialHeader.Name);
+            Assert.AreEqual("England", materialHeader.England);
+            Assert.AreEqual("Wales", materialHeader.Wales);
+            Assert.AreEqual("Scotland", materialHeader.Scotland);
+            Assert.AreEqual("Northern Ireland", materialHeader.NorthernIreland);
+            Assert.AreEqual("Total", materialHeader.Total);
+            Assert.AreEqual("Producer Reported Household Packaging Waste Tonnage",
+                materialHeader.ProducerReportedHouseholdPackagingWasteTonnage);
+            Assert.AreEqual("Late Reporting Tonnage", materialHeader.LateReportingTonnage);
+            Assert.AreEqual("Producer Reported Household Tonnage + Late Reporting Tonnage",
+                materialHeader.ProducerReportedHouseholdPlusLateReportingTonnage);
+            Assert.AreEqual("Comms Cost - by Material Price Per Tonne",
+                materialHeader.CommsCostByMaterialPricePerTonne);
+
+            var aluminiumCost = materialCosts[1];
+            Assert.AreEqual("Aluminium", aluminiumCost.Name);
+            Assert.AreEqual("£4.00", aluminiumCost.England);
+            Assert.AreEqual("£2.00", aluminiumCost.Wales);
+            Assert.AreEqual("£2.00", aluminiumCost.Scotland);
+            Assert.AreEqual("£2.00", aluminiumCost.NorthernIreland);
+            Assert.AreEqual("£10.00", aluminiumCost.Total);
+            Assert.AreEqual("100.000",
+                aluminiumCost.ProducerReportedHouseholdPackagingWasteTonnage);
+            Assert.AreEqual("10.000", aluminiumCost.LateReportingTonnage);
+            Assert.AreEqual("110.000",
+                aluminiumCost.ProducerReportedHouseholdPlusLateReportingTonnage);
+            Assert.AreEqual(".0909",
+                aluminiumCost.CommsCostByMaterialPricePerTonne);
+
+
+            var fibreCompositeCost = materialCosts[2];
+            Assert.AreEqual("Fibre composite", fibreCompositeCost.Name);
+            Assert.AreEqual("£4.00", fibreCompositeCost.England);
+            Assert.AreEqual("£2.00", fibreCompositeCost.Wales);
+            Assert.AreEqual("£2.00", fibreCompositeCost.Scotland);
+            Assert.AreEqual("£2.00", fibreCompositeCost.NorthernIreland);
+            Assert.AreEqual("£10.00", fibreCompositeCost.Total);
+            Assert.AreEqual("200.000",
+                fibreCompositeCost.ProducerReportedHouseholdPackagingWasteTonnage);
+            Assert.AreEqual("10.000", fibreCompositeCost.LateReportingTonnage);
+            Assert.AreEqual("210.000",
+                fibreCompositeCost.ProducerReportedHouseholdPlusLateReportingTonnage);
+            Assert.AreEqual(".0476",
+                fibreCompositeCost.CommsCostByMaterialPricePerTonne);
+
+            var totalMaterialCost = materialCosts.Last();
+            Assert.AreEqual("Total", totalMaterialCost.Name);
+            Assert.AreEqual("£32.00", totalMaterialCost.England);
+            Assert.AreEqual("£16.00", totalMaterialCost.Wales);
+            Assert.AreEqual("£16.00", totalMaterialCost.Scotland);
+            Assert.AreEqual("£16.00", totalMaterialCost.NorthernIreland);
+            Assert.AreEqual("£80.00", totalMaterialCost.Total);
+            Assert.AreEqual("3600.000",
+                totalMaterialCost.ProducerReportedHouseholdPackagingWasteTonnage);
+            Assert.AreEqual("80.000", totalMaterialCost.LateReportingTonnage);
+            Assert.AreEqual("3680.000",
+                totalMaterialCost.ProducerReportedHouseholdPlusLateReportingTonnage);
+            Assert.IsNull(totalMaterialCost.CommsCostByMaterialPricePerTonne);
         }
 
         private void CreateProducerDetail()
