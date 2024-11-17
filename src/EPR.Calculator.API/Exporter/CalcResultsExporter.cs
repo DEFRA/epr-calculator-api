@@ -61,10 +61,10 @@ namespace EPR.Calculator.API.Exporter
 
             csvContent.AppendLine();
 
-            //if (results?.CalcResultCommsCostReportDetail != null)
-            //{
-            //    PrepareCommsCost(results.CalcResultCommsCostReportDetail, csvContent);
-            //}
+            if (results?.CalcResultCommsCostReportDetail != null)
+            {
+                PrepareCommsCost(results.CalcResultCommsCostReportDetail, csvContent);
+            }
 
             if (results?.CalcResultLaDisposalCostData != null)
             {
@@ -114,7 +114,15 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.Wales)},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.Scotland)},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.NorthernIreland)},");
-                csvContent.AppendLine($"{CsvSanitiser.SanitiseData(commsCostByMaterial.Total)}");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.Total)},");
+                csvContent.Append(
+                    $"{CsvSanitiser.SanitiseData(commsCostByMaterial.ProducerReportedHouseholdPackagingWasteTonnage)},");
+                csvContent.Append(
+                    $"{CsvSanitiser.SanitiseData(commsCostByMaterial.LateReportingTonnage)},");
+                csvContent.Append(
+                    $"{CsvSanitiser.SanitiseData(commsCostByMaterial.ProducerReportedHouseholdPlusLateReportingTonnage)},");
+                csvContent.AppendLine(
+                    $"{CsvSanitiser.SanitiseData(commsCostByMaterial.CommsCostByMaterialPricePerTonne)}");
             }
 
             csvContent.AppendLine();

@@ -1,4 +1,4 @@
-﻿namespace EPR.Calculator.API.Builder.CommsCost;
+﻿namespace EPR.Calculator.API.Models;
 
 public class CalcResultCommsCostOnePlusFourApportionment
 {

@@ -44,17 +44,17 @@ namespace EPR.Calculator.API.Builder
 
         public CalcResult Build(CalcResultsRequestDto resultsRequestDto)
         {
-            var calcResult = new CalcResult();
-
-            calcResult.CalcResultDetail = this.calcResultDetailBuilder.Construct(resultsRequestDto);
-            calcResult.CalcResultLapcapData = this.lapcapBuilder.Construct(resultsRequestDto);
-            calcResult.CalcResultLateReportingTonnageData = this.lateReportingBuilder.Construct(resultsRequestDto);
-            calcResult.CalcResultLaDisposalCostData = this.laDisposalCostBuilder.Construct(resultsRequestDto, calcResult);
-            calcResult.CalcResultParameterOtherCost = this.calcResultParameterOtherCostBuilder.Construct(resultsRequestDto);
-            calcResult.CalcResultOnePlusFourApportionment = this.lapcapplusFourApportionmentBuilder.Construct(resultsRequestDto, calcResult);
-            calcResult.CalcResultSummary = this.summaryBuilder.Construct(resultsRequestDto, calcResult);
-
-            return calcResult;
+            var result = new CalcResult();
+            result.CalcResultDetail = this.calcResultDetailBuilder.Construct(resultsRequestDto);
+            result.CalcResultLapcapData = this.lapcapBuilder.Construct(resultsRequestDto);
+            result.CalcResultLateReportingTonnageData = this.lateReportingBuilder.Construct(resultsRequestDto);
+            result.CalcResultParameterOtherCost = this.calcResultParameterOtherCostBuilder.Construct(resultsRequestDto);
+            result.CalcResultOnePlusFourApportionment = this.lapcapplusFourApportionmentBuilder.Construct(resultsRequestDto, result);
+            result.CalcResultCommsCostReportDetail =
+                this.commsCostReportBuilder.Construct(resultsRequestDto, result.CalcResultOnePlusFourApportionment);
+            result.CalcResultLaDisposalCostData = this.laDisposalCostBuilder.Construct(resultsRequestDto, result);
+            calcResult.CalcResultSummary = this.summaryBuilder.Construct(resultsRequestDto, result);
+            return result;
         }
     }
 }

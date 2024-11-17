@@ -1,11 +1,7 @@
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq.Expressions;
     using AutoFixture;
     using EPR.Calculator.API.Builder;
-    using EPR.Calculator.API.Builder.CommsCost;
     using EPR.Calculator.API.Controllers;
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Dtos;
@@ -16,6 +12,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using EPR.Calculator.API.Wrapper;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
+    using System;
+    using System.Collections.Generic;
 
     [TestClass]
     public class CalculatorInternalControllerTests
