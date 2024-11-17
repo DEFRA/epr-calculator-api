@@ -169,7 +169,8 @@ namespace EPR.Calculator.API.Builder.CommsCost
             return totalRow;
         }
 
-        private static CalcResultCommsCostCommsCostByMaterial GetCommsCost(IEnumerable<CalcCommsBuilderResult> materialDefaults, string materialName,
+        private static CalcResultCommsCostCommsCostByMaterial GetCommsCost(
+            IEnumerable<CalcCommsBuilderResult> materialDefaults, string materialName,
             CalcResultOnePlusFourApportionmentDetail apportionmentDetail, CultureInfo culture)
         {
             var materialDefault = materialDefaults.Single(m => m.ParameterCategory == materialName);
@@ -181,13 +182,15 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 ScotlandValue = apportionmentDetail.ScotlandTotal * materialDefault.ParameterValue / 100,
                 Name = materialDefault.ParameterCategory,
             };
-            commsCost.England = $"{commsCost.EnglandValue.ToString(CurrencyFormat, culture)}";
-            commsCost.Wales = $"{commsCost.WalesValue.ToString(CurrencyFormat, culture)}";
-            commsCost.NorthernIreland = $"{commsCost.NorthernIrelandValue.ToString(CurrencyFormat, culture)}";
-            commsCost.Scotland = $"{commsCost.ScotlandValue.ToString(CurrencyFormat, culture)}";
+            commsCost.England = $"{Math.Round(commsCost.EnglandValue, 2).ToString(CurrencyFormat, culture)}";
+            commsCost.Wales = $"{Math.Round(commsCost.WalesValue, 2).ToString(CurrencyFormat, culture)}";
+            commsCost.NorthernIreland =
+                $"{Math.Round(commsCost.NorthernIrelandValue, 2).ToString(CurrencyFormat, culture)}";
+            commsCost.Scotland = $"{Math.Round(commsCost.ScotlandValue, 2).ToString(CurrencyFormat, culture)}";
 
-            commsCost.TotalValue = commsCost.EnglandValue + commsCost.WalesValue + commsCost.NorthernIrelandValue +
-                                   commsCost.ScotlandValue;
+            commsCost.TotalValue = Math.Round(commsCost.EnglandValue + commsCost.WalesValue +
+                                              commsCost.NorthernIrelandValue +
+                                              commsCost.ScotlandValue, 2);
             commsCost.Total = $"{commsCost.TotalValue.ToString(CurrencyFormat, culture)}";
             return commsCost;
         }
