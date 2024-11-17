@@ -1,8 +1,9 @@
-﻿using EPR.Calculator.API.Builder.CommsCost;
-using EPR.Calculator.API.Builder.Detail;
 using EPR.Calculator.API.Builder.LaDisposalCost;
 using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
+using EPR.Calculator.API.Builder.Summary;
+using EPR.Calculator.API.Builder.CommsCost;
+using EPR.Calculator.API.Builder.Detail;
 using EPR.Calculator.API.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Dtos;
@@ -15,6 +16,7 @@ namespace EPR.Calculator.API.Builder
         private readonly ICalcResultParameterOtherCostBuilder calcResultParameterOtherCostBuilder;
         private readonly ICalcResultDetailBuilder calcResultDetailBuilder;
         private readonly ICalcResultLapcapDataBuilder lapcapBuilder;
+        private readonly ICalcResultSummaryBuilder summaryBuilder;
         private readonly ICalcResultOnePlusFourApportionmentBuilder lapcapplusFourApportionmentBuilder;
         private readonly ICalcResultCommsCostBuilder commsCostReportBuilder;
         private readonly ICalcResultLateReportingBuilder lateReportingBuilder;
@@ -27,7 +29,8 @@ namespace EPR.Calculator.API.Builder
             ICalcResultOnePlusFourApportionmentBuilder calcResultOnePlusFourApportionmentBuilder,
             ICalcResultCommsCostBuilder commsCostReportBuilder,
             ICalcResultLateReportingBuilder lateReportingBuilder,
-            ICalcRunLaDisposalCostBuilder calcRunLaDisposalCostBuilder)
+            ICalcRunLaDisposalCostBuilder calcRunLaDisposalCostBuilder,
+            ICalcResultSummaryBuilder summaryBuilder)
         {
             this.calcResultDetailBuilder = calcResultDetailBuilder;
             this.lapcapBuilder = lapcapBuilder;
@@ -36,6 +39,7 @@ namespace EPR.Calculator.API.Builder
             this.calcResultParameterOtherCostBuilder = calcResultParameterOtherCostBuilder;
             this.laDisposalCostBuilder = calcRunLaDisposalCostBuilder;
             this.lapcapplusFourApportionmentBuilder = calcResultOnePlusFourApportionmentBuilder;
+            this.summaryBuilder = summaryBuilder;
         }
 
         public CalcResult Build(CalcResultsRequestDto resultsRequestDto)
@@ -49,7 +53,7 @@ namespace EPR.Calculator.API.Builder
             result.CalcResultCommsCostReportDetail =
                 this.commsCostReportBuilder.Construct(resultsRequestDto, result.CalcResultOnePlusFourApportionment);
             result.CalcResultLaDisposalCostData = this.laDisposalCostBuilder.Construct(resultsRequestDto, result);
-
+            result.CalcResultSummary = this.summaryBuilder.Construct(resultsRequestDto, result);
             return result;
         }
     }
