@@ -38,28 +38,31 @@ namespace EPR.Calculator.API.Builder.Summary
                 .OrderBy(pd => pd.ProducerId)
                 .ToList();
 
-            var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
-
-            foreach (var producer in producerDetailList)
+            if (producerDetailList.Count > 0)
             {
-                // We have to write an additional row if a producer have at least one subsidiary
-                // This additional row will be the total of this producer and its subsidiaries
-                var producersAndSubsidiaries = producerDetailList.Where(pd => pd.ProducerId == producer.ProducerId);
-                // Make sure the total row is written only once
-                if (producersAndSubsidiaries.Count() > 1 && producerDisposalFees.Find(pdf => pdf.ProducerId == producer.ProducerId.ToString()) == null)
+                var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
+
+                foreach (var producer in producerDetailList)
                 {
-                    var totalRow = GetProducerTotalRow(producersAndSubsidiaries.ToList(), materials, calcResult);
-                    producerDisposalFees.Add(totalRow);
+                    // We have to write an additional row if a producer have at least one subsidiary
+                    // This additional row will be the total of this producer and its subsidiaries
+                    var producersAndSubsidiaries = producerDetailList.Where(pd => pd.ProducerId == producer.ProducerId);
+                    // Make sure the total row is written only once
+                    if (producersAndSubsidiaries.Count() > 1 && producerDisposalFees.Find(pdf => pdf.ProducerId == producer.ProducerId.ToString()) == null)
+                    {
+                        var totalRow = GetProducerTotalRow(producersAndSubsidiaries.ToList(), materials, calcResult);
+                        producerDisposalFees.Add(totalRow);
+                    }
+
+                    // Calculate the values for the producer
+                    producerDisposalFees.AddRange(GetProducerRow(producerDisposalFees, producer, materials, calcResult));
                 }
 
-                // Calculate the values for the producer
-                producerDisposalFees.AddRange(GetProducerRow(producerDisposalFees, producer, materials, calcResult));
+                // Calculate the total for all the producers
+                producerDisposalFees.Add(GetProducerTotalRow(producerDetailList.ToList(), materials, calcResult, true));
+
+                result.ProducerDisposalFees = producerDisposalFees;
             }
-
-            // Calculate the total for all the producers
-            producerDisposalFees.Add(GetProducerTotalRow(producerDetailList.ToList(), materials, calcResult, true));
-
-            result.ProducerDisposalFees = producerDisposalFees;
 
             return result;
         }

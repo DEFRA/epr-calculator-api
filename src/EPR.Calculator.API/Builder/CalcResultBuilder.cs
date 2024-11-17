@@ -53,7 +53,7 @@ namespace EPR.Calculator.API.Builder
             result.CalcResultCommsCostReportDetail =
                 this.commsCostReportBuilder.Construct(resultsRequestDto, result.CalcResultOnePlusFourApportionment);
             result.CalcResultLaDisposalCostData = this.laDisposalCostBuilder.Construct(resultsRequestDto, result);
-            calcResult.CalcResultSummary = this.summaryBuilder.Construct(resultsRequestDto, result);
+            result.CalcResultSummary = this.summaryBuilder.Construct(resultsRequestDto, result);
             return result;
         }
     }
