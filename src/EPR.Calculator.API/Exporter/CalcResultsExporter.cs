@@ -21,7 +21,7 @@ namespace EPR.Calculator.API.Exporter
         private const string ParametersFile = "Parameters File";
         private const string LaDisposalCostFile = "LA Disposal cost File";
         private const string CountryApportionmentFile = "Country Apportionment File";
-
+        private const int ProducerCommsFeesHeaderColumnIndex = 99;
 
         public CalcResultsExporter(IBlobStorageService blobStorageService)
         {
@@ -393,7 +393,7 @@ namespace EPR.Calculator.API.Exporter
             StringBuilder lineBuilder = new StringBuilder();
             lineBuilder.Append(resultSummary.ProducerDisposalFeesHeader.Name);
 
-            for (int i = 0; i < 99; i++)
+            for (int i = 0; i < ProducerCommsFeesHeaderColumnIndex; i++)
             {
                 lineBuilder.Append(",");
             }
