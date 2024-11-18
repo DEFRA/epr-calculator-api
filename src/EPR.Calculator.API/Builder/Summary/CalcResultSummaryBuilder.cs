@@ -889,7 +889,7 @@ namespace EPR.Calculator.API.Builder.Summary
         }
         private static decimal GetPriceperTonneForComms(MaterialDetail material, CalcResult calcResult)
         {
-            var commsCostDataDetail = calcResult.CalcResultParameterCommunicationCost.CalcResultParameterCommunicationCostDetails2.FirstOrDefault(la => la.Name == material.Name);
+            var commsCostDataDetail = calcResult.CalcResultCommsCostReportDetail.CalcResultCommsCostCommsCostByMaterial.FirstOrDefault(la => la.Name == material.Name);
 
             if (commsCostDataDetail == null)
             {
