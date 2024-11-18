@@ -634,7 +634,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             foreach (var producer in producers)
             {
-                totalCost += GetEnglandWithBadDebtProvision(producer, material, calcResult);
+                totalCost += GetEnglandWithBadDebtProvisionForComms(producer, material, calcResult);
             }
 
             return totalCost;
@@ -682,7 +682,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             foreach (var material in commsCostSummary)
             {
-                northernIrelandTotalwithBadDebtprovision += material.Value.NorthernIrelandTotalwithBadDebtprovision;
+                northernIrelandTotalwithBadDebtprovision += material.Value.NorthernIrelandWithBadDebtProvision;
             }
 
             return northernIrelandTotalwithBadDebtprovision;
@@ -694,7 +694,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             foreach (var material in commsCostSummary)
             {
-                scotlandTotalwithBadDebtprovision += material.Value.ScotlandTotalwithBadDebtprovision;
+                scotlandTotalwithBadDebtprovision += material.Value.ScotlandWithBadDebtProvision;
             }
 
             return scotlandTotalwithBadDebtprovision;
@@ -706,7 +706,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             foreach (var material in commsCostSummary)
             {
-                walesTotalwithBadDebtprovision += material.Value.WalesTotalwithBadDebtprovision;
+                walesTotalwithBadDebtprovision += material.Value.WalesWithBadDebtProvision;
             }
 
             return walesTotalwithBadDebtprovision;
@@ -718,7 +718,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             foreach (var material in commsCostSummary)
             {
-                englandTotalwithBadDebtprovision += material.Value.EnglandTotalwithBadDebtprovision;
+                englandTotalwithBadDebtprovision += material.Value.EnglandWithBadDebtProvision;
             }
 
             return englandTotalwithBadDebtprovision;
