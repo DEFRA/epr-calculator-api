@@ -99,7 +99,7 @@ namespace EPR.Calculator.API.Services
                                                     Material = material,
                                                     ProducerDetail = producerDetail,
                                                     PackagingType = packagingType,
-                                                    PackagingTonnage = Math.Round((decimal)(totalPackagingMaterialWeight / 1000), 3),
+                                                    PackagingTonnage = Math.Round((decimal)(totalPackagingMaterialWeight) / 1000, 3),
                                                 };
 
                                                 // Populate the producer reported material list

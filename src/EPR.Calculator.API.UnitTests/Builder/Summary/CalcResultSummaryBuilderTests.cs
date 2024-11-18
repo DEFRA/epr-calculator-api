@@ -15,6 +15,7 @@ namespace EPR.Calculator.API.UnitTests
         private DbContextOptions<ApplicationDBContext> _dbContextOptions;
         private ApplicationDBContext _context;
         private CalcResultSummaryBuilder _calcResultsService;
+        private CalcResult _calcResult;
 
         [TestInitialize]
         public void TestInitialize()
@@ -24,6 +25,85 @@ namespace EPR.Calculator.API.UnitTests
                 .Options;
             _context = new ApplicationDBContext(_dbContextOptions);
             _calcResultsService = new CalcResultSummaryBuilder(_context);
+
+            _calcResult = new CalcResult
+            {
+                CalcResultParameterOtherCost = new CalcResultParameterOtherCost { BadDebtProvision = new KeyValuePair<string, string>("key1", "6%") },
+                CalcResultDetail = new CalcResultDetail() { },
+                CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData(),
+                CalcResultLapcapData = new CalcResultLapcapData() { CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>() { } },
+                CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment()
+                {
+                    CalcResultOnePlusFourApportionmentDetails =
+                    [
+                        new()
+                        {
+                            EnglandDisposalTotal="80",
+                            NorthernIrelandDisposalTotal="70",
+                            ScotlandDisposalTotal="30",
+                            WalesDisposalTotal="20",
+                            AllTotal=0.1M,
+                            EnglandTotal=0.10M,
+                            NorthernIrelandTotal=0.15M,
+                            ScotlandTotal=0.15M,
+                            WalesTotal=020M,
+                            Name="Test",
+                        },
+                        new()
+                        {
+                            EnglandDisposalTotal="80",
+                            NorthernIrelandDisposalTotal="70",
+                            ScotlandDisposalTotal="30",
+                            WalesDisposalTotal="20",
+                            AllTotal=0.1M,
+                            EnglandTotal=0.10M,
+                            NorthernIrelandTotal=0.15M,
+                            ScotlandTotal=0.15M,
+                            WalesTotal=020M,
+                            Name="Test",
+                        },
+                        new()
+                        {
+                            EnglandDisposalTotal="80",
+                            NorthernIrelandDisposalTotal="70",
+                            ScotlandDisposalTotal="30",
+                            WalesDisposalTotal="20",
+                            AllTotal=0.1M,
+                            EnglandTotal=0.10M,
+                            NorthernIrelandTotal=0.15M,
+                            ScotlandTotal=0.15M,
+                            WalesTotal=020M,
+                            Name="Test",
+                        },
+                        new()
+                        {
+                            EnglandDisposalTotal="80",
+                            NorthernIrelandDisposalTotal="70",
+                            ScotlandDisposalTotal="30",
+                            WalesDisposalTotal="20",
+                            AllTotal=0.1M,
+                            EnglandTotal=14.53M,
+                            NorthernIrelandTotal=0.15M,
+                            ScotlandTotal=0.15M,
+                            WalesTotal=020M,
+                            Name="Test",
+                        },
+                     new()
+                        {
+                            EnglandDisposalTotal="80",
+                            NorthernIrelandDisposalTotal="70",
+                            ScotlandDisposalTotal="30",
+                            WalesDisposalTotal="20",
+                            AllTotal=0.1M,
+                            EnglandTotal=14.53M,
+                            NorthernIrelandTotal=0.15M,
+                            ScotlandTotal=0.15M,
+                            WalesTotal=020M,
+                            Name="Test",
+                        }]
+                },
+                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { }
+            };
         }
 
         [TestCleanup]
@@ -37,84 +117,6 @@ namespace EPR.Calculator.API.UnitTests
         public void Construct_ShouldReturnCalcResultSummary()
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
-            var calcResult = new CalcResult
-            {
-                CalcResultParameterOtherCost = new CalcResultParameterOtherCost { BadDebtProvision = new KeyValuePair<string, string>("key1", "6%") },
-                CalcResultDetail = new CalcResultDetail() { },
-                CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData(),
-                CalcResultLapcapData = new CalcResultLapcapData() { CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>() { } },
-                CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment()
-                {
-                    CalcResultOnePlusFourApportionmentDetails =
-                    [
-                        new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        },
-                        new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        },
-                        new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        },
-                        new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=14.53M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        },
-                     new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=14.53M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        }]
-                },
-                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { }
-            };
 
             _context.Material.Add(new Material { Id = 1, Name = "Material1", Code = "123" });
             _context.SaveChanges();
@@ -122,7 +124,7 @@ namespace EPR.Calculator.API.UnitTests
             _context.ProducerDetail.Add(new ProducerDetail { Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test" } });
             _context.SaveChanges();
 
-            var result = _calcResultsService.Construct(requestDto, calcResult);
+            var result = _calcResultsService.Construct(requestDto, _calcResult);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
@@ -134,16 +136,13 @@ namespace EPR.Calculator.API.UnitTests
         {
             // Arrange
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
-            var calcResult = new CalcResult
-            {
-                CalcResultParameterOtherCost = new CalcResultParameterOtherCost { BadDebtProvision = new KeyValuePair<string, string>("key1", "6%") }
-            };
 
             _context.Material.Add(new Material { Id = 1, Name = "Material1", Code = "123" });
+            _context.ProducerDetail.Add(new ProducerDetail { Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test" } });
             _context.SaveChanges();
 
             // Act
-            var result = _calcResultsService.Construct(requestDto, calcResult);
+            var result = _calcResultsService.Construct(requestDto, _calcResult);
 
             // Assert
             Assert.AreEqual("Material1 Breakdown", result.MaterialBreakdownHeaders.First().Name);
@@ -153,91 +152,12 @@ namespace EPR.Calculator.API.UnitTests
         public void Construct_ShouldCalculateProducerDisposalFeesCorrectly()
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
-            var calcResult = new CalcResult
-            {
-                CalcResultParameterOtherCost = new CalcResultParameterOtherCost { BadDebtProvision = new KeyValuePair<string, string>("key1", "6%") },
-                CalcResultDetail = new CalcResultDetail() { },
-                CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData(),
-                CalcResultLapcapData = new CalcResultLapcapData() { CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>() { } },
-                CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment()
-                {
-                    CalcResultOnePlusFourApportionmentDetails =
-                    [
-                        new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        },
-                        new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        },
-                        new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        },
-                        new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=14.53M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        },
-                     new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=14.53M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        }]
-                },
-                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { }
-            };
-
 
             _context.Material.Add(new Material { Id = 1, Name = "Material1", Code = "123" });
             _context.ProducerDetail.Add(new ProducerDetail { Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test" } });
             _context.SaveChanges();
 
-            var result = _calcResultsService.Construct(requestDto, calcResult);
+            var result = _calcResultsService.Construct(requestDto, _calcResult);
 
             Assert.IsTrue(result.ProducerDisposalFees.Any());
             Assert.AreEqual("Producer1", result.ProducerDisposalFees.First().ProducerName);
@@ -247,108 +167,26 @@ namespace EPR.Calculator.API.UnitTests
         public void Construct_ShouldReturnEmptyProducerDisposalFees_WhenNoProducers()
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
-            var calcResult = new CalcResult
-            {
-                CalcResultParameterOtherCost = new CalcResultParameterOtherCost { BadDebtProvision = new KeyValuePair<string, string>("key1", "6%") }
-            };
 
             _context.Material.Add(new Material { Id = 1, Name = "Material1", Code = "123" });
             _context.SaveChanges();
 
-            var result = _calcResultsService.Construct(requestDto, calcResult);
+            var result = _calcResultsService.Construct(requestDto, _calcResult);
 
             Assert.IsNotNull(result);
-            Assert.IsFalse(result.ProducerDisposalFees.Any());
+            Assert.IsNull(result.ProducerDisposalFees);
         }
 
         [TestMethod]
         public void Construct_ShouldCalculateBadDebtProvisionCorrectly()
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
-            var calcResult = new CalcResult
-            {
-                CalcResultParameterOtherCost = new CalcResultParameterOtherCost { BadDebtProvision = new KeyValuePair<string, string>("key1", "6%") },
-                CalcResultDetail = new CalcResultDetail() { },
-                CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData(),
-                CalcResultLapcapData = new CalcResultLapcapData() { CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>() { } },
-                CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment()
-                {
-                    CalcResultOnePlusFourApportionmentDetails =
-                    [
-                        new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        },
-                        new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        },
-                        new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        },
-                        new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=14.53M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        },
-                     new()
-                        {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=14.53M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                        }]
-                },
-                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { }
-            };
 
             _context.Material.Add(new Material { Id = 1, Name = "Material1", Code = "123" });
             _context.ProducerDetail.Add(new ProducerDetail { Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test" } });
             _context.SaveChanges();
 
-            var result = _calcResultsService.Construct(requestDto, calcResult);
+            var result = _calcResultsService.Construct(requestDto, _calcResult);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(0, 0);

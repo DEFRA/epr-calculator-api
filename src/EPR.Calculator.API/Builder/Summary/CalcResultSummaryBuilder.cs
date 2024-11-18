@@ -38,34 +38,38 @@ namespace EPR.Calculator.API.Builder.Summary
                 .OrderBy(pd => pd.ProducerId)
                 .ToList();
 
-
-            var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
-
-            foreach (var producer in producerDetailList)
+            if (producerDetailList.Count > 0)
             {
-                // We have to write an additional row if a producer have at least one subsidiary
-                // This additional row will be the total of this producer and its subsidiaries
-                var producersAndSubsidiaries = producerDetailList.Where(pd => pd.ProducerId == producer.ProducerId);
-                // Make sure the total row is written only once
-                if (producersAndSubsidiaries.Count() > 1 && producerDisposalFees.Find(pdf => pdf.ProducerId == producer.ProducerId.ToString()) == null)
+                var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
+
+                foreach (var producer in producerDetailList)
                 {
-                    var totalRow = GetProducerTotalRow(producersAndSubsidiaries.ToList(), materials, calcResult);
-                    producerDisposalFees.AddRange(totalRow);
+                    // We have to write an additional row if a producer have at least one subsidiary
+                    // This additional row will be the total of this producer and its subsidiaries
+                    var producersAndSubsidiaries = producerDetailList.Where(pd => pd.ProducerId == producer.ProducerId);
+                    // Make sure the total row is written only once
+                    if (producersAndSubsidiaries.Count() > 1 && producerDisposalFees.Find(pdf => pdf.ProducerId == producer.ProducerId.ToString()) == null)
+                    {
+                        var totalRow = GetProducerTotalRow(producersAndSubsidiaries.ToList(), materials, calcResult);
+                        producerDisposalFees.Add(totalRow);
+                    }
+
+                    // Calculate the values for the producer
+                    producerDisposalFees.AddRange(GetProducerRow(producerDisposalFees, producer, materials, calcResult));
                 }
 
-                // Calculate and add details of the producer
-                producerDisposalFees.AddRange(GetProducerRow(producerDisposalFees, producer, materials, calcResult));
-            }
+                // Calculate the total for all the producers
+                producerDisposalFees.Add(GetProducerTotalRow(producerDetailList.ToList(), materials, calcResult, true));
 
-            result.ProducerDisposalFees = producerDisposalFees;
+                result.ProducerDisposalFees = producerDisposalFees;
+            }
 
             return result;
         }
 
-        private IEnumerable<CalcResultSummaryProducerDisposalFees> GetProducerTotalRow(List<ProducerDetail> producersAndSubsidiaries, List<MaterialDetail> materials, CalcResult calcResult)
+        private CalcResultSummaryProducerDisposalFees GetProducerTotalRow(
+            List<ProducerDetail> producersAndSubsidiaries, List<MaterialDetail> materials, CalcResult calcResult, bool isOverAllTotalRow = false)
         {
-            var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
-
             var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
 
             foreach (var material in materials)
@@ -86,12 +90,12 @@ namespace EPR.Calculator.API.Builder.Summary
                 });
             }
 
-            producerDisposalFees.Add(new CalcResultSummaryProducerDisposalFees
+            return new CalcResultSummaryProducerDisposalFees
             {
-                ProducerId = producersAndSubsidiaries[0].ProducerId.ToString(),
-                ProducerName = producersAndSubsidiaries[0].ProducerName ?? string.Empty,
+                ProducerId = isOverAllTotalRow ? string.Empty : producersAndSubsidiaries[0].ProducerId.ToString(),
+                ProducerName = isOverAllTotalRow ? string.Empty : producersAndSubsidiaries[0].ProducerName ?? string.Empty,
                 SubsidiaryId = string.Empty,
-                Level = "1",
+                Level = isOverAllTotalRow ? "Totals" : "1",
                 TotalProducerDisposalFee = GetTotalProducerDisposalFee(materialCostSummary),
                 BadDebtProvision = GetTotalBadDebtProvision(materialCostSummary),
                 TotalProducerDisposalFeeWithBadDebtProvision = GetTotalProducerDisposalFeeWithBadDebtProvision(materialCostSummary),
@@ -101,9 +105,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 NorthernIrelandTotal = GetNorthernIrelandTotal(materialCostSummary),
                 ProducerDisposalFeesByMaterial = materialCostSummary,
                 isTotalRow = true
-            });
-
-            return producerDisposalFees;
+            };
         }
 
         private IEnumerable<CalcResultSummaryProducerDisposalFees> GetProducerRow(List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup, ProducerDetail producer, List<MaterialDetail> materials, CalcResult calcResult)

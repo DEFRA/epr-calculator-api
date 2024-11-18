@@ -15,5 +15,6 @@ namespace EPR.Calculator.API.Constants
         public const string ProduceLateTonnage =   "Producer Reported Household Tonnage + Late Reporting Tonnage";
         public const string DisposalCostPricePerTonne = "Disposal Cost Price Per Tonne";
         public const string LADisposalCostData = "LA Disposal Cost Data";
+        public const string Household = "HH";
     }
 }

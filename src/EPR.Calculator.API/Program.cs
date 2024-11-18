@@ -15,6 +15,7 @@ using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Services.EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using FluentValidation;
@@ -47,6 +48,12 @@ builder.Services.AddScoped<ICalcResultLateReportingBuilder, CalcResultLateReport
 builder.Services.AddScoped<ICalcRunLaDisposalCostBuilder, CalcRunLaDisposalCostBuilder>();
 builder.Services.AddScoped<ICalcResultOnePlusFourApportionmentBuilder, CalcResultOnePlusFourApportionmentBuilder>();
 builder.Services.AddScoped<ICalcResultParameterOtherCostBuilder, CalcResultParameterOtherCostBuilder>();
+#if DEBUG
+    builder.Services.AddScoped<IBlobStorageService, LocalFileStorageService>();
+#else
+    builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+#endif
+
 
 builder.Services.AddScoped<ICalcResultCommsCostBuilder, CalcResultCommsCostBuilder>();
 
