@@ -62,6 +62,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 where run.Id == runId && mat.PackagingType == CommonConstants.Household
                 select new
                 {
+                    mat.Id,
                     mat.MaterialId,
                     mat.PackagingTonnage
                 }).Distinct().ToList();
@@ -104,12 +105,12 @@ namespace EPR.Calculator.API.Builder.CommsCost
                     commsCost.TotalValue / commsCost.ProducerReportedHouseholdPlusLateReportingTonnageValue;
 
                 commsCost.ProducerReportedHouseholdPackagingWasteTonnage =
-                    $"{commsCost.ProducerReportedHouseholdPackagingWasteTonnageValue:##.000}";
-                commsCost.LateReportingTonnage = $"{commsCost.LateReportingTonnageValue:##.000}";
+                    $"{commsCost.ProducerReportedHouseholdPackagingWasteTonnageValue:0.000}";
+                commsCost.LateReportingTonnage = $"{commsCost.LateReportingTonnageValue:0.000}";
                 commsCost.ProducerReportedHouseholdPlusLateReportingTonnage =
-                    $"{commsCost.ProducerReportedHouseholdPlusLateReportingTonnageValue:##.000}";
+                    $"{commsCost.ProducerReportedHouseholdPlusLateReportingTonnageValue:0.000}";
                 commsCost.CommsCostByMaterialPricePerTonne =
-                    $"{commsCost.CommsCostByMaterialPricePerTonneValue:##.0000}";
+                    $"{commsCost.CommsCostByMaterialPricePerTonneValue:0.0000}";
 
                 list.Add(commsCost);
             }
@@ -161,9 +162,9 @@ namespace EPR.Calculator.API.Builder.CommsCost
             totalRow.NorthernIreland = $"{totalRow.NorthernIrelandValue.ToString(CurrencyFormat, culture)}";
             totalRow.Scotland = $"{totalRow.ScotlandValue.ToString(CurrencyFormat, culture)}";
 
-            totalRow.ProducerReportedHouseholdPackagingWasteTonnage = $"{totalRow.ProducerReportedHouseholdPackagingWasteTonnageValue:##.000}";
-            totalRow.LateReportingTonnage = $"{totalRow.LateReportingTonnageValue:##.000}";
-            totalRow.ProducerReportedHouseholdPlusLateReportingTonnage = $"{totalRow.ProducerReportedHouseholdPlusLateReportingTonnageValue:##.000}";
+            totalRow.ProducerReportedHouseholdPackagingWasteTonnage = $"{totalRow.ProducerReportedHouseholdPackagingWasteTonnageValue:0.000}";
+            totalRow.LateReportingTonnage = $"{totalRow.LateReportingTonnageValue:0.000}";
+            totalRow.ProducerReportedHouseholdPlusLateReportingTonnage = $"{totalRow.ProducerReportedHouseholdPlusLateReportingTonnageValue:0.000}";
 
             totalRow.Total = $"{totalRow.TotalValue.ToString(CurrencyFormat, culture)}";
             return totalRow;
@@ -174,23 +175,21 @@ namespace EPR.Calculator.API.Builder.CommsCost
             CalcResultOnePlusFourApportionmentDetail apportionmentDetail, CultureInfo culture)
         {
             var materialDefault = materialDefaults.Single(m => m.ParameterCategory == materialName);
-            var commsCost = new CalcResultCommsCostCommsCostByMaterial
-            {
-                EnglandValue = apportionmentDetail.EnglandTotal * materialDefault.ParameterValue / 100,
-                WalesValue = apportionmentDetail.WalesTotal * materialDefault.ParameterValue / 100,
-                NorthernIrelandValue = apportionmentDetail.NorthernIrelandTotal * materialDefault.ParameterValue / 100,
-                ScotlandValue = apportionmentDetail.ScotlandTotal * materialDefault.ParameterValue / 100,
-                Name = materialDefault.ParameterCategory,
-            };
+            var commsCost = new CalcResultCommsCostCommsCostByMaterial();
+            commsCost.TotalValue = Math.Round(materialDefault.ParameterValue, 2);
+            commsCost.EnglandValue = apportionmentDetail.EnglandTotal * commsCost.TotalValue / 100;
+            commsCost.WalesValue = apportionmentDetail.WalesTotal * commsCost.TotalValue / 100;
+            commsCost.NorthernIrelandValue =
+                apportionmentDetail.NorthernIrelandTotal * commsCost.TotalValue / 100;
+            commsCost.ScotlandValue = apportionmentDetail.ScotlandTotal * commsCost.TotalValue / 100;
+            commsCost.Name = materialDefault.ParameterCategory;
             commsCost.England = $"{Math.Round(commsCost.EnglandValue, 2).ToString(CurrencyFormat, culture)}";
             commsCost.Wales = $"{Math.Round(commsCost.WalesValue, 2).ToString(CurrencyFormat, culture)}";
             commsCost.NorthernIreland =
                 $"{Math.Round(commsCost.NorthernIrelandValue, 2).ToString(CurrencyFormat, culture)}";
             commsCost.Scotland = $"{Math.Round(commsCost.ScotlandValue, 2).ToString(CurrencyFormat, culture)}";
 
-            commsCost.TotalValue = Math.Round(commsCost.EnglandValue + commsCost.WalesValue +
-                                              commsCost.NorthernIrelandValue +
-                                              commsCost.ScotlandValue, 2);
+
             commsCost.Total = $"{commsCost.TotalValue.ToString(CurrencyFormat, culture)}";
             return commsCost;
         }
