@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Builder.LaDisposalCost;
 using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
+using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Controllers;
@@ -27,11 +28,11 @@ namespace EPR.Calculator.API.UnitTests
         private Mock<ICalcResultsExporter<CalcResult>> mockExporter;
         private Mock<ICalcResultDetailBuilder> mockDetailBuilder;
         private Mock<ICalcResultLapcapDataBuilder> mockLapcapBuilder;
-        private Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
+        private Mock<ICalcResultSummaryBuilder> mockSummaryBuilder;
         private Mock<ICalcResultLateReportingBuilder> mocklateReportingBuilder;
-        private Mock<ICalcResultParameterOtherCostBuilder> mockICalcResultParameterOtherCostBuilder;
-        private Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
         private Mock<ICalcRunLaDisposalCostBuilder> mockLaDisposalCostBuilder;
+        private Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
+        private Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
 
         private Mock<ApplicationDBContext> mockContext;
         private CalculatorInternalController controller;
@@ -60,9 +61,10 @@ namespace EPR.Calculator.API.UnitTests
 
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             mockLapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
-            mockCommsCostReportBuilder = new Mock<ICalcResultCommsCostBuilder>();
+            mockSummaryBuilder = new Mock<ICalcResultSummaryBuilder>();
             mocklateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
             mockLaDisposalCostBuilder = new Mock<ICalcRunLaDisposalCostBuilder>();
+            mockCommsCostReportBuilder = new Mock<ICalcResultCommsCostBuilder>();
             mockCalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
             mockICalcResultOnePlusFourApportionmentBuilder = new Mock<ICalcResultOnePlusFourApportionmentBuilder>();
             calcResultBuilder = new CalcResultBuilder(
@@ -72,7 +74,8 @@ namespace EPR.Calculator.API.UnitTests
                 mockICalcResultOnePlusFourApportionmentBuilder.Object,
                 mockCommsCostReportBuilder.Object,
                 mocklateReportingBuilder.Object,
-                mockLaDisposalCostBuilder.Object);
+                mockLaDisposalCostBuilder.Object,
+                mockSummaryBuilder.Object);
 
             mockContext = new Mock<ApplicationDBContext>();
             detailBuilder = new CalcResultDetailBuilder(mockContext.Object);

@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Builder.LaDisposalCost;
 using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
+using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Dtos;
@@ -18,54 +19,76 @@ namespace EPR.Calculator.API.UnitTests
     {
         private Mock<ICalcResultDetailBuilder> mockCalcResultDetailBuilder;
         private Mock<ICalcResultLapcapDataBuilder> mockLapcapBuilder;
-        private Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
         private Mock<ICalcResultLateReportingBuilder> mockLateReportingBuilder;
-        private CalcResultBuilder calcResultBuilder;
-        private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockOnePlusFourApportionmentBuilder;
-        private Mock<ICalcResultParameterOtherCostBuilder> mockICalcResultParameterOtherCostBuilder;
         private Mock<ICalcRunLaDisposalCostBuilder> mockCalcRunLaDisposalCostBuilder;
-        private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockICalcResultOnePlusFourApportionmentBuilder;
-
+        private Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
+        private Mock<ICalcResultSummaryBuilder> mockSummaryBuilder;
+        private CalcResultBuilder calcResultBuilder;
+        
+        private Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
+        private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockOnePlusFourApportionmentBuilder;
 
         [TestInitialize]
         public void Setup()
         {
             mockCalcResultDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             mockLapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
+            mockSummaryBuilder = new Mock<ICalcResultSummaryBuilder>();
+            mockLateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
+            mockCalcRunLaDisposalCostBuilder = new Mock<ICalcRunLaDisposalCostBuilder>();
             mockCommsCostReportBuilder = new Mock<ICalcResultCommsCostBuilder>();
             mockLateReportingBuilder = new Mock<ICalcResultLateReportingBuilder>();
-            mockICalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
-            mockICalcResultOnePlusFourApportionmentBuilder = new Mock<ICalcResultOnePlusFourApportionmentBuilder>();
+            mockCalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
+            mockOnePlusFourApportionmentBuilder = new Mock<ICalcResultOnePlusFourApportionmentBuilder>();
             mockCalcRunLaDisposalCostBuilder = new Mock<ICalcRunLaDisposalCostBuilder>();
             calcResultBuilder = new CalcResultBuilder(
                 mockCalcResultDetailBuilder.Object,
                 mockLapcapBuilder.Object,
-                mockICalcResultParameterOtherCostBuilder.Object,
-                mockICalcResultOnePlusFourApportionmentBuilder.Object,
+                mockCalcResultParameterOtherCostBuilder.Object,
+                mockOnePlusFourApportionmentBuilder.Object,
                 mockCommsCostReportBuilder.Object,
                 mockLateReportingBuilder.Object,
-                mockCalcRunLaDisposalCostBuilder.Object);
+                mockCalcRunLaDisposalCostBuilder.Object,
+                mockSummaryBuilder.Object);
+        }
+
+        [TestMethod]
+        public void CanConstruct()
+        {
+           // Act
+           var instance = new CalcResultBuilder(
+                mockCalcResultDetailBuilder.Object,
+                mockLapcapBuilder.Object,
+                mockCalcResultParameterOtherCostBuilder.Object,
+                mockOnePlusFourApportionmentBuilder.Object,
+                mockCommsCostReportBuilder.Object,
+                mockLateReportingBuilder.Object,
+                mockCalcRunLaDisposalCostBuilder.Object,
+                mockSummaryBuilder.Object);
+
+            // Assert
+            Assert.IsNotNull(instance);
         }
 
         [TestMethod]
         public void Build_ShouldReturnCalcResultWithDetailsAndLapcapData()
         {
-            var resultsRequestDto = new CalcResultsRequestDto();
-            var expectedDetail = new CalcResultDetail();
-            var expectedLapcapData = new CalcResultLapcapData
-            {
-                Name = "SomeName",
-                CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>() 
-            };
+           var resultsRequestDto = new CalcResultsRequestDto();
+           var expectedDetail = new CalcResultDetail();
+           var expectedLapcapData = new CalcResultLapcapData
+           {
+               Name = "SomeName",
+               CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>() 
+           };
 
-            mockCalcResultDetailBuilder.Setup(m => m.Construct(resultsRequestDto)).Returns(expectedDetail);
-            mockLapcapBuilder.Setup(m => m.Construct(resultsRequestDto)).Returns(expectedLapcapData);
+           mockCalcResultDetailBuilder.Setup(m => m.Construct(resultsRequestDto)).Returns(expectedDetail);
+           mockLapcapBuilder.Setup(m => m.Construct(resultsRequestDto)).Returns(expectedLapcapData);
 
-            var result = calcResultBuilder.Build(resultsRequestDto);
+           var result = calcResultBuilder.Build(resultsRequestDto);
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedDetail, result.CalcResultDetail);
-            Assert.AreEqual(expectedLapcapData, result.CalcResultLapcapData);
+           Assert.IsNotNull(result);
+           Assert.AreEqual(expectedDetail, result.CalcResultDetail);
+           Assert.AreEqual(expectedLapcapData, result.CalcResultLapcapData);
         }
     }
 }
