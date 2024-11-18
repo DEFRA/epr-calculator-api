@@ -24,7 +24,7 @@ namespace EPR.Calculator.API.UnitTests
             _dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "CalcResultSummaryTestDb")
                 .Options;
-            _context = new ApplicationDBContext(_dbContextOptions); 
+            _context = new ApplicationDBContext(_dbContextOptions);
             _calcResultsService = new CalcResultSummaryBuilder(_context);
 
             _calcResult = new CalcResult
@@ -38,10 +38,10 @@ namespace EPR.Calculator.API.UnitTests
                         new CalcResultLaDisposalCostDataDetail()
                         {
                             DisposalCostPricePerTonne="20",
-                            England="",
-                            Wales="",
-                            Name="",
-                            Scotland=""
+                            England="EnglandTest",
+                            Wales="WalesTest",
+                            Name="ScotlandTest",
+                            Scotland="ScotlandTest"
                         }
                     } 
                 },
@@ -154,7 +154,6 @@ namespace EPR.Calculator.API.UnitTests
         public void Construct_ShouldMapMaterialBreakdownHeaders()
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
-            _context.SaveChanges();
 
             var result = _calcResultsService.Construct(requestDto, _calcResult);
 
@@ -165,7 +164,6 @@ namespace EPR.Calculator.API.UnitTests
         public void Construct_ShouldCalculateProducerDisposalFeesCorrectly()
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
-            _context.SaveChanges();
 
             var result = _calcResultsService.Construct(requestDto, _calcResult);
 
@@ -188,8 +186,6 @@ namespace EPR.Calculator.API.UnitTests
         public void Construct_ShouldCalculateBadDebtProvisionCorrectly()
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
-
-            _context.SaveChanges();
 
             var result = _calcResultsService.Construct(requestDto, _calcResult);
 
