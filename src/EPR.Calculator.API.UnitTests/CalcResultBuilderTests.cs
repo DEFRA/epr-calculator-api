@@ -57,17 +57,17 @@ namespace EPR.Calculator.API.UnitTests
         {
            // Act
            var instance = new CalcResultBuilder(
-               calcResultDetailBuilder.Object,
-               lapcapBuilder.Object,
-               calcResultParameterOtherCostBuilder.Object,
-               onePlusFourApportionmentBuilder.Object,
-               commsCostReportBuilder.Object,
-               lateReportingBuilder.Object,
-               runLaDisposalCostBuilder.Object,
-               summaryBuilder.Object);
+                mockCalcResultDetailBuilder.Object,
+                mockLapcapBuilder.Object,
+                mockCalcResultParameterOtherCostBuilder.Object,
+                mockOnePlusFourApportionmentBuilder.Object,
+                mockCommsCostReportBuilder.Object,
+                mockLateReportingBuilder.Object,
+                mockCalcRunLaDisposalCostBuilder.Object,
+                mockSummaryBuilder.Object);
 
-           // Assert
-           Assert.IsNotNull(instance);
+            // Assert
+            Assert.IsNotNull(instance);
         }
 
         [TestMethod]
