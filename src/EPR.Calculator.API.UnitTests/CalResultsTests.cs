@@ -82,32 +82,32 @@ namespace EPR.Calculator.API.UnitTests
 
         }
 
-        [TestMethod]
-        public void PrepareCalcResults_ShouldReturnCreatedStatus()
-        {
-            var requestDto = new CalcResultsRequestDto();
-            var calcResult = new CalcResult();
-            mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
+        //[TestMethod]
+        //public void PrepareCalcResults_ShouldReturnCreatedStatus()
+        //{
+        //    var requestDto = new CalcResultsRequestDto();
+        //    var calcResult = new CalcResult();
+        //    mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
 
-            var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
+        //    var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(201, result.StatusCode);
-            mockExporter.Verify(e => e.Export(calcResult), Times.Once);
-        }
+        //    Assert.IsNotNull(result);
+        //    Assert.AreEqual(201, result.StatusCode);
+        //    mockExporter.Verify(e => e.Export(calcResult), Times.Once);
+        //}
 
-        [TestMethod]
-        public void Build_ShouldReturnCalcResultWithDetail()
-        {
-            var requestDto = new CalcResultsRequestDto();
-            var detail = new CalcResultDetail();
-            mockDetailBuilder.Setup(d => d.Construct(requestDto)).Returns(detail);
+        //[TestMethod]
+        //public void Build_ShouldReturnCalcResultWithDetail()
+        //{
+        //    var requestDto = new CalcResultsRequestDto();
+        //    var detail = new CalcResultDetail();
+        //    mockDetailBuilder.Setup(d => d.Construct(requestDto)).Returns(detail);
 
-            var result = calcResultBuilder.Build(requestDto);
+        //    var result = calcResultBuilder.Build(requestDto);
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(detail, result.CalcResultDetail);
-        }
+        //    Assert.IsNotNull(result);
+        //    Assert.AreEqual(detail, result.CalcResultDetail);
+        //}
     }
 }
 

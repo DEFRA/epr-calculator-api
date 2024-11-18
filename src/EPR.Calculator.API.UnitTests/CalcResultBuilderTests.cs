@@ -53,24 +53,42 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
+        public void CanConstruct()
+        {
+           // Act
+           var instance = new CalcResultBuilder(
+               calcResultDetailBuilder.Object,
+               lapcapBuilder.Object,
+               calcResultParameterOtherCostBuilder.Object,
+               onePlusFourApportionmentBuilder.Object,
+               commsCostReportBuilder.Object,
+               lateReportingBuilder.Object,
+               runLaDisposalCostBuilder.Object,
+               summaryBuilder.Object);
+
+           // Assert
+           Assert.IsNotNull(instance);
+        }
+
+        [TestMethod]
         public void Build_ShouldReturnCalcResultWithDetailsAndLapcapData()
         {
-            var resultsRequestDto = new CalcResultsRequestDto();
-            var expectedDetail = new CalcResultDetail();
-            var expectedLapcapData = new CalcResultLapcapData
-            {
-                Name = "SomeName",
-                CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>()
-            };
+           var resultsRequestDto = new CalcResultsRequestDto();
+           var expectedDetail = new CalcResultDetail();
+           var expectedLapcapData = new CalcResultLapcapData
+           {
+               Name = "SomeName",
+               CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>() 
+           };
 
-            mockCalcResultDetailBuilder.Setup(m => m.Construct(resultsRequestDto)).Returns(expectedDetail);
-            mockLapcapBuilder.Setup(m => m.Construct(resultsRequestDto)).Returns(expectedLapcapData);
+           mockCalcResultDetailBuilder.Setup(m => m.Construct(resultsRequestDto)).Returns(expectedDetail);
+           mockLapcapBuilder.Setup(m => m.Construct(resultsRequestDto)).Returns(expectedLapcapData);
 
-            var result = calcResultBuilder.Build(resultsRequestDto);
+           var result = calcResultBuilder.Build(resultsRequestDto);
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedDetail, result.CalcResultDetail);
-            Assert.AreEqual(expectedLapcapData, result.CalcResultLapcapData);
+           Assert.IsNotNull(result);
+           Assert.AreEqual(expectedDetail, result.CalcResultDetail);
+           Assert.AreEqual(expectedLapcapData, result.CalcResultLapcapData);
         }
     }
 }
