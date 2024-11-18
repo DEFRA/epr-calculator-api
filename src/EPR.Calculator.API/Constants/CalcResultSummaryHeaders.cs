@@ -1,6 +1,4 @@
-﻿using static Azure.Core.HttpHeader;
-
-namespace EPR.Calculator.API.Constants
+﻿namespace EPR.Calculator.API.Constants
 {
     public static class CalcResultSummaryHeaders
     {
@@ -9,7 +7,7 @@ namespace EPR.Calculator.API.Constants
         public static readonly string CommsCostHeader = "2a Total for Comms Cost - by Material with Bad Debt provision";
         public static readonly string CommsCostSummaryHeader = "Summary of Fee for Comms Costs - by Material";
 
-        
+
         public static readonly string DisposalFeeSummary = "Disposal Fee Summary";
         public static readonly string ProducerId = "Producer ID";
         public static readonly string SubsidiaryId = "Subsidiary ID";
@@ -45,5 +43,6 @@ namespace EPR.Calculator.API.Constants
         public static readonly string ScotlandTotal = "Scotland Total";
         public static readonly string NorthernIrelandTotal = "Northern Ireland Total";
         public static readonly string OneCountryApportionment = "1 Country Apportionment";
+
     }
 }

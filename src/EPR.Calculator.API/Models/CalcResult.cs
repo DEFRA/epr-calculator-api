@@ -6,6 +6,8 @@
 
         public CalcResultLapcapData CalcResultLapcapData { get; set; }
 
+        public CalcResultCommsCost CalcResultCommsCostReportDetail { get; set; }
+
         public CalcResultLateReportingTonnage CalcResultLateReportingTonnageData { get; set; }
 
         public CalcResultParameterCommunicationCost CalcResultParameterCommunicationCost { get; set; }

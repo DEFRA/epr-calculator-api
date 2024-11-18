@@ -645,6 +645,31 @@ namespace EPR.Calculator.API.Builder.Summary
                 CalcResultSummaryHeaders.NorthernIrelandTotal
             ]);
 
+            foreach (var material in materials)
+            {
+                columnHeaders.AddRange([
+                CalcResultSummaryHeaders.ReportedHouseholdPackagingWasteTonnage,
+                CalcResultSummaryHeaders.PricePerTonne,
+                CalcResultSummaryHeaders.ProducerTotalCostWithoutBadDebtProvision,
+                CalcResultSummaryHeaders.BadDebtProvision,
+                CalcResultSummaryHeaders.ProducerTotalCostwithBadDebtProvision,
+                CalcResultSummaryHeaders.EnglandWithBadDebtProvision,
+                CalcResultSummaryHeaders.WalesWithBadDebtProvision,
+                CalcResultSummaryHeaders.ScotlandWithBadDebtProvision,
+                CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision,
+                ]);
+            }
+            columnHeaders.AddRange([
+                CalcResultSummaryHeaders.TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision,
+                CalcResultSummaryHeaders.TotalBadDebtProvision,
+                CalcResultSummaryHeaders.TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision,
+                CalcResultSummaryHeaders.EnglandTotalwithBadDebtprovision,
+                CalcResultSummaryHeaders.WalesTotalwithBadDebtprovision,
+                CalcResultSummaryHeaders.ScotlandTotalwithBadDebtprovision,
+                CalcResultSummaryHeaders.NorthernIrelandTotalwithBadDebtprovision,
+            ]);
+
+
             result.ColumnHeaders = columnHeaders;
         }
 

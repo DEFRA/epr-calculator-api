@@ -2816,3 +2816,94 @@ GO
 
 COMMIT;
 GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241114200611_RemoveCreateAtCalculatorRunClassification'
+)
+BEGIN
+    DECLARE @var18 sysname;
+    SELECT @var18 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_classification]') AND [c].[name] = N'created_at');
+    IF @var18 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_classification] DROP CONSTRAINT [' + @var18 + '];');
+    ALTER TABLE [calculator_run_classification] DROP COLUMN [created_at];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241114200611_RemoveCreateAtCalculatorRunClassification'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20241114200611_RemoveCreateAtCalculatorRunClassification', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241114200729_UpdateOtherParamLapcap'
+)
+BEGIN
+    update dbo.lapcap_data_template_master 
+    set material = 'Other materials'
+    where material like 'Other'
+
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241114200729_UpdateOtherParamLapcap'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20241114200729_UpdateOtherParamLapcap', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241115161403_AddPackagingTonnagePrecision'
+)
+BEGIN
+    DECLARE @var19 sysname;
+    SELECT @var19 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_reported_material]') AND [c].[name] = N'packaging_tonnage');
+    IF @var19 IS NOT NULL EXEC(N'ALTER TABLE [producer_reported_material] DROP CONSTRAINT [' + @var19 + '];');
+    ALTER TABLE [producer_reported_material] ALTER COLUMN [packaging_tonnage] decimal(18,3) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241115161403_AddPackagingTonnagePrecision'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20241115161403_AddPackagingTonnagePrecision', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+

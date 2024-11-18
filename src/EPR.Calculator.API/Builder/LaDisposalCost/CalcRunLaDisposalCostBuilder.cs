@@ -1,11 +1,8 @@
-﻿using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Builder.Lapcap;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json.Linq;
 using System.Globalization;
 
 namespace EPR.Calculator.API.Builder.LaDisposalCost
@@ -36,17 +33,20 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
             var OrderId = 1;
 
             producerData = (from run in context.CalculatorRuns
-                            join producerDetail in context.ProducerDetail on run.Id equals producerDetail.CalculatorRunId
-                            join producerMaterial in context.ProducerReportedMaterial on producerDetail.Id equals producerMaterial.ProducerDetailId
-                            join material in context.Material on producerMaterial.MaterialId equals material.Id
-                            where run.Id == resultsRequestDto.RunId
-                            select new ProducerData
-                            {
-                                Material = material.Name,
-                                Tonnage = producerMaterial.PackagingTonnage
-                            }).ToList();
+                join producerDetail in context.ProducerDetail on run.Id equals producerDetail.CalculatorRunId
+                join producerMaterial in context.ProducerReportedMaterial on producerDetail.Id equals producerMaterial
+                    .ProducerDetailId
+                join material in context.Material on producerMaterial.MaterialId equals material.Id
+                where run.Id == resultsRequestDto.RunId && producerMaterial.PackagingType != null &&
+                      producerMaterial.PackagingType == CommonConstants.Household
+                select new ProducerData
+                {
+                    Material = material.Name,
+                    Tonnage = producerMaterial.PackagingTonnage
+                }).ToList();
 
-            var lapcapDetails = calcResult?.CalcResultLapcapData?.CalcResultLapcapDataDetails?.Where(t => t.OrderId != 1 && t.Name != "1 Country Apportionment").ToList();
+            var lapcapDetails = calcResult?.CalcResultLapcapData?.CalcResultLapcapDataDetails
+                ?.Where(t => t.OrderId != 1 && t.Name != CalcResultLapcapDataBuilder.CountryApportionment).ToList();
 
 
             foreach (var details in lapcapDetails)
@@ -92,7 +92,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
 
         private string GetLateReportingTonnageDataByMaterial(string material, List<CalcResultLateReportingTonnageDetail> details)
         {
-            return material == "Total" ? details.Sum(t=>t.TotalLateReportingTonnage).ToString() : details.Where(t => t.Name == material).Sum(t => t.TotalLateReportingTonnage).ToString();
+            return details.Where(t => t.Name == material).Sum(t => t.TotalLateReportingTonnage).ToString();
         }
 
         private string GetProducerReportedHouseholdTonnagePlusLateReportingTonnage(CalcResultLaDisposalCostDataDetail detail)
