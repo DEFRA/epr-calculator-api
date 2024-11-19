@@ -14,7 +14,7 @@
 
             public Task UploadResultFileContentAsync(string fileName, StringBuilder content)
             {
-                var path = $"C:\\Users\\Uday Denduluri\\OneDrive - Eviden\\Desktop\\Result-Files\\${fileName}";
+                var path = $"{Directory.GetCurrentDirectory()}\\{fileName}";
                 File.WriteAllText(path, content.ToString(), Encoding.UTF8);
                 return Task.CompletedTask;
             }

@@ -15,7 +15,7 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int ProducerDisposalFeesHeaderColumnIndex = 4;
         private const int MaterialsBreakdownHeaderInitialColumnIndex = 4;
         private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
-        private const int LaDataPrepCostsSection4ColumnIndex = 218;
+        private const int LaDataPrepCostsSection4ColumnIndex = 215;
 
         public CalcResultSummaryBuilder(ApplicationDBContext context)
         {
@@ -108,7 +108,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 WalesTotal = GetWalesTotal(materialCostSummary),
                 ScotlandTotal = GetScotlandTotal(materialCostSummary),
                 NorthernIrelandTotal = GetNorthernIrelandTotal(materialCostSummary),
-                LaDataPrepCostsTotalSection4 = GetLaDataPrepCostsTotalSection4(),
+                LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4(),
                 LaDataPrepCostsBadDebtProvisionSection4 = GetLaDataPrepCostsBadDebtProvisionSection4(),
                 LaDataPrepCostsTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithBadDebtProvisionSection4(),
                 LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4(),
@@ -157,7 +157,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 WalesTotal = GetWalesTotal(materialCostSummary),
                 ScotlandTotal = GetScotlandTotal(materialCostSummary),
                 NorthernIrelandTotal = GetNorthernIrelandTotal(materialCostSummary),
-                LaDataPrepCostsTotalSection4 = GetLaDataPrepCostsTotalSection4(),
+                LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4(),
                 LaDataPrepCostsBadDebtProvisionSection4 = GetLaDataPrepCostsBadDebtProvisionSection4(),
                 LaDataPrepCostsTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithBadDebtProvisionSection4(),
                 LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4(),
@@ -537,34 +537,34 @@ namespace EPR.Calculator.API.Builder.Summary
             return GetLaDataPrepCostsTitleSection4(calcResult) + GetLaDataPrepCostsBadDebtProvisionTitleSection4(calcResult);
         }
 
-        private static decimal GetLaDataPrepCostsTotalSection4()
+        private static decimal GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4()
         {
-            return 0;
+            return 99;
         }
 
         private static decimal GetLaDataPrepCostsBadDebtProvisionSection4()
         {
-            return 0;
+            return 99;
         }
         private static decimal GetLaDataPrepCostsTotalWithBadDebtProvisionSection4()
         {
-            return 0;
+            return 99;
         }
         private static decimal GetLaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4()
         {
-            return 0;
+            return 99;
         }
         private static decimal GetLaDataPrepCostsWalesTotalWithBadDebtProvisionSection4()
         {
-            return 0;
+            return 99;
         }
         private static decimal GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4()
         {
-            return 0;
+            return 99;
         }
         private static decimal GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4()
         {
-            return 0;
+            return 99;
         }
 
         private static void SetHeaders(CalcResultSummary result, List<MaterialDetail> materials)
@@ -575,18 +575,31 @@ namespace EPR.Calculator.API.Builder.Summary
                 ColumnIndex = ResultSummaryHeaderColumnIndex
             };
 
-            result.ProducerDisposalFeesHeader = new CalcResultSummaryHeader
-            {
-                Name = CalcResultSummaryHeaders.OneProducerDisposalFeesWithBadDebtProvision,
-                ColumnIndex = ProducerDisposalFeesHeaderColumnIndex
-            };
+            result.ProducerDisposalFeesHeaders = GetProducerDisposalFeesHeaders();
 
-            var materialsBreakdownHeader = new List<CalcResultSummaryHeader>();
+            result.MaterialBreakdownHeaders = GetMaterialsBreakdownHeader(materials);
+
+            result.ColumnHeaders = GetColumnHeaders(materials);
+        }
+
+        private static List<CalcResultSummaryHeader> GetProducerDisposalFeesHeaders()
+        {
+            return [
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.OneProducerDisposalFeesWithBadDebtProvision, ColumnIndex = ProducerDisposalFeesHeaderColumnIndex },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionTitleSection4 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithBadDebtProvisionTitleSection4 },
+            ];
+        }
+
+        private static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(List<MaterialDetail> materials)
+        {
+            var materialsBreakdownHeaders = new List<CalcResultSummaryHeader>();
             var columnIndex = MaterialsBreakdownHeaderInitialColumnIndex;
 
             foreach (var material in materials)
             {
-                materialsBreakdownHeader.Add(new CalcResultSummaryHeader
+                materialsBreakdownHeaders.Add(new CalcResultSummaryHeader
                 {
                     Name = $"{material.Name} Breakdown",
                     ColumnIndex = columnIndex
@@ -595,52 +608,77 @@ namespace EPR.Calculator.API.Builder.Summary
             }
 
             // Add disposal fee summary header
-            materialsBreakdownHeader.Add(new CalcResultSummaryHeader
+            materialsBreakdownHeaders.Add(new CalcResultSummaryHeader
             {
                 Name = CalcResultSummaryHeaders.DisposalFeeSummary,
                 ColumnIndex = columnIndex
             });
 
-            result.MaterialBreakdownHeaders = materialsBreakdownHeader;
+            materialsBreakdownHeaders.AddRange([
+                new CalcResultSummaryHeader { Name = "£36,500.00", ColumnIndex = LaDataPrepCostsSection4ColumnIndex - 4 },
+                new CalcResultSummaryHeader { Name = "£2,190.00" },
+                new CalcResultSummaryHeader { Name = "£38,690.00" }
+            ]);
 
-            var columnHeaders = new List<string>();
+            return materialsBreakdownHeaders;
+        }
+
+        private static List<CalcResultSummaryHeader> GetColumnHeaders(List<MaterialDetail> materials)
+        {
+            var columnHeaders = new List<CalcResultSummaryHeader>();
 
             columnHeaders.AddRange([
-                CalcResultSummaryHeaders.ProducerId,
-                CalcResultSummaryHeaders.SubsidiaryId,
-                CalcResultSummaryHeaders.ProducerOrSubsidiaryName,
-                CalcResultSummaryHeaders.Level
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ProducerId },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.SubsidiaryId },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ProducerOrSubsidiaryName },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.Level }
             ]);
+
+            var columnIndex = 4;
 
             foreach (var material in materials)
             {
                 columnHeaders.AddRange([
-                    CalcResultSummaryHeaders.ReportedHouseholdPackagingWasteTonnage,
-                    CalcResultSummaryHeaders.ReportedSelfManagedConsumerWasteTonnage,
-                    CalcResultSummaryHeaders.NetReportedTonnage,
-                    CalcResultSummaryHeaders.PricePerTonne,
-                    CalcResultSummaryHeaders.ProducerDisposalFee,
-                    CalcResultSummaryHeaders.BadDebtProvision,
-                    CalcResultSummaryHeaders.ProducerDisposalFeeWithBadDebtProvision,
-                    CalcResultSummaryHeaders.EnglandWithBadDebtProvision,
-                    CalcResultSummaryHeaders.WalesWithBadDebtProvision,
-                    CalcResultSummaryHeaders.ScotlandWithBadDebtProvision,
-                    CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision
-
+                    new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ReportedHouseholdPackagingWasteTonnage },
+                    new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ReportedSelfManagedConsumerWasteTonnage },
+                    new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NetReportedTonnage },
+                    new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PricePerTonne },
+                    new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ProducerDisposalFee },
+                    new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision },
+                    new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ProducerDisposalFeeWithBadDebtProvision },
+                    new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.EnglandWithBadDebtProvision },
+                    new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.WalesWithBadDebtProvision },
+                    new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ScotlandWithBadDebtProvision },
+                    new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision }
                 ]);
+
+                columnIndex += 11;
             }
 
             columnHeaders.AddRange([
-                CalcResultSummaryHeaders.TotalProducerDisposalFee,
-                CalcResultSummaryHeaders.BadDebtProvision,
-                CalcResultSummaryHeaders.TotalProducerDisposalFeeWithBadDebtProvision,
-                CalcResultSummaryHeaders.EnglandTotal,
-                CalcResultSummaryHeaders.WalesTotal,
-                CalcResultSummaryHeaders.ScotlandTotal,
-                CalcResultSummaryHeaders.NorthernIrelandTotal
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerDisposalFee },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerDisposalFeeWithBadDebtProvision },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.EnglandTotal },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.WalesTotal },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ScotlandTotal },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotal }
             ]);
 
-            result.ColumnHeaders = columnHeaders;
+            columnIndex += 7;
+
+            // LA data prep costs section 4 column headers
+            columnHeaders.AddRange([
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeWithoutBadDebtProvisionSection4, ColumnIndex = columnIndex + 1 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionSection4 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeWithBadDebtProvisionSection4 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.EnglandTotalWithBadDebtProvisionSection4 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.WalesTotalWithBadDebtProvisionSection4 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ScotlandTotalWithBadDebtProvisionSection4 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalWithBadDebtProvisionSection4 }
+            ]);
+
+            return columnHeaders;
         }
     }
 }

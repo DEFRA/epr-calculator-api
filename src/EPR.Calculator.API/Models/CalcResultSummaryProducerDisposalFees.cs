@@ -26,7 +26,7 @@
 
         public decimal NorthernIrelandTotal { get; set; }
 
-        public decimal LaDataPrepCostsTotalSection4 { get; set; }
+        public decimal LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 { get; set; }
 
         public decimal LaDataPrepCostsBadDebtProvisionSection4 { get; set; }
 
