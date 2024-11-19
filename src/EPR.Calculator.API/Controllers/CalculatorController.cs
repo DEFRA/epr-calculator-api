@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,13 +14,13 @@ namespace EPR.Calculator.API.Controllers
     [Route("v1")]
     public class CalculatorController : ControllerBase
     {
-        private readonly ApplicationDBContext _context;
+        private readonly ApplicationDBContext context;
         private readonly IConfiguration _configuration;
         private readonly IAzureClientFactory<ServiceBusClient> _serviceBusClientFactory;
 
         public CalculatorController(ApplicationDBContext context, IConfiguration configuration, IAzureClientFactory<ServiceBusClient> serviceBusClientFactory)
         {
-            _context = context;
+            this.context = context;
             _configuration = configuration;
             _serviceBusClientFactory = serviceBusClientFactory;
         }
@@ -33,9 +34,9 @@ namespace EPR.Calculator.API.Controllers
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
-        
+
 #pragma warning disable S6966 // Awaitable method should be used
-            using (var transaction = _context.Database.BeginTransaction())
+            using (var transaction = this.context.Database.BeginTransaction())
             {
                 try
                 {
@@ -82,11 +83,11 @@ namespace EPR.Calculator.API.Controllers
                     }
 
                     // Get active default parameter settings master id
-                    var activeDefaultParameterSettingsMasterId = _context.DefaultParameterSettings
+                    var activeDefaultParameterSettingsMasterId = this.context.DefaultParameterSettings
                         .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == request.FinancialYear)?.Id;
 
                     // Get active lapcap data master id
-                    var activeLapcapDataMasterId = _context.LapcapDataMaster
+                    var activeLapcapDataMasterId = this.context.LapcapDataMaster
                         .SingleOrDefault(data => data.ProjectionYear == request.FinancialYear && data.EffectiveTo == null)?.Id;
 
                     // Setup calculator run details
@@ -96,14 +97,14 @@ namespace EPR.Calculator.API.Controllers
                         Financial_Year = request.FinancialYear,
                         CreatedBy = request.CreatedBy,
                         CreatedAt = DateTime.Now,
-                        CalculatorRunClassificationId = 1,
+                        CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                         DefaultParameterSettingMasterId = activeDefaultParameterSettingsMasterId,
                         LapcapDataMasterId = activeLapcapDataMasterId
                     };
 
                     // Save calculator run details to the database
-                    _context.CalculatorRuns.Add(calculatorRun);
-                    _context.SaveChanges();
+                    this.context.CalculatorRuns.Add(calculatorRun);
+                    this.context.SaveChanges();
 
                     // Setup message
                     var calculatorRunMessage = new CalculatorRunMessage
@@ -153,7 +154,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRuns = _context.CalculatorRuns.Where(run => run.Financial_Year == request.FinancialYear).OrderByDescending(run => run.CreatedAt).ToList();
+                var calculatorRuns = context.CalculatorRuns.Where(run => run.Financial_Year == request.FinancialYear).OrderByDescending(run => run.CreatedAt).ToList();
 
                 if (calculatorRuns.Count == 0)
                 {
@@ -187,7 +188,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRun = _context.CalculatorRuns.Count(run => EF.Functions.Like(run.Name, name));
+                var calculatorRun = context.CalculatorRuns.Count(run => EF.Functions.Like(run.Name, name));
 
                 if (calculatorRun <= 0)
                 {
@@ -204,11 +205,11 @@ namespace EPR.Calculator.API.Controllers
         private string DataPreChecksBeforeInitialisingCalculatorRun(string financialYear)
         {
             // Get active default parameter settings for the given financial year
-            var activeDefaultParameterSettings = _context.DefaultParameterSettings
+            var activeDefaultParameterSettings = context.DefaultParameterSettings
                         .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == financialYear);
 
             // Get active Lapcap data for the given financial year
-            var activeLapcapData = _context.LapcapDataMaster
+            var activeLapcapData = context.LapcapDataMaster
                 .SingleOrDefault(data => data.ProjectionYear == financialYear && data.EffectiveTo == null);
 
             // Return no active default paramater settings and lapcap data message
@@ -235,7 +236,7 @@ namespace EPR.Calculator.API.Controllers
 
         private string CalculatorRunNameExists(string runName)
         {
-            var calculatorRun = _context.CalculatorRuns.Count(run => EF.Functions.Like(run.Name, runName));
+            var calculatorRun = context.CalculatorRuns.Count(run => EF.Functions.Like(run.Name, runName));
 
             // Return calculator run name already exists
             if (calculatorRun > 0)

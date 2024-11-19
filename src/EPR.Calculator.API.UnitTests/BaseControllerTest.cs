@@ -9,6 +9,12 @@ using EPR.Calculator.API.UnitTests.Helpers;
 using Moq;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Azure;
+using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Wrapper;
+using EPR.Calculator.API.Builder;
+using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Exporter;
+using EPR.Calculator.API.Services;
 
 namespace EPR.Calculator.API.Tests.Controllers
 {
@@ -19,6 +25,8 @@ namespace EPR.Calculator.API.Tests.Controllers
         protected DefaultParameterSettingController? defaultParameterSettingController;
         protected LapcapDataController? lapcapDataController;
         protected CalculatorController? calculatorController;
+        protected CalculatorInternalController? calculatorInternalController;
+        protected IOrgAndPomWrapper? wrapper;
 
         [TestInitialize]
         public void SetUp()
@@ -40,6 +48,17 @@ namespace EPR.Calculator.API.Tests.Controllers
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(dbContext);
             lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator);
 
+             
+            wrapper = new Mock<IOrgAndPomWrapper>().Object;
+            calculatorInternalController = new CalculatorInternalController(
+                dbContext,
+                new RpdStatusDataValidator(wrapper),
+                wrapper, 
+                new Mock<ICalcResultBuilder>().Object,
+                new Mock<ICalcResultsExporter<CalcResult>>().Object,
+                new Mock<ITransposePomAndOrgDataService>().Object
+            );
+
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var mockClient = new Mock<ServiceBusClient>();
             var mockServiceBusSender = new Mock<ServiceBusSender>();
@@ -48,14 +67,16 @@ namespace EPR.Calculator.API.Tests.Controllers
 
             mockFactory.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(mockClient.Object);
 
-
-
             dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
             dbContext.SaveChanges();
             calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), mockFactory.Object);
-        }
 
-        [TestMethod]
+            dbContext.Material.RemoveRange(dbContext.Material.ToList());
+            dbContext.SaveChanges();
+            dbContext.Material.AddRange(GetMaterials());
+            dbContext.SaveChanges();
+        }
+        
         public void CheckDbContext()
         {
             Assert.IsNotNull(dbContext);
@@ -68,7 +89,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             dbContext?.Database.EnsureDeleted();
         }
 
-        protected static IEnumerable<DefaultParameterTemplateMaster> GetDefaultParameterTemplateMasterData()
+        public static IEnumerable<DefaultParameterTemplateMaster> GetDefaultParameterTemplateMasterData()
         {
             var list = new List<DefaultParameterTemplateMaster>();
             list.Add(new DefaultParameterTemplateMaster
@@ -410,7 +431,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             return list;
         }
         
-        protected static IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
+        public static IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
         {
             var list = new List<LapcapDataTemplateMaster>();
             list.Add(new LapcapDataTemplateMaster
@@ -677,8 +698,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             var list = new List<CalculatorRun>();
             list.Add(new CalculatorRun
             {
-                Id = 1,
-                CalculatorRunClassificationId = 1,
+                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 Name = "Test Run",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
@@ -686,12 +706,160 @@ namespace EPR.Calculator.API.Tests.Controllers
             });
             list.Add(new CalculatorRun
             {
-                Id = 2,
-                CalculatorRunClassificationId = 2,
+                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 Name = "Test Calculated Result",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
                 CreatedBy = "Test User"
+            });
+            list.Add(new CalculatorRun
+            {
+                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                Name = "Test Run",
+                Financial_Year = "2024-25",
+                CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
+                CreatedBy = "Test User",
+                CalculatorRunOrganisationDataMasterId = 1,
+                CalculatorRunPomDataMasterId = 1,
+            });
+            list.Add(new CalculatorRun
+            {
+                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                Name = "Test Calculated Result",
+                Financial_Year = "2024-25",
+                CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
+                CreatedBy = "Test User",
+                CalculatorRunOrganisationDataMasterId = 2,
+                CalculatorRunPomDataMasterId = 2,
+            });
+            return list;
+        }
+
+        protected static IEnumerable<Material> GetMaterials()
+        {
+            var list = new List<Material>();
+            list.Add(new Material
+            {
+                Id = 1,
+                Code = "AL",
+                Name = "Aluminium",
+                Description = "Aluminium"
+            });
+            list.Add(new Material
+            {
+                Id = 2,
+                Code = "FC",
+                Name = "Fibre composite",
+                Description = "Fibre composite"
+            });
+            list.Add(new Material
+            {
+                Id = 3,
+                Code = "GL",
+                Name = "Glass",
+                Description = "Glass"
+            });
+            list.Add(new Material
+            {
+                Id = 4,
+                Code = "PC",
+                Name = "Paper or card",
+                Description = "Paper or card"
+            });
+            list.Add(new Material
+            {
+                Id = 5,
+                Code = "PL",
+                Name = "Plastic",
+                Description = "Plastic"
+            });
+            list.Add(new Material
+            {
+                Id = 6,
+                Code = "ST",
+                Name = "Steel",
+                Description = "Steel"
+            });
+            list.Add(new Material
+            {
+                Id = 7,
+                Code = "WD",
+                Name = "Wood",
+                Description = "Wood"
+            });
+            list.Add(new Material
+            {
+                Id = 8,
+                Code = "OT",
+                Name = "Other materials",
+                Description = "Other materials"
+            });
+            return list;
+        }
+
+        protected static IEnumerable<CalculatorRunPomDataMaster> GetCalculatorRunPomDataMaster()
+        {
+            var list = new List<CalculatorRunPomDataMaster>();
+            list.Add(new CalculatorRunPomDataMaster
+            {
+                Id = 1,
+                CalendarYear = "2024-25",
+                EffectiveFrom = DateTime.Now,
+                CreatedBy = "Test user",
+                CreatedAt  = DateTime.Now
+            });
+            return list;
+        }
+
+        protected static IEnumerable<CalculatorRunPomDataDetail> GetCalculatorRunPomDataDetails()
+        {
+            var list = new List<CalculatorRunPomDataDetail>();
+            list.Add(new CalculatorRunPomDataDetail
+            {
+                Id= 1,
+                OrganisationId = 1,
+                SubsidaryId = "SUBSID1",
+                SubmissionPeriod = "2023-P3",
+                PackagingActivity = null,
+                PackagingType = "CW",
+                PackagingClass = "O1",
+                PackagingMaterial = "PC",
+                PackagingMaterialWeight = 1000,
+                LoadTimeStamp = DateTime.Now,
+                CalculatorRunPomDataMasterId = 1,
+                SubmissionPeriodDesc = "July to December 2023",
+                CalculatorRunPomDataMaster = BaseControllerTest.GetCalculatorRunPomDataMaster().ToList()[0]
+            });
+            return list;
+        }
+
+        protected static IEnumerable<CalculatorRunOrganisationDataMaster> GetCalculatorRunOrganisationDataMaster()
+        {
+            var list = new List<CalculatorRunOrganisationDataMaster>();
+            list.Add(new CalculatorRunOrganisationDataMaster
+            {
+                Id = 1,
+                CalendarYear = "2024-25",
+                EffectiveFrom = DateTime.Now,
+                CreatedBy = "Test user",
+                CreatedAt = DateTime.Now
+            });
+            return list;
+        }
+
+        protected static IEnumerable<CalculatorRunOrganisationDataDetail> GetCalculatorRunOrganisationDataDetails()
+        {
+            var list = new List<CalculatorRunOrganisationDataDetail>();
+            list.Add(new CalculatorRunOrganisationDataDetail
+            {
+                Id = 1,
+                OrganisationId = 1,
+                SubsidaryId = "SUBSID1",
+                OrganisationName = "UPU LIMITED",
+                LoadTimeStamp= DateTime.Now,
+                CalculatorRunOrganisationDataMasterId = 1,
+                SubmissionPeriodDesc = "July to December 2023",
+                CalculatorRunOrganisationDataMaster = BaseControllerTest.GetCalculatorRunOrganisationDataMaster().ToList()[0]
             });
             return list;
         }

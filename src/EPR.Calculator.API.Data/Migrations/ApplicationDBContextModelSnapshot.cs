@@ -106,10 +106,6 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasMaxLength(400)
@@ -130,35 +126,30 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2024, 10, 7, 9, 25, 51, 263, DateTimeKind.Local).AddTicks(8112),
                             CreatedBy = "Test User",
                             Status = "IN THE QUEUE"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2024, 10, 7, 9, 25, 51, 263, DateTimeKind.Local).AddTicks(8115),
                             CreatedBy = "Test User",
                             Status = "RUNNING"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2024, 10, 7, 9, 25, 51, 263, DateTimeKind.Local).AddTicks(8118),
                             CreatedBy = "Test User",
                             Status = "UNCLASSIFIED"
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2024, 10, 7, 9, 25, 51, 263, DateTimeKind.Local).AddTicks(8120),
                             CreatedBy = "Test User",
                             Status = "PLAY"
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2024, 10, 7, 9, 25, 51, 263, DateTimeKind.Local).AddTicks(8127),
                             CreatedBy = "Test User",
                             Status = "ERROR"
                         });
@@ -166,15 +157,11 @@ namespace EPR.Calculator.API.Data.Migrations
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataDetail", b =>
                 {
-                    b.Property<string>("OrganisationId")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("organisation_id");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                    b.Property<string>("SubsidaryId")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("subsidiary_id");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CalculatorRunOrganisationDataMasterId")
                         .HasColumnType("int")
@@ -184,13 +171,27 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("load_ts");
 
+                    b.Property<int?>("OrganisationId")
+                        .HasColumnType("int")
+                        .HasColumnName("organisation_id");
+
                     b.Property<string>("OrganisationName")
                         .IsRequired()
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("organisation_name");
 
-                    b.HasKey("OrganisationId", "SubsidaryId");
+                    b.Property<string>("SubmissionPeriodDesc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("submission_period_desc");
+
+                    b.Property<string>("SubsidaryId")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("subsidiary_id");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("CalculatorRunOrganisationDataMasterId");
 
@@ -235,15 +236,11 @@ namespace EPR.Calculator.API.Data.Migrations
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunPomDataDetail", b =>
                 {
-                    b.Property<string>("OrganisationId")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("organisation_id");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                    b.Property<string>("SubsidaryId")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("subsidiary_id");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CalculatorRunPomDataMasterId")
                         .HasColumnType("int")
@@ -252,6 +249,10 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<DateTime>("LoadTimeStamp")
                         .HasColumnType("datetime2")
                         .HasColumnName("load_ts");
+
+                    b.Property<int?>("OrganisationId")
+                        .HasColumnType("int")
+                        .HasColumnName("organisation_id");
 
                     b.Property<string>("PackagingActivity")
                         .HasMaxLength(400)
@@ -268,9 +269,8 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("packaging_material");
 
-                    b.Property<string>("PackagingMaterialWeight")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
+                    b.Property<double?>("PackagingMaterialWeight")
+                        .HasColumnType("float")
                         .HasColumnName("packaging_material_weight");
 
                     b.Property<string>("PackagingType")
@@ -284,7 +284,17 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("submission_period");
 
-                    b.HasKey("OrganisationId", "SubsidaryId");
+                    b.Property<string>("SubmissionPeriodDesc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("submission_period_desc");
+
+                    b.Property<string>("SubsidaryId")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("subsidiary_id");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("CalculatorRunPomDataMasterId");
 
@@ -325,6 +335,105 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("calculator_run_pom_data_master");
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CostType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("cost_type");
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.Country", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("country");
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CountryApportionment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Apportionment")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("apportionment");
+
+                    b.Property<int>("CalculatorRunId")
+                        .HasColumnType("int")
+                        .HasColumnName("calculator_run_id");
+
+                    b.Property<int>("CostTypeId")
+                        .HasColumnType("int")
+                        .HasColumnName("cost_type_id");
+
+                    b.Property<int>("CountryId")
+                        .HasColumnType("int")
+                        .HasColumnName("country_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CalculatorRunId");
+
+                    b.HasIndex("CostTypeId");
+
+                    b.HasIndex("CountryId");
+
+                    b.ToTable("country_apportionment");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingDetail", b =>
@@ -384,6 +493,12 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<DateTime?>("EffectiveTo")
                         .HasColumnType("datetime2")
                         .HasColumnName("effective_to");
+
+                    b.Property<string>("ParameterFileName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("parameter_filename");
 
                     b.Property<string>("ParameterYear")
                         .IsRequired()
@@ -819,6 +934,12 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("effective_to");
 
+                    b.Property<string>("LapcapFileName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("lapcap_filename");
+
                     b.Property<string>("ProjectionYear")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -1122,21 +1243,46 @@ namespace EPR.Calculator.API.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.Material", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("material");
+                });
+
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.OrganisationData", b =>
                 {
-                    b.Property<string>("OrganisationId")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("organisation_id");
-
-                    b.Property<string>("SubsidaryId")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("subsidiary_id");
-
                     b.Property<DateTime>("LoadTimestamp")
                         .HasColumnType("datetime2")
                         .HasColumnName("load_ts");
+
+                    b.Property<int?>("OrganisationId")
+                        .HasColumnType("int")
+                        .HasColumnName("organisation_id");
 
                     b.Property<string>("OrganisationName")
                         .IsRequired()
@@ -1144,26 +1290,28 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("organisation_name");
 
-                    b.HasKey("OrganisationId", "SubsidaryId");
-
-                    b.ToTable("organization_data");
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.PomData", b =>
-                {
-                    b.Property<string>("OrganisationId")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("organisation_id");
+                    b.Property<string>("SubmissionPeriodDesc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("submission_period_desc");
 
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("subsidiary_id");
 
+                    b.ToTable("organisation_data");
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.PomData", b =>
+                {
                     b.Property<DateTime>("LoadTimeStamp")
                         .HasColumnType("datetime2")
                         .HasColumnName("load_ts");
+
+                    b.Property<int?>("OrganisationId")
+                        .HasColumnType("int")
+                        .HasColumnName("organisation_id");
 
                     b.Property<string>("PackagingActivity")
                         .HasMaxLength(400)
@@ -1176,13 +1324,11 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("packaging_class");
 
                     b.Property<string>("PackagingMaterial")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("packaging_material");
 
-                    b.Property<string>("PackagingMaterialWeight")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
+                    b.Property<double?>("PackagingMaterialWeight")
+                        .HasColumnType("float")
                         .HasColumnName("packaging_material_weight");
 
                     b.Property<string>("PackagingType")
@@ -1196,9 +1342,88 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("submission_period");
 
-                    b.HasKey("OrganisationId", "SubsidaryId");
+                    b.Property<string>("SubmissionPeriodDesc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("submission_period_desc");
+
+                    b.Property<string>("SubsidaryId")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("subsidiary_id");
 
                     b.ToTable("pom_data");
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CalculatorRunId")
+                        .HasColumnType("int")
+                        .HasColumnName("calculator_run_id");
+
+                    b.Property<int>("ProducerId")
+                        .HasColumnType("int")
+                        .HasColumnName("producer_id");
+
+                    b.Property<string>("ProducerName")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("producer_name");
+
+                    b.Property<string>("SubsidiaryId")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("subsidiary_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CalculatorRunId");
+
+                    b.ToTable("producer_detail");
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerReportedMaterial", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MaterialId")
+                        .HasColumnType("int")
+                        .HasColumnName("material_id");
+
+                    b.Property<decimal>("PackagingTonnage")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("packaging_tonnage");
+
+                    b.Property<string>("PackagingType")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("packaging_type");
+
+                    b.Property<int>("ProducerDetailId")
+                        .HasColumnType("int")
+                        .HasColumnName("producer_detail_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("ProducerDetailId");
+
+                    b.ToTable("producer_reported_material");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
@@ -1256,6 +1481,33 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("CalculatorRunPomDataMaster");
                 });
 
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CountryApportionment", b =>
+                {
+                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
+                        .WithMany("CountryApportionments")
+                        .HasForeignKey("CalculatorRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EPR.Calculator.API.Data.DataModels.CostType", "CostType")
+                        .WithMany("CountryApportionments")
+                        .HasForeignKey("CostTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EPR.Calculator.API.Data.DataModels.Country", "Country")
+                        .WithMany("CountryApportionments")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CalculatorRun");
+
+                    b.Navigation("CostType");
+
+                    b.Navigation("Country");
+                });
+
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingDetail", b =>
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingMaster", "DefaultParameterSettingMaster")
@@ -1294,6 +1546,43 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("LapcapDataTemplateMaster");
                 });
 
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDetail", b =>
+                {
+                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
+                        .WithMany("ProducerDetails")
+                        .HasForeignKey("CalculatorRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CalculatorRun");
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerReportedMaterial", b =>
+                {
+                    b.HasOne("EPR.Calculator.API.Data.DataModels.Material", "Material")
+                        .WithMany("ProducerReportedMaterials")
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EPR.Calculator.API.Data.DataModels.ProducerDetail", "ProducerDetail")
+                        .WithMany("ProducerReportedMaterials")
+                        .HasForeignKey("ProducerDetailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Material");
+
+                    b.Navigation("ProducerDetail");
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
+                {
+                    b.Navigation("CountryApportionments");
+
+                    b.Navigation("ProducerDetails");
+                });
+
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", b =>
                 {
                     b.Navigation("CalculatorRunDetails");
@@ -1313,6 +1602,16 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("RunDetails");
                 });
 
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CostType", b =>
+                {
+                    b.Navigation("CountryApportionments");
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.Country", b =>
+                {
+                    b.Navigation("CountryApportionments");
+                });
+
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingMaster", b =>
                 {
                     b.Navigation("Details");
@@ -1330,6 +1629,16 @@ namespace EPR.Calculator.API.Data.Migrations
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.LapcapDataTemplateMaster", b =>
                 {
                     b.Navigation("Details");
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.Material", b =>
+                {
+                    b.Navigation("ProducerReportedMaterials");
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDetail", b =>
+                {
+                    b.Navigation("ProducerReportedMaterials");
                 });
 #pragma warning restore 612, 618
         }

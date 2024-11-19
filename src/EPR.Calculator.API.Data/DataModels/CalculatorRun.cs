@@ -60,6 +60,10 @@ namespace EPR.Calculator.API.Data.DataModels
 
         public LapcapDataMaster? LapcapDataMaster { get; set; }
 
-        public DefaultParameterSettingMaster? DefaultParameterSettingMaster { get; set; }
+        public virtual DefaultParameterSettingMaster? DefaultParameterSettingMaster { get; set; }
+
+        public ICollection<ProducerDetail> ProducerDetails { get; } = new List<ProducerDetail>();
+
+        public ICollection<CountryApportionment> CountryApportionments { get; } = new List<CountryApportionment>();
     }
 }

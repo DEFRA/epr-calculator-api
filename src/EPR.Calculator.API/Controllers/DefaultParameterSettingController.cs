@@ -48,7 +48,8 @@ namespace EPR.Calculator.API.Controllers
                         CreatedBy = "Testuser",
                         EffectiveFrom = DateTime.Now,
                         EffectiveTo = null,
-                        ParameterYear = request.ParameterYear
+                        ParameterYear = request.ParameterYear,
+                        ParameterFileName = request.ParameterFileName
                     };
                     this._context.DefaultParameterSettings.Add(defaultParamSettingMaster);
 

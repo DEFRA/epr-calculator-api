@@ -46,6 +46,7 @@ namespace EPR.Calculator.API.Controllers
                         CreatedBy = "Testuser",
                         EffectiveFrom = DateTime.Now,
                         EffectiveTo = null,
+                        LapcapFileName = request.LapcapFileName,
                         ProjectionYear = request.ParameterYear
                     };
                     this.context.LapcapDataMaster.Add(lapcapDataMaster);
