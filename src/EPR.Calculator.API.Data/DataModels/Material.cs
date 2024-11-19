@@ -24,6 +24,6 @@ namespace EPR.Calculator.API.Data.DataModels
         [StringLength(2000)]
         public string? Description { get; set; }
 
-        public ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = new List<ProducerReportedMaterial>();
+        public virtual ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = new List<ProducerReportedMaterial>();
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices.Marshalling;
@@ -15,6 +16,7 @@ namespace EPR.Calculator.API.Data.DataModels
 
         [Column("apportionment")]
         [Required]
+        [Precision(18, 2)]
         public decimal Apportionment { get; set; }
 
         [Column("country_id")]
@@ -26,10 +28,10 @@ namespace EPR.Calculator.API.Data.DataModels
         [Column("calculator_run_id")]
         public required int CalculatorRunId { get; set; }
 
-        public required virtual Country Country { get; set; }
+        public virtual Country Country { get; set; }
 
-        public required virtual CostType CostType { get; set; }
+        public virtual CostType CostType { get; set; }
 
-        public required virtual CalculatorRun CalculatorRun { get; set; }
+        public virtual CalculatorRun CalculatorRun { get; set; }
     }
 }

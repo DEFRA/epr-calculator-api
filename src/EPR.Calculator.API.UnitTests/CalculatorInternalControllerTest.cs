@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Tests.Controllers;
 using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
@@ -181,7 +182,8 @@ namespace EPR.Calculator.API.UnitTests
                     new RpdStatusDataValidator(mock.Object),
                     mock.Object,
                     new Mock<ICalcResultBuilder>().Object,
-                    new Mock<ICalcResultsExporter<CalcResult>>().Object
+                    new Mock<ICalcResultsExporter<CalcResult>>().Object,
+                    new Mock<ITransposePomAndOrgDataService>().Object
                 );
 
                 var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
@@ -210,7 +212,8 @@ namespace EPR.Calculator.API.UnitTests
                new RpdStatusDataValidator(wrapper),
                wrapper,
                new Mock<ICalcResultBuilder>().Object,
-               new Mock<ICalcResultsExporter<CalcResult>>().Object
+               new Mock<ICalcResultsExporter<CalcResult>>().Object,
+               new Mock<ITransposePomAndOrgDataService>().Object
             );
 
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);

@@ -106,10 +106,6 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasMaxLength(400)
@@ -130,35 +126,30 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2024, 11, 4, 13, 0, 24, 988, DateTimeKind.Local).AddTicks(9020),
                             CreatedBy = "Test User",
                             Status = "IN THE QUEUE"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2024, 11, 4, 13, 0, 24, 988, DateTimeKind.Local).AddTicks(9023),
                             CreatedBy = "Test User",
                             Status = "RUNNING"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2024, 11, 4, 13, 0, 24, 988, DateTimeKind.Local).AddTicks(9025),
                             CreatedBy = "Test User",
                             Status = "UNCLASSIFIED"
                         },
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2024, 11, 4, 13, 0, 24, 988, DateTimeKind.Local).AddTicks(9027),
                             CreatedBy = "Test User",
                             Status = "PLAY"
                         },
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2024, 11, 4, 13, 0, 24, 988, DateTimeKind.Local).AddTicks(9029),
                             CreatedBy = "Test User",
                             Status = "ERROR"
                         });
@@ -418,6 +409,7 @@ namespace EPR.Calculator.API.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Apportionment")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("apportionment");
 
@@ -1411,7 +1403,8 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("material_id");
 
                     b.Property<decimal>("PackagingTonnage")
-                        .HasColumnType("decimal(18,2)")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
                         .HasColumnName("packaging_tonnage");
 
                     b.Property<string>("PackagingType")

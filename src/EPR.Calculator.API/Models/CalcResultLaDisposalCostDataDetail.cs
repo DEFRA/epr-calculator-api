@@ -17,5 +17,7 @@
         public string ProducerReportedHouseholdTonnagePlusLateReportingTonnage { get; set; }
 
         public string DisposalCostPricePerTonne { get; set; }
+
+        public int OrderId { get; set; }
     }
 }
