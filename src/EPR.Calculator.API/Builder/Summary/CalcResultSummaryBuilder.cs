@@ -3,7 +3,10 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
+using Microsoft.Extensions.Azure;
+using Microsoft.Extensions.Hosting;
 using System.Globalization;
+using static Azure.Core.HttpHeader;
 
 namespace EPR.Calculator.API.Builder.Summary
 {
@@ -15,6 +18,8 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int ProducerDisposalFeesHeaderColumnIndex = 4;
         private const int MaterialsBreakdownHeaderInitialColumnIndex = 4;
         private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
+        private const int RewriteLADisposalHeaderIncrementalColumnIndex = 86;
+        private const int RewriteLADisposalFeeHeaderIncrementalColumnIndex = 5;
 
         public CalcResultSummaryBuilder(ApplicationDBContext context)
         {
@@ -567,6 +572,63 @@ namespace EPR.Calculator.API.Builder.Summary
                 CalcResultSummaryHeaders.ScotlandTotal,
                 CalcResultSummaryHeaders.NorthernIrelandTotal
             ]);
+
+            columnIndex = columnIndex + RewriteLADisposalHeaderIncrementalColumnIndex;
+           
+            result.ProducerDisposalFeesHeader = new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.TotalProducerFeeLADisposalFee,
+                ColumnIndex = columnIndex
+            };
+
+            //Add Headers for Rewrite LA Disposal Fee
+            materialsBreakdownHeader.Add(new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.OneFeeForLADisposalCosts,
+                ColumnIndex = columnIndex
+            });
+
+            result.ProducerDisposalFeesHeader = new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.TotalProducerFeeLADisposalFee,
+                ColumnIndex = ++columnIndex
+            };
+            materialsBreakdownHeader.Add(new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.BadDebtProvision,
+                ColumnIndex = columnIndex
+            });
+
+
+            result.ProducerDisposalFeesHeader = new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.TotalProducerFeeLADisposalFee,
+                ColumnIndex = ++columnIndex
+            };
+            materialsBreakdownHeader.Add(new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.OneFeeForLADisposalCostsWithBadDebtProvision,
+                ColumnIndex = columnIndex
+            });
+
+            columnIndex += RewriteLADisposalFeeHeaderIncrementalColumnIndex;
+            materialsBreakdownHeader.Add(new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.TwoAFeeForCommsCosts,
+                ColumnIndex = columnIndex
+            });
+
+            materialsBreakdownHeader.Add(new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.BadDebtProvision,
+                ColumnIndex = ++columnIndex
+            });
+
+            materialsBreakdownHeader.Add(new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.TwoAFeeForCommsCostsWithBadDebtProvision,
+                ColumnIndex = ++columnIndex
+            });
 
             result.ColumnHeaders = columnHeaders;
         }

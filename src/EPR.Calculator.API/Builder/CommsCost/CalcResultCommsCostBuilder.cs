@@ -100,8 +100,16 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 commsCost.ProducerReportedHouseholdPlusLateReportingTonnageValue =
                     commsCost.ProducerReportedHouseholdPackagingWasteTonnageValue +
                     commsCost.LateReportingTonnageValue;
-                commsCost.CommsCostByMaterialPricePerTonneValue =
-                    commsCost.TotalValue / commsCost.ProducerReportedHouseholdPlusLateReportingTonnageValue;
+
+                if (commsCost.ProducerReportedHouseholdPlusLateReportingTonnageValue != 0)
+                {
+                    commsCost.CommsCostByMaterialPricePerTonneValue =
+                        commsCost.TotalValue / commsCost.ProducerReportedHouseholdPlusLateReportingTonnageValue;
+                }
+                else
+                {
+                    commsCost.CommsCostByMaterialPricePerTonneValue = 0;
+                }
 
                 commsCost.ProducerReportedHouseholdPackagingWasteTonnage =
                     $"{commsCost.ProducerReportedHouseholdPackagingWasteTonnageValue:##.000}";
