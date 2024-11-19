@@ -190,7 +190,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 NorthernIrelandTotal = GetNorthernIrelandTotal(materialCostSummary),
                 ProducerDisposalFeesByMaterial = materialCostSummary,
 
-                 //For comms
+                //For comms
                 TotalProducerCommsFee = GetTotalProducerCommsFee(commsCostSummary),
                 BadDebtProvisionComms = GetCommsTotalBadDebtProvision(commsCostSummary),
                 TotalProducerCommsFeeWithBadDebtProvision = GetTotalProducerCommsFeeWithBadDebtProvision(commsCostSummary),
@@ -589,6 +589,47 @@ namespace EPR.Calculator.API.Builder.Summary
                 ColumnIndex = ProducerCommsFeesHeaderColumnIndex
             };
 
+            //santosh
+
+            result.TotalProducerCostWithDebt = new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.TotalProducerCostWithDebt,
+                ColumnIndex = ProducerCommsFeesHeaderColumnIndex
+            };
+
+            result.TotalProducerPercentageCostCost = new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.TotalProducerPercentageCostCost,
+                ColumnIndex = ProducerCommsFeesHeaderColumnIndex
+            };
+
+
+            //Rekha
+
+            result.CommsSLAWithHeader = new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.CommsSLAWithHeader,
+                ColumnIndex = ProducerCommsFeesHeaderColumnIndex
+            };
+
+            result.TotalProducerFeeforSAOperatingCostsbyMaterialwoBadDebtprovision = new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.TotalProducerFeeforSAOperatingCostsbyMaterialwoBadDebtprovision,
+                ColumnIndex = ProducerCommsFeesHeaderColumnIndex
+            };
+
+            result.TotalBadDebtProvisionThree = new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.TotalBadDebtProvisionThree,
+                ColumnIndex = ProducerCommsFeesHeaderColumnIndex
+            };
+
+            result.TotalProducerFeeforSAOperatingCostsbyMaterialwithBadDebtprovision = new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.TotalProducerFeeforSAOperatingCostsbyMaterialwithBadDebtprovision,
+                ColumnIndex = ProducerCommsFeesHeaderColumnIndex
+            };                       
+
             var commsCostColumnIndex = ProducerCommsFeesHeaderColumnIndex;
 
             foreach (var material in materials)
@@ -669,6 +710,22 @@ namespace EPR.Calculator.API.Builder.Summary
                 CalcResultSummaryHeaders.NorthernIrelandTotalwithBadDebtprovision,
             ]);
 
+
+            columnHeaders.AddRange([
+    CalcResultSummaryHeaders.TotalProducerCostWithDebt,
+    CalcResultSummaryHeaders.TotalProducerPercentageCostCost
+            ]);
+
+            columnHeaders.AddRange([
+CalcResultSummaryHeaders.TotalProducerFeeforSAOperatingCostsbyMaterialwoBadDebtprovision,
+    CalcResultSummaryHeaders.TotalBadDebtProvisionThree,
+    CalcResultSummaryHeaders.TotalProducerFeeforSAOperatingCostsbyMaterialwithBadDebtprovision,
+                CalcResultSummaryHeaders.EnglandWithBadDebtProvision,
+                CalcResultSummaryHeaders.WalesWithBadDebtProvision,
+                CalcResultSummaryHeaders.ScotlandWithBadDebtProvision,
+                CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision,
+
+]);
 
             result.ColumnHeaders = columnHeaders;
         }
@@ -845,7 +902,7 @@ namespace EPR.Calculator.API.Builder.Summary
         private static decimal GetProducerTotalCostWithoutBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
             var hhPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material);
-            var priceperTonne = GetPriceperTonneForComms(material,calcResult);
+            var priceperTonne = GetPriceperTonneForComms(material, calcResult);
 
             return hhPackagingWasteTonnage * priceperTonne;
         }

@@ -400,6 +400,17 @@ namespace EPR.Calculator.API.Exporter
 
             lineBuilder.Append(CsvSanitiser.SanitiseData(resultSummary.CommsCostHeader.Name));
 
+            // Add producer disposal fees header
+            lineBuilder.Clear();
+            lineBuilder.Append(resultSummary.ProducerDisposalFeesHeader.Name);
+
+            for (var i = 0; i < 180; i++)
+            {
+                csvContent.Append(",");
+            }
+
+            lineBuilder.Append(CsvSanitiser.SanitiseData(resultSummary.CommsSLAWithHeader.Name));
+
             csvContent.AppendLine(lineBuilder.ToString());
             var indexCounter = 0;
             foreach (var item in resultSummary.MaterialBreakdownHeaders)
