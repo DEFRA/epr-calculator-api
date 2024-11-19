@@ -31,10 +31,10 @@ namespace EPR.Calculator.API.UnitTests
             {
                 CalcResultParameterOtherCost = new CalcResultParameterOtherCost { BadDebtProvision = new KeyValuePair<string, string>("key1", "6%") },
                 CalcResultDetail = new CalcResultDetail() { },
-                CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData() 
-                { 
-                    CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>() 
-                    { 
+                CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData()
+                {
+                    CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>()
+                    {
                         new CalcResultLaDisposalCostDataDetail()
                         {
                             DisposalCostPricePerTonne="20",
@@ -43,7 +43,7 @@ namespace EPR.Calculator.API.UnitTests
                             Name="ScotlandTest",
                             Scotland="ScotlandTest"
                         }
-                    } 
+                    }
                 },
                 CalcResultLapcapData = new CalcResultLapcapData() { CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>() { } },
                 CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment()
@@ -117,7 +117,17 @@ namespace EPR.Calculator.API.UnitTests
                         }]
                 },
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
-                CalcResultSummary = new CalcResultSummary { ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>()},
+                CalcResultSummary = new CalcResultSummary { ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>() },
+                CalcResultCommsCostReportDetail = new CalcResultCommsCost()
+                {
+                    CalcResultCommsCostCommsCostByMaterial =
+                    [
+                        new ()
+                        {
+                            CommsCostByMaterialPricePerTonne="0.42"
+                        }
+                    ]
+                }
             };
 
             // Seed database
@@ -213,7 +223,7 @@ namespace EPR.Calculator.API.UnitTests
             var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(2, result.ProducerDisposalFees.Count()); 
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
         }
 
         [TestMethod]
@@ -227,7 +237,7 @@ namespace EPR.Calculator.API.UnitTests
             var totalRow = result.ProducerDisposalFees.LastOrDefault();
             Assert.IsNotNull(totalRow);
         }
-       
+
         private void SeedDatabase(ApplicationDBContext context)
         {
             context.Material.AddRange(new List<Material>
@@ -240,7 +250,7 @@ namespace EPR.Calculator.API.UnitTests
             {
                 new() {  Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test1" } },
                 new() { Id = 2, ProducerName = "Producer2", CalculatorRunId = 2, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test2" } },
-                new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } } 
+                new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } }
             });
 
             context.SaveChanges();
