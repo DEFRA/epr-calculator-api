@@ -413,7 +413,7 @@ namespace EPR.Calculator.API.Exporter
             {
                 if (item.ColumnIndex != null)
                 {
-                    indexCounter = (int)item.ColumnIndex;
+                    indexCounter = (int)item.ColumnIndex - indexCounter;
                     for (var i = 0; i < indexCounter; i++)
                     {
                         csvContent.Append(",");

@@ -13,10 +13,10 @@ namespace EPR.Calculator.API.Builder.Summary
 
         private const int ResultSummaryHeaderColumnIndex = 0;
         private const int ProducerDisposalFeesHeaderColumnIndex = 4;
-        private const int CommsCostHeaderColumnIndex = 94;
+        private const int CommsCostHeaderColumnIndex = 98;
         private const int MaterialsBreakdownHeaderInitialColumnIndex = 4;
         private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 10;
-        private const int LaDataPrepCostsSection4ColumnIndex = 215;
+        private const int LaDataPrepCostsSection4ColumnIndex = 209;
         private const int ProducerCommsFeesHeaderColumnIndex = 99;
         private const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 8;
 
@@ -63,7 +63,7 @@ namespace EPR.Calculator.API.Builder.Summary
                     }
 
                     // Calculate the values for the producer
-                    producerDisposalFees.AddRange(GetProducerRow(producerDisposalFees, producer, materials, calcResult));
+                    producerDisposalFees.Add(GetProducerRow(producerDisposalFees, producer, materials, calcResult));
                 }
 
                 // Calculate the total for all the producers
@@ -119,6 +119,9 @@ namespace EPR.Calculator.API.Builder.Summary
                 ProducerName = isOverAllTotalRow ? string.Empty : producersAndSubsidiaries[0].ProducerName ?? string.Empty,
                 SubsidiaryId = string.Empty,
                 Level = isOverAllTotalRow ? "Totals" : "1",
+                ProducerDisposalFeesByMaterial = materialCostSummary,
+
+                // Disposal fee summary
                 TotalProducerDisposalFee = GetTotalProducerDisposalFee(materialCostSummary),
                 BadDebtProvision = GetTotalBadDebtProvision(materialCostSummary),
                 TotalProducerDisposalFeeWithBadDebtProvision = GetTotalProducerDisposalFeeWithBadDebtProvision(materialCostSummary),
@@ -126,14 +129,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 WalesTotal = GetWalesTotal(materialCostSummary),
                 ScotlandTotal = GetScotlandTotal(materialCostSummary),
                 NorthernIrelandTotal = GetNorthernIrelandTotal(materialCostSummary),
-                LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4(),
-                LaDataPrepCostsBadDebtProvisionSection4 = GetLaDataPrepCostsBadDebtProvisionSection4(),
-                LaDataPrepCostsTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithBadDebtProvisionSection4(),
-                LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4(),
-                LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsWalesTotalWithBadDebtProvisionSection4(),
-                LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4(),
-                LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
-                ProducerDisposalFeesByMaterial = materialCostSummary,
+
                 //For Comms Start
                 TotalProducerCommsFee = GetTotalProducerCommsFee(commsCostSummary),
                 BadDebtProvisionComms = GetCommsTotalBadDebtProvision(commsCostSummary),
@@ -143,16 +139,25 @@ namespace EPR.Calculator.API.Builder.Summary
                 ScotlandTotalComms = GetScotlandCommsTotal(commsCostSummary),
                 NorthernIrelandTotalComms = GetNorthernIrelandCommsTotal(commsCostSummary),
                 ProducerCommsFeesByMaterial = commsCostSummary,
+
+                // LA data prep costs section 4
+                LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4(),
+                LaDataPrepCostsBadDebtProvisionSection4 = GetLaDataPrepCostsBadDebtProvisionSection4(),
+                LaDataPrepCostsTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsWalesTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
+
                 //For Comms End
                 isTotalRow = true
             };
 
         }
 
-        private IEnumerable<CalcResultSummaryProducerDisposalFees> GetProducerRow(List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup, ProducerDetail producer, List<MaterialDetail> materials, CalcResult calcResult)
+        private CalcResultSummaryProducerDisposalFees GetProducerRow(
+            List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup, ProducerDetail producer, List<MaterialDetail> materials, CalcResult calcResult)
         {
-            var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
-
             var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
             var commsCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>();
 
@@ -188,12 +193,15 @@ namespace EPR.Calculator.API.Builder.Summary
 
             }
 
-            producerDisposalFees.Add(new CalcResultSummaryProducerDisposalFees
+            return new CalcResultSummaryProducerDisposalFees
             {
                 ProducerId = producer.ProducerId.ToString(),
                 ProducerName = producer.ProducerName ?? string.Empty,
                 SubsidiaryId = producer.SubsidiaryId ?? string.Empty,
                 Level = GetLevelIndex(producerDisposalFeesLookup, producer).ToString(),
+                ProducerDisposalFeesByMaterial = materialCostSummary,
+
+                // Disposal fee summary
                 TotalProducerDisposalFee = GetTotalProducerDisposalFee(materialCostSummary),
                 BadDebtProvision = GetTotalBadDebtProvision(materialCostSummary),
                 TotalProducerDisposalFeeWithBadDebtProvision = GetTotalProducerDisposalFeeWithBadDebtProvision(materialCostSummary),
@@ -201,16 +209,8 @@ namespace EPR.Calculator.API.Builder.Summary
                 WalesTotal = GetWalesTotal(materialCostSummary),
                 ScotlandTotal = GetScotlandTotal(materialCostSummary),
                 NorthernIrelandTotal = GetNorthernIrelandTotal(materialCostSummary),
-                LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4(),
-                LaDataPrepCostsBadDebtProvisionSection4 = GetLaDataPrepCostsBadDebtProvisionSection4(),
-                LaDataPrepCostsTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithBadDebtProvisionSection4(),
-                LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4(),
-                LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsWalesTotalWithBadDebtProvisionSection4(),
-                LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4(),
-                LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
-                ProducerDisposalFeesByMaterial = materialCostSummary,
 
-                 //For comms
+                //For comms
                 TotalProducerCommsFee = GetTotalProducerCommsFee(commsCostSummary),
                 BadDebtProvisionComms = GetCommsTotalBadDebtProvision(commsCostSummary),
                 TotalProducerCommsFeeWithBadDebtProvision = GetTotalProducerCommsFeeWithBadDebtProvision(commsCostSummary),
@@ -220,9 +220,15 @@ namespace EPR.Calculator.API.Builder.Summary
                 NorthernIrelandTotalComms = GetNorthernIrelandCommsTotal(commsCostSummary),
                 ProducerCommsFeesByMaterial = commsCostSummary,
 
-            });
-
-            return producerDisposalFees;
+                // LA data prep costs section 4
+                LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4(),
+                LaDataPrepCostsBadDebtProvisionSection4 = GetLaDataPrepCostsBadDebtProvisionSection4(),
+                LaDataPrepCostsTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsWalesTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
+            };
         }
 
         private static int GetLevelIndex(List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup, ProducerDetail producer)
