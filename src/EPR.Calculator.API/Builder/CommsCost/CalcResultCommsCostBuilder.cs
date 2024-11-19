@@ -131,7 +131,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
                 WalesValue = commsCostByUk.ParameterValue * apportionmentDetail.WalesTotal,
                 ScotlandValue = commsCostByUk.ParameterValue * apportionmentDetail.ScotlandTotal,
                 NorthernIrelandValue = commsCostByUk.ParameterValue * apportionmentDetail.NorthernIrelandTotal,
-                TotalValue = commsCostByUk.ParameterValue * apportionmentDetail.AllTotal,
+                TotalValue = commsCostByUk.ParameterValue,
                 Name = TwoBCommsCostUkWide,
                 OrderId = 2
             };
