@@ -26,7 +26,7 @@
         public static readonly string WalesTotal = "Wales Total";
         public static readonly string ScotlandTotal = "Scotland Total";
         public static readonly string NorthernIrelandTotal = "Northern Ireland Total";
-        public static readonly string OneCountryApportionment = "1 Country Apportionment";
+        public static readonly string OneCountryApportionment = "1 Country Apportionment %s";
 
     }
 }
