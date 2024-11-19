@@ -4,7 +4,7 @@
     {
         public static readonly string CalculationResult = "Calculation Result";
         public static readonly string OneProducerDisposalFeesWithBadDebtProvision = "1 Producer Disposal Fees with Bad Debt Provision";
-        public static readonly string CommsCostHeader = "2a Total for Comms Cost - by Material with Bad Debt provision";
+        public static readonly string CommsCostHeader = "2a Fees for Comms Costs - by Material with Bad Debt provision";
         public static readonly string CommsCostSummaryHeader = "Summary of Fee for Comms Costs - by Material";
 
 
@@ -37,11 +37,11 @@
         public static readonly string NorthernIrelandTotalwithBadDebtprovision = "Northern Ireland Total with Bad Debt provision";
 
         public static readonly string TotalProducerDisposalFee = "1 Total Producer Disposal Fee w/o Bad Debt Provision";
-        public static readonly string TotalProducerDisposalFeeWithBadDebtProvision = "1 Total Producer Disposal Fee with Bad Debt Provision";
-        public static readonly string EnglandTotal = "England Total";
-        public static readonly string WalesTotal = "Wales Total";
-        public static readonly string ScotlandTotal = "Scotland Total";
-        public static readonly string NorthernIrelandTotal = "Northern Ireland Total";
+        public static readonly string TotalProducerDisposalFeeWithBadDebtProvision = "1 Total Producer";
+        public static readonly string EnglandTotal = "England";
+        public static readonly string WalesTotal = "Wales";
+        public static readonly string ScotlandTotal = "Scotland";
+        public static readonly string NorthernIrelandTotal = "Northern Ireland";
         public static readonly string OneCountryApportionment = "1 Country Apportionment %s";
 
         // LA data prep costs section 4
