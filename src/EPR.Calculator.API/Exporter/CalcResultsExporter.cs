@@ -3,6 +3,7 @@ using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
+using Microsoft.Extensions.Primitives;
 using System.Text;
 
 namespace EPR.Calculator.API.Exporter
@@ -400,18 +401,26 @@ namespace EPR.Calculator.API.Exporter
 
             lineBuilder.Append(CsvSanitiser.SanitiseData(resultSummary.CommsCostHeader.Name));
 
+
             // Add producer disposal fees header
             lineBuilder.Clear();
-            lineBuilder.Append(resultSummary.ProducerDisposalFeesHeader.Name);
-
             for (var i = 0; i < 180; i++)
             {
                 csvContent.Append(",");
             }
 
+            lineBuilder.Append(CsvSanitiser.SanitiseData(resultSummary.CommsSLAWoHeader.Name));
+
+            lineBuilder.Append(",");
+
+            lineBuilder.Append(CsvSanitiser.SanitiseData(resultSummary.BadDebtProvision.Name));
+            lineBuilder.Append(",");
+
             lineBuilder.Append(CsvSanitiser.SanitiseData(resultSummary.CommsSLAWithHeader.Name));
 
             csvContent.AppendLine(lineBuilder.ToString());
+            //Rekha
+            PrepareSADataHeader(csvContent);
             var indexCounter = 0;
             foreach (var item in resultSummary.MaterialBreakdownHeaders)
             {
@@ -430,6 +439,27 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"{CsvSanitiser.SanitiseData(item)},");
             }
             csvContent.AppendLine();
+        }
+        private static void PrepareSADataHeader(StringBuilder csvContent)
+        { 
+            StringBuilder lineBuilder = new StringBuilder();
+            // Add producer disposal fees header
+
+            for (var i = 0; i < 180; i++)
+            {
+                csvContent.Append(",");
+            }
+
+            lineBuilder.Append(CsvSanitiser.SanitiseData("£65000.00"));
+            lineBuilder.Append(",");
+            //2nd col
+            lineBuilder.Append(CsvSanitiser.SanitiseData("£3900.00"));
+            lineBuilder.Append(",");
+            //3rd col
+            lineBuilder.Append(CsvSanitiser.SanitiseData("£68900.00"));
+            lineBuilder.Append(",");
+
+            csvContent.AppendLine(lineBuilder.ToString());
         }
     }
 }

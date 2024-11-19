@@ -605,7 +605,17 @@ namespace EPR.Calculator.API.Builder.Summary
 
 
             //Rekha
+            result.CommsSLAWoHeader = new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.CommsSLAWoHeader,
+                ColumnIndex = ProducerCommsFeesHeaderColumnIndex
+            };
 
+            result.BadDebtProvision = new CalcResultSummaryHeader
+            {
+                Name = CalcResultSummaryHeaders.BadDebtProvision,
+                ColumnIndex = ProducerCommsFeesHeaderColumnIndex
+            };
             result.CommsSLAWithHeader = new CalcResultSummaryHeader
             {
                 Name = CalcResultSummaryHeaders.CommsSLAWithHeader,
@@ -628,7 +638,7 @@ namespace EPR.Calculator.API.Builder.Summary
             {
                 Name = CalcResultSummaryHeaders.TotalProducerFeeforSAOperatingCostsbyMaterialwithBadDebtprovision,
                 ColumnIndex = ProducerCommsFeesHeaderColumnIndex
-            };                       
+            };
 
             var commsCostColumnIndex = ProducerCommsFeesHeaderColumnIndex;
 

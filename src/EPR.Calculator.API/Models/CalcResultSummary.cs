@@ -19,14 +19,12 @@
         public CalcResultSummaryHeader TotalProducerPercentageCostCost { get; set; }
 
         //Rekha
-        
-        public CalcResultSummaryHeader CommsSLAWoHeader { get; set; }
 
+        public CalcResultSummaryHeader CommsSLAWoHeader { get; set; }
+        public CalcResultSummaryHeader BadDebtProvision { get; set; }
         public CalcResultSummaryHeader CommsSLAWithHeader { get; set; }
         public CalcResultSummaryHeader TotalProducerFeeforSAOperatingCostsbyMaterialwoBadDebtprovision { get; set; }
         public CalcResultSummaryHeader TotalBadDebtProvisionThree { get; set; }
         public CalcResultSummaryHeader TotalProducerFeeforSAOperatingCostsbyMaterialwithBadDebtprovision { get; set; }
-
-        
     }
 }
