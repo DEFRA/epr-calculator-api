@@ -388,11 +388,9 @@ namespace EPR.Calculator.API.Exporter
             {
                 csvContent.Append(",");
             }
-            csvContent.AppendLine(CsvSanitiser.SanitiseData(resultSummary.ProducerDisposalFeesHeader.Name));
+            csvContent.Append(CsvSanitiser.SanitiseData(resultSummary.ProducerDisposalFeesHeader.Name));
 
             StringBuilder lineBuilder = new StringBuilder();
-            lineBuilder.Append(resultSummary.ProducerDisposalFeesHeader.Name);
-
             for (int i = 0; i < ProducerCommsFeesHeaderColumnIndex; i++)
             {
                 lineBuilder.Append(",");
