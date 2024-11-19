@@ -10,6 +10,12 @@
 
         public IEnumerable<string> ColumnHeaders { get; set; }
 
+        public decimal LaDataPrepCostsTitleSection4 { get; set; }
+
+        public decimal LaDataPrepCostsBadDebtProvisionTitleSection4 { get; set; }
+
+        public decimal LaDataPrepCostsWithBadDebtProvisionTitleSection4 { get; set; }
+
         public IEnumerable<CalcResultSummaryProducerDisposalFees> ProducerDisposalFees { get; set; }
     }
 }

@@ -26,6 +26,20 @@
 
         public decimal NorthernIrelandTotal { get; set; }
 
+        public decimal LaDataPrepCostsTotalSection4 { get; set; }
+
+        public decimal LaDataPrepCostsBadDebtProvisionSection4 { get; set; }
+
+        public decimal LaDataPrepCostsTotalWithBadDebtProvisionSection4 { get; set; }
+
+        public decimal LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 { get; set; }
+
+        public decimal LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4 { get; set; }
+
+        public decimal LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 { get; set; }
+
+        public decimal LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 { get; set; }
+
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
     }
 }

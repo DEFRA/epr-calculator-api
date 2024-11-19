@@ -15,6 +15,7 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int ProducerDisposalFeesHeaderColumnIndex = 4;
         private const int MaterialsBreakdownHeaderInitialColumnIndex = 4;
         private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
+        private const int LaDataPrepCostsSection4ColumnIndex = 218;
 
         public CalcResultSummaryBuilder(ApplicationDBContext context)
         {
@@ -40,6 +41,10 @@ namespace EPR.Calculator.API.Builder.Summary
 
             if (producerDetailList.Count > 0)
             {
+                result.LaDataPrepCostsTitleSection4 = GetLaDataPrepCostsTitleSection4(calcResult);
+                result.LaDataPrepCostsBadDebtProvisionTitleSection4 = GetLaDataPrepCostsBadDebtProvisionTitleSection4(calcResult);
+                result.LaDataPrepCostsWithBadDebtProvisionTitleSection4 = GetLaDataPrepCostsWithBadDebtProvisionTitleSection4(calcResult);
+
                 var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
 
                 foreach (var producer in producerDetailList)
@@ -103,6 +108,13 @@ namespace EPR.Calculator.API.Builder.Summary
                 WalesTotal = GetWalesTotal(materialCostSummary),
                 ScotlandTotal = GetScotlandTotal(materialCostSummary),
                 NorthernIrelandTotal = GetNorthernIrelandTotal(materialCostSummary),
+                LaDataPrepCostsTotalSection4 = GetLaDataPrepCostsTotalSection4(),
+                LaDataPrepCostsBadDebtProvisionSection4 = GetLaDataPrepCostsBadDebtProvisionSection4(),
+                LaDataPrepCostsTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsWalesTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
                 ProducerDisposalFeesByMaterial = materialCostSummary,
                 isTotalRow = true
             };
@@ -145,6 +157,13 @@ namespace EPR.Calculator.API.Builder.Summary
                 WalesTotal = GetWalesTotal(materialCostSummary),
                 ScotlandTotal = GetScotlandTotal(materialCostSummary),
                 NorthernIrelandTotal = GetNorthernIrelandTotal(materialCostSummary),
+                LaDataPrepCostsTotalSection4 = GetLaDataPrepCostsTotalSection4(),
+                LaDataPrepCostsBadDebtProvisionSection4 = GetLaDataPrepCostsBadDebtProvisionSection4(),
+                LaDataPrepCostsTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsWalesTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4(),
+                LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
                 ProducerDisposalFeesByMaterial = materialCostSummary
             });
 
@@ -496,6 +515,58 @@ namespace EPR.Calculator.API.Builder.Summary
             return totalNorthernIreland;
         }
 
+        private static decimal GetLaDataPrepCostsTitleSection4(CalcResult calcResult)
+        {
+            return calcResult.CalcResultParameterOtherCost.Details.ToList()[0].TotalValue;
+        }
+
+        private static decimal GetLaDataPrepCostsBadDebtProvisionTitleSection4(CalcResult calcResult)
+        {
+            var isConversionSuccessful = decimal.TryParse(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Replace("%", string.Empty), out decimal value);
+
+            return isConversionSuccessful ? GetLaDataPrepCostsTitleSection4(calcResult) * value : 0;
+        }
+
+        private static decimal GetLaDataPrepCostsWithoutBadDebtProvisionTitleSection4(CalcResult calcResult)
+        {
+            return GetLaDataPrepCostsTitleSection4(calcResult) + GetLaDataPrepCostsBadDebtProvisionTitleSection4(calcResult);
+        }
+
+        private static decimal GetLaDataPrepCostsWithBadDebtProvisionTitleSection4(CalcResult calcResult)
+        {
+            return GetLaDataPrepCostsTitleSection4(calcResult) + GetLaDataPrepCostsBadDebtProvisionTitleSection4(calcResult);
+        }
+
+        private static decimal GetLaDataPrepCostsTotalSection4()
+        {
+            return 0;
+        }
+
+        private static decimal GetLaDataPrepCostsBadDebtProvisionSection4()
+        {
+            return 0;
+        }
+        private static decimal GetLaDataPrepCostsTotalWithBadDebtProvisionSection4()
+        {
+            return 0;
+        }
+        private static decimal GetLaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4()
+        {
+            return 0;
+        }
+        private static decimal GetLaDataPrepCostsWalesTotalWithBadDebtProvisionSection4()
+        {
+            return 0;
+        }
+        private static decimal GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4()
+        {
+            return 0;
+        }
+        private static decimal GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4()
+        {
+            return 0;
+        }
+
         private static void SetHeaders(CalcResultSummary result, List<MaterialDetail> materials)
         {
             result.ResultSummaryHeader = new CalcResultSummaryHeader
@@ -555,6 +626,7 @@ namespace EPR.Calculator.API.Builder.Summary
                     CalcResultSummaryHeaders.WalesWithBadDebtProvision,
                     CalcResultSummaryHeaders.ScotlandWithBadDebtProvision,
                     CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision
+
                 ]);
             }
 
