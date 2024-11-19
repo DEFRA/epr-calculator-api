@@ -363,7 +363,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 return 0;
             }
 
-            var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.EnglandDisposalCost, NumberStyles.Currency, CultureInfo.CurrentCulture.NumberFormat, out decimal value);
+            var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.EnglandDisposalCost.Replace("%", string.Empty), out decimal value);
 
             return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * value : 0;
         }
@@ -390,7 +390,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 return 0;
             }
 
-            var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.WalesDisposalCost, NumberStyles.Currency, CultureInfo.CurrentCulture.NumberFormat, out decimal value);
+            var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.WalesDisposalCost.Replace("%", string.Empty), out decimal value);
 
             return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * value : 0;
         }
@@ -417,7 +417,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 return 0;
             }
 
-            var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.ScotlandDisposalCost, NumberStyles.Currency, CultureInfo.CurrentCulture.NumberFormat, out decimal value);
+            var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.ScotlandDisposalCost.Replace("%", string.Empty), out decimal value);
 
             return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * value : 0;
         }
@@ -444,7 +444,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 return 0;
             }
 
-            var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.NorthernIrelandDisposalCost, NumberStyles.Currency, CultureInfo.CurrentCulture.NumberFormat, out decimal value);
+            var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.NorthernIrelandDisposalCost.Replace("%", string.Empty), out decimal value);
 
             return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * value : 0;
         }
