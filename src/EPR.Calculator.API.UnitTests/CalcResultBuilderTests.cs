@@ -52,25 +52,43 @@ namespace EPR.Calculator.API.UnitTests
                 mockSummaryBuilder.Object);
         }
 
-        //[TestMethod]
-        //public void Build_ShouldReturnCalcResultWithDetailsAndLapcapData()
-        //{
-        //    var resultsRequestDto = new CalcResultsRequestDto();
-        //    var expectedDetail = new CalcResultDetail();
-        //    var expectedLapcapData = new CalcResultLapcapData
-        //    {
-        //        Name = "SomeName",
-        //        CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>() 
-        //    };
+        [TestMethod]
+        public void CanConstruct()
+        {
+           // Act
+           var instance = new CalcResultBuilder(
+                mockCalcResultDetailBuilder.Object,
+                mockLapcapBuilder.Object,
+                mockCalcResultParameterOtherCostBuilder.Object,
+                mockOnePlusFourApportionmentBuilder.Object,
+                mockCommsCostReportBuilder.Object,
+                mockLateReportingBuilder.Object,
+                mockCalcRunLaDisposalCostBuilder.Object,
+                mockSummaryBuilder.Object);
 
-        //    mockCalcResultDetailBuilder.Setup(m => m.Construct(resultsRequestDto)).Returns(expectedDetail);
-        //    mockLapcapBuilder.Setup(m => m.Construct(resultsRequestDto)).Returns(expectedLapcapData);
+            // Assert
+            Assert.IsNotNull(instance);
+        }
 
-        //    var result = calcResultBuilder.Build(resultsRequestDto);
+        [TestMethod]
+        public void Build_ShouldReturnCalcResultWithDetailsAndLapcapData()
+        {
+           var resultsRequestDto = new CalcResultsRequestDto();
+           var expectedDetail = new CalcResultDetail();
+           var expectedLapcapData = new CalcResultLapcapData
+           {
+               Name = "SomeName",
+               CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>() 
+           };
 
-        //    Assert.IsNotNull(result);
-        //    Assert.AreEqual(expectedDetail, result.CalcResultDetail);
-        //    Assert.AreEqual(expectedLapcapData, result.CalcResultLapcapData);
-        //}
+           mockCalcResultDetailBuilder.Setup(m => m.Construct(resultsRequestDto)).Returns(expectedDetail);
+           mockLapcapBuilder.Setup(m => m.Construct(resultsRequestDto)).Returns(expectedLapcapData);
+
+           var result = calcResultBuilder.Build(resultsRequestDto);
+
+           Assert.IsNotNull(result);
+           Assert.AreEqual(expectedDetail, result.CalcResultDetail);
+           Assert.AreEqual(expectedLapcapData, result.CalcResultLapcapData);
+        }
     }
 }

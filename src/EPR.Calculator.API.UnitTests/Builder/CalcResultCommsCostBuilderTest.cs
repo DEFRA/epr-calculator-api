@@ -121,12 +121,12 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("£2.00", aluminiumCost.Scotland);
             Assert.AreEqual("£2.00", aluminiumCost.NorthernIreland);
             Assert.AreEqual("£10.00", aluminiumCost.Total);
-            Assert.AreEqual("100.000",
+            Assert.AreEqual("1000.000",
                 aluminiumCost.ProducerReportedHouseholdPackagingWasteTonnage);
             Assert.AreEqual("10.000", aluminiumCost.LateReportingTonnage);
-            Assert.AreEqual("110.000",
+            Assert.AreEqual("1010.000",
                 aluminiumCost.ProducerReportedHouseholdPlusLateReportingTonnage);
-            Assert.AreEqual(".0909",
+            Assert.AreEqual("0.0099",
                 aluminiumCost.CommsCostByMaterialPricePerTonne);
 
 
@@ -137,12 +137,12 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("£2.00", fibreCompositeCost.Scotland);
             Assert.AreEqual("£2.00", fibreCompositeCost.NorthernIreland);
             Assert.AreEqual("£10.00", fibreCompositeCost.Total);
-            Assert.AreEqual("200.000",
+            Assert.AreEqual("2000.000",
                 fibreCompositeCost.ProducerReportedHouseholdPackagingWasteTonnage);
             Assert.AreEqual("10.000", fibreCompositeCost.LateReportingTonnage);
-            Assert.AreEqual("210.000",
+            Assert.AreEqual("2010.000",
                 fibreCompositeCost.ProducerReportedHouseholdPlusLateReportingTonnage);
-            Assert.AreEqual(".0476",
+            Assert.AreEqual("0.0050",
                 fibreCompositeCost.CommsCostByMaterialPricePerTonne);
 
             var totalMaterialCost = materialCosts.Last();
@@ -152,10 +152,10 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("£16.00", totalMaterialCost.Scotland);
             Assert.AreEqual("£16.00", totalMaterialCost.NorthernIreland);
             Assert.AreEqual("£80.00", totalMaterialCost.Total);
-            Assert.AreEqual("3600.000",
+            Assert.AreEqual("36000.000",
                 totalMaterialCost.ProducerReportedHouseholdPackagingWasteTonnage);
             Assert.AreEqual("80.000", totalMaterialCost.LateReportingTonnage);
-            Assert.AreEqual("3680.000",
+            Assert.AreEqual("36080.000",
                 totalMaterialCost.ProducerReportedHouseholdPlusLateReportingTonnage);
             Assert.IsNull(totalMaterialCost.CommsCostByMaterialPricePerTonne);
         }
@@ -190,7 +190,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
             dbContext.SaveChanges();
 
-            for (int producerDetailId = 0; producerDetailId < 10; producerDetailId++)
+            for (int producerDetailId = 1; producerDetailId <= 10; producerDetailId++)
             {
                 for (int materialId = 1; materialId < 9; materialId++)
                 {
