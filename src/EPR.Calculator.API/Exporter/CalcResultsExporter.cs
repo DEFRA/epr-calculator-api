@@ -450,13 +450,13 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append(",");
             }
 
-            lineBuilder.Append(CsvSanitiser.SanitiseData("£65000.00"));
+            lineBuilder.Append(CsvSanitiser.SanitiseData("65000.00"));
             lineBuilder.Append(",");
             //2nd col
-            lineBuilder.Append(CsvSanitiser.SanitiseData("£3900.00"));
+            lineBuilder.Append(CsvSanitiser.SanitiseData("3900.00"));
             lineBuilder.Append(",");
             //3rd col
-            lineBuilder.Append(CsvSanitiser.SanitiseData("£68900.00"));
+            lineBuilder.Append(CsvSanitiser.SanitiseData("68900.00"));
             lineBuilder.Append(",");
 
             csvContent.AppendLine(lineBuilder.ToString());
