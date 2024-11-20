@@ -29,12 +29,71 @@ namespace EPR.Calculator.API.UnitTests
 
             _calcResult = new CalcResult
             {
-                CalcResultParameterOtherCost = new CalcResultParameterOtherCost { BadDebtProvision = new KeyValuePair<string, string>("key1", "6%") },
+                CalcResultParameterOtherCost = new CalcResultParameterOtherCost
+                {
+                    BadDebtProvision = new KeyValuePair<string, string>("key1", "6%"),
+                    Details = [
+                        new CalcResultParameterOtherCostDetail {
+                            Name = "4 LA Data Prep Charge",
+                            OrderId = 1,
+                            England = "£40.00",
+                            EnglandValue = 40,
+                            Wales = "£30.00",
+                            WalesValue = 30,
+                            Scotland = "£20.00",
+                            ScotlandValue = 20,
+                            NorthernIreland = "£10.00",
+                            NorthernIrelandValue = 10,
+                            Total = "£100.00",
+                            TotalValue = 100
+                        }
+                    ],
+                    Materiality = [
+                        new CalcResultMateriality {
+                            Amount = "Amount £s",
+                            AmountValue = 0,
+                            Percentage = "%",
+                            PercentageValue = 0,
+                            SevenMateriality = "7 Materiality"
+                        }
+                    ],
+                    Name = "Parameters - Other",
+                    SaOperatingCost = [
+                        new CalcResultParameterOtherCostDetail {
+                            Name = string.Empty,
+                            OrderId = 0,
+                            England = "England",
+                            EnglandValue = 0,
+                            Wales = "Wales",
+                            WalesValue = 0,
+                            Scotland = "Scotland",
+                            ScotlandValue = 0,
+                            NorthernIreland = "Northern Ireland",
+                            NorthernIrelandValue = 0,
+                            Total = "Total",
+                            TotalValue = 0
+                        }
+                    ],
+                    SchemeSetupCost = {
+                        Name = "5 Scheme set up cost Yearly Cost",
+                        OrderId = 1,
+                        England = "£40.00",
+                        EnglandValue = 40,
+                        Wales = "£30.00",
+                        WalesValue = 30,
+                        Scotland = "£20.00",
+                        ScotlandValue = 20,
+                        NorthernIreland = "£10.00",
+                        NorthernIrelandValue = 10,
+                        Total = "£100.00",
+                        TotalValue = 100
+                    }
+                },
                 CalcResultDetail = new CalcResultDetail() { },
-                CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData() 
-                { 
-                    CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>() 
-                    { 
+                CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData()
+                {
+                    CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>()
+                    {
                         new CalcResultLaDisposalCostDataDetail()
                         {
                             DisposalCostPricePerTonne="20",
@@ -43,7 +102,7 @@ namespace EPR.Calculator.API.UnitTests
                             Name="ScotlandTest",
                             Scotland="ScotlandTest"
                         }
-                    } 
+                    }
                 },
                 CalcResultLapcapData = new CalcResultLapcapData() { CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>() { } },
                 CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment()
@@ -117,7 +176,17 @@ namespace EPR.Calculator.API.UnitTests
                         }]
                 },
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
-                CalcResultSummary = new CalcResultSummary { ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>()},
+                CalcResultSummary = new CalcResultSummary { ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>() },
+                CalcResultCommsCostReportDetail = new CalcResultCommsCost()
+                {
+                    CalcResultCommsCostCommsCostByMaterial =
+                    [
+                        new ()
+                        {
+                            CommsCostByMaterialPricePerTonne="0.42"
+                        }
+                    ]
+                }
             };
 
             // Seed database
@@ -140,7 +209,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(4, result.ProducerDisposalFeesHeader.ColumnIndex);
+            Assert.AreEqual(5, result.ProducerDisposalFeesHeaders.Count());
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
@@ -213,7 +282,7 @@ namespace EPR.Calculator.API.UnitTests
             var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(2, result.ProducerDisposalFees.Count()); 
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
         }
 
         [TestMethod]
@@ -227,7 +296,7 @@ namespace EPR.Calculator.API.UnitTests
             var totalRow = result.ProducerDisposalFees.LastOrDefault();
             Assert.IsNotNull(totalRow);
         }
-       
+
         private void SeedDatabase(ApplicationDBContext context)
         {
             context.Material.AddRange(new List<Material>
@@ -240,7 +309,7 @@ namespace EPR.Calculator.API.UnitTests
             {
                 new() {  Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test1" } },
                 new() { Id = 2, ProducerName = "Producer2", CalculatorRunId = 2, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test2" } },
-                new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } } 
+                new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } }
             });
 
             context.SaveChanges();
