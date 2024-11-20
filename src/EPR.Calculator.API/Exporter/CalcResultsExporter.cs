@@ -409,15 +409,17 @@ namespace EPR.Calculator.API.Exporter
         private static void WriteProducerDisposalFeesHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
         {
             var indexCounter = 0;
+            var currentPosition = 0;
             foreach (var item in resultSummary.ProducerDisposalFeesHeaders)
             {
                 if (item.ColumnIndex != null)
                 {
-                    indexCounter = (int)item.ColumnIndex - indexCounter;
-                    for (var i = 0; i < indexCounter; i++)
+                    indexCounter = (int)item.ColumnIndex - currentPosition;
+                    for (var i = 1; i < indexCounter; i++)
                     {
                         csvContent.Append(",");
                     }
+                    currentPosition += indexCounter;
                 }
 
                 csvContent.Append($"{CsvSanitiser.SanitiseData(item.Name)},");

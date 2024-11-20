@@ -11,12 +11,12 @@ namespace EPR.Calculator.API.Builder.Summary
     {
         private readonly ApplicationDBContext context;
 
-        private const int ResultSummaryHeaderColumnIndex = 0;
-        private const int ProducerDisposalFeesHeaderColumnIndex = 4;
-        private const int CommsCostHeaderColumnIndex = 98;
+        private const int ResultSummaryHeaderColumnIndex = 1;
+        private const int ProducerDisposalFeesHeaderColumnIndex = 5;
+        private const int CommsCostHeaderColumnIndex = 100;
         private const int MaterialsBreakdownHeaderInitialColumnIndex = 4;
         private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 10;
-        private const int LaDataPrepCostsSection4ColumnIndex = 209;
+        private const int LaDataPrepCostsSection4ColumnIndex = 216;
         private const int ProducerCommsFeesHeaderColumnIndex = 99;
         private const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 8;
 
@@ -44,10 +44,6 @@ namespace EPR.Calculator.API.Builder.Summary
 
             if (producerDetailList.Count > 0)
             {
-                result.LaDataPrepCostsTitleSection4 = GetLaDataPrepCostsTitleSection4(calcResult);
-                result.LaDataPrepCostsBadDebtProvisionTitleSection4 = GetLaDataPrepCostsBadDebtProvisionTitleSection4(calcResult);
-                result.LaDataPrepCostsWithBadDebtProvisionTitleSection4 = GetLaDataPrepCostsWithBadDebtProvisionTitleSection4(calcResult);
-
                 var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
 
                 foreach (var producer in producerDetailList)
@@ -70,6 +66,11 @@ namespace EPR.Calculator.API.Builder.Summary
                 producerDisposalFees.Add(GetProducerTotalRow(producerDetailList.ToList(), materials, calcResult, true));
 
                 result.ProducerDisposalFees = producerDisposalFees;
+
+                // LA data prep costs section 4
+                result.LaDataPrepCostsTitleSection4 = GetLaDataPrepCostsTitleSection4(calcResult);
+                result.LaDataPrepCostsBadDebtProvisionTitleSection4 = GetLaDataPrepCostsBadDebtProvisionTitleSection4(calcResult);
+                result.LaDataPrepCostsWithBadDebtProvisionTitleSection4 = GetLaDataPrepCostsWithBadDebtProvisionTitleSection4(calcResult);
             }
 
             return result;
@@ -638,7 +639,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             result.ProducerDisposalFeesHeaders = GetProducerDisposalFeesHeaders();
 
-            result.MaterialBreakdownHeaders = GetMaterialsBreakdownHeader(materials);
+            result.MaterialBreakdownHeaders = GetMaterialsBreakdownHeader(result, materials);
 
             result.ColumnHeaders = GetColumnHeaders(materials);
         }
@@ -654,7 +655,7 @@ namespace EPR.Calculator.API.Builder.Summary
             ];
         }
 
-        private static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(List<MaterialDetail> materials)
+        private static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(CalcResultSummary result, List<MaterialDetail> materials)
         {
             var materialsBreakdownHeaders = new List<CalcResultSummaryHeader>();
             var columnIndex = MaterialsBreakdownHeaderInitialColumnIndex;
@@ -694,10 +695,11 @@ namespace EPR.Calculator.API.Builder.Summary
                 ColumnIndex = commsCostColumnIndex
             });
 
+            // LA data prep costs section 4
             materialsBreakdownHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = "£36,500.00", ColumnIndex = LaDataPrepCostsSection4ColumnIndex - 4 },
-                new CalcResultSummaryHeader { Name = "£2,190.00" },
-                new CalcResultSummaryHeader { Name = "£38,690.00" }
+                new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsTitleSection4}", ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
+                new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsBadDebtProvisionTitleSection4}" },
+                new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsWithBadDebtProvisionTitleSection4}" }
             ]);
 
             return materialsBreakdownHeaders;
