@@ -12,6 +12,14 @@
 
         public IEnumerable<CalcResultSummaryHeader> ColumnHeaders { get; set; }
 
+        //Section-7
+        public decimal TotalProducerFeeforLADisposalCostswoBadDebtProvision { get; set; }
+
+        public decimal BadDebtProvisionFor1 { get; set; }
+
+        public decimal TotalProducerFeeforLADisposalCostsWithBadDebtProvision { get; set; }
+
+        //Section-4
         public decimal LaDataPrepCostsTitleSection4 { get; set; }
 
         public decimal LaDataPrepCostsBadDebtProvisionTitleSection4 { get; set; }

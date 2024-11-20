@@ -374,6 +374,15 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.ScotlandTotalComms)},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.NorthernIrelandTotalComms)},");
 
+                //Section-7 values
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.TotalProducerFeeforLADisposalCostswoBadDebtProvision)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.BadDebtProvisionFor1)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.TotalProducerFeeforLADisposalCostsWithBadDebtProvision)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.EnglandTotalWithBadDebtProvision)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.WalesTotalWithBadDebtProvision)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.ScotlandTotalWithBadDebtProvision)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.NorthernIrelandTotalWithBadDebtProvision)},");
+
                 // LA data prep costs section 4
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsTotalWithoutBadDebtProvisionSection4)},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsBadDebtProvisionSection4)},");
@@ -383,7 +392,7 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4)},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4)},");
 
-                csvContent.AppendLine();
+        csvContent.AppendLine();
             }
         }
 
