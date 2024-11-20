@@ -6,7 +6,7 @@
         public static readonly string OneProducerDisposalFeesWithBadDebtProvision = "1 Producer Disposal Fees with Bad Debt Provision";
         public static readonly string CommsCostHeader = "2a Fees for Comms Costs - by Material with Bad Debt provision";
         public static readonly string CommsCostSummaryHeader = "Summary of Fee for Comms Costs - by Material";
-
+      
 
         public static readonly string DisposalFeeSummary = "Disposal Fee Summary";
         public static readonly string ProducerId = "Producer ID";
@@ -55,5 +55,17 @@
         public static readonly string WalesTotalWithBadDebtProvisionSection4 = "Wales Total with Bad Debt provision";
         public static readonly string ScotlandTotalWithBadDebtProvisionSection4 = "Scotland Total with Bad Debt provision";
         public static readonly string NorthernIrelandTotalWithBadDebtProvisionSection4 = "Northern Ireland Total with Bad Debt provision";
+
+        // 2b comms total
+        public static readonly string CommsCostHeaderWithoutBadDebtFor2bTitle = "2b Comms Costs - UK wide w/o Bad Debt provision";
+        public static readonly string CommsCostHeaderWithBadDebtFor2bTitle = "2b Comms Costs - UK wide with Bad Debt provision";
+        public static readonly string CommsCostHeaderBadDebtProvisionFor2bTitle = "Bad Debt provision";
+        public static readonly string ProducerFeeWithoutBadDebtForComms2b = "2b Total Producer Fee for Comms Costs - UK wide In proportion to (1+2a) w/o Bad Debt provision";
+        public static readonly string BadDebtProvisionForComms2b = "Bad Debt Provision for 2b";
+        public static readonly string ProducerFeeForCommsCostsWithBadDebtForComms2b = "2b Total Producer Fee for Comms Costs - UK wide In proportion to (1+2a) with Bad Debt provision";
+        public static readonly string EnglandTotalWithBadDebtProvisionForComms2b = "England Total with Bad Debt provision";
+        public static readonly string WalesTotalWithBadDebtProvisionForComms2b = "Wales Total with Bad Debt provision";
+        public static readonly string ScotlandTotalWithBadDebtProvisionForComms2b = "Scotland Total with Bad Debt provision";
+        public static readonly string NorthernIrelandTotalWithBadDebtProvisionForComms2b = "Northern Ireland Total with Bad Debt provision";
     }
 }

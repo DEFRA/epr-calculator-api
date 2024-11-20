@@ -374,6 +374,26 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.ScotlandTotalComms)},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.NorthernIrelandTotalComms)},");
 
+                // Two skip.
+                for (int i = 100; i < 116; i++)
+                {
+                    csvContent.Append($",");
+                };
+
+                // 2b comms Total
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.TotalProducerFeeWithoutBadDebtFor2bComms)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.BadDebtProvisionFor2bComms)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.TotalProducerFeeWithBadDebtFor2bComms)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.EnglandTotalWithBadDebtFor2bComms)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.WalesTotalWithBadDebtFor2bComms)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.ScotlandTotalWithBadDebtFor2bComms)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.NorthernIrelandTotalWithBadDebtFor2bComms)},");
+
+                // Two skip.
+                for (int i = 116; i < 132; i++)
+                {
+                    csvContent.Append($",");
+                };
                 // LA data prep costs section 4
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsTotalWithoutBadDebtProvisionSection4)},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsBadDebtProvisionSection4)},");
