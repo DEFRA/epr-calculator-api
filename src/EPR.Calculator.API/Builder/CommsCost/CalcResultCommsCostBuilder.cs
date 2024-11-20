@@ -127,11 +127,11 @@ namespace EPR.Calculator.API.Builder.CommsCost
 
             var ukCost = new CalcResultCommsCostOnePlusFourApportionment
             {
-                EnglandValue = commsCostByUk.ParameterValue * apportionmentDetail.EnglandTotal,
-                WalesValue = commsCostByUk.ParameterValue * apportionmentDetail.WalesTotal,
-                ScotlandValue = commsCostByUk.ParameterValue * apportionmentDetail.ScotlandTotal,
-                NorthernIrelandValue = commsCostByUk.ParameterValue * apportionmentDetail.NorthernIrelandTotal,
-                TotalValue = commsCostByUk.ParameterValue * apportionmentDetail.AllTotal,
+                EnglandValue = (commsCostByUk.ParameterValue * apportionmentDetail.EnglandTotal) / 100,
+                WalesValue = (commsCostByUk.ParameterValue * apportionmentDetail.WalesTotal) / 100,
+                ScotlandValue = (commsCostByUk.ParameterValue * apportionmentDetail.ScotlandTotal) / 100,
+                NorthernIrelandValue = (commsCostByUk.ParameterValue * apportionmentDetail.NorthernIrelandTotal) / 100,
+                TotalValue = commsCostByUk.ParameterValue,
                 Name = TwoBCommsCostUkWide,
                 OrderId = 2
             };
