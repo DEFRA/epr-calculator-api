@@ -60,7 +60,7 @@ namespace EPR.Calculator.API.UnitTests
                     Name = "Parameters - Other",
                     SaOperatingCost = [
                         new CalcResultParameterOtherCostDetail {
-                            Name = null,
+                            Name = string.Empty,
                             OrderId = 0,
                             England = "England",
                             EnglandValue = 0,
