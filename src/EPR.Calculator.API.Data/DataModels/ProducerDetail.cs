@@ -25,10 +25,10 @@ namespace EPR.Calculator.API.Data.DataModels
         public string? ProducerName { get; set; }
 
         [Column("calculator_run_id")]
-        public required int CalculatorRunId { get; set; }
+        public int CalculatorRunId { get; set; }
 
         public ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = new List<ProducerReportedMaterial>();
 
-       public required virtual CalculatorRun CalculatorRun { get; set; }
+       public virtual CalculatorRun CalculatorRun { get; set; }
     }
 }

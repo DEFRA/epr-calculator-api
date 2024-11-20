@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Exporter;
+using AutoFixture;
+using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

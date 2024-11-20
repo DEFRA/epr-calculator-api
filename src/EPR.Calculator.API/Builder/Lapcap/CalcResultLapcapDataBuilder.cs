@@ -10,7 +10,7 @@ namespace EPR.Calculator.API.Builder.Lapcap
     {
         private readonly ApplicationDBContext context;
         public const string LapcapHeader = "LAPCAP Data";
-        public const string CountryApportionment = "1 Country Apportionment";
+        public const string CountryApportionment = "1 Country Apportionment %s";
         public const string Total = "Total";
         public const int HundredPercent = 100;
         public CalcResultLapcapDataBuilder(ApplicationDBContext context)

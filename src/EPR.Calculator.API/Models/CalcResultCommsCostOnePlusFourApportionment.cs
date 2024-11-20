@@ -1,4 +1,4 @@
-﻿namespace EPR.Calculator.API.Builder.CommsCost;
+﻿namespace EPR.Calculator.API.Models;
 
 public class CalcResultCommsCostOnePlusFourApportionment
 {
@@ -13,4 +13,5 @@ public class CalcResultCommsCostOnePlusFourApportionment
     public decimal NorthernIrelandValue { get; set; }
     public decimal WalesValue { get; set; }
     public decimal TotalValue { get; set; }
+    public int OrderId { get; set; }
 }
