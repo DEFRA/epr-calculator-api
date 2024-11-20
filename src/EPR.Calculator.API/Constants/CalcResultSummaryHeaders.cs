@@ -44,6 +44,10 @@
         public static readonly string NorthernIrelandTotal = "Northern Ireland";
         public static readonly string OneCountryApportionment = "1 Country Apportionment %s";
 
+        //2C Comms Cost
+
+        public static readonly string TwoCCommsCostByCountryWithout = "2c Comms Costs - by Country w/o Bad Debt provision";
+
         // LA data prep costs section 4
         public static readonly string LaDataPrepCostsWithoutBadDebtProvisionTitleSection4 = "4 LA Data Prep Costs w/o Bad Debt provision";
         public static readonly string BadDebtProvisionTitleSection4 = "Bad Debt provision";
