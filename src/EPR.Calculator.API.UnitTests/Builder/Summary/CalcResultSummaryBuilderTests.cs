@@ -150,7 +150,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(4, result.ProducerDisposalFeesHeader.ColumnIndex);
+            Assert.AreEqual(4, result.ProducerDisposalFeesHeaders.ToList()[0].ColumnIndex);
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
