@@ -396,25 +396,22 @@ namespace EPR.Calculator.API.Exporter
             WriteProducerDisposalFeesHeaders(resultSummary, csvContent);
 
             // Add material breakdown header
-            WriteMaterialsBreakdownHeader(resultSummary, csvContent);
+            WriteMaterialsBreakdownHeaders(resultSummary, csvContent);
 
             // Add column header
-            foreach (var item in resultSummary.ColumnHeaders)
-            {
-                csvContent.Append($"{CsvSanitiser.SanitiseData(item.Name)},");
-            }
+            WriteColumnHeaders(resultSummary, csvContent);
+
             csvContent.AppendLine();
         }
 
         private static void WriteProducerDisposalFeesHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
         {
-            var indexCounter = 0;
             var currentPosition = 0;
             foreach (var item in resultSummary.ProducerDisposalFeesHeaders)
             {
                 if (item.ColumnIndex != null)
                 {
-                    indexCounter = (int)item.ColumnIndex - currentPosition;
+                    var indexCounter = (int)item.ColumnIndex - currentPosition;
                     for (var i = 1; i < indexCounter; i++)
                     {
                         csvContent.Append(",");
@@ -427,22 +424,32 @@ namespace EPR.Calculator.API.Exporter
             csvContent.AppendLine();
         }
 
-        private static void WriteMaterialsBreakdownHeader(CalcResultSummary resultSummary, StringBuilder csvContent)
+        private static void WriteMaterialsBreakdownHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
         {
-            var indexCounter = 0;
+            var currentPosition = 0;
             foreach (var item in resultSummary.MaterialBreakdownHeaders)
             {
-                for (var i = indexCounter; i < item.ColumnIndex; i++)
-                {
-                    csvContent.Append(",");
-                }
-                csvContent.Append($"{CsvSanitiser.SanitiseData(item.Name)},");
                 if (item.ColumnIndex != null)
                 {
-                    indexCounter = (int)item.ColumnIndex;
+                    var indexCounter = (int)item.ColumnIndex - currentPosition;
+                    for (var i = 1; i < indexCounter; i++)
+                    {
+                        csvContent.Append(",");
+                    }
+                    currentPosition += indexCounter;
                 }
+
+                csvContent.Append($"{CsvSanitiser.SanitiseData(item.Name)},");
             }
             csvContent.AppendLine();
+        }
+
+        private static void WriteColumnHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
+        {
+            foreach (var item in resultSummary.ColumnHeaders)
+            {
+                csvContent.Append($"{CsvSanitiser.SanitiseData(item.Name)},");
+            }
         }
     }
 }

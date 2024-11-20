@@ -14,11 +14,12 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int ResultSummaryHeaderColumnIndex = 1;
         private const int ProducerDisposalFeesHeaderColumnIndex = 5;
         private const int CommsCostHeaderColumnIndex = 100;
-        private const int MaterialsBreakdownHeaderInitialColumnIndex = 4;
-        private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 10;
+        private const int MaterialsBreakdownHeaderInitialColumnIndex = 5;
+        private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
+        private const int DisposalFeeSummaryColumnIndex = 93;
         private const int LaDataPrepCostsSection4ColumnIndex = 216;
-        private const int ProducerCommsFeesHeaderColumnIndex = 99;
-        private const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 8;
+        private const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
+        private const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
 
         public CalcResultSummaryBuilder(ApplicationDBContext context)
         {
@@ -674,10 +675,10 @@ namespace EPR.Calculator.API.Builder.Summary
             materialsBreakdownHeaders.Add(new CalcResultSummaryHeader
             {
                 Name = CalcResultSummaryHeaders.DisposalFeeSummary,
-                ColumnIndex = columnIndex
+                ColumnIndex = DisposalFeeSummaryColumnIndex
             });
 
-            var commsCostColumnIndex = columnIndex + 6;
+            var commsCostColumnIndex = MaterialsBreakdownHeaderCommsInitialColumnIndex;
 
             foreach (var material in materials)
             {
@@ -716,8 +717,6 @@ namespace EPR.Calculator.API.Builder.Summary
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.Level }
             ]);
 
-            var columnIndex = 4;
-
             foreach (var material in materials)
             {
                 columnHeaders.AddRange([
@@ -733,8 +732,6 @@ namespace EPR.Calculator.API.Builder.Summary
                     new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ScotlandWithBadDebtProvision },
                     new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision }
                 ]);
-
-                columnIndex += 11;
             }
 
             columnHeaders.AddRange([
@@ -772,11 +769,9 @@ namespace EPR.Calculator.API.Builder.Summary
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalwithBadDebtprovision }
             ]);
 
-            columnIndex += 7;
-
             // LA data prep costs section 4 column headers
             columnHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeWithoutBadDebtProvisionSection4, ColumnIndex = columnIndex + 1 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeWithoutBadDebtProvisionSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionSection4 },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeWithBadDebtProvisionSection4 },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.EnglandTotalWithBadDebtProvisionSection4 },
