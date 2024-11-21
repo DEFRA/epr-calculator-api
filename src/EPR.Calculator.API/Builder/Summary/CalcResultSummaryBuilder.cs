@@ -22,7 +22,7 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
         private const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
         private const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
-        private const int Total1Plus2ABadDebt = 189;
+        private const int Total1Plus2ABadDebt = 193;
 
         private static List<ProducerDetail> producerDetailList {  get; set; }
 
@@ -324,9 +324,9 @@ namespace EPR.Calculator.API.Builder.Summary
 
             foreach (MaterialDetail material in materials)
             {
-               // var laDisosalTotal = GetProducerDisposalFeeWithBadDebtProvisionProducerTotal(producerDetailList, material, calcResult);
+                var laDisosalTotal = GetProducerDisposalFeeWithBadDebtProvisionProducerTotal(producerDetailList, material, calcResult);
                 var twoAcommsDisposal = GetProducerTotalCostwithBadDebtProvisionTotal(producerDetailList, material, calcResult);
-                total += twoAcommsDisposal; //laDisosalTotal twoAcommsDisposal;
+                total += laDisosalTotal + twoAcommsDisposal;
             }
 
             return total;
