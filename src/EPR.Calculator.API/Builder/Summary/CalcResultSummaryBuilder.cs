@@ -322,7 +322,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             if (isParseSuccessful)
             {
-                return producerDisposalFee * (value / 100);
+                return (producerDisposalFee * value) / 100;
             }
 
             return 0;
@@ -378,7 +378,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.EnglandDisposalCost.Replace("%", string.Empty), out decimal value);
 
-            return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * (value / 100) : 0;
+            return isParseSuccessful ? (producerDisposalFeeWithBadDebtProvision * value) / 100 : 0;
         }
 
         private static decimal GetEnglandWithBadDebtProvisionProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material, CalcResult calcResult)
@@ -405,7 +405,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.WalesDisposalCost.Replace("%", string.Empty), out decimal value);
 
-            return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * (value / 100) : 0;
+            return isParseSuccessful ? (producerDisposalFeeWithBadDebtProvision * value) / 100 : 0;
         }
 
         private static decimal GetWalesWithBadDebtProvisionProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material, CalcResult calcResult)
@@ -432,7 +432,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.ScotlandDisposalCost.Replace("%", string.Empty), out decimal value);
 
-            return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * (value / 100) : 0;
+            return isParseSuccessful ? (producerDisposalFeeWithBadDebtProvision * value) / 100 : 0;
         }
 
         private static decimal GetScotlandWithBadDebtProvisionProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material, CalcResult calcResult)
@@ -459,7 +459,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.NorthernIrelandDisposalCost.Replace("%", string.Empty), out decimal value);
 
-            return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * (value / 100) : 0;
+            return isParseSuccessful ? (producerDisposalFeeWithBadDebtProvision * value) / 100 : 0;
         }
 
         private static decimal GetNorthernIrelandWithBadDebtProvisionProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material, CalcResult calcResult)
