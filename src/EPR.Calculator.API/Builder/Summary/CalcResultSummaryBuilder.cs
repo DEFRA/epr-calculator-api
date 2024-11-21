@@ -648,7 +648,7 @@ namespace EPR.Calculator.API.Builder.Summary
         {
             return GetLaDataPrepCostsTitleSection4(calcResult) + GetLaDataPrepCostsBadDebtProvisionTitleSection4(calcResult);
         }
-
+        
         private static decimal GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4()
         {
             return 99;
@@ -658,22 +658,27 @@ namespace EPR.Calculator.API.Builder.Summary
         {
             return 99;
         }
+
         private static decimal GetLaDataPrepCostsTotalWithBadDebtProvisionSection4()
         {
             return 99;
         }
+
         private static decimal GetLaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4()
         {
             return 99;
         }
+
         private static decimal GetLaDataPrepCostsWalesTotalWithBadDebtProvisionSection4()
         {
             return 99;
         }
+
         private static decimal GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4()
         {
             return 99;
         }
+
         private static decimal GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4()
         {
             return 99;
@@ -1041,7 +1046,6 @@ namespace EPR.Calculator.API.Builder.Summary
             return englandTotalwithBadDebtprovision;
         }
 
-
         private static decimal GetProducerTotalCostWithoutBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
         {
             var hhPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material);
@@ -1087,6 +1091,7 @@ namespace EPR.Calculator.API.Builder.Summary
             var producerTotalCostwithBadDebtProvision = GetProducerTotalCostwithBadDebtProvision(producer, material, calcResult);
             return producerTotalCostwithBadDebtProvision * (1 + Convert.ToDecimal(calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.Select(x => x.NorthernIrelandDisposalTotal).ToList()[4].Trim('%')));
         }
+
         private static decimal GetPriceperTonneForComms(MaterialDetail material, CalcResult calcResult)
         {
             var commsCostDataDetail = calcResult.CalcResultCommsCostReportDetail.CalcResultCommsCostCommsCostByMaterial.FirstOrDefault(la => la.Name == material.Name);
@@ -1099,6 +1104,25 @@ namespace EPR.Calculator.API.Builder.Summary
             var isParseSuccessful = decimal.TryParse(commsCostDataDetail.CommsCostByMaterialPricePerTonne, NumberStyles.Currency, CultureInfo.CurrentCulture.NumberFormat, out decimal value);
 
             return isParseSuccessful ? value : 0;
+        }
+
+        private static decimal GetTotal1Plus2ABadDebt(IEnumerable<ProducerDetail> producers, List<MaterialDetail> materials, CalcResult calcResult)
+        {
+            if (producers.ToList() is null)
+            {
+                return 0;
+            }
+
+            decimal total = 0m;
+
+            foreach (MaterialDetail material in materials)
+            {
+                var laDisosalTotal = GetProducerDisposalFeeWithBadDebtProvisionProducerTotal(producers, material, calcResult);
+                var twoAcommsDisposal = GetProducerTotalCostwithBadDebtProvisionTotal(producers, material, calcResult);
+                total += laDisosalTotal + twoAcommsDisposal;
+            }
+
+            return total;
         }
 
     }
