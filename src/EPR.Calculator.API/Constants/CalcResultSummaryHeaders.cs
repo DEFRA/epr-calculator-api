@@ -29,7 +29,6 @@ namespace EPR.Calculator.API.Constants
         public static readonly string NorthernIrelandWithBadDebtProvision = "Northern Ireland with Bad Debt Provision";
         public static readonly string ProducerTotalCostWithoutBadDebtProvision = "Producer Total Cost w/o Bad Debt Provision";
         public static readonly string ProducerTotalCostwithBadDebtProvision = "Producer Total Cost with Bad Debt Provision";
-        public static readonly string SummaryofFeeforCommsCostsbyMaterial = "Summary of Fee for Comms Costs - by Material";
 
         public static readonly string TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision = "2a Total Producer Fee for Comms Costs - by Material w/o Bad Debt provision";
         public static readonly string TotalBadDebtProvision = "Total Bad Debt Provision";
