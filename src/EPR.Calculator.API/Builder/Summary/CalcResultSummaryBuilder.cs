@@ -233,7 +233,9 @@ namespace EPR.Calculator.API.Builder.Summary
                 ProducerCommsFeesByMaterial = commsCostSummary,
 
                 //2c Section
-                TwoCTotalProducerFeeForCommsCostsWithoutBadDebt = GetTwoCTotalProducerFeeForCommsCostsWithoutDebt(commsCostSummary),
+                TwoCTotalProducerFeeForCommsCostsWithoutBadDebt = Decimal.One,
+                TwoCBadDebtProvisionHeader = Decimal.One,
+                TwoCBadDebtCommCostByCountry = Decimal.One,
 
                 // LA data prep costs section 4
                 LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4(),
@@ -244,11 +246,6 @@ namespace EPR.Calculator.API.Builder.Summary
                 LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4(),
                 LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
             };
-        }
-
-        private static decimal GetTwoCTotalProducerFeeForCommsCostsWithoutDebt(Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> commsCostSummary)
-        {
-            throw new NotImplementedException();
         }
 
         private static int GetLevelIndex(List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup, ProducerDetail producer)

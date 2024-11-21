@@ -41,6 +41,8 @@
         public decimal NorthernIrelandTotalComms { get; set; }
 
         public decimal TwoCTotalProducerFeeForCommsCostsWithoutBadDebt { get; set; }
+        public decimal TwoCBadDebtProvisionHeader { get; set; }
+        public decimal TwoCBadDebtCommCostByCountry{ get; set; }
         public decimal TwoCBadDebtProvision { get; set; }
         public decimal TwoCTotalProducerFeeForCommsCostsWithBadDebt { get; set; }
         public decimal TwoCEnglandTotalWithBadDebt { get; set; }
