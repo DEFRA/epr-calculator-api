@@ -3,9 +3,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
-using Microsoft.Extensions.Hosting;
 using System.Globalization;
-using static Azure.Core.HttpHeader;
 
 namespace EPR.Calculator.API.Builder.Summary
 {
@@ -1137,7 +1135,7 @@ namespace EPR.Calculator.API.Builder.Summary
             return GetTotalFee(producerDisposalFees, fee => fee.TotalProducerCommsFeeWithBadDebtProvision);
         }
 
-        private static decimal GetTotalFee(IEnumerable<CalcResultSummaryProducerDisposalFees> producerDisposalFees, Func<CalcResultSummaryProducerDisposalFees, decimal?> selector)
+        public static decimal GetTotalFee(IEnumerable<CalcResultSummaryProducerDisposalFees> producerDisposalFees, Func<CalcResultSummaryProducerDisposalFees, decimal?> selector)
         {
             if (producerDisposalFees == null)
             {
