@@ -315,18 +315,13 @@ namespace EPR.Calculator.API.Builder.Summary
         //section bad debt total
         private static decimal GetTotal1Plus2ABadDebt(List<MaterialDetail> materials, CalcResult calcResult)
         {
-            if (producerDetailList is null)
-            {
-                return 0;
-            }
-
             decimal total = 0m;            
 
             foreach (MaterialDetail material in materials)
             {
-                var laDisosalTotal = GetProducerDisposalFeeWithBadDebtProvisionProducerTotal(producerDetailList, material, calcResult);
+                var laDisposalTotal = GetProducerDisposalFeeWithBadDebtProvisionProducerTotal(producerDetailList, material, calcResult);
                 var twoAcommsDisposal = GetProducerTotalCostwithBadDebtProvisionTotal(producerDetailList, material, calcResult);
-                total += laDisosalTotal + twoAcommsDisposal;
+                total += laDisposalTotal + twoAcommsDisposal;
             }
 
             return total;
