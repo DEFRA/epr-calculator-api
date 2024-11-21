@@ -284,7 +284,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 return 0;
             }
 
-            var isParseSuccessful = decimal.TryParse(laDisposalCostDataDetail.DisposalCostPricePerTonne, NumberStyles.Currency, CultureInfo.CurrentCulture.NumberFormat, out decimal value);
+            var isParseSuccessful = decimal.TryParse(laDisposalCostDataDetail.DisposalCostPricePerTonne, NumberStyles.Currency, CultureInfo.GetCultureInfo("en-GB"), out decimal value);
 
             return isParseSuccessful ? value : 0;
         }
