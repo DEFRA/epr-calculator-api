@@ -29,7 +29,66 @@ namespace EPR.Calculator.API.UnitTests
 
             _calcResult = new CalcResult
             {
-                CalcResultParameterOtherCost = new CalcResultParameterOtherCost { BadDebtProvision = new KeyValuePair<string, string>("key1", "6%") },
+                CalcResultParameterOtherCost = new CalcResultParameterOtherCost
+                {
+                    BadDebtProvision = new KeyValuePair<string, string>("key1", "6%"),
+                    Details = [
+                        new CalcResultParameterOtherCostDetail {
+                            Name = "4 LA Data Prep Charge",
+                            OrderId = 1,
+                            England = "£40.00",
+                            EnglandValue = 40,
+                            Wales = "£30.00",
+                            WalesValue = 30,
+                            Scotland = "£20.00",
+                            ScotlandValue = 20,
+                            NorthernIreland = "£10.00",
+                            NorthernIrelandValue = 10,
+                            Total = "£100.00",
+                            TotalValue = 100
+                        }
+                    ],
+                    Materiality = [
+                        new CalcResultMateriality {
+                            Amount = "Amount £s",
+                            AmountValue = 0,
+                            Percentage = "%",
+                            PercentageValue = 0,
+                            SevenMateriality = "7 Materiality"
+                        }
+                    ],
+                    Name = "Parameters - Other",
+                    SaOperatingCost = [
+                        new CalcResultParameterOtherCostDetail {
+                            Name = string.Empty,
+                            OrderId = 0,
+                            England = "England",
+                            EnglandValue = 0,
+                            Wales = "Wales",
+                            WalesValue = 0,
+                            Scotland = "Scotland",
+                            ScotlandValue = 0,
+                            NorthernIreland = "Northern Ireland",
+                            NorthernIrelandValue = 0,
+                            Total = "Total",
+                            TotalValue = 0
+                        }
+                    ],
+                    SchemeSetupCost = {
+                        Name = "5 Scheme set up cost Yearly Cost",
+                        OrderId = 1,
+                        England = "£40.00",
+                        EnglandValue = 40,
+                        Wales = "£30.00",
+                        WalesValue = 30,
+                        Scotland = "£20.00",
+                        ScotlandValue = 20,
+                        NorthernIreland = "£10.00",
+                        NorthernIrelandValue = 10,
+                        Total = "£100.00",
+                        TotalValue = 100
+                    }
+                },
                 CalcResultDetail = new CalcResultDetail() { },
                 CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData()
                 {
@@ -150,7 +209,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(4, result.ProducerDisposalFeesHeader.ColumnIndex);
+            Assert.AreEqual(5, result.ProducerDisposalFeesHeaders.Count());
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
