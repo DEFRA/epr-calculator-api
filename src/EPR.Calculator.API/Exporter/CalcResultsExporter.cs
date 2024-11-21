@@ -21,7 +21,7 @@ namespace EPR.Calculator.API.Exporter
         private const string ParametersFile = "Parameters File";
         private const string LaDisposalCostFile = "LA Disposal cost File";
         private const string CountryApportionmentFile = "Country Apportionment File";
-        private const int ProducerCommsFeesHeaderColumnIndex = 99;
+        private const int ProducerCommsFeesHeaderColumnIndex = 95;
 
         public CalcResultsExporter(IBlobStorageService blobStorageService)
         {
@@ -39,12 +39,7 @@ namespace EPR.Calculator.API.Exporter
             if (results.CalcResultLateReportingTonnageData != null)
             {
                 PrepareLateReportingData(results.CalcResultLateReportingTonnageData, csvContent);
-            }
-
-            if (results.CalcResultLaDisposalCostData != null)
-            {
-                PrepareLaDisposalCostData(results.CalcResultLaDisposalCostData, csvContent);
-            }
+            }            
 
             csvContent.AppendLine();
             // csvContent.AppendLine(results.CalcResultCommsCostReportDetail.ToString());
