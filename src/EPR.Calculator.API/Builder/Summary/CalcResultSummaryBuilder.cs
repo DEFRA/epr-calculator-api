@@ -21,6 +21,7 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int LaDataPrepCostsSection4ColumnIndex = 216;
         private const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
         private const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
+        //Section-(1) & (2a)
         private const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
 
         public CalcResultSummaryBuilder(ApplicationDBContext context)
