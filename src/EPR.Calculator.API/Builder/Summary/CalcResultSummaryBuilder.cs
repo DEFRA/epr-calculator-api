@@ -787,7 +787,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             foreach (var material in commsCostSummary)
             {
-                totalCommsCostsbyMaterialwithBadDebtprovision += material.Value.TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision;
+                totalCommsCostsbyMaterialwithBadDebtprovision += material.Value.ProducerTotalCostwithBadDebtProvision;
             }
 
             return totalCommsCostsbyMaterialwithBadDebtprovision;
@@ -854,7 +854,7 @@ namespace EPR.Calculator.API.Builder.Summary
         {
             var badDebtProvision = Convert.ToDecimal(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Trim('%'));
             var producerTotalCostWithoutBadDebtProvision = GetProducerTotalCostWithoutBadDebtProvision(producer, material, calcResult);
-            return producerTotalCostWithoutBadDebtProvision * badDebtProvision;
+            return (producerTotalCostWithoutBadDebtProvision * badDebtProvision) / 100;
         }
 
         private static decimal GetProducerTotalCostwithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
