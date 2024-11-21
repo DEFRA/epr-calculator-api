@@ -315,7 +315,7 @@ namespace EPR.Calculator.API.Exporter
             csvContent.AppendLine();
 
             // Add headers
-            CalcResultsExporter.PrepareSummaryDataHeader(resultSummary, csvContent);
+            PrepareSummaryDataHeader(resultSummary, csvContent);
 
             // Add data
             foreach (var producer in resultSummary.ProducerDisposalFees)
@@ -330,23 +330,23 @@ namespace EPR.Calculator.API.Exporter
                     csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.HouseholdPackagingWasteTonnage)},");
                     csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.ManagedConsumerWasteTonnage)},");
                     csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.NetReportedTonnage)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.PricePerTonne)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.ProducerDisposalFee)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.BadDebtProvision)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.ProducerDisposalFeeWithBadDebtProvision)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.EnglandWithBadDebtProvision)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.WalesWithBadDebtProvision)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.ScotlandWithBadDebtProvision)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.NorthernIrelandWithBadDebtProvision)},");
+                    csvContent.Append($"£{CsvSanitiser.SanitiseData(disposalFee.Value.PricePerTonne)},");
+                    csvContent.Append($"£{CsvSanitiser.SanitiseData(disposalFee.Value.ProducerDisposalFee)},");
+                    csvContent.Append($"£{CsvSanitiser.SanitiseData(disposalFee.Value.BadDebtProvision)},");
+                    csvContent.Append($"£{CsvSanitiser.SanitiseData(disposalFee.Value.ProducerDisposalFeeWithBadDebtProvision)},");
+                    csvContent.Append($"£{CsvSanitiser.SanitiseData(disposalFee.Value.EnglandWithBadDebtProvision)},");
+                    csvContent.Append($"£{CsvSanitiser.SanitiseData(disposalFee.Value.WalesWithBadDebtProvision)},");
+                    csvContent.Append($"£{CsvSanitiser.SanitiseData(disposalFee.Value.ScotlandWithBadDebtProvision)},");
+                    csvContent.Append($"£{CsvSanitiser.SanitiseData(disposalFee.Value.NorthernIrelandWithBadDebtProvision)},");
                 }
 
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.TotalProducerDisposalFee)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.BadDebtProvision)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.TotalProducerDisposalFeeWithBadDebtProvision)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.EnglandTotal)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.WalesTotal)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.ScotlandTotal)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.NorthernIrelandTotal)},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(producer.TotalProducerDisposalFee)},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(producer.BadDebtProvision)},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(producer.TotalProducerDisposalFeeWithBadDebtProvision)},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(producer.EnglandTotal)},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(producer.WalesTotal)},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(producer.ScotlandTotal)},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(producer.NorthernIrelandTotal)},");
 
                 foreach (var disposalFee in producer.ProducerCommsFeesByMaterial)
                 {
