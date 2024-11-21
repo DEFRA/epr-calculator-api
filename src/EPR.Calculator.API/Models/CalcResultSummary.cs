@@ -12,7 +12,7 @@ namespace EPR.Calculator.API.Models
 
         public IEnumerable<CalcResultSummaryHeader> ColumnHeaders { get; set; }
 
-        //Section-7
+        //Section-(1) & (2a)
         public decimal TotalFeeforLADisposalCostswoBadDebtprovision1 { get; set; }
 
         public decimal BadDebtProvisionFor1 { get; set; }

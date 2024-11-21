@@ -70,7 +70,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
                 result.ProducerDisposalFees = producerDisposalFees;
 
-                //Section-7
+                //Section-(1) & (2a)
                 var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
                 var commsCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>();
 
@@ -156,7 +156,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 NorthernIrelandTotalComms = GetNorthernIrelandCommsTotal(commsCostSummary),
                 ProducerCommsFeesByMaterial = commsCostSummary,
 
-                //Section-7
+                //Section-(1) & (2a)
                 TotalProducerFeeforLADisposalCostswoBadDebtprovision = GetTotalProducerDisposalFee(materialCostSummary),
                 BadDebtProvisionFor1 = GetTotalBadDebtProvision(materialCostSummary),
                 TotalProducerFeeforLADisposalCostswithBadDebtprovision = GetTotalProducerDisposalFeeWithBadDebtProvision(materialCostSummary),
@@ -252,7 +252,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 NorthernIrelandTotalComms = GetNorthernIrelandCommsTotal(commsCostSummary),
                 ProducerCommsFeesByMaterial = commsCostSummary,
 
-                //Section-7
+                //Section-(1) & (2a)
                 TotalProducerFeeforLADisposalCostswoBadDebtprovision = GetTotalProducerDisposalFee(materialCostSummary),
                 BadDebtProvisionFor1 = GetTotalBadDebtProvision(materialCostSummary),
                 TotalProducerFeeforLADisposalCostswithBadDebtprovision = GetTotalProducerDisposalFeeWithBadDebtProvision(materialCostSummary),
@@ -696,7 +696,7 @@ namespace EPR.Calculator.API.Builder.Summary
         private static List<CalcResultSummaryHeader> GetProducerDisposalFeesHeaders()
         {
             return [
-                //Section-7 Title headers
+                //Section-(1) & (2a) Title headers
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforLADisposalCostswoBadDebtprovision1, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision},
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforLADisposalCostswithBadDebtprovision1 },
@@ -838,7 +838,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalwithBadDebtprovision }
             ]);
 
-            //Section-7
+            //Section-(1) & (2a)
             columnHeaders.AddRange([
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeforLADisposalCostswoBadDebtprovision, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionFor1 },

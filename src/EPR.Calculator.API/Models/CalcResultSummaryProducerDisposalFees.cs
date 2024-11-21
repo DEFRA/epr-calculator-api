@@ -54,7 +54,7 @@
 
         public decimal LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 { get; set; }
 
-        //Section 7 Start
+        //Section-(1) & (2a) Start
         public decimal TotalProducerFeeforLADisposalCostswoBadDebtprovision { get; set; }
         
         public decimal BadDebtProvisionFor1 { get; set; }
@@ -82,7 +82,7 @@
         public decimal ScotlandTotalwithBadDebtprovision2A { get; set; }
         
         public decimal NorthernIrelandTotalwithBadDebtprovision2A { get; set; }
-        //Section 7 End
+        //Section-(1) & (2a) End
 
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> ProducerCommsFeesByMaterial { get; set; }
