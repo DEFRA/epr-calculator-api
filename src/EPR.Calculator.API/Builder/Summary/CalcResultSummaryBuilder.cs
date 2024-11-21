@@ -144,7 +144,13 @@ namespace EPR.Calculator.API.Builder.Summary
                 ProducerCommsFeesByMaterial = commsCostSummary,
 
                 //2c Section
-                TwoCTotalProducerFeeForCommsCostsWithoutBadDebt = GetTotalFor2CCommsCosts(commsCostSummary),
+                TwoCTotalProducerFeeForCommsCostsWithoutBadDebt = Decimal.One,
+                TwoCBadDebtProvision = Decimal.One,
+                TwoCTotalProducerFeeForCommsCostsWithBadDebt = Decimal.One,
+                TwoCEnglandTotalWithBadDebt = Decimal.One,
+                TwoCWalesTotalWithBadDebt = Decimal.One,
+                TwoCScotlandTotalWithBadDebt = Decimal.One,
+                TwoCNorthernIrelandTotalWithBadDebt = Decimal.One,
 
                 // LA data prep costs section 4
                 LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4(),
@@ -159,11 +165,6 @@ namespace EPR.Calculator.API.Builder.Summary
                 isTotalRow = true
             };
 
-        }
-
-        private static decimal GetTotalFor2CCommsCosts(Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> commsCostSummary)
-        {
-            throw new NotImplementedException();
         }
 
         private static CalcResultSummaryProducerDisposalFees GetProducerRow(
@@ -668,8 +669,8 @@ namespace EPR.Calculator.API.Builder.Summary
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.OneProducerDisposalFeesWithBadDebtProvision, ColumnIndex = ProducerDisposalFeesHeaderColumnIndex },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.CommsCostHeader, ColumnIndex = CommsCostHeaderColumnIndex },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostByCountryWithout, ColumnIndex = TwoCColumnIndex },
-                // new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionTitleSection4 },
-                // new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithBadDebtProvisionTitleSection4 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostBadBebtProvision },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostByCountryWithBadDebt },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionTitleSection4 },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithBadDebtProvisionTitleSection4 },
@@ -798,7 +799,14 @@ namespace EPR.Calculator.API.Builder.Summary
 
             // 2C Comms Cost
             columnHeaders.AddRange([
-                // new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeWithoutBadDebtProvisionSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
+                new CalcResultSummaryHeader
+                    { Name = CalcResultSummaryHeaders.TwoCCommsCostCountryInPropertionWithoutBadDebt, ColumnIndex = TwoCColumnIndex },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostBadDebtProvision },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostCountryInPropertionWithBadDebt},
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostEnglandWithBadDebt },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostWalesWithBadDebt },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostScotlandWithBadDebt },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostNIWithBadDebt },
             ]);
 
             // LA data prep costs section 4 column headers
