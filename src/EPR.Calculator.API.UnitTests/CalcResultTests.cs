@@ -22,7 +22,7 @@ using EPR.Calculator.API.Builder.Detail;
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
-    public class CalcResultServiceTests
+    public class CalcResultTests
     {
         private Mock<ICalcResultBuilder> mockCalcResultBuilder;
         private Mock<ICalcResultsExporter<CalcResult>> mockExporter;

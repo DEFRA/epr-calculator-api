@@ -6,6 +6,8 @@
 
         public CalcResultSummaryHeader ProducerDisposalFeesHeader { get; set; }
 
+        public CalcResultSummaryHeader CommsCostHeader { get; set; }
+
         public IEnumerable<CalcResultSummaryHeader> MaterialBreakdownHeaders { get; set; }
 
         public IEnumerable<string> ColumnHeaders { get; set; }
