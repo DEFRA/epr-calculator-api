@@ -29,6 +29,23 @@ namespace EPR.Calculator.API.Constants
         public static readonly string NorthernIrelandWithBadDebtProvision = "Northern Ireland with Bad Debt Provision";
         public static readonly string ProducerTotalCostWithoutBadDebtProvision = "Producer Total Cost w/o Bad Debt Provision";
         public static readonly string ProducerTotalCostwithBadDebtProvision = "Producer Total Cost with Bad Debt Provision";
+        public static readonly string SummaryofFeeforCommsCostsbyMaterial = "Summary of Fee for Comms Costs - by Material";
+
+        public static readonly string TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision = "2a Total Producer Fee for Comms Costs - by Material w/o Bad Debt provision";
+        public static readonly string TotalBadDebtProvision = "Total Bad Debt Provision";
+        public static readonly string TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision = "2a Total Producer Fee for Comms Costs - by Material with Bad Debt provision";
+        public static readonly string EnglandTotalwithBadDebtprovision = "England Total with Bad Debt provision";
+        public static readonly string WalesTotalwithBadDebtprovision = "Wales Total with Bad Debt provision";
+        public static readonly string ScotlandTotalwithBadDebtprovision = "Scotland Total with Bad Debt provision";
+        public static readonly string NorthernIrelandTotalwithBadDebtprovision = "Northern Ireland Total with Bad Debt provision";
+
+        public static readonly string TotalProducerDisposalFee = "1 Total Producer Disposal Fee w/o Bad Debt Provision";
+        public static readonly string TotalProducerDisposalFeeWithBadDebtProvision = "1 Total Producer Disposal Fee with Bad Debt Provision";
+        public static readonly string EnglandTotal = "England Total";
+        public static readonly string WalesTotal = "Wales Total";
+        public static readonly string ScotlandTotal = "Scotland Total";
+        public static readonly string NorthernIrelandTotal = "Northern Ireland Total";
+        public static readonly string OneCountryApportionment = "1 Country Apportionment %s";
 
         public static readonly string TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision = "2a Total Producer Fee for Comms Costs - by Material w/o Bad Debt provision";
         public static readonly string TotalBadDebtProvision = "Total Bad Debt Provision";
