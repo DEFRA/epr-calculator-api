@@ -29,23 +29,6 @@ namespace EPR.Calculator.API.Constants
         public static readonly string NorthernIrelandWithBadDebtProvision = "Northern Ireland with Bad Debt Provision";
         public static readonly string ProducerTotalCostWithoutBadDebtProvision = "Producer Total Cost w/o Bad Debt Provision";
         public static readonly string ProducerTotalCostwithBadDebtProvision = "Producer Total Cost with Bad Debt Provision";
-        public static readonly string SummaryofFeeforCommsCostsbyMaterial = "Summary of Fee for Comms Costs - by Material";
-
-        public static readonly string TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision = "2a Total Producer Fee for Comms Costs - by Material w/o Bad Debt provision";
-        public static readonly string TotalBadDebtProvision = "Total Bad Debt Provision";
-        public static readonly string TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision = "2a Total Producer Fee for Comms Costs - by Material with Bad Debt provision";
-        public static readonly string EnglandTotalwithBadDebtprovision = "England Total with Bad Debt provision";
-        public static readonly string WalesTotalwithBadDebtprovision = "Wales Total with Bad Debt provision";
-        public static readonly string ScotlandTotalwithBadDebtprovision = "Scotland Total with Bad Debt provision";
-        public static readonly string NorthernIrelandTotalwithBadDebtprovision = "Northern Ireland Total with Bad Debt provision";
-
-        public static readonly string TotalProducerDisposalFee = "1 Total Producer Disposal Fee w/o Bad Debt Provision";
-        public static readonly string TotalProducerDisposalFeeWithBadDebtProvision = "1 Total Producer Disposal Fee with Bad Debt Provision";
-        public static readonly string EnglandTotal = "England Total";
-        public static readonly string WalesTotal = "Wales Total";
-        public static readonly string ScotlandTotal = "Scotland Total";
-        public static readonly string NorthernIrelandTotal = "Northern Ireland Total";
-        public static readonly string OneCountryApportionment = "1 Country Apportionment %s";
 
         public static readonly string TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision = "2a Total Producer Fee for Comms Costs - by Material w/o Bad Debt provision";
         public static readonly string TotalBadDebtProvision = "Total Bad Debt Provision";
@@ -67,11 +50,11 @@ namespace EPR.Calculator.API.Constants
         public static readonly string TotalProducerFeeforLADisposalCostswoBadDebtprovision = "1 Total Producer Fee for LA Disposal Costs w/o Bad Debt provision";
         public static readonly string BadDebtProvisionFor1 = "Bad Debt Provision for 1";
         public static readonly string TotalProducerFeeforLADisposalCostswithBadDebtprovision = "1 Total Producer Fee for LA Disposal Costs with Bad Debt provision";
-        
+
         public static readonly string TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision2A = "2a Total Producer Fee for Comms Costs - by Material w/o Bad Debt provision";
         public static readonly string BadDebtProvisionfor2A = "Bad Debt Provision for 2a";
         public static readonly string TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision2A = "2a Total Producer Fee for Comms Costs - by Material with Bad Debt provision";
-        
+
         public static readonly string FeeforLADisposalCostswoBadDebtprovision1 = "1 Fee for LA Disposal Costs w/o Bad Debt provision";
         public static readonly string FeeforLADisposalCostswithBadDebtprovision1 = "1 Fee for LA Disposal Costs with Bad Debt provision";
         public static readonly string FeeforCommsCostsbyMaterialwoBadDebtprovision2A = "2a Fee for Comms Costs - by Material w/o Bad Debt provision";
