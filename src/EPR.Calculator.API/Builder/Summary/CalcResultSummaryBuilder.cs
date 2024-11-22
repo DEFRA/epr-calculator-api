@@ -797,7 +797,7 @@ namespace EPR.Calculator.API.Builder.Summary
             // 2C Comms Cost
             columnHeaders.AddRange([
                 new CalcResultSummaryHeader
-                    { Name = CalcResultSummaryHeaders.TwoCCommsCostCountryInPropertionWithoutBadDebt, ColumnIndex = TwoCColumnIndex },
+                    { Name = CalcResultSummaryHeaders.TwoCCommsCostCountryInPropertionWithoutBadDebt },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostBadDebtProvision },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostCountryInPropertionWithBadDebt},
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostEnglandWithBadDebt },
