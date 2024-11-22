@@ -16,13 +16,14 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int CommsCostHeaderColumnIndex = 100;
         private const int MaterialsBreakdownHeaderInitialColumnIndex = 5;
         private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
-        private const int DisposalFeeSummaryColumnIndex = 93;        
+        private const int DisposalFeeSummaryColumnIndex = 93;
+        private const int LaDataPrepCostsSection4ColumnIndex = 216;
         private const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
         private const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
         //Section-(1) & (2a)
         private const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
-        private const int Total1Plus2ABadDebt = 193;
-        private const int LaDataPrepCostsSection4ColumnIndex = 216;
+        //Section-(1) & (2a)
+        private const int Total1Plus2ABadDebt = 193;        
 
         public static List<ProducerDetail> producerDetailList {  get; set; }
 
@@ -91,8 +92,6 @@ namespace EPR.Calculator.API.Builder.Summary
 
 
             }
-            // Set headers with calculated column index
-            SetHeaders(result, materials);
 
             // Set headers with calculated column index
             SetHeaders(result, materials);
@@ -214,7 +213,6 @@ namespace EPR.Calculator.API.Builder.Summary
         {
             var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
             var commsCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>();
-            var TotalDebtProvision = 1;
 
             foreach (var material in materials)
             {
@@ -456,8 +454,14 @@ namespace EPR.Calculator.API.Builder.Summary
         {
             var producerDisposalFee = GetProducerDisposalFee(producer, material, calcResult);
 
+            var isParseSuccessful = decimal.TryParse(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Replace("%", string.Empty), out decimal value);
 
-            return producerDisposalFee * 6;
+            if (isParseSuccessful)
+            {
+                return (producerDisposalFee * value) / 100;
+            }
+
+            return 0;
         }
 
         private static decimal GetBadDebtProvisionProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material, CalcResult calcResult)
@@ -476,7 +480,14 @@ namespace EPR.Calculator.API.Builder.Summary
         {
             var producerDisposalFee = GetProducerDisposalFee(producer, material, calcResult);
 
-            return producerDisposalFee * (1 + 6);
+            var isParseSuccessful = decimal.TryParse(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Replace("%", string.Empty), out decimal value);
+
+            if (isParseSuccessful)
+            {
+                return producerDisposalFee * (1 + (value / 100));
+            }
+
+            return 0;
         }
 
         private static decimal GetProducerDisposalFeeWithBadDebtProvisionProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material, CalcResult calcResult)
@@ -503,7 +514,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.EnglandDisposalCost.Replace("%", string.Empty), out decimal value);
 
-            return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * value : 0;
+            return isParseSuccessful ? (producerDisposalFeeWithBadDebtProvision * value) / 100 : 0;
         }
 
         private static decimal GetEnglandWithBadDebtProvisionProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material, CalcResult calcResult)
@@ -530,7 +541,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.WalesDisposalCost.Replace("%", string.Empty), out decimal value);
 
-            return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * value : 0;
+            return isParseSuccessful ? (producerDisposalFeeWithBadDebtProvision * value) / 100 : 0;
         }
 
         private static decimal GetWalesWithBadDebtProvisionProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material, CalcResult calcResult)
@@ -557,7 +568,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.ScotlandDisposalCost.Replace("%", string.Empty), out decimal value);
 
-            return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * value : 0;
+            return isParseSuccessful ? (producerDisposalFeeWithBadDebtProvision * value) / 100 : 0;
         }
 
         private static decimal GetScotlandWithBadDebtProvisionProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material, CalcResult calcResult)
@@ -584,7 +595,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             var isParseSuccessful = decimal.TryParse(countryApportionmentPercentage.NorthernIrelandDisposalCost.Replace("%", string.Empty), out decimal value);
 
-            return isParseSuccessful ? producerDisposalFeeWithBadDebtProvision * value : 0;
+            return isParseSuccessful ? (producerDisposalFeeWithBadDebtProvision * value) / 100 : 0;
         }
 
         private static decimal GetNorthernIrelandWithBadDebtProvisionProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material, CalcResult calcResult)
@@ -1068,7 +1079,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             foreach (var material in commsCostSummary)
             {
-                totalCommsCostsbyMaterialwithBadDebtprovision += material.Value.TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision;
+                totalCommsCostsbyMaterialwithBadDebtprovision += material.Value.ProducerTotalCostwithBadDebtProvision;
             }
 
             return totalCommsCostsbyMaterialwithBadDebtprovision;
@@ -1134,7 +1145,7 @@ namespace EPR.Calculator.API.Builder.Summary
         {
             var badDebtProvision = Convert.ToDecimal(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Trim('%'));
             var producerTotalCostWithoutBadDebtProvision = GetProducerTotalCostWithoutBadDebtProvision(producer, material, calcResult);
-            return producerTotalCostWithoutBadDebtProvision * badDebtProvision;
+            return (producerTotalCostWithoutBadDebtProvision * badDebtProvision) / 100;
         }
 
         private static decimal GetProducerTotalCostwithBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
