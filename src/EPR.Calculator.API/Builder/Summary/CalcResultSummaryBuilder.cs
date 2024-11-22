@@ -21,6 +21,7 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
         private const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
         //Section-(1) & (2a)
+        private const int decimalRoundUp = 2;
         private const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
 
         public CalcResultSummaryBuilder(ApplicationDBContext context)
@@ -769,18 +770,18 @@ namespace EPR.Calculator.API.Builder.Summary
                 Name = CalcResultSummaryHeaders.CommsCostSummaryHeader,
                 ColumnIndex = commsCostColumnIndex
             });
-
+            
             //Section-(1) & (2a)
             materialsBreakdownHeaders.AddRange([ 
-                new CalcResultSummaryHeader { Name = $"{result.TotalFeeforLADisposalCostswoBadDebtprovision1}", ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex },
-                new CalcResultSummaryHeader { Name = $"{result.BadDebtProvisionFor1}" },
-                new CalcResultSummaryHeader { Name = $"{result.TotalFeeforLADisposalCostswithBadDebtprovision1}" }
+                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforLADisposalCostswoBadDebtprovision1, decimalRoundUp)}", ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex },
+                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionFor1, decimalRoundUp)}" },
+                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforLADisposalCostswithBadDebtprovision1, decimalRoundUp)}" }
             ]);
 
             materialsBreakdownHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = $"{result.TotalFeeforCommsCostsbyMaterialwoBadDebtProvision2A}", ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 5 },
-                new CalcResultSummaryHeader { Name = $"{result.BadDebtProvisionFor2A}" },
-                new CalcResultSummaryHeader { Name = $"{result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A}" }
+                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwoBadDebtProvision2A, decimalRoundUp)}", ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 5 },
+                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionFor2A, decimalRoundUp)}" },
+                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A, decimalRoundUp)}" }
             ]);
 
             // LA data prep costs section 4
