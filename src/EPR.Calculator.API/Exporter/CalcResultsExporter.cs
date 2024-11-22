@@ -331,7 +331,7 @@ namespace EPR.Calculator.API.Exporter
                     csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.HouseholdPackagingWasteTonnage)},");
                     csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.ManagedConsumerWasteTonnage)},");
                     csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.NetReportedTonnage)},");
-                    csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.PricePerTonne)},");
+                    csvContent.Append(producer.Level != "Totals" ? $"£{CsvSanitiser.SanitiseData(disposalFee.Value.PricePerTonne)}," : ",");
                     csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.ProducerDisposalFee)},");
                     csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.BadDebtProvision)},");
                     csvContent.Append($"{CsvSanitiser.SanitiseData(disposalFee.Value.ProducerDisposalFeeWithBadDebtProvision)},");
@@ -352,7 +352,7 @@ namespace EPR.Calculator.API.Exporter
                 foreach (var disposalFee in producer.ProducerCommsFeesByMaterial)
                 {
                     csvContent.Append($"{CsvSanitiser.SanitiseData(Math.Round(disposalFee.Value.HouseholdPackagingWasteTonnage, 3).ToString("F3"))},");
-                    csvContent.Append($"£{CsvSanitiser.SanitiseData(disposalFee.Value.PriceperTonne)},");
+                    csvContent.Append(producer.Level != "Totals" ? $"£{CsvSanitiser.SanitiseData(disposalFee.Value.PriceperTonne)}," : ",");
                     csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(disposalFee.Value.ProducerTotalCostWithoutBadDebtProvision, decimalRoundUp))},");
                     csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(disposalFee.Value.BadDebtProvision, decimalRoundUp))},");
                     csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(disposalFee.Value.ProducerTotalCostwithBadDebtProvision, decimalRoundUp))},");
