@@ -79,11 +79,8 @@ namespace EPR.Calculator.API.Builder.Summary
                 result.BadDebtProvisionFor2A = GetTotalBadDebtprovision2A(producerDisposalFees);
                 result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A = GetTotalCommsCostswithBadDebtprovision2A(producerDisposalFees);
 
-                result.TotalFeeforCommsCostsbyMaterialwoBadDebtProvision2A = GetTotalProducerCommsFee(commsCostSummary);
-                result.BadDebtProvisionFor2A = GetTotalBadDebtProvision(materialCostSummary);
-                result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A = GetTotalProducerCommsFeeWithBadDebtProvision(commsCostSummary);
                 result.TotalOnePlus2AFeeWithBadDebtProvision = GetTotal1Plus2ABadDebt(materials, calcResult);
-                //result.TotalOnePlus2AFeeWithBadDebtProvision = producerDisposalFees.FirstOrDefault(t=>t.Level == "Totals").TotalProducerDisposalFeeWithBadDebtProvision + producerDisposalFees.FirstOrDefault(t => t.Level == "Totals").TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision;
+                
 
 
 
@@ -842,12 +839,6 @@ namespace EPR.Calculator.API.Builder.Summary
             materialsBreakdownHeaders.AddRange([
                 new CalcResultSummaryHeader { Name = $"{result.TotalOnePlus2AFeeWithBadDebtProvision}", ColumnIndex = Total1Plus2ABadDebt },
             ]);
-
-            materialsBreakdownHeaders.Add(new CalcResultSummaryHeader
-            {
-                Name = CalcResultSummaryHeaders.CommsCostSummaryHeader,
-                ColumnIndex = commsCostColumnIndex
-            });
 
             // LA data prep costs section 4
             materialsBreakdownHeaders.AddRange([
