@@ -335,13 +335,6 @@ namespace EPR.Calculator.API.Builder.Summary
 
         }
 
-
-            private static decimal GetProducerPercentageCosts(decimal producerDisposalFee, decimal commsTotalBadDebt, decimal totalDebtProvision)
-        {
-            if (totalDebtProvision <= 0) return 0;
-            return Math.Round((producerDisposalFee + commsTotalBadDebt) / totalDebtProvision, 8);
-        }
-
         private static int GetLevelIndex(List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup, ProducerDetail producer)
         {
             var totalRow = producerDisposalFeesLookup.Find(pdf => pdf.ProducerId == producer.ProducerId.ToString() && pdf.isTotalRow);
@@ -849,9 +842,6 @@ namespace EPR.Calculator.API.Builder.Summary
             ]);
 
             materialsBreakdownHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwoBadDebtProvision2A, decimalRoundUp)}", ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 5 },
-                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionFor2A, decimalRoundUp)}" },
-                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A, decimalRoundUp)}" },
                 new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalOnePlus2AFeeWithBadDebtProvision,decimalRoundUp)}", ColumnIndex = Total1Plus2ABadDebt },
             ]);
 
