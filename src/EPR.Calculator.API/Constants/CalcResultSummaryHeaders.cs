@@ -4,7 +4,7 @@
     {
         public static readonly string CalculationResult = "Calculation Result";
         public static readonly string OneProducerDisposalFeesWithBadDebtProvision = "1 Producer Disposal Fees with Bad Debt Provision";
-        public static readonly string CommsCostHeader = "2a Total for Comms Cost - by Material with Bad Debt provision";
+        public static readonly string CommsCostHeader = "2a Fees for Comms Costs - by Material with Bad Debt provision";
         public static readonly string CommsCostSummaryHeader = "Summary of Fee for Comms Costs - by Material";
 
 
