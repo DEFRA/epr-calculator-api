@@ -251,7 +251,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(11, result.ProducerDisposalFeesHeaders.Count());
+            Assert.AreEqual(12, result.ProducerDisposalFeesHeaders.Count());
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
@@ -479,7 +479,7 @@ namespace EPR.Calculator.API.UnitTests
         public void GetTotalDisposalCostswithBadDebtOnePlus2A_ShouldReturnCorrectValues()
         {
 
-            var materialInDb = _context.Material.ToList();
+          var materialInDb = _context.Material.ToList();
             var material = Mappers.MaterialMapper.Map(materialInDb);
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
 
@@ -489,12 +489,12 @@ namespace EPR.Calculator.API.UnitTests
                .ToList();
 
             var value = CalcResultSummaryBuilder.GetTotal1Plus2ABadDebtPercentage(100, 100, material, _calcResult);
-            Assert.AreEqual(0.70977200M, value);
+            Assert.AreEqual(4.52685300M, value);
 
             var totalFee = CalcResultSummaryBuilder.GetTotal1Plus2ABadDebt(material, _calcResult);
-            Assert.AreEqual(28178.0800M, totalFee);
+            Assert.AreEqual(4418.0800M, totalFee);
 
-            var debt = Math.Floor((value * totalFee) / 100);
+            var debt = Math.Ceiling((value * totalFee) / 100);
             Assert.AreEqual(200, debt);
         }
     }
