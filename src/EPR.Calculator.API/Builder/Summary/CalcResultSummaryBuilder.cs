@@ -16,15 +16,15 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int CommsCostHeaderColumnIndex = 100;
         private const int MaterialsBreakdownHeaderInitialColumnIndex = 5;
         private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
-        private const int DisposalFeeSummaryColumnIndex = 93;
-        private const int LaDataPrepCostsSection4ColumnIndex = 216;
+        private const int DisposalFeeSummaryColumnIndex = 93;        
         private const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
         private const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
         //Section-(1) & (2a)
         private const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
         private const int Total1Plus2ABadDebt = 193;
+        private const int LaDataPrepCostsSection4ColumnIndex = 216;
 
-        private static List<ProducerDetail> producerDetailList {  get; set; }
+        public static List<ProducerDetail> producerDetailList {  get; set; }
 
         public CalcResultSummaryBuilder(ApplicationDBContext context)
         {
@@ -312,7 +312,7 @@ namespace EPR.Calculator.API.Builder.Summary
         }
 
         //section bad debt total
-        private static decimal GetTotal1Plus2ABadDebt(List<MaterialDetail> materials, CalcResult calcResult)
+        public static decimal GetTotal1Plus2ABadDebt(List<MaterialDetail> materials, CalcResult calcResult)
         {
             decimal total = 0m;            
 
@@ -326,7 +326,7 @@ namespace EPR.Calculator.API.Builder.Summary
             return total;
         }
 
-        private static decimal GetTotal1Plus2ABadDebtPercentage(decimal totalLaDisposal, decimal total2aCommsCost, List<MaterialDetail> materials, CalcResult calcResult)
+        public static decimal GetTotal1Plus2ABadDebtPercentage(decimal totalLaDisposal, decimal total2aCommsCost, List<MaterialDetail> materials, CalcResult calcResult)
         {
             var total = GetTotal1Plus2ABadDebt(materials, calcResult);
 
