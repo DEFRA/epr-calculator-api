@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Collections.Generic;
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
@@ -313,6 +314,116 @@ namespace EPR.Calculator.API.UnitTests
             });
 
             context.SaveChanges();
+        }
+
+        [TestMethod]
+        public void GetTotalBadDebtprovision1_ShouldReturnCorrectValue()
+        {
+            var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            Assert.IsNotNull(result);
+
+            var totalRow = result.ProducerDisposalFees.LastOrDefault();
+            Assert.IsNotNull(totalRow);
+            totalRow.BadDebtProvisionFor1 = 100m;
+            totalRow.Level = "Totals";
+
+            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.BadDebtProvisionFor1);
+
+            Assert.AreEqual(100m, totalFee);
+        }
+
+        [TestMethod]
+        public void GetTotalDisposalCostswithBadDebtprovision1_ShouldReturnCorrectValue()
+        {
+            var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            Assert.IsNotNull(result);
+
+            var totalRow = result.ProducerDisposalFees.LastOrDefault();
+            Assert.IsNotNull(totalRow);
+            totalRow.TotalProducerDisposalFeeWithBadDebtProvision = 200m;
+            totalRow.Level = "Totals";
+
+            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.TotalProducerDisposalFeeWithBadDebtProvision);
+
+            Assert.AreEqual(200m, totalFee);
+        }
+
+        [TestMethod]
+        public void GetTotalCommsCostswoBadDebtprovision2A_ShouldReturnCorrectValue()
+        {
+            var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            Assert.IsNotNull(result);
+
+            var totalRow = result.ProducerDisposalFees.LastOrDefault();
+            Assert.IsNotNull(totalRow);
+            totalRow.TotalProducerCommsFee = 300m;
+            totalRow.Level = "Totals";
+
+            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.TotalProducerCommsFee);
+
+            Assert.AreEqual(300m, totalFee);
+        }
+
+        [TestMethod]
+        public void GetTotalBadDebtprovision2A_ShouldReturnCorrectValue()
+        {
+            var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            Assert.IsNotNull(result);
+
+            var totalRow = result.ProducerDisposalFees.LastOrDefault();
+            Assert.IsNotNull(totalRow);
+            totalRow.BadDebtProvisionFor2A = 400m;
+            totalRow.Level = "Totals";
+
+            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.BadDebtProvisionFor2A);
+
+            Assert.AreEqual(400m, totalFee);
+        }
+
+        [TestMethod]
+        public void GetTotalCommsCostswithBadDebtprovision2A_ShouldReturnCorrectValue()
+        {
+            var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            Assert.IsNotNull(result);
+
+            var totalRow = result.ProducerDisposalFees.LastOrDefault();
+            Assert.IsNotNull(totalRow);
+            totalRow.TotalProducerCommsFeeWithBadDebtProvision = 500m;
+            totalRow.Level = "Totals";
+
+            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.TotalProducerCommsFeeWithBadDebtProvision);
+
+            Assert.AreEqual(500m, totalFee);
+        }
+
+        [TestMethod]
+        public void GetTotalFee_ShouldReturnZero_WhenNoTotalsLevel()
+        {
+            var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            Assert.IsNotNull(result);
+
+            var totalRow = result.ProducerDisposalFees.LastOrDefault();
+            Assert.IsNotNull(totalRow);
+            totalRow.BadDebtProvisionFor1 = 0m;
+            totalRow.Level = "Totals";
+
+            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.BadDebtProvisionFor1);
+
+            Assert.AreEqual(0m, totalFee);
+        }
+
+        [TestMethod]
+        public void GetTotalFee_ShouldReturnZero_WhenFeesIsNull()
+        {
+            var result = CalcResultSummaryBuilder.GetTotalFee(null, fee => fee.BadDebtProvisionFor1);
+
+            Assert.AreEqual(0m, result);
         }
     }
 }
