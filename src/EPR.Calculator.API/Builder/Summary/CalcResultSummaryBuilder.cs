@@ -851,7 +851,7 @@ namespace EPR.Calculator.API.Builder.Summary
             materialsBreakdownHeaders.AddRange([
                 new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwoBadDebtProvision2A, decimalRoundUp)}", ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 5 },
                 new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionFor2A, decimalRoundUp)}" },
-                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A, decimalRoundUp)}" }
+                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A, decimalRoundUp)}" },
                 new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalOnePlus2AFeeWithBadDebtProvision,decimalRoundUp)}", ColumnIndex = Total1Plus2ABadDebt },
             ]);
 
