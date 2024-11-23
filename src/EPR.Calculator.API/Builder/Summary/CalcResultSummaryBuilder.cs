@@ -746,17 +746,26 @@ namespace EPR.Calculator.API.Builder.Summary
                     Name = CalcResultSummaryHeaders.FeeforLADisposalCostswoBadDebtprovision1,
                     ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex
                 },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision },
                 new CalcResultSummaryHeader
-                    { Name = CalcResultSummaryHeaders.FeeforLADisposalCostswithBadDebtprovision1 },
+                {
+                    Name = CalcResultSummaryHeaders.BadDebtProvision,
+                    ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 1
+                },
+                new CalcResultSummaryHeader
+                {
+                    Name = CalcResultSummaryHeaders.FeeforLADisposalCostswithBadDebtprovision1,
+                    ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 2
+                },
                 new CalcResultSummaryHeader
                 {
                     Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwoBadDebtprovision2A,
-                    ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 5
+                    ColumnIndex = 186
                 },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision, ColumnIndex = 187 },
                 new CalcResultSummaryHeader
-                    { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwithBadDebtprovision2A },
+                {
+                    Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwithBadDebtprovision2A, ColumnIndex = 188
+                },
 
                 //Section-4 Title headers
                 new CalcResultSummaryHeader
@@ -764,8 +773,16 @@ namespace EPR.Calculator.API.Builder.Summary
                     Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithout,
                     ColumnIndex = TwoCCommsCostColumnIndex.Value
                 },
-                new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostBadBebtProvision },
-                new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithBadDebt },
+                new CalcResultSummaryHeader
+                {
+                    Name = TwoCCommsConstantsHeader.TwoCCommsCostBadBebtProvision,
+                    ColumnIndex = TwoCCommsCostColumnIndex.Value + 1
+                },
+                new CalcResultSummaryHeader
+                {
+                    Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithBadDebt,
+                    ColumnIndex = TwoCCommsCostColumnIndex.Value + 2
+                },
 
                 //Section-4 Title headers
                 new CalcResultSummaryHeader

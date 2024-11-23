@@ -43,7 +43,6 @@ namespace EPR.Calculator.API.Exporter
             }            
 
             csvContent.AppendLine();
-            // csvContent.AppendLine(results.CalcResultCommsCostReportDetail.ToString());
 
             if (results?.CalcResultParameterOtherCost != null)
             {
@@ -396,7 +395,7 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4)},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4)},");
 
-        csvContent.AppendLine();
+                csvContent.AppendLine();
             }
         }
 
@@ -419,22 +418,18 @@ namespace EPR.Calculator.API.Exporter
 
         private static void WriteProducerDisposalFeesHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
         {
-            var currentPosition = 0;
+            const int maxColumnSize = 235;
+            var headerRows = new string[maxColumnSize];
             foreach (var item in resultSummary.ProducerDisposalFeesHeaders)
             {
-                if (item.ColumnIndex != null)
+                if (item.ColumnIndex.HasValue)
                 {
-                    var indexCounter = (int)item.ColumnIndex - currentPosition;
-                    for (var i = 1; i < indexCounter; i++)
-                    {
-                        csvContent.Append(",");
-                    }
-                    currentPosition += indexCounter;
+                    headerRows[item.ColumnIndex.Value - 1] = $"{item.Name}";
                 }
-
-                csvContent.Append($"{CsvSanitiser.SanitiseData(item.Name)},");
             }
-            csvContent.AppendLine();
+
+            var headerRow = string.Join(",", headerRows);
+            csvContent.AppendLine(headerRow);
         }
 
         private static void WriteMaterialsBreakdownHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
