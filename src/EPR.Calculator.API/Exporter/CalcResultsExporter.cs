@@ -424,7 +424,7 @@ namespace EPR.Calculator.API.Exporter
             {
                 if (item.ColumnIndex.HasValue)
                 {
-                    headerRows[item.ColumnIndex.Value - 1] = $"{item.Name}";
+                    headerRows[item.ColumnIndex.Value - 1] = $"{CsvSanitiser.SanitiseData(item.Name)}";
                 }
             }
 
