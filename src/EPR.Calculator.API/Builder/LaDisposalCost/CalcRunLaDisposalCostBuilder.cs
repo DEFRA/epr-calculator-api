@@ -109,7 +109,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
             var culture = CultureInfo.CreateSpecificCulture("en-GB");
             culture.NumberFormat.CurrencySymbol = "£";
             culture.NumberFormat.CurrencyPositivePattern = 0;
-            return value.ToString("C", culture);
+            return value.ToString("C4", culture);
         }
 
 
