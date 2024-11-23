@@ -24,6 +24,9 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int decimalRoundUp = 2;
         private const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
 
+        // Percentage of Producer Reported Household Tonnage vs All Producers
+        private const int PercentageofProducerReportedHHTonnageColumnIndex = 193;
+
         public CalcResultSummaryBuilder(ApplicationDBContext context)
         {
             this.context = context;
@@ -89,7 +92,7 @@ namespace EPR.Calculator.API.Builder.Summary
             return result;
         }
 
-        private static CalcResultSummaryProducerDisposalFees GetProducerTotalRow(
+        private CalcResultSummaryProducerDisposalFees GetProducerTotalRow(
             List<ProducerDetail> producersAndSubsidiaries, List<MaterialDetail> materials, CalcResult calcResult, bool isOverAllTotalRow = false)
         {
             var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
@@ -180,12 +183,14 @@ namespace EPR.Calculator.API.Builder.Summary
                 LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4(),
                 LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
 
+                // Percentage of Producer Reported Household Tonnage vs All Producers
+                PercentageofProducerReportedHHTonnagevsAllProducers = GetPercentageofProducerReportedHHTonnagevsAllProducersTotal(producersAndSubsidiaries),
                 isTotalRow = true
             };
 
         }
 
-        private static CalcResultSummaryProducerDisposalFees GetProducerRow(
+        private CalcResultSummaryProducerDisposalFees GetProducerRow(
             List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup, ProducerDetail producer, List<MaterialDetail> materials, CalcResult calcResult)
         {
             var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
@@ -276,6 +281,8 @@ namespace EPR.Calculator.API.Builder.Summary
                 LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4(),
                 LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
 
+                // Percentage of Producer Reported Household Tonnage vs All Producers
+                PercentageofProducerReportedHHTonnagevsAllProducers = GetPercentageofProducerReportedHHTonnagevsAllProducers(producer),
             };
         }
 
@@ -658,7 +665,7 @@ namespace EPR.Calculator.API.Builder.Summary
         {
             return GetLaDataPrepCostsTitleSection4(calcResult) + GetLaDataPrepCostsBadDebtProvisionTitleSection4(calcResult);
         }
-        
+
         private static decimal GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4()
         {
             return 99;
@@ -723,7 +730,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwoBadDebtprovision2A, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 5 },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision},
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwithBadDebtprovision2A },
-                
+
                 //Section-4 Title headers
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionTitleSection4 },
@@ -770,9 +777,9 @@ namespace EPR.Calculator.API.Builder.Summary
                 Name = CalcResultSummaryHeaders.CommsCostSummaryHeader,
                 ColumnIndex = commsCostColumnIndex
             });
-            
+
             //Section-(1) & (2a)
-            materialsBreakdownHeaders.AddRange([ 
+            materialsBreakdownHeaders.AddRange([
                 new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforLADisposalCostswoBadDebtprovision1, decimalRoundUp)}", ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex },
                 new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionFor1, decimalRoundUp)}" },
                 new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforLADisposalCostswithBadDebtprovision1, decimalRoundUp)}" }
@@ -876,6 +883,23 @@ namespace EPR.Calculator.API.Builder.Summary
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ScotlandTotalwithBadDebtprovision },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalwithBadDebtprovision }
             ]);
+
+            // skippping columns for other sections
+            columnHeaders.AddRange([
+                new CalcResultSummaryHeader { Name = "" }, 
+                new CalcResultSummaryHeader { Name = "" }
+            ]);
+
+            // Percentage of Producer Reported Household Tonnage vs All Producers
+            columnHeaders.AddRange([
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PercentageofProducerReportedHHTonnagevsAllProducers, ColumnIndex = PercentageofProducerReportedHHTonnageColumnIndex },
+            ]);
+
+            // skippping columns for other sections
+            for (int i = PercentageofProducerReportedHHTonnageColumnIndex; i <= LaDataPrepCostsSection4ColumnIndex; i++)
+            {
+                columnHeaders.AddRange([new CalcResultSummaryHeader { Name = "", ColumnIndex = i }]);
+            }
 
             // LA data prep costs section 4 column headers
             columnHeaders.AddRange([
@@ -1133,17 +1157,17 @@ namespace EPR.Calculator.API.Builder.Summary
         {
             return GetTotalFee(producerDisposalFees, fee => fee.TotalProducerDisposalFeeWithBadDebtProvision);
         }
-        
+
         private static decimal GetTotalCommsCostswoBadDebtprovision2A(IEnumerable<CalcResultSummaryProducerDisposalFees> producerDisposalFees)
         {
             return GetTotalFee(producerDisposalFees, fee => fee.TotalProducerCommsFee);
         }
-        
+
         private static decimal GetTotalBadDebtprovision2A(IEnumerable<CalcResultSummaryProducerDisposalFees> producerDisposalFees)
         {
             return GetTotalFee(producerDisposalFees, fee => fee.BadDebtProvisionFor2A);
         }
-        
+
         private static decimal GetTotalCommsCostswithBadDebtprovision2A(IEnumerable<CalcResultSummaryProducerDisposalFees> producerDisposalFees)
         {
             return GetTotalFee(producerDisposalFees, fee => fee.TotalProducerCommsFeeWithBadDebtProvision);
@@ -1160,6 +1184,41 @@ namespace EPR.Calculator.API.Builder.Summary
                 .FirstOrDefault(t => t.Level == "Totals");
 
             return selector(totalFee) ?? 0m;
+        }
+
+        private decimal GetPercentageofProducerReportedHHTonnagevsAllProducersTotal(List<ProducerDetail> producers)
+        {
+            decimal totalPercentageofProducerReportedHH = 0;
+
+            foreach (var producer in producers)
+            {
+                totalPercentageofProducerReportedHH += GetPercentageofProducerReportedHHTonnagevsAllProducers(producer);
+            }
+
+            return totalPercentageofProducerReportedHH;
+        }
+
+        private decimal GetPercentageofProducerReportedHHTonnagevsAllProducers(ProducerDetail producer)
+        {
+            var result =
+                        (from p in context.ProducerDetail
+                         join m in context.ProducerReportedMaterial
+                         on p.Id equals m.ProducerDetailId
+                         where p.CalculatorRunId == producer.CalculatorRunId && m.PackagingType == "HH"
+                         group m by p.ProducerId into g
+                         select new
+                         {
+                             ProducerId = g.Key,
+                             TotalPackagingTonnage = g.Sum(x => x.PackagingTonnage)
+                         }).ToList();
+
+            var totalTonnage = result.Sum(x => x.TotalPackagingTonnage);
+            var producerData = result.FirstOrDefault(x => x.ProducerId == producer.ProducerId);
+            var PercentageofHHTonnage = producerData != null && totalTonnage > 0
+                ? (producerData.TotalPackagingTonnage / totalTonnage) * 100
+                : 0;
+
+            return PercentageofHHTonnage;
         }
     }
 }
