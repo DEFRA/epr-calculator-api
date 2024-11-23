@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Builder.Summary.TwoCCommsCost;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -17,7 +18,7 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int MaterialsBreakdownHeaderInitialColumnIndex = 5;
         private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
         private const int DisposalFeeSummaryColumnIndex = 93;
-        private const int TwoCColumnIndex = 202;
+
         private const int LaDataPrepCostsSection4ColumnIndex = 216;
         private const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
         private const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
@@ -183,13 +184,13 @@ namespace EPR.Calculator.API.Builder.Summary
 
 
                 //2c Section
-                TwoCTotalProducerFeeForCommsCostsWithoutBadDebt = Decimal.One,
-                TwoCBadDebtProvision = Decimal.One,
-                TwoCTotalProducerFeeForCommsCostsWithBadDebt = Decimal.One,
-                TwoCEnglandTotalWithBadDebt = Decimal.One,
-                TwoCWalesTotalWithBadDebt = Decimal.One,
-                TwoCScotlandTotalWithBadDebt = Decimal.One,
-                TwoCNorthernIrelandTotalWithBadDebt = Decimal.One,
+                TwoCTotalProducerFeeForCommsCostsWithoutBadDebt = 500M,
+                TwoCBadDebtProvision = 500M,
+                TwoCTotalProducerFeeForCommsCostsWithBadDebt = 500M,
+                TwoCEnglandTotalWithBadDebt = 500M,
+                TwoCWalesTotalWithBadDebt = 500M,
+                TwoCScotlandTotalWithBadDebt = 500M,
+                TwoCNorthernIrelandTotalWithBadDebt = 500M,
 
 
                 //For Comms End
@@ -728,27 +729,58 @@ namespace EPR.Calculator.API.Builder.Summary
 
         private static List<CalcResultSummaryHeader> GetProducerDisposalFeesHeaders()
         {
-            return [
+            return
+            [
                 //Section-1 Title headers
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.OneProducerDisposalFeesWithBadDebtProvision, ColumnIndex = ProducerDisposalFeesHeaderColumnIndex },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.CommsCostHeader, ColumnIndex = CommsCostHeaderColumnIndex },
-                
+                new CalcResultSummaryHeader
+                {
+                    Name = CalcResultSummaryHeaders.OneProducerDisposalFeesWithBadDebtProvision,
+                    ColumnIndex = ProducerDisposalFeesHeaderColumnIndex
+                },
+                new CalcResultSummaryHeader
+                    { Name = CalcResultSummaryHeaders.CommsCostHeader, ColumnIndex = CommsCostHeaderColumnIndex },
+
                 //Section-(1) & (2a) Title headers   
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforLADisposalCostswoBadDebtprovision1, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision},
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforLADisposalCostswithBadDebtprovision1 },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwoBadDebtprovision2A, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 5 },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision},
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwithBadDebtprovision2A },
-                
+                new CalcResultSummaryHeader
+                {
+                    Name = CalcResultSummaryHeaders.FeeforLADisposalCostswoBadDebtprovision1,
+                    ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex
+                },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision },
+                new CalcResultSummaryHeader
+                    { Name = CalcResultSummaryHeaders.FeeforLADisposalCostswithBadDebtprovision1 },
+                new CalcResultSummaryHeader
+                {
+                    Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwoBadDebtprovision2A,
+                    ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 5
+                },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision },
+                new CalcResultSummaryHeader
+                    { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwithBadDebtprovision2A },
+
                 //Section-4 Title headers
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
+                new CalcResultSummaryHeader
+                {
+                    Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithout,
+                    ColumnIndex = TwoCCommsCostColumnIndex.Value
+                },
+                new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostBadBebtProvision },
+                new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithBadDebt },
+
+                //Section-4 Title headers
+                new CalcResultSummaryHeader
+                {
+                    Name = CalcResultSummaryHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitleSection4,
+                    ColumnIndex = LaDataPrepCostsSection4ColumnIndex
+                },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionTitleSection4 },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithBadDebtProvisionTitleSection4 },
+                new CalcResultSummaryHeader
+                    { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithBadDebtProvisionTitleSection4 },
             ];
         }
 
-        private static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(CalcResultSummary result, List<MaterialDetail> materials)
+        private static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(CalcResultSummary result,
+            List<MaterialDetail> materials)
         {
             var materialsBreakdownHeaders = new List<CalcResultSummaryHeader>();
             var columnIndex = MaterialsBreakdownHeaderInitialColumnIndex;
@@ -787,37 +819,60 @@ namespace EPR.Calculator.API.Builder.Summary
                 Name = CalcResultSummaryHeaders.CommsCostSummaryHeader,
                 ColumnIndex = commsCostColumnIndex
             });
-            
+
             //Section-(1) & (2a)
-            materialsBreakdownHeaders.AddRange([ 
-                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforLADisposalCostswoBadDebtprovision1, decimalRoundUp)}", ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex },
+            materialsBreakdownHeaders.AddRange([
+                new CalcResultSummaryHeader
+                {
+                    Name = $"£{Math.Round(result.TotalFeeforLADisposalCostswoBadDebtprovision1, decimalRoundUp)}",
+                    ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex
+                },
                 new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionFor1, decimalRoundUp)}" },
-                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforLADisposalCostswithBadDebtprovision1, decimalRoundUp)}" }
+                new CalcResultSummaryHeader
+                    { Name = $"£{Math.Round(result.TotalFeeforLADisposalCostswithBadDebtprovision1, decimalRoundUp)}" }
             ]);
 
             materialsBreakdownHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwoBadDebtProvision2A, decimalRoundUp)}", ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 5 },
+                new CalcResultSummaryHeader
+                {
+                    Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwoBadDebtProvision2A, decimalRoundUp)}",
+                    ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 5
+                },
                 new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionFor2A, decimalRoundUp)}" },
-                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A, decimalRoundUp)}" }
+                new CalcResultSummaryHeader
+                {
+                    Name =
+                        $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A, decimalRoundUp)}"
+                }
             ]);
 
             // LA data prep costs section 4
             materialsBreakdownHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsTitleSection4}", ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
+                new CalcResultSummaryHeader
+                {
+                    Name = $"{result.LaDataPrepCostsTitleSection4}", ColumnIndex = LaDataPrepCostsSection4ColumnIndex
+                },
                 new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsBadDebtProvisionTitleSection4}" },
                 new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsWithBadDebtProvisionTitleSection4}" }
             ]);
 
             // 2c section
             materialsBreakdownHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = $"{result.TwoCCommsCostsByCountryWithoutBadDebtProvision}", ColumnIndex = TwoCColumnIndex },
+                new CalcResultSummaryHeader
+                {
+                    Name = $"{result.TwoCCommsCostsByCountryWithoutBadDebtProvision}",
+                    ColumnIndex = TwoCCommsCostColumnIndex.Value
+                },
                 new CalcResultSummaryHeader { Name = $"{result.TwoCBadDebtProvision}" },
                 new CalcResultSummaryHeader { Name = $"{result.TwoCCommsCostsByCountryWithBadDebtProvision}" }
             ]);
 
             // LA data prep costs section 4
             materialsBreakdownHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsTitleSection4}", ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
+                new CalcResultSummaryHeader
+                {
+                    Name = $"{result.LaDataPrepCostsTitleSection4}", ColumnIndex = LaDataPrepCostsSection4ColumnIndex
+                },
                 new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsBadDebtProvisionTitleSection4}" },
                 new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsWithBadDebtProvisionTitleSection4}" }
             ]);
@@ -911,13 +966,13 @@ namespace EPR.Calculator.API.Builder.Summary
             // 2C Comms Cost
             columnHeaders.AddRange([
                 new CalcResultSummaryHeader
-                    { Name = CalcResultSummaryHeaders.TwoCCommsCostCountryInPropertionWithoutBadDebt },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostBadDebtProvision },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostCountryInPropertionWithBadDebt},
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostEnglandWithBadDebt },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostWalesWithBadDebt },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostScotlandWithBadDebt },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TwoCCommsCostNIWithBadDebt },
+                    { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostCountryInPropertionWithoutBadDebt },
+                new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostBadDebtProvision },
+                new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostCountryInPropertionWithBadDebt},
+                new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostEnglandWithBadDebt },
+                new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostWalesWithBadDebt },
+                new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostScotlandWithBadDebt },
+                new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostNIWithBadDebt },
             ]);
 
         // LA data prep costs section 4 column headers
