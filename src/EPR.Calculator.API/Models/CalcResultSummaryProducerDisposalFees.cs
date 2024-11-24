@@ -94,6 +94,8 @@
         public decimal TwoCScotlandTotalWithBadDebt { get; set; }
         public decimal TwoCNorthernIrelandTotalWithBadDebt { get; set; }
 
+        public decimal PercentageofProducerReportedHHTonnagevsAllProducers { get; set; }
+
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> ProducerCommsFeesByMaterial { get; set; }
 

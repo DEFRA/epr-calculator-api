@@ -23,6 +23,8 @@ namespace EPR.Calculator.API.Exporter
         private const string CountryApportionmentFile = "Country Apportionment File";
         private const int ProducerCommsFeesHeaderColumnIndex = 95;
         private const int decimalRoundUp = 2;
+        private const int LaDataPrepCostsSection4ColumnIndex = 216;
+        private const int PercentageofProducerReportedHHTonnageColumnIndex = 193;
 
         public CalcResultsExporter(IBlobStorageService blobStorageService)
         {
@@ -385,6 +387,19 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.WalesTotalwithBadDebtprovision2A, decimalRoundUp))},");
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.ScotlandTotalwithBadDebtprovision2A, decimalRoundUp))},");
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.NorthernIrelandTotalwithBadDebtprovision2A, decimalRoundUp))},");
+
+                // skipping columns for other sections
+                csvContent.Append($",");
+                csvContent.Append($",");
+
+                // Percentage of Producer Reported Household Tonnage vs All Producers
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.PercentageofProducerReportedHHTonnagevsAllProducers)}%,");
+
+                // skipping columns for other sections
+                for (int i = PercentageofProducerReportedHHTonnageColumnIndex; i <= LaDataPrepCostsSection4ColumnIndex; i++)
+                {
+                    csvContent.Append($",");
+                };
 
                 // LA data prep costs section 4
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsTotalWithoutBadDebtProvisionSection4)},");

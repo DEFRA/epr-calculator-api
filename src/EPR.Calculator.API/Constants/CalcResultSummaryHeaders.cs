@@ -119,6 +119,9 @@ namespace EPR.Calculator.API.Constants
 
         public static readonly string WalesTotalWithBadDebtProvisionSection4 = "Wales Total with Bad Debt provision";
 
+        // Percentage of Producer Reported Household Tonnage vs All Producers
+        public static readonly string PercentageofProducerReportedHHTonnagevsAllProducers = "Percentage of Producer Reported Household Tonnage vs All Producers";
+
         public static readonly string ScotlandTotalWithBadDebtProvisionSection4 =
             "Scotland Total with Bad Debt provision";
 

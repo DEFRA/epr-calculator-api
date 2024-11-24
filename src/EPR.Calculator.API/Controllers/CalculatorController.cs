@@ -114,9 +114,7 @@ namespace EPR.Calculator.API.Controllers
                         CreatedBy = User?.Identity?.Name ?? request.CreatedBy
                     };
 
-#if DEBUG
-#else
-
+#if !DEBUG
                     // Send message to service bus
                     var client = _serviceBusClientFactory.CreateClient("calculator");
                     ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
@@ -124,6 +122,7 @@ namespace EPR.Calculator.API.Controllers
                     ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
                     await serviceBusSender.SendMessageAsync(serviceBusMessage);
 #endif
+
                     // All good, commit transaction
                     transaction.Commit();
                 }
