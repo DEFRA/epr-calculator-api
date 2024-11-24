@@ -49,8 +49,6 @@ namespace EPR.Calculator.API.Builder.Summary
 
             if (producerDetailList.Count > 0)
             {
-
-
                 var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
 
                 foreach (var producer in producerDetailList)
@@ -87,6 +85,8 @@ namespace EPR.Calculator.API.Builder.Summary
                 result.LaDataPrepCostsTitleSection4 = GetLaDataPrepCostsTitleSection4(calcResult);
                 result.LaDataPrepCostsBadDebtProvisionTitleSection4 = GetLaDataPrepCostsBadDebtProvisionTitleSection4(calcResult);
                 result.LaDataPrepCostsWithBadDebtProvisionTitleSection4 = GetLaDataPrepCostsWithBadDebtProvisionTitleSection4(calcResult);
+
+                result.schemeAdministratorSetupCostsSummary = new SchemeAdministratorSetupCostsSummary();
             }
 
             // Set headers with calculated column index
@@ -746,7 +746,7 @@ namespace EPR.Calculator.API.Builder.Summary
             return 99;
         }
 
-        private static void SetHeaders(CalcResultSummaryHeader result, List<MaterialDetail> materials)
+        private static void SetHeaders(CalcResultSummary result, List<MaterialDetail> materials)
         {
             result.ResultSummaryHeader = new CalcResultSummaryHeader
             {
@@ -786,7 +786,7 @@ namespace EPR.Calculator.API.Builder.Summary
             ];
         }
 
-        private static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(CalcResultSummaryHeader result, List<MaterialDetail> materials)
+        private static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(CalcResultSummary result, List<MaterialDetail> materials)
         {
             var materialsBreakdownHeaders = new List<CalcResultSummaryHeader>();
             var columnIndex = MaterialsBreakdownHeaderInitialColumnIndex;

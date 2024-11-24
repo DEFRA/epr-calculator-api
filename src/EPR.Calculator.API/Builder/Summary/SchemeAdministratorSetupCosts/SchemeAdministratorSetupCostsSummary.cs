@@ -6,10 +6,10 @@ namespace EPR.Calculator.API.Builder.Summary.SchemeAdministratorSetupCosts
     {
         private static readonly int columnIndex = 223;
 
-        private decimal badDebtProvision;
-        private decimal oneOffFeeSetupCostsWithBadDebtProvision;
-        private decimal oneOffFeeSetupCostsWithoutBadDebtProvision;
-        
+        public decimal BadDebtProvision { get; set; }
+        public decimal OneOffFeeSetupCostsWithBadDebtProvision { get; set; }
+        public decimal OneOffFeeSetupCostsWithoutBadDebtProvision { get; set; }
+
         public SchemeAdministratorSetupCostsSummary()
         {
             this.Calculate();
@@ -18,17 +18,17 @@ namespace EPR.Calculator.API.Builder.Summary.SchemeAdministratorSetupCosts
         public IEnumerable<CalcResultSummaryHeader> GetHeaders()
         {
             return[
-                new CalcResultSummaryHeader { Name = $"{oneOffFeeSetupCostsWithoutBadDebtProvision}", ColumnIndex = columnIndex },
-                new CalcResultSummaryHeader { Name = $"{badDebtProvision}" },
-                new CalcResultSummaryHeader { Name = $"{oneOffFeeSetupCostsWithBadDebtProvision}" }
+                new CalcResultSummaryHeader { Name = $"{OneOffFeeSetupCostsWithoutBadDebtProvision}", ColumnIndex = columnIndex },
+                new CalcResultSummaryHeader { Name = $"{BadDebtProvision}" },
+                new CalcResultSummaryHeader { Name = $"{OneOffFeeSetupCostsWithBadDebtProvision}" }
             ];
         }
 
         private void Calculate()
         {
-            badDebtProvision = GetBadDebtProvision();
-            oneOffFeeSetupCostsWithBadDebtProvision = GetOneOffFeeSetupCostsWithBadDebtProvision();
-            oneOffFeeSetupCostsWithoutBadDebtProvision = GetOneOffFeeSetupCostsWithoutBadDebtProvision();
+            BadDebtProvision = GetBadDebtProvision();
+            OneOffFeeSetupCostsWithBadDebtProvision = GetOneOffFeeSetupCostsWithBadDebtProvision();
+            OneOffFeeSetupCostsWithoutBadDebtProvision = GetOneOffFeeSetupCostsWithoutBadDebtProvision();
         }
 
         private decimal GetBadDebtProvision()

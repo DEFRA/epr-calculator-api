@@ -18,15 +18,6 @@ namespace EPR.Calculator.API.Builder.Summary.SchemeAdministratorSetupCosts
             this.Calculate();
         }
 
-        public IEnumerable<CalcResultSummaryHeader> GetTitleHeaders()
-        {
-            return [
-                new CalcResultSummaryHeader { Name = SchemeAdministratorSetupCostsHeaders.OneOffFeeSetupCostsWithoutBadDebtProvisionTitle, order = 1 },
-                new CalcResultSummaryHeader { Name = SchemeAdministratorSetupCostsHeaders.BadDebtProvisionTitle, order = 2 },
-                new CalcResultSummaryHeader { Name = SchemeAdministratorSetupCostsHeaders.OneOffFeeSetupCostsWithBadDebtProvisionTitle, order = 3 }
-            ];
-        }
-
         public IEnumerable<CalcResultSummaryHeader> GetHeaders()
         {
             return [

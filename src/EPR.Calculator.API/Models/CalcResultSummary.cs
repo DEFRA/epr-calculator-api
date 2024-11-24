@@ -36,7 +36,7 @@ namespace EPR.Calculator.API.Models
         public decimal LaDataPrepCostsWithBadDebtProvisionTitleSection4 { get; set; }
 
         // Section-5
-        public SchemeAdministratorSetupCostsSummary schemeAdministratorSetupCostsTitle { get; set; }
+        public SchemeAdministratorSetupCostsSummary schemeAdministratorSetupCostsSummary { get; set; }
 
         public IEnumerable<CalcResultSummaryProducerDisposalFees> ProducerDisposalFees { get; set; }
     }
