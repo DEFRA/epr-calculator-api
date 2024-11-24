@@ -449,7 +449,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             new LapcapDataTemplateMaster
             {
                 UniqueReference = "NI-AL",
-                Country = "Northern Ireland",
+                Country = "NI",
                 Material = "Aluminium",
                 TotalCostFrom = 0M,
                 TotalCostTo = 999999999.99M,
@@ -457,7 +457,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             new LapcapDataTemplateMaster
             {
                 UniqueReference = "NI-FC",
-                Country = "Northern Ireland",
+                Country = "NI",
                 Material = "Fibre composite",
                 TotalCostFrom = 0M,
                 TotalCostTo = 999999999.99M,
@@ -465,7 +465,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             new LapcapDataTemplateMaster
             {
                 UniqueReference = "NI-GL",
-                Country = "Northern Ireland",
+                Country = "NI",
                 Material = "Glass",
                 TotalCostFrom = 0M,
                 TotalCostTo = 999999999.99M,
@@ -473,7 +473,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             new LapcapDataTemplateMaster
             {
                 UniqueReference = "NI-PC",
-                Country = "Northern Ireland",
+                Country = "NI",
                 Material = "Paper or card",
                 TotalCostFrom = 0M,
                 TotalCostTo = 999999999.99M,
@@ -481,7 +481,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             new LapcapDataTemplateMaster
             {
                 UniqueReference = "NI-PL",
-                Country = "Northern Ireland",
+                Country = "NI",
                 Material = "Plastic",
                 TotalCostFrom = 0M,
                 TotalCostTo = 999999999.99M,
@@ -489,7 +489,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             new LapcapDataTemplateMaster
             {
                 UniqueReference = "NI-ST",
-                Country = "Northern Ireland",
+                Country = "NI",
                 Material = "Steel",
                 TotalCostFrom = 0M,
                 TotalCostTo = 999999999.99M,
@@ -497,7 +497,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             new LapcapDataTemplateMaster
             {
                 UniqueReference = "NI-WD",
-                Country = "Northern Ireland",
+                Country = "NI",
                 Material = "Wood",
                 TotalCostFrom = 0M,
                 TotalCostTo = 999999999.99M,
@@ -505,7 +505,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             new LapcapDataTemplateMaster
             {
                 UniqueReference = "NI-OT",
-                Country = "Northern Ireland",
+                Country = "NI",
                 Material = "Other",
                 TotalCostFrom = 0M,
                 TotalCostTo = 999999999.99M,
