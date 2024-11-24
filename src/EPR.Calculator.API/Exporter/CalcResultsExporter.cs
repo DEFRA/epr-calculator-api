@@ -309,7 +309,7 @@ namespace EPR.Calculator.API.Exporter
             }
         }
 
-        private static void PrepareSummaryData(CalcResultSummary resultSummary, StringBuilder csvContent)
+        private static void PrepareSummaryData(CalcResultSummaryHeader resultSummary, StringBuilder csvContent)
         {
             // Add empty lines
             csvContent.AppendLine();
@@ -370,7 +370,7 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.ScotlandTotalComms, decimalRoundUp))},");
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.NorthernIrelandTotalComms, decimalRoundUp))},");
 
-                //Section-(1) & (2a) values
+                // Section-(1) & (2a) values
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TotalProducerFeeforLADisposalCostswoBadDebtprovision, decimalRoundUp))},");
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.BadDebtProvisionFor1, decimalRoundUp))},");
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TotalProducerFeeforLADisposalCostswithBadDebtprovision, decimalRoundUp))},");
@@ -396,11 +396,20 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4)},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4)},");
 
+                // Scheme administrator setup costs section 5
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.schemeAdministratorSetupCostsProducer.OneOffFeeSetupCostsTotalWithoutBadDebtProvision)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.schemeAdministratorSetupCostsProducer.BadDebtProvision)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.schemeAdministratorSetupCostsProducer.OneOffFeeSetupCostsTotalWithBadDebtProvision)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.schemeAdministratorSetupCostsProducer.EnglandTotalWithBadDebtProvision)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.schemeAdministratorSetupCostsProducer.WalesTotalWithBadDebtProvision)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.schemeAdministratorSetupCostsProducer.ScotlandTotalWithBadDebtProvision)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.schemeAdministratorSetupCostsProducer.NorthernIrelandTotalWithBadDebtProvision)},");
+
                 csvContent.AppendLine();
             }
         }
 
-        private static void PrepareSummaryDataHeader(CalcResultSummary resultSummary, StringBuilder csvContent)
+        private static void PrepareSummaryDataHeader(CalcResultSummaryHeader resultSummary, StringBuilder csvContent)
         {
             // Add result summary header
             csvContent.AppendLine(CsvSanitiser.SanitiseData(resultSummary.ResultSummaryHeader.Name));
@@ -417,7 +426,7 @@ namespace EPR.Calculator.API.Exporter
             csvContent.AppendLine();
         }
 
-        private static void WriteProducerDisposalFeesHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
+        private static void WriteProducerDisposalFeesHeaders(CalcResultSummaryHeader resultSummary, StringBuilder csvContent)
         {
             var currentPosition = 0;
             foreach (var item in resultSummary.ProducerDisposalFeesHeaders)
@@ -437,7 +446,7 @@ namespace EPR.Calculator.API.Exporter
             csvContent.AppendLine();
         }
 
-        private static void WriteMaterialsBreakdownHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
+        private static void WriteMaterialsBreakdownHeaders(CalcResultSummaryHeader resultSummary, StringBuilder csvContent)
         {
             var currentPosition = 0;
             foreach (var item in resultSummary.MaterialBreakdownHeaders)
@@ -457,7 +466,7 @@ namespace EPR.Calculator.API.Exporter
             csvContent.AppendLine();
         }
 
-        private static void WriteColumnHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
+        private static void WriteColumnHeaders(CalcResultSummaryHeader resultSummary, StringBuilder csvContent)
         {
             foreach (var item in resultSummary.ColumnHeaders)
             {

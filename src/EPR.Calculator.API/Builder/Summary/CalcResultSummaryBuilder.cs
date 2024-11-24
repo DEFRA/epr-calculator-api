@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Builder.Summary.SchemeAdministratorSetupCosts;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -17,12 +18,15 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int MaterialsBreakdownHeaderInitialColumnIndex = 5;
         private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
         private const int DisposalFeeSummaryColumnIndex = 93;
-        private const int LaDataPrepCostsSection4ColumnIndex = 216;
         private const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
         private const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
         //Section-(1) & (2a)
         private const int decimalRoundUp = 2;
         private const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
+        // Section-4
+        private const int LaDataPrepCostsSection4ColumnIndex = 216;
+        // Section-5
+        private const int SaSetupCostsSection5ColumnIndex = 223;
 
         public CalcResultSummaryBuilder(ApplicationDBContext context)
         {
@@ -45,6 +49,8 @@ namespace EPR.Calculator.API.Builder.Summary
 
             if (producerDetailList.Count > 0)
             {
+
+
                 var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
 
                 foreach (var producer in producerDetailList)
@@ -180,6 +186,15 @@ namespace EPR.Calculator.API.Builder.Summary
                 LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4(),
                 LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
 
+                // Scheme administrator costs section 5
+                TotalProducerFeeWithoutBadDebtProvisionSection5 = GetSchemeAdminSetupCostsWithoutBadDebtProvisionSection5(),
+                BadDebtProvisionSection5 = GetBadDebtProvisionSection5(),
+                TotalProducerFeeWithBadDebtProvisionSection5 = GetSchemeAdminSetupCostsWithBadDebtProvisionSection5(),
+                EnglandTotalWithBadDebtProvisionSection5 = GetSchemeAdminSetupCostsEnglandTotalSection5(),
+                WalesTotalWithBadDebtProvisionSection5 = GetSchemeAdminSetupCostsWalesTotalSection5(),
+                ScotlandTotalWithBadDebtProvisionSection5 = GetSchemeAdminSetupCostsScotlandTotalSection5(),
+                NorthernIrelandTotalWithBadDebtProvisionSection5 = GetSchemeAdminSetupCostsNorthernIrelandTotalSection5(),
+
                 isTotalRow = true
             };
 
@@ -276,6 +291,8 @@ namespace EPR.Calculator.API.Builder.Summary
                 LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4(),
                 LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
 
+                // Scheme administrator costs section 5
+                schemeAdministratorSetupCostsProducer = new SchemeAdministratorSetupCostsProducer()
             };
         }
 
@@ -694,7 +711,42 @@ namespace EPR.Calculator.API.Builder.Summary
             return 99;
         }
 
-        private static void SetHeaders(CalcResultSummary result, List<MaterialDetail> materials)
+        private static decimal GetSchemeAdminSetupCostsWithBadDebtProvisionSection5()
+        {
+            return 99;
+        }
+
+        private static decimal GetBadDebtProvisionSection5()
+        {
+            return 99;
+        }
+
+        private static decimal GetSchemeAdminSetupCostsWithoutBadDebtProvisionSection5()
+        {
+            return 99;
+        }
+
+        private static decimal GetSchemeAdminSetupCostsEnglandTotalSection5()
+        {
+            return 99;
+        }
+
+        private static decimal GetSchemeAdminSetupCostsWalesTotalSection5()
+        {
+            return 99;
+        }
+
+        private static decimal GetSchemeAdminSetupCostsScotlandTotalSection5()
+        {
+            return 99;
+        }
+
+        private static decimal GetSchemeAdminSetupCostsNorthernIrelandTotalSection5()
+        {
+            return 99;
+        }
+
+        private static void SetHeaders(CalcResultSummaryHeader result, List<MaterialDetail> materials)
         {
             result.ResultSummaryHeader = new CalcResultSummaryHeader
             {
@@ -725,13 +777,16 @@ namespace EPR.Calculator.API.Builder.Summary
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwithBadDebtprovision2A },
                 
                 //Section-4 Title headers
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitleSection4, ColumnIndex = SaSetupCostsSection5ColumnIndex },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionTitleSection4 },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithBadDebtProvisionTitleSection4 },
+
+                // Section-5
+                
             ];
         }
 
-        private static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(CalcResultSummary result, List<MaterialDetail> materials)
+        private static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(CalcResultSummaryHeader result, List<MaterialDetail> materials)
         {
             var materialsBreakdownHeaders = new List<CalcResultSummaryHeader>();
             var columnIndex = MaterialsBreakdownHeaderInitialColumnIndex;
@@ -790,6 +845,10 @@ namespace EPR.Calculator.API.Builder.Summary
                 new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsBadDebtProvisionTitleSection4}" },
                 new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsWithBadDebtProvisionTitleSection4}" }
             ]);
+
+            // Scheme administrator setup costs section-5
+            var schemeAdministratorSetupCostsSummary = new SchemeAdministratorSetupCostsSummary();
+            materialsBreakdownHeaders.AddRange(schemeAdministratorSetupCostsSummary.GetHeaders());
 
             return materialsBreakdownHeaders;
         }
@@ -886,6 +945,17 @@ namespace EPR.Calculator.API.Builder.Summary
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.WalesTotalWithBadDebtProvisionSection4 },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ScotlandTotalWithBadDebtProvisionSection4 },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalWithBadDebtProvisionSection4 }
+            ]);
+
+            // Scheme administrator setup costs section 4 column headers
+            columnHeaders.AddRange([
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeWithoutBadDebtProvisionSection5, ColumnIndex = SaSetupCostsSection5ColumnIndex },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionSection5 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeWithBadDebtProvisionSection5 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.EnglandTotalWithBadDebtProvisionSection5 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.WalesTotalWithBadDebtProvisionSection5 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ScotlandTotalWithBadDebtProvisionSection5 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalWithBadDebtProvisionSection5 }
             ]);
 
             return columnHeaders;

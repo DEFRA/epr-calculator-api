@@ -1,4 +1,5 @@
-﻿using static Azure.Core.HttpHeader;
+﻿using EPR.Calculator.API.Builder.Summary.SchemeAdministratorSetupCosts;
+using static Azure.Core.HttpHeader;
 
 namespace EPR.Calculator.API.Models
 {
@@ -33,6 +34,9 @@ namespace EPR.Calculator.API.Models
         public decimal LaDataPrepCostsBadDebtProvisionTitleSection4 { get; set; }
 
         public decimal LaDataPrepCostsWithBadDebtProvisionTitleSection4 { get; set; }
+
+        // Section-5
+        public SchemeAdministratorSetupCostsSummary schemeAdministratorSetupCostsTitle { get; set; }
 
         public IEnumerable<CalcResultSummaryProducerDisposalFees> ProducerDisposalFees { get; set; }
     }

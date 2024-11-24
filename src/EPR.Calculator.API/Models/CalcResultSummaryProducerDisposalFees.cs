@@ -1,4 +1,6 @@
-﻿namespace EPR.Calculator.API.Models
+﻿using EPR.Calculator.API.Builder.Summary.SchemeAdministratorSetupCosts;
+
+namespace EPR.Calculator.API.Models
 {
     public class CalcResultSummaryProducerDisposalFees
     {
@@ -83,6 +85,9 @@
         
         public decimal NorthernIrelandTotalwithBadDebtprovision2A { get; set; }
         //Section-(1) & (2a) End
+
+        // Section - 5
+        public SchemeAdministratorSetupCostsProducer schemeAdministratorSetupCostsProducer { get; set; }
 
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> ProducerCommsFeesByMaterial { get; set; }
