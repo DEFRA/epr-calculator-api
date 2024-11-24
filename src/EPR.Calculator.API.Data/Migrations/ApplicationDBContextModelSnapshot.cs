@@ -1052,7 +1052,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             UniqueReference = "NI-AL",
-                            Country = "Northern Ireland",
+                            Country = "NI",
                             Material = "Aluminium",
                             TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
@@ -1060,7 +1060,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             UniqueReference = "NI-FC",
-                            Country = "Northern Ireland",
+                            Country = "NI",
                             Material = "Fibre composite",
                             TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
@@ -1068,7 +1068,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             UniqueReference = "NI-GL",
-                            Country = "Northern Ireland",
+                            Country = "NI",
                             Material = "Glass",
                             TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
@@ -1076,7 +1076,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             UniqueReference = "NI-PC",
-                            Country = "Northern Ireland",
+                            Country = "NI",
                             Material = "Paper or card",
                             TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
@@ -1084,7 +1084,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             UniqueReference = "NI-PL",
-                            Country = "Northern Ireland",
+                            Country = "NI",
                             Material = "Plastic",
                             TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
@@ -1092,7 +1092,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             UniqueReference = "NI-ST",
-                            Country = "Northern Ireland",
+                            Country = "NI",
                             Material = "Steel",
                             TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
@@ -1100,7 +1100,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             UniqueReference = "NI-WD",
-                            Country = "Northern Ireland",
+                            Country = "NI",
                             Material = "Wood",
                             TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
@@ -1108,7 +1108,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             UniqueReference = "NI-OT",
-                            Country = "Northern Ireland",
+                            Country = "NI",
                             Material = "Other",
                             TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
