@@ -10,6 +10,7 @@ namespace EPR.Calculator.API.Models
         public IEnumerable<CalcResultSummaryHeader> ProducerDisposalFeesHeaders { get; set; }
 
         public CalcResultSummaryHeader CommsCostHeader { get; set; }
+        
 
         public IEnumerable<CalcResultSummaryHeader> MaterialBreakdownHeaders { get; set; }
 
