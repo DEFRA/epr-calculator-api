@@ -189,7 +189,7 @@ namespace EPR.Calculator.API.UnitTests
                             NorthernIrelandTotal=0.15M,
                             ScotlandTotal=0.15M,
                             WalesTotal=020M,
-                            Name="Test",
+                            Name="1 + 4 Apportionment %s",
                         }]
                 },
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
@@ -247,7 +247,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(12, result.ProducerDisposalFeesHeaders.Count());
+            Assert.AreEqual(15, result.ProducerDisposalFeesHeaders.Count());
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
