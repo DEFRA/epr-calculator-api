@@ -105,8 +105,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 result.TwoCCommsCostsByCountryWithoutBadDebtProvision = calcResult.CalcResultCommsCostReportDetail
                     .CommsCostByCountry.Last().TotalValue;
 
-                result.TwoCBadDebtProvision = (calcResult.CalcResultParameterOtherCost.BadDebtValue *
-                                               result.TwoCCommsCostsByCountryWithoutBadDebtProvision) / 100;
+                result.TwoCBadDebtProvision = calcResult.CalcResultParameterOtherCost.BadDebtValue;
 
                 result.TwoCCommsCostsByCountryWithBadDebtProvision =
                     result.TwoCCommsCostsByCountryWithoutBadDebtProvision + result.TwoCBadDebtProvision;
@@ -124,6 +123,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             return result;
         }
+
 
         private CalcResultSummaryProducerDisposalFees GetProducerTotalRow(
             List<ProducerDetail> producersAndSubsidiaries, 
@@ -187,7 +187,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             }
 
-            return new CalcResultSummaryProducerDisposalFees
+            var result = new CalcResultSummaryProducerDisposalFees
             {
                 ProducerId = isOverAllTotalRow ? string.Empty : producersAndSubsidiaries[0].ProducerId.ToString(),
                 ProducerName = isOverAllTotalRow
@@ -255,21 +255,40 @@ namespace EPR.Calculator.API.Builder.Summary
                 // Percentage of Producer Reported Household Tonnage vs All Producers
                 PercentageofProducerReportedHHTonnagevsAllProducers =
                     GetPercentageofProducerReportedHHTonnagevsAllProducersTotal(producersAndSubsidiaries, runProducerMaterialDetails),
-
-                //2c Section
-                TwoCTotalProducerFeeForCommsCostsWithoutBadDebt = 500M,
-                TwoCBadDebtProvision = 500M,
-                TwoCTotalProducerFeeForCommsCostsWithBadDebt = 500M,
-                TwoCEnglandTotalWithBadDebt = 500M,
-                TwoCWalesTotalWithBadDebt = 500M,
-                TwoCScotlandTotalWithBadDebt = 500M,
-                TwoCNorthernIrelandTotalWithBadDebt = 500M,
-
-
-                //For Comms End
+               
                 isTotalRow = true
             };
+            result.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt =
+                calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().TotalValue *
+                result.PercentageofProducerReportedHHTonnagevsAllProducers / 100;
 
+            result.TwoCBadDebtProvision = calcResult.CalcResultParameterOtherCost.BadDebtValue *
+                result.PercentageofProducerReportedHHTonnagevsAllProducers / 100;
+
+            result.TwoCTotalProducerFeeForCommsCostsWithBadDebt =
+                result.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt + result.TwoCBadDebtProvision;
+
+            var englandTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
+                .Single(x => x.Name == "1 + 4 Apportionment %s").EnglandTotal;
+            result.TwoCEnglandTotalWithBadDebt =
+                englandTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
+
+            var walesTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
+                .Single(x => x.Name == "1 + 4 Apportionment %s").WalesTotal;
+            result.TwoCWalesTotalWithBadDebt =
+                walesTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
+
+            var scotlandTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
+                .Single(x => x.Name == "1 + 4 Apportionment %s").ScotlandTotal;
+            result.TwoCScotlandTotalWithBadDebt =
+                scotlandTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
+
+            var niTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
+                .Single(x => x.Name == "1 + 4 Apportionment %s").NorthernIrelandTotal;
+            result.TwoCNorthernIrelandTotalWithBadDebt =
+                niTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
+
+            return result;
         }
 
         private CalcResultSummaryProducerDisposalFees GetProducerRow(
@@ -321,7 +340,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             }
 
-            return new CalcResultSummaryProducerDisposalFees
+            var result = new CalcResultSummaryProducerDisposalFees
             {
                 ProducerId = producer.ProducerId.ToString(),
                 ProducerName = producer.ProducerName ?? string.Empty,
@@ -392,6 +411,21 @@ namespace EPR.Calculator.API.Builder.Summary
                 PercentageofProducerReportedHHTonnagevsAllProducers =
                     GetPercentageofProducerReportedHHTonnagevsAllProducers(producer, runProducerMaterialDetails),
             };
+            result.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt =
+                (calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().TotalValue *
+                result.PercentageofProducerReportedHHTonnagevsAllProducers) / 100;
+
+            result.TwoCBadDebtProvision = (calcResult.CalcResultParameterOtherCost.BadDebtValue *
+                                           result.PercentageofProducerReportedHHTonnagevsAllProducers) / 100;
+
+            result.TwoCTotalProducerFeeForCommsCostsWithBadDebt =
+                (calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().TotalValue +
+                 calcResult.CalcResultParameterOtherCost.BadDebtValue);
+            result.TwoCEnglandTotalWithBadDebt = 500M;
+            result.TwoCWalesTotalWithBadDebt = 500M;
+            result.TwoCScotlandTotalWithBadDebt = 500M;
+            result.TwoCNorthernIrelandTotalWithBadDebt = 500M;
+            return result;
         }
 
         private static int GetLevelIndex(List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup, ProducerDetail producer)
@@ -511,8 +545,8 @@ namespace EPR.Calculator.API.Builder.Summary
 
             if (isParseSuccessful)
             {
-                return (producerDisposalFee * value) / 100;
-            }
+            return (producerDisposalFee * value) / 100;
+        }
 
             return 0;
         }
@@ -537,8 +571,8 @@ namespace EPR.Calculator.API.Builder.Summary
 
             if (isParseSuccessful)
             {
-                return producerDisposalFee * (1 + (value / 100));
-            }
+            return producerDisposalFee * (1 + (value / 100));
+        }
 
             return 0;
         }
