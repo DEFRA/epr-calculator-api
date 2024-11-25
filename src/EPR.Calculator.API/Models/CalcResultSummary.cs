@@ -27,8 +27,7 @@ namespace EPR.Calculator.API.Models
 
         public decimal TotalOnePlus2AFeeWithBadDebtProvision { get; set; }
 
-        //Section-3 -Rekha
-
+        //Section-3 -
         public decimal SAOperatingCostsWoTitleSection3 { get; set; }
         public decimal SAOperatingCostsWithTitleSection3 { get; set; }
         public decimal BadDebtProvisionTitleSection3 { get; set; }
