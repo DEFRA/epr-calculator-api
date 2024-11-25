@@ -400,7 +400,7 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4)},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4)},");
 
-        csvContent.AppendLine();
+                csvContent.AppendLine();
             }
         }
 
