@@ -396,33 +396,21 @@ namespace EPR.Calculator.API.Exporter
                 // Percentage of Producer Reported Household Tonnage vs All Producers
                 csvContent.Append($"{CsvSanitiser.SanitiseData(Math.Round(producer.PercentageofProducerReportedHHTonnagevsAllProducers, 8))}%,");
 
-                // skipping columns for other sections
-                for (int i = PercentageofProducerReportedHHTonnageColumnIndex; i <= LaDataPrepCostsSection4ColumnIndex; i++)
-                {
-                    csvContent.Append($",");
-                };
-
-
-                // Two skip.
-                for (int i = 100; i < 116; i++)
-                {
-                    csvContent.Append($",");
-                };
-
                 // 2b comms Total
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.TotalProducerFeeWithoutBadDebtFor2bComms)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.BadDebtProvisionFor2bComms)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.TotalProducerFeeWithBadDebtFor2bComms)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.EnglandTotalWithBadDebtFor2bComms)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.WalesTotalWithBadDebtFor2bComms)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.ScotlandTotalWithBadDebtFor2bComms)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.NorthernIrelandTotalWithBadDebtFor2bComms)},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TotalProducerFeeWithoutBadDebtFor2bComms, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.BadDebtProvisionFor2bComms, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TotalProducerFeeWithBadDebtFor2bComms, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.EnglandTotalWithBadDebtFor2bComms, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.WalesTotalWithBadDebtFor2bComms, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.ScotlandTotalWithBadDebtFor2bComms, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.NorthernIrelandTotalWithBadDebtFor2bComms, decimalRoundUp))},");
 
                 // Two skip.
-                for (int i = 116; i < 132; i++)
+                for (int i = 1; i < 14; i++)
                 {
                     csvContent.Append($",");
                 };
+
                 // LA data prep costs section 4
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsTotalWithoutBadDebtProvisionSection4)},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsBadDebtProvisionSection4)},");

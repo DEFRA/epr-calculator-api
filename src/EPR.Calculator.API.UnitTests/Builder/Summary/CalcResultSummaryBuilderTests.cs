@@ -111,7 +111,7 @@ namespace EPR.Calculator.API.UnitTests
                             Wales="WalesTest",
                             Name="Material1",
                             Scotland="ScotlandTest",
-                            
+
                         },
                           new CalcResultLaDisposalCostDataDetail()
                         {
@@ -218,13 +218,23 @@ namespace EPR.Calculator.API.UnitTests
                         {
                             CommsCostByMaterialPricePerTonne="0.42",
                             Name ="Material1",
-                            
+
                         },
                         new ()
                         {
                             CommsCostByMaterialPricePerTonne="0.3",
                             Name ="Material2",
 
+                        }
+                    ],
+                    CommsCostByCountry = [
+                        new()
+                        {
+                            Total= "Total"
+                        },
+                        new()
+                        {
+                            TotalValue= 2530
                         }
                     ]
                 }
@@ -339,7 +349,7 @@ namespace EPR.Calculator.API.UnitTests
         }
 
 
-          
+
 
         [TestMethod]
         public void GetTotalBadDebtprovision1_ShouldReturnCorrectValue()

@@ -41,7 +41,7 @@ namespace EPR.Calculator.API.Models
 
         public decimal CommsCostHeaderWithoutBadDebtFor2bTitle { get; set; }
 
-        public decimal CommsCostHeaderWithBadDebtFor2bCTitle { get; set; }
+        public decimal CommsCostHeaderWithBadDebtFor2bTitle { get; set; }
 
         public decimal CommsCostHeaderBadDebtProvisionFor2bTitle { get; set; }
 
