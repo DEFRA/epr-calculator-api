@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Collections.Generic;
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
@@ -100,7 +101,26 @@ namespace EPR.Calculator.API.UnitTests
                             England="EnglandTest",
                             Wales="WalesTest",
                             Name="ScotlandTest",
-                            Scotland="ScotlandTest"
+                            Scotland="ScotlandTest",
+                            Material = "Material1"
+                        },
+                         new CalcResultLaDisposalCostDataDetail()
+                        {
+                            DisposalCostPricePerTonne="20",
+                            England="EnglandTest",
+                            Wales="WalesTest",
+                            Name="Material1",
+                            Scotland="ScotlandTest",
+                            
+                        },
+                          new CalcResultLaDisposalCostDataDetail()
+                        {
+                            DisposalCostPricePerTonne="10",
+                            England="EnglandTest",
+                            Wales="WalesTest",
+                            Name="Material2",
+                            Scotland="ScotlandTest",
+
                         }
                     }
                 },
@@ -176,14 +196,35 @@ namespace EPR.Calculator.API.UnitTests
                         }]
                 },
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
-                CalcResultSummary = new CalcResultSummary { ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>() },
+                CalcResultSummary = new CalcResultSummary
+                {
+                    ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>() { new()
+                {
+                     ProducerCommsFeesByMaterial =  new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>(){ },
+                      ProducerDisposalFeesByMaterial = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>(){ },
+                       ProducerId ="1",
+                        ProducerName ="Test",
+                     TotalProducerDisposalFeeWithBadDebtProvision =100,
+                     TotalProducerCommsFeeWithBadDebtProvision =100,
+                      SubsidiaryId ="1",
+
+                } }
+                },
                 CalcResultCommsCostReportDetail = new CalcResultCommsCost()
                 {
                     CalcResultCommsCostCommsCostByMaterial =
                     [
                         new ()
                         {
-                            CommsCostByMaterialPricePerTonne="0.42"
+                            CommsCostByMaterialPricePerTonne="0.42",
+                            Name ="Material1",
+                            
+                        },
+                        new ()
+                        {
+                            CommsCostByMaterialPricePerTonne="0.3",
+                            Name ="Material2",
+
                         }
                     ]
                 }
@@ -209,7 +250,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(8, result.ProducerDisposalFeesHeaders.Count());
+            Assert.AreEqual(15, result.ProducerDisposalFeesHeaders.Count());
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
@@ -297,6 +338,159 @@ namespace EPR.Calculator.API.UnitTests
             Assert.IsNotNull(totalRow);
         }
 
+
+          
+
+        [TestMethod]
+        public void GetTotalBadDebtprovision1_ShouldReturnCorrectValue()
+        {
+            var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            Assert.IsNotNull(result);
+
+            var totalRow = result.ProducerDisposalFees.LastOrDefault();
+            Assert.IsNotNull(totalRow);
+            totalRow.BadDebtProvisionFor1 = 100m;
+            totalRow.Level = "Totals";
+
+            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.BadDebtProvisionFor1);
+
+            Assert.AreEqual(100m, totalFee);
+        }
+
+        [TestMethod]
+        public void GetTotalDisposalCostswithBadDebtprovision1_ShouldReturnCorrectValue()
+        {
+            var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            Assert.IsNotNull(result);
+
+            var totalRow = result.ProducerDisposalFees.LastOrDefault();
+            Assert.IsNotNull(totalRow);
+            totalRow.TotalProducerDisposalFeeWithBadDebtProvision = 200m;
+            totalRow.Level = "Totals";
+
+            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.TotalProducerDisposalFeeWithBadDebtProvision);
+
+            Assert.AreEqual(200m, totalFee);
+        }
+
+        [TestMethod]
+        public void GetTotalCommsCostswoBadDebtprovision2A_ShouldReturnCorrectValue()
+        {
+            var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            Assert.IsNotNull(result);
+
+            var totalRow = result.ProducerDisposalFees.LastOrDefault();
+            Assert.IsNotNull(totalRow);
+            totalRow.TotalProducerCommsFee = 300m;
+            totalRow.Level = "Totals";
+
+            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.TotalProducerCommsFee);
+
+            Assert.AreEqual(300m, totalFee);
+        }
+
+        [TestMethod]
+        public void GetTotalBadDebtprovision2A_ShouldReturnCorrectValue()
+        {
+            var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            Assert.IsNotNull(result);
+
+            var totalRow = result.ProducerDisposalFees.LastOrDefault();
+            Assert.IsNotNull(totalRow);
+            totalRow.BadDebtProvisionFor2A = 400m;
+            totalRow.Level = "Totals";
+
+            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.BadDebtProvisionFor2A);
+
+            Assert.AreEqual(400m, totalFee);
+        }
+
+        [TestMethod]
+        public void GetTotalCommsCostswithBadDebtprovision2A_ShouldReturnCorrectValue()
+        {
+            var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            Assert.IsNotNull(result);
+
+            var totalRow = result.ProducerDisposalFees.LastOrDefault();
+            Assert.IsNotNull(totalRow);
+            totalRow.TotalProducerCommsFeeWithBadDebtProvision = 500m;
+            totalRow.Level = "Totals";
+
+            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.TotalProducerCommsFeeWithBadDebtProvision);
+
+            Assert.AreEqual(500m, totalFee);
+        }
+
+        [TestMethod]
+        public void GetTotalFee_ShouldReturnZero_WhenNoTotalsLevel()
+        {
+            var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            Assert.IsNotNull(result);
+
+            var totalRow = result.ProducerDisposalFees.LastOrDefault();
+            Assert.IsNotNull(totalRow);
+            totalRow.BadDebtProvisionFor1 = 0m;
+            totalRow.Level = "Totals";
+
+            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.BadDebtProvisionFor1);
+
+            Assert.AreEqual(0m, totalFee);
+        }
+
+        [TestMethod]
+        public void GetTotalFee_ShouldReturnZero_WhenFeesIsNull()
+        {
+            var result = CalcResultSummaryBuilder.GetTotalFee(null, fee => fee.BadDebtProvisionFor1);
+
+            Assert.AreEqual(0m, result);
+        }
+
+        [TestMethod]
+        public void ProducerTotalPercentageVsTotal_ShouldReturnCorrectValue()
+        {
+            var requestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(requestDto, _calcResult);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
+            Assert.AreEqual(15, result.ProducerDisposalFeesHeaders.Count());
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.ProducerDisposalFees);
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
+            var producerTotalPercentage = result.ProducerDisposalFees.FirstOrDefault().PercentageofProducerReportedHHTonnagevsAllProducers;
+            Assert.IsNotNull(producerTotalPercentage);
+            Assert.AreEqual(100, producerTotalPercentage);
+        }
+
+        [TestMethod]
+        public void GetTotalDisposalCostswithBadDebtOnePlus2A_ShouldReturnCorrectValues()
+        {
+
+            var materialInDb = _context.Material.ToList();
+            var material = Mappers.MaterialMapper.Map(materialInDb);
+            var requestDto = new CalcResultsRequestDto { RunId = 1 };
+
+            CalcResultSummaryBuilder.producerDetailList = _context.ProducerDetail
+               .Where(pd => pd.CalculatorRunId == requestDto.RunId)
+               .OrderBy(pd => pd.ProducerId)
+               .ToList();
+
+            var value = CalcResultSummaryBuilder.GetTotal1Plus2ABadDebtPercentage(100, 100, material, _calcResult);
+            Assert.AreEqual(4.52685329M, value);
+
+            var totalFee = CalcResultSummaryBuilder.GetTotal1Plus2ABadDebt(material, _calcResult);
+            Assert.AreEqual(4418.0800M, totalFee);
+
+            var debt = Math.Ceiling((value * totalFee) / 100);
+            Assert.AreEqual(200, debt);
+        }
         private void SeedDatabase(ApplicationDBContext context)
         {
             context.Material.AddRange(new List<Material>
@@ -312,6 +506,13 @@ namespace EPR.Calculator.API.UnitTests
                 new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } }
             });
 
+            context.ProducerReportedMaterial.AddRange(new List<ProducerReportedMaterial>
+            {
+                new() { Id = 1, MaterialId = 1, PackagingType="HH", PackagingTonnage=400m,ProducerDetailId =1},
+                new(){ Id = 2, MaterialId = 2, PackagingType="HH", PackagingTonnage=400m,ProducerDetailId =2},
+                new(){ Id = 3, MaterialId = 1, PackagingType="CW", PackagingTonnage=200m,ProducerDetailId =1},
+                new(){ Id = 4, MaterialId = 2, PackagingType="CW", PackagingTonnage=200m,ProducerDetailId =2}
+            });
             context.SaveChanges();
         }
     }

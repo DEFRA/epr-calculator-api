@@ -1,4 +1,7 @@
-﻿namespace EPR.Calculator.API.Constants
+﻿using Microsoft.Extensions.Hosting;
+using static Azure.Core.HttpHeader;
+
+namespace EPR.Calculator.API.Constants
 {
     public static class CalcResultSummaryHeaders
     {
@@ -26,7 +29,6 @@
         public static readonly string NorthernIrelandWithBadDebtProvision = "Northern Ireland with Bad Debt Provision";
         public static readonly string ProducerTotalCostWithoutBadDebtProvision = "Producer Total Cost w/o Bad Debt Provision";
         public static readonly string ProducerTotalCostwithBadDebtProvision = "Producer Total Cost with Bad Debt Provision";
-        public static readonly string SummaryofFeeforCommsCostsbyMaterial = "Summary of Fee for Comms Costs - by Material";
 
         public static readonly string TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision = "2a Total Producer Fee for Comms Costs - by Material w/o Bad Debt provision";
         public static readonly string TotalBadDebtProvision = "Total Bad Debt Provision";
@@ -37,12 +39,33 @@
         public static readonly string NorthernIrelandTotalwithBadDebtprovision = "Northern Ireland Total with Bad Debt provision";
 
         public static readonly string TotalProducerDisposalFee = "1 Total Producer Disposal Fee w/o Bad Debt Provision";
-        public static readonly string TotalProducerDisposalFeeWithBadDebtProvision = "1 Total Producer";
-        public static readonly string EnglandTotal = "England";
-        public static readonly string WalesTotal = "Wales";
-        public static readonly string ScotlandTotal = "Scotland";
-        public static readonly string NorthernIrelandTotal = "Northern Ireland";
+        public static readonly string TotalProducerDisposalFeeWithBadDebtProvision = "1 Total Producer Disposal Fee with Bad Debt Provision";
+        public static readonly string EnglandTotal = "England Total";
+        public static readonly string WalesTotal = "Wales Total";
+        public static readonly string ScotlandTotal = "Scotland Total";
+        public static readonly string NorthernIrelandTotal = "Northern Ireland Total";
         public static readonly string OneCountryApportionment = "1 Country Apportionment %s";
+
+        //section 7
+        public static readonly string TotalProducerFeeforLADisposalCostswoBadDebtprovision = "1 Total Producer Fee for LA Disposal Costs w/o Bad Debt provision";
+        public static readonly string BadDebtProvisionFor1 = "Bad Debt Provision for 1";
+        public static readonly string TotalProducerFeeforLADisposalCostswithBadDebtprovision = "1 Total Producer Fee for LA Disposal Costs with Bad Debt provision";
+
+        public static readonly string TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision2A = "2a Total Producer Fee for Comms Costs - by Material w/o Bad Debt provision";
+        public static readonly string BadDebtProvisionfor2A = "Bad Debt Provision for 2a";
+        public static readonly string TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision2A = "2a Total Producer Fee for Comms Costs - by Material with Bad Debt provision";
+
+        public static readonly string FeeforLADisposalCostswoBadDebtprovision1 = "1 Fee for LA Disposal Costs w/o Bad Debt provision";
+        public static readonly string FeeforLADisposalCostswithBadDebtprovision1 = "1 Fee for LA Disposal Costs with Bad Debt provision";
+        public static readonly string FeeforCommsCostsbyMaterialwoBadDebtprovision2A = "2a Fee for Comms Costs - by Material w/o Bad Debt provision";
+        public static readonly string FeeforCommsCostsbyMaterialwithBadDebtprovision2A = "2a Fee for Comms Costs - by Material with Bad Debt provision";
+
+        public static readonly string TotalBadDebtProvision1Plus2A = "Total (1 + 2a) with Bad Debt provision";
+        public static readonly string TotalProducer1Plus2ABadDebt = "Producer Total(1+2a) with Bad Debt provision";
+        public static readonly string TotalProducer1Plus2ABadDebtPercentage = "Producer Percentage of Costs: Producer (1+2a) Percentage of Overal Producer Cost of (1+2a)";
+
+
+
 
         // LA data prep costs section 4
         public static readonly string LaDataPrepCostsWithoutBadDebtProvisionTitleSection4 = "4 LA Data Prep Costs w/o Bad Debt provision";
@@ -55,6 +78,9 @@
         public static readonly string WalesTotalWithBadDebtProvisionSection4 = "Wales Total with Bad Debt provision";
         public static readonly string ScotlandTotalWithBadDebtProvisionSection4 = "Scotland Total with Bad Debt provision";
         public static readonly string NorthernIrelandTotalWithBadDebtProvisionSection4 = "Northern Ireland Total with Bad Debt provision";
+
+        // Percentage of Producer Reported Household Tonnage vs All Producers
+        public static readonly string PercentageofProducerReportedHHTonnagevsAllProducers = "Percentage of Producer Reported Household Tonnage vs All Producers";
 
         // 2b comms total
         public static readonly string CommsCostHeaderWithoutBadDebtFor2bTitle = "2b Comms Costs - UK wide w/o Bad Debt provision";
