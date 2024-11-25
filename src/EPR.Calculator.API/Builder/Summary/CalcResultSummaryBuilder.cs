@@ -101,6 +101,16 @@ namespace EPR.Calculator.API.Builder.Summary
                 result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A =
                     GetTotalCommsCostswithBadDebtprovision2A(producerDisposalFees);
 
+                //Section 2c
+                result.TwoCCommsCostsByCountryWithoutBadDebtProvision = calcResult.CalcResultCommsCostReportDetail
+                    .CommsCostByCountry.Last().TotalValue;
+
+                result.TwoCBadDebtProvision = (calcResult.CalcResultParameterOtherCost.BadDebtValue *
+                                               result.TwoCCommsCostsByCountryWithoutBadDebtProvision) / 100;
+
+                result.TwoCCommsCostsByCountryWithBadDebtProvision =
+                    result.TwoCCommsCostsByCountryWithoutBadDebtProvision + result.TwoCBadDebtProvision;
+
                 // LA data prep costs section 4
                 result.LaDataPrepCostsTitleSection4 = GetLaDataPrepCostsTitleSection4(calcResult);
                 result.LaDataPrepCostsBadDebtProvisionTitleSection4 =
