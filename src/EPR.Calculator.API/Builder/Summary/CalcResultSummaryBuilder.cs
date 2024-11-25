@@ -54,7 +54,7 @@ namespace EPR.Calculator.API.Builder.Summary
                     }).ToList();
 
             // Get the ordered list of producers associated with the calculator run id
-            var producerDetailList = runProducerMaterialDetails.Select(x => x.ProducerDetail).Distinct()
+            var producerDetailList = context.ProducerDetail
                 .Where(pd => pd.CalculatorRunId == resultsRequestDto.RunId)
                 .OrderBy(pd => pd.ProducerId)
                 .ToList();
@@ -1407,18 +1407,18 @@ namespace EPR.Calculator.API.Builder.Summary
                 (from p in allProducerDetails
                  join m in allProducerReportedMaterials
                         on p.Id equals m.ProducerDetailId
-                    where p.CalculatorRunId == producer.CalculatorRunId && m.PackagingType == "HH"
-                    group m by p.ProducerId
-                    into g
-                    select new
-                    {
-                        ProducerId = g.Key,
-                        TotalPackagingTonnage = g.Sum(x => x.PackagingTonnage)
-                    }).ToList();
-
+                 where p.CalculatorRunId == producer.CalculatorRunId && m.PackagingType == "HH"
+                 group new { m, p } by new { p.ProducerId, p.SubsidiaryId }
+                 into g
+                 select new
+                 {
+                     ProducerId = g.Key,
+                     g.Key.SubsidiaryId,
+                     TotalPackagingTonnage = g.Sum(x => x.m.PackagingTonnage)
+                 }).ToList();
 
             var totalTonnage = result.Sum(x => x.TotalPackagingTonnage);
-            var producerData = result.FirstOrDefault(x => x.ProducerId == producer.ProducerId);
+            var producerData = result.FirstOrDefault(r => r.ProducerId.ProducerId == producer.ProducerId && r.ProducerId.SubsidiaryId == producer.SubsidiaryId);
             var PercentageofHHTonnage = producerData != null && totalTonnage > 0
                 ? (producerData.TotalPackagingTonnage / totalTonnage) * 100
                 : 0;

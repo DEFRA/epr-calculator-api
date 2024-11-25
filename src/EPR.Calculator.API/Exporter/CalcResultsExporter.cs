@@ -393,7 +393,7 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($",");
 
                 // Percentage of Producer Reported Household Tonnage vs All Producers
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.PercentageofProducerReportedHHTonnagevsAllProducers)}%,");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(Math.Round(producer.PercentageofProducerReportedHHTonnagevsAllProducers, 8))}%,");
 
                 // skipping columns for other sections
                 for (int i = PercentageofProducerReportedHHTonnageColumnIndex; i <= LaDataPrepCostsSection4ColumnIndex; i++)

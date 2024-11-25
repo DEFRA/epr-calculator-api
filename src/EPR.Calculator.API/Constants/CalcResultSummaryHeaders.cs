@@ -61,11 +61,11 @@ namespace EPR.Calculator.API.Constants
             "Northern Ireland Total with Bad Debt provision";
 
         public static readonly string TotalProducerDisposalFee = "1 Total Producer Disposal Fee w/o Bad Debt Provision";
-        public static readonly string TotalProducerDisposalFeeWithBadDebtProvision = "1 Total Producer";
-        public static readonly string EnglandTotal = "England";
-        public static readonly string WalesTotal = "Wales";
-        public static readonly string ScotlandTotal = "Scotland";
-        public static readonly string NorthernIrelandTotal = "Northern Ireland";
+        public static readonly string TotalProducerDisposalFeeWithBadDebtProvision = "1 Total Producer Disposal Fee with Bad Debt Provision";
+        public static readonly string EnglandTotal = "England Total";
+        public static readonly string WalesTotal = "Wales Total";
+        public static readonly string ScotlandTotal = "Scotland Total";
+        public static readonly string NorthernIrelandTotal = "Northern Ireland Total";
         public static readonly string OneCountryApportionment = "1 Country Apportionment %s";
 
         //section 7

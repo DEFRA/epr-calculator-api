@@ -298,23 +298,6 @@ namespace EPR.Calculator.API.UnitTests
             Assert.IsNotNull(totalRow);
         }
 
-        private void SeedDatabase(ApplicationDBContext context)
-        {
-            context.Material.AddRange(new List<Material>
-            {
-                new() { Id = 1, Name = "Material1", Code = "123"},
-                new() { Id = 2, Name = "Material2", Code = "456"}
-            });
-
-            context.ProducerDetail.AddRange(new List<ProducerDetail>
-            {
-                new() {  Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test1" } },
-                new() { Id = 2, ProducerName = "Producer2", CalculatorRunId = 2, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test2" } },
-                new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } }
-            });
-
-            context.SaveChanges();
-        }
 
         [TestMethod]
         public void GetTotalBadDebtprovision1_ShouldReturnCorrectValue()
@@ -424,6 +407,62 @@ namespace EPR.Calculator.API.UnitTests
             var result = CalcResultSummaryBuilder.GetTotalFee(null, fee => fee.BadDebtProvisionFor1);
 
             Assert.AreEqual(0m, result);
+        }
+
+        [TestMethod]
+        public void ProducerTotalPercentageVsTotal_ShouldReturnCorrectValue()
+        {
+            var requestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(requestDto, _calcResult);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
+            Assert.AreEqual(11, result.ProducerDisposalFeesHeaders.Count());
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.ProducerDisposalFees);
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
+            var producerTotalPercentage = result.ProducerDisposalFees.FirstOrDefault().PercentageofProducerReportedHHTonnagevsAllProducers;
+            Assert.IsNotNull(producerTotalPercentage);
+            Assert.AreEqual(100, producerTotalPercentage);
+        }
+
+        private void SeedDatabase(ApplicationDBContext context)
+        {
+            context.Material.AddRange(new List<Material>
+            {
+                new() { Id = 1, Name = "Material1", Code = "123"},
+                new() { Id = 2, Name = "Material2", Code = "456"}
+            });
+
+            context.ProducerDetail.AddRange(new List<ProducerDetail>
+            {
+                new() {  Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test1" } },
+                new() { Id = 2, ProducerName = "Producer2", CalculatorRunId = 2, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test2" } },
+                new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } }
+            });
+
+            context.ProducerReportedMaterial.AddRange(new List<ProducerReportedMaterial>
+            {
+                new()
+                {
+                    Id = 786,
+                    ProducerDetailId = 1,
+                    MaterialId = 1,
+                    PackagingTonnage = 300,
+                    PackagingType = "HH",
+                },
+                new()
+                {
+                    Id = 789,
+                    ProducerDetailId = 2,
+                    MaterialId = 2,
+                    PackagingTonnage = 500,
+                    PackagingType = "HH",
+                },
+            });
+
+            context.SaveChanges();
         }
     }
 }
