@@ -194,7 +194,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 //Section-3
                 Total3SAOperatingCostwoBadDebtprovision = GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
                 BadDebtProvisionFor3 = GetBadDebtProvisionPrtoducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
-                Total3SAOperatingCostswithBadDebtprovision = GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                Total3SAOperatingCostswithBadDebtprovision = GetSAOperatingCostsTotalWithBadDebtProvisionPrtoducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
                 EnglandTotalwithBadDebtprovision3 = GetSAOperatingCostsEnglandTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
                 WalesTotalwithBadDebtprovision3 = GetSAOperatingCostsWalesTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
                 ScotlandTotalwithBadDebtprovision3 = GetSAOperatingCostsScotlandTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
