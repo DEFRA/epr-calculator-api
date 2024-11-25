@@ -17,7 +17,7 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int MaterialsBreakdownHeaderInitialColumnIndex = 5;
         private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
         private const int DisposalFeeSummaryColumnIndex = 93;
-        private const int LaDataPrepCostsSection4ColumnIndex = 216;
+        private const int LaDataPrepCostsSection4ColumnIndex = 202;
         private const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
         private const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
         //Section-(1) & (2a)
@@ -26,7 +26,7 @@ namespace EPR.Calculator.API.Builder.Summary
         //Section-(1) & (2a)
         private const int Total1Plus2ABadDebt = 193;
         //Section-3
-        private const int SAOperatingCostCostsHeaderInitialColumnIndex = 209;
+        private const int SAOperatingCostCostsHeaderInitialColumnIndex = 195;
 
         public static List<ProducerDetail> producerDetailList { get; set; }
 
@@ -191,6 +191,15 @@ namespace EPR.Calculator.API.Builder.Summary
                 TotalOnePlus2AFeeWithBadDebtProvision = GetTotalOnePlus2AFeeWithBadDebtProvision(materialCostSummary, commsCostSummary),
                 ProducerPercentageOfCosts = GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(commsCostSummary), materials, calcResult),
 
+                //Section-3
+                Total3SAOperatingCostwoBadDebtprovision = GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                BadDebtProvisionFor3 = GetBadDebtProvisionPrtoducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                Total3SAOperatingCostswithBadDebtprovision = GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                EnglandTotalwithBadDebtprovision3 = GetSAOperatingCostsEnglandTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                WalesTotalwithBadDebtprovision3 = GetSAOperatingCostsWalesTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                ScotlandTotalwithBadDebtprovision3 = GetSAOperatingCostsScotlandTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                NorthernIrelandTotalwithBadDebtprovision3 = GetSAOperatingCostsNITotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+
 
                 // LA data prep costs section 4
                 LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4(),
@@ -303,21 +312,13 @@ namespace EPR.Calculator.API.Builder.Summary
                 ProducerPercentageOfCosts = GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(commsCostSummary), materials, calcResult),
 
                 //Section-3
-                //this calculation is for Equation: 3
                 Total3SAOperatingCostwoBadDebtprovision = GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialCostSummary,commsCostSummary,materials, calcResult),
-
-                //this calculation is for Equation: 4
                 BadDebtProvisionFor3 = GetBadDebtProvisionPrtoducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
-                //this calculation is for Equation: 5
                 Total3SAOperatingCostswithBadDebtprovision = GetSAOperatingCostsTotalWithBadDebtProvisionPrtoducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
-                //this calculation is for Equation: 6
-                EnglandTotalwithBadDebtprovision3 = GetEnglandCommsTotal(commsCostSummary),
-
-
-                //WalesTotalwithBadDebtprovision3 = GetLaDataPrepCostsWalesTotalWithBadDebtProvisionSection4(),
-                //ScotlandTotalwithBadDebtprovision3 = GetLaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4(),
-                //NorthernIrelandTotalwithBadDebtprovision3 = GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
-
+                EnglandTotalwithBadDebtprovision3 = GetSAOperatingCostsEnglandTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                WalesTotalwithBadDebtprovision3 = GetSAOperatingCostsWalesTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                ScotlandTotalwithBadDebtprovision3 = GetSAOperatingCostsScotlandTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                NorthernIrelandTotalwithBadDebtprovision3 = GetSAOperatingCostsNITotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
 
                 // LA data prep costs section 4
                 LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4(),
@@ -714,7 +715,105 @@ namespace EPR.Calculator.API.Builder.Summary
             return totalNorthernIreland;
         }
 
+        //Section -3 Rekha 
+        private static decimal ConverttoDecimal(string parameter)
+        {
+            var isConversionSuccessful = decimal.TryParse(parameter.Replace("%", string.Empty), out decimal value);
 
+            return isConversionSuccessful ? value / 100 : 0;
+        }
+
+        private static decimal GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(CalcResult calcResult)
+        {
+            return calcResult.CalcResultParameterOtherCost.SaOperatingCost.OrderByDescending(t => t.OrderId).FirstOrDefault().TotalValue; ;
+        }
+
+        private static decimal GetSAOperatingCostsBadDebtProvisionTitleSection3(decimal sacostvalue, CalcResult calcResult)
+        {
+            var isConversionSuccessful = decimal.TryParse(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Replace("%", string.Empty), out decimal value);
+
+            return isConversionSuccessful ? sacostvalue * value / 100 : 0;
+        }
+        private static decimal GetSAOperatingCostsTotalWithBadDebtProvisionTitleSection3(CalcResultSummary result)
+        {
+            return result.SAOperatingCostsWoTitleSection3 + result.BadDebtProvisionTitleSection3;
+        }
+
+        //Section-3 Equation-3
+        private static decimal GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
+        {
+            decimal Total1Plus2ABadDebtPercentage = GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialsCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(costSummary), materials, calcResult);
+            decimal TotalProvisioncost = GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(calcResult);
+
+            return Total1Plus2ABadDebtPercentage * TotalProvisioncost / 100; ;
+        }
+        //Section-3 Equation-4
+        private static decimal GetBadDebtProvisionPrtoducerTotalSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
+        {
+            decimal ThreesalTotalCost = GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialsCostSummary, costSummary, materials, calcResult);
+            var isConversionSuccessful = decimal.TryParse(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Replace("%", string.Empty), out decimal value);
+
+            return isConversionSuccessful ? ThreesalTotalCost * value / 100 : 0;
+        }
+        //Section-3 Equation-5
+        private static decimal GetSAOperatingCostsTotalWithBadDebtProvisionPrtoducerTotalSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
+        {
+            return GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialsCostSummary, costSummary, materials, calcResult) + GetBadDebtProvisionPrtoducerTotalSection3(materialsCostSummary, costSummary, materials, calcResult);
+        }
+        private static decimal GetSAOperatingCostsEnglandTotalWithBadDebtProvisionSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
+        {
+            //1+paramOthers
+            Decimal OnePlusOtherParam = 1 + ConverttoDecimal(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value);
+
+            //1+4 apportenmnt
+
+            var oneplause = ConverttoDecimal(calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.Where(x => x.Name == "1 + 4 Apportionment %s").FirstOrDefault().EnglandDisposalTotal);
+
+            return GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(calcResult) * OnePlusOtherParam *
+                GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialsCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(costSummary), materials, calcResult) *
+                oneplause;
+        }
+        private static decimal GetSAOperatingCostsWalesTotalWithBadDebtProvisionSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
+        {
+            //1+paramOthers
+            Decimal OnePlusOtherParam = 1 + ConverttoDecimal(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value);
+
+            //1+4 apportenmnt
+
+            var oneplause = ConverttoDecimal(calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.Where(x => x.Name == "1 + 4 Apportionment %s").FirstOrDefault().WalesDisposalTotal);
+
+            return GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(calcResult) * OnePlusOtherParam *
+                GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialsCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(costSummary), materials, calcResult) *
+                oneplause;
+        }
+        private static decimal GetSAOperatingCostsScotlandTotalWithBadDebtProvisionSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
+        {
+            //1+paramOthers
+            Decimal OnePlusOtherParam = 1 + ConverttoDecimal(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value);
+
+            //1+4 apportenmnt
+
+            var oneplause = ConverttoDecimal(calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.Where(x => x.Name == "1 + 4 Apportionment %s").FirstOrDefault().ScotlandDisposalTotal);
+
+            return GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(calcResult) * OnePlusOtherParam *
+                GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialsCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(costSummary), materials, calcResult) *
+                oneplause;
+        }
+        private static decimal GetSAOperatingCostsNITotalWithBadDebtProvisionSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
+        {
+            //1+paramOthers
+            Decimal OnePlusOtherParam = 1 + ConverttoDecimal(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value);
+
+            //1+4 apportenmnt
+
+            var oneplause = ConverttoDecimal(calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.Where(x => x.Name == "1 + 4 Apportionment %s").FirstOrDefault().NorthernIrelandDisposalTotal);
+
+            return GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(calcResult) * OnePlusOtherParam *
+                GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialsCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(costSummary), materials, calcResult) *
+                oneplause;
+        }
+
+        // Section 3 End
         private static decimal GetLaDataPrepCostsTitleSection4(CalcResult calcResult)
         {
             return calcResult.CalcResultParameterOtherCost.Details.ToList()[0].TotalValue;
@@ -771,56 +870,7 @@ namespace EPR.Calculator.API.Builder.Summary
         {
             return 99;
         }
-
-        //Section -3 Rekha Equations Functions Top row calculation
-        private static decimal GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(CalcResult calcResult)
-        {
-            return calcResult.CalcResultParameterOtherCost.SaOperatingCost.OrderByDescending(t => t.OrderId).FirstOrDefault().TotalValue; ;
-        }
-
-        private static decimal GetSAOperatingCostsBadDebtProvisionTitleSection3(decimal sacostvalue, CalcResult calcResult)
-        {
-            var isConversionSuccessful = decimal.TryParse(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Replace("%", string.Empty), out decimal value);
-
-            return isConversionSuccessful ? sacostvalue * value / 100 : 0;
-        }
-        private static decimal GetSAOperatingCostsTotalWithBadDebtProvisionTitleSection3(CalcResultSummary result)
-        {
-            return result.SAOperatingCostsWoTitleSection3 + result.BadDebtProvisionTitleSection3;
-        }
-
-        //Section-3 Equation-3
-        private static decimal GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
-        {
-            decimal Total1Plus2ABadDebtPercentage = GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialsCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(costSummary), materials, calcResult);
-            decimal TotalProvisioncost = GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(calcResult);
-
-            return Total1Plus2ABadDebtPercentage * TotalProvisioncost / 100; ;
-        }
-        //Section-3 Equation-4
-        private static decimal GetBadDebtProvisionPrtoducerTotalSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
-        {
-            decimal ThreesalTotalCost = GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialsCostSummary,costSummary,materials,calcResult);
-            var isConversionSuccessful = decimal.TryParse(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Replace("%", string.Empty), out decimal value);
-
-            return isConversionSuccessful ? ThreesalTotalCost * value / 100 : 0;
-        }
-        //Section-3 Equation-5
-        private static decimal GetSAOperatingCostsTotalWithBadDebtProvisionPrtoducerTotalSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
-        {
-            return GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialsCostSummary, costSummary, materials, calcResult) + GetBadDebtProvisionPrtoducerTotalSection3(materialsCostSummary, costSummary, materials, calcResult);
-        }
-        //Section-3 Equation-6
-        private static decimal GetSAOperatingCostsEnglandTotalWithBadDebtProvisionSection3()
-        {
-            return 99;
-        }
-        private static decimal GetSAOperatingCostsWalesTotalWithBadDebtProvisionSection3()
-        {
-            return 99;
-        }
-        //End
-
+       
         private static void SetHeaders(CalcResultSummary result, List<MaterialDetail> materials)
         {
             result.ResultSummaryHeader = new CalcResultSummaryHeader
