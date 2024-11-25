@@ -5,11 +5,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using System.Collections.Generic;
-using System.Reflection;
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
@@ -112,7 +108,7 @@ namespace EPR.Calculator.API.UnitTests
                             Wales="WalesTest",
                             Name="Material1",
                             Scotland="ScotlandTest",
-                            
+
                         },
                           new CalcResultLaDisposalCostDataDetail()
                         {
@@ -219,7 +215,7 @@ namespace EPR.Calculator.API.UnitTests
                         {
                             CommsCostByMaterialPricePerTonne="0.42",
                             Name ="Material1",
-                            
+
                         },
                         new ()
                         {
@@ -479,7 +475,7 @@ namespace EPR.Calculator.API.UnitTests
         public void GetTotalDisposalCostswithBadDebtOnePlus2A_ShouldReturnCorrectValues()
         {
 
-          var materialInDb = _context.Material.ToList();
+            var materialInDb = _context.Material.ToList();
             var material = Mappers.MaterialMapper.Map(materialInDb);
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
 
@@ -489,7 +485,7 @@ namespace EPR.Calculator.API.UnitTests
                .ToList();
 
             var value = CalcResultSummaryBuilder.GetTotal1Plus2ABadDebtPercentage(100, 100, material, _calcResult);
-            Assert.AreEqual(4.52685300M, value);
+            Assert.AreEqual(4.52685329M, value);
 
             var totalFee = CalcResultSummaryBuilder.GetTotal1Plus2ABadDebt(material, _calcResult);
             Assert.AreEqual(4418.0800M, totalFee);

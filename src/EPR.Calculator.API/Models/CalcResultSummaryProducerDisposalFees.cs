@@ -84,6 +84,22 @@
         public decimal NorthernIrelandTotalwithBadDebtprovision2A { get; set; }
         //Section-(1) & (2a) End
 
+        //Section-3
+        public decimal Total3SAOperatingCostwoBadDebtprovision { get; set; }
+
+        public decimal BadDebtProvisionFor3 { get; set; }
+
+        public decimal Total3SAOperatingCostswithBadDebtprovision { get; set; }
+
+        public decimal EnglandTotalwithBadDebtprovision3 { get; set; }
+
+        public decimal WalesTotalwithBadDebtprovision3 { get; set; }
+
+        public decimal ScotlandTotalwithBadDebtprovision3 { get; set; }
+
+        public decimal NorthernIrelandTotalwithBadDebtprovision3 { get; set; }
+        //End Section-3
+
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> ProducerCommsFeesByMaterial { get; set; }
         public decimal TotalOnePlus2AFeeWithBadDebtProvision { get; set; }
