@@ -46,7 +46,7 @@ namespace EPR.Calculator.API.Constants
         public static readonly string NorthernIrelandTotal = "Northern Ireland Total";
         public static readonly string OneCountryApportionment = "1 Country Apportionment %s";
 
-        //section 7
+        //Section-(1) & (2a)
         public static readonly string TotalProducerFeeforLADisposalCostswoBadDebtprovision = "1 Total Producer Fee for LA Disposal Costs w/o Bad Debt provision";
         public static readonly string BadDebtProvisionFor1 = "Bad Debt Provision for 1";
         public static readonly string TotalProducerFeeforLADisposalCostswithBadDebtprovision = "1 Total Producer Fee for LA Disposal Costs with Bad Debt provision";
