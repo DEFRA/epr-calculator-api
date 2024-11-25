@@ -433,7 +433,7 @@ namespace EPR.Calculator.API.Exporter
 
         private static void WriteProducerDisposalFeesHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
         {
-            const int maxColumnSize = 235;
+            const int maxColumnSize = 236;
             var headerRows = new string[maxColumnSize];
             foreach (var item in resultSummary.ProducerDisposalFeesHeaders)
             {
