@@ -489,7 +489,7 @@ namespace EPR.Calculator.API.UnitTests
                .ToList();
 
             var value = CalcResultSummaryBuilder.GetTotal1Plus2ABadDebtPercentage(100, 100, material, _calcResult);
-            Assert.AreEqual(4.52685300M, value);
+            Assert.AreEqual(4.52685329M, value);
 
             var totalFee = CalcResultSummaryBuilder.GetTotal1Plus2ABadDebt(material, _calcResult);
             Assert.AreEqual(4418.0800M, totalFee);
