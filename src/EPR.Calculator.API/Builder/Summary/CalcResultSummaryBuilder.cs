@@ -25,8 +25,6 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
         // Section-4
         private const int LaDataPrepCostsSection4ColumnIndex = 216;
-        // Section-5
-        private const int SaSetupCostsSection5ColumnIndex = 223;
 
         public CalcResultSummaryBuilder(ApplicationDBContext context)
         {
@@ -86,7 +84,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 result.LaDataPrepCostsBadDebtProvisionTitleSection4 = GetLaDataPrepCostsBadDebtProvisionTitleSection4(calcResult);
                 result.LaDataPrepCostsWithBadDebtProvisionTitleSection4 = GetLaDataPrepCostsWithBadDebtProvisionTitleSection4(calcResult);
 
-                result.schemeAdministratorSetupCostsSummary = new SchemeAdministratorSetupCostsSummary();
+
             }
 
             // Set headers with calculated column index
@@ -187,13 +185,13 @@ namespace EPR.Calculator.API.Builder.Summary
                 LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
 
                 // Scheme administrator costs section 5
-                TotalProducerFeeWithoutBadDebtProvisionSection5 = GetSchemeAdminSetupCostsWithoutBadDebtProvisionSection5(),
-                BadDebtProvisionSection5 = GetBadDebtProvisionSection5(),
-                TotalProducerFeeWithBadDebtProvisionSection5 = GetSchemeAdminSetupCostsWithBadDebtProvisionSection5(),
-                EnglandTotalWithBadDebtProvisionSection5 = GetSchemeAdminSetupCostsEnglandTotalSection5(),
-                WalesTotalWithBadDebtProvisionSection5 = GetSchemeAdminSetupCostsWalesTotalSection5(),
-                ScotlandTotalWithBadDebtProvisionSection5 = GetSchemeAdminSetupCostsScotlandTotalSection5(),
-                NorthernIrelandTotalWithBadDebtProvisionSection5 = GetSchemeAdminSetupCostsNorthernIrelandTotalSection5(),
+                TotalProducerFeeWithoutBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetOneOffFeeWithoutBadDebtProvisionTotal(),
+                BadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetBadDebtProvisionTotal(),
+                TotalProducerFeeWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetOneOffFeeWithBadDebtProvisionTotal(),
+                EnglandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetEnglandOverallTotalWithBadDebtProvision(),
+                WalesTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetWalesOverallTotalWithBadDebtProvision(),
+                ScotlandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetScotlandOverallTotalWithBadDebtProvision(),
+                NorthernIrelandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetNorthernIrelandOverallTotalWithBadDebtProvision(),
 
                 isTotalRow = true
             };
@@ -292,7 +290,13 @@ namespace EPR.Calculator.API.Builder.Summary
                 LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
 
                 // Scheme administrator costs section 5
-                schemeAdministratorSetupCostsProducer = new SchemeAdministratorSetupCostsProducer()
+                TotalProducerFeeWithoutBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetProducerOneOffFeeWithoutBadDebtProvision(),
+                BadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetBadDebtProvision(),
+                TotalProducerFeeWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetProducerOneOffFeeWithBadDebtProvision(),
+                EnglandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetEnglandTotalWithBadDebtProvision(),
+                WalesTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetWalesTotalWithBadDebtProvision(),
+                ScotlandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetScotlandTotalWithBadDebtProvision(),
+                NorthernIrelandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetNorthernIrelandTotalWithBadDebtProvision()
             };
         }
 
@@ -711,41 +715,6 @@ namespace EPR.Calculator.API.Builder.Summary
             return 99;
         }
 
-        private static decimal GetSchemeAdminSetupCostsWithBadDebtProvisionSection5()
-        {
-            return 99;
-        }
-
-        private static decimal GetBadDebtProvisionSection5()
-        {
-            return 99;
-        }
-
-        private static decimal GetSchemeAdminSetupCostsWithoutBadDebtProvisionSection5()
-        {
-            return 99;
-        }
-
-        private static decimal GetSchemeAdminSetupCostsEnglandTotalSection5()
-        {
-            return 99;
-        }
-
-        private static decimal GetSchemeAdminSetupCostsWalesTotalSection5()
-        {
-            return 99;
-        }
-
-        private static decimal GetSchemeAdminSetupCostsScotlandTotalSection5()
-        {
-            return 99;
-        }
-
-        private static decimal GetSchemeAdminSetupCostsNorthernIrelandTotalSection5()
-        {
-            return 99;
-        }
-
         private static void SetHeaders(CalcResultSummary result, List<MaterialDetail> materials)
         {
             result.ResultSummaryHeader = new CalcResultSummaryHeader
@@ -763,7 +732,9 @@ namespace EPR.Calculator.API.Builder.Summary
 
         private static List<CalcResultSummaryHeader> GetProducerDisposalFeesHeaders()
         {
-            return [
+            var producerDisposalFeeHeaders = new List<CalcResultSummaryHeader>();
+
+            producerDisposalFeeHeaders.AddRange([
                 //Section-1 Title headers
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.OneProducerDisposalFeesWithBadDebtProvision, ColumnIndex = ProducerDisposalFeesHeaderColumnIndex },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.CommsCostHeader, ColumnIndex = CommsCostHeaderColumnIndex },
@@ -779,11 +750,15 @@ namespace EPR.Calculator.API.Builder.Summary
                 //Section-4 Title headers
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionTitleSection4 },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithBadDebtProvisionTitleSection4 },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithBadDebtProvisionTitleSection4 }
+            ]);
 
-                // Section-5
-                
-            ];
+            // Section-5 title headers
+            producerDisposalFeeHeaders.AddRange(
+                SchemeAdministratorSetupCostsSummary.GetHeaders()
+            );
+
+            return producerDisposalFeeHeaders;
         }
 
         private static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(CalcResultSummary result, List<MaterialDetail> materials)
@@ -847,8 +822,9 @@ namespace EPR.Calculator.API.Builder.Summary
             ]);
 
             // Scheme administrator setup costs section-5
-            var schemeAdministratorSetupCostsSummary = new SchemeAdministratorSetupCostsSummary();
-            materialsBreakdownHeaders.AddRange(schemeAdministratorSetupCostsSummary.GetHeaders());
+            materialsBreakdownHeaders.AddRange(
+                SchemeAdministratorSetupCostsSummary.GetHeaders()
+            );
 
             return materialsBreakdownHeaders;
         }
@@ -947,16 +923,10 @@ namespace EPR.Calculator.API.Builder.Summary
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalWithBadDebtProvisionSection4 }
             ]);
 
-            // Scheme administrator setup costs section 4 column headers
-            columnHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeWithoutBadDebtProvisionSection5, ColumnIndex = SaSetupCostsSection5ColumnIndex },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionSection5 },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeWithBadDebtProvisionSection5 },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.EnglandTotalWithBadDebtProvisionSection5 },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.WalesTotalWithBadDebtProvisionSection5 },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ScotlandTotalWithBadDebtProvisionSection5 },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalWithBadDebtProvisionSection5 }
-            ]);
+            // Scheme administrator setup costs section 5 column headers
+            columnHeaders.AddRange(
+                SchemeAdministratorSetupCostsProducer.GetHeaders()
+            );
 
             return columnHeaders;
         }

@@ -87,7 +87,19 @@ namespace EPR.Calculator.API.Models
         //Section-(1) & (2a) End
 
         // Section - 5
-        public SchemeAdministratorSetupCostsProducer schemeAdministratorSetupCostsProducer { get; set; }
+        public decimal TotalProducerFeeWithoutBadDebtProvisionSection5 { get; set; }
+
+        public decimal BadDebtProvisionSection5 { get; set; }
+
+        public decimal TotalProducerFeeWithBadDebtProvisionSection5 { get; set; }
+
+        public decimal EnglandTotalWithBadDebtProvisionSection5 { get; set; }
+
+        public decimal WalesTotalWithBadDebtProvisionSection5 { get; set; }
+
+        public decimal ScotlandTotalWithBadDebtProvisionSection5 { get; set; }
+
+        public decimal NorthernIrelandTotalWithBadDebtProvisionSection5 { get; set; }
 
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> ProducerCommsFeesByMaterial { get; set; }

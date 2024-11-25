@@ -2,46 +2,30 @@
 
 namespace EPR.Calculator.API.Builder.Summary.SchemeAdministratorSetupCosts
 {
-    public class SchemeAdministratorSetupCostsSummary
+    public static class SchemeAdministratorSetupCostsSummary
     {
         private static readonly int columnIndex = 223;
 
-        public decimal BadDebtProvision { get; set; }
-        public decimal OneOffFeeSetupCostsWithBadDebtProvision { get; set; }
-        public decimal OneOffFeeSetupCostsWithoutBadDebtProvision { get; set; }
-
-        public SchemeAdministratorSetupCostsSummary()
-        {
-            this.Calculate();
-        }
-
-        public IEnumerable<CalcResultSummaryHeader> GetHeaders()
+        public static IEnumerable<CalcResultSummaryHeader> GetHeaders()
         {
             return[
-                new CalcResultSummaryHeader { Name = $"{OneOffFeeSetupCostsWithoutBadDebtProvision}", ColumnIndex = columnIndex },
-                new CalcResultSummaryHeader { Name = $"{BadDebtProvision}" },
-                new CalcResultSummaryHeader { Name = $"{OneOffFeeSetupCostsWithBadDebtProvision}" }
+                new CalcResultSummaryHeader { Name = $"{SchemeAdministratorSetupCostsHeaders.OneOffFeeSetupCostsWithoutBadDebtProvisionTitle}", ColumnIndex = columnIndex },
+                new CalcResultSummaryHeader { Name = $"{SchemeAdministratorSetupCostsHeaders.BadDebtProvisionTitle}", ColumnIndex = columnIndex + 1 },
+                new CalcResultSummaryHeader { Name = $"{SchemeAdministratorSetupCostsHeaders.OneOffFeeSetupCostsWithBadDebtProvisionTitle}", ColumnIndex = columnIndex + 2 }
             ];
         }
 
-        private void Calculate()
-        {
-            BadDebtProvision = GetBadDebtProvision();
-            OneOffFeeSetupCostsWithBadDebtProvision = GetOneOffFeeSetupCostsWithBadDebtProvision();
-            OneOffFeeSetupCostsWithoutBadDebtProvision = GetOneOffFeeSetupCostsWithoutBadDebtProvision();
-        }
-
-        private decimal GetBadDebtProvision()
+        public static decimal GetBadDebtProvision()
         {
             return 109;
         }
 
-        private decimal GetOneOffFeeSetupCostsWithBadDebtProvision()
+        public static decimal GetOneOffFeeSetupCostsWithBadDebtProvision()
         {
             return 110;
         }
 
-        private decimal GetOneOffFeeSetupCostsWithoutBadDebtProvision()
+        public static decimal GetOneOffFeeSetupCostsWithoutBadDebtProvision()
         {
             return 111;
         }
