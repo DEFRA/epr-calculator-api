@@ -508,6 +508,8 @@ namespace EPR.Calculator.API.UnitTests
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
             Assert.AreEqual(15, result.ProducerDisposalFeesHeaders.Count());
+            var isColumnHeaderExists = result.ProducerDisposalFeesHeaders.Select(dict => dict.ColumnIndex == 196 || dict.ColumnIndex == 197 || dict.ColumnIndex == 198).ToList();
+            Assert.IsTrue(isColumnHeaderExists.Contains(true));
             Assert.IsNotNull(result.ProducerDisposalFees);
             Assert.AreEqual(2, result.ProducerDisposalFees.Count());
         }
