@@ -50,11 +50,11 @@ namespace EPR.Calculator.API.Constants
         public static readonly string TotalProducerFeeforLADisposalCostswoBadDebtprovision = "1 Total Producer Fee for LA Disposal Costs w/o Bad Debt provision";
         public static readonly string BadDebtProvisionFor1 = "Bad Debt Provision for 1";
         public static readonly string TotalProducerFeeforLADisposalCostswithBadDebtprovision = "1 Total Producer Fee for LA Disposal Costs with Bad Debt provision";
-        
+
         public static readonly string TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision2A = "2a Total Producer Fee for Comms Costs - by Material w/o Bad Debt provision";
         public static readonly string BadDebtProvisionfor2A = "Bad Debt Provision for 2a";
         public static readonly string TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision2A = "2a Total Producer Fee for Comms Costs - by Material with Bad Debt provision";
-        
+
         public static readonly string FeeforLADisposalCostswoBadDebtprovision1 = "1 Fee for LA Disposal Costs w/o Bad Debt provision";
         public static readonly string FeeforLADisposalCostswithBadDebtprovision1 = "1 Fee for LA Disposal Costs with Bad Debt provision";
         public static readonly string FeeforCommsCostsbyMaterialwoBadDebtprovision2A = "2a Fee for Comms Costs - by Material w/o Bad Debt provision";
