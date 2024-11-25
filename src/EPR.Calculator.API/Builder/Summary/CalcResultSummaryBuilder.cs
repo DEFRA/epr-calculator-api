@@ -164,7 +164,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 NorthernIrelandTotalwithBadDebtprovision = GetNorthernIrelandTotal(materialCostSummary),
 
                 TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision = GetTotalProducerCommsFee(commsCostSummary),
-                BadDebtProvisionFor2A = GetTotalBadDebtProvision(materialCostSummary),
+                BadDebtProvisionFor2A = GetCommsTotalBadDebtProvision(commsCostSummary),
                 TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision = GetTotalProducerCommsFeeWithBadDebtProvision(commsCostSummary),
                 EnglandTotalwithBadDebtprovision2A = GetEnglandCommsTotal(commsCostSummary),
                 WalesTotalwithBadDebtprovision2A = GetWalesCommsTotal(commsCostSummary),
@@ -260,7 +260,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 NorthernIrelandTotalwithBadDebtprovision = GetNorthernIrelandTotal(materialCostSummary),
 
                 TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision = GetTotalProducerCommsFee(commsCostSummary),
-                BadDebtProvisionFor2A = GetTotalBadDebtProvision(materialCostSummary),
+                BadDebtProvisionFor2A = GetCommsTotalBadDebtProvision(commsCostSummary),
                 TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision = GetTotalProducerCommsFeeWithBadDebtProvision(commsCostSummary),
                 EnglandTotalwithBadDebtprovision2A = GetEnglandCommsTotal(commsCostSummary),
                 WalesTotalwithBadDebtprovision2A = GetWalesCommsTotal(commsCostSummary),
