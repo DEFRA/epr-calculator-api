@@ -410,10 +410,10 @@ namespace EPR.Calculator.API.Exporter
             csvContent.AppendLine(CsvSanitiser.SanitiseData(resultSummary.ResultSummaryHeader.Name));
 
             // Add producer disposal fees header
-            WriteProducerDisposalFeesHeaders(resultSummary, csvContent);
+            WriteSecondaryHeaders(csvContent, resultSummary.ProducerDisposalFeesHeaders);
 
             // Add material breakdown header
-            WriteMaterialsBreakdownHeaders(resultSummary, csvContent);
+            WriteSecondaryHeaders(csvContent, resultSummary.MaterialBreakdownHeaders);
 
             // Add column header
             WriteColumnHeaders(resultSummary, csvContent);
@@ -421,45 +421,22 @@ namespace EPR.Calculator.API.Exporter
             csvContent.AppendLine();
         }
 
-        private static void WriteProducerDisposalFeesHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
+        private static void WriteSecondaryHeaders(StringBuilder csvContent, IEnumerable<CalcResultSummaryHeader> headers)
         {
-            var currentPosition = 0;
-            foreach (var item in resultSummary.ProducerDisposalFeesHeaders)
+            const int maxColumnSize = 236;
+            var headerRows = new string[maxColumnSize];
+            foreach (var item in headers)
             {
-                if (item.ColumnIndex != null)
+                if (item.ColumnIndex.HasValue)
                 {
-                    var indexCounter = (int)item.ColumnIndex - currentPosition;
-                    for (var i = 1; i < indexCounter; i++)
-                    {
-                        csvContent.Append(",");
-                    }
-                    currentPosition += indexCounter;
+                    headerRows[item.ColumnIndex.Value - 1] = $"{CsvSanitiser.SanitiseData(item.Name)}";
                 }
-
-                csvContent.Append($"{CsvSanitiser.SanitiseData(item.Name)},");
             }
-            csvContent.AppendLine();
+
+            var headerRow = string.Join(",", headerRows);
+            csvContent.AppendLine(headerRow);
         }
 
-        private static void WriteMaterialsBreakdownHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
-        {
-            var currentPosition = 0;
-            foreach (var item in resultSummary.MaterialBreakdownHeaders)
-            {
-                if (item.ColumnIndex != null)
-                {
-                    var indexCounter = (int)item.ColumnIndex - currentPosition;
-                    for (var i = 1; i < indexCounter; i++)
-                    {
-                        csvContent.Append(",");
-                    }
-                    currentPosition += indexCounter;
-                }
-
-                csvContent.Append($"{CsvSanitiser.SanitiseData(item.Name)},");
-            }
-            csvContent.AppendLine();
-        }
 
         private static void WriteColumnHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
         {
