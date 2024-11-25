@@ -1,4 +1,4 @@
-﻿using EPR.Calculator.API.Builder.Summary.SchemeAdministratorSetupCosts;
+using EPR.Calculator.API.Builder.Summary.SchemeAdministratorSetupCosts;
 using static Azure.Core.HttpHeader;
 
 namespace EPR.Calculator.API.Models

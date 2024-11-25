@@ -426,7 +426,7 @@ namespace EPR.Calculator.API.Exporter
             csvContent.AppendLine();
         }
 
-        private static void WriteProducerDisposalFeesHeaders(CalcResultSummaryHeader resultSummary, StringBuilder csvContent)
+        private static void WriteProducerDisposalFeesHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
         {
             var currentPosition = 0;
             foreach (var item in resultSummary.ProducerDisposalFeesHeaders)
@@ -446,7 +446,7 @@ namespace EPR.Calculator.API.Exporter
             csvContent.AppendLine();
         }
 
-        private static void WriteMaterialsBreakdownHeaders(CalcResultSummaryHeader resultSummary, StringBuilder csvContent)
+        private static void WriteMaterialsBreakdownHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
         {
             var currentPosition = 0;
             foreach (var item in resultSummary.MaterialBreakdownHeaders)
@@ -466,7 +466,7 @@ namespace EPR.Calculator.API.Exporter
             csvContent.AppendLine();
         }
 
-        private static void WriteColumnHeaders(CalcResultSummaryHeader resultSummary, StringBuilder csvContent)
+        private static void WriteColumnHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
         {
             foreach (var item in resultSummary.ColumnHeaders)
             {
