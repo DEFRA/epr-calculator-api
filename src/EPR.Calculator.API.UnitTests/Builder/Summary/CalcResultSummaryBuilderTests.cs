@@ -348,9 +348,6 @@ namespace EPR.Calculator.API.UnitTests
             Assert.IsNotNull(totalRow);
         }
 
-
-
-
         [TestMethod]
         public void GetTotalBadDebtprovision1_ShouldReturnCorrectValue()
         {
@@ -501,6 +498,20 @@ namespace EPR.Calculator.API.UnitTests
             var debt = Math.Ceiling((value * totalFee) / 100);
             Assert.AreEqual(200, debt);
         }
+
+        [TestMethod]
+        public void CommsCost2bBill_ShouldReturnCorrectValue()
+        {
+            var requestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(requestDto, _calcResult);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
+            Assert.AreEqual(15, result.ProducerDisposalFeesHeaders.Count());
+            Assert.IsNotNull(result.ProducerDisposalFees);
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
+        }
+
         private void SeedDatabase(ApplicationDBContext context)
         {
             context.Material.AddRange(new List<Material>
