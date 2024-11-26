@@ -388,7 +388,7 @@ namespace EPR.Calculator.API.Exporter
 
                 //bad debt Total
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TotalOnePlus2AFeeWithBadDebtProvision,decimalRoundUp))},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(Math.Round(producer.ProducerPercentageOfCosts,8))}%,");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(Math.Round(producer.ProducerPercentageOfCosts,8).ToString("F8"))}%,");
 
 
                 // LA data prep costs section 4
