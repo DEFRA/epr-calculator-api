@@ -17,7 +17,7 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int MaterialsBreakdownHeaderInitialColumnIndex = 5;
         private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
         private const int DisposalFeeSummaryColumnIndex = 93;
-        private const int LaDataPrepCostsSection4ColumnIndex = 202;
+        private const int LaDataPrepCostsSection4ColumnIndex = 217;
         private const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
         private const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
         //Section-(1) & (2a)
@@ -26,7 +26,7 @@ namespace EPR.Calculator.API.Builder.Summary
         //Section-(1) & (2a)
         private const int Total1Plus2ABadDebt = 193;
         //Section-3
-        private const int SAOperatingCostCostsHeaderInitialColumnIndex = 195;
+        private const int SAOperatingCostCostsHeaderInitialColumnIndex = 210;
 
         public static List<ProducerDetail> producerDetailList { get; set; }
 
@@ -967,9 +967,9 @@ namespace EPR.Calculator.API.Builder.Summary
 
             //Section-3 -first header
             materialsBreakdownHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = $"{result.SAOperatingCostsWoTitleSection3}", ColumnIndex = SAOperatingCostCostsHeaderInitialColumnIndex },
-                new CalcResultSummaryHeader { Name = $"{result.BadDebtProvisionTitleSection3}" ,ColumnIndex = SAOperatingCostCostsHeaderInitialColumnIndex+1},
-                new CalcResultSummaryHeader { Name = $"{result.SAOperatingCostsWithTitleSection3}", ColumnIndex = SAOperatingCostCostsHeaderInitialColumnIndex+2 }
+                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SAOperatingCostsWoTitleSection3, decimalRoundUp)}", ColumnIndex = SAOperatingCostCostsHeaderInitialColumnIndex },
+                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionTitleSection3, decimalRoundUp)}" ,ColumnIndex = SAOperatingCostCostsHeaderInitialColumnIndex+1},
+                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SAOperatingCostsWithTitleSection3, decimalRoundUp)}", ColumnIndex = SAOperatingCostCostsHeaderInitialColumnIndex+2 }
             ]);
 
             // LA data prep costs section 4
@@ -1071,6 +1071,12 @@ namespace EPR.Calculator.API.Builder.Summary
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducer1Plus2ABadDebt },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducer1Plus2ABadDebtPercentage }
                 ]);
+
+            // Two skip.
+            for (int i = 194; i < 209; i++)
+            {
+                columnHeaders.AddRange([new CalcResultSummaryHeader { Name = "", ColumnIndex = i }]);
+            };
 
             // SA operating cost section 3
             columnHeaders.AddRange([
