@@ -764,9 +764,8 @@ namespace EPR.Calculator.API.Builder.Summary
 
             var oneplause = ConverttoDecimal(calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.Where(x => x.Name == "1 + 4 Apportionment %s").FirstOrDefault().EnglandDisposalTotal);
 
-            return GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(calcResult) * OnePlusOtherParam *
-                GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialsCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(costSummary), materials, calcResult) *
-                oneplause;
+            var producerPercentage = GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialsCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(costSummary), materials, calcResult);
+            return GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(calcResult) * ConverttoDecimal(producerPercentage.ToString()) * OnePlusOtherParam * oneplause;
         }
         private static decimal GetSAOperatingCostsWalesTotalWithBadDebtProvisionSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
         {
@@ -777,9 +776,8 @@ namespace EPR.Calculator.API.Builder.Summary
 
             var oneplause = ConverttoDecimal(calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.Where(x => x.Name == "1 + 4 Apportionment %s").FirstOrDefault().WalesDisposalTotal);
 
-            return GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(calcResult) * OnePlusOtherParam *
-                GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialsCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(costSummary), materials, calcResult) *
-                oneplause;
+            var producerPercentage = GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialsCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(costSummary), materials, calcResult);
+            return GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(calcResult) * ConverttoDecimal(producerPercentage.ToString()) * OnePlusOtherParam * oneplause;
         }
         private static decimal GetSAOperatingCostsScotlandTotalWithBadDebtProvisionSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
         {
@@ -789,10 +787,8 @@ namespace EPR.Calculator.API.Builder.Summary
             //1+4 apportenmnt
 
             var oneplause = ConverttoDecimal(calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.Where(x => x.Name == "1 + 4 Apportionment %s").FirstOrDefault().ScotlandDisposalTotal);
-
-            return GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(calcResult) * OnePlusOtherParam *
-                GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialsCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(costSummary), materials, calcResult) *
-                oneplause;
+            var producerPercentage = GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialsCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(costSummary), materials, calcResult);
+            return GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(calcResult) * ConverttoDecimal(producerPercentage.ToString()) * OnePlusOtherParam * oneplause;
         }
         private static decimal GetSAOperatingCostsNITotalWithBadDebtProvisionSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
         {
@@ -803,9 +799,8 @@ namespace EPR.Calculator.API.Builder.Summary
 
             var oneplause = ConverttoDecimal(calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.Where(x => x.Name == "1 + 4 Apportionment %s").FirstOrDefault().NorthernIrelandDisposalTotal);
 
-            return GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(calcResult) * OnePlusOtherParam *
-                GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialsCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(costSummary), materials, calcResult) *
-                oneplause;
+            var producerPercentage = GetTotal1Plus2ABadDebtPercentage(GetTotalProducerDisposalFeeWithBadDebtProvision(materialsCostSummary), GetTotalProducerCommsFeeWithBadDebtProvision(costSummary), materials, calcResult);
+            return GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(calcResult) * ConverttoDecimal(producerPercentage.ToString()) * OnePlusOtherParam * oneplause;
         }
 
         // Section 3 End
