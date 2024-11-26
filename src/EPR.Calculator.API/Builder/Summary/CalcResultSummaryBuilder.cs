@@ -27,9 +27,6 @@ namespace EPR.Calculator.API.Builder.Summary
         private const int Total1Plus2ABadDebt = 193;
         private const int CommsCost2bColumnIndex = 196;
 
-        // Percentage of Producer Reported Household Tonnage vs All Producers
-        private const int PercentageofProducerReportedHHTonnageColumnIndex = 193;
-
         public static List<ProducerDetail> producerDetailList { get; set; }
 
         private const string England = "England";
@@ -1086,7 +1083,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             // Percentage of Producer Reported Household Tonnage vs All Producers
             columnHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PercentageofProducerReportedHHTonnagevsAllProducers, ColumnIndex = PercentageofProducerReportedHHTonnageColumnIndex },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PercentageofProducerReportedHHTonnagevsAllProducers },
             ]);
 
             // 2b comms total.
