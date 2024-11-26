@@ -13,21 +13,6 @@ namespace EPR.Calculator.API.Builder.Summary
     {
         private readonly ApplicationDBContext context;
 
-        public const int ResultSummaryHeaderColumnIndex = 1;
-        public const int ProducerDisposalFeesHeaderColumnIndex = 5;
-        public const int CommsCostHeaderColumnIndex = 100;
-        public const int MaterialsBreakdownHeaderInitialColumnIndex = 5;
-        public const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
-        public const int DisposalFeeSummaryColumnIndex = 93;
-        public const int LaDataPrepCostsSection4ColumnIndex = 216;
-        public const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
-        public const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
-        //Section-(1) & (2a)
-        public const int decimalRoundUp = 2;
-        public const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
-        //Section-(1) & (2a)
-        public const int Total1Plus2ABadDebt = 193;
-
         public static List<ProducerDetail> producerDetailList {  get; set; }
 
         public CalcResultSummaryBuilder(ApplicationDBContext context)

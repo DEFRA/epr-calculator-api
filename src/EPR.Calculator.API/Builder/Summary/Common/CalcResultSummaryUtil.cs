@@ -8,6 +8,21 @@ namespace EPR.Calculator.API.Builder.Summary.Common;
 
 public static class CalcResultSummaryUtil
 {
+    public const int ResultSummaryHeaderColumnIndex = 1;
+    public const int ProducerDisposalFeesHeaderColumnIndex = 5;
+    public const int CommsCostHeaderColumnIndex = 100;
+    public const int MaterialsBreakdownHeaderInitialColumnIndex = 5;
+    public const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
+    public const int DisposalFeeSummaryColumnIndex = 93;
+    public const int LaDataPrepCostsSection4ColumnIndex = 216;
+    public const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
+    public const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
+    //Section-(1) & (2a)
+    public const int decimalRoundUp = 2;
+    public const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
+    //Section-(1) & (2a)
+    public const int Total1Plus2ABadDebt = 193;
+
     public static int GetLevelIndex(List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup, ProducerDetail producer)
     {
         var totalRow = producerDisposalFeesLookup.Find(pdf => pdf.ProducerId == producer.ProducerId.ToString() && pdf.isTotalRow);
@@ -428,7 +443,7 @@ public static class CalcResultSummaryUtil
         result.ResultSummaryHeader = new CalcResultSummaryHeader
         {
             Name = CalcResultSummaryHeaders.CalculationResult,
-            ColumnIndex = CalcResultSummaryBuilder.ResultSummaryHeaderColumnIndex
+            ColumnIndex = ResultSummaryHeaderColumnIndex
         };
 
         result.ProducerDisposalFeesHeaders = GetProducerDisposalFeesHeaders();
@@ -442,28 +457,28 @@ public static class CalcResultSummaryUtil
     {
         return [
             //Section-1 Title headers
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.OneProducerDisposalFeesWithBadDebtProvision, ColumnIndex = CalcResultSummaryBuilder.ProducerDisposalFeesHeaderColumnIndex },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.CommsCostHeader, ColumnIndex = CalcResultSummaryBuilder.CommsCostHeaderColumnIndex },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.OneProducerDisposalFeesWithBadDebtProvision, ColumnIndex = ProducerDisposalFeesHeaderColumnIndex },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.CommsCostHeader, ColumnIndex = CommsCostHeaderColumnIndex },
                 
             //Section-(1) & (2a) Title headers   
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforLADisposalCostswoBadDebtprovision1, ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision,ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex +1 },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforLADisposalCostswithBadDebtprovision1, ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex +2 },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwoBadDebtprovision2A, ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex + 5 },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision, ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex +6 },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwithBadDebtprovision2A,ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex +7  },
-            new CalcResultSummaryHeader {Name = CalcResultSummaryHeaders.TotalBadDebtProvision1Plus2A, ColumnIndex = CalcResultSummaryBuilder.Total1Plus2ABadDebt},
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforLADisposalCostswoBadDebtprovision1, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision,ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex +1 },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforLADisposalCostswithBadDebtprovision1, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex +2 },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwoBadDebtprovision2A, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 5 },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex +6 },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwithBadDebtprovision2A,ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex +7  },
+            new CalcResultSummaryHeader {Name = CalcResultSummaryHeaders.TotalBadDebtProvision1Plus2A, ColumnIndex = Total1Plus2ABadDebt},
             //Section-4 Title headers
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitleSection4, ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionTitleSection4, ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex+1 },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithBadDebtProvisionTitleSection4, ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex+2 },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex+1 },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithBadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex+2 },
         ];
     }
 
     public static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(CalcResultSummary result, List<MaterialDetail> materials)
     {
         var materialsBreakdownHeaders = new List<CalcResultSummaryHeader>();
-        var columnIndex = CalcResultSummaryBuilder.MaterialsBreakdownHeaderInitialColumnIndex;
+        var columnIndex = MaterialsBreakdownHeaderInitialColumnIndex;
 
         foreach (var material in materials)
         {
@@ -472,17 +487,17 @@ public static class CalcResultSummaryUtil
                 Name = $"{material.Name} Breakdown",
                 ColumnIndex = columnIndex
             });
-            columnIndex = columnIndex + CalcResultSummaryBuilder.MaterialsBreakdownHeaderIncrementalColumnIndex;
+            columnIndex = columnIndex + MaterialsBreakdownHeaderIncrementalColumnIndex;
         }
 
         // Add disposal fee summary header
         materialsBreakdownHeaders.Add(new CalcResultSummaryHeader
         {
             Name = CalcResultSummaryHeaders.DisposalFeeSummary,
-            ColumnIndex = CalcResultSummaryBuilder.DisposalFeeSummaryColumnIndex
+            ColumnIndex = DisposalFeeSummaryColumnIndex
         });
 
-        var commsCostColumnIndex = CalcResultSummaryBuilder.MaterialsBreakdownHeaderCommsInitialColumnIndex;
+        var commsCostColumnIndex = MaterialsBreakdownHeaderCommsInitialColumnIndex;
 
         foreach (var material in materials)
         {
@@ -491,7 +506,7 @@ public static class CalcResultSummaryUtil
                 Name = $"{material.Name} Breakdown",
                 ColumnIndex = commsCostColumnIndex
             });
-            commsCostColumnIndex = commsCostColumnIndex + CalcResultSummaryBuilder.MaterialsBreakdownHeaderCommsIncrementalColumnIndex;
+            commsCostColumnIndex = commsCostColumnIndex + MaterialsBreakdownHeaderCommsIncrementalColumnIndex;
         }
 
         materialsBreakdownHeaders.Add(new CalcResultSummaryHeader
@@ -502,26 +517,26 @@ public static class CalcResultSummaryUtil
 
         //Section-(1) & (2a)
         materialsBreakdownHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforLADisposalCostswoBadDebtprovision1, CalcResultSummaryBuilder.decimalRoundUp)}", ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex },
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionFor1, CalcResultSummaryBuilder.decimalRoundUp)}", ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex+1 },
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforLADisposalCostswithBadDebtprovision1, CalcResultSummaryBuilder.decimalRoundUp)}",ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex+2 }
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforLADisposalCostswoBadDebtprovision1, decimalRoundUp)}", ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionFor1, decimalRoundUp)}", ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex+1 },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforLADisposalCostswithBadDebtprovision1, decimalRoundUp)}",ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex+2 }
         ]);
 
         materialsBreakdownHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwoBadDebtProvision2A, CalcResultSummaryBuilder.decimalRoundUp)}", ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex + 5 },
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionFor2A, CalcResultSummaryBuilder.decimalRoundUp)}",ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex+6 },
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A, CalcResultSummaryBuilder.decimalRoundUp)}",ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex+7 }
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwoBadDebtProvision2A, decimalRoundUp)}", ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 5 },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionFor2A, decimalRoundUp)}",ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex+6 },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A, decimalRoundUp)}",ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex+7 }
         ]);
 
         materialsBreakdownHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalOnePlus2AFeeWithBadDebtProvision, CalcResultSummaryBuilder.decimalRoundUp)}", ColumnIndex = CalcResultSummaryBuilder.Total1Plus2ABadDebt },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalOnePlus2AFeeWithBadDebtProvision, decimalRoundUp)}", ColumnIndex = Total1Plus2ABadDebt },
         ]);
 
         // LA data prep costs section 4
         materialsBreakdownHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsTitleSection4}", ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex },
-            new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsBadDebtProvisionTitleSection4}", ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex+1 },
-            new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsWithBadDebtProvisionTitleSection4}",ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex+2 }
+            new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsTitleSection4}", ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
+            new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsBadDebtProvisionTitleSection4}", ColumnIndex = LaDataPrepCostsSection4ColumnIndex+1 },
+            new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsWithBadDebtProvisionTitleSection4}",ColumnIndex = LaDataPrepCostsSection4ColumnIndex+2 }
         ]);
 
         return materialsBreakdownHeaders;
@@ -592,7 +607,7 @@ public static class CalcResultSummaryUtil
 
         //Section-(1) & (2a)
         columnHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeforLADisposalCostswoBadDebtprovision, ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeforLADisposalCostswoBadDebtprovision, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionFor1 },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeforLADisposalCostswithBadDebtprovision },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.EnglandTotalwithBadDebtprovision },
@@ -602,7 +617,7 @@ public static class CalcResultSummaryUtil
         ]);
 
         columnHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision2A, ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision2A, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionfor2A },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision2A },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.EnglandTotalwithBadDebtprovision },
@@ -624,7 +639,7 @@ public static class CalcResultSummaryUtil
 
         // LA data prep costs section 4 column headers
         columnHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeWithoutBadDebtProvisionSection4, ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeWithoutBadDebtProvisionSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionSection4 },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeWithBadDebtProvisionSection4 },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.EnglandTotalWithBadDebtProvisionSection4 },
