@@ -64,9 +64,6 @@ namespace EPR.Calculator.API.Constants
         public static readonly string TotalProducer1Plus2ABadDebt = "Producer Total(1+2a) with Bad Debt provision";
         public static readonly string TotalProducer1Plus2ABadDebtPercentage = "Producer Percentage of Costs: Producer (1+2a) Percentage of Overal Producer Cost of (1+2a)";
 
-
-
-
         // LA data prep costs section 4
         public static readonly string LaDataPrepCostsWithoutBadDebtProvisionTitleSection4 = "4 LA Data Prep Costs w/o Bad Debt provision";
         public static readonly string BadDebtProvisionTitleSection4 = "Bad Debt provision";

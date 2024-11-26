@@ -26,9 +26,6 @@ namespace EPR.Calculator.API.Builder.Summary
         //Section-(1) & (2a)
         private const int Total1Plus2ABadDebt = 193;
 
-        // Percentage of Producer Reported Household Tonnage vs All Producers
-        private const int PercentageofProducerReportedHHTonnageColumnIndex = 193;
-
         public static List<ProducerDetail> producerDetailList {  get; set; }
 
         public CalcResultSummaryBuilder(ApplicationDBContext context)
@@ -1031,7 +1028,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
             // Percentage of Producer Reported Household Tonnage vs All Producers
             columnHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PercentageofProducerReportedHHTonnagevsAllProducers, ColumnIndex = PercentageofProducerReportedHHTonnageColumnIndex },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PercentageofProducerReportedHHTonnagevsAllProducers },
             ]);
 
             // LA data prep costs section 4 column headers
