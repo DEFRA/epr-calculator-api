@@ -524,6 +524,12 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalOnePlus2AFeeWithBadDebtProvision, CalcResultSummaryBuilder.decimalRoundUp)}", ColumnIndex = CalcResultSummaryBuilder.Total1Plus2ABadDebt },
         ]);
 
+        materialsBreakdownHeaders.AddRange([
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TwoCCommsCostsByCountryWithoutBadDebtProvision, CalcResultSummaryBuilder.decimalRoundUp)}", ColumnIndex = TwoCCommsCostColumnIndex.Value },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TwoCBadDebtProvision, CalcResultSummaryBuilder.decimalRoundUp)}", ColumnIndex = TwoCCommsCostColumnIndex.Value + 1 },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TwoCCommsCostsByCountryWithBadDebtProvision, CalcResultSummaryBuilder.decimalRoundUp)}", ColumnIndex = TwoCCommsCostColumnIndex.Value + 2 },
+        ]);
+
         // LA data prep costs section 4
         materialsBreakdownHeaders.AddRange([
             new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsTitleSection4}", ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex },
