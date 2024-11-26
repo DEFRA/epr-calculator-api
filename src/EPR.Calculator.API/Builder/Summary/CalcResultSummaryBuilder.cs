@@ -1073,7 +1073,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 ]);
 
             // Two skip.
-            for (int i = 194; i < 209; i++)
+            for (int i = Total1Plus2ABadDebt + 1; i < SAOperatingCostCostsHeaderInitialColumnIndex - 1; i++)
             {
                 columnHeaders.AddRange([new CalcResultSummaryHeader { Name = "", ColumnIndex = i }]);
             };
