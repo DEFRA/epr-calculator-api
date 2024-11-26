@@ -995,56 +995,6 @@ namespace EPR.Calculator.API.Builder.Summary
 
             foreach (var material in materials)
             {
-                materialsBreakdownHeaders.Add(new CalcResultSummaryHeader
-                {
-                    Name = $"{material.Name} Breakdown",
-                    ColumnIndex = commsCostColumnIndex
-                });
-                commsCostColumnIndex = commsCostColumnIndex + MaterialsBreakdownHeaderCommsIncrementalColumnIndex;
-            }
-
-            materialsBreakdownHeaders.Add(new CalcResultSummaryHeader
-            {
-                Name = CalcResultSummaryHeaders.CommsCostSummaryHeader,
-                ColumnIndex = commsCostColumnIndex
-            });
-            
-            //Section-(1) & (2a)
-            materialsBreakdownHeaders.AddRange([ 
-                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforLADisposalCostswoBadDebtprovision1, decimalRoundUp)}", ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex },
-                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionFor1, decimalRoundUp)}" },
-                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforLADisposalCostswithBadDebtprovision1, decimalRoundUp)}" }
-            ]);
-
-            materialsBreakdownHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwoBadDebtProvision2A, decimalRoundUp)}", ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 5 },
-                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionFor2A, decimalRoundUp)}" },
-                new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A, decimalRoundUp)}" }
-            ]);
-
-            // LA data prep costs section 4
-            materialsBreakdownHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsTitleSection4}", ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
-                new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsBadDebtProvisionTitleSection4}" },
-                new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsWithBadDebtProvisionTitleSection4}" }
-            ]);
-
-            return materialsBreakdownHeaders;
-        }
-
-        private static List<CalcResultSummaryHeader> GetColumnHeaders(List<MaterialDetail> materials)
-        {
-            var columnHeaders = new List<CalcResultSummaryHeader>();
-
-            columnHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ProducerId },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.SubsidiaryId },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ProducerOrSubsidiaryName },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.Level }
-            ]);
-
-            foreach (var material in materials)
-            {
                 columnHeaders.AddRange([
                     new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ReportedHouseholdPackagingWasteTonnage },
                     new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ReportedSelfManagedConsumerWasteTonnage },
