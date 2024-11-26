@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.Builder.Summary;
+using EPR.Calculator.API.Builder.Summary.OneAndTwoA;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -337,33 +338,7 @@ namespace EPR.Calculator.API.UnitTests
             var totalRow = result.ProducerDisposalFees.LastOrDefault();
             Assert.IsNotNull(totalRow);
         }
-
-        private void SeedDatabase(ApplicationDBContext context)
-        {
-            context.Material.AddRange(new List<Material>
-            {
-                new() { Id = 1, Name = "Material1", Code = "123"},
-                new() { Id = 2, Name = "Material2", Code = "456"}
-            });
-
-            context.ProducerDetail.AddRange(new List<ProducerDetail>
-            {
-                new() {  Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test1" } },
-                new() { Id = 2, ProducerName = "Producer2", CalculatorRunId = 2, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test2" } },
-                new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } }
-            });
-
-            context.ProducerReportedMaterial.AddRange(new List<ProducerReportedMaterial>
-            {
-                new() { Id = 1, MaterialId = 1, PackagingType="HH", PackagingTonnage=400m,ProducerDetailId =1},
-                new(){ Id = 2, MaterialId = 2, PackagingType="HH", PackagingTonnage=400m,ProducerDetailId =2},
-                new(){ Id = 3, MaterialId = 1, PackagingType="CW", PackagingTonnage=200m,ProducerDetailId =1},
-                new(){ Id = 4, MaterialId = 2, PackagingType="CW", PackagingTonnage=200m,ProducerDetailId =2}
-            });
-
-            context.SaveChanges();
-        }
-
+        
         [TestMethod]
         public void GetTotalBadDebtprovision1_ShouldReturnCorrectValue()
         {
@@ -376,7 +351,7 @@ namespace EPR.Calculator.API.UnitTests
             totalRow.BadDebtProvisionFor1 = 100m;
             totalRow.Level = "Totals";
 
-            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.BadDebtProvisionFor1);
+            var totalFee = CalcResultOneAndTwoAUtil.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.BadDebtProvisionFor1);
 
             Assert.AreEqual(100m, totalFee);
         }
@@ -393,7 +368,7 @@ namespace EPR.Calculator.API.UnitTests
             totalRow.TotalProducerDisposalFeeWithBadDebtProvision = 200m;
             totalRow.Level = "Totals";
 
-            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.TotalProducerDisposalFeeWithBadDebtProvision);
+            var totalFee = CalcResultOneAndTwoAUtil.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.TotalProducerDisposalFeeWithBadDebtProvision);
 
             Assert.AreEqual(200m, totalFee);
         }
@@ -410,7 +385,7 @@ namespace EPR.Calculator.API.UnitTests
             totalRow.TotalProducerCommsFee = 300m;
             totalRow.Level = "Totals";
 
-            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.TotalProducerCommsFee);
+            var totalFee = CalcResultOneAndTwoAUtil.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.TotalProducerCommsFee);
 
             Assert.AreEqual(300m, totalFee);
         }
@@ -427,7 +402,7 @@ namespace EPR.Calculator.API.UnitTests
             totalRow.BadDebtProvisionFor2A = 400m;
             totalRow.Level = "Totals";
 
-            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.BadDebtProvisionFor2A);
+            var totalFee = CalcResultOneAndTwoAUtil.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.BadDebtProvisionFor2A);
 
             Assert.AreEqual(400m, totalFee);
         }
@@ -444,7 +419,7 @@ namespace EPR.Calculator.API.UnitTests
             totalRow.TotalProducerCommsFeeWithBadDebtProvision = 500m;
             totalRow.Level = "Totals";
 
-            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.TotalProducerCommsFeeWithBadDebtProvision);
+            var totalFee = CalcResultOneAndTwoAUtil.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.TotalProducerCommsFeeWithBadDebtProvision);
 
             Assert.AreEqual(500m, totalFee);
         }
@@ -461,7 +436,7 @@ namespace EPR.Calculator.API.UnitTests
             totalRow.BadDebtProvisionFor1 = 0m;
             totalRow.Level = "Totals";
 
-            var totalFee = CalcResultSummaryBuilder.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.BadDebtProvisionFor1);
+            var totalFee = CalcResultOneAndTwoAUtil.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.BadDebtProvisionFor1);
 
             Assert.AreEqual(0m, totalFee);
         }
@@ -469,9 +444,27 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void GetTotalFee_ShouldReturnZero_WhenFeesIsNull()
         {
-            var result = CalcResultSummaryBuilder.GetTotalFee(null, fee => fee.BadDebtProvisionFor1);
+            var result = CalcResultOneAndTwoAUtil.GetTotalFee(null, fee => fee.BadDebtProvisionFor1);
 
             Assert.AreEqual(0m, result);
+        }
+
+        [TestMethod]
+        public void ProducerTotalPercentageVsTotal_ShouldReturnCorrectValue()
+        {
+            var requestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(requestDto, _calcResult);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
+            Assert.AreEqual(15, result.ProducerDisposalFeesHeaders.Count());
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.ProducerDisposalFees);
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
+            var producerTotalPercentage = result.ProducerDisposalFees.FirstOrDefault().PercentageofProducerReportedHHTonnagevsAllProducers;
+            Assert.IsNotNull(producerTotalPercentage);
+            Assert.AreEqual(100, producerTotalPercentage);
         }
 
         [TestMethod]
@@ -495,6 +488,30 @@ namespace EPR.Calculator.API.UnitTests
 
             var debt = Math.Ceiling((value * totalFee) / 100);
             Assert.AreEqual(200, debt);
+        }
+        private void SeedDatabase(ApplicationDBContext context)
+        {
+            context.Material.AddRange(new List<Material>
+            {
+                new() { Id = 1, Name = "Material1", Code = "123"},
+                new() { Id = 2, Name = "Material2", Code = "456"}
+            });
+
+            context.ProducerDetail.AddRange(new List<ProducerDetail>
+            {
+                new() {  Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test1" } },
+                new() { Id = 2, ProducerName = "Producer2", CalculatorRunId = 2, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test2" } },
+                new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } }
+            });
+
+            context.ProducerReportedMaterial.AddRange(new List<ProducerReportedMaterial>
+            {
+                new() { Id = 1, MaterialId = 1, PackagingType="HH", PackagingTonnage=400m,ProducerDetailId =1},
+                new(){ Id = 2, MaterialId = 2, PackagingType="HH", PackagingTonnage=400m,ProducerDetailId =2},
+                new(){ Id = 3, MaterialId = 1, PackagingType="CW", PackagingTonnage=200m,ProducerDetailId =1},
+                new(){ Id = 4, MaterialId = 2, PackagingType="CW", PackagingTonnage=200m,ProducerDetailId =2}
+            });
+            context.SaveChanges();
         }
     }
 }
