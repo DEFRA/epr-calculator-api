@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Builder.Summary.Common;
+﻿using EPR.Calculator.API.Builder.CommsCost;
+using EPR.Calculator.API.Builder.Summary.Common;
 using EPR.Calculator.API.Builder.Summary.CommsCostTwoA;
 using EPR.Calculator.API.Builder.Summary.HHTonnageVsAllProducer;
 using EPR.Calculator.API.Builder.Summary.OneAndTwoA;
@@ -6,8 +7,6 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
-using System.Globalization;
-using EPR.Calculator.API.Builder.Summary.TwoCCommsCost;
 
 namespace EPR.Calculator.API.Builder.Summary
 {
@@ -361,22 +360,22 @@ namespace EPR.Calculator.API.Builder.Summary
                 result.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt + result.TwoCBadDebtProvision;
 
             var englandTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
-                .Single(x => x.Name == "1 + 4 Apportionment %s").EnglandTotal;
+                .Single(x => x.Name == CalcResultCommsCostBuilder.OnePlusFourApportionment).EnglandTotal;
             result.TwoCEnglandTotalWithBadDebt =
                 englandTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
 
             var walesTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
-                .Single(x => x.Name == "1 + 4 Apportionment %s").WalesTotal;
+                .Single(x => x.Name == CalcResultCommsCostBuilder.OnePlusFourApportionment).WalesTotal;
             result.TwoCWalesTotalWithBadDebt =
                 walesTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
 
             var scotlandTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
-                .Single(x => x.Name == "1 + 4 Apportionment %s").ScotlandTotal;
+                .Single(x => x.Name == CalcResultCommsCostBuilder.OnePlusFourApportionment).ScotlandTotal;
             result.TwoCScotlandTotalWithBadDebt =
                 scotlandTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
 
             var niTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
-                .Single(x => x.Name == "1 + 4 Apportionment %s").NorthernIrelandTotal;
+                .Single(x => x.Name == CalcResultCommsCostBuilder.OnePlusFourApportionment).NorthernIrelandTotal;
             result.TwoCNorthernIrelandTotalWithBadDebt =
                 niTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
 
