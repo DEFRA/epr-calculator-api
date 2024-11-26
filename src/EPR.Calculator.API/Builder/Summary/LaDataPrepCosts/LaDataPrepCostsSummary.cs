@@ -2,7 +2,7 @@
 
 namespace EPR.Calculator.API.Builder.Summary.LaDataPrepCosts
 {
-    public class LaDataPrepCostsSummary
+    public static class LaDataPrepCostsSummary
     {
         private static readonly int columnIndex = 216;
 

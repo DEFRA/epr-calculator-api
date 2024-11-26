@@ -2,7 +2,7 @@
 
 namespace EPR.Calculator.API.Builder.Summary.LaDataPrepCosts
 {
-    public class LaDataPrepCostsProducer
+    public static class LaDataPrepCostsProducer
     {
         private static readonly int columnIndex = 223;
 
@@ -19,17 +19,45 @@ namespace EPR.Calculator.API.Builder.Summary.LaDataPrepCosts
             ];
         }
 
+        public static decimal GetBadDebtProvision1(CalcResult calcResult,
+            Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary,
+            Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> materialCommsCostSummary)
+        {
+            decimal totalBadDebtProvision = 0;
+
+            foreach (var material in materialCostSummary)
+            {
+                totalBadDebtProvision += material.Value.BadDebtProvision;
+            }
+
+            decimal totalCommsBadDebtProvision = 0;
+
+            foreach (var material in materialCommsCostSummary)
+            {
+                totalCommsBadDebtProvision += material.Value.BadDebtProvision;
+            }
+
+            var abc = calcResult.CalcResultSummary.ProducerDisposalFees.Where(x => x.Level == "Totals").FirstOrDefault().TotalOnePlus2AFeeWithBadDebtProvision;
+
+            // var result = (totalBadDebtProvision + totalCommsBadDebtProvision) / ()
+
+            return 112;
+        }
+
         public static decimal GetBadDebtProvision()
         {
             return 112;
         }
+
         public static decimal GetBadDebtProvisionTotal()
         {
             return 112;
         }
 
-        public static decimal GetProducerFeeWithoutBadDebtProvision()
+        public static decimal GetProducerFeeWithoutBadDebtProvision(CalcResult calcResult)
         {
+
+
             return 113;
         }
 

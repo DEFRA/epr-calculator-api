@@ -28,6 +28,8 @@ namespace EPR.Calculator.API.Models
         
         public decimal TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A { get; set; }
 
+        public decimal TotalOnePlus2AFeeWithBadDebtProvision { get; set; }
+
         //Section-4
         public decimal LaDataPrepCostsTitleSection4 { get; set; }
 
