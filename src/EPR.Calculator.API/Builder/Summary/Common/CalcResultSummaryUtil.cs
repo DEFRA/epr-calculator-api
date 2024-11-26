@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using EPR.Calculator.API.Builder.Summary.CommsCostTwoA;
+using EPR.Calculator.API.Builder.Summary.TwoCCommsCost;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Models;
@@ -453,6 +454,12 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision, ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex +6 },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwithBadDebtprovision2A,ColumnIndex = CalcResultSummaryBuilder.DisposalFeeCommsCostsHeaderInitialColumnIndex +7  },
             new CalcResultSummaryHeader {Name = CalcResultSummaryHeaders.TotalBadDebtProvision1Plus2A, ColumnIndex = CalcResultSummaryBuilder.Total1Plus2ABadDebt},
+
+            // 2c
+            new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithout, ColumnIndex = TwoCCommsCostColumnIndex.Value },
+            new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostBadBebtProvision, ColumnIndex = TwoCCommsCostColumnIndex.Value + 1 },
+            new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithBadDebt, ColumnIndex = TwoCCommsCostColumnIndex.Value + 2 },
+
             //Section-4 Title headers
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitleSection4, ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionTitleSection4, ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex+1 },
@@ -620,6 +627,26 @@ public static class CalcResultSummaryUtil
         // Percentage of Producer Reported Household Tonnage vs All Producers
         columnHeaders.AddRange([
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PercentageofProducerReportedHHTonnagevsAllProducers },
+        ]);
+
+        columnHeaders.AddRange([
+            new CalcResultSummaryHeader {Name = "One Missing"},
+            new CalcResultSummaryHeader {Name = "Two Missing"},
+            new CalcResultSummaryHeader {Name = "Three Missing"},
+            new CalcResultSummaryHeader {Name = "Four Missing"},
+            new CalcResultSummaryHeader {Name = "Five Missing"},
+            new CalcResultSummaryHeader {Name = "Six Missing"},
+        ]);
+
+
+columnHeaders.AddRange([
+            new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostCountryInPropertionWithoutBadDebt, ColumnIndex = TwoCCommsCostColumnIndex.Value },
+            new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostBadDebtProvision },
+            new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostCountryInPropertionWithBadDebt },
+            new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostEnglandWithBadDebt },
+            new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostWalesWithBadDebt },
+            new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostScotlandWithBadDebt },
+            new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostNIWithBadDebt }
         ]);
 
         // LA data prep costs section 4 column headers
