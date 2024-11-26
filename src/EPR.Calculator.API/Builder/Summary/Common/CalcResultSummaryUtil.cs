@@ -650,7 +650,7 @@ public static class CalcResultSummaryUtil
 
         // SA operating cost section 3
         columnHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalSAOperatingCostsWoTitleSection3, ColumnIndex = SAOperatingCostCostsHeaderInitialColumnIndex },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalSAOperatingCostsWoTitleSection3, ColumnIndex = 209 },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionSection3 },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.SAOperatingCostsWithTitleSection3 },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.EnglandTotalWithBadDebtProvisionSection3 },

@@ -248,7 +248,6 @@ namespace EPR.Calculator.API.Builder.Summary
             var commsCostBadDebt = CalcResultSummaryUtil.GetTotalProducerCommsFeeWithBadDebtProvision(costSummary);
             return totalLaDisposalFee + commsCostBadDebt;
         }
-
         private CalcResultSummaryProducerDisposalFees GetProducerRow(
             List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup,
             ProducerDetail producer,
