@@ -388,6 +388,20 @@ public static class CalcResultSummaryUtil
         return GetLaDataPrepCostsTitleSection4(calcResult) + GetLaDataPrepCostsBadDebtProvisionTitleSection4(calcResult);
     }
 
+    public static decimal GetTotal1Plus2ABadDebt(IEnumerable<ProducerDetail> producers, IEnumerable<MaterialDetail> materials, CalcResult calcResult)
+    {
+        decimal total = 0m;
+
+        foreach (var material in materials)
+        {
+            var laDisposalTotal = CalcResultSummaryUtil.GetProducerDisposalFeeWithBadDebtProvisionProducerTotal(producers, material, calcResult);
+            var twoAcommsDisposal = CalcResultSummaryCommsCostTwoA.GetProducerTotalCostwithBadDebtProvisionTotal(producers, material, calcResult);
+            total += laDisposalTotal + twoAcommsDisposal;
+        }
+
+        return total;
+    }
+
     public static decimal GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4()
     {
         return 99;
