@@ -23,19 +23,13 @@ namespace EPR.Calculator.API.Builder.Summary.LaDataPrepCosts
             Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary,
             Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> materialCommsCostSummary)
         {
-            decimal totalBadDebtProvision = 0;
+            decimal materialBadDebtProvision = Util.GetBadDebtProvisionForMaterials(materialCostSummary);
+            decimal materialCommsCostBadDebtProvision = Util.GetBadDebtProvisionForMaterialsCommsCost(materialCommsCostSummary);
 
-            foreach (var material in materialCostSummary)
-            {
-                totalBadDebtProvision += material.Value.BadDebtProvision;
-            }
 
-            decimal totalCommsBadDebtProvision = 0;
 
-            foreach (var material in materialCommsCostSummary)
-            {
-                totalCommsBadDebtProvision += material.Value.BadDebtProvision;
-            }
+
+            var totalOnePlus2AFeeWithBadDebtProvision = Util.GetTotalProducerDisposalFeeWithBadDebtProvision(materialCostSummary);
 
             var abc = calcResult.CalcResultSummary.ProducerDisposalFees.Where(x => x.Level == "Totals").FirstOrDefault().TotalOnePlus2AFeeWithBadDebtProvision;
 
