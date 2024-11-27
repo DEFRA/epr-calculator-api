@@ -661,10 +661,9 @@ public static class CalcResultSummaryUtil
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalWithBadDebtProvisionForComms2b }
         ]);
 
-        for (int i = 222; i < 235; i++)
+        for (int i = 203; i < 216; i++)
         {
-            columnHeaders.AddRange([
-                 new CalcResultSummaryHeader { Name = "missing", ColumnIndex = i }]);
+            columnHeaders.AddRange([new CalcResultSummaryHeader { Name = "missing", ColumnIndex = i }]);
         }
 
         // LA data prep costs section 4 column headers

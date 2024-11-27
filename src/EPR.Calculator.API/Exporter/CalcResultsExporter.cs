@@ -406,10 +406,10 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.NorthernIrelandTotalWithBadDebtFor2bComms, decimalRoundUp))},");
 
                 // Two skip.
-                for (int i = 1; i < 14; i++)
+                for (int i = 203; i < 216; i++)
                 {
                     csvContent.Append($"missing,");
-                };
+                }
 
                 // LA data prep costs section 4
                 csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsTotalWithoutBadDebtProvisionSection4)},");
