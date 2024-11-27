@@ -664,7 +664,7 @@ public static class CalcResultSummaryUtil
         for (int i = 222; i < 235; i++)
         {
             columnHeaders.AddRange([
-                 new CalcResultSummaryHeader { Name = "", ColumnIndex = i }]);
+                 new CalcResultSummaryHeader { Name = "missing", ColumnIndex = i }]);
         }
 
         // LA data prep costs section 4 column headers
