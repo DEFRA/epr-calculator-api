@@ -13,7 +13,7 @@ public static class CalcResultSummaryUtil
     {
         var totalRow = producerDisposalFeesLookup.Find(pdf => pdf.ProducerId == producer.ProducerId.ToString() && pdf.isTotalRow);
 
-        return totalRow == null ? 1 : 2;
+        return totalRow == null ? (int)CalcResultSummaryLevelIndex.One : (int)CalcResultSummaryLevelIndex.Two;
     }
 
     public static decimal GetHouseholdPackagingWasteTonnage(ProducerDetail producer, MaterialDetail material)
