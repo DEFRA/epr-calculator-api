@@ -107,7 +107,8 @@ namespace EPR.Calculator.API.Builder.Summary
                 result.TwoCCommsCostsByCountryWithoutBadDebtProvision = calcResult.CalcResultCommsCostReportDetail
                     .CommsCostByCountry.Last().TotalValue;
 
-                result.TwoCBadDebtProvision = calcResult.CalcResultParameterOtherCost.BadDebtValue;
+                result.TwoCBadDebtProvision = (calcResult.CalcResultParameterOtherCost.BadDebtValue *
+                                               result.TwoCCommsCostsByCountryWithoutBadDebtProvision) / 100;
 
                 result.TwoCCommsCostsByCountryWithBadDebtProvision =
                     result.TwoCCommsCostsByCountryWithoutBadDebtProvision + result.TwoCBadDebtProvision;
@@ -237,18 +238,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 isTotalRow = true
             };
 
-            if (isOverAllTotalRow)
-            {
-                totalRow.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt = producerDisposalFees
-                    .Where(pf => pf.Level == ((int)CalcResultSummaryLevelIndex.One).ToString())
-                    .Sum(x => x.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt);
-            }
-            else
-            {
-                totalRow.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt =
-                    TwoCCommsCostUtil.GetTwoCTotalProducerFeeForCommsCostsWithoutBadDebt(producersAndSubsidiaries,
-                        runProducerMaterialDetails);
-            }
+            TwoCCommsCostUtil.UpdateTwoCTotals(calcResult, producerDisposalFees, isOverAllTotalRow, totalRow);
 
             return totalRow;
 
