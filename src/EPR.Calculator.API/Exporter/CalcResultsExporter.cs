@@ -408,7 +408,7 @@ namespace EPR.Calculator.API.Exporter
                 // Two skip.
                 for (int i = 1; i < 14; i++)
                 {
-                    csvContent.Append($",");
+                    csvContent.Append($"missing,");
                 };
 
                 // LA data prep costs section 4
