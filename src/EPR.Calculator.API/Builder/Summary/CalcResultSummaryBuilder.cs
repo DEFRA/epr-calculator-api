@@ -103,15 +103,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
                 result.TotalOnePlus2AFeeWithBadDebtProvision = GetTotal1Plus2ABadDebt(materials, calcResult);
 
-                //Section 2c
-                result.TwoCCommsCostsByCountryWithoutBadDebtProvision = calcResult.CalcResultCommsCostReportDetail
-                    .CommsCostByCountry.Last().TotalValue;
-
-                result.TwoCBadDebtProvision = (calcResult.CalcResultParameterOtherCost.BadDebtValue *
-                                               result.TwoCCommsCostsByCountryWithoutBadDebtProvision) / 100;
-
-                result.TwoCCommsCostsByCountryWithBadDebtProvision =
-                    result.TwoCCommsCostsByCountryWithoutBadDebtProvision + result.TwoCBadDebtProvision;
+                TwoCCommsCostUtil.UpdateHeaderTotal(calcResult, result);
 
 
                 // LA data prep costs section 4
@@ -125,6 +117,8 @@ namespace EPR.Calculator.API.Builder.Summary
 
             return result;
         }
+
+
 
         private CalcResultSummaryProducerDisposalFees GetProducerTotalRow(List<ProducerDetail> producersAndSubsidiaries,
             List<MaterialDetail> materials,
@@ -357,38 +351,12 @@ namespace EPR.Calculator.API.Builder.Summary
                 PercentageofProducerReportedHHTonnagevsAllProducers = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducers(producer, runProducerMaterialDetails),
             };
 
-            result.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt =
-                calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().TotalValue *
-                result.PercentageofProducerReportedHHTonnagevsAllProducers / 100;
-
-            result.TwoCBadDebtProvision = calcResult.CalcResultParameterOtherCost.BadDebtValue *
-                result.PercentageofProducerReportedHHTonnagevsAllProducers / 100;
-
-            result.TwoCTotalProducerFeeForCommsCostsWithBadDebt =
-                result.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt + result.TwoCBadDebtProvision;
-
-            var englandTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
-                .Single(x => x.Name == CalcResultCommsCostBuilder.OnePlusFourApportionment).EnglandTotal;
-            result.TwoCEnglandTotalWithBadDebt =
-                englandTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
-
-            var walesTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
-                .Single(x => x.Name == CalcResultCommsCostBuilder.OnePlusFourApportionment).WalesTotal;
-            result.TwoCWalesTotalWithBadDebt =
-                walesTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
-
-            var scotlandTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
-                .Single(x => x.Name == CalcResultCommsCostBuilder.OnePlusFourApportionment).ScotlandTotal;
-            result.TwoCScotlandTotalWithBadDebt =
-                scotlandTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
-
-            var niTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
-                .Single(x => x.Name == CalcResultCommsCostBuilder.OnePlusFourApportionment).NorthernIrelandTotal;
-            result.TwoCNorthernIrelandTotalWithBadDebt =
-                niTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
+            TwoCCommsCostUtil.UpdateTwoCRows(calcResult, result);
 
             return result;
         }
+
+        
 
         //section bad debt total
         public static decimal GetTotal1Plus2ABadDebt(List<MaterialDetail> materials, CalcResult calcResult)
