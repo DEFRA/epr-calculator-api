@@ -34,6 +34,7 @@ namespace EPR.Calculator.API.Models
 
         public decimal TwoCCommsCostsByCountryWithBadDebtProvision { get; set; }
 
+        // Section-4 LA data prep costs
         public decimal LaDataPrepCostsTitleSection4 { get; set; }
 
         public decimal LaDataPrepCostsBadDebtProvisionTitleSection4 { get; set; }

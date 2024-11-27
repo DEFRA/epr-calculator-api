@@ -533,9 +533,9 @@ public static class CalcResultSummaryUtil
 
         // LA data prep costs section 4
         materialsBreakdownHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsTitleSection4}", ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex },
-            new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsBadDebtProvisionTitleSection4}", ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex+1 },
-            new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsWithBadDebtProvisionTitleSection4}",ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex+2 }
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsTitleSection4, CalcResultSummaryBuilder.decimalRoundUp)}", ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsBadDebtProvisionTitleSection4, CalcResultSummaryBuilder.decimalRoundUp)}", ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex + 1 },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsWithBadDebtProvisionTitleSection4, CalcResultSummaryBuilder.decimalRoundUp)}",ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex + 2 }
         ]);
 
         return materialsBreakdownHeaders;
