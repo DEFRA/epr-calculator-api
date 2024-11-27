@@ -71,7 +71,10 @@ namespace EPR.Calculator.API.Exporter
                 PrepareSummaryData(results.CalcResultSummary, csvContent);
             }
 
-            var fileName = GetResultFileName(results.CalcResultDetail.RunId);
+            var fileName = new CalcResultsFileName(
+                results.CalcResultDetail.RunId,
+                results.CalcResultDetail.RunName,
+                DateTime.Now);
             try
             {
                 _blobStorageService.UploadResultFileContentAsync(fileName, csvContent);
@@ -220,11 +223,6 @@ namespace EPR.Calculator.API.Exporter
         private static void AppendCsvLine(StringBuilder csvContent, string label, string value)
         {
             csvContent.AppendLine($"{label},{CsvSanitiser.SanitiseData(value)}");
-        }
-
-        private static string GetResultFileName(int runId)
-        {
-            return $"{runId}-{DateTime.Now:yyyy-MM-dd-HHmm}.csv";
         }
 
         private static void PrepareLapcapData(CalcResultLapcapData calcResultLapcapData, StringBuilder csvContent)
