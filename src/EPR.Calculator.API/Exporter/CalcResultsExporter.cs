@@ -399,7 +399,7 @@ namespace EPR.Calculator.API.Exporter
                 // skipping columns for other sections
                 for (int i = PercentageofProducerReportedHHTonnageColumnIndex; i <= LaDataPrepCostsSection4ColumnIndex; i++)
                 {
-                    csvContent.Append($",");
+                    csvContent.Append($"missing,");
                 };
 
 
