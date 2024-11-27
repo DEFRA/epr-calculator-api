@@ -637,6 +637,11 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PercentageofProducerReportedHHTonnagevsAllProducers },
         ]);
 
+        for (int i = 196; i < 216; i++)
+        {
+            columnHeaders.AddRange([
+                 new CalcResultSummaryHeader { Name = "missing", ColumnIndex = i }]);
+        }
         // LA data prep costs section 4 column headers
         columnHeaders.AddRange([
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducerFeeWithoutBadDebtProvisionSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
