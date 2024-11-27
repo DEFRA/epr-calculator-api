@@ -12,19 +12,22 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
             {
                 var level1Rows = producerDisposalFees
                     .Where(pf => pf.Level == ((int)CalcResultSummaryLevelIndex.One).ToString()).ToList();
-
+                var englandTotal = level1Rows.Sum(x => x.TwoCEnglandTotalWithBadDebt);
+                var walesTotal = level1Rows.Sum(x => x.TwoCWalesTotalWithBadDebt);
+                var scotlandTotal = level1Rows.Sum(x => x.TwoCScotlandTotalWithBadDebt);
+                var niTotal = level1Rows.Sum(x => x.TwoCNorthernIrelandTotalWithBadDebt);
                 totalRow.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt =
                     level1Rows.Sum(x => x.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt);
 
                 totalRow.TwoCBadDebtProvision =  level1Rows.Sum(x => x.TwoCBadDebtProvision);
 
-                totalRow.TwoCEnglandTotalWithBadDebt = level1Rows.Sum(x => x.TwoCEnglandTotalWithBadDebt);
+                totalRow.TwoCEnglandTotalWithBadDebt = englandTotal;
 
-                totalRow.TwoCWalesTotalWithBadDebt = level1Rows.Sum(x => x.TwoCWalesTotalWithBadDebt);
+                totalRow.TwoCWalesTotalWithBadDebt = walesTotal;
 
-                totalRow.TwoCScotlandTotalWithBadDebt = level1Rows.Sum(x => x.TwoCScotlandTotalWithBadDebt);
+                totalRow.TwoCScotlandTotalWithBadDebt = scotlandTotal;
 
-                totalRow.TwoCNorthernIrelandTotalWithBadDebt = level1Rows.Sum(x => x.TwoCNorthernIrelandTotalWithBadDebt);
+                totalRow.TwoCNorthernIrelandTotalWithBadDebt = niTotal;
 
             }
             else
@@ -34,10 +37,27 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
                         .CalcResultCommsCostReportDetail.CommsCostByCountry.Last().TotalValue) / 100;
 
                 var badDebtProvisionValue = (calcResult.CalcResultParameterOtherCost.BadDebtValue *
-                                             calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().TotalValue) / 100;
+                                             calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last()
+                                                 .TotalValue) / 100;
 
                 totalRow.TwoCBadDebtProvision = (totalRow.PercentageofProducerReportedHHTonnagevsAllProducers *
                                                  badDebtProvisionValue) / 100;
+
+                var level2Rows = producerDisposalFees
+                    .Where(pf => pf.Level == ((int)CalcResultSummaryLevelIndex.Two).ToString()).ToList();
+
+                var englandTotal = level2Rows.Sum(x => x.TwoCEnglandTotalWithBadDebt);
+                var walesTotal = level2Rows.Sum(x => x.TwoCWalesTotalWithBadDebt);
+                var scotlandTotal = level2Rows.Sum(x => x.TwoCScotlandTotalWithBadDebt);
+                var niTotal = level2Rows.Sum(x => x.TwoCNorthernIrelandTotalWithBadDebt);
+
+                totalRow.TwoCEnglandTotalWithBadDebt = englandTotal;
+
+                totalRow.TwoCWalesTotalWithBadDebt = walesTotal;
+
+                totalRow.TwoCScotlandTotalWithBadDebt = scotlandTotal;
+
+                totalRow.TwoCNorthernIrelandTotalWithBadDebt = niTotal;
             }
 
             totalRow.TwoCTotalProducerFeeForCommsCostsWithBadDebt =
