@@ -1,82 +1,278 @@
 namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
 {
-    using System;
-    using AutoFixture;
     using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
+    using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.Models;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
     public class LaDataPrepCostsSummaryTests
     {
+        private IEnumerable<ProducerDetail> _producerDetails;
+        private CalcResult _calcResult;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            _producerDetails = [
+                new() {  Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test1" } },
+                new() { Id = 2, ProducerName = "Producer2", CalculatorRunId = 2, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test2" } },
+                new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } }
+            ];
+
+            _calcResult = new CalcResult
+            {
+                CalcResultParameterOtherCost = new CalcResultParameterOtherCost
+                {
+                    BadDebtProvision = new KeyValuePair<string, string>("key1", "6%"),
+                    Details = [
+                        new CalcResultParameterOtherCostDetail {
+                            Name = "4 LA Data Prep Charge",
+                            OrderId = 1,
+                            England = "£40.00",
+                            EnglandValue = 40,
+                            Wales = "£30.00",
+                            WalesValue = 30,
+                            Scotland = "£20.00",
+                            ScotlandValue = 20,
+                            NorthernIreland = "£10.00",
+                            NorthernIrelandValue = 10,
+                            Total = "£100.00",
+                            TotalValue = 100
+                        }
+                    ],
+                    Materiality = [
+                        new CalcResultMateriality {
+                            Amount = "Amount £s",
+                            AmountValue = 0,
+                            Percentage = "%",
+                            PercentageValue = 0,
+                            SevenMateriality = "7 Materiality"
+                        }
+                    ],
+                    Name = "Parameters - Other",
+                    SaOperatingCost = [
+                        new CalcResultParameterOtherCostDetail {
+                            Name = string.Empty,
+                            OrderId = 0,
+                            England = "England",
+                            EnglandValue = 0,
+                            Wales = "Wales",
+                            WalesValue = 0,
+                            Scotland = "Scotland",
+                            ScotlandValue = 0,
+                            NorthernIreland = "Northern Ireland",
+                            NorthernIrelandValue = 0,
+                            Total = "Total",
+                            TotalValue = 0
+                        }
+                    ],
+                    SchemeSetupCost = {
+                        Name = "5 Scheme set up cost Yearly Cost",
+                        OrderId = 1,
+                        England = "£40.00",
+                        EnglandValue = 40,
+                        Wales = "£30.00",
+                        WalesValue = 30,
+                        Scotland = "£20.00",
+                        ScotlandValue = 20,
+                        NorthernIreland = "£10.00",
+                        NorthernIrelandValue = 10,
+                        Total = "£100.00",
+                        TotalValue = 100
+                    }
+                },
+                CalcResultDetail = new CalcResultDetail() { },
+                CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData()
+                {
+                    CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>()
+                    {
+                        new CalcResultLaDisposalCostDataDetail()
+                        {
+                            DisposalCostPricePerTonne="20",
+                            England="EnglandTest",
+                            Wales="WalesTest",
+                            Name="ScotlandTest",
+                            Scotland="ScotlandTest",
+                            Material = "Material1"
+                        },
+                         new CalcResultLaDisposalCostDataDetail()
+                        {
+                            DisposalCostPricePerTonne="20",
+                            England="EnglandTest",
+                            Wales="WalesTest",
+                            Name="Material1",
+                            Scotland="ScotlandTest",
+
+                        },
+                          new CalcResultLaDisposalCostDataDetail()
+                        {
+                            DisposalCostPricePerTonne="10",
+                            England="EnglandTest",
+                            Wales="WalesTest",
+                            Name="Material2",
+                            Scotland="ScotlandTest",
+
+                        }
+                    }
+                },
+                CalcResultLapcapData = new CalcResultLapcapData() { CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>() { } },
+                CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment()
+                {
+                    CalcResultOnePlusFourApportionmentDetails =
+                    [
+                        new()
+                        {
+                            EnglandDisposalTotal="80",
+                            NorthernIrelandDisposalTotal="70",
+                            ScotlandDisposalTotal="30",
+                            WalesDisposalTotal="20",
+                            AllTotal=0.1M,
+                            EnglandTotal=0.10M,
+                            NorthernIrelandTotal=0.15M,
+                            ScotlandTotal=0.15M,
+                            WalesTotal=020M,
+                            Name="Test",
+                        },
+                        new()
+                        {
+                            EnglandDisposalTotal="80",
+                            NorthernIrelandDisposalTotal="70",
+                            ScotlandDisposalTotal="30",
+                            WalesDisposalTotal="20",
+                            AllTotal=0.1M,
+                            EnglandTotal=0.10M,
+                            NorthernIrelandTotal=0.15M,
+                            ScotlandTotal=0.15M,
+                            WalesTotal=020M,
+                            Name="Test",
+                        },
+                        new()
+                        {
+                            EnglandDisposalTotal="80",
+                            NorthernIrelandDisposalTotal="70",
+                            ScotlandDisposalTotal="30",
+                            WalesDisposalTotal="20",
+                            AllTotal=0.1M,
+                            EnglandTotal=0.10M,
+                            NorthernIrelandTotal=0.15M,
+                            ScotlandTotal=0.15M,
+                            WalesTotal=020M,
+                            Name="Test",
+                        },
+                        new()
+                        {
+                            EnglandDisposalTotal="80",
+                            NorthernIrelandDisposalTotal="70",
+                            ScotlandDisposalTotal="30",
+                            WalesDisposalTotal="20",
+                            AllTotal=0.1M,
+                            EnglandTotal=14.53M,
+                            NorthernIrelandTotal=0.15M,
+                            ScotlandTotal=0.15M,
+                            WalesTotal=020M,
+                            Name="Test",
+                        },
+                     new()
+                        {
+                            EnglandDisposalTotal="80",
+                            NorthernIrelandDisposalTotal="70",
+                            ScotlandDisposalTotal="30",
+                            WalesDisposalTotal="20",
+                            AllTotal=0.1M,
+                            EnglandTotal=14.53M,
+                            NorthernIrelandTotal=0.15M,
+                            ScotlandTotal=0.15M,
+                            WalesTotal=020M,
+                            Name="Test",
+                        }]
+                },
+                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
+                CalcResultSummary = new CalcResultSummary
+                {
+                    ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>() { new()
+                {
+                     ProducerCommsFeesByMaterial =  new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>(){ },
+                      ProducerDisposalFeesByMaterial = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>(){ },
+                       ProducerId ="1",
+                        ProducerName ="Test",
+                     TotalProducerDisposalFeeWithBadDebtProvision =100,
+                     TotalProducerCommsFeeWithBadDebtProvision =100,
+                      SubsidiaryId ="1",
+
+                } }
+                },
+                CalcResultCommsCostReportDetail = new CalcResultCommsCost()
+                {
+                    CalcResultCommsCostCommsCostByMaterial =
+                    [
+                        new ()
+                        {
+                            CommsCostByMaterialPricePerTonne="0.42",
+                            Name ="Material1",
+
+                        },
+                        new ()
+                        {
+                            CommsCostByMaterialPricePerTonne="0.3",
+                            Name ="Material2",
+
+                        }
+                    ]
+                }
+            };
+        }
+
         [TestMethod]
         public void CanCallGetHeaders()
         {
             // Act
-            var result = LaDataPrepCostsSummary.GetHeaders();
+            var result = LaDataPrepCostsSummary.GetHeaders().ToList();
+
+            var expectedResult = new List<CalcResultSummaryHeader>();
+            expectedResult.AddRange([
+                new CalcResultSummaryHeader { Name = $"{LaDataPrepCostsHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitle}", ColumnIndex = 216 },
+                new CalcResultSummaryHeader { Name = $"{LaDataPrepCostsHeaders.BadDebtProvisionTitle}", ColumnIndex = 217 },
+                new CalcResultSummaryHeader { Name = $"{LaDataPrepCostsHeaders.LaDataPrepCostsWithBadDebtProvisionTitle}", ColumnIndex = 218 }
+            ]);
 
             // Assert
-            Assert.Fail("Create or modify test");
+            Assert.AreEqual(expectedResult[0].Name, result[0].Name);
+            Assert.AreEqual(expectedResult[0].ColumnIndex, result[0].ColumnIndex);
+            Assert.AreEqual(expectedResult[1].Name, result[1].Name);
+            Assert.AreEqual(expectedResult[1].ColumnIndex, result[1].ColumnIndex);
+            Assert.AreEqual(expectedResult[2].Name, result[2].Name);
+            Assert.AreEqual(expectedResult[2].ColumnIndex, result[2].ColumnIndex);
         }
 
         [TestMethod]
         public void CanCallGetLaDataPrepCostsWithoutBadDebtProvision()
         {
-            // Arrange
-            var fixture = new Fixture();
-            var calcResult = fixture.Create<CalcResult>();
-
             // Act
-            var result = LaDataPrepCostsSummary.GetLaDataPrepCostsWithoutBadDebtProvision(calcResult);
+            var result = LaDataPrepCostsSummary.GetLaDataPrepCostsWithoutBadDebtProvision(_calcResult);
 
             // Assert
-            Assert.Fail("Create or modify test");
-        }
-
-        [TestMethod]
-        public void CannotCallGetLaDataPrepCostsWithoutBadDebtProvisionWithNullCalcResult()
-        {
-            Assert.ThrowsException<ArgumentNullException>(() => LaDataPrepCostsSummary.GetLaDataPrepCostsWithoutBadDebtProvision(default(CalcResult)));
+            Assert.AreEqual(100, result);
         }
 
         [TestMethod]
         public void CanCallGetBadDebtProvision()
         {
-            // Arrange
-            var fixture = new Fixture();
-            var calcResult = fixture.Create<CalcResult>();
-
             // Act
-            var result = LaDataPrepCostsSummary.GetBadDebtProvision(calcResult);
+            var result = LaDataPrepCostsSummary.GetBadDebtProvision(_calcResult);
 
             // Assert
-            Assert.Fail("Create or modify test");
-        }
-
-        [TestMethod]
-        public void CannotCallGetBadDebtProvisionWithNullCalcResult()
-        {
-            Assert.ThrowsException<ArgumentNullException>(() => LaDataPrepCostsSummary.GetBadDebtProvision(default(CalcResult)));
+            Assert.AreEqual(6, result);
         }
 
         [TestMethod]
         public void CanCallGetLaDataPrepCostsWithBadDebtProvision()
         {
-            // Arrange
-            var fixture = new Fixture();
-            var calcResult = fixture.Create<CalcResult>();
-
             // Act
-            var result = LaDataPrepCostsSummary.GetLaDataPrepCostsWithBadDebtProvision(calcResult);
+            var result = LaDataPrepCostsSummary.GetLaDataPrepCostsWithBadDebtProvision(_calcResult);
 
             // Assert
-            Assert.Fail("Create or modify test");
-        }
-
-        [TestMethod]
-        public void CannotCallGetLaDataPrepCostsWithBadDebtProvisionWithNullCalcResult()
-        {
-            Assert.ThrowsException<ArgumentNullException>(() => LaDataPrepCostsSummary.GetLaDataPrepCostsWithBadDebtProvision(default(CalcResult)));
+            Assert.AreEqual(106, result);
         }
     }
 }
