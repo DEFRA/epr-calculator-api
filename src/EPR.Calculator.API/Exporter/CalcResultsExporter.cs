@@ -395,7 +395,20 @@ namespace EPR.Calculator.API.Exporter
                 // Percentage of Producer Reported Household Tonnage vs All Producers
                 csvContent.Append($"{CsvSanitiser.SanitiseData(Math.Round(producer.PercentageofProducerReportedHHTonnagevsAllProducers, 8))}%,");
 
+                // 2b comms Total
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TotalProducerFeeWithoutBadDebtFor2bComms, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.BadDebtProvisionFor2bComms, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TotalProducerFeeWithBadDebtFor2bComms, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.EnglandTotalWithBadDebtFor2bComms, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.WalesTotalWithBadDebtFor2bComms, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.ScotlandTotalWithBadDebtFor2bComms, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.NorthernIrelandTotalWithBadDebtFor2bComms, decimalRoundUp))},");
 
+                // Two skip.
+                for (int i = 203; i < 216; i++)
+                {
+                    csvContent.Append($"missing,");
+                }
 
                 csvContent.Append("missing,missing,missing,missing,missing,missing,");
 
