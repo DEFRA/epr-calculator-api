@@ -8,7 +8,7 @@ namespace EPR.Calculator.API.Builder.Summary.ThreeSA
         public static decimal GetSAOperatingCostsScotlandTotalWithBadDebtProvisionSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
         {
             //1+paramOthers
-            Decimal OnePlusOtherParam = 1 + ConverttoDecimal(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value);
+            Decimal OnePlusOtherParam = 1 + (calcResult.CalcResultParameterOtherCost.BadDebtValue / 100);
 
             //1+4 apportenmnt
 
@@ -20,7 +20,7 @@ namespace EPR.Calculator.API.Builder.Summary.ThreeSA
         public static decimal GetSAOperatingCostsWalesTotalWithBadDebtProvisionSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
         {
             //1+paramOthers
-            Decimal OnePlusOtherParam = 1 + ConverttoDecimal(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value);
+            Decimal OnePlusOtherParam = 1 + (calcResult.CalcResultParameterOtherCost.BadDebtValue / 100);
 
             //1+4 apportenmnt
 
@@ -33,7 +33,7 @@ namespace EPR.Calculator.API.Builder.Summary.ThreeSA
         public static decimal GetSAOperatingCostsEnglandTotalWithBadDebtProvisionSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
         {
             //1+paramOthers
-            Decimal OnePlusOtherParam = 1 + ConverttoDecimal(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value);
+            Decimal OnePlusOtherParam = 1 + (calcResult.CalcResultParameterOtherCost.BadDebtValue / 100);
 
             //1+4 apportenmnt
 
@@ -55,9 +55,7 @@ namespace EPR.Calculator.API.Builder.Summary.ThreeSA
 
         public static decimal GetSAOperatingCostsBadDebtProvisionTitleSection3(decimal sacostvalue, CalcResult calcResult)
         {
-            var isConversionSuccessful = decimal.TryParse(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Replace("%", string.Empty), out decimal value);
-
-            return isConversionSuccessful ? sacostvalue * value / 100 : 0;
+            return sacostvalue * (calcResult.CalcResultParameterOtherCost.BadDebtValue / 100);
         }
 
         public static decimal GetSAOperatingCostsTotalWithBadDebtProvisionTitleSection3(CalcResultSummary result) => result.SAOperatingCostsWoTitleSection3 + result.BadDebtProvisionTitleSection3;
@@ -65,7 +63,7 @@ namespace EPR.Calculator.API.Builder.Summary.ThreeSA
         public static decimal GetSAOperatingCostsNITotalWithBadDebtProvisionSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
         {
             //1+paramOthers
-            Decimal OnePlusOtherParam = 1 + ConverttoDecimal(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value);
+            Decimal OnePlusOtherParam = 1 + (calcResult.CalcResultParameterOtherCost.BadDebtValue / 100);
 
             //1+4 apportenmnt
 
@@ -88,9 +86,8 @@ namespace EPR.Calculator.API.Builder.Summary.ThreeSA
         public static decimal GetBadDebtProvisionPrtoducerTotalSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
         {
             decimal ThreesalTotalCost = GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialsCostSummary, costSummary, materials, calcResult);
-            var isConversionSuccessful = decimal.TryParse(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Replace("%", string.Empty), out decimal value);
 
-            return isConversionSuccessful ? ThreesalTotalCost * value / 100 : 0;
+            return ThreesalTotalCost * (calcResult.CalcResultParameterOtherCost.BadDebtValue / 100);
         }
 
         public static decimal ConverttoDecimal(string parameter)
