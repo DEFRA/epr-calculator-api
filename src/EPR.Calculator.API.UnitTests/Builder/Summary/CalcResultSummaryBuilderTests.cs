@@ -5,10 +5,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using System.Collections.Generic;
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
@@ -101,7 +98,26 @@ namespace EPR.Calculator.API.UnitTests
                             England="EnglandTest",
                             Wales="WalesTest",
                             Name="ScotlandTest",
-                            Scotland="ScotlandTest"
+                            Scotland="ScotlandTest",
+                            Material = "Material1"
+                        },
+                         new CalcResultLaDisposalCostDataDetail()
+                        {
+                            DisposalCostPricePerTonne="20",
+                            England="EnglandTest",
+                            Wales="WalesTest",
+                            Name="Material1",
+                            Scotland="ScotlandTest",
+                            
+                        },
+                          new CalcResultLaDisposalCostDataDetail()
+                        {
+                            DisposalCostPricePerTonne="10",
+                            England="EnglandTest",
+                            Wales="WalesTest",
+                            Name="Material2",
+                            Scotland="ScotlandTest",
+
                         }
                     }
                 },
@@ -177,14 +193,35 @@ namespace EPR.Calculator.API.UnitTests
                         }]
                 },
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
-                CalcResultSummary = new CalcResultSummary { ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>() },
+                CalcResultSummary = new CalcResultSummary
+                {
+                    ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>() { new()
+                {
+                     ProducerCommsFeesByMaterial =  new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>(){ },
+                      ProducerDisposalFeesByMaterial = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>(){ },
+                       ProducerId ="1",
+                        ProducerName ="Test",
+                     TotalProducerDisposalFeeWithBadDebtProvision =100,
+                     TotalProducerCommsFeeWithBadDebtProvision =100,
+                      SubsidiaryId ="1",
+
+                } }
+                },
                 CalcResultCommsCostReportDetail = new CalcResultCommsCost()
                 {
                     CalcResultCommsCostCommsCostByMaterial =
                     [
                         new ()
                         {
-                            CommsCostByMaterialPricePerTonne="0.42"
+                            CommsCostByMaterialPricePerTonne="0.42",
+                            Name ="Material1",
+                            
+                        },
+                        new ()
+                        {
+                            CommsCostByMaterialPricePerTonne="0.3",
+                            Name ="Material2",
+
                         }
                     ]
                 }
@@ -210,7 +247,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(11, result.ProducerDisposalFeesHeaders.Count());
+            Assert.AreEqual(12, result.ProducerDisposalFeesHeaders.Count());
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
@@ -311,6 +348,14 @@ namespace EPR.Calculator.API.UnitTests
                 new() {  Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test1" } },
                 new() { Id = 2, ProducerName = "Producer2", CalculatorRunId = 2, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test2" } },
                 new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } }
+            });
+
+            context.ProducerReportedMaterial.AddRange(new List<ProducerReportedMaterial>
+            {
+                new() { Id = 1, MaterialId = 1, PackagingType="HH", PackagingTonnage=400m,ProducerDetailId =1},
+                new(){ Id = 2, MaterialId = 2, PackagingType="HH", PackagingTonnage=400m,ProducerDetailId =2},
+                new(){ Id = 3, MaterialId = 1, PackagingType="CW", PackagingTonnage=200m,ProducerDetailId =1},
+                new(){ Id = 4, MaterialId = 2, PackagingType="CW", PackagingTonnage=200m,ProducerDetailId =2}
             });
 
             context.SaveChanges();
@@ -424,6 +469,29 @@ namespace EPR.Calculator.API.UnitTests
             var result = CalcResultSummaryBuilder.GetTotalFee(null, fee => fee.BadDebtProvisionFor1);
 
             Assert.AreEqual(0m, result);
+        }
+
+        [TestMethod]
+        public void GetTotalDisposalCostswithBadDebtOnePlus2A_ShouldReturnCorrectValues()
+        {
+
+          var materialInDb = _context.Material.ToList();
+            var material = Mappers.MaterialMapper.Map(materialInDb);
+            var requestDto = new CalcResultsRequestDto { RunId = 1 };
+
+            CalcResultSummaryBuilder.producerDetailList = _context.ProducerDetail
+               .Where(pd => pd.CalculatorRunId == requestDto.RunId)
+               .OrderBy(pd => pd.ProducerId)
+               .ToList();
+
+            var value = CalcResultSummaryBuilder.GetTotal1Plus2ABadDebtPercentage(100, 100, material, _calcResult);
+            Assert.AreEqual(4.52685329M, value);
+
+            var totalFee = CalcResultSummaryBuilder.GetTotal1Plus2ABadDebt(material, _calcResult);
+            Assert.AreEqual(4418.0800M, totalFee);
+
+            var debt = Math.Ceiling((value * totalFee) / 100);
+            Assert.AreEqual(200, debt);
         }
     }
 }

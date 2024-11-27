@@ -103,6 +103,8 @@ namespace EPR.Calculator.API.Models
 
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> ProducerCommsFeesByMaterial { get; set; }
+        public decimal TotalOnePlus2AFeeWithBadDebtProvision { get; set; }
+        public decimal ProducerPercentageOfCosts { get; set; }
 
     }
 }

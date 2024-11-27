@@ -44,5 +44,8 @@ namespace EPR.Calculator.API.Models
         public decimal SaSetupCostsOneOfFeeWithBadDebtProvision { get; set; }
 
         public IEnumerable<CalcResultSummaryProducerDisposalFees> ProducerDisposalFees { get; set; }
+
+        public decimal TotalOnePlus2AFeeWithBadDebtProvision { get; set; }
+        
     }
 }
