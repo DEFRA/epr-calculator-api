@@ -74,7 +74,7 @@ namespace EPR.Calculator.API.Exporter
             var fileName = new CalcResultsFileName(
                 results.CalcResultDetail.RunId,
                 results.CalcResultDetail.RunName,
-                DateTime.Now);
+                results.CalcResultDetail.RunDate);
             try
             {
                 _blobStorageService.UploadResultFileContentAsync(fileName, csvContent);
