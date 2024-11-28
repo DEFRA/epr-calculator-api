@@ -1,5 +1,4 @@
-﻿using EPR.Calculator.API.Builder.CommsCost;
-using EPR.Calculator.API.Builder.Summary.HHTonnageVsAllProducer;
+﻿using EPR.Calculator.API.Builder.Summary.HHTonnageVsAllProducer;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Models;
 
@@ -23,6 +22,7 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
                     .Where(pf => pf.Level == ((int)CalcResultSummaryLevelIndex.One).ToString()).ToList();
                 totalRow.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt =
                     level1Rows.Sum(x => x.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt);
+                totalRow.TwoCBadDebtProvision = level1Rows.Sum(x => x.TwoCBadDebtProvision);
             }
             else
             {
@@ -58,25 +58,7 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
             result.TwoCTotalProducerFeeForCommsCostsWithBadDebt =
                 result.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt + result.TwoCBadDebtProvision;
 
-            //var englandTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
-            //    .Single(x => x.Name == CalcResultCommsCostBuilder.OnePlusFourApportionment).EnglandTotal;
-            //result.TwoCEnglandTotalWithBadDebt =
-            //    englandTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
-
-            //var walesTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
-            //    .Single(x => x.Name == CalcResultCommsCostBuilder.OnePlusFourApportionment).WalesTotal;
-            //result.TwoCWalesTotalWithBadDebt =
-            //    walesTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
-
-            //var scotlandTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
-            //    .Single(x => x.Name == CalcResultCommsCostBuilder.OnePlusFourApportionment).ScotlandTotal;
-            //result.TwoCScotlandTotalWithBadDebt =
-            //    scotlandTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
-
-            //var niTotal = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails
-            //    .Single(x => x.Name == CalcResultCommsCostBuilder.OnePlusFourApportionment).NorthernIrelandTotal;
-            //result.TwoCNorthernIrelandTotalWithBadDebt =
-            //    niTotal * result.TwoCTotalProducerFeeForCommsCostsWithBadDebt / 100;
+           
         }
 
         public static void UpdateHeaderTotal(CalcResult calcResult, CalcResultSummary result)
