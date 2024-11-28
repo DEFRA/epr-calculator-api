@@ -17,74 +17,86 @@ namespace EPR.Calculator.API.Builder.Summary.CommsCostTwoBTotalBill
         #region TotalsRow
         public static decimal GetCommsProducerFeeWithoutBadDebtFor2bTotalsRow(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
         {
-            decimal northernIrelandTotalwithBadDebtprovision = 0;
+            decimal producerFeeWithoutBadDebt = 0;
 
             foreach (var producer in producers)
             {
-                northernIrelandTotalwithBadDebtprovision += GetCommsProducerFeeWithoutBadDebtFor2b(calcResult, producer, allResults);
+                producerFeeWithoutBadDebt += GetCommsProducerFeeWithoutBadDebtFor2b(calcResult, producer, allResults);
             }
 
-            return northernIrelandTotalwithBadDebtprovision;
+            return producerFeeWithoutBadDebt;
         }
 
         public static decimal GetCommsBadDebtProvisionFor2bTotalsRow(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
         {
-            decimal northernIrelandTotalwithBadDebtprovision = 0;
+            decimal BadDebtProvision = 0;
 
             foreach (var producer in producers)
             {
-                northernIrelandTotalwithBadDebtprovision += GetCommsBadDebtProvisionFor2b(calcResult, producer, allResults);
+                BadDebtProvision += GetCommsBadDebtProvisionFor2b(calcResult, producer, allResults);
             }
 
-            return northernIrelandTotalwithBadDebtprovision;
+            return BadDebtProvision;
         }
 
         public static decimal GetCommsProducerFeeWithBadDebtFor2bTotalsRow(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
         {
-            decimal northernIrelandTotalwithBadDebtprovision = 0;
+            decimal producerFeeWithBadDebt = 0;
 
             foreach (var producer in producers)
             {
-                northernIrelandTotalwithBadDebtprovision += GetCommsProducerFeeWithBadDebtFor2b(calcResult, producer, allResults);
+                producerFeeWithBadDebt += GetCommsProducerFeeWithBadDebtFor2b(calcResult, producer, allResults);
             }
 
-            return northernIrelandTotalwithBadDebtprovision;
+            return producerFeeWithBadDebt;
         }
 
         public static decimal GetCommsEnglandWithBadDebtTotalsRow(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
         {
-            decimal northernIrelandTotalwithBadDebtprovision = 0;
+            decimal englandWithBadDebt = 0;
 
             foreach (var producer in producers)
             {
-                northernIrelandTotalwithBadDebtprovision += GetCommsEnglandWithBadDebt(calcResult, producer, allResults);
+                englandWithBadDebt += GetCommsEnglandWithBadDebt(calcResult, producer, allResults);
             }
 
-            return northernIrelandTotalwithBadDebtprovision;
+            return englandWithBadDebt;
         }
 
         public static decimal GetCommsWalesWithBadDebtTotalsRow(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
         {
-            decimal northernIrelandTotalwithBadDebtprovision = 0;
+            decimal walesWithBadDebt = 0;
 
             foreach (var producer in producers)
             {
-                northernIrelandTotalwithBadDebtprovision += GetCommsWalesWithBadDebt(calcResult, producer, allResults);
+                walesWithBadDebt += GetCommsWalesWithBadDebt(calcResult, producer, allResults);
             }
 
-            return northernIrelandTotalwithBadDebtprovision;
+            return walesWithBadDebt;
         }
 
         public static decimal GetCommsScotlandWithBadDebtTotalsRow(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
         {
-            decimal northernIrelandTotalwithBadDebtprovision = 0;
+            decimal scotlandWithBadDebt = 0;
 
             foreach (var producer in producers)
             {
-                northernIrelandTotalwithBadDebtprovision += GetCommsScotlandWithBadDebt(calcResult, producer, allResults);
+                scotlandWithBadDebt += GetCommsScotlandWithBadDebt(calcResult, producer, allResults);
             }
 
-            return northernIrelandTotalwithBadDebtprovision;
+            return scotlandWithBadDebt;
+        }
+
+        public static decimal GetCommsNorthernIrelandWithBadDebtTotalsRow(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        {
+            decimal northernIrelandWithBadDebt = 0;
+
+            foreach (var producer in producers)
+            {
+                northernIrelandWithBadDebt += GetCommsNorthernIrelandWithBadDebt(calcResult, producer, allResults);
+            }
+
+            return northernIrelandWithBadDebt;
         }
         #endregion
 
@@ -160,18 +172,6 @@ namespace EPR.Calculator.API.Builder.Summary.CommsCostTwoBTotalBill
         public static decimal GetCommsProducerFeeWithoutBadDebtFor2b(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
         {
             return CalculateProducerFee(calcResult, producer, allResults, includeBadDebt: false);
-        }
-
-        public static decimal GetCommsNorthernIrelandWithBadDebtTotalsRow(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
-        {
-            decimal northernIrelandTotalwithBadDebtprovision = 0;
-
-            foreach (var producer in producers)
-            {
-                northernIrelandTotalwithBadDebtprovision += GetCommsNorthernIrelandWithBadDebt(calcResult, producer, allResults);
-            }
-
-            return northernIrelandTotalwithBadDebtprovision;
         }
         #endregion
     }
