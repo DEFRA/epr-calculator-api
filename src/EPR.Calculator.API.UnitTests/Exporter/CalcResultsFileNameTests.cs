@@ -2,8 +2,12 @@ namespace EPR.Calculator.API.UnitTests.Exporter
 {
     using System;
     using AutoFixture;
+    using EPR.Calculator.API.Data;
+    using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.Exporter;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Moq;
+    using Moq.EntityFrameworkCore;
 
     /// <summary>
     /// Unit tests for <see cref="CalcResultsExporter"/>.
@@ -88,14 +92,37 @@ namespace EPR.Calculator.API.UnitTests.Exporter
             Assert.AreEqual(expectedTimeStamp, components[3]);
             Assert.AreEqual(CalcResultsFileName.FileExtension, components[4]);
             Assert.AreEqual(
-                testClass, 
+                testClass,
                 $"{this.RunId}-{expectedRunName}_Results File_{expectedTimeStamp}.csv");
+        }
+
+        /// <summary>
+        /// Checks generating a file name using values retrieved from the database.
+        /// </summary>
+        [TestMethod]
+        public void CanCallFromDatabase()
+        {
+            // Arrange
+            var mockRun = Fixture.Create<CalculatorRun>();
+            var context = new Mock<ApplicationDBContext>();
+            context.Setup(c => c.CalculatorRuns).ReturnsDbSet([mockRun]);
+            var expectedFileName = $"{mockRun.Id}" +
+                $"-{mockRun.Name[0..30]}" +
+                $"_Results File" +
+                $"_{mockRun.CreatedAt:yyyyMMdd}" +
+                $".csv";
+
+            // Act
+            var result = CalcResultsFileName.FromDatabase(context.Object, mockRun.Id);
+
+            // Assert
+            Assert.AreEqual(expectedFileName, (string)result);
         }
 
         private static string GetRandomString(int length)
             => string.Join(string.Empty, new char[length].Select(c => GetRandomChar()));
 
         private static char GetRandomChar()
-            =>(char)('a' + Random.Shared.Next(0, 26));
+            => (char)('a' + Random.Shared.Next(0, 26));
     }
 }
