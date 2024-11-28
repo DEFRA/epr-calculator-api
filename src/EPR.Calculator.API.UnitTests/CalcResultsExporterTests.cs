@@ -134,7 +134,7 @@ namespace EPR.Calculator.API.UnitTests
             var expectedFileName = $"{calcResult.CalcResultDetail.RunId}" +
                 $"-{calcResult.CalcResultDetail.RunName}" +
                 $"_Results File" +
-                $"_{DateTime.Now:yyyyMMdd}.csv";
+                $"_{calcResult.CalcResultDetail.RunDate:yyyyMMdd}.csv";
 
             // Act
             _calcResultsExporter.Export(calcResult);
