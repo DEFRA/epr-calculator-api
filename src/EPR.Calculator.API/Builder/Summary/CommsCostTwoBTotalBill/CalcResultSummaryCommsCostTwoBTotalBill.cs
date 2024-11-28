@@ -162,11 +162,11 @@ namespace EPR.Calculator.API.Builder.Summary.CommsCostTwoBTotalBill
             return CalculateProducerFee(calcResult, producer, allResults, includeBadDebt: false);
         }
 
-        public static decimal GetCommsNorthernIrelandWithBadDebtTotalsRow(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        public static decimal GetCommsNorthernIrelandWithBadDebtTotalsRow(CalcResult calcResult, IEnumerable<ProducerDetail> producersAndSubsidiaries, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
         {
             decimal northernIrelandTotalwithBadDebtprovision = 0;
 
-            foreach (var producer in producers)
+            foreach (var producer in producersAndSubsidiaries)
             {
                 northernIrelandTotalwithBadDebtprovision += GetCommsNorthernIrelandWithBadDebt(calcResult, producer, allResults);
             }

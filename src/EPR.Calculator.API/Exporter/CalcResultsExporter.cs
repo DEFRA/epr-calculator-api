@@ -404,14 +404,7 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.ScotlandTotalWithBadDebtFor2bComms, decimalRoundUp))},");
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.NorthernIrelandTotalWithBadDebtFor2bComms, decimalRoundUp))},");
 
-                // Two skip.
-                for (int i = 203; i < 216; i++)
-                {
-                    csvContent.Append($"missing,");
-                }
-
-                csvContent.Append("missing,missing,missing,missing,missing,missing,");
-
+                // 2c comms Total
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt, decimalRoundUp))},");
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TwoCBadDebtProvision, decimalRoundUp))},");
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TwoCTotalProducerFeeForCommsCostsWithBadDebt, decimalRoundUp))},");
