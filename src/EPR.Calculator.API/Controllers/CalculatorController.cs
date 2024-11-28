@@ -35,107 +35,117 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-#pragma warning disable S6966 // Awaitable method should be used
-            using (var transaction = this.context.Database.BeginTransaction())
+            var count = this.context.CalculatorRuns.Where(x => x.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
+            if (!count.Any())
             {
-                try
+#pragma warning disable S6966 // Awaitable method should be used
+                using (var transaction = this.context.Database.BeginTransaction())
                 {
-                    // Return failed dependency error if at least one of the dependent data not available for the financial year
-                    var dataPreCheckMessage = DataPreChecksBeforeInitialisingCalculatorRun(request.FinancialYear);
-                    if (!string.IsNullOrWhiteSpace(dataPreCheckMessage))
+                    try
                     {
-                        return new ObjectResult(dataPreCheckMessage) { StatusCode = StatusCodes.Status424FailedDependency };
-                    }
+                        // Return failed dependency error if at least one of the dependent data not available for the financial year
+                        var dataPreCheckMessage = DataPreChecksBeforeInitialisingCalculatorRun(request.FinancialYear);
+                        if (!string.IsNullOrWhiteSpace(dataPreCheckMessage))
+                        {
+                            return new ObjectResult(dataPreCheckMessage) { StatusCode = StatusCodes.Status424FailedDependency };
+                        }
 
-                    // Return bad gateway error if the calculator run name provided already exists
-                    var calculatorRunNameExistsMessage = CalculatorRunNameExists(request.CalculatorRunName);
-                    if (!string.IsNullOrWhiteSpace(calculatorRunNameExistsMessage))
-                    {
-                        return new ObjectResult(calculatorRunNameExistsMessage) { StatusCode = StatusCodes.Status400BadRequest };
-                    }
+                        // Return bad gateway error if the calculator run name provided already exists
+                        var calculatorRunNameExistsMessage = CalculatorRunNameExists(request.CalculatorRunName);
+                        if (!string.IsNullOrWhiteSpace(calculatorRunNameExistsMessage))
+                        {
+                            return new ObjectResult(calculatorRunNameExistsMessage) { StatusCode = StatusCodes.Status400BadRequest };
+                        }
 
-                    // Read configuration items: service bus connection string and queue name 
-                    var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
-                    var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
+                        // Read configuration items: service bus connection string and queue name 
+                        var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
+                        var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
 
-                    if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
-                    {
-                        return new ObjectResult("Configuration item not found: ServiceBus__ConnectionString") { StatusCode = StatusCodes.Status500InternalServerError };
-                    }
+                        if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
+                        {
+                            return new ObjectResult("Configuration item not found: ServiceBus__ConnectionString") { StatusCode = StatusCodes.Status500InternalServerError };
+                        }
 
-                    if (string.IsNullOrWhiteSpace(serviceBusQueueName))
-                    {
-                        return new ObjectResult("Configuration item not found: ServiceBus__QueueName") { StatusCode = StatusCodes.Status500InternalServerError };
-                    }
+                        if (string.IsNullOrWhiteSpace(serviceBusQueueName))
+                        {
+                            return new ObjectResult("Configuration item not found: ServiceBus__QueueName") { StatusCode = StatusCodes.Status500InternalServerError };
+                        }
 
-                    // Read configuration items: message retry count and period
-                    var messageRetryCountFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value, out int messageRetryCount);
-                    var messageRetryPeriodFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value, out int messageRetryPeriod);
+                        // Read configuration items: message retry count and period
+                        var messageRetryCountFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value, out int messageRetryCount);
+                        var messageRetryPeriodFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value, out int messageRetryPeriod);
 
-                    if (!messageRetryCountFound)
-                    {
-                        return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryCount") { StatusCode = StatusCodes.Status500InternalServerError };
-                    }
+                        if (!messageRetryCountFound)
+                        {
+                            return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryCount") { StatusCode = StatusCodes.Status500InternalServerError };
+                        }
 
-                    if (!messageRetryPeriodFound)
-                    {
-                        return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryPeriod") { StatusCode = StatusCodes.Status500InternalServerError };
-                    }
+                        if (!messageRetryPeriodFound)
+                        {
+                            return new ObjectResult("Configuration item not found: ServiceBus__PostMessageRetryPeriod") { StatusCode = StatusCodes.Status500InternalServerError };
+                        }
 
-                    // Get active default parameter settings master id
-                    var activeDefaultParameterSettingsMasterId = this.context.DefaultParameterSettings
-                        .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == request.FinancialYear)?.Id;
+                        // Get active default parameter settings master id
+                        var activeDefaultParameterSettingsMasterId = this.context.DefaultParameterSettings
+                            .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == request.FinancialYear)?.Id;
 
-                    // Get active lapcap data master id
-                    var activeLapcapDataMasterId = this.context.LapcapDataMaster
-                        .SingleOrDefault(data => data.ProjectionYear == request.FinancialYear && data.EffectiveTo == null)?.Id;
+                        // Get active lapcap data master id
+                        var activeLapcapDataMasterId = this.context.LapcapDataMaster
+                            .SingleOrDefault(data => data.ProjectionYear == request.FinancialYear && data.EffectiveTo == null)?.Id;
 
-                    // Setup calculator run details
-                    var calculatorRun = new CalculatorRun
-                    {
-                        Name = request.CalculatorRunName,
-                        Financial_Year = request.FinancialYear,
-                        CreatedBy = request.CreatedBy,
-                        CreatedAt = DateTime.Now,
-                        CalculatorRunClassificationId = (int)RunClassification.RUNNING,
-                        DefaultParameterSettingMasterId = activeDefaultParameterSettingsMasterId,
-                        LapcapDataMasterId = activeLapcapDataMasterId
-                    };
+                        // Setup calculator run details
+                        var calculatorRun = new CalculatorRun
+                        {
+                            Name = request.CalculatorRunName,
+                            Financial_Year = request.FinancialYear,
+                            CreatedBy = request.CreatedBy,
+                            CreatedAt = DateTime.Now,
+                            CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                            DefaultParameterSettingMasterId = activeDefaultParameterSettingsMasterId,
+                            LapcapDataMasterId = activeLapcapDataMasterId
+                        };
 
-                    // Save calculator run details to the database
-                    this.context.CalculatorRuns.Add(calculatorRun);
-                    this.context.SaveChanges();
+                        // Save calculator run details to the database
+                        this.context.CalculatorRuns.Add(calculatorRun);
+                        this.context.SaveChanges();
 
-                    // Setup message
-                    var calculatorRunMessage = new CalculatorRunMessage
-                    {
-                        CalculatorRunId = calculatorRun.Id,
-                        FinancialYear = calculatorRun.Financial_Year,
-                        CreatedBy = User?.Identity?.Name ?? request.CreatedBy
-                    };
+                        // Setup message
+                        var calculatorRunMessage = new CalculatorRunMessage
+                        {
+                            CalculatorRunId = calculatorRun.Id,
+                            FinancialYear = calculatorRun.Financial_Year,
+                            CreatedBy = User?.Identity?.Name ?? request.CreatedBy
+                        };
 
-                    // Send message to service bus
+                        // Send message to service bus
                     var client = _serviceBusClientFactory.CreateClient("calculator");
                     ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
                     var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
                     ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
                     await serviceBusSender.SendMessageAsync(serviceBusMessage);
 
-                    // All good, commit transaction
-                    transaction.Commit();
-                }
-                catch (Exception exception)
-                {
-                    // Error, rollback transaction
-                    transaction.Rollback();
-                    // Return error status code: Internal Server Error
-                    return StatusCode(StatusCodes.Status500InternalServerError, exception);
-                }
+                        // All good, commit transaction
+                        transaction.Commit();
+                    }
+                    catch (Exception exception)
+                    {
+                        // Error, rollback transaction
+                        transaction.Rollback();
+                        // Return error status code: Internal Server Error
+                        return StatusCode(StatusCodes.Status500InternalServerError, exception);
+                    }
 #pragma warning restore S6966 // Awaitable method should be used
+                }
+                // Return accepted status code: Accepted
+                return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
             }
 
             // Return accepted status code: Accepted
-            return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
+            return new ObjectResult(new { Message = "The Calculator is currently running. You will be able to run another calculation once the current one has finished." })
+            {
+                StatusCode = StatusCodes.Status422UnprocessableEntity,
+            };
+
         }
 
         [HttpPost]
