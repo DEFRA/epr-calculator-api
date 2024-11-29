@@ -61,11 +61,8 @@ namespace EPR.Calculator.API.Constants
         public static readonly string FeeforCommsCostsbyMaterialwithBadDebtprovision2A = "2a Fee for Comms Costs - by Material with Bad Debt provision";
 
         public static readonly string TotalBadDebtProvision1Plus2A = "Total (1 + 2a) with Bad Debt provision";
-        public static readonly string TotalProducer1Plus2ABadDebt = "Producer Total (1+2a) with Bad Debt provision";
+        public static readonly string TotalProducer1Plus2ABadDebt = "Producer Total(1+2a) with Bad Debt provision";
         public static readonly string TotalProducer1Plus2ABadDebtPercentage = "Producer Percentage of Costs: Producer (1+2a) Percentage of Overal Producer Cost of (1+2a)";
-
-
-
 
         // LA data prep costs section 4
         public static readonly string LaDataPrepCostsWithoutBadDebtProvisionTitleSection4 = "4 LA Data Prep Costs w/o Bad Debt provision";
@@ -78,5 +75,8 @@ namespace EPR.Calculator.API.Constants
         public static readonly string WalesTotalWithBadDebtProvisionSection4 = "Wales Total with Bad Debt provision";
         public static readonly string ScotlandTotalWithBadDebtProvisionSection4 = "Scotland Total with Bad Debt provision";
         public static readonly string NorthernIrelandTotalWithBadDebtProvisionSection4 = "Northern Ireland Total with Bad Debt provision";
+
+        // Percentage of Producer Reported Household Tonnage vs All Producers
+        public static readonly string PercentageofProducerReportedHHTonnagevsAllProducers = "Percentage of Producer Reported Household Tonnage vs All Producers";
     }
 }
