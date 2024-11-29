@@ -3,6 +3,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -178,14 +179,27 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var runDetails = this.context.CalculatorRuns.SingleOrDefault(x => x.Id == runId);
+            var calculatorRunDetail =
+                (from run in this.context.CalculatorRuns
+                join classification in context.CalculatorRunClassifications
+                    on run.CalculatorRunClassificationId equals classification.Id
+                where run.Id == runId
+                select new
+                {
+                    Run = run,
+                    Classification = classification
+                }).SingleOrDefault();
 
-            if (runDetails == null)
+            
+            if (calculatorRunDetail == null)
             {
                 return new NotFoundObjectResult($"Unable to find Run Id {runId}");
             }
+            var calcRun = calculatorRunDetail.Run;
+            var runClassification = calculatorRunDetail.Classification;
+            var runDto = CalcRunMapper.Map(calcRun, runClassification);
 
-            return new ObjectResult(runDetails);
+            return new ObjectResult(runDto);
         }
 
         [HttpGet]
