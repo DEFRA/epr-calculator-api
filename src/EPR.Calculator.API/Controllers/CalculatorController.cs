@@ -204,6 +204,47 @@ namespace EPR.Calculator.API.Controllers
             return new ObjectResult(runDto);
         }
 
+        [HttpPut]
+        [Route("calculatorRuns")]
+        public IActionResult PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            var calculatorRun = context.CalculatorRuns.SingleOrDefault(x => x.Id == runStatusUpdateDto.RunId);
+            if (calculatorRun == null)
+            {
+                return new ObjectResult($"Unable to find Run Id {runStatusUpdateDto.RunId}")
+                    { StatusCode = StatusCodes.Status404NotFound };
+            }
+
+            var classification =
+                this.context.CalculatorRunClassifications.SingleOrDefault(x =>
+                    x.Id == runStatusUpdateDto.ClassificationId);
+
+            if (classification == null)
+            {
+                return new ObjectResult($"Unable to find Classification Id {runStatusUpdateDto.ClassificationId}")
+                    { StatusCode = StatusCodes.Status404NotFound };
+            }
+
+            if (runStatusUpdateDto.ClassificationId == calculatorRun.CalculatorRunClassificationId)
+            {
+                return new ObjectResult(
+                        $"RunId {runStatusUpdateDto.RunId} cannot be changed to classification {runStatusUpdateDto.ClassificationId}")
+                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
+            }
+
+            calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
+
+            this.context.CalculatorRuns.Update(calculatorRun);
+            this.context.SaveChanges();
+
+            return StatusCode(201);
+        }
+
         [HttpGet]
         [Route("CheckCalcNameExists/{name}")]
         public IActionResult GetCalculatorRunByName([FromRoute] string name)
