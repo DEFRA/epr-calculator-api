@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using EPR.Calculator.API.Builder.Summary.CommsCostTwoA;
+using EPR.Calculator.API.Builder.Summary.SchemeAdministratorSetupCosts;
 using EPR.Calculator.API.Builder.Summary.TwoCCommsCost;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
@@ -388,6 +389,20 @@ public static class CalcResultSummaryUtil
         return calcResult.CalcResultParameterOtherCost.Details.ToList()[0].TotalValue;
     }
 
+    public static decimal GetTotal1Plus2ABadDebt(IEnumerable<ProducerDetail> producers, IEnumerable<MaterialDetail> materials, CalcResult calcResult)
+    {
+        decimal total = 0m;
+
+        foreach (var material in materials)
+        {
+            var laDisposalTotal = CalcResultSummaryUtil.GetProducerDisposalFeeWithBadDebtProvisionProducerTotal(producers, material, calcResult);
+            var twoAcommsDisposal = CalcResultSummaryCommsCostTwoA.GetProducerTotalCostwithBadDebtProvisionTotal(producers, material, calcResult);
+            total += laDisposalTotal + twoAcommsDisposal;
+        }
+
+        return total;
+    }
+
     public static decimal GetLaDataPrepCostsBadDebtProvisionTitleSection4(CalcResult calcResult)
     {
         var isConversionSuccessful = decimal.TryParse(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Replace("%", string.Empty), out decimal value);
@@ -457,7 +472,9 @@ public static class CalcResultSummaryUtil
 
     public static List<CalcResultSummaryHeader> GetProducerDisposalFeesHeaders()
     {
-        return [
+        var summaryHeaders = new List<CalcResultSummaryHeader>();
+
+        summaryHeaders.AddRange([
             //Section-1 Title headers
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.OneProducerDisposalFeesWithBadDebtProvision, ColumnIndex = ProducerDisposalFeesHeaderColumnIndex },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.CommsCostHeader, ColumnIndex = CommsCostHeaderColumnIndex },
@@ -481,8 +498,13 @@ public static class CalcResultSummaryUtil
             //Section-4 Title headers
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex+1 },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithBadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex+2 },
-        ];
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithBadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex+2 }
+        ]);
+
+        // Section-5 Title headers
+        summaryHeaders.AddRange(SchemeAdministratorSetupCostsSummary.GetHeaders());
+
+        return summaryHeaders;
     }
 
     public static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(CalcResultSummary result, List<MaterialDetail> materials)
@@ -554,6 +576,13 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsTitleSection4}", ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
             new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsBadDebtProvisionTitleSection4}", ColumnIndex = LaDataPrepCostsSection4ColumnIndex+1 },
             new CalcResultSummaryHeader { Name = $"{result.LaDataPrepCostsWithBadDebtProvisionTitleSection4}",ColumnIndex = LaDataPrepCostsSection4ColumnIndex+2 }
+        ]);
+
+        // Scheme administrator setup costs section 5
+        materialsBreakdownHeaders.AddRange([
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SaSetupCostsTitleSection5, decimalRoundUp)}", ColumnIndex = SchemeAdministratorSetupCostsSummary.columnIndex },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SaSetupCostsBadDebtProvisionTitleSection5, decimalRoundUp)}", ColumnIndex = SchemeAdministratorSetupCostsSummary.columnIndex + 1 },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SaSetupCostsWithBadDebtProvisionTitleSection5, decimalRoundUp)}",ColumnIndex = SchemeAdministratorSetupCostsSummary.columnIndex + 2 }
         ]);
 
         return materialsBreakdownHeaders;

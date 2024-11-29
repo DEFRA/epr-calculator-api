@@ -42,11 +42,11 @@ namespace EPR.Calculator.API.Models
         public decimal LaDataPrepCostsWithBadDebtProvisionTitleSection4 { get; set; }
 
         // Section-5
-        public decimal SaSetupCostsOneOfFeeWithoutBadDebtProvision { get; set; }
+        public decimal SaSetupCostsTitleSection5 { get; set; }
 
-        public decimal SaSetupCostsBadDeptProvision { get; set; }
+        public decimal SaSetupCostsBadDebtProvisionTitleSection5 { get; set; }
 
-        public decimal SaSetupCostsOneOfFeeWithBadDebtProvision { get; set; }
+        public decimal SaSetupCostsWithBadDebtProvisionTitleSection5 { get; set; }
 
         public IEnumerable<CalcResultSummaryProducerDisposalFees> ProducerDisposalFees { get; set; }
 

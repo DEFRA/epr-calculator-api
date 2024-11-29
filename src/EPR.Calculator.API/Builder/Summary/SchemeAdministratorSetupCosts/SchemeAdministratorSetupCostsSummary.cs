@@ -4,7 +4,7 @@ namespace EPR.Calculator.API.Builder.Summary.SchemeAdministratorSetupCosts
 {
     public static class SchemeAdministratorSetupCostsSummary
     {
-        private static readonly int columnIndex = 223;
+        public static readonly int columnIndex = 224;
 
         public static IEnumerable<CalcResultSummaryHeader> GetHeaders()
         {
@@ -15,19 +15,26 @@ namespace EPR.Calculator.API.Builder.Summary.SchemeAdministratorSetupCosts
             ];
         }
 
-        public static decimal GetBadDebtProvision()
+        public static decimal GetOneOffFeeSetupCostsWithoutBadDebtProvision(CalcResult calcResult)
         {
-            return 109;
+            return calcResult.CalcResultParameterOtherCost.SchemeSetupCost.TotalValue;
         }
 
-        public static decimal GetOneOffFeeSetupCostsWithBadDebtProvision()
+        public static decimal GetBadDebtProvision(CalcResult calcResult)
         {
-            return 110;
+            var isParseSuccessful = decimal.TryParse(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Replace("%", string.Empty), out decimal value);
+
+            if (isParseSuccessful)
+            {
+                return GetOneOffFeeSetupCostsWithoutBadDebtProvision(calcResult) * value / 100;
+            }
+
+            return 0;
         }
 
-        public static decimal GetOneOffFeeSetupCostsWithoutBadDebtProvision()
+        public static decimal GetOneOffFeeSetupCostsWithBadDebtProvision(CalcResult calcResult)
         {
-            return 111;
+            return GetOneOffFeeSetupCostsWithoutBadDebtProvision(calcResult) + GetBadDebtProvision(calcResult);
         }
     }
 }

@@ -103,6 +103,11 @@ namespace EPR.Calculator.API.Builder.Summary
                 result.LaDataPrepCostsTitleSection4 = CalcResultSummaryUtil.GetLaDataPrepCostsTitleSection4(calcResult);
                 result.LaDataPrepCostsBadDebtProvisionTitleSection4 = CalcResultSummaryUtil.GetLaDataPrepCostsBadDebtProvisionTitleSection4(calcResult);
                 result.LaDataPrepCostsWithBadDebtProvisionTitleSection4 = CalcResultSummaryUtil.GetLaDataPrepCostsWithBadDebtProvisionTitleSection4(calcResult);
+
+                // Scheme administrator setup costs section 5
+                result.SaSetupCostsTitleSection5 = SchemeAdministratorSetupCostsSummary.GetOneOffFeeSetupCostsWithoutBadDebtProvision(calcResult);
+                result.SaSetupCostsBadDebtProvisionTitleSection5 = SchemeAdministratorSetupCostsSummary.GetBadDebtProvision(calcResult);
+                result.SaSetupCostsWithBadDebtProvisionTitleSection5 = SchemeAdministratorSetupCostsSummary.GetOneOffFeeSetupCostsWithBadDebtProvision(calcResult);
             }
 
             // Set headers with calculated column index
@@ -228,13 +233,13 @@ namespace EPR.Calculator.API.Builder.Summary
                 LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = CalcResultSummaryUtil.GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
 
                 // Scheme administrator costs section 5
-                TotalProducerFeeWithoutBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetOneOffFeeWithoutBadDebtProvisionTotal(),
-                BadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetBadDebtProvisionTotal(),
-                TotalProducerFeeWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetOneOffFeeWithBadDebtProvisionTotal(),
-                EnglandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetEnglandOverallTotalWithBadDebtProvision(),
-                WalesTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetWalesOverallTotalWithBadDebtProvision(),
-                ScotlandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetScotlandOverallTotalWithBadDebtProvision(),
-                NorthernIrelandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetNorthernIrelandOverallTotalWithBadDebtProvision(),
+                TotalProducerFeeWithoutBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetProducerOneOffFeeWithoutBadDebtProvisionTotal(producerDetailList, producersAndSubsidiaries, materials, calcResult),
+                BadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetBadDebtProvisionTotal(producerDetailList, producersAndSubsidiaries, materials, calcResult),
+                TotalProducerFeeWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetProducerOneOffFeeWithBadDebtProvisionTotal(producerDetailList, producersAndSubsidiaries, materials, calcResult),
+                EnglandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetEnglandOverallTotalWithBadDebtProvision(producerDetailList, producersAndSubsidiaries, materials, calcResult),
+                WalesTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetWalesOverallTotalWithBadDebtProvision(producerDetailList, producersAndSubsidiaries, materials, calcResult),
+                ScotlandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetScotlandOverallTotalWithBadDebtProvision(producerDetailList, producersAndSubsidiaries, materials, calcResult),
+                NorthernIrelandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetNorthernIrelandOverallTotalWithBadDebtProvision(producerDetailList, producersAndSubsidiaries, materials, calcResult),
 
                 // Percentage of Producer Reported Household Tonnage vs All Producers
                 PercentageofProducerReportedHHTonnagevsAllProducers = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducersTotal(producersAndSubsidiaries, runProducerMaterialDetails),
@@ -246,13 +251,6 @@ namespace EPR.Calculator.API.Builder.Summary
 
             return totalRow;
 
-        }
-
-        private static decimal GetTotalOnePlus2AFeeWithBadDebtProvision(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materials, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary)
-        {
-            var totalLaDisposalFee = CalcResultSummaryUtil.GetTotalProducerDisposalFeeWithBadDebtProvision(materials);
-            var commsCostBadDebt = CalcResultSummaryUtil.GetTotalProducerCommsFeeWithBadDebtProvision(costSummary);
-            return totalLaDisposalFee + commsCostBadDebt;
         }
 
         private CalcResultSummaryProducerDisposalFees GetProducerRow(
@@ -368,13 +366,13 @@ namespace EPR.Calculator.API.Builder.Summary
                 LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = CalcResultSummaryUtil.GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4(),
 
                 // Scheme administrator costs section 5
-                TotalProducerFeeWithoutBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetProducerOneOffFeeWithoutBadDebtProvision(),
-                BadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetBadDebtProvision(),
-                TotalProducerFeeWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetProducerOneOffFeeWithBadDebtProvision(),
-                EnglandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetEnglandTotalWithBadDebtProvision(),
-                WalesTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetWalesTotalWithBadDebtProvision(),
-                ScotlandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetScotlandTotalWithBadDebtProvision(),
-                NorthernIrelandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetNorthernIrelandTotalWithBadDebtProvision()
+                TotalProducerFeeWithoutBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetProducerOneOffFeeWithoutBadDebtProvision(producerDetailList, materials, calcResult, materialCostSummary, commsCostSummary),
+                BadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetBadDebtProvision(producerDetailList, materials, calcResult, materialCostSummary, commsCostSummary),
+                TotalProducerFeeWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetProducerOneOffFeeWithBadDebtProvision(producerDetailList, materials, calcResult, materialCostSummary, commsCostSummary),
+                EnglandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetEnglandTotalWithBadDebtProvision(producerDetailList, materials, calcResult, materialCostSummary, commsCostSummary),
+                WalesTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetWalesTotalWithBadDebtProvision(producerDetailList, materials, calcResult, materialCostSummary, commsCostSummary),
+                ScotlandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetScotlandTotalWithBadDebtProvision(producerDetailList, materials, calcResult, materialCostSummary, commsCostSummary),
+                NorthernIrelandTotalWithBadDebtProvisionSection5 = SchemeAdministratorSetupCostsProducer.GetNorthernIrelandTotalWithBadDebtProvision(producerDetailList, materials, calcResult, materialCostSummary, commsCostSummary),
                 // Percentage of Producer Reported Household Tonnage vs All Producers
                 PercentageofProducerReportedHHTonnagevsAllProducers = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducers(producer, runProducerMaterialDetails),
             };
@@ -384,7 +382,12 @@ namespace EPR.Calculator.API.Builder.Summary
             return result;
         }
 
-        
+        private static decimal GetTotalOnePlus2AFeeWithBadDebtProvision(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materials, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary)
+        {
+            var totalLaDisposalFee = CalcResultSummaryUtil.GetTotalProducerDisposalFeeWithBadDebtProvision(materials);
+            var commsCostBadDebt = CalcResultSummaryUtil.GetTotalProducerCommsFeeWithBadDebtProvision(costSummary);
+            return totalLaDisposalFee + commsCostBadDebt;
+        }
 
         //section bad debt total
         public static decimal GetTotal1Plus2ABadDebt(List<MaterialDetail> materials, CalcResult calcResult)
