@@ -170,11 +170,22 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("calculatorRuns/{id}")]
-        public IActionResult GetCalculatorRun()
+        [Route("calculatorRuns/{runId}")]
+        public IActionResult GetCalculatorRun(int runId)
         {
-            // TODO: Return the details of a particular run
-            return new OkResult();
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            var runDetails = this.context.CalculatorRuns.SingleOrDefault(x => x.Id == runId);
+
+            if (runDetails == null)
+            {
+                return new NotFoundObjectResult($"Unable to find Run Id {runId}");
+            }
+
+            return new ObjectResult(runDetails);
         }
 
         [HttpGet]
