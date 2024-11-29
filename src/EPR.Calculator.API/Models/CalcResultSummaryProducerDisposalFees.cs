@@ -84,6 +84,8 @@
         public decimal NorthernIrelandTotalwithBadDebtprovision2A { get; set; }
         //Section-(1) & (2a) End
 
+        public decimal PercentageofProducerReportedHHTonnagevsAllProducers { get; set; }
+
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> ProducerCommsFeesByMaterial { get; set; }
         public decimal TotalOnePlus2AFeeWithBadDebtProvision { get; set; }
