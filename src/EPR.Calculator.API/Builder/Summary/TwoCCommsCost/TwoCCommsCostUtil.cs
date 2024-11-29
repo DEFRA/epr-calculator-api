@@ -13,8 +13,10 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
         private const string NorthernIreland = "NorthernIreland";
         #endregion
 
-        public static void UpdateTwoCTotals(CalcResult calcResult, IEnumerable<CalcResultSummaryProducerDisposalFees> producerDisposalFees, bool isOverAllTotalRow,
-            CalcResultSummaryProducerDisposalFees totalRow)
+        public static void UpdateTwoCTotals(CalcResult calcResult,
+            IEnumerable<CalcResultSummaryProducerDisposalFees> producerDisposalFees, bool isOverAllTotalRow,
+            CalcResultSummaryProducerDisposalFees totalRow, List<ProducerDetail> producersAndSubsidiaries,
+            IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails)
         {
             if (isOverAllTotalRow)
             {
@@ -41,24 +43,45 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
 
             totalRow.TwoCTotalProducerFeeForCommsCostsWithBadDebt =
                 totalRow.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt + totalRow.TwoCBadDebtProvision;
+
+            totalRow.TwoCEnglandTotalWithBadDebt =
+                GetCommsEnglandWithBadDebtTotalsRow2C(calcResult, producersAndSubsidiaries,
+                    runProducerMaterialDetails);
+            totalRow.TwoCWalesTotalWithBadDebt =
+                GetCommsWalesWithBadDebtTotalsRow2C(calcResult, producersAndSubsidiaries,
+                    runProducerMaterialDetails);
+            totalRow.TwoCNorthernIrelandTotalWithBadDebt =
+                GetCommsNIWithBadDebtTotalsRow2C(calcResult, producersAndSubsidiaries,
+                    runProducerMaterialDetails);
+            totalRow.TwoCScotlandTotalWithBadDebt =
+                GetCommsScotlandWithBadDebtTotalsRow2C(calcResult, producersAndSubsidiaries,
+                    runProducerMaterialDetails);
         }
 
-        public static void UpdateTwoCRows(CalcResult calcResult, CalcResultSummaryProducerDisposalFees result)
+        public static void UpdateTwoCRows(CalcResult calcResult, CalcResultSummaryProducerDisposalFees result,
+            ProducerDetail producer, List<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails)
         {
+            result.TwoCEnglandTotalWithBadDebt =
+                GetCommsEnglandWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
+            result.TwoCWalesTotalWithBadDebt =
+                GetCommsWalesWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
+            result.TwoCNorthernIrelandTotalWithBadDebt =
+                GetCommsNIWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
+            result.TwoCScotlandTotalWithBadDebt =
+                GetCommsScotlandWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
+
             result.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt =
                 calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().TotalValue *
                 result.PercentageofProducerReportedHHTonnagevsAllProducers / 100;
 
-            
             var badDebtProvisionValue = (calcResult.CalcResultParameterOtherCost.BadDebtValue *
-                                         calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().TotalValue) / 100;
+                                         calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last()
+                                             .TotalValue) / 100;
             result.TwoCBadDebtProvision = badDebtProvisionValue *
                 result.PercentageofProducerReportedHHTonnagevsAllProducers / 100;
 
             result.TwoCTotalProducerFeeForCommsCostsWithBadDebt =
                 result.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt + result.TwoCBadDebtProvision;
-
-           
         }
 
         public static void UpdateHeaderTotal(CalcResult calcResult, CalcResultSummary result)

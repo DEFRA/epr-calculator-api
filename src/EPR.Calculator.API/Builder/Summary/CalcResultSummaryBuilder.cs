@@ -216,12 +216,6 @@ namespace EPR.Calculator.API.Builder.Summary
                 ScotlandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsScotlandWithBadDebtTotalsRow(calcResult, producersAndSubsidiaries, runProducerMaterialDetails),
                 NorthernIrelandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsNorthernIrelandWithBadDebtTotalsRow(calcResult, producersAndSubsidiaries, runProducerMaterialDetails),
 
-                //Total Bill for 2c
-                TwoCEnglandTotalWithBadDebt = TwoCCommsCostUtil.GetCommsEnglandWithBadDebtTotalsRow2C(calcResult, producersAndSubsidiaries, runProducerMaterialDetails),
-                TwoCWalesTotalWithBadDebt = TwoCCommsCostUtil.GetCommsWalesWithBadDebtTotalsRow2C(calcResult, producersAndSubsidiaries, runProducerMaterialDetails),
-                TwoCNorthernIrelandTotalWithBadDebt = TwoCCommsCostUtil.GetCommsNIWithBadDebtTotalsRow2C(calcResult, producersAndSubsidiaries, runProducerMaterialDetails),
-                TwoCScotlandTotalWithBadDebt = TwoCCommsCostUtil.GetCommsScotlandWithBadDebtTotalsRow2C(calcResult, producersAndSubsidiaries, runProducerMaterialDetails),
-
                 // LA data prep costs section 4
                 LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = CalcResultSummaryUtil.GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4(),
                 LaDataPrepCostsBadDebtProvisionSection4 = CalcResultSummaryUtil.GetLaDataPrepCostsBadDebtProvisionSection4(),
@@ -237,7 +231,8 @@ namespace EPR.Calculator.API.Builder.Summary
                 isTotalRow = true
             };
 
-            TwoCCommsCostUtil.UpdateTwoCTotals(calcResult, producerDisposalFees, isOverAllTotalRow, totalRow);
+            TwoCCommsCostUtil.UpdateTwoCTotals(calcResult, producerDisposalFees, isOverAllTotalRow, totalRow,
+                producersAndSubsidiaries, runProducerMaterialDetails);
 
             return totalRow;
 
@@ -352,12 +347,6 @@ namespace EPR.Calculator.API.Builder.Summary
                 ScotlandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsScotlandWithBadDebt(calcResult, producer, runProducerMaterialDetails),
                 NorthernIrelandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsNorthernIrelandWithBadDebt(calcResult, producer, runProducerMaterialDetails),
 
-                // 2C
-                TwoCEnglandTotalWithBadDebt = TwoCCommsCostUtil.GetCommsEnglandWithBadDebt2C(calcResult, producer, runProducerMaterialDetails),
-                TwoCWalesTotalWithBadDebt = TwoCCommsCostUtil.GetCommsWalesWithBadDebt2C(calcResult, producer, runProducerMaterialDetails),
-                TwoCNorthernIrelandTotalWithBadDebt = TwoCCommsCostUtil.GetCommsNIWithBadDebt2C(calcResult, producer, runProducerMaterialDetails),
-                TwoCScotlandTotalWithBadDebt = TwoCCommsCostUtil.GetCommsScotlandWithBadDebt2C(calcResult, producer, runProducerMaterialDetails),
-
                 // LA data prep costs section 4
                 LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = CalcResultSummaryUtil.GetLaDataPrepCostsTotalWithoutBadDebtProvisionSection4(),
                 LaDataPrepCostsBadDebtProvisionSection4 = CalcResultSummaryUtil.GetLaDataPrepCostsBadDebtProvisionSection4(),
@@ -371,7 +360,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 PercentageofProducerReportedHHTonnagevsAllProducers = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducers(producer, runProducerMaterialDetails),
             };
 
-            TwoCCommsCostUtil.UpdateTwoCRows(calcResult, result);
+            TwoCCommsCostUtil.UpdateTwoCRows(calcResult, result, producer, runProducerMaterialDetails);
 
             return result;
         }
