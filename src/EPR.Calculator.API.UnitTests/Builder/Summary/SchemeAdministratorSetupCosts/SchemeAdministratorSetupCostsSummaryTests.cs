@@ -238,7 +238,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SchemeAdministratorSetupC
         }
 
         [TestMethod]
-        public void CanCallGetLaDataPrepCostsWithoutBadDebtProvision()
+        public void CanCallGetSaSetupCostsWithoutBadDebtProvision()
         {
             // Act
             var result = SchemeAdministratorSetupCostsSummary.GetOneOffFeeSetupCostsWithoutBadDebtProvision(_calcResult);
@@ -258,7 +258,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SchemeAdministratorSetupC
         }
 
         [TestMethod]
-        public void CanCallGetLaDataPrepCostsWithBadDebtProvision()
+        public void CanCallGetSaSetupCostsWithBadDebtProvision()
         {
             // Act
             var result = SchemeAdministratorSetupCostsSummary.GetOneOffFeeSetupCostsWithBadDebtProvision(_calcResult);

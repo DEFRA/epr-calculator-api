@@ -8,7 +8,7 @@ namespace EPR.Calculator.API.Builder.Summary.SchemeAdministratorSetupCosts
 {
     public static class SchemeAdministratorSetupCostsProducer
     {
-        private static readonly int columnIndex = 223;
+        private static readonly int columnIndex = 224;
 
         public static IEnumerable<CalcResultSummaryHeader> GetHeaders()
         {
