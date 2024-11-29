@@ -160,12 +160,13 @@ namespace EPR.Calculator.API.Builder.Summary.CommsCostTwoBTotalBill
         {
             decimal commsCostHeaderWithoutBadDebtFor2bTitle = CalcResultSummaryUtil.GetCommsCostHeaderWithoutBadDebtFor2bTitle(calcResult);
             decimal percentageOfProducerReportedHHTonnagevsAllProducers = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducers(producer, allResults) / 100;
-            decimal badDebtProvisionFor2b = GetCommsBadDebtProvisionFor2b(calcResult, producer, allResults);
+            
             decimal producerFeeWithoutBadDebt = commsCostHeaderWithoutBadDebtFor2bTitle * percentageOfProducerReportedHHTonnagevsAllProducers;
 
             if (!includeBadDebt)
                 return producerFeeWithoutBadDebt;
 
+            decimal badDebtProvisionFor2b = GetCommsBadDebtProvisionFor2b(calcResult, producer, allResults);
             return producerFeeWithoutBadDebt + badDebtProvisionFor2b;
         }
 
