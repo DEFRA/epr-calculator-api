@@ -91,5 +91,19 @@
         public decimal TotalOnePlus2AFeeWithBadDebtProvision { get; set; }
         public decimal ProducerPercentageOfCosts { get; set; }
 
+        public decimal TotalProducerFeeWithoutBadDebtFor2bComms { get; set; }
+
+        public decimal BadDebtProvisionFor2bComms { get; set; }
+
+        public decimal TotalProducerFeeWithBadDebtFor2bComms { get; set; }
+
+        public decimal EnglandTotalWithBadDebtFor2bComms { get; set; }
+
+        public decimal WalesTotalWithBadDebtFor2bComms { get; set; }
+
+        public decimal ScotlandTotalWithBadDebtFor2bComms { get; set; }
+
+        public decimal NorthernIrelandTotalWithBadDebtFor2bComms { get; set; }
+
     }
 }
