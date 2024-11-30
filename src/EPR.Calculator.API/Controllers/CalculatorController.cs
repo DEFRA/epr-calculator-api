@@ -217,7 +217,7 @@ namespace EPR.Calculator.API.Controllers
             if (calculatorRun == null)
             {
                 return new ObjectResult($"Unable to find Run Id {runStatusUpdateDto.RunId}")
-                    { StatusCode = StatusCodes.Status404NotFound };
+                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
             }
 
             var classification =
@@ -227,7 +227,7 @@ namespace EPR.Calculator.API.Controllers
             if (classification == null)
             {
                 return new ObjectResult($"Unable to find Classification Id {runStatusUpdateDto.ClassificationId}")
-                    { StatusCode = StatusCodes.Status404NotFound };
+                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
             }
 
             if (runStatusUpdateDto.ClassificationId == calculatorRun.CalculatorRunClassificationId)
