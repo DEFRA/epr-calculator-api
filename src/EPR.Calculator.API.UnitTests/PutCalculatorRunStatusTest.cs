@@ -81,5 +81,66 @@ namespace EPR.Calculator.API.UnitTests
             Assert.AreEqual(422, result.StatusCode);
             Assert.AreEqual($"Unable to find Classification Id {invalidClassificationId}", result.Value);
         }
+
+        [TestMethod]
+        public void PutCalculatorRunStatusTest_Valid_Run_Classification_Id()
+        {
+            var runId = 1;
+            var validClassificationId = 5;
+            var date = DateTime.Now;
+            this.context.CalculatorRuns.Add(new CalculatorRun
+            {
+                Name = "Calc RunName",
+                CalculatorRunClassificationId = 2,
+                CreatedAt = date,
+                CreatedBy = "User23",
+                LapcapDataMasterId = 1,
+                DefaultParameterSettingMasterId = 1,
+                Financial_Year = "2024-25"
+            });
+            this.context.SaveChanges();
+
+            var controller =
+                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object);
+
+            var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
+                { ClassificationId = validClassificationId, RunId = runId }) as StatusCodeResult;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(201, result.StatusCode);
+
+            var run = this.context.CalculatorRuns.Single(x => x.Id == 1);
+            Assert.IsNotNull(run);
+
+            Assert.AreEqual(5, run.CalculatorRunClassificationId);
+        }
+
+        [TestMethod]
+        public void PutCalculatorRunStatusTest_Unable_To_Change_Classification_Id()
+        {
+            var runId = 1;
+            var classificationId = 5;
+            var date = DateTime.Now;
+            this.context.CalculatorRuns.Add(new CalculatorRun
+            {
+                Name = "Calc RunName",
+                CalculatorRunClassificationId = classificationId,
+                CreatedAt = date,
+                CreatedBy = "User23",
+                LapcapDataMasterId = 1,
+                DefaultParameterSettingMasterId = 1,
+                Financial_Year = "2024-25"
+            });
+            this.context.SaveChanges();
+
+            var controller =
+                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object);
+
+            var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
+                { ClassificationId = classificationId, RunId = runId }) as ObjectResult;
+            Assert.IsNotNull(result);
+
+            Assert.AreEqual(422, result.StatusCode);
+            Assert.AreEqual($"RunId {runId} cannot be changed to classification {classificationId}", result.Value);
+        }
     }
 }
