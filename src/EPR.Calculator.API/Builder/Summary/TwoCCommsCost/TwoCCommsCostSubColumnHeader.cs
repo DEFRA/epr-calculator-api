@@ -3,7 +3,7 @@
     public class TwoCCommsCostSubColumnHeader
     {
         public static readonly string TwoCCommsCostCountryInPropertionWithoutBadDebt =
-            "2c Total Producer Fee for Comms Costs - by Country In proportion to (1+2a) w/o Bad Debt provision";
+            "2c Total Producer Fee for Comms Costs - by Country In proportion to Reported Household Tonnage w/o Bad Debt provision";
         public static readonly string TwoCCommsCostBadDebtProvision = "Bad Debt Provision for 2c";
         public static readonly string TwoCCommsCostCountryInPropertionWithBadDebt =
             "2c Total Producer Fee for Comms Costs - by Country In proportion to (1+2a) with Bad Debt provision";
