@@ -72,6 +72,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
             other.SchemeSetupCost = schemeSetupCharge;
 
             var badDebtValue = results.Single(x => x.ParameterType == BadDebtProvision).ParameterValue;
+            other.BadDebtValue = badDebtValue;
             other.BadDebtProvision = new KeyValuePair<string, string> (BadDebtProvisionHeader, $"{badDebtValue:0.00}%");
 
             var materialityHeader = new CalcResultMateriality();
