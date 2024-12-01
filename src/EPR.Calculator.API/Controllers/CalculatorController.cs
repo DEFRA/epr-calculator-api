@@ -35,8 +35,8 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var count = this.context.CalculatorRuns.Where(x => x.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
-            if (!count.Any())
+            var isCalcAlreadyRunning = this.context.CalculatorRuns.Any(x => x.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
+            if (!isCalcAlreadyRunning)
             {
 #pragma warning disable S6966 // Awaitable method should be used
                 using (var transaction = this.context.Database.BeginTransaction())
