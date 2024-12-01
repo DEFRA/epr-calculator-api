@@ -3,7 +3,7 @@ using EPR.Calculator.API.Constants;
 using System.Text;
 namespace EPR.Calculator.API.Services
 {
-    public class BlobStorageService: IBlobStorageService
+    public class BlobStorageService : IStorageService
     {
         private readonly BlobContainerClient _containerClient;
 
@@ -18,7 +18,7 @@ namespace EPR.Calculator.API.Services
             try
             {
                 File.WriteAllText(fileName, csvContent.ToString());
-                BlobClient blobClient = _containerClient.GetBlobClient(fileName);
+                var blobClient = _containerClient.GetBlobClient(fileName);
                 using var fileStream = File.OpenRead(fileName);
                 await blobClient.UploadAsync(fileStream, true);
             }

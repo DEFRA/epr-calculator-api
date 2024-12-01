@@ -2,7 +2,7 @@
 
 namespace EPR.Calculator.API.Services
 {
-    public interface IBlobStorageService
+    public interface IStorageService
     {
         Task UploadResultFileContentAsync(string fileName, StringBuilder content);
     }

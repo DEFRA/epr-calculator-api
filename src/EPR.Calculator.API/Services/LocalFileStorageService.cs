@@ -5,7 +5,7 @@
 
     namespace EPR.Calculator.API.Services
     {
-        public class LocalFileStorageService : IBlobStorageService
+        public class LocalFileStorageService : IStorageService
         {
             public Task<string?> GetResultFileContentAsync()
             {
