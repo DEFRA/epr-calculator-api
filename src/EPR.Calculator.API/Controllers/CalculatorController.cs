@@ -181,27 +181,32 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var calculatorRunDetail =
-                (from run in this.context.CalculatorRuns
-                join classification in context.CalculatorRunClassifications
-                    on run.CalculatorRunClassificationId equals classification.Id
-                where run.Id == runId
-                select new
-                {
-                    Run = run,
-                    Classification = classification
-                }).SingleOrDefault();
-
-            
-            if (calculatorRunDetail == null)
+            try
             {
-                return new NotFoundObjectResult($"Unable to find Run Id {runId}");
-            }
-            var calcRun = calculatorRunDetail.Run;
-            var runClassification = calculatorRunDetail.Classification;
-            var runDto = CalcRunMapper.Map(calcRun, runClassification);
+                var calculatorRunDetail =
+                    (from run in this.context.CalculatorRuns
+                        join classification in context.CalculatorRunClassifications
+                            on run.CalculatorRunClassificationId equals classification.Id
+                        where run.Id == runId
+                        select new
+                        {
+                            Run = run,
+                            Classification = classification
+                        }).SingleOrDefault();
+                if (calculatorRunDetail == null)
+                {
+                    return new NotFoundObjectResult($"Unable to find Run Id {runId}");
+                }
 
-            return new ObjectResult(runDto);
+                var calcRun = calculatorRunDetail.Run;
+                var runClassification = calculatorRunDetail.Classification;
+                var runDto = CalcRunMapper.Map(calcRun, runClassification);
+                return new ObjectResult(runDto);
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
         }
 
         [HttpPut]
@@ -213,36 +218,42 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var calculatorRun = context.CalculatorRuns.SingleOrDefault(x => x.Id == runStatusUpdateDto.RunId);
-            if (calculatorRun == null)
+            try
             {
-                return new ObjectResult($"Unable to find Run Id {runStatusUpdateDto.RunId}")
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                var calculatorRun = context.CalculatorRuns.SingleOrDefault(x => x.Id == runStatusUpdateDto.RunId);
+                if (calculatorRun == null)
+                {
+                    return new ObjectResult($"Unable to find Run Id {runStatusUpdateDto.RunId}")
+                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
+
+                var classification =
+                    this.context.CalculatorRunClassifications.SingleOrDefault(x =>
+                        x.Id == runStatusUpdateDto.ClassificationId);
+                if (classification == null)
+                {
+                    return new ObjectResult($"Unable to find Classification Id {runStatusUpdateDto.ClassificationId}")
+                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
+
+                if (runStatusUpdateDto.ClassificationId == calculatorRun.CalculatorRunClassificationId)
+                {
+                    return new ObjectResult(
+                            $"RunId {runStatusUpdateDto.RunId} cannot be changed to classification {runStatusUpdateDto.ClassificationId}")
+                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
+
+                calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
+
+                this.context.CalculatorRuns.Update(calculatorRun);
+                this.context.SaveChanges();
+
+                return StatusCode(201);
             }
-
-            var classification =
-                this.context.CalculatorRunClassifications.SingleOrDefault(x =>
-                    x.Id == runStatusUpdateDto.ClassificationId);
-
-            if (classification == null)
+            catch (Exception exception)
             {
-                return new ObjectResult($"Unable to find Classification Id {runStatusUpdateDto.ClassificationId}")
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
-
-            if (runStatusUpdateDto.ClassificationId == calculatorRun.CalculatorRunClassificationId)
-            {
-                return new ObjectResult(
-                        $"RunId {runStatusUpdateDto.RunId} cannot be changed to classification {runStatusUpdateDto.ClassificationId}")
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
-            }
-
-            calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
-
-            this.context.CalculatorRuns.Update(calculatorRun);
-            this.context.SaveChanges();
-
-            return StatusCode(201);
         }
 
         [HttpGet]
