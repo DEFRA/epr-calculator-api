@@ -15,23 +15,6 @@ namespace EPR.Calculator.API.Builder.Summary
     public class CalcResultSummaryBuilder : ICalcResultSummaryBuilder
     {
         private readonly ApplicationDBContext context;
-
-        private const int ResultSummaryHeaderColumnIndex = 1;
-        private const int ProducerDisposalFeesHeaderColumnIndex = 5;
-        private const int CommsCostHeaderColumnIndex = 100;
-        private const int MaterialsBreakdownHeaderInitialColumnIndex = 5;
-        private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
-        private const int DisposalFeeSummaryColumnIndex = 93;
-        private const int LaDataPrepCostsSection4ColumnIndex = 217;
-        private const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
-        private const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
-        //Section-(1) & (2a)
-        private const int decimalRoundUp = 2;
-        private const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
-        //Section-(1) & (2a)
-        private const int Total1Plus2ABadDebt = 193;
-        //Section-3
-
         public static List<ProducerDetail> producerDetailList { get; set; }
 
         public CalcResultSummaryBuilder(ApplicationDBContext context)

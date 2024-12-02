@@ -23,7 +23,6 @@ namespace EPR.Calculator.API.Exporter
         private const string CountryApportionmentFile = "Country Apportionment File";
         private const int ProducerCommsFeesHeaderColumnIndex = 95;
         private const int decimalRoundUp = 2;
-        private const int LaDataPrepCostsSection4ColumnIndex = 216;
         private const int PercentageofProducerReportedHHTonnageColumnIndex = 193;
 
         public CalcResultsExporter(IBlobStorageService blobStorageService)
@@ -42,7 +41,7 @@ namespace EPR.Calculator.API.Exporter
             if (results.CalcResultLateReportingTonnageData != null)
             {
                 PrepareLateReportingData(results.CalcResultLateReportingTonnageData, csvContent);
-            }            
+            }
 
             csvContent.AppendLine();
 
@@ -73,7 +72,10 @@ namespace EPR.Calculator.API.Exporter
                 PrepareSummaryData(results.CalcResultSummary, csvContent);
             }
 
-            var fileName = GetResultFileName(results.CalcResultDetail.RunId);
+            var fileName = new CalcResultsFileName(
+                results.CalcResultDetail.RunId,
+                results.CalcResultDetail.RunName,
+                results.CalcResultDetail.RunDate);
             try
             {
                 _blobStorageService.UploadResultFileContentAsync(fileName, csvContent);
@@ -222,11 +224,6 @@ namespace EPR.Calculator.API.Exporter
         private static void AppendCsvLine(StringBuilder csvContent, string label, string value)
         {
             csvContent.AppendLine($"{label},{CsvSanitiser.SanitiseData(value)}");
-        }
-
-        private static string GetResultFileName(int runId)
-        {
-            return $"{runId}-{DateTime.Now:yyyy-MM-dd-HHmm}.csv";
         }
 
         private static void PrepareLapcapData(CalcResultLapcapData calcResultLapcapData, StringBuilder csvContent)
@@ -392,6 +389,9 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TotalOnePlus2AFeeWithBadDebtProvision, decimalRoundUp))},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(Math.Round(producer.ProducerPercentageOfCosts, 8))}%,");
 
+                // Percentage of Producer Reported Household Tonnage vs All Producers
+                csvContent.Append($"{CsvSanitiser.SanitiseData(Math.Round(producer.PercentageofProducerReportedHHTonnagevsAllProducers, 8))}%,");
+
                 // 2b comms Total
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TotalProducerFeeWithoutBadDebtFor2bComms, decimalRoundUp))},");
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.BadDebtProvisionFor2bComms, decimalRoundUp))},");
@@ -409,7 +409,6 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TwoCWalesTotalWithBadDebt, decimalRoundUp))},");
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TwoCScotlandTotalWithBadDebt, decimalRoundUp))},");
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TwoCNorthernIrelandTotalWithBadDebt, decimalRoundUp))},");
-
 
                 //Section 3 Exported row 101
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.Total3SAOperatingCostwoBadDebtprovision, decimalRoundUp))},");
