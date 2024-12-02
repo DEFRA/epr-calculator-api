@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using Microsoft.AspNetCore.Routing.Constraints;
 
 namespace EPR.Calculator.API.Services
 {
@@ -8,6 +9,16 @@ namespace EPR.Calculator.API.Services
     public class TransposePomAndOrgDataService : ITransposePomAndOrgDataService
     {
         private readonly ApplicationDBContext context;
+
+        internal class OrganisationDetails
+        {
+            public int? OrganisationId { get; set; }
+            public required string OrganisationName { get; set; }
+            public int SubmissionPeriod { get; set; }
+
+        }
+
+       // private List<OrganisationDetails> Organisations { get; set; }
 
         public TransposePomAndOrgDataService(ApplicationDBContext context)
         {
@@ -25,6 +36,8 @@ namespace EPR.Calculator.API.Services
                 // Get the calculator run organisation data master record based on the CalculatorRunOrganisationDataMasterId
                 // from the calculator run table
                 var organisationDataMaster = context.CalculatorRunOrganisationDataMaster.Single(odm => odm.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);
+
+                //Organisations = GetOrganisationDetails(organisationDataMaster.Id);
 
                 // Get the calculator run organisation data details as we need the organisation name
                 var organisationDataDetails = context.CalculatorRunOrganisationDataDetails
@@ -72,7 +85,7 @@ namespace EPR.Calculator.API.Services
                                         CalculatorRunId = resultsRequestDto.RunId,
                                         ProducerId = producer.OrganisationId.Value,
                                         SubsidiaryId = producer.SubsidaryId,
-                                        ProducerName = producer.OrganisationName,
+                                        ProducerName = GetOrganisationName(producer.OrganisationId.Value, organisationDataMaster.Id),
                                         CalculatorRun = calculatorRun
                                     };
 
@@ -129,6 +142,40 @@ namespace EPR.Calculator.API.Services
                     }
                 }
             }
+        }
+
+
+        private List<OrganisationDetails> GetOrganisationDetails(int orgMasterId)
+        {
+            return (from org in context.CalculatorRunOrganisationDataDetails
+                    join pom in context.CalculatorRunPomDataDetails
+                    on new { org.OrganisationId, org.SubmissionPeriodDesc } equals new { pom.OrganisationId, pom.SubmissionPeriodDesc }
+                    where (org.CalculatorRunOrganisationDataMasterId == orgMasterId && org.OrganisationName != null && org.SubsidaryId == null)
+                    select new OrganisationDetails
+                    {
+                        OrganisationId = org.OrganisationId,
+                        OrganisationName = org.OrganisationName,
+                        SubmissionPeriod = Convert.ToInt32(pom.SubmissionPeriod.Replace("-P", "")),
+                    }).OrderByDescending(t=>t.SubmissionPeriod).ToList();
+        }
+
+
+        private string? GetOrganisationName(int orgId, int orgMasterId)
+        {
+          var Organisations =  (from org in context.CalculatorRunOrganisationDataDetails
+             join pom in context.CalculatorRunPomDataDetails
+             on new { org.OrganisationId, org.SubmissionPeriodDesc } equals new { pom.OrganisationId, pom.SubmissionPeriodDesc }
+             where (org.CalculatorRunOrganisationDataMasterId == orgMasterId && org.OrganisationName != null && org.SubsidaryId == null)
+             select new OrganisationDetails
+             {
+                 OrganisationId = org.OrganisationId,
+                 OrganisationName = org.OrganisationName,
+                 SubmissionPeriod = Convert.ToInt32(pom.SubmissionPeriod.Replace("-P", "")),
+             }).OrderByDescending(t => t.SubmissionPeriod).ToList();
+
+            if (Organisations is  null) return string.Empty;
+            Organisations = Organisations.DistinctBy(t => t.OrganisationId).ToList();
+            return Organisations.FirstOrDefault(t => t.OrganisationId == orgId).OrganisationName;           
         }
     }
 }
