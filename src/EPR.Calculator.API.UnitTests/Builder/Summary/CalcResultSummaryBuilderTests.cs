@@ -112,7 +112,6 @@ namespace EPR.Calculator.API.UnitTests
                             Wales="WalesTest",
                             Name="Material1",
                             Scotland="ScotlandTest",
-                            
                         },
                           new CalcResultLaDisposalCostDataDetail()
                         {
@@ -219,13 +218,22 @@ namespace EPR.Calculator.API.UnitTests
                         {
                             CommsCostByMaterialPricePerTonne="0.42",
                             Name ="Material1",
-                            
                         },
                         new ()
                         {
                             CommsCostByMaterialPricePerTonne="0.3",
                             Name ="Material2",
 
+                        }
+                    ],
+                    CommsCostByCountry = [
+                        new()
+                        {
+                            Total= "Total"
+                        },
+                        new()
+                        {
+                            TotalValue= 2530
                         }
                     ]
                 }
@@ -251,7 +259,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(12, result.ProducerDisposalFeesHeaders.Count());
+            Assert.AreEqual(18, result.ProducerDisposalFeesHeaders.Count());
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
@@ -338,9 +346,6 @@ namespace EPR.Calculator.API.UnitTests
             var totalRow = result.ProducerDisposalFees.LastOrDefault();
             Assert.IsNotNull(totalRow);
         }
-
-
-          
 
         [TestMethod]
         public void GetTotalBadDebtprovision1_ShouldReturnCorrectValue()
@@ -460,7 +465,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(12, result.ProducerDisposalFeesHeaders.Count());
+            Assert.AreEqual(18, result.ProducerDisposalFeesHeaders.Count());
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
@@ -492,6 +497,22 @@ namespace EPR.Calculator.API.UnitTests
             var debt = Math.Ceiling((value * totalFee) / 100);
             Assert.AreEqual(200, debt);
         }
+
+        [TestMethod]
+        public void CommsCost2bBill_ShouldReturnCorrectValue()
+        {
+            var requestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(requestDto, _calcResult);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
+            Assert.AreEqual(18, result.ProducerDisposalFeesHeaders.Count());
+            var isColumnHeaderExists = result.ProducerDisposalFeesHeaders.Select(dict => dict.ColumnIndex == 196 || dict.ColumnIndex == 197 || dict.ColumnIndex == 198).ToList();
+            Assert.IsTrue(isColumnHeaderExists.Contains(true));
+            Assert.IsNotNull(result.ProducerDisposalFees);
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
+        }
+
         private void SeedDatabase(ApplicationDBContext context)
         {
             context.Material.AddRange(new List<Material>

@@ -17,7 +17,7 @@ namespace EPR.Calculator.API.Services
         {
             try
             {
-                File.WriteAllText(fileName, csvContent.ToString());
+                File.WriteAllText(fileName, csvContent.ToString(), Encoding.UTF8);
                 BlobClient blobClient = _containerClient.GetBlobClient(fileName);
                 using var fileStream = File.OpenRead(fileName);
                 await blobClient.UploadAsync(fileStream, true);
