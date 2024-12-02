@@ -73,7 +73,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
 
             var badDebtValue = results.Single(x => x.ParameterType == BadDebtProvision).ParameterValue;
             other.BadDebtValue = badDebtValue;
-            other.BadDebtProvision = new KeyValuePair<string, string>(BadDebtProvisionHeader, $"{badDebtValue:0.00}%");
+            other.BadDebtProvision = new KeyValuePair<string, string> (BadDebtProvisionHeader, $"{badDebtValue:0.00}%");
 
             var materialityHeader = new CalcResultMateriality();
             materialityHeader.SevenMateriality = "7 Materiality";

@@ -6,7 +6,10 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using System.Collections.Generic;
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
@@ -224,6 +227,16 @@ namespace EPR.Calculator.API.UnitTests
                             Name ="Material2",
 
                         }
+                    ],
+                    CommsCostByCountry = [
+                        new()
+                        {
+                            Total= "Total"
+                        },
+                        new()
+                        {
+                            TotalValue= 2530
+                        }
                     ]
                 }
             };
@@ -248,7 +261,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(15, result.ProducerDisposalFeesHeaders.Count());
+            Assert.AreEqual(18, result.ProducerDisposalFeesHeaders.Count());
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
@@ -454,7 +467,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(15, result.ProducerDisposalFeesHeaders.Count());
+            Assert.AreEqual(18, result.ProducerDisposalFeesHeaders.Count());
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
@@ -486,6 +499,22 @@ namespace EPR.Calculator.API.UnitTests
             var debt = Math.Ceiling((value * totalFee) / 100);
             Assert.AreEqual(200, debt);
         }
+
+        [TestMethod]
+        public void CommsCost2bBill_ShouldReturnCorrectValue()
+        {
+            var requestDto = new CalcResultsRequestDto { RunId = 1 };
+            var result = _calcResultsService.Construct(requestDto, _calcResult);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
+            Assert.AreEqual(18, result.ProducerDisposalFeesHeaders.Count());
+            var isColumnHeaderExists = result.ProducerDisposalFeesHeaders.Select(dict => dict.ColumnIndex == 196 || dict.ColumnIndex == 197 || dict.ColumnIndex == 198).ToList();
+            Assert.IsTrue(isColumnHeaderExists.Contains(true));
+            Assert.IsNotNull(result.ProducerDisposalFees);
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
+        }
+
         private void SeedDatabase(ApplicationDBContext context)
         {
             context.Material.AddRange(new List<Material>
