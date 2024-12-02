@@ -18,7 +18,6 @@ namespace EPR.Calculator.API.Services
             this.containerClient = blobServiceClient.GetBlobContainerClient(settings.ContainerName ??
                                                                         throw new ArgumentNullException(
                                                                             ContainerNameMissingError));
-            this.containerClient.CreateIfNotExists();
         }
 
         public async Task UploadResultFileContentAsync(string fileName, StringBuilder csvContent)
@@ -41,7 +40,6 @@ namespace EPR.Calculator.API.Services
             using var memoryStream = new MemoryStream();
             var blobClient = this.containerClient.GetBlobClient(fileName);
             await blobClient.DownloadToAsync(memoryStream);
-
             return Results.File(memoryStream.ToArray(), OctetStream, fileName);
         }
     }

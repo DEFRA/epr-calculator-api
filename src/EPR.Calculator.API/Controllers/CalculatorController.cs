@@ -3,6 +3,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -209,10 +210,34 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("downloadResult/{runId}")]
-        public IFileHttpResult DownloadResult()
+        [Route("DownloadResult/{runId}")]
+        public async Task<IResult> DownloadResult(int runId)
         {
-            throw new NotImplementedException();
+            if (!ModelState.IsValid)
+            {
+                var badRequest = Results.BadRequest(ModelState.Values.SelectMany(x => x.Errors));
+                return badRequest;
+            }
+
+            var calcRun = await context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId);
+            if (calcRun == null)
+            {
+                var notFound = Results.NotFound(ModelState.Values.SelectMany(x => x.Errors));
+                return notFound;
+            }
+
+            try
+            {
+                var fileName = new CalcResultsFileName(
+                    calcRun.Id,
+                    calcRun.Name,
+                    calcRun.CreatedAt);
+                return await storageService.DownloadFile(fileName);
+            }
+            catch (Exception)
+            {
+                return Results.Problem();
+            }
         }
 
         private string DataPreChecksBeforeInitialisingCalculatorRun(string financialYear)
