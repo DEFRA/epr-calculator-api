@@ -193,7 +193,7 @@ namespace EPR.Calculator.API.UnitTests
                             NorthernIrelandTotal=0.15M,
                             ScotlandTotal=0.15M,
                             WalesTotal=020M,
-                            Name="1 + 4 Apportionment %s",
+                            Name=OnePlus4ApportionmentColumnHeaders.OnePluseFourApportionment,
                         }]
                 },
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
