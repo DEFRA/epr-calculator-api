@@ -147,7 +147,6 @@ namespace EPR.Calculator.API.Controllers
             }
             // Return accepted status code: Accepted
             return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
-
         }
 
         [HttpPost]
