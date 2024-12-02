@@ -8,16 +8,17 @@ namespace EPR.Calculator.API.Services
         public const string BlobStorageSection = "BlobStorage";
         public const string BlobSettingsMissingError = "BlobStorage settings are missing in configuration.";
         public const string ContainerNameMissingError = "Container name is missing in configuration.";
+        public const string OctetStream = "application/octet-stream";
         private readonly BlobContainerClient containerClient;
 
         public BlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration)
         {
             var settings = configuration.GetSection(BlobStorageSection).Get<BlobStorageSettings>() ??
                            throw new ArgumentNullException(BlobSettingsMissingError);
-            containerClient = blobServiceClient.GetBlobContainerClient(settings.ContainerName ??
+            this.containerClient = blobServiceClient.GetBlobContainerClient(settings.ContainerName ??
                                                                         throw new ArgumentNullException(
                                                                             ContainerNameMissingError));
-            containerClient.CreateIfNotExists();
+            this.containerClient.CreateIfNotExists();
         }
 
         public async Task UploadResultFileContentAsync(string fileName, StringBuilder csvContent)
@@ -25,7 +26,7 @@ namespace EPR.Calculator.API.Services
             try
             {
                 await File.WriteAllTextAsync(fileName, csvContent.ToString());
-                var blobClient = containerClient.GetBlobClient(fileName);
+                var blobClient = this.containerClient.GetBlobClient(fileName);
                 await using var fileStream = File.OpenRead(fileName);
                 await blobClient.UploadAsync(fileStream, true);
             }
@@ -35,13 +36,13 @@ namespace EPR.Calculator.API.Services
             }
         }
 
-        public async Task<string> DownloadFile(string fileName)
+        public async Task<IResult> DownloadFile(string fileName)
         {
-            var blobClient = containerClient.GetBlobClient("blobName.csv");
-            var response = await blobClient.DownloadAsync();
-            using var streamReader = new StreamReader(response.Value.Content);
-            var content = await streamReader.ReadToEndAsync();
-            return content;
+            using var memoryStream = new MemoryStream();
+            var blobClient = this.containerClient.GetBlobClient(fileName);
+            await blobClient.DownloadToAsync(memoryStream);
+
+            return Results.File(memoryStream.ToArray(), OctetStream, fileName);
         }
     }
 }

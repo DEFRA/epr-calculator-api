@@ -19,7 +19,7 @@
                 return Task.CompletedTask;
             }
 
-            public Task<string> DownloadFile(string fileName)
+            public Task<IResult> DownloadFile(string fileName)
             {
                 throw new NotImplementedException();
             }
