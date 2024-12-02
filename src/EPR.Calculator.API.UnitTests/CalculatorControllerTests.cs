@@ -475,6 +475,16 @@ namespace EPR.Calculator.API.UnitTests
             });
             dbContext?.SaveChanges();
 
+            dbContext?.CalculatorRuns.Add(new CalculatorRun
+            {
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                CalculatorRunClassificationId = 2,
+                Financial_Year = "2023-24",
+                Name = "TestOneAtATime"
+            });
+            dbContext?.SaveChanges();
+
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.

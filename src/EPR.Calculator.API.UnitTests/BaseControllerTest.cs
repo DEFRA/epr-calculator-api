@@ -698,7 +698,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             var list = new List<CalculatorRun>();
             list.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
                 Name = "Test Run",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
@@ -706,7 +706,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             });
             list.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
                 Name = "Test Calculated Result",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
@@ -714,7 +714,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             });
             list.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
                 Name = "Test Run",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
@@ -724,7 +724,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             });
             list.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
                 Name = "Test Calculated Result",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
