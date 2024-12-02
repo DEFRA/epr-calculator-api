@@ -48,21 +48,16 @@ namespace EPR.Calculator.API.UnitTests.Services
         {
             
             _context.CalculatorRunOrganisationDataMaster.AddRange(GetCalculatorRunOrganisationDataMaster());
-            _context.ChangeTracker.Clear();
             _context.CalculatorRunOrganisationDataDetails.AddRange(GetCalculatorRunOrganisationDataDetails());
 
-            _context.CalculatorRunPomDataMaster.AddRange(GetCalculatorRunPomDataMaster());
-            _context.CalculatorRunPomDataDetails.AddRange(GetCalculatorRunPomDataDetails());
+            //_context.CalculatorRunPomDataMaster.AddRange(GetCalculatorRunPomDataMaster());
+            //_context.CalculatorRunPomDataDetails.AddRange(GetCalculatorRunPomDataDetails());
 
 
             _context.CalculatorRuns.AddRange(GetCalculatorRuns());
             _context.Material.AddRange(GetMaterials());
 
             _context.SaveChanges();
-            foreach (var entity in _context.ChangeTracker.Entries())
-            {
-                entity.State = EntityState.Detached;
-            }
         }
 
 
@@ -196,42 +191,28 @@ namespace EPR.Calculator.API.UnitTests.Services
         protected static IEnumerable<CalculatorRunOrganisationDataDetail> GetCalculatorRunOrganisationDataDetails()
         {
             var list = new List<CalculatorRunOrganisationDataDetail>();
-            list.AddRange(new List<CalculatorRunOrganisationDataDetail>() { new CalculatorRunOrganisationDataDetail
+            list.AddRange(new List<CalculatorRunOrganisationDataDetail>()
             {
-                Id = 1,
-                OrganisationId = 1,
-                OrganisationName = "UPU LIMITED",
-                LoadTimeStamp= DateTime.Now,
-                CalculatorRunOrganisationDataMasterId = 1,
-                SubmissionPeriodDesc = "July to December 2023",
-                CalculatorRunOrganisationDataMaster =
-                new CalculatorRunOrganisationDataMaster
-            {
-                Id = 1,
-                CalendarYear = "2024-25",
-                EffectiveFrom = DateTime.Now,
-                CreatedBy = "Test user",
-                CreatedAt = DateTime.Now
-            }
-            },
                 new CalculatorRunOrganisationDataDetail
-            {
-                Id = 2,
-                OrganisationId = 1,
-                SubsidaryId = "SUBSID1",
-                OrganisationName = "UPU LIMITED",
-                LoadTimeStamp= DateTime.Now,
-                CalculatorRunOrganisationDataMasterId = 1,
-                SubmissionPeriodDesc = "July to December 2023",
-                CalculatorRunOrganisationDataMaster = new CalculatorRunOrganisationDataMaster
-            {
-                Id = 1,
-                CalendarYear = "2024-25",
-                EffectiveFrom = DateTime.Now,
-                CreatedBy = "Test user",
-                CreatedAt = DateTime.Now
-            }
-            } });
+                {
+                    Id = 1,
+                    OrganisationId = 1,
+                    OrganisationName = "UPU LIMITED",
+                    LoadTimeStamp = DateTime.Now,
+                    CalculatorRunOrganisationDataMasterId = 1,
+                    SubmissionPeriodDesc = "July to December 2023"
+                },
+                new CalculatorRunOrganisationDataDetail
+                {
+                    Id = 2,
+                    OrganisationId = 1,
+                    SubsidaryId = "SUBSID1",
+                    OrganisationName = "UPU LIMITED",
+                    LoadTimeStamp = DateTime.Now,
+                    CalculatorRunOrganisationDataMasterId = 1,
+                    SubmissionPeriodDesc = "July to December 2023"
+                }
+            });
             return list;
         }
 
