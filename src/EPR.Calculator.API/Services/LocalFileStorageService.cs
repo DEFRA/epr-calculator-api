@@ -18,7 +18,11 @@
                 File.WriteAllText(path, content.ToString(), Encoding.UTF8);
                 return Task.CompletedTask;
             }
+
+            public Task<string> DownloadFile(string fileName)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
-
 }
