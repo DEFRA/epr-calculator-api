@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using EPR.Calculator.API.Builder.Summary.CommsCostTwoA;
+using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
 using EPR.Calculator.API.Builder.Summary.TwoCCommsCost;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
@@ -570,11 +571,9 @@ public static class CalcResultSummaryUtil
         ]);
 
         // LA data prep costs section 4
-        materialsBreakdownHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsTitleSection4, CalcResultSummaryBuilder.decimalRoundUp)}", ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex },
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsBadDebtProvisionTitleSection4, CalcResultSummaryBuilder.decimalRoundUp)}", ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex + 1 },
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsWithBadDebtProvisionTitleSection4, CalcResultSummaryBuilder.decimalRoundUp)}",ColumnIndex = CalcResultSummaryBuilder.LaDataPrepCostsSection4ColumnIndex + 2 }
-        ]);
+        materialsBreakdownHeaders.AddRange(
+            LaDataPrepCostsSummary.GetHeaders()
+        );
 
         return materialsBreakdownHeaders;
     }
