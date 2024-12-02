@@ -9,7 +9,7 @@ namespace EPR.Calculator.API.Models
         public IEnumerable<CalcResultSummaryHeader> ProducerDisposalFeesHeaders { get; set; }
 
         public CalcResultSummaryHeader CommsCostHeader { get; set; }
-        
+
 
         public IEnumerable<CalcResultSummaryHeader> MaterialBreakdownHeaders { get; set; }
 
@@ -19,16 +19,25 @@ namespace EPR.Calculator.API.Models
         public decimal TotalFeeforLADisposalCostswoBadDebtprovision1 { get; set; }
 
         public decimal BadDebtProvisionFor1 { get; set; }
-        
+
         public decimal TotalFeeforLADisposalCostswithBadDebtprovision1 { get; set; }
-        
+
         public decimal TotalFeeforCommsCostsbyMaterialwoBadDebtProvision2A { get; set; }
-        
+
         public decimal BadDebtProvisionFor2A { get; set; }
-        
+
         public decimal TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A { get; set; }
 
-        public decimal TwoCCommsCostsByCountryWithoutBadDebtProvision {get; set; }
+        public decimal TotalOnePlus2AFeeWithBadDebtProvision { get; set; }
+
+        //Section-3 -
+        public decimal SAOperatingCostsWoTitleSection3 { get; set; }
+        public decimal SAOperatingCostsWithTitleSection3 { get; set; }
+        public decimal BadDebtProvisionTitleSection3 { get; set; }
+
+
+        //Section-4
+        public decimal TwoCCommsCostsByCountryWithoutBadDebtProvision { get; set; }
 
         public decimal TwoCBadDebtProvision { get; set; }
 
@@ -42,8 +51,6 @@ namespace EPR.Calculator.API.Models
         public decimal LaDataPrepCostsWithBadDebtProvisionTitleSection4 { get; set; }
 
         public IEnumerable<CalcResultSummaryProducerDisposalFees> ProducerDisposalFees { get; set; }
-
-        public decimal TotalOnePlus2AFeeWithBadDebtProvision { get; set; }
 
         public decimal CommsCostHeaderWithoutBadDebtFor2bTitle { get; set; }
 
