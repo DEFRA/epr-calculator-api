@@ -5,12 +5,12 @@ using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Models;
 using System.Globalization;
+using EPR.Calculator.API.Builder.Summary.ThreeSa;
 
 namespace EPR.Calculator.API.Builder.Summary.Common;
 
 public static class CalcResultSummaryUtil
 {
-    public const int SAOperatingCostCostsHeaderInitialColumnIndex = 210;
     public const int ResultSummaryHeaderColumnIndex = 1;
     public const int ProducerDisposalFeesHeaderColumnIndex = 5;
     public const int CommsCostHeaderColumnIndex = 100;
@@ -481,9 +481,9 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithBadDebt, ColumnIndex = TwoCCommsCostColumnIndex.Value + 2 },
 
             //Section-3 Title headers
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.SAOperatingCostsWithoutBadDebtProvisionTitleSection3, ColumnIndex = SAOperatingCostCostsHeaderInitialColumnIndex },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionTitleSection3, ColumnIndex=SAOperatingCostCostsHeaderInitialColumnIndex+1},
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.SAOperatingCostsWithBadDebtProvisionTitleSection3,ColumnIndex=SAOperatingCostCostsHeaderInitialColumnIndex+2 },
+            new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.SAOperatingCostsWithoutBadDebtProvisionTitleSection3, ColumnIndex = ThreeSaCostColumnIndex.Index },
+            new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.BadDebtProvisionTitleSection3, ColumnIndex=ThreeSaCostColumnIndex.Index+1},
+            new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.SAOperatingCostsWithBadDebtProvisionTitleSection3,ColumnIndex=ThreeSaCostColumnIndex.Index+2 },
             //Section-4 Title headers
         new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSection4ColumnIndex+1 },
@@ -564,9 +564,9 @@ public static class CalcResultSummaryUtil
 
         //Section-3 -first header
         materialsBreakdownHeaders.AddRange([
-           new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SAOperatingCostsWoTitleSection3, decimalRoundUp)}", ColumnIndex = SAOperatingCostCostsHeaderInitialColumnIndex },
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionTitleSection3, decimalRoundUp)}" ,ColumnIndex = SAOperatingCostCostsHeaderInitialColumnIndex+1},
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SAOperatingCostsWithTitleSection3, decimalRoundUp)}", ColumnIndex = SAOperatingCostCostsHeaderInitialColumnIndex+2 }
+           new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SAOperatingCostsWoTitleSection3, decimalRoundUp)}", ColumnIndex = ThreeSaCostColumnIndex.Index },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionTitleSection3, decimalRoundUp)}" ,ColumnIndex = ThreeSaCostColumnIndex.Index +1},
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SAOperatingCostsWithTitleSection3, decimalRoundUp)}", ColumnIndex = ThreeSaCostColumnIndex.Index +2 }
          ]);
 
         // LA data prep costs section 4
@@ -699,13 +699,13 @@ public static class CalcResultSummaryUtil
 
         // SA operating cost section 3
         columnHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalSAOperatingCostsWoTitleSection3, ColumnIndex = SAOperatingCostCostsHeaderInitialColumnIndex },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionSection3 },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.SAOperatingCostsWithTitleSection3 },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.EnglandTotalWithBadDebtProvisionSection3 },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.WalesTotalWithBadDebtProvisionSection3 },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ScotlandTotalWithBadDebtProvisionSection3 },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalWithBadDebtProvisionSection3 }
+            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.TotalSAOperatingCostsWoTitleSection3, ColumnIndex = ThreeSaCostColumnIndex.Index },
+            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.BadDebtProvisionSection3 },
+            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.SAOperatingCostsWithTitleSection3 },
+            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.EnglandTotalWithBadDebtProvisionSection3 },
+            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.WalesTotalWithBadDebtProvisionSection3 },
+            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.ScotlandTotalWithBadDebtProvisionSection3 },
+            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.NorthernIrelandTotalWithBadDebtProvisionSection3 }
         ]);
 
 
