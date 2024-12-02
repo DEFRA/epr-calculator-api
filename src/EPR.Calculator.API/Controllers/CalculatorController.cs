@@ -1,4 +1,5 @@
 ﻿using Azure.Messaging.ServiceBus;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -141,7 +142,7 @@ namespace EPR.Calculator.API.Controllers
             }
 
             // Return accepted status code: Accepted
-            return new ObjectResult(new { Message = "The Calculator is currently running. You will be able to run another calculation once the current one has finished." })
+            return new ObjectResult(new { Message = ErrorMessages.CalculationAlreadyRunning })
             {
                 StatusCode = StatusCodes.Status422UnprocessableEntity,
             };
