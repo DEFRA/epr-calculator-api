@@ -12,9 +12,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
     [TestClass]
     public class LaDataPrepCostsProducerTests
     {
-        private ApplicationDBContext dbContext;
-        private IEnumerable<ProducerDetail> _producerDetails;
-        private IEnumerable<ProducerReportedMaterial> _producerReportedMaterials;
+        private ApplicationDBContext _dbContext;
         private IEnumerable<MaterialDetail> _materials;
         private CalcResult _calcResult;
         private Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> _materialCostSummary;
@@ -28,8 +26,8 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
 
-            dbContext = new ApplicationDBContext(dbContextOptions);
-            dbContext.Database.EnsureCreated();
+            _dbContext = new ApplicationDBContext(dbContextOptions);
+            _dbContext.Database.EnsureCreated();
 
             CreateMaterials();
             CreateProducerDetail();
@@ -98,6 +96,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
                 CalcResultParameterOtherCost = new CalcResultParameterOtherCost
                 {
                     BadDebtProvision = new KeyValuePair<string, string>("key1", "6%"),
+                    BadDebtValue = 6m,
                     Details = [
                         new CalcResultParameterOtherCostDetail
                         {
@@ -273,7 +272,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
                 CalcResultSummary = new CalcResultSummary
                 {
                     ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>()
-                    { 
+                    {
                         new()
                         {
                             ProducerCommsFeesByMaterial =  new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>(){ },
@@ -344,7 +343,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         [TestCleanup]
         public void TearDown()
         {
-            dbContext?.Database.EnsureDeleted();
+            _dbContext?.Database.EnsureDeleted();
         }
 
         [TestMethod]
@@ -355,13 +354,13 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
 
             var expectedResult = new List<CalcResultSummaryHeader>();
             expectedResult.AddRange([
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.TotalProducerFeeWithoutBadDebtProvision , ColumnIndex = 223 },
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.BadDebtProvision, ColumnIndex = 224 },
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.TotalProducerFeeWithBadDebtProvision, ColumnIndex = 225 },
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.EnglandTotalWithBadDebtProvision, ColumnIndex = 226 },
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.WalesTotalWithBadDebtProvision, ColumnIndex = 227 },
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.ScotlandTotalWithBadDebtProvision, ColumnIndex = 228 },
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.NorthernIrelandTotalWithBadDebtProvision, ColumnIndex = 229 }
+                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.TotalProducerFeeWithoutBadDebtProvision , ColumnIndex = 217 },
+                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.BadDebtProvision, ColumnIndex = 218 },
+                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.TotalProducerFeeWithBadDebtProvision, ColumnIndex = 219 },
+                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.EnglandTotalWithBadDebtProvision, ColumnIndex = 220 },
+                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.WalesTotalWithBadDebtProvision, ColumnIndex = 221 },
+                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.ScotlandTotalWithBadDebtProvision, ColumnIndex = 222 },
+                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.NorthernIrelandTotalWithBadDebtProvision, ColumnIndex = 223 }
             ]);
 
             // Assert
@@ -385,7 +384,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         public void CanCallGetLaDataPrepCostsProducerFeeWithoutBadDebtProvision()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsProducerFeeWithoutBadDebtProvision(dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
+            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsProducerFeeWithoutBadDebtProvision(_dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
 
             // Assert
             Assert.AreEqual((decimal)736.39, Math.Round(result, 2));
@@ -395,7 +394,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         public void CanCallGetLaDataPrepCostsBadDebtProvision()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsBadDebtProvision(dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
+            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsBadDebtProvision(_dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
 
             // Assert
             Assert.AreEqual((decimal)44.18, Math.Round(result, 2));
@@ -405,7 +404,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         public void CanCallGetLaDataPrepCostsProducerFeeWithBadDebtProvision()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsProducerFeeWithBadDebtProvision(dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
+            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsProducerFeeWithBadDebtProvision(_dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
 
             // Assert
             Assert.AreEqual((decimal)780.57, Math.Round(result, 2));
@@ -415,7 +414,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         public void CanCallGetLaDataPrepCostsProducerFeeWithoutBadDebtProvisionTotal()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsProducerFeeWithoutBadDebtProvisionTotal(dbContext.ProducerDetail, dbContext.ProducerDetail, _materials, _calcResult);
+            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsProducerFeeWithoutBadDebtProvisionTotal(_dbContext.ProducerDetail, _dbContext.ProducerDetail, _materials, _calcResult);
 
             // Assert
             Assert.AreEqual(100, result);
@@ -425,7 +424,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         public void CanCallGetLaDataPrepCostsBadDebtProvisionTotal()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsBadDebtProvisionTotal(dbContext.ProducerDetail, dbContext.ProducerDetail, _materials, _calcResult);
+            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsBadDebtProvisionTotal(_dbContext.ProducerDetail, _dbContext.ProducerDetail, _materials, _calcResult);
 
             // Assert
             Assert.AreEqual(6, result);
@@ -435,7 +434,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         public void CanCallGetLaDataPrepCostsProducerFeeWithBadDebtProvisionTotal()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsProducerFeeWithBadDebtProvisionTotal(dbContext.ProducerDetail, dbContext.ProducerDetail, _materials, _calcResult);
+            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsProducerFeeWithBadDebtProvisionTotal(_dbContext.ProducerDetail, _dbContext.ProducerDetail, _materials, _calcResult);
 
             // Assert
             Assert.AreEqual(106, result);
@@ -445,7 +444,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         public void CanCallGetLaDataPrepCostsEnglandTotalWithBadDebtProvision()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsEnglandTotalWithBadDebtProvision(dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
+            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsEnglandTotalWithBadDebtProvision(_dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
 
             // Assert
             Assert.AreEqual((decimal)0.78, Math.Round(result, 2));
@@ -455,7 +454,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         public void CanCallGetLaDataPrepCostsEnglandOverallTotalWithBadDebtProvision()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsEnglandOverallTotalWithBadDebtProvision(dbContext.ProducerDetail, dbContext.ProducerDetail, _materials, _calcResult);
+            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsEnglandOverallTotalWithBadDebtProvision(_dbContext.ProducerDetail, _dbContext.ProducerDetail, _materials, _calcResult);
 
             // Assert
             Assert.AreEqual((decimal)0.11, Math.Round(result, 2));
@@ -465,7 +464,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         public void CanCallGetLaDataPrepCostsWalesTotalWithBadDebtProvision()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsWalesTotalWithBadDebtProvision(dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
+            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsWalesTotalWithBadDebtProvision(_dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
 
             // Assert
             Assert.AreEqual((decimal)156.11, Math.Round(result, 2));
@@ -475,7 +474,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         public void CanCallGetLaDataPrepCostsWalesOverallTotalWithBadDebtProvision()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsWalesOverallTotalWithBadDebtProvision(dbContext.ProducerDetail, dbContext.ProducerDetail, _materials, _calcResult);
+            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsWalesOverallTotalWithBadDebtProvision(_dbContext.ProducerDetail, _dbContext.ProducerDetail, _materials, _calcResult);
 
             // Assert
             Assert.AreEqual((decimal)21.20, Math.Round(result, 2));
@@ -485,7 +484,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         public void CanCallGetLaDataPrepCostsScotlandTotalWithBadDebtProvision()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsScotlandTotalWithBadDebtProvision(dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
+            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsScotlandTotalWithBadDebtProvision(_dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
 
             // Assert
             Assert.AreEqual((decimal)1.17, Math.Round(result, 2));
@@ -495,7 +494,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         public void CanCallGetLaDataPrepCostsScotlandOverallTotalWithBadDebtProvision()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsScotlandOverallTotalWithBadDebtProvision(dbContext.ProducerDetail, dbContext.ProducerDetail, _materials, _calcResult);
+            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsScotlandOverallTotalWithBadDebtProvision(_dbContext.ProducerDetail, _dbContext.ProducerDetail, _materials, _calcResult);
 
             // Assert
             Assert.AreEqual((decimal)0.16, Math.Round(result, 2));
@@ -505,7 +504,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         public void CanCallGetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvision()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvision(dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
+            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvision(_dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
 
             // Assert
             Assert.AreEqual((decimal)1.17, Math.Round(result, 2));
@@ -515,7 +514,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
         public void CanCallGetLaDataPrepCostsNorthernIrelandOverallTotalWithBadDebtProvision()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsNorthernIrelandOverallTotalWithBadDebtProvision(dbContext.ProducerDetail, dbContext.ProducerDetail, _materials, _calcResult);
+            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsNorthernIrelandOverallTotalWithBadDebtProvision(_dbContext.ProducerDetail, _dbContext.ProducerDetail, _materials, _calcResult);
 
             // Assert
             Assert.AreEqual((decimal)0.16, Math.Round(result, 2));
@@ -535,7 +534,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
 
             foreach (var materialKv in materialDictionary)
             {
-                dbContext.Material.Add(new Material
+                _dbContext.Material.Add(new Material
                 {
                     Name = materialKv.Value,
                     Code = materialKv.Key,
@@ -543,7 +542,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
                 });
             }
 
-            dbContext.SaveChanges();
+            _dbContext.SaveChanges();
         }
 
         private void CreateProducerDetail()
@@ -565,7 +564,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
             var producerId = 1;
             foreach (var producerName in producerNames)
             {
-                dbContext.ProducerDetail.Add(new ProducerDetail
+                _dbContext.ProducerDetail.Add(new ProducerDetail
                 {
                     ProducerId = producerId++,
                     SubsidiaryId = $"{producerId}-Sub",
@@ -574,20 +573,20 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
                 });
             }
 
-            dbContext.SaveChanges();
+            _dbContext.SaveChanges();
 
             for (int producerDetailId = 1; producerDetailId <= 10; producerDetailId++)
             {
                 for (int materialId = 1; materialId < 9; materialId++)
                 {
-                    dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial
+                    _dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial
                     {
                         MaterialId = materialId,
                         ProducerDetailId = producerDetailId,
                         PackagingType = "HH",
                         PackagingTonnage = (materialId * 100)
                     });
-                    dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial
+                    _dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial
                     {
                         MaterialId = materialId,
                         ProducerDetailId = producerDetailId,
@@ -596,7 +595,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
                     });
                 }
             }
-            dbContext.SaveChanges();
+            _dbContext.SaveChanges();
         }
     }
 }

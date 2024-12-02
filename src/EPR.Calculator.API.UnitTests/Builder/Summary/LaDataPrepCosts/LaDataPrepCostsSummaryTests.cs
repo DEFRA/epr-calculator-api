@@ -1,30 +1,23 @@
 namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
 {
     using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
-    using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.Models;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
     public class LaDataPrepCostsSummaryTests
     {
-        private IEnumerable<ProducerDetail> _producerDetails;
         private CalcResult _calcResult;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _producerDetails = [
-                new() {  Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test1" } },
-                new() { Id = 2, ProducerName = "Producer2", CalculatorRunId = 2, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test2" } },
-                new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } }
-            ];
-
             _calcResult = new CalcResult
             {
                 CalcResultParameterOtherCost = new CalcResultParameterOtherCost
                 {
                     BadDebtProvision = new KeyValuePair<string, string>("key1", "6%"),
+                    BadDebtValue = 6m,
                     Details = [
                         new CalcResultParameterOtherCostDetail {
                             Name = "4 LA Data Prep Charge",
@@ -231,9 +224,9 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
 
             var expectedResult = new List<CalcResultSummaryHeader>();
             expectedResult.AddRange([
-                new CalcResultSummaryHeader { Name = $"{LaDataPrepCostsHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitle}", ColumnIndex = 216 },
-                new CalcResultSummaryHeader { Name = $"{LaDataPrepCostsHeaders.BadDebtProvisionTitle}", ColumnIndex = 217 },
-                new CalcResultSummaryHeader { Name = $"{LaDataPrepCostsHeaders.LaDataPrepCostsWithBadDebtProvisionTitle}", ColumnIndex = 218 }
+                new CalcResultSummaryHeader { Name = $"{LaDataPrepCostsHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitle}", ColumnIndex = 217 },
+                new CalcResultSummaryHeader { Name = $"{LaDataPrepCostsHeaders.BadDebtProvisionTitle}", ColumnIndex = 218 },
+                new CalcResultSummaryHeader { Name = $"{LaDataPrepCostsHeaders.LaDataPrepCostsWithBadDebtProvisionTitle}", ColumnIndex = 219 }
             ]);
 
             // Assert
