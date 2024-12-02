@@ -104,6 +104,7 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void Export_CreatesCorrectCsvContent()
         {
+            // Arrange
             var calcResult = new CalcResult
             {
                 CalcResultDetail = new CalcResultDetail
@@ -130,10 +131,16 @@ namespace EPR.Calculator.API.UnitTests
                 }
             };
 
+            var expectedFileName = $"{calcResult.CalcResultDetail.RunId}" +
+                $"-{calcResult.CalcResultDetail.RunName}" +
+                $"_Results File" +
+                $"_{calcResult.CalcResultDetail.RunDate:yyyyMMdd}.csv";
+
+            // Act
             _calcResultsExporter.Export(calcResult);
 
-            _blobStorageServiceMock.Verify(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<StringBuilder>()), Times.Once);
-            var expectedFileName = $"{calcResult.CalcResultDetail.RunId}-{DateTime.Now:yyyy-MM-dd-HHmm}.csv";
+            // Assert
+            _blobStorageServiceMock.Verify(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<StringBuilder>()), Times.Once); 
             _blobStorageServiceMock.Verify(x => x.UploadResultFileContentAsync(expectedFileName, It.IsAny<StringBuilder>()), Times.Once);
         }
     }

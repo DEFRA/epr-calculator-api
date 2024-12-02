@@ -174,6 +174,7 @@ namespace EPR.Calculator.API.Builder.Summary.CommsCostTwoBTotalBill
         {
             return CalculateProducerFee(calcResult, producer, allResults, includeBadDebt: false);
         }
+
         #endregion
     }
 }
