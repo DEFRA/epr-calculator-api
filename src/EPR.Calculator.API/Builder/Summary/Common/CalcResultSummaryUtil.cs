@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Builder.CommsCost;
 using EPR.Calculator.API.Builder.Summary.CommsCostTwoA;
 using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
+using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
 using EPR.Calculator.API.Builder.Summary.ThreeSa;
 using EPR.Calculator.API.Builder.Summary.TwoCCommsCost;
 using EPR.Calculator.API.Constants;
@@ -19,7 +20,6 @@ public static class CalcResultSummaryUtil
     public const int MaterialsBreakdownHeaderInitialColumnIndex = 5;
     public const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
     public const int DisposalFeeSummaryColumnIndex = 93;
-    public const int LaDataPrepCostsSection4ColumnIndex = 217;
     public const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
     public const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
     //Section-(1) & (2a)
@@ -533,6 +533,13 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsWithBadDebtProvisionTitleSection4, decimalRoundUp)}", ColumnIndex = LaDataPrepCostsSummary.ColumnIndex + 2 }
         ]);
 
+        // Scheme administrator setup costs section 5
+        materialsBreakdownHeaders.AddRange([
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SaSetupCostsTitleSection5, decimalRoundUp)}", ColumnIndex = SaSetupCostsSummary.ColumnIndex },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SaSetupCostsBadDebtProvisionTitleSection5, decimalRoundUp)}", ColumnIndex = SaSetupCostsSummary.ColumnIndex + 1 },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SaSetupCostsWithBadDebtProvisionTitleSection5, decimalRoundUp)}",ColumnIndex = SaSetupCostsSummary.ColumnIndex + 2 }
+        ]);
+
         return materialsBreakdownHeaders;
     }
 
@@ -669,6 +676,11 @@ public static class CalcResultSummaryUtil
             LaDataPrepCostsProducer.GetHeaders()
         );
 
+        // Section-5 SA setup costs column headers
+        columnHeaders.AddRange(
+            SaSetupCostsProducer.GetHeaders()
+        );
+
         return columnHeaders;
     }
 
@@ -755,6 +767,7 @@ public static class CalcResultSummaryUtil
 
         return englandTotalwithBadDebtprovision;
     }
+
     public static decimal GetCommsCostHeaderWithoutBadDebtFor2bTitle(CalcResult calcResult)
     {
         return calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.ToList()[1].TotalValue;

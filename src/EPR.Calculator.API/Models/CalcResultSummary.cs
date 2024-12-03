@@ -10,7 +10,6 @@ namespace EPR.Calculator.API.Models
 
         public CalcResultSummaryHeader CommsCostHeader { get; set; }
 
-
         public IEnumerable<CalcResultSummaryHeader> MaterialBreakdownHeaders { get; set; }
 
         public IEnumerable<CalcResultSummaryHeader> ColumnHeaders { get; set; }
@@ -46,13 +45,19 @@ namespace EPR.Calculator.API.Models
         public decimal LaDataPrepCostsWithBadDebtProvisionTitleSection4 { get; set; }
         // End Section-4 LA data prep costs
 
+        // Section-5 SA setup costs
+        public decimal SaSetupCostsTitleSection5 { get; set; }
+
+        public decimal SaSetupCostsBadDebtProvisionTitleSection5 { get; set; }
+
+        public decimal SaSetupCostsWithBadDebtProvisionTitleSection5 { get; set; }
+        // End Section-5 SA setup costs
+
         public decimal TwoCCommsCostsByCountryWithoutBadDebtProvision { get; set; }
 
         public decimal TwoCBadDebtProvision { get; set; }
 
         public decimal TwoCCommsCostsByCountryWithBadDebtProvision { get; set; }
-
-        public IEnumerable<CalcResultSummaryProducerDisposalFees> ProducerDisposalFees { get; set; }
 
         public decimal CommsCostHeaderWithoutBadDebtFor2bTitle { get; set; }
 
@@ -60,5 +65,6 @@ namespace EPR.Calculator.API.Models
 
         public decimal CommsCostHeaderBadDebtProvisionFor2bTitle { get; set; }
 
+        public IEnumerable<CalcResultSummaryProducerDisposalFees> ProducerDisposalFees { get; set; }
     }
 }
