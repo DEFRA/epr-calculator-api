@@ -56,37 +56,37 @@
 
         //Section-(1) & (2a) Start
         public decimal TotalProducerFeeforLADisposalCostswoBadDebtprovision { get; set; }
-        
+
         public decimal BadDebtProvisionFor1 { get; set; }
-        
+
         public decimal TotalProducerFeeforLADisposalCostswithBadDebtprovision { get; set; }
-        
+
         public decimal EnglandTotalwithBadDebtprovision { get; set; }
-        
+
         public decimal WalesTotalwithBadDebtprovision { get; set; }
-        
+
         public decimal ScotlandTotalwithBadDebtprovision { get; set; }
-        
+
         public decimal NorthernIrelandTotalwithBadDebtprovision { get; set; }
-        
+
         public decimal TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision { get; set; }
-        
+
         public decimal BadDebtProvisionFor2A { get; set; }
-        
+
         public decimal TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision { get; set; }
-        
+
         public decimal EnglandTotalwithBadDebtprovision2A { get; set; }
 
         public decimal WalesTotalwithBadDebtprovision2A { get; set; }
-        
+
         public decimal ScotlandTotalwithBadDebtprovision2A { get; set; }
-        
+
         public decimal NorthernIrelandTotalwithBadDebtprovision2A { get; set; }
         //Section-(1) & (2a) End
 
         public decimal TwoCTotalProducerFeeForCommsCostsWithoutBadDebt { get; set; }
         public decimal TwoCBadDebtProvisionHeader { get; set; }
-        public decimal TwoCBadDebtCommCostByCountry{ get; set; }
+        public decimal TwoCBadDebtCommCostByCountry { get; set; }
         public decimal TwoCBadDebtProvision { get; set; }
         public decimal TwoCTotalProducerFeeForCommsCostsWithBadDebt { get; set; }
         public decimal TwoCEnglandTotalWithBadDebt { get; set; }
@@ -95,6 +95,22 @@
         public decimal TwoCNorthernIrelandTotalWithBadDebt { get; set; }
 
         public decimal PercentageofProducerReportedHHTonnagevsAllProducers { get; set; }
+
+        //Section-3
+        public decimal Total3SAOperatingCostwoBadDebtprovision { get; set; }
+
+        public decimal BadDebtProvisionFor3 { get; set; }
+
+        public decimal Total3SAOperatingCostswithBadDebtprovision { get; set; }
+
+        public decimal EnglandTotalwithBadDebtprovision3 { get; set; }
+
+        public decimal WalesTotalwithBadDebtprovision3 { get; set; }
+
+        public decimal ScotlandTotalwithBadDebtprovision3 { get; set; }
+
+        public decimal NorthernIrelandTotalwithBadDebtprovision3 { get; set; }
+        //End Section-3
 
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> ProducerCommsFeesByMaterial { get; set; }

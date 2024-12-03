@@ -12,7 +12,7 @@ namespace EPR.Calculator.API.Constants
 
         public static readonly string CommsCostHeader = "2a Fees for Comms Costs - by Material with Bad Debt provision";
         public static readonly string CommsCostSummaryHeader = "Summary of Fee for Comms Costs - by Material";
-      
+
 
         public static readonly string DisposalFeeSummary = "Disposal Fee Summary";
         public static readonly string ProducerId = "Producer ID";
@@ -102,25 +102,14 @@ namespace EPR.Calculator.API.Constants
         public static readonly string TotalProducer1Plus2ABadDebtPercentage = "Producer Percentage of Costs: Producer (1+2a) Percentage of Overal Producer Cost of (1+2a)";
 
         // LA data prep costs section 4
-        public static readonly string LaDataPrepCostsWithoutBadDebtProvisionTitleSection4 =
-            "4 LA Data Prep Costs w/o Bad Debt provision";
-
+        public static readonly string LaDataPrepCostsWithoutBadDebtProvisionTitleSection4 = "4 LA Data Prep Costs w/o Bad Debt provision";
         public static readonly string BadDebtProvisionTitleSection4 = "Bad Debt provision";
+        public static readonly string LaDataPrepCostsWithBadDebtProvisionTitleSection4 = "4 LA Data Prep Costs with Bad Debt provision";
 
-        public static readonly string LaDataPrepCostsWithBadDebtProvisionTitleSection4 =
-            "4 LA Data Prep Costs with Bad Debt provision";
-
-        public static readonly string TotalProducerFeeWithoutBadDebtProvisionSection4 =
-            "4 Total Producer Fee for LA Data Prep Costs In proportion to (1+2a) w/o Bad Debt provision";
-
+        public static readonly string TotalProducerFeeWithoutBadDebtProvisionSection4 = "4 Total Producer Fee for LA Data Prep Costs In proportion to (1+2a) w/o Bad Debt provision";
         public static readonly string BadDebtProvisionSection4 = "Bad Debt Provision for 4";
-
-        public static readonly string TotalProducerFeeWithBadDebtProvisionSection4 =
-            "4 Total Producer Fee for LA Data Prep Costs In proportion to (1+2a) with Bad Debt provision";
-
-        public static readonly string EnglandTotalWithBadDebtProvisionSection4 =
-            "England Total with Bad Debt provision";
-
+        public static readonly string TotalProducerFeeWithBadDebtProvisionSection4 = "4 Total Producer Fee for LA Data Prep Costs In proportion to (1+2a) with Bad Debt provision";
+        public static readonly string EnglandTotalWithBadDebtProvisionSection4 = "England Total with Bad Debt provision";
         public static readonly string WalesTotalWithBadDebtProvisionSection4 = "Wales Total with Bad Debt provision";
 
         // Percentage of Producer Reported Household Tonnage vs All Producers
