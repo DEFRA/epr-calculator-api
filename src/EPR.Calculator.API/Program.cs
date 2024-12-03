@@ -42,14 +42,14 @@ builder.Services.AddScoped<ICalcResultBuilder, CalcResultBuilder>();
 builder.Services.AddScoped<ICalcResultsExporter<CalcResult>, CalcResultsExporter>();
 builder.Services.AddScoped<ICalcResultLapcapDataBuilder, CalcResultLapcapDataBuilder>();
 builder.Services.AddScoped<ICalcResultSummaryBuilder, CalcResultSummaryBuilder>();
-builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+builder.Services.AddScoped<IStorageService, BlobStorageService>();
 builder.Services.AddScoped<ITransposePomAndOrgDataService, TransposePomAndOrgDataService>();
 builder.Services.AddScoped<ICalcResultLateReportingBuilder, CalcResultLateReportingBuilder>();
 builder.Services.AddScoped<ICalcRunLaDisposalCostBuilder, CalcRunLaDisposalCostBuilder>();
 builder.Services.AddScoped<ICalcResultOnePlusFourApportionmentBuilder, CalcResultOnePlusFourApportionmentBuilder>();
 builder.Services.AddScoped<ICalcResultParameterOtherCostBuilder, CalcResultParameterOtherCostBuilder>();
 #if DEBUG
-    builder.Services.AddScoped<IBlobStorageService, LocalFileStorageService>();
+    builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
 #else
     builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 #endif

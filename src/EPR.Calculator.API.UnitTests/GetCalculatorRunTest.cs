@@ -3,6 +3,7 @@ using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -19,10 +20,12 @@ namespace EPR.Calculator.API.UnitTests
         private ApplicationDBContext context;
         private Mock<IConfiguration> mockConfig;
         private Mock<IAzureClientFactory<ServiceBusClient>> mockServiceBusFactory;
+        private Mock<IStorageService> mockStorageService;
 
         [TestInitialize]
         public void SetUp()
         {
+            this.mockStorageService = new Mock<IStorageService>();
             this.mockConfig = new Mock<IConfiguration>();
             this.mockServiceBusFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
@@ -56,7 +59,8 @@ namespace EPR.Calculator.API.UnitTests
             this.context.SaveChanges();
 
             var controller =
-                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object);
+                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
+                    this.mockStorageService.Object);
 
             var response = controller.GetCalculatorRun(1) as ObjectResult;
             Assert.IsNotNull(response);
@@ -76,7 +80,8 @@ namespace EPR.Calculator.API.UnitTests
         public void GetCalculatorRunTest_Get_Invalid_Run()
         {
             var controller =
-                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object);
+                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
+                    this.mockStorageService.Object);
 
             var response = controller.GetCalculatorRun(1) as ObjectResult;
             Assert.IsNotNull(response);

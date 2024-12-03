@@ -4,7 +4,9 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
@@ -16,14 +18,17 @@ namespace EPR.Calculator.API.Controllers
     public class CalculatorController : ControllerBase
     {
         private readonly ApplicationDBContext context;
-        private readonly IConfiguration _configuration;
-        private readonly IAzureClientFactory<ServiceBusClient> _serviceBusClientFactory;
+        private readonly IConfiguration configuration;
+        private readonly IAzureClientFactory<ServiceBusClient> serviceBusClientFactory;
+        private readonly IStorageService storageService;
 
-        public CalculatorController(ApplicationDBContext context, IConfiguration configuration, IAzureClientFactory<ServiceBusClient> serviceBusClientFactory)
+        public CalculatorController(ApplicationDBContext context, IConfiguration configuration,
+            IAzureClientFactory<ServiceBusClient> serviceBusClientFactory, IStorageService storageService)
         {
             this.context = context;
-            _configuration = configuration;
-            _serviceBusClientFactory = serviceBusClientFactory;
+            this.configuration = configuration;
+            this.serviceBusClientFactory = serviceBusClientFactory;
+            this.storageService = storageService;
         }
 
         [HttpPost]
@@ -56,8 +61,8 @@ namespace EPR.Calculator.API.Controllers
                     }
 
                     // Read configuration items: service bus connection string and queue name 
-                    var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
-                    var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
+                    var serviceBusConnectionString = this.configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
+                    var serviceBusQueueName = this.configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
 
                     if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
                     {
@@ -70,8 +75,8 @@ namespace EPR.Calculator.API.Controllers
                     }
 
                     // Read configuration items: message retry count and period
-                    var messageRetryCountFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value, out int messageRetryCount);
-                    var messageRetryPeriodFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value, out int messageRetryPeriod);
+                    var messageRetryCountFound = int.TryParse(this.configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value, out int messageRetryCount);
+                    var messageRetryPeriodFound = int.TryParse(this.configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value, out int messageRetryPeriod);
 
                     if (!messageRetryCountFound)
                     {
@@ -278,6 +283,37 @@ namespace EPR.Calculator.API.Controllers
             catch (Exception exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+        }
+
+        [HttpGet]
+        [Route("DownloadResult/{runId}")]
+        public async Task<IResult> DownloadResult(int runId)
+        {
+            if (!ModelState.IsValid)
+            {
+                var badRequest = Results.BadRequest(ModelState.Values.SelectMany(x => x.Errors));
+                return badRequest;
+            }
+
+            var calcRun = await context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId);
+            if (calcRun == null)
+            {
+                var notFound = Results.NotFound(ModelState.Values.SelectMany(x => x.Errors));
+                return notFound;
+            }
+
+            try
+            {
+                var fileName = new CalcResultsFileName(
+                    calcRun.Id,
+                    calcRun.Name,
+                    calcRun.CreatedAt);
+                return await storageService.DownloadFile(fileName);
+            }
+            catch (Exception e)
+            {
+                return Results.Problem(e.Message);
             }
         }
 
