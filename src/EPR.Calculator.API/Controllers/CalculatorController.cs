@@ -286,7 +286,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("DownloadResult/{runId}")]
-        public async Task<IResult> DownloadResult(int runId)
+        public async Task<IResult> DownloadResultFile(int runId)
         {
             if (!ModelState.IsValid)
             {
