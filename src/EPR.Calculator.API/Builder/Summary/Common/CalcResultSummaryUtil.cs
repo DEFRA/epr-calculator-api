@@ -418,7 +418,9 @@ public static class CalcResultSummaryUtil
 
     public static List<CalcResultSummaryHeader> GetProducerDisposalFeesHeaders()
     {
-        return [
+        var resultSummaryHeaders = new List<CalcResultSummaryHeader>();
+
+        resultSummaryHeaders.AddRange([
             //Section-1 Title headers
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.OneProducerDisposalFeesWithBadDebtProvision, ColumnIndex = ProducerDisposalFeesHeaderColumnIndex },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.CommsCostHeader, ColumnIndex = CommsCostHeaderColumnIndex },
@@ -442,11 +444,19 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.SAOperatingCostsWithoutBadDebtProvisionTitleSection3, ColumnIndex = ThreeSaCostColumnIndex.Index },
             new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.BadDebtProvisionTitleSection3, ColumnIndex = ThreeSaCostColumnIndex.Index + 1 },
             new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.SAOperatingCostsWithBadDebtProvisionTitleSection3,ColumnIndex = ThreeSaCostColumnIndex.Index + 2 },
-            //Section-4 Title headers
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSummary.ColumnIndex },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSummary.ColumnIndex + 1 },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.LaDataPrepCostsWithBadDebtProvisionTitleSection4, ColumnIndex = LaDataPrepCostsSummary.ColumnIndex + 2 }
-        ];
+        ]);
+
+        // Section-4 Title headers
+        resultSummaryHeaders.AddRange(
+            LaDataPrepCostsSummary.GetHeaders()
+        );
+
+        // Section-5 Title headers
+        resultSummaryHeaders.AddRange(
+            SaSetupCostsSummary.GetHeaders()
+        );
+
+        return resultSummaryHeaders;
     }
 
     public static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(CalcResultSummary result, List<MaterialDetail> materials)
@@ -671,7 +681,7 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.NorthernIrelandTotalWithBadDebtProvisionSection3 }
         ]);
 
-        // LA data prep costs section 4 column headers
+        // Section-4 LA data prep costs column headers
         columnHeaders.AddRange(
             LaDataPrepCostsProducer.GetHeaders()
         );
