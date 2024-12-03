@@ -17,6 +17,9 @@ namespace EPR.Calculator.API.Enums
         PLAY = 4,
 
         [Description("ERROR")]
-        ERROR = 5
+        ERROR = 5,
+
+        [Description("DELETED")]
+        DELETED = 6
     }
 }
