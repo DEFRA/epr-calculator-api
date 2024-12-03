@@ -158,9 +158,8 @@ namespace EPR.Calculator.API.Services
             }
         }
 
-        private List<OrganisationDetails> GetOrganisationDetailsBySubmissionPeriod(int runId)
+        private IEnumerable<OrganisationDetails> GetOrganisationDetailsBySubmissionPeriod(int runId)
         {
-
             OrganisationsBySubmissionPeriod = [.. (from run in context.CalculatorRuns join
                  org in context.CalculatorRunOrganisationDataDetails on run.CalculatorRunOrganisationDataMasterId equals org.CalculatorRunOrganisationDataMasterId
                     join pom in context.CalculatorRunPomDataDetails on run.CalculatorRunPomDataMasterId equals pom.CalculatorRunPomDataMasterId
@@ -171,10 +170,11 @@ namespace EPR.Calculator.API.Services
                         OrganisationName = org.OrganisationName,
                         SubmissionPeriod = pom.SubmissionPeriod,
                     }).Distinct()];
+
             return OrganisationsBySubmissionPeriod;
         }
 
-        private List<SubsidaryDetails> GetSubsidaryDetailsBySubmissionPeriod(int runId)
+        private IEnumerable<SubsidaryDetails> GetSubsidaryDetailsBySubmissionPeriod(int runId)
         {
             SubsidariesBySubmissionPeriod = (from run in context.CalculatorRuns join
                  org in context.CalculatorRunOrganisationDataDetails on run.CalculatorRunOrganisationDataMasterId equals org.CalculatorRunOrganisationDataMasterId
@@ -186,9 +186,7 @@ namespace EPR.Calculator.API.Services
                         OrganisationName = org.OrganisationName,
                         SubmissionPeriod = pom.SubmissionPeriod,
                         SubsidaryId = org.SubsidaryId
-                    }).Distinct().ToList();  
-
-
+                    }).Distinct().ToList();
             
             return SubsidariesBySubmissionPeriod;
         }
