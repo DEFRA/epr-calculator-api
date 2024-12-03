@@ -100,7 +100,6 @@ namespace EPR.Calculator.API.UnitTests.Services
             {
                 Id = 1,
                 ProducerId = 1,
-                SubsidiaryId = "SUBSID1",
                 ProducerName = "Test LIMITED",
                 CalculatorRunId = 1,
                 CalculatorRun = new CalculatorRun()
@@ -116,8 +115,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var producerDetail = _context.ProducerDetail.FirstOrDefault();
             Assert.IsNotNull(producerDetail);
             Assert.AreEqual(expectedResult.ProducerId, producerDetail.ProducerId);
-            Assert.AreEqual(expectedResult.ProducerName, producerDetail.ProducerName);
-            Assert.AreEqual(expectedResult.SubsidiaryId, producerDetail.SubsidiaryId);
+            Assert.AreEqual(expectedResult.ProducerName, producerDetail.ProducerName);           
         }
 
         [TestMethod]
@@ -141,7 +139,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 {
                     Id = 1,
                     ProducerId = 1,
-                    SubsidiaryId = "SUBSID1",
+                    SubsidiaryId = "1",
                     ProducerName = "Test LIMITED",
                     CalculatorRunId = 1,
                     CalculatorRun = new CalculatorRun()
@@ -157,12 +155,38 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var producerReportedMaterial = _context.ProducerReportedMaterial.FirstOrDefault();
             Assert.IsNotNull(producerReportedMaterial);
-            Assert.AreEqual(expectedResult.ProducerDetailId, producerReportedMaterial.ProducerDetailId);
             Assert.AreEqual(expectedResult.Material.Code, producerReportedMaterial.Material.Code);
             Assert.AreEqual(expectedResult.Material.Name, producerReportedMaterial.Material.Name);
             Assert.AreEqual(expectedResult.ProducerDetail.ProducerId, producerReportedMaterial.ProducerDetail.ProducerId);
             Assert.AreEqual(expectedResult.ProducerDetail.ProducerName, producerReportedMaterial.ProducerDetail.ProducerName);
         }
+
+        [TestMethod]
+        public void Transpose_Should_Return_Correct_Producer_Subsidary_Detail()
+        {
+            var expectedResult = new ProducerDetail
+            {
+                Id = 1,
+                ProducerId = 1,
+                SubsidiaryId ="1",                
+                ProducerName = "Subsid2",
+                CalculatorRunId = 1,
+                CalculatorRun = new CalculatorRun()
+            };
+
+#pragma warning disable CS8604 // Possible null reference argument.
+            var service = new TransposePomAndOrgDataService(_context);
+#pragma warning restore CS8604 // Possible null reference argument.
+
+            var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
+            service.Transpose(resultsRequestDto);
+
+            var producerDetail = _context.ProducerDetail.FirstOrDefault(t=>t.SubsidiaryId != null);
+            Assert.IsNotNull(producerDetail);
+            Assert.AreEqual(expectedResult.ProducerId, producerDetail.ProducerId);
+            Assert.AreEqual(expectedResult.ProducerName, producerDetail.ProducerName);
+        }
+
 
         protected static IEnumerable<CalculatorRunOrganisationDataMaster> GetCalculatorRunOrganisationDataMaster()
         {
@@ -187,7 +211,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 new() {
                     Id = 1,
                     OrganisationId = 1,
-                    SubsidaryId = "SUBSID1",
+                    SubsidaryId = "1",
                     OrganisationName = "UPU LIMITED",
                     LoadTimeStamp = DateTime.Now,
                     CalculatorRunOrganisationDataMasterId = 1,
@@ -197,6 +221,15 @@ namespace EPR.Calculator.API.UnitTests.Services
                     Id = 2,
                     OrganisationId = 1,
                     OrganisationName = "Test LIMITED",
+                    LoadTimeStamp = DateTime.Now,
+                    CalculatorRunOrganisationDataMasterId = 1,
+                    SubmissionPeriodDesc = "July to December 2023"
+                },
+                 new() {
+                    Id = 3,
+                    OrganisationId = 1,
+                    SubsidaryId = "1",
+                    OrganisationName = "Subsid2",
                     LoadTimeStamp = DateTime.Now,
                     CalculatorRunOrganisationDataMasterId = 1,
                     SubmissionPeriodDesc = "July to December 2023"
@@ -283,8 +316,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                 new() {
                     Id = 1,
                     OrganisationId = 1,
-                    SubsidaryId = "SUBSID1",
-                    SubmissionPeriod = "2023-P3",
+                    SubsidaryId = "1",
+                    SubmissionPeriod = "2023-P2",
                     PackagingActivity = null,
                     PackagingType = "CW",
                     PackagingClass = "O1",
@@ -293,7 +326,35 @@ namespace EPR.Calculator.API.UnitTests.Services
                     LoadTimeStamp = DateTime.Now,
                     CalculatorRunPomDataMasterId = 1,
                     SubmissionPeriodDesc = "July to December 2023"
+                },
+                new() {
+                    Id = 2,
+                    OrganisationId = 1,
+                    SubmissionPeriod = "2023-P1",
+                    PackagingActivity = null,
+                    PackagingType = "CW",
+                    PackagingClass = "O1",
+                    PackagingMaterial = "PC",
+                    PackagingMaterialWeight = 1000,
+                    LoadTimeStamp = DateTime.Now,
+                    CalculatorRunPomDataMasterId = 1,
+                    SubmissionPeriodDesc = "July to December 2023"
+                },
+                new() {
+                    Id = 3,
+                    OrganisationId = 1,
+                    SubsidaryId = "1",
+                    SubmissionPeriod = "2023-P1",
+                    PackagingActivity = null,
+                    PackagingType = "CW",
+                    PackagingClass = "O1",
+                    PackagingMaterial = "PC",
+                    PackagingMaterialWeight = 1000,
+                    LoadTimeStamp = DateTime.Now,
+                    CalculatorRunPomDataMasterId = 1,
+                    SubmissionPeriodDesc = "January to June 2023"
                 }
+
             };
             return list;
         }

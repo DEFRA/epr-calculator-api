@@ -18,6 +18,19 @@ namespace EPR.Calculator.API.Services
 
         }
 
+        internal class SubsidaryDetails :OrganisationDetails
+        {
+            public int? SubsidaryId { get; set; }
+        }
+
+
+
+        private List<OrganisationDetails> OrganisationsBySubmissionPeriod { get; set; }
+
+        private List<SubsidaryDetails> SubsidariesBySubmissionPeriod { get; set; }
+
+
+
         public TransposePomAndOrgDataService(ApplicationDBContext context)
         {
             this.context = context;
@@ -33,7 +46,10 @@ namespace EPR.Calculator.API.Services
             {
                 // Get the calculator run organisation data master record based on the CalculatorRunOrganisationDataMasterId
                 // from the calculator run table
-                var organisationDataMaster = context.CalculatorRunOrganisationDataMaster.Single(odm => odm.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);                
+                var organisationDataMaster = context.CalculatorRunOrganisationDataMaster.Single(odm => odm.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);
+
+                OrganisationsBySubmissionPeriod = GetOrganisationDetailsBySubmissionPeriod(organisationDataMaster.Id);
+                SubsidariesBySubmissionPeriod = GetSubsidaryDetailsBySubmissionPeriod(organisationDataMaster.Id);
 
                 // Get the calculator run organisation data details as we need the organisation name
                 var organisationDataDetails = context.CalculatorRunOrganisationDataDetails
@@ -81,7 +97,7 @@ namespace EPR.Calculator.API.Services
                                         CalculatorRunId = resultsRequestDto.RunId,
                                         ProducerId = producer.OrganisationId.Value,
                                         SubsidiaryId = producer.SubsidaryId,
-                                        ProducerName = GetOrganisationName(producer.OrganisationId.Value, organisationDataMaster.Id),
+                                        ProducerName = string.IsNullOrEmpty(producer.SubsidaryId) ? GetLatestOrganisationName(producer.OrganisationId.Value) : GetLatestSubsidaryName(producer.OrganisationId.Value, producer.SubsidaryId),
                                         CalculatorRun = calculatorRun
                                     };
 
@@ -140,22 +156,46 @@ namespace EPR.Calculator.API.Services
             }
         }
 
-        private string? GetOrganisationName(int orgId, int orgMasterId)
+        private List<OrganisationDetails> GetOrganisationDetailsBySubmissionPeriod(int orgMasterId)
         {
-          var Organisations =  (from org in context.CalculatorRunOrganisationDataDetails
-             join pom in context.CalculatorRunPomDataDetails
-             on new { org.OrganisationId, org.SubmissionPeriodDesc } equals new { pom.OrganisationId, pom.SubmissionPeriodDesc }
-             where (org.CalculatorRunOrganisationDataMasterId == orgMasterId && org.OrganisationName != null && org.SubsidaryId == null)
-             select new OrganisationDetails
-             {
-                 OrganisationId = org.OrganisationId,
-                 OrganisationName = org.OrganisationName,
-                 SubmissionPeriod = Convert.ToInt32(pom.SubmissionPeriod.Replace("-P", "")),
-             }).OrderByDescending(t => t.SubmissionPeriod).ToList();
+            return [.. (from org in context.CalculatorRunOrganisationDataDetails
+                    join pom in context.CalculatorRunPomDataDetails
+                    on new { org.OrganisationId, org.SubmissionPeriodDesc } equals new { pom.OrganisationId, pom.SubmissionPeriodDesc }
+                    where (org.CalculatorRunOrganisationDataMasterId == orgMasterId && org.OrganisationName != null && org.SubsidaryId ==null)
+                    select new OrganisationDetails
+                    {
+                        OrganisationId = org.OrganisationId,
+                        OrganisationName = org.OrganisationName,
+                        SubmissionPeriod = Convert.ToInt32(pom.SubmissionPeriod.Replace("-P", "")),
+                    }).Distinct().OrderByDescending(t => t.SubmissionPeriod)];
+        }
 
-            if (Organisations is  null) return string.Empty;
-            Organisations = Organisations.DistinctBy(t => t.OrganisationId).ToList();
-            return Organisations?.FirstOrDefault(t => t.OrganisationId == orgId)?.OrganisationName;           
+        private List<SubsidaryDetails> GetSubsidaryDetailsBySubmissionPeriod(int orgMasterId)
+        {
+            return (from org in context.CalculatorRunOrganisationDataDetails
+                        join pom in context.CalculatorRunPomDataDetails
+                        on new { org.OrganisationId, org.SubsidaryId, org.SubmissionPeriodDesc } equals new { pom.OrganisationId, pom.SubsidaryId, pom.SubmissionPeriodDesc }
+                        where (org.CalculatorRunOrganisationDataMasterId == orgMasterId && org.OrganisationName != null && org.SubsidaryId != null)
+                        select new SubsidaryDetails
+                        {
+                            OrganisationId = org.OrganisationId,
+                            OrganisationName = org.OrganisationName,
+                            SubmissionPeriod = Convert.ToInt32(pom.SubmissionPeriod.Replace("-P", "")),
+                            SubsidaryId = Convert.ToInt32(org.SubsidaryId)
+                        }).Distinct().OrderByDescending(t => t.SubmissionPeriod).ToList();            
+        }
+
+        private string? GetLatestOrganisationName(int orgId)
+        {
+            if (OrganisationsBySubmissionPeriod is  null) return string.Empty;
+            return OrganisationsBySubmissionPeriod?.FirstOrDefault(t => t.OrganisationId == orgId)?.OrganisationName;
+        }
+
+        private string? GetLatestSubsidaryName(int orgId, string? subsidaryId)
+        {
+            var subId = Convert.ToInt32(subsidaryId);
+            if (SubsidariesBySubmissionPeriod is null) return string.Empty;
+            return SubsidariesBySubmissionPeriod?.FirstOrDefault(t => t.OrganisationId == orgId && t.SubsidaryId == subId)?.OrganisationName;
         }
     }
 }
