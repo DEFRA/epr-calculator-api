@@ -5,6 +5,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -13,18 +14,23 @@ namespace EPR.Calculator.API.Controllers
     {
         private readonly ApplicationDBContext _context;
         private readonly ICreateDefaultParameterDataValidator validator;
+        private readonly ILogger<DefaultParameterSettingController> logger;
+
 
         public DefaultParameterSettingController(ApplicationDBContext context,
-                ICreateDefaultParameterDataValidator validator)
+                ICreateDefaultParameterDataValidator validator,
+                ILogger<DefaultParameterSettingController> logger)
         {
             this._context = context;
             this.validator = validator;
+            this.logger = logger;
         }
 
         [HttpPost]
         [Route("defaultParameterSetting")]
         public IActionResult Create([FromBody] CreateDefaultParameterSettingDto request)
         {
+            this.logger.LogInformation("In API step 1");
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
@@ -34,7 +40,7 @@ namespace EPR.Calculator.API.Controllers
             {
                 return BadRequest(validationResult.Errors);
             }
-
+            this.logger.LogInformation("Starting the transaction");
             using (var transaction = _context.Database.BeginTransaction())
             {
                 try
@@ -64,9 +70,11 @@ namespace EPR.Calculator.API.Controllers
                     }
                     this._context.SaveChanges();
                     transaction.Commit();
+                    this.logger.LogInformation("completed the transaction");
                 }
                 catch (Exception exception)
                 {
+                    this.logger.LogError(exception, "Error in exception..");
                     transaction.Rollback();
                     return StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
