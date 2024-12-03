@@ -50,8 +50,8 @@ namespace EPR.Calculator.API.Services
                 // from the calculator run table
                 var organisationDataMaster = context.CalculatorRunOrganisationDataMaster.Single(odm => odm.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);
 
-                OrganisationsBySubmissionPeriod = GetOrganisationDetailsBySubmissionPeriod(resultsRequestDto.RunId);
-                SubsidariesBySubmissionPeriod = GetSubsidaryDetailsBySubmissionPeriod(resultsRequestDto.RunId);
+                OrganisationsBySubmissionPeriod = GetOrganisationDetailsBySubmissionPeriod(resultsRequestDto.RunId).ToList();
+                SubsidariesBySubmissionPeriod = GetSubsidaryDetailsBySubmissionPeriod(resultsRequestDto.RunId).ToList();
 
                 // Get the calculator run organisation data details as we need the organisation name
                 var organisationDataDetails = context.CalculatorRunOrganisationDataDetails
