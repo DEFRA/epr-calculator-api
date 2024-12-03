@@ -114,6 +114,22 @@
         public decimal LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 { get; set; }
         // End Section-4 LA data prep costs
 
+        // Section-5 SA setup costs
+        public decimal TotalProducerFeeWithoutBadDebtProvisionSection5 { get; set; }
+
+        public decimal BadDebtProvisionSection5 { get; set; }
+
+        public decimal TotalProducerFeeWithBadDebtProvisionSection5 { get; set; }
+
+        public decimal EnglandTotalWithBadDebtProvisionSection5 { get; set; }
+
+        public decimal WalesTotalWithBadDebtProvisionSection5 { get; set; }
+
+        public decimal ScotlandTotalWithBadDebtProvisionSection5 { get; set; }
+
+        public decimal NorthernIrelandTotalWithBadDebtProvisionSection5 { get; set; }
+        // End Section-5 SA setup costs
+
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> ProducerCommsFeesByMaterial { get; set; }
         public decimal TotalOnePlus2AFeeWithBadDebtProvision { get; set; }
