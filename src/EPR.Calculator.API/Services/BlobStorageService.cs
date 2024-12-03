@@ -24,10 +24,9 @@ namespace EPR.Calculator.API.Services
         {
             try
             {
-                await File.WriteAllTextAsync(fileName, csvContent.ToString());
                 var blobClient = this.containerClient.GetBlobClient(fileName);
-                await using var fileStream = File.OpenRead(fileName);
-                await blobClient.UploadAsync(fileStream, true);
+                var binaryData = BinaryData.FromString(csvContent.ToString());
+                await blobClient.UploadAsync(binaryData);
             }
             catch (Exception ex)
             {
