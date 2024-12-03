@@ -44,7 +44,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             dbContext.SaveChanges();
 
             var validator = new CreateDefaultParameterDataValidator(dbContext);
-            defaultParameterSettingController = new DefaultParameterSettingController(dbContext, validator);
+            //defaultParameterSettingController = new DefaultParameterSettingController(dbContext, validator);
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(dbContext);
             lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator);
 

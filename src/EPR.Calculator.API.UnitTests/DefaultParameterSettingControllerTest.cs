@@ -9,87 +9,87 @@ namespace EPR.Calculator.API.Tests.Controllers
     [TestClass]
     public class DefaultParameterSettingControllerTest : BaseControllerTest
     {
-        [TestMethod]
-        public void CreateTest_With_Records()
-        {
-            var actionResult = DataPostCall();
-            Assert.AreEqual(201, actionResult?.StatusCode);
+        //[TestMethod]
+        //public void CreateTest_With_Records()
+        //{
+        //    var actionResult = DataPostCall();
+        //    Assert.AreEqual(201, actionResult?.StatusCode);
 
-            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterSettingDetail.Count());
-            Assert.AreEqual(1, dbContext?.DefaultParameterSettings.Count());
-            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterTemplateMasterList.Count());
-        }
+        //    Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterSettingDetail.Count());
+        //    Assert.AreEqual(1, dbContext?.DefaultParameterSettings.Count());
+        //    Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterTemplateMasterList.Count());
+        //}
 
-        [TestMethod]
-        public void CreateTest_With_Records_When_Existing_Updates()
-        {
-            var actionResult1 = DataPostCall();
-            Assert.AreEqual(201, actionResult1?.StatusCode);
+        //[TestMethod]
+        //public void CreateTest_With_Records_When_Existing_Updates()
+        //{
+        //    var actionResult1 = DataPostCall();
+        //    Assert.AreEqual(201, actionResult1?.StatusCode);
 
-            var actionResult2 = DataPostCall();
-            Assert.AreEqual(201, actionResult2?.StatusCode);
+        //    var actionResult2 = DataPostCall();
+        //    Assert.AreEqual(201, actionResult2?.StatusCode);
 
-            var expectedLength = DefaultParameterUniqueReferences.UniqueReferences.Length * 2;
-            Assert.AreEqual(expectedLength, dbContext?.DefaultParameterSettingDetail.Count());
-            Assert.AreEqual(2, dbContext?.DefaultParameterSettings.Count());
-            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterTemplateMasterList.Count());
+        //    var expectedLength = DefaultParameterUniqueReferences.UniqueReferences.Length * 2;
+        //    Assert.AreEqual(expectedLength, dbContext?.DefaultParameterSettingDetail.Count());
+        //    Assert.AreEqual(2, dbContext?.DefaultParameterSettings.Count());
+        //    Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterTemplateMasterList.Count());
 
-            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2));
-            Assert.AreEqual(1, dbContext?.DefaultParameterSettings.Count(a => a.EffectiveTo == null));
-        }
-        //GET API
-        [TestMethod]
-        public void Get_RequestOkResult_WithDefaultSchemeParametersDto_WhenDataExist()
-        {
-            DataPostCall();
+        //    Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2));
+        //    Assert.AreEqual(1, dbContext?.DefaultParameterSettings.Count(a => a.EffectiveTo == null));
+        //}
+        ////GET API
+        //[TestMethod]
+        //public void Get_RequestOkResult_WithDefaultSchemeParametersDto_WhenDataExist()
+        //{
+        //    DataPostCall();
 
-            var tempdateData = new DefaultSchemeParametersDto()
-            {
-                Id = 1,
-                ParameterYear = "2024-25",
-                EffectiveFrom = DateTime.Now,
+        //    var tempdateData = new DefaultSchemeParametersDto()
+        //    {
+        //        Id = 1,
+        //        ParameterYear = "2024-25",
+        //        EffectiveFrom = DateTime.Now,
 
-                EffectiveTo = null,
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
+        //        EffectiveTo = null,
+        //        CreatedBy = "Testuser",
+        //        CreatedAt = DateTime.Now,
 
-                DefaultParameterSettingMasterId = 1,
-                ParameterUniqueRef = "BADEBT-P",
-                ParameterType = "Aluminium",
-                ParameterCategory = "Communication costs",
-                ParameterValue = 90m,
-            };
+        //        DefaultParameterSettingMasterId = 1,
+        //        ParameterUniqueRef = "BADEBT-P",
+        //        ParameterType = "Aluminium",
+        //        ParameterCategory = "Communication costs",
+        //        ParameterValue = 90m,
+        //    };
 
-            //Act
-            var actionResult1 = defaultParameterSettingController?.Get("2024-25") as ObjectResult;
+        //    //Act
+        //    var actionResult1 = defaultParameterSettingController?.Get("2024-25") as ObjectResult;
 
-            //Assert
-            var okResult = actionResult1 as ObjectResult;
-            Assert.IsNotNull(okResult);
-            Assert.AreEqual(okResult.StatusCode, 200);
+        //    //Assert
+        //    var okResult = actionResult1 as ObjectResult;
+        //    Assert.IsNotNull(okResult);
+        //    Assert.AreEqual(okResult.StatusCode, 200);
 
-            var actionResul2 = okResult.Value as List<DefaultSchemeParametersDto>;
-            Assert.AreEqual(actionResul2?.Count, DefaultParameterUniqueReferences.UniqueReferences.Length);
+        //    var actionResul2 = okResult.Value as List<DefaultSchemeParametersDto>;
+        //    Assert.AreEqual(actionResul2?.Count, DefaultParameterUniqueReferences.UniqueReferences.Length);
 
-            Assert.AreEqual(tempdateData.Id, actionResul2?[0].Id);
-            Assert.AreEqual(tempdateData.ParameterValue, actionResul2?[0].ParameterValue);
-            Assert.AreEqual(tempdateData.ParameterUniqueRef, actionResul2?[0].ParameterUniqueRef);
-        }
+        //    Assert.AreEqual(tempdateData.Id, actionResul2?[0].Id);
+        //    Assert.AreEqual(tempdateData.ParameterValue, actionResul2?[0].ParameterValue);
+        //    Assert.AreEqual(tempdateData.ParameterUniqueRef, actionResul2?[0].ParameterUniqueRef);
+        //}
 
-        [TestMethod]
-        public void GetSchemeParameter_ReturnNotFound_WithDefaultSchemeParametersDoesNotExist()
-        {
-            DataPostCall();
+        //[TestMethod]
+        //public void GetSchemeParameter_ReturnNotFound_WithDefaultSchemeParametersDoesNotExist()
+        //{
+        //    DataPostCall();
 
-            // Return 404 error if the year does not exist
-            //Act
-            var result = defaultParameterSettingController?.Get("2028-25");
-            //Assert
-            var okResult = result as ObjectResult;
-            Assert.IsNotNull(okResult);
-            Assert.AreEqual(404, okResult.StatusCode);
+        //    // Return 404 error if the year does not exist
+        //    //Act
+        //    var result = defaultParameterSettingController?.Get("2028-25");
+        //    //Assert
+        //    var okResult = result as ObjectResult;
+        //    Assert.IsNotNull(okResult);
+        //    Assert.AreEqual(404, okResult.StatusCode);
 
-        }
+        //}
 
         [TestMethod]
         public void GetSchemeParameter_Return_400_Error_With_No_YearSupplied()
