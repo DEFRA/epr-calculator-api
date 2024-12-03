@@ -40,20 +40,6 @@
 
         public decimal NorthernIrelandTotalComms { get; set; }
 
-        public decimal LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 { get; set; }
-
-        public decimal LaDataPrepCostsBadDebtProvisionSection4 { get; set; }
-
-        public decimal LaDataPrepCostsTotalWithBadDebtProvisionSection4 { get; set; }
-
-        public decimal LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 { get; set; }
-
-        public decimal LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4 { get; set; }
-
-        public decimal LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 { get; set; }
-
-        public decimal LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 { get; set; }
-
         //Section-(1) & (2a) Start
         public decimal TotalProducerFeeforLADisposalCostswoBadDebtprovision { get; set; }
 
@@ -111,6 +97,22 @@
 
         public decimal NorthernIrelandTotalwithBadDebtprovision3 { get; set; }
         //End Section-3
+
+        // Section-4 LA data prep costs
+        public decimal LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 { get; set; }
+
+        public decimal LaDataPrepCostsBadDebtProvisionSection4 { get; set; }
+
+        public decimal LaDataPrepCostsTotalWithBadDebtProvisionSection4 { get; set; }
+
+        public decimal LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 { get; set; }
+
+        public decimal LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4 { get; set; }
+
+        public decimal LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 { get; set; }
+
+        public decimal LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 { get; set; }
+        // End Section-4 LA data prep costs
 
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> ProducerCommsFeesByMaterial { get; set; }

@@ -30,24 +30,27 @@ namespace EPR.Calculator.API.Models
 
         public decimal TotalOnePlus2AFeeWithBadDebtProvision { get; set; }
 
-        //Section-3 -
+        // Section-3
         public decimal SAOperatingCostsWoTitleSection3 { get; set; }
+
         public decimal SAOperatingCostsWithTitleSection3 { get; set; }
+
         public decimal BadDebtProvisionTitleSection3 { get; set; }
+        //Ends Section-3
 
-
-        //Section-4
-        public decimal TwoCCommsCostsByCountryWithoutBadDebtProvision { get; set; }
-
-        public decimal TwoCBadDebtProvision { get; set; }
-
-        public decimal TwoCCommsCostsByCountryWithBadDebtProvision { get; set; }
-
+        // Section-4 LA data prep costs
         public decimal LaDataPrepCostsTitleSection4 { get; set; }
 
         public decimal LaDataPrepCostsBadDebtProvisionTitleSection4 { get; set; }
 
         public decimal LaDataPrepCostsWithBadDebtProvisionTitleSection4 { get; set; }
+        // End Section-4 LA data prep costs
+
+        public decimal TwoCCommsCostsByCountryWithoutBadDebtProvision { get; set; }
+
+        public decimal TwoCBadDebtProvision { get; set; }
+
+        public decimal TwoCCommsCostsByCountryWithBadDebtProvision { get; set; }
 
         public IEnumerable<CalcResultSummaryProducerDisposalFees> ProducerDisposalFees { get; set; }
 
