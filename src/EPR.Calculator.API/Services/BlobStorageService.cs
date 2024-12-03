@@ -20,24 +20,23 @@ namespace EPR.Calculator.API.Services
                                                                             ContainerNameMissingError));
         }
 
-        public async Task UploadResultFileContentAsync(string fileName, StringBuilder csvContent)
+        public async Task UploadResultFileContentAsync(string fileName, string content)
         {
-            try
-            {
-                var blobClient = this.containerClient.GetBlobClient(fileName);
-                var binaryData = BinaryData.FromString(csvContent.ToString());
-                await blobClient.UploadAsync(binaryData);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error occurred while saving blob content: {ex.Message}");
-            }
+            var blobClient = this.containerClient.GetBlobClient(fileName);
+            var binaryData = BinaryData.FromString(content);
+            await blobClient.UploadAsync(binaryData);
         }
 
         public async Task<IResult> DownloadFile(string fileName)
         {
-            using var memoryStream = new MemoryStream();
             var blobClient = this.containerClient.GetBlobClient(fileName);
+
+            if (!await blobClient.ExistsAsync())
+            {
+                return Results.NotFound(fileName);
+            }
+
+            using var memoryStream = new MemoryStream();
             await blobClient.DownloadToAsync(memoryStream);
             return Results.File(memoryStream.ToArray(), OctetStream, fileName);
         }

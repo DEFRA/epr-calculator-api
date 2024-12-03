@@ -4,7 +4,7 @@ namespace EPR.Calculator.API.Services
 {
     public interface IStorageService
     {
-        Task UploadResultFileContentAsync(string fileName, StringBuilder content);
+        Task UploadResultFileContentAsync(string fileName, string content);
         Task<IResult> DownloadFile(string fileName);
     }
 }

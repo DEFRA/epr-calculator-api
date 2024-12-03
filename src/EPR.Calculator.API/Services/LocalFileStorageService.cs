@@ -12,10 +12,10 @@
                 throw new NotImplementedException();
             }
 
-            public Task UploadResultFileContentAsync(string fileName, StringBuilder content)
+            public Task UploadResultFileContentAsync(string fileName, string content)
             {
                 var path = $"{Directory.GetCurrentDirectory()}\\{fileName}";
-                File.WriteAllText(path, content.ToString(), Encoding.UTF8);
+                File.WriteAllText(path, content, Encoding.UTF8);
                 return Task.CompletedTask;
             }
 

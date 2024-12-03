@@ -311,9 +311,9 @@ namespace EPR.Calculator.API.Controllers
                     calcRun.CreatedAt);
                 return await storageService.DownloadFile(fileName);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return Results.Problem();
+                return Results.Problem(e.Message);
             }
         }
 

@@ -74,7 +74,7 @@ namespace EPR.Calculator.API.Exporter
                 results.CalcResultDetail.RunDate);
             try
             {
-                _iStorageService.UploadResultFileContentAsync(fileName, csvContent);
+                _iStorageService.UploadResultFileContentAsync(fileName, csvContent.ToString());
             }
             catch (IOException ex)
             {
