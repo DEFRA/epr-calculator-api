@@ -3,6 +3,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
@@ -177,11 +178,87 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("calculatorRuns/{id}")]
-        public IActionResult GetCalculatorRun()
+        [Route("calculatorRuns/{runId}")]
+        public IActionResult GetCalculatorRun(int runId)
         {
-            // TODO: Return the details of a particular run
-            return new OkResult();
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            try
+            {
+                var calculatorRunDetail =
+                    (from run in this.context.CalculatorRuns
+                        join classification in context.CalculatorRunClassifications
+                            on run.CalculatorRunClassificationId equals classification.Id
+                        where run.Id == runId
+                        select new
+                        {
+                            Run = run,
+                            Classification = classification
+                        }).SingleOrDefault();
+                if (calculatorRunDetail == null)
+                {
+                    return new NotFoundObjectResult($"Unable to find Run Id {runId}");
+                }
+
+                var calcRun = calculatorRunDetail.Run;
+                var runClassification = calculatorRunDetail.Classification;
+                var runDto = CalcRunMapper.Map(calcRun, runClassification);
+                return new ObjectResult(runDto);
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+        }
+
+        [HttpPut]
+        [Route("calculatorRuns")]
+        public IActionResult PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            try
+            {
+                var calculatorRun = context.CalculatorRuns.SingleOrDefault(x => x.Id == runStatusUpdateDto.RunId);
+                if (calculatorRun == null)
+                {
+                    return new ObjectResult($"Unable to find Run Id {runStatusUpdateDto.RunId}")
+                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
+
+                var classification =
+                    this.context.CalculatorRunClassifications.SingleOrDefault(x =>
+                        x.Id == runStatusUpdateDto.ClassificationId);
+                if (classification == null)
+                {
+                    return new ObjectResult($"Unable to find Classification Id {runStatusUpdateDto.ClassificationId}")
+                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
+
+                if (runStatusUpdateDto.ClassificationId == calculatorRun.CalculatorRunClassificationId)
+                {
+                    return new ObjectResult(
+                            $"RunId {runStatusUpdateDto.RunId} cannot be changed to classification {runStatusUpdateDto.ClassificationId}")
+                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
+
+                calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
+
+                this.context.CalculatorRuns.Update(calculatorRun);
+                this.context.SaveChanges();
+
+                return StatusCode(201);
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
         }
 
         [HttpGet]
