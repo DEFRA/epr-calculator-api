@@ -17,6 +17,7 @@
                 CalcResultParameterOtherCost = new CalcResultParameterOtherCost
                 {
                     BadDebtProvision = new KeyValuePair<string, string>("key1", "6%"),
+                    BadDebtValue = 6m,
                     Details = [
                         new CalcResultParameterOtherCostDetail {
                             Name = "4 LA Data Prep Charge",

@@ -100,6 +100,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                 CalcResultParameterOtherCost = new CalcResultParameterOtherCost
                 {
                     BadDebtProvision = new KeyValuePair<string, string>("key1", "6%"),
+                    BadDebtValue = 6m,
                     Details = [
                         new CalcResultParameterOtherCostDetail
                         {
