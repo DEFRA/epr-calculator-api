@@ -490,7 +490,7 @@ namespace EPR.Calculator.API.UnitTests
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(422, actionResult.StatusCode);
-            var expectedJson = "{\"Message\":\"The Calculator is currently running. You will be able to run another calculation once the current one has finished.\"}";
+            var expectedJson = "{\"Message\":\"The calculator is currently running. You will be able to run another calculation once the current one has finished.\"}";
             var actualJson = System.Text.Json.JsonSerializer.Serialize(actionResult?.Value);
             Assert.AreEqual(expectedJson, actualJson);
         }
