@@ -8,7 +8,7 @@ namespace EPR.Calculator.API.Exporter
 {
     public class CalcResultsExporter : ICalcResultsExporter<CalcResult>
     {
-        private readonly IStorageService _iStorageService;
+        private readonly IStorageService storageService;
         private const string RunName = "Run Name";
         private const string RunId = "Run Id";
         private const string RunDate = "Run Date";
@@ -20,11 +20,10 @@ namespace EPR.Calculator.API.Exporter
         private const string ParametersFile = "Parameters File";
         private const string CountryApportionmentFile = "Country Apportionment File";
         private const int decimalRoundUp = 2;
-        private const int PercentageofProducerReportedHHTonnageColumnIndex = 193;
 
-        public CalcResultsExporter(IStorageService iStorageService)
+        public CalcResultsExporter(IStorageService storageService)
         {
-            _iStorageService = iStorageService;
+            this.storageService = storageService;
         }
         public void Export(CalcResult results)
         {
@@ -75,7 +74,7 @@ namespace EPR.Calculator.API.Exporter
                 results.CalcResultDetail.RunDate);
             try
             {
-                _iStorageService.UploadResultFileContentAsync(fileName, csvContent.ToString());
+                this.storageService.UploadResultFileContentAsync(fileName, csvContent.ToString());
             }
             catch (IOException ex)
             {
