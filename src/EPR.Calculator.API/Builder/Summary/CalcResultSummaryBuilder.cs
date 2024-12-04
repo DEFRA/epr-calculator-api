@@ -399,7 +399,7 @@ namespace EPR.Calculator.API.Builder.Summary
         }
 
         //section bad debt total
-        public static decimal GetTotal1Plus2ABadDebt(List<MaterialDetail> materials, CalcResult calcResult)
+        public static decimal GetTotal1Plus2ABadDebt(IEnumerable<MaterialDetail> materials, CalcResult calcResult)
         {
             decimal total = 0m;
 

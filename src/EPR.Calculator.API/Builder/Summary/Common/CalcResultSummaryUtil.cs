@@ -416,7 +416,7 @@ public static class CalcResultSummaryUtil
         result.ColumnHeaders = GetColumnHeaders(materials);
     }
 
-    public static List<CalcResultSummaryHeader> GetProducerDisposalFeesHeaders()
+    public static IEnumerable<CalcResultSummaryHeader> GetProducerDisposalFeesHeaders()
     {
         var resultSummaryHeaders = new List<CalcResultSummaryHeader>();
 
@@ -813,8 +813,8 @@ public static class CalcResultSummaryUtil
                 return onePlusFourApportionment.ScotlandTotal;
             case Countries.NorthernIreland:
                 return onePlusFourApportionment.NorthernIrelandTotal;
+            default:
+                return 0;
         }
-
-        return 0;
     }
 }
