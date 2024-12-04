@@ -102,22 +102,22 @@
                         {
                             Name = "4 LA Data Prep Charge",
                             OrderId = 1,
-                            England = "�40.00",
+                            England = "£40.00",
                             EnglandValue = 40,
-                            Wales = "�30.00",
+                            Wales = "£30.00",
                             WalesValue = 30,
-                            Scotland = "�20.00",
+                            Scotland = "£20.00",
                             ScotlandValue = 20,
-                            NorthernIreland = "�10.00",
+                            NorthernIreland = "£10.00",
                             NorthernIrelandValue = 10,
-                            Total = "�100.00",
+                            Total = "£100.00",
                             TotalValue = 100
                         }
                     ],
                     Materiality = [
                         new CalcResultMateriality
                         {
-                            Amount = "Amount �s",
+                            Amount = "Amount £s",
                             AmountValue = 0,
                             Percentage = "%",
                             PercentageValue = 0,
@@ -145,15 +145,15 @@
                     SchemeSetupCost = {
                         Name = "5 Scheme set up cost Yearly Cost",
                         OrderId = 1,
-                        England = "�40.00",
+                        England = "£40.00",
                         EnglandValue = 40,
-                        Wales = "�30.00",
+                        Wales = "£30.00",
                         WalesValue = 30,
-                        Scotland = "�20.00",
+                        Scotland = "£20.00",
                         ScotlandValue = 20,
-                        NorthernIreland = "�10.00",
+                        NorthernIreland = "£10.00",
                         NorthernIrelandValue = 10,
-                        Total = "�100.00",
+                        Total = "£100.00",
                         TotalValue = 100
                     }
                 },
