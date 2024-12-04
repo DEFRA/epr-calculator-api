@@ -48,12 +48,12 @@ namespace EPR.Calculator.API.Tests.Controllers
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(dbContext);
             lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator);
 
-             
+
             wrapper = new Mock<IOrgAndPomWrapper>().Object;
             calculatorInternalController = new CalculatorInternalController(
                 dbContext,
                 new RpdStatusDataValidator(wrapper),
-                wrapper, 
+                wrapper,
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object
@@ -76,7 +76,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             dbContext.Material.AddRange(GetMaterials());
             dbContext.SaveChanges();
         }
-        
+
         public void CheckDbContext()
         {
             Assert.IsNotNull(dbContext);
@@ -430,7 +430,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             });
             return list;
         }
-        
+
         public static IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
         {
             var list = new List<LapcapDataTemplateMaster>();
@@ -698,7 +698,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             var list = new List<CalculatorRun>();
             list.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
                 Name = "Test Run",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
@@ -706,7 +706,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             });
             list.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
                 Name = "Test Calculated Result",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
@@ -714,7 +714,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             });
             list.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
                 Name = "Test Run",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
@@ -724,7 +724,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             });
             list.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
                 Name = "Test Calculated Result",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
@@ -806,7 +806,7 @@ namespace EPR.Calculator.API.Tests.Controllers
                 CalendarYear = "2024-25",
                 EffectiveFrom = DateTime.Now,
                 CreatedBy = "Test user",
-                CreatedAt  = DateTime.Now
+                CreatedAt = DateTime.Now
             });
             return list;
         }
@@ -816,7 +816,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             var list = new List<CalculatorRunPomDataDetail>();
             list.Add(new CalculatorRunPomDataDetail
             {
-                Id= 1,
+                Id = 1,
                 OrganisationId = 1,
                 SubsidaryId = "SUBSID1",
                 SubmissionPeriod = "2023-P3",
@@ -856,7 +856,7 @@ namespace EPR.Calculator.API.Tests.Controllers
                 OrganisationId = 1,
                 SubsidaryId = "SUBSID1",
                 OrganisationName = "UPU LIMITED",
-                LoadTimeStamp= DateTime.Now,
+                LoadTimeStamp = DateTime.Now,
                 CalculatorRunOrganisationDataMasterId = 1,
                 SubmissionPeriodDesc = "July to December 2023",
                 CalculatorRunOrganisationDataMaster = BaseControllerTest.GetCalculatorRunOrganisationDataMaster().ToList()[0]

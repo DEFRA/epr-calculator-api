@@ -442,5 +442,57 @@ namespace EPR.Calculator.API.UnitTests
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.Value);
         }
+
+        [TestMethod]
+        public async Task Create_Calculator_Run_Return_422_If_One_Calculation_Already_In_Running()
+        {
+            var createCalculatorRunDto = new CreateCalculatorRunDto
+            {
+                CalculatorRunName = "Test calculator run",
+                CreatedBy = "Test user",
+                FinancialYear = "2024-25"
+            };
+
+            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            {
+                Id = 1,
+                ParameterYear = "2023-24",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext?.SaveChanges();
+
+            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
+            {
+                Id = 1,
+                ProjectionYear = "2023-24",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext?.SaveChanges();
+
+            dbContext?.CalculatorRuns.Add(new CalculatorRun
+            {
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                CalculatorRunClassificationId = 2,
+                Financial_Year = "2023-24",
+                Name = "TestOneAtATime"
+            });
+            dbContext?.SaveChanges();
+
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(422, actionResult.StatusCode);
+            var expectedJson = "{\"Message\":\"The calculator is currently running. You will be able to run another calculation once the current one has finished.\"}";
+            var actualJson = System.Text.Json.JsonSerializer.Serialize(actionResult?.Value);
+            Assert.AreEqual(expectedJson, actualJson);
+        }
     }
 }
