@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace EPR.Calculator.API.Tests.Controllers
 {
     [TestClass]
-    public class DefaultParameterSettingControllerTest : BaseControllerTest
+    public class DefaultParameterSettingControllerTests : BaseControllerTest
     {
         [TestMethod]
         public void CreateTest_With_Records()

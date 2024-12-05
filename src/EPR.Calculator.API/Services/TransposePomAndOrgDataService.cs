@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using Microsoft.AspNetCore.Routing.Constraints;
 
 namespace EPR.Calculator.API.Services
 {
@@ -8,6 +9,35 @@ namespace EPR.Calculator.API.Services
     public class TransposePomAndOrgDataService : ITransposePomAndOrgDataService
     {
         private readonly ApplicationDBContext context;
+
+        private const string PeriodSeparator = "-P";
+
+        internal class OrganisationDetails
+        {
+            public int? OrganisationId { get; set; }
+            public required string OrganisationName { get; set; }
+            public string? SubmissionPeriod { get; set; }
+            public string? SubmissionPeriodDescription { get; set; }
+
+            public string? SubsidaryId { get; set; }
+
+        }
+
+        internal class SubmissionDetails
+        {
+            public string? SubmissionPeriod { get; set; }
+            public string? SubmissionPeriodDesc { get; set; }
+        }
+
+
+
+        private List<OrganisationDetails> OrganisationsBySubmissionPeriod { get; set; }
+
+        private List<OrganisationDetails> OrganisationsList { get; set; }
+
+        private List<SubmissionDetails> SubmissionPeriodDetails { get; set; }
+
+
 
         public TransposePomAndOrgDataService(ApplicationDBContext context)
         {
@@ -26,6 +56,20 @@ namespace EPR.Calculator.API.Services
                 // from the calculator run table
                 var organisationDataMaster = context.CalculatorRunOrganisationDataMaster.Single(odm => odm.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);
 
+                SubmissionPeriodDetails = (from s in context.CalculatorRunPomDataDetails
+                                           where s.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId
+                                           select new SubmissionDetails
+                                           {
+                                               SubmissionPeriod = s.SubmissionPeriod,
+                                               SubmissionPeriodDesc = s.SubmissionPeriodDesc
+                                           }
+                                        ).Distinct().ToList();
+               
+                GetAllOrganisationsBasedonRunId(resultsRequestDto.RunId);
+
+
+                OrganisationsBySubmissionPeriod = GetOrganisationDetailsBySubmissionPeriod().ToList();
+
                 // Get the calculator run organisation data details as we need the organisation name
                 var organisationDataDetails = context.CalculatorRunOrganisationDataDetails
                     .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id && odd.OrganisationName != null)
@@ -33,6 +77,9 @@ namespace EPR.Calculator.API.Services
                     .GroupBy(odd => new { odd.OrganisationId, odd.SubsidaryId })
                     .Select(odd => odd.First())
                     .ToList();
+
+
+
 
                 // Get the calculator run pom data master record based on the CalculatorRunPomDataMasterId
                 var pomDataMaster = context.CalculatorRunPomDataMaster.Single(pdm => pdm.Id == calculatorRun.CalculatorRunPomDataMasterId);
@@ -72,7 +119,7 @@ namespace EPR.Calculator.API.Services
                                         CalculatorRunId = resultsRequestDto.RunId,
                                         ProducerId = producer.OrganisationId.Value,
                                         SubsidiaryId = producer.SubsidaryId,
-                                        ProducerName = producer.OrganisationName,
+                                        ProducerName = string.IsNullOrEmpty(producer.SubsidaryId) ? GetLatestOrganisationName(producer.OrganisationId.Value) : GetLatestSubsidaryName(producer.OrganisationId.Value, producer.SubsidaryId),
                                         CalculatorRun = calculatorRun
                                     };
 
@@ -129,6 +176,55 @@ namespace EPR.Calculator.API.Services
                     }
                 }
             }
+        }
+
+        private IEnumerable<OrganisationDetails> GetOrganisationDetailsBySubmissionPeriod()
+        { 
+            OrganisationsBySubmissionPeriod = (from org in OrganisationsList
+                                               join sub in SubmissionPeriodDetails on
+                                               org.SubmissionPeriodDescription equals sub.SubmissionPeriodDesc
+                                               select new OrganisationDetails
+                                               {
+                                                   OrganisationId = org.OrganisationId,
+                                                   OrganisationName = org.OrganisationName,
+                                                   SubmissionPeriodDescription = org.SubmissionPeriodDescription,
+                                                   SubmissionPeriod = sub.SubmissionPeriod,
+                                                   SubsidaryId = org.SubsidaryId
+                                               }).ToList();
+
+            return OrganisationsBySubmissionPeriod;
+           
+        }
+
+        private void GetAllOrganisationsBasedonRunId(int runId)
+        {
+            OrganisationsList = [.. (from run in context.CalculatorRuns join
+                 org in context.CalculatorRunOrganisationDataDetails on run.CalculatorRunOrganisationDataMasterId equals org.CalculatorRunOrganisationDataMasterId
+                    where (run.Id == runId && org.OrganisationName != null)
+                    select new OrganisationDetails
+                    {
+                        OrganisationId = org.OrganisationId,
+                        OrganisationName = org.OrganisationName,
+                        SubmissionPeriodDescription = org.SubmissionPeriodDesc,
+                        SubsidaryId = org.SubsidaryId
+                    }).Distinct()];
+        }
+       
+
+        private string? GetLatestOrganisationName(int orgId)
+        {
+            if (OrganisationsBySubmissionPeriod is null) return string.Empty;
+
+            var organisations = OrganisationsBySubmissionPeriod.Where(t => t.OrganisationId == orgId && t.SubsidaryId == null).OrderByDescending(t => t.SubmissionPeriod?.Replace(PeriodSeparator, string.Empty)).ToList();
+
+            return organisations?.FirstOrDefault(t => t.OrganisationId == orgId)?.OrganisationName ?? OrganisationsList.FirstOrDefault(t => t.OrganisationId == orgId)?.OrganisationName;
+        }
+
+        private string? GetLatestSubsidaryName(int orgId, string? subsidaryId)
+        {
+            if (OrganisationsBySubmissionPeriod is null) return string.Empty;
+            var subsidaries = OrganisationsBySubmissionPeriod.Where(t => t.OrganisationId == orgId && t.SubsidaryId == subsidaryId).OrderByDescending(t => t.SubmissionPeriod?.Replace(PeriodSeparator, string.Empty)).ToList();
+            return subsidaries?.FirstOrDefault(t => t.OrganisationId == orgId && t.SubsidaryId == subsidaryId)?.OrganisationName ?? OrganisationsList.FirstOrDefault(t => t.OrganisationId == orgId && t.SubsidaryId == subsidaryId)?.OrganisationName;
         }
     }
 }
