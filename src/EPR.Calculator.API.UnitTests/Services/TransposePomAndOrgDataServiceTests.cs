@@ -53,46 +53,6 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
 
-        protected static IEnumerable<CalculatorRun> GetCalculatorRuns()
-        {
-            var list = new List<CalculatorRun>
-            {
-                new() {
-                    CalculatorRunClassificationId = (int)RunClassification.RUNNING,
-                    Name = "Test Run",
-                    Financial_Year = "2024-25",
-                    CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
-                    CreatedBy = "Test User"
-                },
-                new() {
-                    CalculatorRunClassificationId = (int)RunClassification.RUNNING,
-                    Name = "Test Calculated Result",
-                    Financial_Year = "2024-25",
-                    CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
-                    CreatedBy = "Test User"
-                },
-                new() {
-                    CalculatorRunClassificationId = (int)RunClassification.RUNNING,
-                    Name = "Test Run",
-                    Financial_Year = "2024-25",
-                    CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
-                    CreatedBy = "Test User",
-                    CalculatorRunOrganisationDataMasterId = 1,
-                    CalculatorRunPomDataMasterId = 1,
-                },
-                new() {
-                    CalculatorRunClassificationId = (int)RunClassification.RUNNING,
-                    Name = "Test Calculated Result",
-                    Financial_Year = "2024-25",
-                    CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
-                    CreatedBy = "Test User",
-                    CalculatorRunOrganisationDataMasterId = 2,
-                    CalculatorRunPomDataMasterId = 2,
-                }
-            };
-            return list;
-        }
-
         [TestMethod]
         public void Transpose_Should_Return_Correct_Producer_Detail()
         {
@@ -100,7 +60,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             {
                 Id = 1,
                 ProducerId = 1,
-                ProducerName = "Test LIMITED",
+                ProducerName = "UPU LIMITED",
                 CalculatorRunId = 1,
                 CalculatorRun = new CalculatorRun()
             };
@@ -140,7 +100,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                     Id = 1,
                     ProducerId = 1,
                     SubsidiaryId = "1",
-                    ProducerName = "Test LIMITED",
+                    ProducerName = "UPU LIMITED",
                     CalculatorRunId = 1,
                     CalculatorRun = new CalculatorRun()
                 }
@@ -167,7 +127,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var expectedResult = new ProducerDetail
             {
                 Id = 1,
-                ProducerId = 1,
+                ProducerId = 2,
                 SubsidiaryId ="1",                
                 ProducerName = "Subsid2",
                 CalculatorRunId = 1,
@@ -178,10 +138,36 @@ namespace EPR.Calculator.API.UnitTests.Services
             var service = new TransposePomAndOrgDataService(_context);
 #pragma warning restore CS8604 // Possible null reference argument.
 
-            var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
+            var resultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
             service.Transpose(resultsRequestDto);
 
             var producerDetail = _context.ProducerDetail.FirstOrDefault(t=>t.SubsidiaryId != null);
+            Assert.IsNotNull(producerDetail);
+            Assert.AreEqual(expectedResult.ProducerId, producerDetail.ProducerId);
+            Assert.AreEqual(expectedResult.ProducerName, producerDetail.ProducerName);
+        }
+
+
+        [TestMethod]
+        public void Transpose_Should_Return_Correct_Producer_Detail_When_Submission_Period_Not_Exists()
+        {
+            var expectedResult = new ProducerDetail
+            {
+                Id = 1,
+                ProducerId = 2,
+                ProducerName = "Subsid2",
+                CalculatorRunId = 1,
+                CalculatorRun = new CalculatorRun()
+            };
+
+#pragma warning disable CS8604 // Possible null reference argument.
+            var service = new TransposePomAndOrgDataService(_context);
+#pragma warning restore CS8604 // Possible null reference argument.
+
+            var resultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
+            service.Transpose(resultsRequestDto);
+
+            var producerDetail = _context.ProducerDetail.FirstOrDefault();
             Assert.IsNotNull(producerDetail);
             Assert.AreEqual(expectedResult.ProducerId, producerDetail.ProducerId);
             Assert.AreEqual(expectedResult.ProducerName, producerDetail.ProducerName);
@@ -194,6 +180,13 @@ namespace EPR.Calculator.API.UnitTests.Services
             {
                 new() {
                     Id = 1,
+                    CalendarYear = "2024-25",
+                    EffectiveFrom = DateTime.Now,
+                    CreatedBy = "Test user",
+                    CreatedAt = DateTime.Now
+                },
+                new() {
+                    Id = 2,
                     CalendarYear = "2024-25",
                     EffectiveFrom = DateTime.Now,
                     CreatedBy = "Test user",
@@ -211,8 +204,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                 new() {
                     Id = 1,
                     OrganisationId = 1,
-                    SubsidaryId = "1",
                     OrganisationName = "UPU LIMITED",
+                    SubsidaryId ="1",
                     LoadTimeStamp = DateTime.Now,
                     CalculatorRunOrganisationDataMasterId = 1,
                     SubmissionPeriodDesc = "January to June 2023"
@@ -227,13 +220,13 @@ namespace EPR.Calculator.API.UnitTests.Services
                 },
                  new() {
                     Id = 3,
-                    OrganisationId = 1,
+                    OrganisationId = 2,
                     SubsidaryId = "1",
                     OrganisationName = "Subsid2",
                     LoadTimeStamp = DateTime.Now,
-                    CalculatorRunOrganisationDataMasterId = 1,
+                    CalculatorRunOrganisationDataMasterId = 2,
                     SubmissionPeriodDesc = "July to December 2023"
-                }
+                },
             });
             return list;
         }
@@ -304,6 +297,13 @@ namespace EPR.Calculator.API.UnitTests.Services
                     EffectiveFrom = DateTime.Now,
                     CreatedBy = "Test user",
                     CreatedAt = DateTime.Now
+                },
+                 new() {
+                    Id = 2,
+                    CalendarYear = "2024-25",
+                    EffectiveFrom = DateTime.Now,
+                    CreatedBy = "Test user",
+                    CreatedAt = DateTime.Now
                 }
             };
             return list;
@@ -330,7 +330,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 new() {
                     Id = 2,
                     OrganisationId = 1,
-                    SubmissionPeriod = "2023-P1",
+                    SubmissionPeriod = "2023-P2",
                     PackagingActivity = null,
                     PackagingType = "CW",
                     PackagingClass = "O1",
@@ -353,8 +353,65 @@ namespace EPR.Calculator.API.UnitTests.Services
                     LoadTimeStamp = DateTime.Now,
                     CalculatorRunPomDataMasterId = 1,
                     SubmissionPeriodDesc = "January to June 2023"
-                }
+                },
+                 new() {
+                    Id = 4,
+                    OrganisationId = 2,
+                    SubsidaryId = "1",
+                    SubmissionPeriod = "2024-P1",
+                    PackagingActivity = null,
+                    PackagingType = "CW",
+                    PackagingClass = "O1",
+                    PackagingMaterial = "PC",
+                    PackagingMaterialWeight = 1000,
+                    LoadTimeStamp = DateTime.Now,
+                    CalculatorRunPomDataMasterId = 2,
+                    SubmissionPeriodDesc = "January to June 2024"
+                },
+            };
+            return list;
+        }
 
+
+
+        protected static IEnumerable<CalculatorRun> GetCalculatorRuns()
+        {
+            var list = new List<CalculatorRun>
+            {
+                new() {
+                    CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                    Name = "Test Run",
+                    Financial_Year = "2024-25",
+                    CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
+                    CreatedBy = "Test User",
+                    CalculatorRunOrganisationDataMasterId = 2,
+                    CalculatorRunPomDataMasterId = 2,
+                },
+                new() {
+                    CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                    Name = "Test Calculated Result",
+                    Financial_Year = "2024-25",
+                    CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
+                    CreatedBy = "Test User"
+                },
+                new() {
+                    CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                    Name = "Test Run",
+                    Financial_Year = "2024-25",
+                    CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
+                    CreatedBy = "Test User",
+                    CalculatorRunOrganisationDataMasterId = 1,
+                    CalculatorRunPomDataMasterId = 1,
+                },
+                new() {
+                    CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                    Name = "Test Calculated Result",
+                    Financial_Year = "2024-25",
+                    CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
+                    CreatedBy = "Test User",
+                    CalculatorRunOrganisationDataMasterId = 2,
+                    CalculatorRunPomDataMasterId = 2,
+                }
             };
             return list;
         }
