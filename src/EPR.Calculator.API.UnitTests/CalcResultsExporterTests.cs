@@ -12,12 +12,12 @@ namespace EPR.Calculator.API.UnitTests
     public class CalcResultsExporterTests
     {
         private CalcResultsExporter _calcResultsExporter;
-        private Mock<IBlobStorageService> _blobStorageServiceMock;
+        private Mock<IStorageService> _blobStorageServiceMock;
 
         [TestInitialize]
         public void Setup()
         {
-            _blobStorageServiceMock = new Mock<IBlobStorageService>();
+            _blobStorageServiceMock = new Mock<IStorageService>();
             _calcResultsExporter = new CalcResultsExporter(_blobStorageServiceMock.Object);
         }
 
@@ -39,7 +39,7 @@ namespace EPR.Calculator.API.UnitTests
             };
 
             _blobStorageServiceMock
-                .Setup(service => service.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<StringBuilder>()))
+                .Setup(service => service.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Throws(new IOException("Simulated IO error"));
             var exception = Assert.ThrowsException<IOException>(() => _calcResultsExporter.Export(calcResult));
             Assert.AreEqual("File upload failed: Simulated IO error", exception.Message);
@@ -140,8 +140,8 @@ namespace EPR.Calculator.API.UnitTests
             _calcResultsExporter.Export(calcResult);
 
             // Assert
-            _blobStorageServiceMock.Verify(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<StringBuilder>()), Times.Once); 
-            _blobStorageServiceMock.Verify(x => x.UploadResultFileContentAsync(expectedFileName, It.IsAny<StringBuilder>()), Times.Once);
+            _blobStorageServiceMock.Verify(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Once); 
+            _blobStorageServiceMock.Verify(x => x.UploadResultFileContentAsync(expectedFileName, It.IsAny<string>()), Times.Once);
         }
     }
 }
