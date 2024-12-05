@@ -42,7 +42,6 @@ namespace EPR.Calculator.API.UnitTests
         private CalcResultBuilder calcResultBuilder;
         private CalcResultDetailBuilder detailBuilder;
         private CalcResultsExporter exporter;
-        // protected ApplicationDBContext? dbContext;
         protected IOrgAndPomWrapper? wrapper;
         private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockICalcResultOnePlusFourApportionmentBuilder;
 

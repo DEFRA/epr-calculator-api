@@ -226,6 +226,28 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
+        public void PrepareCalcResults_ShouldReturnUnprocessableEntity()
+        {
+            var requestDto = new CalcResultsRequestDto() { RunId = 0 };
+            var calcResult = new CalcResult();
+
+            var mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
+            var controller = new CalculatorInternalController(
+                dbContext,
+                new RpdStatusDataValidator(wrapper),
+                wrapper,
+                new Mock<ICalcResultBuilder>().Object,
+                new Mock<ICalcResultsExporter<CalcResult>>().Object,
+                new Mock<ITransposePomAndOrgDataService>().Object
+            );
+
+            mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
+            var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(422, result.StatusCode);
+        }
+
+        [TestMethod]
         public void FinancialYear_ShouldBeEmpty_WhenCalcRunIsNull()
         {
             CalculatorRun? calcRun = null;
