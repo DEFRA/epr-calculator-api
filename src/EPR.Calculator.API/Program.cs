@@ -20,8 +20,10 @@ using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
+using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,6 +79,20 @@ builder.Services.AddSingleton<BlobServiceClient>(provider =>
     return new BlobServiceClient(connectionString);
 });
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApi(options =>
+    {
+        builder.Configuration.Bind("AzureAd", options);
+        // options.TokenValidationParameters.NameClaimType = "name";
+        options.IncludeErrorDetails = true;
+    }, options => { builder.Configuration.Bind("AzureAd", options); });
+
+//builder.Services.AddAuthorization(config =>
+//{
+//    config.AddPolicy("AuthZPolicy", policyBuilder =>
+//        policyBuilder.Requirements.Add(new ScopeAuthorizationRequirement() { RequiredScopesConfigurationKey = $"AzureAd:Scopes" }));
+//});
+
 var serviceBusConnectionString = builder.Configuration.GetSection("ServiceBus").GetSection("ConnectionString");
 var serviceBusQueueName = builder.Configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
 #pragma warning disable CS8604 // Possible null reference argument.
@@ -122,5 +138,7 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.MapControllers();
+app.UseAuthentication();
+// app.UseAuthorization();
 
 app.Run();

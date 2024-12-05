@@ -5,6 +5,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
@@ -143,6 +144,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRuns")]
+        [Authorize]
         public IActionResult GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
         {
             if (!ModelState.IsValid)
@@ -209,6 +211,7 @@ namespace EPR.Calculator.API.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut]
         [Route("calculatorRuns")]
         public IActionResult PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
