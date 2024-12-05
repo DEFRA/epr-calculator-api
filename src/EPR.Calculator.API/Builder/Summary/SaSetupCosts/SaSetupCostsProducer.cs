@@ -36,6 +36,11 @@ namespace EPR.Calculator.API.Builder.Summary.SaSetupCosts
 
             var total1Plus2ABadDebt = CalcResultSummaryUtil.GetTotal1Plus2ABadDebt(producers, materials, calcResult);
 
+            if (total1Plus2ABadDebt == 0)
+            {
+                return 0;
+            }
+
             var producerPercentageOfOverallProducerCosts = (totalProducerDisposalFeeWithBadDebtProvision + totalProducerCommsFeeWithBadDebtProvision) / total1Plus2ABadDebt;
 
             return producerPercentageOfOverallProducerCosts * oneOffFeeSetupCostsWithoutBadDebtProvision;
@@ -71,6 +76,11 @@ namespace EPR.Calculator.API.Builder.Summary.SaSetupCosts
             var total1Plus2ABadDebtForAllProducers = CalcResultSummaryUtil.GetTotal1Plus2ABadDebt(producers, materials, calcResult);
 
             var total1Plus2ABadDebtForProducersAndSubsidiaries = CalcResultSummaryUtil.GetTotal1Plus2ABadDebt(producersAndSubsidiaries, materials, calcResult);
+
+            if (total1Plus2ABadDebtForAllProducers == 0)
+            {
+                return 0;
+            }
 
             var producerPercentageOfOverallProducerCosts = total1Plus2ABadDebtForProducersAndSubsidiaries / total1Plus2ABadDebtForAllProducers;
 
@@ -187,6 +197,11 @@ namespace EPR.Calculator.API.Builder.Summary.SaSetupCosts
 
             var total1Plus2ABadDebt = CalcResultSummaryUtil.GetTotal1Plus2ABadDebt(producers, materials, calcResult);
 
+            if (total1Plus2ABadDebt == 0)
+            {
+                return 0;
+            }
+
             var producerPercentageOfOverallProducerCosts = ((totalProducerDisposalFeeWithBadDebtProvision + totalProducerCommsFeeWithBadDebtProvision) / total1Plus2ABadDebt) / 100;
 
             return oneOffFeeSetupCostsWithoutBadDebtProvision *
@@ -207,6 +222,11 @@ namespace EPR.Calculator.API.Builder.Summary.SaSetupCosts
             var total1Plus2ABadDebtForAllProducers = CalcResultSummaryUtil.GetTotal1Plus2ABadDebt(producers, materials, calcResult);
 
             var total1Plus2ABadDebtForProducersAndSubsidiaries = CalcResultSummaryUtil.GetTotal1Plus2ABadDebt(producersAndSubsidiaries, materials, calcResult);
+
+            if (total1Plus2ABadDebtForAllProducers == 0)
+            {
+                return 0;
+            }
 
             var producerPercentageOfOverallProducerCosts = (total1Plus2ABadDebtForProducersAndSubsidiaries / total1Plus2ABadDebtForAllProducers) / 100;
 
