@@ -1,354 +1,279 @@
-namespace EPR.Calculator.API.UnitTests.Controllers
+using EPR.Calculator.API.Builder;
+using EPR.Calculator.API.Controllers;
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Exporter;
+using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Tests.Controllers;
+using EPR.Calculator.API.Utils;
+using EPR.Calculator.API.Validators;
+using EPR.Calculator.API.Wrapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+
+namespace EPR.Calculator.API.UnitTests
 {
-    using AutoFixture;
-    using EPR.Calculator.API.Builder;
-    using EPR.Calculator.API.Controllers;
-    using EPR.Calculator.API.Data;
-    using EPR.Calculator.API.Dtos;
-    using EPR.Calculator.API.Exporter;
-    using EPR.Calculator.API.Models;
-    using EPR.Calculator.API.Services;
-    using EPR.Calculator.API.Validators;
-    using EPR.Calculator.API.Wrapper;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Moq;
-    using System;
-    using System.Collections.Generic;
-
     [TestClass]
-    public class CalculatorInternalControllerTests
+    public class CalculatorInternalControllerTests : BaseControllerTest
     {
-        private Fixture Fixture { get; } = new Fixture();
-
-        private CalculatorInternalController _testClass;
-        private ApplicationDBContext _context;
-        private Mock<IRpdStatusDataValidator> _rpdStatusDataValidator;
-        private Mock<IOrgAndPomWrapper> _wrapper;
-        private Mock<ICalcResultBuilder> _builder;
-        private Mock<ICalcResultsExporter<CalcResult>> _exporter;
-        private Mock<ITransposePomAndOrgDataService> _transposePomAndOrgDataService;
-
-        [TestInitialize]
-        public void SetUp()
+        [TestMethod]
+        public void UpdateRpdStatus_With_Missing_RunId()
         {
-            _context = new ApplicationDBContext();
-            _rpdStatusDataValidator = new Mock<IRpdStatusDataValidator>();
-            _wrapper = new Mock<IOrgAndPomWrapper>();
-            _builder = new Mock<ICalcResultBuilder>();
-            _exporter = new Mock<ICalcResultsExporter<CalcResult>>();
-            _transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
-            _testClass = new CalculatorInternalController(_context, _rpdStatusDataValidator.Object, _wrapper.Object, _builder.Object, _exporter.Object, _transposePomAndOrgDataService.Object);
+            var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 999, UpdatedBy = "User1" };
+            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var objResult = result as ObjectResult;
+            Assert.IsNotNull(objResult);
+            Assert.AreEqual(400, objResult.StatusCode);
+            Assert.AreEqual("Calculator Run 999 is missing", objResult.Value);
         }
 
         [TestMethod]
-        public void CanCallPrepareCalcResults()
+        public void UpdateRpdStatus_With_RunId_Having_OrganisationDataMasterId()
         {
-            // Arrange
-            var resultsRequestDto = new CalcResultsRequestDto { RunId = 1706708422 };
+            this.dbContext?.SaveChanges();
 
-            _builder.Setup(mock => mock.Build(It.IsAny<CalcResultsRequestDto>())).Returns(new CalcResult
+            var organisationMaster = this.dbContext?.CalculatorRunOrganisationDataMaster.ToList();
+            this.dbContext?.CalculatorRuns.Add(new CalculatorRun
             {
-                CalcResultDetail = new CalcResultDetail
-                {
-                    RunName = "TestValue26600268",
-                    RunId = 1555710394,
-                    RunDate = DateTime.UtcNow,
-                    RunBy = "TestValue887677417",
-                    FinancialYear = "TestValue2028236729",
-                    RpdFileORG = "TestValue1468463827",
-                    RpdFilePOM = "TestValue1468463837",
-                    LapcapFile = "TestValue1811770456",
-                    ParametersFile = "TestValue1028165412"
-                },
-                CalcResultLapcapData = new CalcResultLapcapData
-                {
-                    Name = "TestValue1390335580",
-                    CalcResultLapcapDataDetails = new[] {
-                        new CalcResultLapcapDataDetails
-                        {
-                            Name = "TestValue1226159960",
-                            EnglandDisposalCost = "TestValue441421652",
-                            WalesDisposalCost = "TestValue1552381969",
-                            ScotlandDisposalCost = "TestValue1978928873",
-                            NorthernIrelandDisposalCost = "TestValue566927844",
-                            TotalDisposalCost = "TestValue1764326788",
-                            OrderId = 704773396
-                        },
-                        new CalcResultLapcapDataDetails
-                        {
-                            Name = "TestValue1531493392",
-                            EnglandDisposalCost = "TestValue813688780",
-                            WalesDisposalCost = "TestValue1343449936",
-                            ScotlandDisposalCost = "TestValue871919063",
-                            NorthernIrelandDisposalCost = "TestValue1649127366",
-                            TotalDisposalCost = "TestValue346141130",
-                            OrderId = 781377830
-                        },
-                        new CalcResultLapcapDataDetails
-                        {
-                            Name = "TestValue111688060",
-                            EnglandDisposalCost = "TestValue48524705",
-                            WalesDisposalCost = "TestValue1281709861",
-                            ScotlandDisposalCost = "TestValue2028925117",
-                            NorthernIrelandDisposalCost = "TestValue413187689",
-                            TotalDisposalCost = "TestValue436582086",
-                            OrderId = 1776367784
-                        }
-                    }
-                },
-                CalcResultCommsCostReportDetail = Fixture.Create<CalcResultCommsCost>(),
-                CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
-                {
-                    Name = "TestValue2008053382",
-                    CalcResultLateReportingTonnageDetails = new[] {
-                        new CalcResultLateReportingTonnageDetail
-                        {
-                            Name = "TestValue2143215974",
-                            TotalLateReportingTonnage = 1142363418.57M
-                        },
-                        new CalcResultLateReportingTonnageDetail
-                        {
-                            Name = "TestValue950828146",
-                            TotalLateReportingTonnage = 2103732562.14M
-                        },
-                        new CalcResultLateReportingTonnageDetail
-                        {
-                            Name = "TestValue1995738811",
-                            TotalLateReportingTonnage = 940670239.41M
-                        }
-                    }
-                },
-                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost
-                {
-                    Name = "TestValue384507152",
-                    CalcResultParameterCommunicationCostDetails = new[] {
-                        new CalcResultParameterCommunicationCostDetail1
-                        {
-                            Name = "TestValue163477184",
-                            England = "TestValue39207367",
-                            Wales = "TestValue423871176",
-                            Scotland = "TestValue891242292",
-                            NorthernIreland = "TestValue1925406460",
-                            Total = "TestValue1292599773",
-                            OrderId = 1141710207
-                        },
-                        new CalcResultParameterCommunicationCostDetail1
-                        {
-                            Name = "TestValue1567817807",
-                            England = "TestValue1670419790",
-                            Wales = "TestValue809681337",
-                            Scotland = "TestValue623341535",
-                            NorthernIreland = "TestValue1396596403",
-                            Total = "TestValue188883285",
-                            OrderId = 1822882885
-                        },
-                        new CalcResultParameterCommunicationCostDetail1
-                        {
-                            Name = "TestValue1650299495",
-                            England = "TestValue1426377447",
-                            Wales = "TestValue1298148344",
-                            Scotland = "TestValue323444817",
-                            NorthernIreland = "TestValue1392706085",
-                            Total = "TestValue1444022334",
-                            OrderId = 839152712
-                        }
-                    },
-                    CalcResultParameterCommunicationCostDetails2 = new[] {
-                        new CalcResultParameterCommunicationCostDetail2
-                        {
-                            Name = "TestValue746526868",
-                            England = "TestValue1587022357",
-                            Wales = "TestValue1398582767",
-                            Scotland = "TestValue591583326",
-                            NorthernIreland = "TestValue1761451443",
-                            Total = "TestValue1365590225",
-                            OrderId = 445689325,
-                            ProducerReportedHouseholdPackagingWasteTonnage = "TestValue398479526",
-                            LateReportingTonnage = "TestValue1028100727",
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "TestValue589429105",
-                            CommsCostByMaterialPricePerTonne = "TestValue1916071624"
-                        },
-                        new CalcResultParameterCommunicationCostDetail2
-                        {
-                            Name = "TestValue1902085084",
-                            England = "TestValue1146986240",
-                            Wales = "TestValue650211596",
-                            Scotland = "TestValue1304242568",
-                            NorthernIreland = "TestValue448047887",
-                            Total = "TestValue757885074",
-                            OrderId = 568218317,
-                            ProducerReportedHouseholdPackagingWasteTonnage = "TestValue1636261704",
-                            LateReportingTonnage = "TestValue1117461500",
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "TestValue628190545",
-                            CommsCostByMaterialPricePerTonne = "TestValue1758773718"
-                        },
-                        new CalcResultParameterCommunicationCostDetail2
-                        {
-                            Name = "TestValue1219243780",
-                            England = "TestValue1937329801",
-                            Wales = "TestValue1187469330",
-                            Scotland = "TestValue1587484499",
-                            NorthernIreland = "TestValue185170497",
-                            Total = "TestValue492916479",
-                            OrderId = 1875008643,
-                            ProducerReportedHouseholdPackagingWasteTonnage = "TestValue1800163449",
-                            LateReportingTonnage = "TestValue1801537569",
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "TestValue603032726",
-                            CommsCostByMaterialPricePerTonne = "TestValue1653633272"
-                        }
-                    },
-                    CalcResultParameterCommunicationCostDetails3 = new[] {
-                        new CalcResultParameterCommunicationCostDetail3
-                        {
-                            Name = "TestValue1692838087",
-                            England = "TestValue1564433963",
-                            Wales = "TestValue599668658",
-                            Scotland = "TestValue1172772056",
-                            NorthernIreland = "TestValue299658966",
-                            Total = "TestValue163955017"
-                        },
-                        new CalcResultParameterCommunicationCostDetail3
-                        {
-                            Name = "TestValue2074493195",
-                            England = "TestValue696020882",
-                            Wales = "TestValue1169338281",
-                            Scotland = "TestValue642319063",
-                            NorthernIreland = "TestValue220252232",
-                            Total = "TestValue854753558"
-                        },
-                        new CalcResultParameterCommunicationCostDetail3
-                        {
-                            Name = "TestValue1641994966",
-                            England = "TestValue1189380692",
-                            Wales = "TestValue1172671289",
-                            Scotland = "TestValue346056927",
-                            NorthernIreland = "TestValue978329560",
-                            Total = "TestValue540263270"
-                        }
-                    }
-                },
-                CalcResultParameterOtherCost = new CalcResultParameterOtherCost
-                {
-                    Name = "TestValue1902710147",
-                    SaOperatingCost = new[] {
-                        new CalcResultParameterOtherCostDetail
-                        {
-                        Name = "TestValue248451812",
-                        England = "TestValue1601631800",
-                        Wales = "TestValue1233261280",
-                        Scotland = "TestValue704573910",
-                        NorthernIreland = "TestValue1422759478",
-                        Total = "TestValue458226108",
-                        OrderId = 404263300
-                        }
-                    },
-                    Details = new[] {
-                        new CalcResultParameterOtherCostDetail
-                        {
-                            Name = "TestValue1709252156",
-                            England = "TestValue421440618",
-                            Wales = "TestValue1606335911",
-                            Scotland = "TestValue1116454655",
-                            NorthernIreland = "TestValue998991548",
-                            Total = "TestValue1082576243",
-                            OrderId = 1692958011
-                        },
-                        new CalcResultParameterOtherCostDetail
-                        {
-                            Name = "TestValue398103807",
-                            England = "TestValue1159982855",
-                            Wales = "TestValue146859551",
-                            Scotland = "TestValue896679083",
-                            NorthernIreland = "TestValue1259900179",
-                            Total = "TestValue2046311069",
-                            OrderId = 846588345
-                        },
-                        new CalcResultParameterOtherCostDetail
-                        {
-                            Name = "TestValue1327072438",
-                            England = "TestValue1481875920",
-                            Wales = "TestValue429197166",
-                            Scotland = "TestValue231890081",
-                            NorthernIreland = "TestValue1711519090",
-                            Total = "TestValue895544970",
-                            OrderId = 2137471720
-                        }
-                    },
-                    SchemeSetupCost = new CalcResultParameterOtherCostDetail
-                    {
-                        Name = "TestValue894073467",
-                        England = "TestValue743248036",
-                        Wales = "TestValue498383751",
-                        Scotland = "TestValue1414381785",
-                        NorthernIreland = "TestValue1432360696",
-                        Total = "TestValue1689198307",
-                        OrderId = 1393543154
-                    },
-                    BadDebtProvision = new KeyValuePair<string, string>(),
-                    Materiality = new[] {
-                        new CalcResultMateriality
-                        {
-                            SevenMateriality = "TestValue20436873",
-                            Amount = "TestValue1953396941",
-                            Percentage = "TestValue1921759094"
-                        },
-                        new CalcResultMateriality
-                        {
-                            SevenMateriality = "TestValue115520746",
-                            Amount = "TestValue1036547761",
-                            Percentage = "TestValue466450553"
-                        },
-                        new CalcResultMateriality
-                        {
-                            SevenMateriality = "TestValue1068863021",
-                            Amount = "TestValue119755880",
-                            Percentage = "TestValue804064114"
-                        }
-                    }
-                },
-                CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment
-                {
-                    Name = "TestValue472683829",
-                    CalcResultOnePlusFourApportionmentDetails = new[] {
-                        new CalcResultOnePlusFourApportionmentDetail
-                        {
-                            Name = "TestValue1858724035",
-                            Total = "TestValue1710164785",
-                            EnglandDisposalTotal = "TestValue414275227",
-                            WalesDisposalTotal = "TestValue815178689",
-                            ScotlandDisposalTotal = "TestValue1825676229",
-                            NorthernIrelandDisposalTotal = "TestValue1107952160",
-                            OrderId = 1714114499
-                        },
-                        new CalcResultOnePlusFourApportionmentDetail
-                        {
-                            Name = "TestValue1540861583",
-                            Total = "TestValue299414857",
-                            EnglandDisposalTotal = "TestValue810354915",
-                            WalesDisposalTotal = "TestValue1220572846",
-                            ScotlandDisposalTotal = "TestValue505376535",
-                            NorthernIrelandDisposalTotal = "TestValue1341109001",
-                            OrderId = 547864222
-                        },
-                        new CalcResultOnePlusFourApportionmentDetail
-                        {
-                            Name = "TestValue651912473",
-                            Total = "TestValue1421952222",
-                            EnglandDisposalTotal = "TestValue729766017",
-                            WalesDisposalTotal = "TestValue410415024",
-                            ScotlandDisposalTotal = "TestValue863103052",
-                            NorthernIrelandDisposalTotal = "TestValue1185358720",
-                            OrderId = 214124936
-                        }
-                    }
-                }
+                CalculatorRunClassificationId = 1,
+                CreatedAt = DateTime.Now,
+                CreatedBy = "Some User",
+                Financial_Year = "2024-25",
+                Name = "CalculationRun1-Test",
+                DefaultParameterSettingMasterId = 1,
+                LapcapDataMasterId = 1,
+                CalculatorRunOrganisationDataMasterId = 1,
             });
 
-            // Act
-            var result = _testClass.PrepareCalcResults(resultsRequestDto);
+            this.dbContext?.SaveChanges();
 
-            // Assert
-            _builder.Verify(mock => mock.Build(It.IsAny<CalcResultsRequestDto>()));
+
+            var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 3, UpdatedBy = "User1" };
+            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var objResult = result as ObjectResult;
+            Assert.IsNotNull(objResult);
+            Assert.AreEqual(422, objResult.StatusCode);
+            Assert.AreEqual("Calculator Run 3 already has OrganisationDataMasterId associated with it", objResult.Value);
+        }
+
+        [TestMethod]
+        public void UpdateRpdStatus_With_RunId_Having_PomDataMasterId()
+        {
+            var pomMaster = new CalculatorRunPomDataMaster
+            {
+                CalendarYear = "2023",
+                CreatedAt = DateTime.Now,
+                CreatedBy = "Some User",
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null,
+            };
+
+            var pomDataDetail = new CalculatorRunPomDataDetail
+            {
+                OrganisationId = 1234,
+                SubsidaryId = "4455",
+                LoadTimeStamp = DateTime.Now,
+                CalculatorRunPomDataMaster = pomMaster,
+                Id = 0,
+                SubmissionPeriod = "some-period",
+                CalculatorRunPomDataMasterId = pomMaster.Id,
+                SubmissionPeriodDesc = "some-period-desc",
+            };
+
+            this.dbContext?.CalculatorRunPomDataDetails.Add(pomDataDetail);
+
+            this.dbContext?.SaveChanges();
+
+            var organisationMaster = this.dbContext?.CalculatorRunOrganisationDataMaster.ToList();
+            var calcRun = this.dbContext?.CalculatorRuns.Single(run => run.Id == 1);
+            if (calcRun != null)
+            {
+                calcRun.CalculatorRunPomDataMaster = pomMaster;
+                calcRun.CalculatorRunPomDataMasterId = pomMaster.Id;
+            }
+
+            this.dbContext?.SaveChanges();
+
+            var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 1, UpdatedBy = "User1" };
+            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var objResult = result as ObjectResult;
+            Assert.IsNotNull(objResult);
+            Assert.AreEqual(422, objResult.StatusCode);
+            Assert.AreEqual("Calculator Run 1 already has PomDataMasterId associated with it", objResult.Value);
+        }
+
+        [TestMethod]
+        public void UpdateRpdStatus_With_RunId_With_Incorrect_Classification()
+        {
+            var calcRun = this.dbContext?.CalculatorRuns.Single(x => x.Id == 1);
+            if (calcRun != null)
+            {
+                calcRun.CalculatorRunClassificationId = 3;
+                this.dbContext?.CalculatorRuns.Update(calcRun);
+            }
+
+            var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 1, UpdatedBy = "User1" };
+            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var objResult = result as ObjectResult;
+            Assert.IsNotNull(objResult);
+            Assert.AreEqual(422, objResult.StatusCode);
+            Assert.AreEqual("Calculator Run 1 classification should be RUNNING or IN THE QUEUE", objResult.Value);
+        }
+
+        [TestMethod]
+        public void UpdateRpdStatus_With_RunId_When_Not_Successful()
+        {
+            var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 1, UpdatedBy = "User1" };
+            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var objResult = result as ObjectResult;
+            Assert.AreEqual(201, objResult?.StatusCode);
+            var updatedRun = this.dbContext?.CalculatorRuns.Single(x => x.Id == 1);
+            Assert.IsNotNull(updatedRun);
+            Assert.AreEqual(5, updatedRun.CalculatorRunClassificationId);
+        }
+
+        [TestMethod]
+        public void UpdateRpdStatus_With_RunId_Having_Pom_Data_Missing()
+        {
+            var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
+            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var objResult = result as ObjectResult;
+            Assert.AreEqual(422, objResult?.StatusCode);
+            Assert.AreEqual("PomData or Organisation Data is missing", objResult?.Value);
+        }
+
+        [TestMethod]
+        public void UpdateRpdStatus_With_RunId_When_Successful()
+        {
+            var organisation = new OrganisationData
+            {
+                LoadTimestamp = DateTime.UtcNow,
+                OrganisationName = "OrgName",
+                OrganisationId = 1345,
+                SubsidaryId = "Sub1d1",
+                SubmissionPeriodDesc = "some-period-desc"
+            };
+            var pomData = new PomData
+            {
+                LoadTimeStamp = DateTime.Now,
+                OrganisationId = 1567,
+                SubsidaryId = "Sub1d1",
+                PackagingType = "packtype",
+                PackagingClass = "class1",
+                PackagingMaterial = "Aluminium",
+                PackagingMaterialWeight = 200,
+                SubmissionPeriod = "2024-25",
+                SubmissionPeriodDesc = "November 2024 to June 2025"
+            };
+            var pomDataList = new List<PomData> { pomData };
+            var organisationDataList = new List<OrganisationData> { organisation };
+            var mock = new Mock<IOrgAndPomWrapper>();
+            mock.Setup(x => x.AnyPomData()).Returns(true);
+            mock.Setup(x => x.AnyOrganisationData()).Returns(true);
+            mock.Setup(x => x.GetOrganisationData()).Returns(organisationDataList);
+            mock.Setup(x => x.GetPomData()).Returns(pomDataList);
+
+            if (dbContext != null)
+            {
+                var controller = new CalculatorInternalController(
+                    dbContext,
+                    new RpdStatusDataValidator(mock.Object),
+                    mock.Object,
+                    new Mock<ICalcResultBuilder>().Object,
+                    new Mock<ICalcResultsExporter<CalcResult>>().Object,
+                    new Mock<ITransposePomAndOrgDataService>().Object
+                );
+
+                var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
+                var result = controller?.UpdateRpdStatus(request);
+
+                var objResult = result as ObjectResult;
+                Assert.AreEqual(201, objResult?.StatusCode);
+                var calcRun = dbContext.CalculatorRuns.Single(x => x.Id == 1);
+                Assert.IsNotNull(calcRun);
+                Assert.AreEqual(2, calcRun.CalculatorRunClassificationId);
+                Assert.IsNotNull(calcRun.CalculatorRunOrganisationDataMasterId);
+                Assert.IsNotNull(calcRun.CalculatorRunPomDataMasterId);
+            }
+
+        }
+
+        [TestMethod]
+        public void PrepareCalcResults_ShouldReturnCreatedStatus()
+        {
+            var requestDto = new CalcResultsRequestDto() { RunId = 1 };
+            var calcResult = new CalcResult();
+
+            var mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
+            var controller = new CalculatorInternalController(
+               dbContext,
+               new RpdStatusDataValidator(wrapper),
+               wrapper,
+               new Mock<ICalcResultBuilder>().Object,
+               new Mock<ICalcResultsExporter<CalcResult>>().Object,
+               new Mock<ITransposePomAndOrgDataService>().Object
+            );
+
+            mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
+            var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
+            var calculatorRun = dbContext.CalculatorRuns.SingleOrDefault(run => run.Id == 1);
+            Assert.IsNotNull(result);
+            Assert.AreEqual((int)RunClassification.UNCLASSIFIED, calculatorRun?.CalculatorRunClassificationId);
+            Assert.AreEqual(201, result.StatusCode);
+        }
+
+        [TestMethod]
+        public void FinancialYear_ShouldBeEmpty_WhenCalcRunIsNull()
+        {
+            CalculatorRun? calcRun = null;
+
+            string financialYear = calcRun?.Financial_Year ?? string.Empty;
+
+            Assert.AreEqual(string.Empty, financialYear);
+        }
+
+        [TestMethod]
+        public void FinancialYear_ShouldReturnValue_WhenCalcRunIsNotNull()
+        {
+            CalculatorRun calcRun = new()
+            {
+                Financial_Year = "2024-25"
+            };
+
+            string fy = calcRun?.Financial_Year ?? string.Empty;
+
+            Assert.AreEqual("2024-25", fy);
+        }
+
+        [TestMethod]
+        public void GetCalendarYear_FromValidFinancialYear()
+        {
+            string financialYear = "2024-25";
+
+            string result = Util.GetCalendarYear(financialYear);
+
+            Assert.AreEqual("2023", result);
+        }
+
+        [TestMethod]
+        public void GetCalendarYear_InvalidFinancialYear_ThrowsException()
+        {
+            string financialYear = "InvalidYear";
+
+            var exception = Assert.ThrowsException<FormatException>(() => Util.GetCalendarYear(financialYear));
+            Assert.AreEqual("Financial year format is invalid. Expected format is 'YYYY-YY'.", exception.Message);
+        }
+
+        [TestMethod]
+        public void GetCalendarYear_EmptyFinancialYear_ThrowsException()
+        {
+            string financialYear = "";
+
+            var exception = Assert.ThrowsException<ArgumentException>(() => Util.GetCalendarYear(financialYear));
+            Assert.AreEqual("Financial year cannot be null or empty (Parameter 'financialYear')", exception.Message);
         }
     }
 }
