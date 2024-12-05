@@ -226,7 +226,7 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void PrepareCalcResults_ShouldReturnUnprocessableEntity()
+        public void PrepareCalcResults_ShouldReturnNotFound()
         {
             var requestDto = new CalcResultsRequestDto() { RunId = 0 };
             var calcResult = new CalcResult();
@@ -244,7 +244,7 @@ namespace EPR.Calculator.API.UnitTests
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
             var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
             Assert.IsNotNull(result);
-            Assert.AreEqual(422, result.StatusCode);
+            Assert.AreEqual(404, result.StatusCode);
         }
 
         [TestMethod]

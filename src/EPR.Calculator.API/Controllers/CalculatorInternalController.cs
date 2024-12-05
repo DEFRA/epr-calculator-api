@@ -157,7 +157,7 @@ namespace EPR.Calculator.API.Controllers
             if (calculatorRun == null)
             {
                 return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                    { StatusCode = StatusCodes.Status404NotFound };
             }
 
             try
