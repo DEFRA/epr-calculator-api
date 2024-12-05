@@ -1,5 +1,4 @@
-﻿using EPR.Calculator.API.Builder.CommsCost;
-using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
@@ -9,7 +8,7 @@ namespace EPR.Calculator.API.Exporter
 {
     public class CalcResultsExporter : ICalcResultsExporter<CalcResult>
     {
-        private readonly IBlobStorageService _blobStorageService;
+        private readonly IStorageService storageService;
         private const string RunName = "Run Name";
         private const string RunId = "Run Id";
         private const string RunDate = "Run Date";
@@ -19,15 +18,12 @@ namespace EPR.Calculator.API.Exporter
         private const string RPDFilePOM = "RPD File - POM";
         private const string LapcapFile = "LAPCAP File";
         private const string ParametersFile = "Parameters File";
-        private const string LaDisposalCostFile = "LA Disposal cost File";
         private const string CountryApportionmentFile = "Country Apportionment File";
-        private const int ProducerCommsFeesHeaderColumnIndex = 95;
         private const int decimalRoundUp = 2;
-        private const int PercentageofProducerReportedHHTonnageColumnIndex = 193;
 
-        public CalcResultsExporter(IBlobStorageService blobStorageService)
+        public CalcResultsExporter(IStorageService storageService)
         {
-            _blobStorageService = blobStorageService;
+            this.storageService = storageService;
         }
         public void Export(CalcResult results)
         {
@@ -78,7 +74,7 @@ namespace EPR.Calculator.API.Exporter
                 results.CalcResultDetail.RunDate);
             try
             {
-                _blobStorageService.UploadResultFileContentAsync(fileName, csvContent);
+                this.storageService.UploadResultFileContentAsync(fileName, csvContent.ToString());
             }
             catch (IOException ex)
             {

@@ -3,29 +3,42 @@ using EPR.Calculator.API.Constants;
 using System.Text;
 namespace EPR.Calculator.API.Services
 {
-    public class BlobStorageService: IBlobStorageService
+    public class BlobStorageService : IStorageService
     {
-        private readonly BlobContainerClient _containerClient;
+        public const string BlobStorageSection = "BlobStorage";
+        public const string BlobSettingsMissingError = "BlobStorage settings are missing in configuration.";
+        public const string ContainerNameMissingError = "Container name is missing in configuration.";
+        public const string OctetStream = "application/octet-stream";
+        private readonly BlobContainerClient containerClient;
 
         public BlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration)
         {
-            var settings = configuration.GetSection("BlobStorage").Get<BlobStorageSettings>() ?? throw new ArgumentNullException("BlobStorage settings are missing in configuration.");
-            _containerClient = blobServiceClient.GetBlobContainerClient(settings.ContainerName ?? throw new ArgumentNullException("Container name is missing in configuration."));
+            var settings = configuration.GetSection(BlobStorageSection).Get<BlobStorageSettings>() ??
+                           throw new ArgumentNullException(BlobSettingsMissingError);
+            this.containerClient = blobServiceClient.GetBlobContainerClient(settings.ContainerName ??
+                                                                        throw new ArgumentNullException(
+                                                                            ContainerNameMissingError));
         }
 
-        public async Task UploadResultFileContentAsync(string fileName, StringBuilder csvContent)
+        public async Task UploadResultFileContentAsync(string fileName, string content)
         {
-            try
+            var blobClient = this.containerClient.GetBlobClient(fileName);
+            var binaryData = BinaryData.FromString(content);
+            await blobClient.UploadAsync(binaryData);
+        }
+
+        public async Task<IResult> DownloadFile(string fileName)
+        {
+            var blobClient = this.containerClient.GetBlobClient(fileName);
+
+            if (!await blobClient.ExistsAsync())
             {
-                File.WriteAllText(fileName, csvContent.ToString(), Encoding.UTF8);
-                BlobClient blobClient = _containerClient.GetBlobClient(fileName);
-                using var fileStream = File.OpenRead(fileName);
-                await blobClient.UploadAsync(fileStream, true);
+                return Results.NotFound(fileName);
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error occurred while saving blob content: {ex.Message}");
-            }
+
+            using var memoryStream = new MemoryStream();
+            await blobClient.DownloadToAsync(memoryStream);
+            return Results.File(memoryStream.ToArray(), OctetStream, fileName);
         }
     }
 }

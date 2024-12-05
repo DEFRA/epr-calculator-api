@@ -59,6 +59,7 @@ namespace EPR.Calculator.API.Tests.Controllers
                 new Mock<ITransposePomAndOrgDataService>().Object
             );
 
+            var mockStorageService = new Mock<IStorageService>();
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var mockClient = new Mock<ServiceBusClient>();
             var mockServiceBusSender = new Mock<ServiceBusSender>();
@@ -69,7 +70,8 @@ namespace EPR.Calculator.API.Tests.Controllers
 
             dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
             dbContext.SaveChanges();
-            calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(), mockFactory.Object);
+            calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(),
+                mockFactory.Object, mockStorageService.Object);
 
             dbContext.Material.RemoveRange(dbContext.Material.ToList());
             dbContext.SaveChanges();
