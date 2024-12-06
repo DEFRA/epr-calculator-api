@@ -6,6 +6,7 @@ using EPR.Calculator.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static EPR.Calculator.API.Services.TransposePomAndOrgDataService;
 
 namespace EPR.Calculator.API.UnitTests.Services
 {
@@ -173,8 +174,91 @@ namespace EPR.Calculator.API.UnitTests.Services
             Assert.AreEqual(expectedResult.ProducerName, producerDetail.ProducerName);
         }
 
+        [TestMethod]
+        public void Transpose_Should_Return_Latest_Organisation_Name()
+        {
+            
+            var service = new TransposePomAndOrgDataService(_context);
 
-        protected static IEnumerable<CalculatorRunOrganisationDataMaster> GetCalculatorRunOrganisationDataMaster()
+            var orgDetails = service.GetAllOrganisationsBasedonRunId(3);
+
+            var orgSubDetails = new List<OrganisationDetails>()
+            {
+                new OrganisationDetails()
+                {
+                     OrganisationId = 1,
+                     OrganisationName = "Test",
+                      SubmissionPeriod = "2023-p1",
+                       SubmissionPeriodDescription = "January to June 2023"
+                },
+                 new OrganisationDetails()
+                {
+                     OrganisationId = 1,
+                     OrganisationName = "Test1",
+                      SubmissionPeriod = "2023-p2",
+                       SubmissionPeriodDescription = "July to December 2023"
+                 }
+
+            };
+
+            var output = service.GetLatestOrganisationName(1, orgSubDetails, orgDetails);
+            Assert.IsNotNull(output);
+            Assert.AreEqual(output, "Test1");
+        }
+
+
+        [TestMethod]
+        public void Transpose_Should_Return_Latest_Subsidary_Name()
+        {
+
+            var service = new TransposePomAndOrgDataService(_context);
+
+            var orgDetails = service.GetAllOrganisationsBasedonRunId(3);
+
+            var orgSubDetails = new List<OrganisationDetails>()
+            {
+                new OrganisationDetails()
+                {
+                     OrganisationId = 1,
+                     SubsidaryId = "1",
+                     OrganisationName = "Test",
+                      SubmissionPeriod = "2023-p1",
+                       SubmissionPeriodDescription = "January to June 2023"
+                },
+                 new OrganisationDetails()
+                {
+                     OrganisationId = 1,
+                      SubsidaryId = "1",
+                     OrganisationName = "Test1",
+                      SubmissionPeriod = "2023-p2",
+                       SubmissionPeriodDescription = "July to December 2023"
+                 }
+
+            };
+
+            var output = service.GetLatestSubsidaryName(1, "1", orgSubDetails, orgDetails);
+            Assert.IsNotNull(output);
+            Assert.AreEqual(output, "Test1");
+        }
+
+        [TestMethod]
+        public void Transpose_Should_Return_Latest_Organisation_Name_From_Run()
+        {
+            var service = new TransposePomAndOrgDataService(_context);
+
+            var orgDetails = service.GetAllOrganisationsBasedonRunId(3);
+
+            var orgSubDetails = new List<OrganisationDetails>();
+            
+
+            var output = service.GetLatestSubsidaryName(1, "1", orgSubDetails, orgDetails);
+            Assert.IsNotNull(output);
+            Assert.AreEqual(output, "UPU LIMITED");
+        }
+
+
+
+            protected static IEnumerable<CalculatorRunOrganisationDataMaster> GetCalculatorRunOrganisationDataMaster()
         {
             var list = new List<CalculatorRunOrganisationDataMaster>
             {
