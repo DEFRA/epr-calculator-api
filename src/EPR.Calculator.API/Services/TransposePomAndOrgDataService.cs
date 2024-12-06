@@ -72,7 +72,7 @@ namespace EPR.Calculator.API.Services
 
                 // Get the calculator run organisation data details as we need the organisation name
                 var organisationDataDetails = context.CalculatorRunOrganisationDataDetails
-                    .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id && odd.OrganisationName != null)
+                    .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id && odd.OrganisationName != null && odd.OrganisationName !="")
                     .OrderBy(odd => odd.OrganisationName)
                     .GroupBy(odd => new { odd.OrganisationId, odd.SubsidaryId })
                     .Select(odd => odd.First())
@@ -88,7 +88,7 @@ namespace EPR.Calculator.API.Services
                 {
                     try
                     {
-                        foreach (var organisation in organisationDataDetails)
+                        foreach (var organisation in organisationDataDetails.Where(t=>!string.IsNullOrWhiteSpace(t.OrganisationName)))
                         {
                             // Initialise the producerReportedMaterials
                             var producerReportedMaterials = new List<ProducerReportedMaterial>();
@@ -105,7 +105,7 @@ namespace EPR.Calculator.API.Services
                             // TO DO: We have to record if there is no pom data in a separate table post Dec 2024
                             if (calculatorRunPomDataDetails.Count > 0)
                             {
-                                var organisations = organisationDataDetails.Where(odd => odd.OrganisationName == organisation.OrganisationName).OrderByDescending(odd => odd.SubmissionPeriodDesc);
+                                var organisations = organisationDataDetails.Where(odd => odd.OrganisationName == organisation.OrganisationName  && odd.SubsidaryId == organisation.SubsidaryId).OrderByDescending(odd => odd.SubmissionPeriodDesc);
 
                                 // Get the producer based on the latest submission period
                                 var producer = organisations.FirstOrDefault();
@@ -119,7 +119,7 @@ namespace EPR.Calculator.API.Services
                                         CalculatorRunId = resultsRequestDto.RunId,
                                         ProducerId = producer.OrganisationId.Value,
                                         SubsidiaryId = producer.SubsidaryId,
-                                        ProducerName = string.IsNullOrEmpty(producer.SubsidaryId) ? GetLatestOrganisationName(producer.OrganisationId.Value) : GetLatestSubsidaryName(producer.OrganisationId.Value, producer.SubsidaryId),
+                                        ProducerName = string.IsNullOrWhiteSpace(producer.SubsidaryId) ? GetLatestOrganisationName(producer.OrganisationId.Value) : GetLatestSubsidaryName(producer.OrganisationId.Value, producer.SubsidaryId),
                                         CalculatorRun = calculatorRun
                                     };
 
@@ -217,14 +217,16 @@ namespace EPR.Calculator.API.Services
 
             var organisations = OrganisationsBySubmissionPeriod.Where(t => t.OrganisationId == orgId && t.SubsidaryId == null).OrderByDescending(t => t.SubmissionPeriod?.Replace(PeriodSeparator, string.Empty)).ToList();
 
-            return organisations?.FirstOrDefault(t => t.OrganisationId == orgId)?.OrganisationName ?? OrganisationsList.FirstOrDefault(t => t.OrganisationId == orgId)?.OrganisationName;
+            var orgName = organisations?.FirstOrDefault(t => t.OrganisationId == orgId)?.OrganisationName;
+            return string.IsNullOrWhiteSpace(orgName) ? OrganisationsList.FirstOrDefault(t => t.OrganisationId == orgId)?.OrganisationName : orgName;
         }
 
         private string? GetLatestSubsidaryName(int orgId, string? subsidaryId)
         {
             if (OrganisationsBySubmissionPeriod is null) return string.Empty;
             var subsidaries = OrganisationsBySubmissionPeriod.Where(t => t.OrganisationId == orgId && t.SubsidaryId == subsidaryId).OrderByDescending(t => t.SubmissionPeriod?.Replace(PeriodSeparator, string.Empty)).ToList();
-            return subsidaries?.FirstOrDefault(t => t.OrganisationId == orgId && t.SubsidaryId == subsidaryId)?.OrganisationName ?? OrganisationsList.FirstOrDefault(t => t.OrganisationId == orgId && t.SubsidaryId == subsidaryId)?.OrganisationName;
+            var subsidaryName = subsidaries?.FirstOrDefault(t => t.OrganisationId == orgId && t.SubsidaryId == subsidaryId)?.OrganisationName;
+            return string.IsNullOrWhiteSpace(subsidaryName) ? OrganisationsList.FirstOrDefault(t => t.OrganisationId == orgId && t.SubsidaryId == subsidaryId)?.OrganisationName : subsidaryName;
         }
     }
 }
