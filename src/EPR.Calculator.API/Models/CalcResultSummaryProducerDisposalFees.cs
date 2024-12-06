@@ -149,5 +149,20 @@
 
         public decimal NorthernIrelandTotalWithBadDebtFor2bComms { get; set; }
 
+        // Section-TotalBill
+        public decimal TotalProducerBillWithoutBadDebtProvision { get; set; }
+
+        public decimal BadDebtProvisionForTotalProducerBill { get; set; }
+
+        public decimal TotalProducerBillWithBadDebtProvision { get; set; }
+
+        public decimal EnglandTotalwithBadDebtprovisionTotalBill { get; set; }
+
+        public decimal WalesTotalwithBadDebtprovisionTotalBill { get; set; }
+
+        public decimal ScotlandTotalwithBadDebtprovisionTotalBill { get; set; }
+
+        public decimal NorthernIrelandTotalwithBadDebtprovisionTotalBill { get; set; }
+        // End Section-TotalBill
     }
 }

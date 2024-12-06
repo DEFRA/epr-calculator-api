@@ -4,6 +4,7 @@ using EPR.Calculator.API.Builder.Summary.CommsCostTwoA;
 using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
 using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
 using EPR.Calculator.API.Builder.Summary.ThreeSa;
+using EPR.Calculator.API.Builder.Summary.TotalBillBreakdown;
 using EPR.Calculator.API.Builder.Summary.TwoCCommsCost;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
@@ -689,6 +690,11 @@ public static class CalcResultSummaryUtil
         // Section-5 SA setup costs column headers
         columnHeaders.AddRange(
             SaSetupCostsProducer.GetHeaders()
+        );
+
+        // Section-TotalBill column headers
+        columnHeaders.AddRange(
+            TotalBillBreakdownProducer.GetHeaders()
         );
 
         return columnHeaders;
