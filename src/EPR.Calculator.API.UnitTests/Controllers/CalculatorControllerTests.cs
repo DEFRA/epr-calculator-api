@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Tests.Controllers;
 using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Validators;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.Azure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace EPR.Calculator.API.UnitTests
+namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
     public class CalculatorControllerTests : BaseControllerTest
@@ -210,9 +211,11 @@ namespace EPR.Calculator.API.UnitTests
             configs.GetSection("ServiceBus").GetSection("ConnectionString").Value = string.Empty;
 
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
+            var mockStorageService = new Mock<IStorageService>();
 
 #pragma warning disable CS8604 // Possible null reference argument.
-            calculatorController = new CalculatorController(dbContext, configs, mockFactory.Object);
+            calculatorController =
+                new CalculatorController(dbContext, configs, mockFactory.Object, mockStorageService.Object);
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
@@ -258,9 +261,10 @@ namespace EPR.Calculator.API.UnitTests
             configs.GetSection("ServiceBus").GetSection("QueueName").Value = string.Empty;
 
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
-
+            var mockStorageService = new Mock<IStorageService>();
 #pragma warning disable CS8604 // Possible null reference argument.
-            calculatorController = new CalculatorController(dbContext, configs, mockFactory.Object);
+            calculatorController =
+                new CalculatorController(dbContext, configs, mockFactory.Object, mockStorageService.Object);
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
@@ -306,9 +310,11 @@ namespace EPR.Calculator.API.UnitTests
             configs.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value = string.Empty;
 
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
+            var mockStorageService = new Mock<IStorageService>();
 
 #pragma warning disable CS8604 // Possible null reference argument.
-            calculatorController = new CalculatorController(dbContext, configs, mockFactory.Object);
+            calculatorController =
+                new CalculatorController(dbContext, configs, mockFactory.Object, mockStorageService.Object);
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
@@ -354,9 +360,11 @@ namespace EPR.Calculator.API.UnitTests
             configs.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value = string.Empty;
 
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
+            var mockStorageService = new Mock<IStorageService>();
 
 #pragma warning disable CS8604 // Possible null reference argument.
-            calculatorController = new CalculatorController(dbContext, configs, mockFactory.Object);
+            calculatorController =
+                new CalculatorController(dbContext, configs, mockFactory.Object, mockStorageService.Object);
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
@@ -441,6 +449,58 @@ namespace EPR.Calculator.API.UnitTests
             var actionResult = calculatorController?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.Value);
+        }
+
+        [TestMethod]
+        public async Task Create_Calculator_Run_Return_422_If_One_Calculation_Already_In_Running()
+        {
+            var createCalculatorRunDto = new CreateCalculatorRunDto
+            {
+                CalculatorRunName = "Test calculator run",
+                CreatedBy = "Test user",
+                FinancialYear = "2024-25"
+            };
+
+            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            {
+                Id = 1,
+                ParameterYear = "2023-24",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext?.SaveChanges();
+
+            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
+            {
+                Id = 1,
+                ProjectionYear = "2023-24",
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null
+            });
+            dbContext?.SaveChanges();
+
+            dbContext?.CalculatorRuns.Add(new CalculatorRun
+            {
+                CreatedBy = "Testuser",
+                CreatedAt = DateTime.Now,
+                CalculatorRunClassificationId = 2,
+                Financial_Year = "2023-24",
+                Name = "TestOneAtATime"
+            });
+            dbContext?.SaveChanges();
+
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(422, actionResult.StatusCode);
+            var expectedJson = "{\"Message\":\"The calculator is currently running. You will be able to run another calculation once the current one has finished.\"}";
+            var actualJson = System.Text.Json.JsonSerializer.Serialize(actionResult?.Value);
+            Assert.AreEqual(expectedJson, actualJson);
         }
     }
 }

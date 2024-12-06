@@ -1,5 +1,4 @@
-﻿using EPR.Calculator.API.Builder.CommsCost;
-using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
@@ -9,7 +8,7 @@ namespace EPR.Calculator.API.Exporter
 {
     public class CalcResultsExporter : ICalcResultsExporter<CalcResult>
     {
-        private readonly IBlobStorageService _blobStorageService;
+        private readonly IStorageService storageService;
         private const string RunName = "Run Name";
         private const string RunId = "Run Id";
         private const string RunDate = "Run Date";
@@ -19,15 +18,12 @@ namespace EPR.Calculator.API.Exporter
         private const string RPDFilePOM = "RPD File - POM";
         private const string LapcapFile = "LAPCAP File";
         private const string ParametersFile = "Parameters File";
-        private const string LaDisposalCostFile = "LA Disposal cost File";
         private const string CountryApportionmentFile = "Country Apportionment File";
-        private const int ProducerCommsFeesHeaderColumnIndex = 95;
         private const int decimalRoundUp = 2;
-        private const int PercentageofProducerReportedHHTonnageColumnIndex = 193;
 
-        public CalcResultsExporter(IBlobStorageService blobStorageService)
+        public CalcResultsExporter(IStorageService storageService)
         {
-            _blobStorageService = blobStorageService;
+            this.storageService = storageService;
         }
         public void Export(CalcResult results)
         {
@@ -78,7 +74,7 @@ namespace EPR.Calculator.API.Exporter
                 results.CalcResultDetail.RunDate);
             try
             {
-                _blobStorageService.UploadResultFileContentAsync(fileName, csvContent);
+                this.storageService.UploadResultFileContentAsync(fileName, csvContent.ToString());
             }
             catch (IOException ex)
             {
@@ -420,13 +416,22 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.NorthernIrelandTotalwithBadDebtprovision3, decimalRoundUp))},");
 
                 // LA data prep costs section 4
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsTotalWithoutBadDebtProvisionSection4)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsBadDebtProvisionSection4)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsTotalWithBadDebtProvisionSection4)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(producer.LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4)},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.LaDataPrepCostsTotalWithoutBadDebtProvisionSection4, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.LaDataPrepCostsBadDebtProvisionSection4, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.LaDataPrepCostsTotalWithBadDebtProvisionSection4, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4, decimalRoundUp))},");
+
+                // Section-5 SA setup costs
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TotalProducerFeeWithoutBadDebtProvisionSection5, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.BadDebtProvisionSection5, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TotalProducerFeeWithBadDebtProvisionSection5, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.EnglandTotalWithBadDebtProvisionSection5, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.WalesTotalWithBadDebtProvisionSection5, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.ScotlandTotalWithBadDebtProvisionSection5, decimalRoundUp))},");
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.NorthernIrelandTotalWithBadDebtProvisionSection5, decimalRoundUp))},");
 
                 csvContent.AppendLine();
             }
@@ -464,7 +469,6 @@ namespace EPR.Calculator.API.Exporter
             var headerRow = string.Join(",", headerRows);
             csvContent.AppendLine(headerRow);
         }
-
 
         private static void WriteColumnHeaders(CalcResultSummary resultSummary, StringBuilder csvContent)
         {
