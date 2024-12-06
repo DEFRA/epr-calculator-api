@@ -21,6 +21,7 @@ using EPR.Calculator.API.Wrapper;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
+using EPR.Calculator.API.Utils;
 using Microsoft.Extensions.Azure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,6 +56,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+builder.Services.AddSingleton(typeof(PipelineClientFactory));
 
 builder.Services.Configure<BlobStorageSettings>(
     builder.Configuration.GetSection("BlobStorage"));
