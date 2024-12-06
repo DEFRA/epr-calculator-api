@@ -153,6 +153,11 @@ namespace EPR.Calculator.API.Controllers
         [Route("prepareCalcResults")]
         public IActionResult PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
             this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
             var results = this.builder.Build(resultsRequestDto);
             this.exporter.Export(results);
