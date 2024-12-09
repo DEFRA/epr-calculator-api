@@ -3,7 +3,7 @@
     public static class CountryConstants
     {
         public static string England = "England";
-        public static string NI = "NI";
+        public static string NI = "Northern Ireland";
         public static string Wales = "Wales";
         public static string Scotland = "Scotland";
     }
