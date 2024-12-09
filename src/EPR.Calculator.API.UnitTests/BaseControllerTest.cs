@@ -34,12 +34,14 @@ namespace EPR.Calculator.API.Tests.Controllers
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
             .UseInMemoryDatabase(databaseName: "PayCal")
             .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-            .Options;
+            .Options;           
+
 
             dbContext = new ApplicationDBContext(dbContextOptions);
             dbContext.Database.EnsureCreated();
             dbContext.DefaultParameterTemplateMasterList.RemoveRange(dbContext.DefaultParameterTemplateMasterList);
-            dbContext.SaveChanges();
+            dbContext.SaveChanges();          
+
             dbContext.DefaultParameterTemplateMasterList.AddRange(GetDefaultParameterTemplateMasterData().ToList());
             dbContext.SaveChanges();
 
@@ -845,24 +847,49 @@ namespace EPR.Calculator.API.Tests.Controllers
                 EffectiveFrom = DateTime.Now,
                 CreatedBy = "Test user",
                 CreatedAt = DateTime.Now
-            });
+            });           
             return list;
         }
 
         protected static IEnumerable<CalculatorRunOrganisationDataDetail> GetCalculatorRunOrganisationDataDetails()
         {
             var list = new List<CalculatorRunOrganisationDataDetail>();
-            list.Add(new CalculatorRunOrganisationDataDetail
+            list.AddRange(new List<CalculatorRunOrganisationDataDetail>() { new CalculatorRunOrganisationDataDetail
             {
                 Id = 1,
+                OrganisationId = 1,
+                OrganisationName = "UPU LIMITED",
+                LoadTimeStamp= DateTime.Now,
+                CalculatorRunOrganisationDataMasterId = 1,
+                SubmissionPeriodDesc = "July to December 2023",
+                CalculatorRunOrganisationDataMaster =
+                new CalculatorRunOrganisationDataMaster
+            {
+                Id = 1,
+                CalendarYear = "2024-25",
+                EffectiveFrom = DateTime.Now,
+                CreatedBy = "Test user",
+                CreatedAt = DateTime.Now
+            }
+            },
+                new CalculatorRunOrganisationDataDetail
+            {
+                Id = 2,
                 OrganisationId = 1,
                 SubsidaryId = "SUBSID1",
                 OrganisationName = "UPU LIMITED",
                 LoadTimeStamp = DateTime.Now,
                 CalculatorRunOrganisationDataMasterId = 1,
                 SubmissionPeriodDesc = "July to December 2023",
-                CalculatorRunOrganisationDataMaster = BaseControllerTest.GetCalculatorRunOrganisationDataMaster().ToList()[0]
-            });
+                CalculatorRunOrganisationDataMaster = new CalculatorRunOrganisationDataMaster
+            {
+                Id = 1,
+                CalendarYear = "2024-25",
+                EffectiveFrom = DateTime.Now,
+                CreatedBy = "Test user",
+                CreatedAt = DateTime.Now
+            }
+            } });
             return list;
         }
     }
