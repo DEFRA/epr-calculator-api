@@ -98,7 +98,7 @@ namespace EPR.Calculator.API.Constants
             "2a Fee for Comms Costs - by Material with Bad Debt provision";
 
         public static readonly string TotalBadDebtProvision1Plus2A = "Total (1 + 2a) with Bad Debt provision";
-        public static readonly string TotalProducer1Plus2ABadDebt = "Producer Total(1+2a) with Bad Debt provision";
+        public static readonly string TotalProducer1Plus2ABadDebt = "Producer Total (1+2a) with Bad Debt provision";
         public static readonly string TotalProducer1Plus2ABadDebtPercentage = "Producer Percentage of Costs: Producer (1+2a) Percentage of Overal Producer Cost of (1+2a)";
 
         // LA data prep costs section 4
