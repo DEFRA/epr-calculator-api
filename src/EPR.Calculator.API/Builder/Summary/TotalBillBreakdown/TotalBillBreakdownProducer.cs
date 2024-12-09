@@ -1,11 +1,4 @@
-﻿using EPR.Calculator.API.Builder.Summary.Common;
-using EPR.Calculator.API.Builder.Summary.CommsCostTwoBTotalBill;
-using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
-using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
-using EPR.Calculator.API.Builder.Summary.ThreeSA;
-using EPR.Calculator.API.Builder.Summary.TotalProducerBillBreakdown;
-using EPR.Calculator.API.Builder.Summary.TwoCCommsCost;
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Builder.Summary.TotalProducerBillBreakdown;
 using EPR.Calculator.API.Models;
 
 namespace EPR.Calculator.API.Builder.Summary.TotalBillBreakdown
@@ -40,7 +33,8 @@ namespace EPR.Calculator.API.Builder.Summary.TotalBillBreakdown
 
             return total;
         }
-        public static decimal GetBadDebtProvisionforTotalProducerBill(CalcResultSummaryProducerDisposalFees result)
+
+        public static decimal GetBadDebtProvisionForTotalProducerBill(CalcResultSummaryProducerDisposalFees result)
         {
             var total = result.BadDebtProvisionFor1 +
                         result.BadDebtProvisionFor2A +
@@ -53,6 +47,7 @@ namespace EPR.Calculator.API.Builder.Summary.TotalBillBreakdown
 
             return total;
         }
+
         public static decimal GetTotalProducerBillWithBadDebtProvision(CalcResultSummaryProducerDisposalFees result)
         {
             var total = result.TotalProducerFeeforLADisposalCostswithBadDebtprovision +
@@ -66,55 +61,57 @@ namespace EPR.Calculator.API.Builder.Summary.TotalBillBreakdown
 
             return total;
         }
-        public static decimal GetEnglandTotalwithBadDebtprovision(CalcResultSummaryProducerDisposalFees result)
+
+        public static decimal GetEnglandTotalWithBadDebtProvision(CalcResultSummaryProducerDisposalFees result)
         {
-            var total = result.EnglandTotalwithBadDebtprovision +
-                        result.EnglandTotalwithBadDebtprovision2A +
+            var total = result.EnglandTotalWithBadDebtProvision +
+                        result.EnglandTotalWithBadDebtProvision2A +
                         result.EnglandTotalWithBadDebtFor2bComms +
                         result.TwoCEnglandTotalWithBadDebt +
                         
-                        result.EnglandTotalwithBadDebtprovision3 +
+                        result.EnglandTotalWithBadDebtProvision3 +
                         result.LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 +
                         result.EnglandTotalWithBadDebtProvisionSection5;
 
             return total;
         }
 
-        public static decimal GetWalesTotalwithBadDebtprovision(CalcResultSummaryProducerDisposalFees result)
+        public static decimal GetWalesTotalWithBadDebtProvision(CalcResultSummaryProducerDisposalFees result)
         {
-            var total = result.WalesTotalwithBadDebtprovision +
-                        result.WalesTotalwithBadDebtprovision2A +
+            var total = result.WalesTotalWithBadDebtProvision +
+                        result.WalesTotalWithBadDebtProvision2A +
                         result.WalesTotalWithBadDebtFor2bComms +
                         result.TwoCWalesTotalWithBadDebt +
                         
-                        result.WalesTotalwithBadDebtprovision3 +
+                        result.WalesTotalWithBadDebtProvision3 +
                         result.LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4 +
                         result.WalesTotalWithBadDebtProvisionSection5;
 
             return total;
         }
 
-        public static decimal GetScotlandTotalwithBadDebtprovision(CalcResultSummaryProducerDisposalFees result)
+        public static decimal GetScotlandTotalWithBadDebtProvision(CalcResultSummaryProducerDisposalFees result)
         {
-            var total = result.ScotlandTotalwithBadDebtprovision +
-                        result.ScotlandTotalwithBadDebtprovision2A +
+            var total = result.ScotlandTotalWithBadDebtProvision +
+                        result.ScotlandTotalWithBadDebtProvision2A +
                         result.ScotlandTotalWithBadDebtFor2bComms +
                         result.TwoCScotlandTotalWithBadDebt +
                         
-                        result.ScotlandTotalwithBadDebtprovision3 +
+                        result.ScotlandTotalWithBadDebtProvision3 +
                         result.LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 +
                         result.ScotlandTotalWithBadDebtProvisionSection5;
 
             return total;
         }
-        public static decimal GetNorthernIrelandTotalwithBadDebtprovision(CalcResultSummaryProducerDisposalFees result)
+
+        public static decimal GetNorthernIrelandTotalWithBadDebtProvision(CalcResultSummaryProducerDisposalFees result)
         {
-            var total = result.NorthernIrelandTotalwithBadDebtprovision +
-                        result.NorthernIrelandTotalwithBadDebtprovision2A +
+            var total = result.NorthernIrelandTotalWithBadDebtProvision +
+                        result.NorthernIrelandTotalWithBadDebtProvision2A +
                         result.NorthernIrelandTotalWithBadDebtFor2bComms +
                         result.TwoCNorthernIrelandTotalWithBadDebt +
                         
-                        result.NorthernIrelandTotalwithBadDebtprovision3 +
+                        result.NorthernIrelandTotalWithBadDebtProvision3 +
                         result.LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 +
                         result.NorthernIrelandTotalWithBadDebtProvisionSection5;
 
@@ -136,7 +133,7 @@ namespace EPR.Calculator.API.Builder.Summary.TotalBillBreakdown
             return total;
         }
 
-        public static decimal GetBadDebtProvisionforTotalProducerBillTotal(CalcResultSummaryProducerDisposalFees totalRow)
+        public static decimal GetBadDebtProvisionForTotalProducerBillTotal(CalcResultSummaryProducerDisposalFees totalRow)
         {
             var total = totalRow.BadDebtProvisionFor1 +
                         totalRow.BadDebtProvisionFor2A +
@@ -149,6 +146,7 @@ namespace EPR.Calculator.API.Builder.Summary.TotalBillBreakdown
 
             return total;
         }
+
         public static decimal GetTotalProducerBillWithBadDebtProvisionTotal(CalcResultSummaryProducerDisposalFees totalRow)
         {
             var total = totalRow.TotalProducerFeeforLADisposalCostswithBadDebtprovision +
@@ -162,53 +160,57 @@ namespace EPR.Calculator.API.Builder.Summary.TotalBillBreakdown
 
             return total;
         }
-        public static decimal GetEnglandTotalwithBadDebtprovisionTotal(CalcResultSummaryProducerDisposalFees totalRow)
+
+        public static decimal GetEnglandTotalWithBadDebtProvisionTotal(CalcResultSummaryProducerDisposalFees totalRow)
         {
-            var total = totalRow.EnglandTotalwithBadDebtprovision +
-                        totalRow.EnglandTotalwithBadDebtprovision2A +
+            var total = totalRow.EnglandTotalWithBadDebtProvision +
+                        totalRow.EnglandTotalWithBadDebtProvision2A +
                         totalRow.EnglandTotalWithBadDebtFor2bComms +
                         totalRow.TwoCEnglandTotalWithBadDebt + 
 
-                        totalRow.EnglandTotalwithBadDebtprovision3 +
+                        totalRow.EnglandTotalWithBadDebtProvision3 +
                         totalRow.LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 +
                         totalRow.EnglandTotalWithBadDebtProvisionSection5;
 
             return total;
         }
-        public static decimal GetWalesTotalwithBadDebtprovisionTotal(CalcResultSummaryProducerDisposalFees totalRow)
+
+        public static decimal GetWalesTotalWithBadDebtProvisionTotal(CalcResultSummaryProducerDisposalFees totalRow)
         {
-            var total = totalRow.WalesTotalwithBadDebtprovision +
-                        totalRow.WalesTotalwithBadDebtprovision2A +
+            var total = totalRow.WalesTotalWithBadDebtProvision +
+                        totalRow.WalesTotalWithBadDebtProvision2A +
                         totalRow.WalesTotalWithBadDebtFor2bComms +
                         totalRow.TwoCWalesTotalWithBadDebt +
 
-                        totalRow.WalesTotalwithBadDebtprovision3 +
+                        totalRow.WalesTotalWithBadDebtProvision3 +
                         totalRow.LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4 +
                         totalRow.WalesTotalWithBadDebtProvisionSection5;
 
             return total;
         }
-        public static decimal GetScotlandTotalwithBadDebtprovisionTotal(CalcResultSummaryProducerDisposalFees totalRow)
+
+        public static decimal GetScotlandTotalWithBadDebtProvisionTotal(CalcResultSummaryProducerDisposalFees totalRow)
         {
-            var total = totalRow.ScotlandTotalwithBadDebtprovision +
-                        totalRow.ScotlandTotalwithBadDebtprovision2A +
+            var total = totalRow.ScotlandTotalWithBadDebtProvision +
+                        totalRow.ScotlandTotalWithBadDebtProvision2A +
                         totalRow.ScotlandTotalWithBadDebtFor2bComms +
                         totalRow.TwoCScotlandTotalWithBadDebt+
 
-                        totalRow.ScotlandTotalwithBadDebtprovision3 +
+                        totalRow.ScotlandTotalWithBadDebtProvision3 +
                         totalRow.LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 +
                         totalRow.ScotlandTotalWithBadDebtProvisionSection5;
 
             return total;
         }
-        public static decimal GetNorthernIrelandTotalwithBadDebtprovisionTotal(CalcResultSummaryProducerDisposalFees totalRow)
+        
+        public static decimal GetNorthernIrelandTotalWithBadDebtProvisionTotal(CalcResultSummaryProducerDisposalFees totalRow)
         {
-            var total = totalRow.NorthernIrelandTotalwithBadDebtprovision +
-                        totalRow.NorthernIrelandTotalwithBadDebtprovision2A +
+            var total = totalRow.NorthernIrelandTotalWithBadDebtProvision +
+                        totalRow.NorthernIrelandTotalWithBadDebtProvision2A +
                         totalRow.NorthernIrelandTotalWithBadDebtFor2bComms +
                         totalRow.TwoCNorthernIrelandTotalWithBadDebt +
 
-                        totalRow.NorthernIrelandTotalwithBadDebtprovision3 +
+                        totalRow.NorthernIrelandTotalWithBadDebtProvision3 +
                         totalRow.LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 +
                         totalRow.NorthernIrelandTotalWithBadDebtProvisionSection5;
 

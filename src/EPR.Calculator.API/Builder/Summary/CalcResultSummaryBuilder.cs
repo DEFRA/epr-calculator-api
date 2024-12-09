@@ -200,18 +200,18 @@ namespace EPR.Calculator.API.Builder.Summary
                 TotalProducerFeeforLADisposalCostswoBadDebtprovision = CalcResultSummaryUtil.GetTotalProducerDisposalFee(materialCostSummary),
                 BadDebtProvisionFor1 = CalcResultSummaryUtil.GetTotalBadDebtProvision(materialCostSummary),
                 TotalProducerFeeforLADisposalCostswithBadDebtprovision = CalcResultSummaryUtil.GetTotalProducerDisposalFeeWithBadDebtProvision(materialCostSummary),
-                EnglandTotalwithBadDebtprovision = CalcResultSummaryUtil.GetEnglandTotal(materialCostSummary),
-                WalesTotalwithBadDebtprovision = CalcResultSummaryUtil.GetWalesTotal(materialCostSummary),
-                ScotlandTotalwithBadDebtprovision = CalcResultSummaryUtil.GetScotlandTotal(materialCostSummary),
-                NorthernIrelandTotalwithBadDebtprovision = CalcResultSummaryUtil.GetNorthernIrelandTotal(materialCostSummary),
+                EnglandTotalWithBadDebtProvision = CalcResultSummaryUtil.GetEnglandTotal(materialCostSummary),
+                WalesTotalWithBadDebtProvision = CalcResultSummaryUtil.GetWalesTotal(materialCostSummary),
+                ScotlandTotalWithBadDebtProvision = CalcResultSummaryUtil.GetScotlandTotal(materialCostSummary),
+                NorthernIrelandTotalWithBadDebtProvision = CalcResultSummaryUtil.GetNorthernIrelandTotal(materialCostSummary),
 
                 TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision = CalcResultSummaryUtil.GetTotalProducerCommsFee(commsCostSummary),
                 BadDebtProvisionFor2A = CalcResultSummaryUtil.GetCommsTotalBadDebtProvision(commsCostSummary),
                 TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision = CalcResultSummaryUtil.GetTotalProducerCommsFeeWithBadDebtProvision(commsCostSummary),
-                EnglandTotalwithBadDebtprovision2A = CalcResultSummaryUtil.GetEnglandCommsTotal(commsCostSummary),
-                WalesTotalwithBadDebtprovision2A = CalcResultSummaryUtil.GetWalesCommsTotal(commsCostSummary),
-                ScotlandTotalwithBadDebtprovision2A = CalcResultSummaryUtil.GetScotlandCommsTotal(commsCostSummary),
-                NorthernIrelandTotalwithBadDebtprovision2A = CalcResultSummaryUtil.GetNorthernIrelandCommsTotal(commsCostSummary),
+                EnglandTotalWithBadDebtProvision2A = CalcResultSummaryUtil.GetEnglandCommsTotal(commsCostSummary),
+                WalesTotalWithBadDebtProvision2A = CalcResultSummaryUtil.GetWalesCommsTotal(commsCostSummary),
+                ScotlandTotalWithBadDebtProvision2A = CalcResultSummaryUtil.GetScotlandCommsTotal(commsCostSummary),
+                NorthernIrelandTotalWithBadDebtProvision2A = CalcResultSummaryUtil.GetNorthernIrelandCommsTotal(commsCostSummary),
 
                 //section bad debt total 
                 TotalOnePlus2AFeeWithBadDebtProvision = GetTotalOnePlus2AFeeWithBadDebtProvision(materialCostSummary, commsCostSummary),
@@ -230,10 +230,10 @@ namespace EPR.Calculator.API.Builder.Summary
                 Total3SAOperatingCostwoBadDebtprovision = ThreeSaUtil.GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
                 BadDebtProvisionFor3 = ThreeSaUtil.GetBadDebtProvisionProducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
                 Total3SAOperatingCostswithBadDebtprovision = ThreeSaUtil.GetSAOperatingCostsTotalWithBadDebtProvisionPrtoducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
-                EnglandTotalwithBadDebtprovision3 = ThreeSaUtil.GetSAOperatingCostsEnglandTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
-                WalesTotalwithBadDebtprovision3 = ThreeSaUtil.GetSAOperatingCostsWalesTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
-                ScotlandTotalwithBadDebtprovision3 = ThreeSaUtil.GetSAOperatingCostsScotlandTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
-                NorthernIrelandTotalwithBadDebtprovision3 = ThreeSaUtil.GetSAOperatingCostsNITotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                EnglandTotalWithBadDebtProvision3 = ThreeSaUtil.GetSAOperatingCostsEnglandTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                WalesTotalWithBadDebtProvision3 = ThreeSaUtil.GetSAOperatingCostsWalesTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                ScotlandTotalWithBadDebtProvision3 = ThreeSaUtil.GetSAOperatingCostsScotlandTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                NorthernIrelandTotalWithBadDebtProvision3 = ThreeSaUtil.GetSAOperatingCostsNITotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
 
                 // Section-4 LA data prep costs
                 LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = LaDataPrepCostsProducer.GetLaDataPrepCostsProducerFeeWithoutBadDebtProvisionTotal(producerDetailList, producersAndSubsidiaries, materials, calcResult),
@@ -263,13 +263,13 @@ namespace EPR.Calculator.API.Builder.Summary
                 producersAndSubsidiaries, runProducerMaterialDetails);
 
             // Section-TotalBill
-            totalRow.TotalProducerBillWithoutBadDebtProvision = TotalBillBreakdownProducer.GetBadDebtProvisionforTotalProducerBillTotal(totalRow);
-            totalRow.BadDebtProvisionForTotalProducerBill = TotalBillBreakdownProducer.GetTotalProducerBillWithoutBadDebtProvisionTotal(totalRow);
+            totalRow.TotalProducerBillWithoutBadDebtProvision = TotalBillBreakdownProducer.GetTotalProducerBillWithoutBadDebtProvisionTotal(totalRow);
+            totalRow.BadDebtProvisionForTotalProducerBill = TotalBillBreakdownProducer.GetBadDebtProvisionForTotalProducerBillTotal(totalRow);
             totalRow.TotalProducerBillWithBadDebtProvision = TotalBillBreakdownProducer.GetTotalProducerBillWithBadDebtProvisionTotal(totalRow);
-            totalRow.EnglandTotalwithBadDebtprovisionTotalBill = TotalBillBreakdownProducer.GetEnglandTotalwithBadDebtprovisionTotal(totalRow);
-            totalRow.WalesTotalwithBadDebtprovisionTotalBill = TotalBillBreakdownProducer.GetWalesTotalwithBadDebtprovisionTotal(totalRow);
-            totalRow.ScotlandTotalwithBadDebtprovisionTotalBill = TotalBillBreakdownProducer.GetScotlandTotalwithBadDebtprovisionTotal(totalRow);
-            totalRow.NorthernIrelandTotalwithBadDebtprovisionTotalBill = TotalBillBreakdownProducer.GetNorthernIrelandTotalwithBadDebtprovisionTotal(totalRow);
+            totalRow.EnglandTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetEnglandTotalWithBadDebtProvisionTotal(totalRow);
+            totalRow.WalesTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetWalesTotalWithBadDebtProvisionTotal(totalRow);
+            totalRow.ScotlandTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetScotlandTotalWithBadDebtProvisionTotal(totalRow);
+            totalRow.NorthernIrelandTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetNorthernIrelandTotalWithBadDebtProvisionTotal(totalRow);
 
             return totalRow;
 
@@ -348,18 +348,18 @@ namespace EPR.Calculator.API.Builder.Summary
                 TotalProducerFeeforLADisposalCostswoBadDebtprovision = CalcResultSummaryUtil.GetTotalProducerDisposalFee(materialCostSummary),
                 BadDebtProvisionFor1 = CalcResultSummaryUtil.GetTotalBadDebtProvision(materialCostSummary),
                 TotalProducerFeeforLADisposalCostswithBadDebtprovision = CalcResultSummaryUtil.GetTotalProducerDisposalFeeWithBadDebtProvision(materialCostSummary),
-                EnglandTotalwithBadDebtprovision = CalcResultSummaryUtil.GetEnglandTotal(materialCostSummary),
-                WalesTotalwithBadDebtprovision = CalcResultSummaryUtil.GetWalesTotal(materialCostSummary),
-                ScotlandTotalwithBadDebtprovision = CalcResultSummaryUtil.GetScotlandTotal(materialCostSummary),
-                NorthernIrelandTotalwithBadDebtprovision = CalcResultSummaryUtil.GetNorthernIrelandTotal(materialCostSummary),
+                EnglandTotalWithBadDebtProvision = CalcResultSummaryUtil.GetEnglandTotal(materialCostSummary),
+                WalesTotalWithBadDebtProvision = CalcResultSummaryUtil.GetWalesTotal(materialCostSummary),
+                ScotlandTotalWithBadDebtProvision = CalcResultSummaryUtil.GetScotlandTotal(materialCostSummary),
+                NorthernIrelandTotalWithBadDebtProvision = CalcResultSummaryUtil.GetNorthernIrelandTotal(materialCostSummary),
 
                 TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision = CalcResultSummaryUtil.GetTotalProducerCommsFee(commsCostSummary),
                 BadDebtProvisionFor2A = CalcResultSummaryUtil.GetCommsTotalBadDebtProvision(commsCostSummary),
                 TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision = CalcResultSummaryUtil.GetTotalProducerCommsFeeWithBadDebtProvision(commsCostSummary),
-                EnglandTotalwithBadDebtprovision2A = CalcResultSummaryUtil.GetEnglandCommsTotal(commsCostSummary),
-                WalesTotalwithBadDebtprovision2A = CalcResultSummaryUtil.GetWalesCommsTotal(commsCostSummary),
-                ScotlandTotalwithBadDebtprovision2A = CalcResultSummaryUtil.GetScotlandCommsTotal(commsCostSummary),
-                NorthernIrelandTotalwithBadDebtprovision2A = CalcResultSummaryUtil.GetNorthernIrelandCommsTotal(commsCostSummary),
+                EnglandTotalWithBadDebtProvision2A = CalcResultSummaryUtil.GetEnglandCommsTotal(commsCostSummary),
+                WalesTotalWithBadDebtProvision2A = CalcResultSummaryUtil.GetWalesCommsTotal(commsCostSummary),
+                ScotlandTotalWithBadDebtProvision2A = CalcResultSummaryUtil.GetScotlandCommsTotal(commsCostSummary),
+                NorthernIrelandTotalWithBadDebtProvision2A = CalcResultSummaryUtil.GetNorthernIrelandCommsTotal(commsCostSummary),
 
                 //section bad debt total 
                 TotalOnePlus2AFeeWithBadDebtProvision = GetTotalOnePlus2AFeeWithBadDebtProvision(materialCostSummary, commsCostSummary),
@@ -378,10 +378,10 @@ namespace EPR.Calculator.API.Builder.Summary
                 Total3SAOperatingCostwoBadDebtprovision = ThreeSaUtil.GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
                 BadDebtProvisionFor3 = ThreeSaUtil.GetBadDebtProvisionProducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
                 Total3SAOperatingCostswithBadDebtprovision = ThreeSaUtil.GetSAOperatingCostsTotalWithBadDebtProvisionPrtoducerTotalSection3(materialCostSummary, commsCostSummary, materials, calcResult),
-                EnglandTotalwithBadDebtprovision3 = ThreeSaUtil.GetSAOperatingCostsEnglandTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
-                WalesTotalwithBadDebtprovision3 = ThreeSaUtil.GetSAOperatingCostsWalesTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
-                ScotlandTotalwithBadDebtprovision3 = ThreeSaUtil.GetSAOperatingCostsScotlandTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
-                NorthernIrelandTotalwithBadDebtprovision3 = ThreeSaUtil.GetSAOperatingCostsNITotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                EnglandTotalWithBadDebtProvision3 = ThreeSaUtil.GetSAOperatingCostsEnglandTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                WalesTotalWithBadDebtProvision3 = ThreeSaUtil.GetSAOperatingCostsWalesTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                ScotlandTotalWithBadDebtProvision3 = ThreeSaUtil.GetSAOperatingCostsScotlandTotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
+                NorthernIrelandTotalWithBadDebtProvision3 = ThreeSaUtil.GetSAOperatingCostsNITotalWithBadDebtProvisionSection3(materialCostSummary, commsCostSummary, materials, calcResult),
 
                 // LA data prep costs section 4
                 LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = LaDataPrepCostsProducer.GetLaDataPrepCostsProducerFeeWithoutBadDebtProvision(producerDetailList, materials, calcResult, materialCostSummary, commsCostSummary),
@@ -410,12 +410,12 @@ namespace EPR.Calculator.API.Builder.Summary
 
             // section-TotalBill
             result.TotalProducerBillWithoutBadDebtProvision = TotalBillBreakdownProducer.GetTotalProducerBillWithoutBadDebtProvision(result);
-            result.BadDebtProvisionForTotalProducerBill = TotalBillBreakdownProducer.GetBadDebtProvisionforTotalProducerBill(result);
+            result.BadDebtProvisionForTotalProducerBill = TotalBillBreakdownProducer.GetBadDebtProvisionForTotalProducerBill(result);
             result.TotalProducerBillWithBadDebtProvision = TotalBillBreakdownProducer.GetTotalProducerBillWithBadDebtProvision(result);
-            result.EnglandTotalwithBadDebtprovisionTotalBill = TotalBillBreakdownProducer.GetEnglandTotalwithBadDebtprovision(result);
-            result.WalesTotalwithBadDebtprovisionTotalBill = TotalBillBreakdownProducer.GetWalesTotalwithBadDebtprovision(result);
-            result.ScotlandTotalwithBadDebtprovisionTotalBill = TotalBillBreakdownProducer.GetScotlandTotalwithBadDebtprovision(result);
-            result.NorthernIrelandTotalwithBadDebtprovisionTotalBill = TotalBillBreakdownProducer.GetNorthernIrelandTotalwithBadDebtprovision(result);
+            result.EnglandTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetEnglandTotalWithBadDebtProvision(result);
+            result.WalesTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetWalesTotalWithBadDebtProvision(result);
+            result.ScotlandTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetScotlandTotalWithBadDebtProvision(result);
+            result.NorthernIrelandTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetNorthernIrelandTotalWithBadDebtProvision(result);
 
             return result;
         }
