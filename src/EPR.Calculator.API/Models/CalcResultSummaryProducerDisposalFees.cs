@@ -47,13 +47,13 @@
 
         public decimal TotalProducerFeeforLADisposalCostswithBadDebtprovision { get; set; }
 
-        public decimal EnglandTotalwithBadDebtprovision { get; set; }
+        public decimal EnglandTotalWithBadDebtProvision { get; set; }
 
-        public decimal WalesTotalwithBadDebtprovision { get; set; }
+        public decimal WalesTotalWithBadDebtProvision { get; set; }
 
-        public decimal ScotlandTotalwithBadDebtprovision { get; set; }
+        public decimal ScotlandTotalWithBadDebtProvision { get; set; }
 
-        public decimal NorthernIrelandTotalwithBadDebtprovision { get; set; }
+        public decimal NorthernIrelandTotalWithBadDebtProvision { get; set; }
 
         public decimal TotalProducerFeeforCommsCostsbyMaterialwoBadDebtprovision { get; set; }
 
@@ -61,13 +61,13 @@
 
         public decimal TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision { get; set; }
 
-        public decimal EnglandTotalwithBadDebtprovision2A { get; set; }
+        public decimal EnglandTotalWithBadDebtProvision2A { get; set; }
 
-        public decimal WalesTotalwithBadDebtprovision2A { get; set; }
+        public decimal WalesTotalWithBadDebtProvision2A { get; set; }
 
-        public decimal ScotlandTotalwithBadDebtprovision2A { get; set; }
+        public decimal ScotlandTotalWithBadDebtProvision2A { get; set; }
 
-        public decimal NorthernIrelandTotalwithBadDebtprovision2A { get; set; }
+        public decimal NorthernIrelandTotalWithBadDebtProvision2A { get; set; }
         //Section-(1) & (2a) End
 
         public decimal TwoCTotalProducerFeeForCommsCostsWithoutBadDebt { get; set; }
@@ -89,13 +89,13 @@
 
         public decimal Total3SAOperatingCostswithBadDebtprovision { get; set; }
 
-        public decimal EnglandTotalwithBadDebtprovision3 { get; set; }
+        public decimal EnglandTotalWithBadDebtProvision3 { get; set; }
 
-        public decimal WalesTotalwithBadDebtprovision3 { get; set; }
+        public decimal WalesTotalWithBadDebtProvision3 { get; set; }
 
-        public decimal ScotlandTotalwithBadDebtprovision3 { get; set; }
+        public decimal ScotlandTotalWithBadDebtProvision3 { get; set; }
 
-        public decimal NorthernIrelandTotalwithBadDebtprovision3 { get; set; }
+        public decimal NorthernIrelandTotalWithBadDebtProvision3 { get; set; }
         //End Section-3
 
         // Section-4 LA data prep costs
@@ -149,5 +149,20 @@
 
         public decimal NorthernIrelandTotalWithBadDebtFor2bComms { get; set; }
 
+        // Section-TotalBill
+        public decimal TotalProducerBillWithoutBadDebtProvision { get; set; }
+
+        public decimal BadDebtProvisionForTotalProducerBill { get; set; }
+
+        public decimal TotalProducerBillWithBadDebtProvision { get; set; }
+
+        public decimal EnglandTotalWithBadDebtProvisionTotalBill { get; set; }
+
+        public decimal WalesTotalWithBadDebtProvisionTotalBill { get; set; }
+
+        public decimal ScotlandTotalWithBadDebtProvisionTotalBill { get; set; }
+
+        public decimal NorthernIrelandTotalWithBadDebtProvisionTotalBill { get; set; }
+        // End Section-TotalBill
     }
 }
