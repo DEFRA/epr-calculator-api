@@ -2,9 +2,8 @@
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Azure;
@@ -15,7 +14,7 @@ using Moq;
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
-    public class GetCalculatorRunTest
+    public class DownloadResultFileTest
     {
         private ApplicationDBContext context;
         private Mock<IConfiguration> mockConfig;
@@ -43,9 +42,9 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void GetCalculatorRunTest_Get_Valid_Run()
+        public void DownloadResultFile_Test()
         {
-            var date = DateTime.Now;
+            var date = new DateTime(2024, 11, 11);
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",
@@ -61,32 +60,18 @@ namespace EPR.Calculator.API.UnitTests
             var controller =
                 new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
                     this.mockStorageService.Object);
+            var mockResult = new Mock<IResult>();
+            this.mockStorageService.Setup(x => x.DownloadFile(It.IsAny<string>())).ReturnsAsync(mockResult.Object);
 
-            var response = controller.GetCalculatorRun(1) as ObjectResult;
-            Assert.IsNotNull(response);
-            var run = response.Value as CalculatorRunDto;
+            var downloadResultFile = controller.DownloadResultFile(1);
 
-            Assert.IsNotNull(run);
+            downloadResultFile.Wait();
 
-            Assert.AreEqual(1, run.RunId);
-            Assert.AreEqual("RUNNING", run.RunClassificationStatus);
-            Assert.AreEqual(date, run.CreatedAt);
-            Assert.AreEqual(2, run.RunClassificationId);
-            Assert.IsNull(run.UpdatedAt);
-            Assert.IsNull(run.UpdatedBy);
-        }
+            var result1 = downloadResultFile.Result;
 
-        [TestMethod]
-        public void GetCalculatorRunTest_Get_Invalid_Run()
-        {
-            var controller =
-                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
-                    this.mockStorageService.Object);
+            this.mockStorageService.Verify(x => x.DownloadFile("1-Calc RunName_Results File_20241111.csv"));
 
-            var response = controller.GetCalculatorRun(1) as ObjectResult;
-            Assert.IsNotNull(response);
-            Assert.AreEqual(404, response.StatusCode);
-            Assert.AreEqual("Unable to find Run Id 1", response.Value);
+            Assert.AreEqual(mockResult.Object, result1);
         }
     }
 }

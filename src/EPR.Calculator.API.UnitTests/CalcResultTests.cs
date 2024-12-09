@@ -18,11 +18,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using EPR.Calculator.API.Builder.CommsCost;
 using EPR.Calculator.API.Builder.Detail;
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Tests.Controllers;
 
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
-    public class CalcResultTests
+    public class CalcResultTests : BaseControllerTest
     {
         private Mock<ICalcResultBuilder> mockCalcResultBuilder;
         private Mock<ICalcResultsExporter<CalcResult>> mockExporter;
@@ -39,7 +42,6 @@ namespace EPR.Calculator.API.UnitTests
         private CalcResultBuilder calcResultBuilder;
         private CalcResultDetailBuilder detailBuilder;
         private CalcResultsExporter exporter;
-        protected ApplicationDBContext? dbContext;
         protected IOrgAndPomWrapper? wrapper;
         private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockICalcResultOnePlusFourApportionmentBuilder;
 
@@ -50,6 +52,7 @@ namespace EPR.Calculator.API.UnitTests
             mockExporter = new Mock<ICalcResultsExporter<CalcResult>>();
             wrapper = new Mock<IOrgAndPomWrapper>().Object;
             var transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
+
             controller = new CalculatorInternalController(
                dbContext,
                new RpdStatusDataValidator(wrapper),
@@ -85,7 +88,7 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
-            var requestDto = new CalcResultsRequestDto();
+            var requestDto = new CalcResultsRequestDto() { RunId = 1 };
             var calcResult = new CalcResult();
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
 

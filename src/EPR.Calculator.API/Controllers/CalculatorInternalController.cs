@@ -153,10 +153,38 @@ namespace EPR.Calculator.API.Controllers
         [Route("prepareCalcResults")]
         public IActionResult PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
-            this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
-            var results = this.builder.Build(resultsRequestDto);
-            this.exporter.Export(results);
-            return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            var calculatorRun = this.context.CalculatorRuns.SingleOrDefault(run => run.Id == resultsRequestDto.RunId);
+            if (calculatorRun == null)
+            {
+                return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
+                    { StatusCode = StatusCodes.Status404NotFound };
+            }
+
+            try
+            {
+                this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
+                var results = this.builder.Build(resultsRequestDto);
+                this.exporter.Export(results);
+
+                // Set the run to unclassified
+                calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
+
+                this.context.CalculatorRuns.Update(calculatorRun);
+                this.context.SaveChanges();
+
+                return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+            }
+            catch (Exception exception)
+            {
+                // TO DO: Set the run to error
+
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
         }
     }
 }
