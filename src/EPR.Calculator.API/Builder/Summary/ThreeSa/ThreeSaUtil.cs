@@ -45,7 +45,7 @@ namespace EPR.Calculator.API.Builder.Summary.ThreeSA
 
         public static decimal GetSAOperatingCostsTotalWithBadDebtProvisionPrtoducerTotalSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
         {
-            return GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialsCostSummary, costSummary, materials, calcResult) + GetBadDebtProvisionPrtoducerTotalSection3(materialsCostSummary, costSummary, materials, calcResult);
+            return GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialsCostSummary, costSummary, materials, calcResult) + GetBadDebtProvisionProducerTotalSection3(materialsCostSummary, costSummary, materials, calcResult);
         }
 
         public static decimal GetSAOperatingCostsTotalWithoutBadDebtProvisionTitleSection3(CalcResult calcResult)
@@ -83,7 +83,7 @@ namespace EPR.Calculator.API.Builder.Summary.ThreeSA
 
         }
 
-        public static decimal GetBadDebtProvisionPrtoducerTotalSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
+        public static decimal GetBadDebtProvisionProducerTotalSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
         {
             decimal ThreesalTotalCost = GetSAOperatingCostsTotalWithoutBadDebtProvisionPrtoducerTotalSection3(materialsCostSummary, costSummary, materials, calcResult);
 
