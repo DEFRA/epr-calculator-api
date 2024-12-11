@@ -8,13 +8,16 @@ using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Newtonsoft.Json;
+using Microsoft.Identity.Web.Resource;
 
 namespace EPR.Calculator.API.Controllers
 {
+    [RequiredScope("default")]
     [Route("v1")]
     public class CalculatorController : ControllerBase
     {
@@ -186,6 +189,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("calculatorRuns/{runId}")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult GetCalculatorRun(int runId)
         {
             if (!ModelState.IsValid)
