@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
+using EPR.Calculator.API.Utils;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -34,6 +37,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRun")]
+        [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
         {
             // Return bad request if the model is invalid
@@ -111,7 +115,7 @@ namespace EPR.Calculator.API.Controllers
                     {
                         Name = request.CalculatorRunName,
                         Financial_Year = request.FinancialYear,
-                        CreatedBy = request.CreatedBy,
+                        CreatedBy = Util.GetUserName(this.HttpContext),
                         CreatedAt = DateTime.Now,
                         CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                         DefaultParameterSettingMasterId = activeDefaultParameterSettingsMasterId,
@@ -127,7 +131,7 @@ namespace EPR.Calculator.API.Controllers
                     {
                         CalculatorRunId = calculatorRun.Id,
                         FinancialYear = calculatorRun.Financial_Year,
-                        CreatedBy = User?.Identity?.Name ?? request.CreatedBy
+                        CreatedBy = Util.GetUserName(this.HttpContext)
                     };
 
                     // Send message to service bus
@@ -155,6 +159,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRuns")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
         {
             if (!ModelState.IsValid)
@@ -186,6 +191,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("calculatorRuns/{runId}")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult GetCalculatorRun(int runId)
         {
             if (!ModelState.IsValid)
@@ -223,6 +229,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPut]
         [Route("calculatorRuns")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
             if (!ModelState.IsValid)
@@ -270,6 +277,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("CheckCalcNameExists/{name}")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult GetCalculatorRunByName([FromRoute] string name)
         {
             if (!ModelState.IsValid)
@@ -295,6 +303,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("DownloadResult/{runId}")]
+        [Authorize(Roles = "SASuperUser")]
         public async Task<IResult> DownloadResultFile(int runId)
         {
             if (!ModelState.IsValid)

@@ -9,6 +9,7 @@ using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EPR.Calculator.API.Controllers
@@ -41,6 +42,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("rpdStatus")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult UpdateRpdStatus([FromBody] UpdateRpdStatus request)
         {
             var runId = request.RunId;
@@ -77,7 +79,7 @@ namespace EPR.Calculator.API.Controllers
                     {
                         CalendarYear = Util.GetCalendarYear(financialYear),
                         CreatedAt = DateTime.Now,
-                        CreatedBy = request.UpdatedBy,
+                        CreatedBy = Util.GetUserName(this.HttpContext),
                         EffectiveFrom = DateTime.Now,
                         EffectiveTo = null,
                     };
@@ -105,7 +107,7 @@ namespace EPR.Calculator.API.Controllers
                     {
                         CalendarYear = Util.GetCalendarYear(financialYear),
                         CreatedAt = DateTime.Now,
-                        CreatedBy = request.UpdatedBy,
+                        CreatedBy = Util.GetUserName(this.HttpContext),
                         EffectiveFrom = DateTime.Now,
                         EffectiveTo = null,
                     };
@@ -151,6 +153,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("prepareCalcResults")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
             if (!ModelState.IsValid)

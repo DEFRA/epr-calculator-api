@@ -3,7 +3,9 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Utils;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -21,6 +23,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("lapcapData")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult Create([FromBody] CreateLapcapDataDto request)
         {
             if (!ModelState.IsValid)
@@ -43,7 +46,7 @@ namespace EPR.Calculator.API.Controllers
                     var lapcapDataMaster = new LapcapDataMaster
                     {
                         CreatedAt = DateTime.Now,
-                        CreatedBy = "Testuser",
+                        CreatedBy = Util.GetUserName(this.HttpContext),
                         EffectiveFrom = DateTime.Now,
                         EffectiveTo = null,
                         LapcapFileName = request.LapcapFileName,
@@ -92,6 +95,7 @@ namespace EPR.Calculator.API.Controllers
         /// <response code="500">If an internal server error occurs.</response>
         [HttpGet]
         [Route("lapcapData/{parameterYear}")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult Get([FromRoute] string parameterYear)
         {
             if (!ModelState.IsValid)

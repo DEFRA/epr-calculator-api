@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -237,5 +238,8 @@ namespace EPR.Calculator.API.Utils
             int year = int.Parse(GetFinancialYearAsYYYY(financialYear));
             return (year - 1).ToString();
         }
+
+        public static string GetUserName(HttpContext context)
+            => context.User.Identity?.Name ?? ErrorMessages.UnknownUser;
     }
 }

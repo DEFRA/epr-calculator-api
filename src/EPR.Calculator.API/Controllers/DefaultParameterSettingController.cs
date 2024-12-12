@@ -5,6 +5,8 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using EPR.Calculator.API.Utils;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -23,6 +25,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("defaultParameterSetting")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult Create([FromBody] CreateDefaultParameterSettingDto request)
         {
             if (!ModelState.IsValid)
@@ -45,7 +48,7 @@ namespace EPR.Calculator.API.Controllers
                     var defaultParamSettingMaster = new DefaultParameterSettingMaster
                     {
                         CreatedAt = DateTime.Now,
-                        CreatedBy = "Testuser",
+                        CreatedBy = Util.GetUserName(this.HttpContext),
                         EffectiveFrom = DateTime.Now,
                         EffectiveTo = null,
                         ParameterYear = request.ParameterYear,
@@ -77,6 +80,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("defaultParameterSetting/{parameterYear}")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult Get([FromRoute] string parameterYear)
         {
             if (!ModelState.IsValid)
