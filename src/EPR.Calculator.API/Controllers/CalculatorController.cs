@@ -1,10 +1,13 @@
 ﻿using Azure.Messaging.ServiceBus;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
+using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
@@ -16,14 +19,17 @@ namespace EPR.Calculator.API.Controllers
     public class CalculatorController : ControllerBase
     {
         private readonly ApplicationDBContext context;
-        private readonly IConfiguration _configuration;
-        private readonly IAzureClientFactory<ServiceBusClient> _serviceBusClientFactory;
+        private readonly IConfiguration configuration;
+        private readonly IAzureClientFactory<ServiceBusClient> serviceBusClientFactory;
+        private readonly IStorageService storageService;
 
-        public CalculatorController(ApplicationDBContext context, IConfiguration configuration, IAzureClientFactory<ServiceBusClient> serviceBusClientFactory)
+        public CalculatorController(ApplicationDBContext context, IConfiguration configuration,
+            IAzureClientFactory<ServiceBusClient> serviceBusClientFactory, IStorageService storageService)
         {
             this.context = context;
-            _configuration = configuration;
-            _serviceBusClientFactory = serviceBusClientFactory;
+            this.configuration = configuration;
+            this.serviceBusClientFactory = serviceBusClientFactory;
+            this.storageService = storageService;
         }
 
         [HttpPost]
@@ -34,6 +40,15 @@ namespace EPR.Calculator.API.Controllers
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            bool isCalcAlreadyRunning = this.context.CalculatorRuns.Any(run => run.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
+            if (isCalcAlreadyRunning)
+            {
+                return new ObjectResult(new { Message = ErrorMessages.CalculationAlreadyRunning })
+                {
+                    StatusCode = StatusCodes.Status422UnprocessableEntity,
+                };
             }
 
 #pragma warning disable S6966 // Awaitable method should be used
@@ -56,8 +71,8 @@ namespace EPR.Calculator.API.Controllers
                     }
 
                     // Read configuration items: service bus connection string and queue name 
-                    var serviceBusConnectionString = this._configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
-                    var serviceBusQueueName = this._configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
+                    var serviceBusConnectionString = this.configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
+                    var serviceBusQueueName = this.configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
 
                     if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
                     {
@@ -70,8 +85,8 @@ namespace EPR.Calculator.API.Controllers
                     }
 
                     // Read configuration items: message retry count and period
-                    var messageRetryCountFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value, out int messageRetryCount);
-                    var messageRetryPeriodFound = int.TryParse(this._configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value, out int messageRetryPeriod);
+                    var messageRetryCountFound = int.TryParse(this.configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value, out int messageRetryCount);
+                    var messageRetryPeriodFound = int.TryParse(this.configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value, out int messageRetryPeriod);
 
                     if (!messageRetryCountFound)
                     {
@@ -115,14 +130,12 @@ namespace EPR.Calculator.API.Controllers
                         CreatedBy = User?.Identity?.Name ?? request.CreatedBy
                     };
 
-#if !DEBUG
                     // Send message to service bus
-                    var client = _serviceBusClientFactory.CreateClient("calculator");
+                    var client = serviceBusClientFactory.CreateClient("calculator");
                     ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
                     var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
                     ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
                     await serviceBusSender.SendMessageAsync(serviceBusMessage);
-#endif
 
                     // All good, commit transaction
                     transaction.Commit();
@@ -136,7 +149,6 @@ namespace EPR.Calculator.API.Controllers
                 }
 #pragma warning restore S6966 // Awaitable method should be used
             }
-
             // Return accepted status code: Accepted
             return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
         }
@@ -185,14 +197,14 @@ namespace EPR.Calculator.API.Controllers
             {
                 var calculatorRunDetail =
                     (from run in this.context.CalculatorRuns
-                        join classification in context.CalculatorRunClassifications
-                            on run.CalculatorRunClassificationId equals classification.Id
-                        where run.Id == runId
-                        select new
-                        {
-                            Run = run,
-                            Classification = classification
-                        }).SingleOrDefault();
+                     join classification in context.CalculatorRunClassifications
+                         on run.CalculatorRunClassificationId equals classification.Id
+                     where run.Id == runId
+                     select new
+                     {
+                         Run = run,
+                         Classification = classification
+                     }).SingleOrDefault();
                 if (calculatorRunDetail == null)
                 {
                     return new NotFoundObjectResult($"Unable to find Run Id {runId}");
@@ -224,7 +236,7 @@ namespace EPR.Calculator.API.Controllers
                 if (calculatorRun == null)
                 {
                     return new ObjectResult($"Unable to find Run Id {runStatusUpdateDto.RunId}")
-                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
                 var classification =
@@ -233,14 +245,14 @@ namespace EPR.Calculator.API.Controllers
                 if (classification == null)
                 {
                     return new ObjectResult($"Unable to find Classification Id {runStatusUpdateDto.ClassificationId}")
-                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
                 if (runStatusUpdateDto.ClassificationId == calculatorRun.CalculatorRunClassificationId)
                 {
                     return new ObjectResult(
                             $"RunId {runStatusUpdateDto.RunId} cannot be changed to classification {runStatusUpdateDto.ClassificationId}")
-                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
                 calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
@@ -278,6 +290,37 @@ namespace EPR.Calculator.API.Controllers
             catch (Exception exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+        }
+
+        [HttpGet]
+        [Route("DownloadResult/{runId}")]
+        public async Task<IResult> DownloadResultFile(int runId)
+        {
+            if (!ModelState.IsValid)
+            {
+                var badRequest = Results.BadRequest(ModelState.Values.SelectMany(x => x.Errors));
+                return badRequest;
+            }
+
+            var calcRun = await context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId);
+            if (calcRun == null)
+            {
+                var notFound = Results.NotFound(ModelState.Values.SelectMany(x => x.Errors));
+                return notFound;
+            }
+
+            try
+            {
+                var fileName = new CalcResultsFileName(
+                    calcRun.Id,
+                    calcRun.Name,
+                    calcRun.CreatedAt);
+                return await storageService.DownloadFile(fileName);
+            }
+            catch (Exception e)
+            {
+                return Results.Problem(e.Message);
             }
         }
 

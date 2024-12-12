@@ -193,7 +193,7 @@ namespace EPR.Calculator.API.UnitTests
                             NorthernIrelandTotal=0.15M,
                             ScotlandTotal=0.15M,
                             WalesTotal=020M,
-                            Name="Test",
+                            Name=OnePlus4ApportionmentColumnHeaders.OnePluseFourApportionment,
                         }]
                 },
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
@@ -261,7 +261,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(18, result.ProducerDisposalFeesHeaders.Count());
+            Assert.AreEqual(25, result.ProducerDisposalFeesHeaders.Count());
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
@@ -467,7 +467,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(18, result.ProducerDisposalFeesHeaders.Count());
+            Assert.AreEqual(25, result.ProducerDisposalFeesHeaders.Count());
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
@@ -508,7 +508,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(18, result.ProducerDisposalFeesHeaders.Count());
+            Assert.AreEqual(25, result.ProducerDisposalFeesHeaders.Count());
             var isColumnHeaderExists = result.ProducerDisposalFeesHeaders.Select(dict => dict.ColumnIndex == 196 || dict.ColumnIndex == 197 || dict.ColumnIndex == 198).ToList();
             Assert.IsTrue(isColumnHeaderExists.Contains(true));
             Assert.IsNotNull(result.ProducerDisposalFees);
