@@ -57,7 +57,6 @@ builder.Services.AddScoped<ICalcResultCommsCostBuilder, CalcResultCommsCostBuild
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddAuthorization();
-builder.Services.AddRequiredScopeAuthorization();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
