@@ -296,7 +296,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 {
                     ParameterUniqueReferenceId = templateMaster.ParameterUniqueReferenceId,
                     ParameterValue = GetValue(templateMaster),
-                    DefaultParameterSettingMasterId = 1
+                    DefaultParameterSettingMasterId = 1,
+                    DefaultParameterSettingMaster = defaultMaster,
                 };
                 dbContext.DefaultParameterSettingDetail.Add(defaultDetail);
             }

@@ -14,13 +14,13 @@ namespace EPR.Calculator.API.Data.DataModels
         [Column("default_parameter_setting_master_id")]
         public int DefaultParameterSettingMasterId { get; set; }
 
-        public DefaultParameterSettingMaster DefaultParameterSettingMaster { get; set; }
+        public required DefaultParameterSettingMaster DefaultParameterSettingMaster { get; set; }
 
         [Column("parameter_unique_ref")]
         [StringLength(450)]
-        public string ParameterUniqueReferenceId { get; set; }
+        public required string ParameterUniqueReferenceId { get; set; }
 
-        public DefaultParameterTemplateMaster ParameterUniqueReference {  get; set; }
+        public DefaultParameterTemplateMaster? ParameterUniqueReference {  get; set; }
 
         [Column("parameter_value")]
         [Precision(18, 3)]

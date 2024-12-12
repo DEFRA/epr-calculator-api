@@ -59,7 +59,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 LapcapDataMasterId = 2
             };
 
-            var details = GetLapcapDetails();
+            
             var lapcapDataMaster = new LapcapDataMaster
             {
                 Id = 2,
@@ -68,6 +68,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
             };
+            var details = GetLapcapDetails(lapcapDataMaster);
             details.ForEach(detail => detail.LapcapDataMaster = lapcapDataMaster);
 
             dbContext.Country.Add(new Country { Code = "En", Name = "England", Description = "England" });
@@ -168,7 +169,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
         }
 
-        public static List<LapcapDataDetail> GetLapcapDetails()
+        public static List<LapcapDataDetail> GetLapcapDetails(LapcapDataMaster master)
         {
             var details = new List<LapcapDataDetail>();
 
@@ -179,7 +180,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     {
                         LapcapDataMasterId = 2,
                         UniqueReference = uniqueRef,
-                        TotalCost = GetTotalCostByCountry(uniqueRef)
+                        TotalCost = GetTotalCostByCountry(uniqueRef),
+                        LapcapDataMaster = master,
                     }
                 );
             }

@@ -58,8 +58,20 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
             var defaultParameterSettingDetails = new List<DefaultParameterSettingDetail>
             {
-                new() { DefaultParameterSettingMasterId = 1, ParameterUniqueReferenceId = "1", ParameterValue = 100 },
-                new() { DefaultParameterSettingMasterId = 1, ParameterUniqueReferenceId = "2", ParameterValue = 200 }
+                new()
+                {
+                    DefaultParameterSettingMasterId = 1,
+                    ParameterUniqueReferenceId = "1",
+                    ParameterValue = 100,
+                    DefaultParameterSettingMaster = defaultParameterSettings[0],
+                },
+                new()
+                {
+                    DefaultParameterSettingMasterId = 1,
+                    ParameterUniqueReferenceId = "2",
+                    ParameterValue = 200,
+                    DefaultParameterSettingMaster = defaultParameterSettings[0],
+                }
             };
 
             dbContext.CalculatorRuns.AddRange(calculatorRuns);

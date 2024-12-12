@@ -19,12 +19,12 @@ namespace EPR.Calculator.API.Data.DataModels
         [Column("name")]
         [StringLength(250)]
         [Required]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [Column("financial_year")]
         [StringLength(250)]
         [Required]
-        public string Financial_Year { get; set; }
+        public string? Financial_Year { get; set; }
 
         [Column("created_by")]
         [StringLength(400)]
