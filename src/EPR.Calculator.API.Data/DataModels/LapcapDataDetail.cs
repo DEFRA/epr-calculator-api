@@ -23,6 +23,6 @@ namespace EPR.Calculator.API.Data.DataModels
 
         public required LapcapDataMaster LapcapDataMaster { get; set; }
 
-        public virtual LapcapDataTemplateMaster LapcapDataTemplateMaster { get; set; }
+        public virtual LapcapDataTemplateMaster? LapcapDataTemplateMaster { get; set; }
     }
 }
