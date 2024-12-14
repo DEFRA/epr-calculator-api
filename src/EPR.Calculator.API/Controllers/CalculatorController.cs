@@ -35,6 +35,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRun")]
+        [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
         {
             // Return bad request if the model is invalid
@@ -188,6 +189,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("calculatorRuns/{runId}")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult GetCalculatorRun(int runId)
         {
             if (!ModelState.IsValid)
