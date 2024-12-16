@@ -3,11 +3,14 @@
     using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
     using Models;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using AutoFixture;
 
     [TestClass]
     public class SaSetupCostsSummaryTests
     {
         private readonly CalcResult _calcResult;
+
+        private Fixture Fixture { get; init; } = new Fixture();
 
         public SaSetupCostsSummaryTests()
         {
@@ -179,7 +182,7 @@
                             Name="Test",
                         }]
                 },
-                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
+                CalcResultParameterCommunicationCost = Fixture.Create<CalcResultParameterCommunicationCost>(),
                 CalcResultSummary = new CalcResultSummary
                 {
                     ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>() { new()

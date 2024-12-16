@@ -1,5 +1,6 @@
 ﻿namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
 {
+    using AutoFixture;
     using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
     using EPR.Calculator.API.Models;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -8,6 +9,8 @@
     public class LaDataPrepCostsSummaryTests
     {
         private readonly CalcResult _calcResult;
+
+        private Fixture Fixture { get; init; } = new Fixture();
 
         public LaDataPrepCostsSummaryTests()
         {
@@ -179,7 +182,7 @@
                             Name="Test",
                         }]
                 },
-                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
+                CalcResultParameterCommunicationCost = Fixture.Create<CalcResultParameterCommunicationCost>(),
                 CalcResultSummary = new CalcResultSummary
                 {
                     ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>() { new()

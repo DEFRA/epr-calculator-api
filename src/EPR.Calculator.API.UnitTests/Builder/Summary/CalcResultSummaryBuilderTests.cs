@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Builder.Summary;
+﻿using AutoFixture;
+using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Builder.Summary.OneAndTwoA;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
@@ -19,6 +20,8 @@ namespace EPR.Calculator.API.UnitTests
         private readonly ApplicationDBContext _context;
         private readonly CalcResultSummaryBuilder _calcResultsService;
         private readonly CalcResult _calcResult;
+
+        private Fixture Fixture { get; init; } = new Fixture();
 
         public CalcResultSummaryBuilderTests()
         {
@@ -195,7 +198,7 @@ namespace EPR.Calculator.API.UnitTests
                             Name=OnePlus4ApportionmentColumnHeaders.OnePluseFourApportionment,
                         }]
                 },
-                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
+                CalcResultParameterCommunicationCost = Fixture.Create<CalcResultParameterCommunicationCost>(),
                 CalcResultSummary = new CalcResultSummary
                 {
                     ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>() { new()

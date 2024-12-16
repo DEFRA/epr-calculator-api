@@ -34,7 +34,7 @@ public static class CalcResultOneAndTwoAUtil
         return GetTotalFee(producerDisposalFees, fee => fee.TotalProducerCommsFeeWithBadDebtProvision);
     }
 
-    public static decimal GetTotalFee(IEnumerable<CalcResultSummaryProducerDisposalFees> producerDisposalFees, Func<CalcResultSummaryProducerDisposalFees?, decimal?> selector)
+    public static decimal GetTotalFee(IEnumerable<CalcResultSummaryProducerDisposalFees> producerDisposalFees, Func<CalcResultSummaryProducerDisposalFees, decimal> selector)
     {
         if (producerDisposalFees == null)
         {
@@ -43,7 +43,12 @@ public static class CalcResultOneAndTwoAUtil
 
         var totalFee = producerDisposalFees
             .FirstOrDefault(t => t.Level == "Totals");
+        
+        if (totalFee is null)
+        {
+            return 0m;
+        }
 
-        return selector(totalFee) ?? 0m;
+        return selector(totalFee);
     }
 }

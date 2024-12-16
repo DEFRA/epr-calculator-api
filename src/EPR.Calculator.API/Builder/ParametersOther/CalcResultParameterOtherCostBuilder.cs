@@ -41,8 +41,10 @@ namespace EPR.Calculator.API.Builder.ParametersOther
 
             var schemeAdminCosts = results.Where(x => x.ParameterType == SchemeAdminOperatingCost);
 
-            var other = new CalcResultParameterOtherCost();
-            other.Name = "Parameters - Other";
+            var other = new CalcResultParameterOtherCost
+            {
+                Name = "Parameters - Other",
+            };
 
             var saDetails = new List<CalcResultParameterOtherCostDetail>();
             var saOperatinCostHeader = new CalcResultParameterOtherCostDetail

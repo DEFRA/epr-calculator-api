@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using AutoFixture;
 
 namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
 {
@@ -21,6 +22,8 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
         private readonly CalcResult _calcResult;
         private readonly Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> _materialCostSummary;
         private readonly Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> _commsCostSummary;
+
+        private Fixture Fixture { get; init; } = new Fixture();
 
         public SaSetupCostsProducerTests()
         {
@@ -271,7 +274,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                         }
                     ]
                 },
-                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
+                CalcResultParameterCommunicationCost = Fixture.Create<CalcResultParameterCommunicationCost>(),
                 CalcResultSummary = new CalcResultSummary
                 {
                     ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>()

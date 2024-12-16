@@ -1,5 +1,6 @@
 ﻿namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
 {
+    using AutoFixture;
     using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Data.DataModels;
@@ -17,6 +18,8 @@
         private readonly CalcResult _calcResult;
         private readonly Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> _materialCostSummary;
         private readonly Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> _commsCostSummary;
+
+        private Fixture Fixture { get; init; } = new Fixture();
 
         public LaDataPrepCostsProducerTests()
         {
@@ -267,7 +270,7 @@
                         }
                     ]
                 },
-                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
+                CalcResultParameterCommunicationCost = Fixture.Create<CalcResultParameterCommunicationCost>(),
                 CalcResultSummary = new CalcResultSummary
                 {
                     ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>()
