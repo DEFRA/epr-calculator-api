@@ -308,7 +308,8 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
 
                         }
                     ]
-                }
+                },
+                CalcResultLateReportingTonnageData = Fixture.Create<CalcResultLateReportingTonnage>(),
             };
 
             _materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();

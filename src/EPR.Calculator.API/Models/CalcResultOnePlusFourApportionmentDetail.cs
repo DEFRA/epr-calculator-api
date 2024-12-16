@@ -2,7 +2,7 @@
 {
     public class CalcResultOnePlusFourApportionmentDetail
     {
-        public string Name { get; set; }
+        public required string Name { get; set; }
         public string EnglandDisposalTotal { get; set; }
         public string WalesDisposalTotal { get; set; }
         public string ScotlandDisposalTotal { get; set; }

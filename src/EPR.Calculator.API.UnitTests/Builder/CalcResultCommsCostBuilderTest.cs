@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Builder.CommsCost;
+﻿using AutoFixture;
+using EPR.Calculator.API.Builder.CommsCost;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -28,6 +29,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
             builder = new CalcResultCommsCostBuilder(dbContext);
         }
 
+        private Fixture Fixture { get; init; } = new Fixture();
+
         [TestCleanup]
         public void TearDown()
         {
@@ -49,6 +52,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 {
                     new CalcResultOnePlusFourApportionmentDetail
                     {
+                        Name = Fixture.Create<string>(),
                         EnglandTotal = 40M,
                         ScotlandTotal = 20M,
                         WalesTotal = 20M,

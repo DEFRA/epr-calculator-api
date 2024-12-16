@@ -95,13 +95,13 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
             return details.Where(t => t.Name == material).Sum(t => t.TotalLateReportingTonnage).ToString();
         }
 
-        private string GetProducerReportedHouseholdTonnagePlusLateReportingTonnage(CalcResultLaDisposalCostDataDetail detail)
+        private static string GetProducerReportedHouseholdTonnagePlusLateReportingTonnage(CalcResultLaDisposalCostDataDetail detail)
         {
             var value = GetDecimalValue(detail.LateReportingTonnage) + GetDecimalValue(detail.ProducerReportedHouseholdPackagingWasteTonnage);
             return value.ToString();
         }
 
-        private string CalculateDisposalCostPricePerTonne(CalcResultLaDisposalCostDataDetail detail)
+        private static string CalculateDisposalCostPricePerTonne(CalcResultLaDisposalCostDataDetail detail)
         {
             var HouseholdTonnagePlusLateReportingTonnage = GetDecimalValue(detail.ProducerReportedHouseholdTonnagePlusLateReportingTonnage);
             if (HouseholdTonnagePlusLateReportingTonnage == 0) return "0";

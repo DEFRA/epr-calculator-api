@@ -39,9 +39,9 @@ namespace EPR.Calculator.API.UnitTests
                logger => logger.Log(
                    LogLevel.Error,
                    It.IsAny<EventId>(),
-                   It.Is<It.IsAnyType>((state, t) => state.ToString().Contains("An unhandled exception occurred.")),
+                   It.Is<It.IsAnyType>((state, t) => state.ToString()!.Contains("An unhandled exception occurred.")),
                    exception,
-                   It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+                   It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                    Times.Once);
                 }
 

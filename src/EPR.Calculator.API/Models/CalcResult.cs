@@ -2,22 +2,22 @@
 {
     public class CalcResult
     {
-        public CalcResultDetail CalcResultDetail { get; set; }
+        public CalcResultDetail? CalcResultDetail { get; set; }
 
         public required CalcResultLapcapData CalcResultLapcapData { get; set; }
 
-        public CalcResultCommsCost CalcResultCommsCostReportDetail { get; set; }
+        public CalcResultCommsCost? CalcResultCommsCostReportDetail { get; set; }
 
-        public CalcResultLateReportingTonnage CalcResultLateReportingTonnageData { get; set; }
+        public required CalcResultLateReportingTonnage CalcResultLateReportingTonnageData { get; set; }
 
-        public CalcResultParameterCommunicationCost CalcResultParameterCommunicationCost { get; set; }
+        public CalcResultParameterCommunicationCost? CalcResultParameterCommunicationCost { get; set; }
 
-        public CalcResultParameterOtherCost CalcResultParameterOtherCost { get; set; }
+        public required CalcResultParameterOtherCost CalcResultParameterOtherCost { get; set; }
 
-        public CalcResultOnePlusFourApportionment CalcResultOnePlusFourApportionment {  get; set; }
+        public CalcResultOnePlusFourApportionment? CalcResultOnePlusFourApportionment {  get; set; }
 
-        public CalcResultLaDisposalCostData CalcResultLaDisposalCostData { get; set; }
+        public CalcResultLaDisposalCostData? CalcResultLaDisposalCostData { get; set; }
 
-        public CalcResultSummary CalcResultSummary { get; set; }
+        public CalcResultSummary? CalcResultSummary { get; set; }
     }
 }

@@ -28,6 +28,7 @@ namespace EPR.Calculator.API.UnitTests
         {
             var calcResult = new CalcResult
             {
+                CalcResultParameterOtherCost = Fixture.Create<CalcResultParameterOtherCost>(),
                 CalcResultDetail = new CalcResultDetail
                 {
                     RunName = "Test Run",
@@ -39,6 +40,7 @@ namespace EPR.Calculator.API.UnitTests
                     ParametersFile = "Params.csv,2023-10-02,Jane Doe",
                 },
                 CalcResultLapcapData = Fixture.Create<CalcResultLapcapData>(),
+                CalcResultLateReportingTonnageData = Fixture.Create<CalcResultLateReportingTonnage>(),
             };
 
             _blobStorageServiceMock
@@ -110,6 +112,7 @@ namespace EPR.Calculator.API.UnitTests
             // Arrange
             var calcResult = new CalcResult
             {
+                CalcResultParameterOtherCost = Fixture.Create<CalcResultParameterOtherCost>(),
                 CalcResultDetail = new CalcResultDetail
                 {
                     RunName = "Test Run",

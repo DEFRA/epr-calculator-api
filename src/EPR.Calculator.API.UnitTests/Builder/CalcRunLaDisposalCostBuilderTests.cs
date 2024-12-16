@@ -1,6 +1,7 @@
 namespace EPR.Calculator.API.UnitTests.Builder
 {
     using System;
+    using AutoFixture;
     using EPR.Calculator.API.Builder.LaDisposalCost;
     using EPR.Calculator.API.Constants;
     using EPR.Calculator.API.Data;
@@ -17,10 +18,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
     public class CalcRunLaDisposalCostBuilderTests
     {
         private readonly CalcRunLaDisposalCostBuilder builder;
-        private readonly ApplicationDBContext dbContext;       
+        private readonly ApplicationDBContext dbContext;     
 
         public CalcRunLaDisposalCostBuilderTests()
         {
+            this.Fixture = new Fixture();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                                     .UseInMemoryDatabase(databaseName: "PayCal")
                                     .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
@@ -36,6 +38,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
             builder = new CalcRunLaDisposalCostBuilder(dbContext);           
         }
+
+        private Fixture Fixture { get; init; }
 
         [TestCleanup]
         public void TearDown()
@@ -74,6 +78,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             var resultsDto = new CalcResultsRequestDto { RunId = 2 };
             var calcResult = new CalcResult
             {
+                CalcResultParameterOtherCost = Fixture.Create<CalcResultParameterOtherCost>(),
                 CalcResultDetail = new CalcResultDetail
                 {
                     RunName = "TestValue1471524307",

@@ -294,7 +294,8 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TotalBillBreakdown
 
                         }
                     ]
-                }
+                },
+                CalcResultLateReportingTonnageData = Fixture.Create<CalcResultLateReportingTonnage>(),
             };
 
             _materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
