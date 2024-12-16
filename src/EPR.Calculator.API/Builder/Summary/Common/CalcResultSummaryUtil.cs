@@ -28,7 +28,7 @@ public static class CalcResultSummaryUtil
     public const int decimalRoundUp = 2;
     public const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
     //Section-(1) & (2a)
-    public const int Total1Plus2ABadDebt = 193;
+    public const int Total1Plus2ABadDebt = 208;
     private const int CommsCost2bColumnIndex = 196;
 
     public static int GetLevelIndex(List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup, ProducerDetail producer)
@@ -519,10 +519,6 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A, decimalRoundUp)}",ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex+9 }
         ]);
 
-        materialsBreakdownHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalOnePlus2AFeeWithBadDebtProvision, decimalRoundUp)}", ColumnIndex = Total1Plus2ABadDebt },
-        ]);
-
         // 2b comms total bill
         materialsBreakdownHeaders.AddRange([
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.CommsCostHeaderWithoutBadDebtFor2bTitle, decimalRoundUp)}", ColumnIndex = CommsCost2bColumnIndex },
@@ -534,6 +530,11 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TwoCCommsCostsByCountryWithoutBadDebtProvision, CalcResultSummaryUtil.decimalRoundUp)}", ColumnIndex = TwoCCommsCostColumnIndex.Value },
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TwoCBadDebtProvision, CalcResultSummaryUtil.decimalRoundUp)}",ColumnIndex = TwoCCommsCostColumnIndex.Value + 1 },
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TwoCCommsCostsByCountryWithBadDebtProvision, CalcResultSummaryUtil.decimalRoundUp)}",ColumnIndex = TwoCCommsCostColumnIndex.Value + 2 }
+        ]);
+
+        // Total bill 1 + 2a + 2b + 2c
+        materialsBreakdownHeaders.AddRange([
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalOnePlus2AFeeWithBadDebtProvision, decimalRoundUp)}", ColumnIndex = Total1Plus2ABadDebt },
         ]);
 
         //Section-3 -first header
@@ -644,12 +645,6 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalwithBadDebtprovision }
         ]);
 
-        // bad debt
-        columnHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducer1Plus2ABadDebt },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducer1Plus2ABadDebtPercentage }
-        ]);
-
         // Percentage of Producer Reported Household Tonnage vs All Producers
         columnHeaders.AddRange([
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PercentageofProducerReportedHHTonnagevsAllProducers },
@@ -675,6 +670,12 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostWalesWithBadDebt },
             new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostScotlandWithBadDebt },
             new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostNIWithBadDebt }
+        ]);
+
+        // Total bill 1 + 2a + 2b + 2c
+        columnHeaders.AddRange([
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducer1Plus2ABadDebt },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducer1Plus2ABadDebtPercentage }
         ]);
 
         // SA operating cost section 3

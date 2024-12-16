@@ -97,21 +97,6 @@ namespace EPR.Calculator.API.Constants
         public static readonly string FeeforCommsCostsbyMaterialwithBadDebtprovision2A =
             "2a Fee for Comms Costs - by Material with Bad Debt provision";
 
-        public static readonly string TotalBadDebtProvision1Plus2A = "Total (1 + 2a) with Bad Debt provision";
-        public static readonly string TotalProducer1Plus2ABadDebt = "Producer Total (1+2a) with Bad Debt provision";
-        public static readonly string TotalProducer1Plus2ABadDebtPercentage = "Producer Percentage of Costs: Producer (1+2a) Percentage of Overal Producer Cost of (1+2a)";
-
-        // LA data prep costs section 4
-        public static readonly string LaDataPrepCostsWithoutBadDebtProvisionTitleSection4 = "4 LA Data Prep Costs w/o Bad Debt provision";
-        public static readonly string BadDebtProvisionTitleSection4 = "Bad Debt provision";
-        public static readonly string LaDataPrepCostsWithBadDebtProvisionTitleSection4 = "4 LA Data Prep Costs with Bad Debt provision";
-
-        public static readonly string TotalProducerFeeWithoutBadDebtProvisionSection4 = "4 Total Producer Fee for LA Data Prep Costs In proportion to (1+2a) w/o Bad Debt provision";
-        public static readonly string BadDebtProvisionSection4 = "Bad Debt Provision for 4";
-        public static readonly string TotalProducerFeeWithBadDebtProvisionSection4 = "4 Total Producer Fee for LA Data Prep Costs In proportion to (1+2a) with Bad Debt provision";
-        public static readonly string EnglandTotalWithBadDebtProvisionSection4 = "England Total with Bad Debt provision";
-        public static readonly string WalesTotalWithBadDebtProvisionSection4 = "Wales Total with Bad Debt provision";
-
         // Percentage of Producer Reported Household Tonnage vs All Producers
         public static readonly string PercentageofProducerReportedHHTonnagevsAllProducers = "Percentage of Producer Reported Household Tonnage vs All Producers";
 
@@ -127,10 +112,9 @@ namespace EPR.Calculator.API.Constants
         public static readonly string ScotlandTotalWithBadDebtProvisionForComms2b = "Scotland Total with Bad Debt provision";
         public static readonly string NorthernIrelandTotalWithBadDebtProvisionForComms2b = "Northern Ireland Total with Bad Debt provision";
 
-        public static readonly string ScotlandTotalWithBadDebtProvisionSection4 =
-            "Scotland Total with Bad Debt provision";
-
-        public static readonly string NorthernIrelandTotalWithBadDebtProvisionSection4 =
-            "Northern Ireland Total with Bad Debt provision";
+        // Total bill 1 + 2a + 2b + 2c
+        public static readonly string TotalBadDebtProvision1Plus2A = "Total (1+2a+2b+2c) with Bad Debt provision";
+        public static readonly string TotalProducer1Plus2ABadDebt = "Producer Total (1+2a+2b+2c) with Bad Debt provision";
+        public static readonly string TotalProducer1Plus2ABadDebtPercentage = "Producer Percentage of Overall Producer Cost for (1+2a+2b+2c)";
     }
 }
