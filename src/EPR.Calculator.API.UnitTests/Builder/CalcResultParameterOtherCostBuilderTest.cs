@@ -144,7 +144,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     .All(x => x.Amount == "£10.00" && x.Percentage == "10.00%"));
         }
             
-        private decimal GetValue(DefaultParameterTemplateMaster templateMaster)
+        private static decimal GetValue(DefaultParameterTemplateMaster templateMaster)
         {
             if (templateMaster.ParameterType == "Scheme setup costs" ||
                 templateMaster.ParameterType == "Scheme administrator operating costs" ||

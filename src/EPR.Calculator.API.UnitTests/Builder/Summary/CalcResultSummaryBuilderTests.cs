@@ -463,7 +463,7 @@ namespace EPR.Calculator.API.UnitTests
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
             Assert.AreEqual(2, result.ProducerDisposalFees.Count());
-            var producerTotalPercentage = result.ProducerDisposalFees.FirstOrDefault().PercentageofProducerReportedHHTonnagevsAllProducers;
+            var producerTotalPercentage = result.ProducerDisposalFees.First().PercentageofProducerReportedHHTonnagevsAllProducers;
             Assert.IsNotNull(producerTotalPercentage);
             Assert.AreEqual(100, producerTotalPercentage);
         }
@@ -506,7 +506,7 @@ namespace EPR.Calculator.API.UnitTests
             Assert.AreEqual(2, result.ProducerDisposalFees.Count());
         }
 
-        private void SeedDatabase(ApplicationDBContext context)
+        private static void SeedDatabase(ApplicationDBContext context)
         {
             context.Material.AddRange(new List<Material>
             {

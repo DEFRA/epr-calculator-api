@@ -7,10 +7,9 @@
     [TestClass]
     public class LaDataPrepCostsSummaryTests
     {
-        private CalcResult _calcResult;
+        private readonly CalcResult _calcResult;
 
-        [TestInitialize]
-        public void TestInitialize()
+        public LaDataPrepCostsSummaryTests()
         {
             _calcResult = new CalcResult
             {

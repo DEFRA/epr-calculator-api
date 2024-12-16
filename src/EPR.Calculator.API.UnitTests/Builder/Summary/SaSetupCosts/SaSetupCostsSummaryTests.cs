@@ -7,10 +7,9 @@
     [TestClass]
     public class SaSetupCostsSummaryTests
     {
-        private CalcResult _calcResult;
+        private readonly CalcResult _calcResult;
 
-        [TestInitialize]
-        public void TestInitialize()
+        public SaSetupCostsSummaryTests()
         {
             _calcResult = new CalcResult
             {
