@@ -11,7 +11,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
     {
         internal class ProducerData
         {
-            public string Material { get; set; }
+            public required string Material { get; set; }
             public decimal Tonnage { get; set; }
         }
 
@@ -45,8 +45,8 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
                     Tonnage = producerMaterial.PackagingTonnage
                 }).ToList();
 
-            var lapcapDetails = calcResult?.CalcResultLapcapData?.CalcResultLapcapDataDetails
-                ?.Where(t => t.OrderId != 1 && t.Name != CalcResultLapcapDataBuilder.CountryApportionment).ToList();
+            var lapcapDetails = calcResult.CalcResultLapcapData.CalcResultLapcapDataDetails
+                .Where(t => t.OrderId != 1 && t.Name != CalcResultLapcapDataBuilder.CountryApportionment).ToList();
 
 
             foreach (var details in lapcapDetails)

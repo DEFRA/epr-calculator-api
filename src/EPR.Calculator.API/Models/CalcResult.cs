@@ -4,7 +4,7 @@
     {
         public CalcResultDetail CalcResultDetail { get; set; }
 
-        public CalcResultLapcapData CalcResultLapcapData { get; set; }
+        public required CalcResultLapcapData CalcResultLapcapData { get; set; }
 
         public CalcResultCommsCost CalcResultCommsCostReportDetail { get; set; }
 

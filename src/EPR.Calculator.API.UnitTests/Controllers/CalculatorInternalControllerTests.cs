@@ -1,3 +1,4 @@
+using AutoFixture;
 using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data.DataModels;
@@ -19,6 +20,8 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class CalculatorInternalControllerTests : BaseControllerTest
     {
+        private Fixture Fixture { get; init; } = new Fixture();
+
         [TestMethod]
         public void UpdateRpdStatus_With_Missing_RunId()
         {
@@ -205,7 +208,7 @@ namespace EPR.Calculator.API.UnitTests
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
             var requestDto = new CalcResultsRequestDto() { RunId = 1 };
-            var calcResult = new CalcResult();
+            var calcResult = this.Fixture.Create<CalcResult>();
 
             var mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
             var controller = new CalculatorInternalController(
@@ -229,7 +232,7 @@ namespace EPR.Calculator.API.UnitTests
         public void PrepareCalcResults_ShouldReturnNotFound()
         {
             var requestDto = new CalcResultsRequestDto() { RunId = 0 };
-            var calcResult = new CalcResult();
+            var calcResult = Fixture.Create<CalcResult>();
 
             var mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
             var controller = new CalculatorInternalController(

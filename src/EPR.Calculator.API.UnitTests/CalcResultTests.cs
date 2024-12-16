@@ -21,6 +21,7 @@ using EPR.Calculator.API.Builder.Detail;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Tests.Controllers;
+using AutoFixture;
 
 namespace EPR.Calculator.API.UnitTests
 {
@@ -43,6 +44,8 @@ namespace EPR.Calculator.API.UnitTests
         private readonly CalcResultDetailBuilder detailBuilder;
         protected readonly new IOrgAndPomWrapper? wrapper;
         private readonly Mock<ICalcResultOnePlusFourApportionmentBuilder> mockICalcResultOnePlusFourApportionmentBuilder;
+
+        private Fixture Fixture { get; init; } = new Fixture();
 
         public CalcResultTests()
         {
@@ -87,7 +90,7 @@ namespace EPR.Calculator.API.UnitTests
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
             var requestDto = new CalcResultsRequestDto() { RunId = 1 };
-            var calcResult = new CalcResult();
+            var calcResult = this.Fixture.Create<CalcResult>();
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
 
             var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
