@@ -1,12 +1,4 @@
-﻿DECLARE @migrationId NVARCHAR = '20240730085820_AddInitialMigration'
-DECLARE @parameterType NVARCHAR = 'parameter_type'
-DECLARE @parameterCategory NVARCHAR = 'parameter_category'
-DECLARE @parameterUniqueRef NVARCHAR = 'parameter_unique_ref'
-DECLARE @defaultParameterTemplateMaster NVARCHAR = 'default_parameter_template_master'
-DECLARE @validRangeFrom NVARCHAR = 'valid_Range_from'
-DECLARE @productVersion NVARCHAR = '8.0.7'
-
-IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
+﻿IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
 BEGIN
     CREATE TABLE [__EFMigrationsHistory] (
         [MigrationId] nvarchar(150) NOT NULL,
@@ -21,7 +13,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @migrationId
+    WHERE [MigrationId] = N'20240730085820_AddInitialMigration'
 )
 BEGIN
     CREATE TABLE [default_parameter_setting_master] (
@@ -38,7 +30,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @migrationId
+    WHERE [MigrationId] = N'20240730085820_AddInitialMigration'
 )
 BEGIN
     CREATE TABLE [default_parameter_template_master] (
@@ -54,7 +46,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @migrationId
+    WHERE [MigrationId] = N'20240730085820_AddInitialMigration'
 )
 BEGIN
     CREATE TABLE [default_parameter_setting_detail] (
@@ -71,10 +63,10 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @migrationId
+    WHERE [MigrationId] = N'20240730085820_AddInitialMigration'
 )
 BEGIN
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterCategory, @parameterType, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] ON;
     EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])
     VALUES (N''BADEBT-P'', N''Communication costs'', N''Aluminium'', 0.0, 999999999.99),
@@ -118,14 +110,14 @@ BEGIN
     (N''TONT-DI'', N''Tonnage change threshold'', N''Amount Decrease'', 0.0, 999999999.99),
     (N''TONT-PD'', N''Tonnage change threshold'', N''Percent Decrease'', 0.0, -1000.0),
     (N''TONT-PI'', N''Tonnage change threshold'', N''Percent Increase'', 0.0, 1000.0)');
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterCategory, @parameterType, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @migrationId
+    WHERE [MigrationId] = N'20240730085820_AddInitialMigration'
 )
 BEGIN
     CREATE INDEX [IX_default_parameter_setting_detail_default_parameter_setting_master_id] ON [default_parameter_setting_detail] ([default_parameter_setting_master_id]);
@@ -134,7 +126,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @migrationId
+    WHERE [MigrationId] = N'20240730085820_AddInitialMigration'
 )
 BEGIN
     CREATE INDEX [IX_default_parameter_setting_detail_parameter_unique_ref] ON [default_parameter_setting_detail] ([parameter_unique_ref]);
@@ -143,11 +135,11 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @migrationId
+    WHERE [MigrationId] = N'20240730085820_AddInitialMigration'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (@migrationId, N'8.0.7');
+    VALUES (N'20240730085820_AddInitialMigration', N'8.0.7');
 END;
 GO
 
@@ -157,25 +149,23 @@ GO
 BEGIN TRANSACTION;
 GO
 
-DECLARE @20240731130652_202407311405_migrationId NVARCHAR = '20240731130652_202407311405_UpdateTemplateMaster'
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731130652_202407311405_migrationId
+    WHERE [MigrationId] = N'20240731130652_202407311405_UpdateTemplateMaster'
 )
 BEGIN
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterType, @parameterCategory, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_type', N'parameter_category', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] ON;
     EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_type], [parameter_category], [valid_Range_from], [valid_Range_to])
     VALUES (N''TONT-AD'', N''Amount Decrease'', N''Tonnage change threshold'', 0.0, 999999999.99)');
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterType, @parameterCategory, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_type', N'parameter_category', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731130652_202407311405_migrationId
+    WHERE [MigrationId] = N'20240731130652_202407311405_UpdateTemplateMaster'
 )
 BEGIN
     EXEC(N'UPDATE [default_parameter_setting_detail] SET [parameter_unique_ref] = N''TONT-AD''
@@ -186,7 +176,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731130652_202407311405_migrationId
+    WHERE [MigrationId] = N'20240731130652_202407311405_UpdateTemplateMaster'
 )
 BEGIN
     EXEC(N'DELETE FROM [default_parameter_template_master]
@@ -197,11 +187,11 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731130652_202407311405_migrationId
+    WHERE [MigrationId] = N'20240731130652_202407311405_UpdateTemplateMaster'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (@migrationId, N'8.0.7');
+    VALUES (N'20240731130652_202407311405_UpdateTemplateMaster', N'8.0.7');
 END;
 GO
 
@@ -211,11 +201,9 @@ GO
 BEGIN TRANSACTION;
 GO
 
-DECLARE @20240731135218_202407311451_migrationId NVARCHAR = '20240731135218_202407311451_UpdateTemplateMasterValues'
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731135218_202407311451_migrationId
+    WHERE [MigrationId] = N'20240731135218_202407311451_UpdateTemplateMasterValues'
 )
 BEGIN
     EXEC(N'UPDATE [default_parameter_template_master] SET [valid_Range_from] = -1000.0
@@ -226,7 +214,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731135218_202407311451_migrationId
+    WHERE [MigrationId] = N'20240731135218_202407311451_UpdateTemplateMasterValues'
 )
 BEGIN
     EXEC(N'UPDATE [default_parameter_template_master] SET [valid_Range_to] = 0.0
@@ -237,7 +225,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731135218_202407311451_migrationId
+    WHERE [MigrationId] = N'20240731135218_202407311451_UpdateTemplateMasterValues'
 )
 BEGIN
     EXEC(N'UPDATE [default_parameter_template_master] SET [valid_Range_from] = -1000.0
@@ -248,7 +236,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731135218_202407311451_migrationId
+    WHERE [MigrationId] = N'20240731135218_202407311451_UpdateTemplateMasterValues'
 )
 BEGIN
     EXEC(N'UPDATE [default_parameter_template_master] SET [valid_Range_to] = 0.0
@@ -259,11 +247,11 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731135218_202407311451_migrationId
+    WHERE [MigrationId] = N'20240731135218_202407311451_UpdateTemplateMasterValues'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (@20240731135218_202407311451_migrationId, N'8.0.7');
+    VALUES (N'20240731135218_202407311451_UpdateTemplateMasterValues', N'8.0.7');
 END;
 GO
 
@@ -273,11 +261,9 @@ GO
 BEGIN TRANSACTION;
 GO
 
-DECLARE @20240731140140_202407311501_migrationId NVARCHAR = '20240731140140_202407311501_UpdateTemplateMasterType'
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731140140_202407311501_migrationId
+    WHERE [MigrationId] = N'20240731140140_202407311501_UpdateTemplateMasterType'
 )
 BEGIN
     EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_type] = N''Fibre Composite''
@@ -288,7 +274,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731140140_202407311501_migrationId
+    WHERE [MigrationId] = N'20240731140140_202407311501_UpdateTemplateMasterType'
 )
 BEGIN
     EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_type] = N''Glass''
@@ -299,7 +285,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731140140_202407311501_migrationId
+    WHERE [MigrationId] = N'20240731140140_202407311501_UpdateTemplateMasterType'
 )
 BEGIN
     EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_type] = N''Other''
@@ -310,7 +296,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731140140_202407311501_migrationId
+    WHERE [MigrationId] = N'20240731140140_202407311501_UpdateTemplateMasterType'
 )
 BEGIN
     EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_type] = N''Paper Or Card''
@@ -321,7 +307,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731140140_202407311501_migrationId
+    WHERE [MigrationId] = N'20240731140140_202407311501_UpdateTemplateMasterType'
 )
 BEGIN
     EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_type] = N''Plastic''
@@ -332,7 +318,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731140140_202407311501_migrationId
+    WHERE [MigrationId] = N'20240731140140_202407311501_UpdateTemplateMasterType'
 )
 BEGIN
     EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_type] = N''Steel''
@@ -343,7 +329,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731140140_202407311501_migrationId
+    WHERE [MigrationId] = N'20240731140140_202407311501_UpdateTemplateMasterType'
 )
 BEGIN
     EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_type] = N''Wood''
@@ -354,11 +340,11 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240731140140_202407311501_migrationId
+    WHERE [MigrationId] = N'20240731140140_202407311501_UpdateTemplateMasterType'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (@20240731140140_202407311501_migrationId, N'8.0.7');
+    VALUES (N'20240731140140_202407311501_UpdateTemplateMasterType', N'8.0.7');
 END;
 GO
 
@@ -368,11 +354,9 @@ GO
 BEGIN TRANSACTION;
 GO
 
-DECLARE @20240808120743_migrationId NVARCHAR = '20240808120743_UpdateTemplateMaster'
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240808120743_migrationId
+    WHERE [MigrationId] = N'20240808120743_UpdateTemplateMaster'
 )
 BEGIN
     delete dbo.default_parameter_setting_detail where 1=1
@@ -381,7 +365,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240808120743_migrationId
+    WHERE [MigrationId] = N'20240808120743_UpdateTemplateMaster'
 )
 BEGIN
     delete dbo.default_parameter_setting_master where 1=1
@@ -390,7 +374,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240808120743_migrationId
+    WHERE [MigrationId] = N'20240808120743_UpdateTemplateMaster'
 )
 BEGIN
     delete dbo.default_parameter_template_master where 1=1
@@ -399,11 +383,12 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240808120743_migrationId
+    WHERE [MigrationId] = N'20240808120743_UpdateTemplateMaster'
 )
 BEGIN
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterCategory, @parameterType, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] ON;
+<<<<<<< HEAD
     EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])'
     +'VALUES (N''COMC-AL'', N''Aluminium'', N''Communication costs'', 0.0, 999999999.99),'
     +'(N''COMC-FC'', N''Fibre composite'', N''Communication costs'', 0.0, 999999999.99),'
@@ -447,17 +432,62 @@ BEGIN
     +'(N''LEVY-SCT'', N''Scotland'', N''Levy'', 0.0, 999999999.99),'
     +'(N''LEVY-NIR'', N''Northern Ireland'', N''Levy'', 0.0, 999999999.99)');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterCategory, @parameterType, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
+=======
+    EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])
+    VALUES (N''COMC-AL'', N''Aluminium'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-FC'', N''Fibre composite'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-GL'', N''Glass'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-PC'', N''Paper or card'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-PL'', N''Plastic'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-ST'', N''Steel'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-WD'', N''Wood'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-OT'', N''Other'', N''Communication costs'', 0.0, 999999999.99),
+    (N''SAOC-ENG'', N''England'', N''Scheme administrator operating costs'', 0.0, 999999999.99),
+    (N''SAOC-WLS'', N''Wales'', N''Scheme administrator operating costs'', 0.0, 999999999.99),
+    (N''SAOC-SCT'', N''Scotland'', N''Scheme administrator operating costs'', 0.0, 999999999.99),
+    (N''SAOC-NIR'', N''Northern Ireland'', N''Scheme administrator operating costs'', 0.0, 999999999.99),
+    (N''LAPC-ENG'', N''England'', N''Local authority data preparation costs'', 0.0, 999999999.99),
+    (N''LAPC-WLS'', N''Wales'', N''Local authority data preparation costs'', 0.0, 999999999.99),
+    (N''LAPC-SCT'', N''Scotland'', N''Local authority data preparation costs'', 0.0, 999999999.99),
+    (N''LAPC-NIR'', N''Northern Ireland'', N''Local authority data preparation costs'', 0.0, 999999999.99),
+    (N''SCSC-ENG'', N''England'', N''Scheme setup costs'', 0.0, 999999999.99),
+    (N''SCSC-WLS'', N''Wales'', N''Scheme setup costs'', 0.0, 999999999.99),
+    (N''SCSC-SCT'', N''Scotland'', N''Scheme setup costs'', 0.0, 999999999.99),
+    (N''SCSC-NIR'', N''Northern Ireland'', N''Scheme setup costs'', 0.0, 999999999.99),
+    (N''LRET-AL'', N''Aluminium'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-FC'', N''Fibre composite'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-GL'', N''Glass'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-PC'', N''Paper or card'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-PL'', N''Plastic'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-ST'', N''Steel'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-WD'', N''Wood'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-OT'', N''Other'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''BADEBT-P'', N''BadDebt'', N''Bad debt provision percentage'', 0.0, 999.99),
+    (N''MATT-AI'', N''Amount Increase'', N''Materiality threshold'', 0.0, 999999999.99),
+    (N''MATT-AD'', N''Amount Decrease'', N''Materiality threshold'', -999999999.99, 0.0),
+    (N''MATT-PI'', N''Percent Increase'', N''Materiality threshold'', 0.0, 999.99),
+    (N''MATT-PD'', N''Percent Decrease'', N''Materiality threshold'', -999.99, 0.0),
+    (N''TONT-AI'', N''Amount Increase'', N''Tonnage change threshold'', 0.0, 999999999.99),
+    (N''TONT-AD'', N''Amount Decrease'', N''Tonnage change threshold'', -999999999.99, 0.0),
+    (N''TONT-PI'', N''Percent Increase'', N''Tonnage change threshold'', 0.0, 999.99),
+    (N''TONT-PD'', N''Percent Decrease'', N''Tonnage change threshold'', -999.99, 0.0),
+    (N''LEVY-ENG'', N''England'', N''Levy'', 0.0, 999999999.99),
+    (N''LEVY-WLS'', N''Wales'', N''Levy'', 0.0, 999999999.99),
+    (N''LEVY-SCT'', N''Scotland'', N''Levy'', 0.0, 999999999.99),
+    (N''LEVY-NIR'', N''Northern Ireland'', N''Levy'', 0.0, 999999999.99)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
+>>>>>>> parent of dbf8c73 (Fix more warnings)
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240808120743_migrationId
+    WHERE [MigrationId] = N'20240808120743_UpdateTemplateMaster'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (@20240808120743_migrationId, N'8.0.7');
+    VALUES (N'20240808120743_UpdateTemplateMaster', N'8.0.7');
 END;
 GO
 
@@ -467,18 +497,16 @@ GO
 BEGIN TRANSACTION;
 GO
 
-DECLARE @20240809123714_migrationId NVARCHAR = '20240809123714_decimalPrecision'
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240809123714_migrationId
+    WHERE [MigrationId] = N'20240809123714_decimalPrecision'
 )
 BEGIN
     DECLARE @var0 sysname;
     SELECT @var0 = [d].[name]
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(@defaultParameterTemplateMaster) AND [c].[name] = N'valid_Range_to');
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[default_parameter_template_master]') AND [c].[name] = N'valid_Range_to');
     IF @var0 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_template_master] DROP CONSTRAINT [' + @var0 + '];');
     ALTER TABLE [default_parameter_template_master] ALTER COLUMN [valid_Range_to] decimal(18,3) NOT NULL;
 END;
@@ -486,14 +514,14 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240809123714_migrationId
+    WHERE [MigrationId] = N'20240809123714_decimalPrecision'
 )
 BEGIN
     DECLARE @var1 sysname;
     SELECT @var1 = [d].[name]
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(@defaultParameterTemplateMaster) AND [c].[name] = @validRangeFrom);
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[default_parameter_template_master]') AND [c].[name] = N'valid_Range_from');
     IF @var1 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_template_master] DROP CONSTRAINT [' + @var1 + '];');
     ALTER TABLE [default_parameter_template_master] ALTER COLUMN [valid_Range_from] decimal(18,3) NOT NULL;
 END;
@@ -501,7 +529,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240809123714_migrationId
+    WHERE [MigrationId] = N'20240809123714_decimalPrecision'
 )
 BEGIN
     DECLARE @var2 sysname;
@@ -516,11 +544,11 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240809123714_migrationId
+    WHERE [MigrationId] = N'20240809123714_decimalPrecision'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (@20240809123714_migrationId, N'8.0.7');
+    VALUES (N'20240809123714_decimalPrecision', N'8.0.7');
 END;
 GO
 
@@ -530,11 +558,9 @@ GO
 BEGIN TRANSACTION;
 GO
 
-DECLARE @20240809131657_migrationId NVARCHAR = '20240809131657_UpdateTemplateMasterData'
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240809131657_migrationId
+    WHERE [MigrationId] = N'20240809131657_UpdateTemplateMasterData'
 )
 BEGIN
     delete dbo.default_parameter_setting_detail where 1=1
@@ -543,7 +569,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240809131657_migrationId
+    WHERE [MigrationId] = N'20240809131657_UpdateTemplateMasterData'
 )
 BEGIN
     delete dbo.default_parameter_setting_master where 1=1
@@ -552,7 +578,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240809131657_migrationId
+    WHERE [MigrationId] = N'20240809131657_UpdateTemplateMasterData'
 )
 BEGIN
     delete dbo.default_parameter_template_master where 1=1
@@ -561,11 +587,12 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240809131657_migrationId
+    WHERE [MigrationId] = N'20240809131657_UpdateTemplateMasterData'
 )
 BEGIN
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterCategory, @parameterType, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] ON;
+<<<<<<< HEAD
     EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])'
     +'VALUES (N''COMC-AL'', N''Aluminium'', N''Communication costs'', 0.0, 999999999.99),'
     +'(N''COMC-FC'', N''Fibre composite'', N''Communication costs'', 0.0, 999999999.99),'
@@ -609,17 +636,62 @@ BEGIN
     +'(N''LEVY-SCT'', N''Scotland'', N''Levy'', 0.0, 999999999.99),'
     +'(N''LEVY-NIR'', N''Northern Ireland'', N''Levy'', 0.0, 999999999.99)');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterCategory, @parameterType, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
+=======
+    EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])
+    VALUES (N''COMC-AL'', N''Aluminium'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-FC'', N''Fibre composite'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-GL'', N''Glass'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-PC'', N''Paper or card'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-PL'', N''Plastic'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-ST'', N''Steel'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-WD'', N''Wood'', N''Communication costs'', 0.0, 999999999.99),
+    (N''COMC-OT'', N''Other'', N''Communication costs'', 0.0, 999999999.99),
+    (N''SAOC-ENG'', N''England'', N''Scheme administrator operating costs'', 0.0, 999999999.99),
+    (N''SAOC-WLS'', N''Wales'', N''Scheme administrator operating costs'', 0.0, 999999999.99),
+    (N''SAOC-SCT'', N''Scotland'', N''Scheme administrator operating costs'', 0.0, 999999999.99),
+    (N''SAOC-NIR'', N''Northern Ireland'', N''Scheme administrator operating costs'', 0.0, 999999999.99),
+    (N''LAPC-ENG'', N''England'', N''Local authority data preparation costs'', 0.0, 999999999.99),
+    (N''LAPC-WLS'', N''Wales'', N''Local authority data preparation costs'', 0.0, 999999999.99),
+    (N''LAPC-SCT'', N''Scotland'', N''Local authority data preparation costs'', 0.0, 999999999.99),
+    (N''LAPC-NIR'', N''Northern Ireland'', N''Local authority data preparation costs'', 0.0, 999999999.99),
+    (N''SCSC-ENG'', N''England'', N''Scheme setup costs'', 0.0, 999999999.99),
+    (N''SCSC-WLS'', N''Wales'', N''Scheme setup costs'', 0.0, 999999999.99),
+    (N''SCSC-SCT'', N''Scotland'', N''Scheme setup costs'', 0.0, 999999999.99),
+    (N''SCSC-NIR'', N''Northern Ireland'', N''Scheme setup costs'', 0.0, 999999999.99),
+    (N''LRET-AL'', N''Aluminium'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-FC'', N''Fibre composite'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-GL'', N''Glass'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-PC'', N''Paper or card'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-PL'', N''Plastic'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-ST'', N''Steel'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-WD'', N''Wood'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-OT'', N''Other'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''BADEBT-P'', N''BadDebt'', N''Bad debt provision percentage'', 0.0, 999.99),
+    (N''MATT-AI'', N''Amount Increase'', N''Materiality threshold'', 0.0, 999999999.99),
+    (N''MATT-AD'', N''Amount Decrease'', N''Materiality threshold'', -999999999.99, 0.0),
+    (N''MATT-PI'', N''Percent Increase'', N''Materiality threshold'', 0.0, 999.99),
+    (N''MATT-PD'', N''Percent Decrease'', N''Materiality threshold'', -999.99, 0.0),
+    (N''TONT-AI'', N''Amount Increase'', N''Tonnage change threshold'', 0.0, 999999999.99),
+    (N''TONT-AD'', N''Amount Decrease'', N''Tonnage change threshold'', -999999999.99, 0.0),
+    (N''TONT-PI'', N''Percent Increase'', N''Tonnage change threshold'', 0.0, 999.99),
+    (N''TONT-PD'', N''Percent Decrease'', N''Tonnage change threshold'', -999.99, 0.0),
+    (N''LEVY-ENG'', N''England'', N''Levy'', 0.0, 999999999.99),
+    (N''LEVY-WLS'', N''Wales'', N''Levy'', 0.0, 999999999.99),
+    (N''LEVY-SCT'', N''Scotland'', N''Levy'', 0.0, 999999999.99),
+    (N''LEVY-NIR'', N''Northern Ireland'', N''Levy'', 0.0, 999999999.99)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
+>>>>>>> parent of dbf8c73 (Fix more warnings)
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240809131657_migrationId
+    WHERE [MigrationId] = N'20240809131657_UpdateTemplateMasterData'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (@20240809131657_migrationId, N'8.0.7');
+    VALUES (N'20240809131657_UpdateTemplateMasterData', N'8.0.7');
 END;
 GO
 
@@ -629,11 +701,9 @@ GO
 BEGIN TRANSACTION;
 GO
 
-DECLARE @20240814103125_migrationId NVARCHAR = '20240814103125_UpdateBadDebtInTemplateMaster'
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240814103125_migrationId
+    WHERE [MigrationId] = N'20240814103125_UpdateBadDebtInTemplateMaster'
 )
 BEGIN
     update dbo.default_parameter_template_master
@@ -646,11 +716,11 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = @20240814103125_migrationId
+    WHERE [MigrationId] = N'20240814103125_UpdateBadDebtInTemplateMaster'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (@20240814103125_migrationId, N'8.0.7');
+    VALUES (N'20240814103125_UpdateBadDebtInTemplateMaster', N'8.0.7');
 END;
 GO
 
@@ -1125,8 +1195,9 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20240924110427_AddCommunicationCostsDefaultParamaterMaster'
 )
 BEGIN
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterCategory, @parameterType, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] ON;
+<<<<<<< HEAD
     EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])'
     +'VALUES (N''COMC-UK'', N''United Kingdom'', N''Communication costs by country'', 0.0, 999999999.99),'
     +'(N''COMC-ENG'', N''England'', N''Communication costs by country'', 0.0, 999999999.99),'
@@ -1134,6 +1205,15 @@ BEGIN
     +'(N''COMC-SCT'', N''Scotland'', N''Communication costs by country'', 0.0, 999999999.99),'
     +'(N''COMC-NIR'', N''Northern Ireland'', N''Communication costs by country'', 0.0, 999999999.99)');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterCategory, @parameterType, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
+=======
+    EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])
+    VALUES (N''COMC-UK'', N''United Kingdom'', N''Communication costs by country'', 0.0, 999999999.99),
+    (N''COMC-ENG'', N''England'', N''Communication costs by country'', 0.0, 999999999.99),
+    (N''COMC-WLS'', N''Wales'', N''Communication costs by country'', 0.0, 999999999.99),
+    (N''COMC-SCT'', N''Scotland'', N''Communication costs by country'', 0.0, 999999999.99),
+    (N''COMC-NIR'', N''Northern Ireland'', N''Communication costs by country'', 0.0, 999999999.99)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
+>>>>>>> parent of dbf8c73 (Fix more warnings)
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
 GO
