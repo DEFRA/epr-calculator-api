@@ -14,15 +14,13 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TotalBillBreakdown
     [TestClass]
     public class TotalBillBreakdownProducerTests
     {
-        private ApplicationDBContext _dbContext;
-        private IEnumerable<MaterialDetail> _materials;
-        private CalcResult _calcResult;
-        private CalcResultSummaryProducerDisposalFees _disposalFees;
-        private Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> _materialCostSummary;
-        private Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> _commsCostSummary;
+        private readonly ApplicationDBContext _dbContext;
+        private readonly IEnumerable<MaterialDetail> _materials;
+        private readonly CalcResult _calcResult;
+        private readonly Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> _materialCostSummary;
+        private readonly Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> _commsCostSummary;
 
-        [TestInitialize]
-        public void TestInitialize()
+        public TotalBillBreakdownProducerTests()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")

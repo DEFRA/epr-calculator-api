@@ -11,11 +11,10 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class CalcResultsExporterTests
     {
-        private CalcResultsExporter _calcResultsExporter;
-        private Mock<IStorageService> _blobStorageServiceMock;
+        private readonly CalcResultsExporter _calcResultsExporter;
+        private readonly Mock<IStorageService> _blobStorageServiceMock;
 
-        [TestInitialize]
-        public void Setup()
+        public CalcResultsExporterTests()
         {
             _blobStorageServiceMock = new Mock<IStorageService>();
             _calcResultsExporter = new CalcResultsExporter(_blobStorageServiceMock.Object);
