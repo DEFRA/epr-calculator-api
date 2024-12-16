@@ -76,48 +76,49 @@ IF NOT EXISTS (
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterCategory, @parameterType, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
         SET IDENTITY_INSERT [default_parameter_template_master] ON;
-    EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])'
-    +'VALUES (N''BADEBT-P'', N''Communication costs'', N''Aluminium'', 0.0, 999999999.99),'
-    +'(N''COMC-AL'', N''Communication costs'', N''Aluminium'', 0.0, 999999999.99),'
-    +'(N''COMC-FC'', N''Communication costs'', N''Fibre composite'', 0.0, 999999999.99),'
-    +'(N''COMC-GL'', N''Communication costs'', N''Glass'', 0.0, 999999999.99),'
-    +'(N''COMC-OT'', N''Communication costs'', N''Other'', 0.0, 999999999.99),'
-    +'(N''COMC-PC'', N''Communication costs'', N''Paper or card'', 0.0, 999999999.99),'
-    +'(N''COMC-PL'', N''Communication costs'', N''Plastic'', 0.0, 999999999.99),'
-    +'(N''COMC-ST'', N''Communication costs'', N''Steel'', 0.0, 999999999.99),'
-    +'(N''COMC-WD'', N''Communication costs'', N''Wood'', 0.0, 999999999.99),'
-    +'(N''LAPC-ENG'', N''Local authority data preparation costs'', N''England'', 0.0, 999999999.99),'
-    +'(N''LAPC-NIR'', N''Local authority data preparation costs'', N''Northern Ireland'', 0.0, 999999999.99),'
-    +'(N''LAPC-SCT'', N''Local authority data preparation costs'', N''Scotland'', 0.0, 999999999.99),'
-    +'(N''LAPC-WLS'', N''Local authority data preparation costs'', N''Wales'', 0.0, 999999999.99),'
-    +'(N''LEVY-ENG'', N''Levy'', N''England'', 0.0, 999999999.99),'
-    +'(N''LEVY-NIR'', N''Levy'', N''Northern Ireland'', 0.0, 999999999.99),'
-    +'(N''LEVY-SCT'', N''Levy'', N''Scotland'', 0.0, 999999999.99),'
-    +'(N''LEVY-WLS'', N''Levy'', N''Wales'', 0.0, 999999999.99),'
-    +'(N''LRET-AL'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),'
-    +'(N''LRET-FC'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),'
-    +'(N''LRET-GL'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),'
-    +'(N''LRET-OT'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),'
-    +'(N''LRET-PC'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),'
-    +'(N''LRET-PL'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),'
-    +'(N''LRET-ST'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),'
-    +'(N''LRET-WD'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),'
-    +'(N''MATT-AD'', N''Materiality threshold'', N''Amount Decrease'', 0.0, 999999999.99),'
-    +'(N''MATT-AI'', N''Materiality threshold'', N''Amount Increase'', 0.0, 999999999.99),'
-    +'(N''MATT-PD'', N''Materiality threshold'', N''Percent Decrease'', 0.0, -1000.0),'
-    +'(N''MATT-PI'', N''Materiality threshold'', N''Percent Increase'', 0.0, 1000.0),'
-    +'(N''SAOC-ENG'', N''Scheme administrator operating costs'', N''England'', 0.0, 999999999.99),'
-    +'(N''SAOC-NIR'', N''Scheme administrator operating costs'', N''Northern Ireland'', 0.0, 999999999.99),'
-    +'(N''SAOC-SCT'', N''Scheme administrator operating costs'', N''Scotland'', 0.0, 999999999.99),'
-    +'(N''SAOC-WLS'', N''Scheme administrator operating costs'', N''Wales'', 0.0, 999999999.99),'
-    +'(N''SCSC-ENG'', N''Scheme setup costs'', N''England'', 0.0, 999999999.99),'
-    +'(N''SCSC-NIR'', N''Scheme setup costs'', N''Northern Ireland'', 0.0, 999999999.99),'
-    +'(N''SCSC-SCT'', N''Scheme setup costs'', N''Scotland'', 0.0, 999999999.99),'
-    +'(N''SCSC-WLS'', N''Scheme setup costs'', N''Wales'', 0.0, 999999999.99),'
-    +'(N''TONT-AI'', N''Tonnage change threshold'', N''Amount Increase'', 0.0, 999999999.99),'
-    +'(N''TONT-DI'', N''Tonnage change threshold'', N''Amount Decrease'', 0.0, 999999999.99),'
-    +'(N''TONT-PD'', N''Tonnage change threshold'', N''Percent Decrease'', 0.0, -1000.0),'
-    +'(N''TONT-PI'', N''Tonnage change threshold'', N''Percent Increase'', 0.0, 1000.0)');
+    EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])
+    VALUES (N''BADEBT-P'', N''Communication costs'', N''Aluminium'', 0.0, 999999999.99),
+    (N''COMC-AL'', N''Communication costs'', N''Aluminium'', 0.0, 999999999.99),
+    (N''COMC-FC'', N''Communication costs'', N''Fibre composite'', 0.0, 999999999.99),
+    (N''COMC-GL'', N''Communication costs'', N''Glass'', 0.0, 999999999.99),
+    (N''COMC-OT'', N''Communication costs'', N''Other'', 0.0, 999999999.99),
+    (N''COMC-PC'', N''Communication costs'', N''Paper or card'', 0.0, 999999999.99),
+    (N''COMC-PL'', N''Communication costs'', N''Plastic'', 0.0, 999999999.99),
+    (N''COMC-ST'', N''Communication costs'', N''Steel'', 0.0, 999999999.99),
+    (N''COMC-WD'', N''Communication costs'', N''Wood'', 0.0, 999999999.99),
+    (N''LAPC-ENG'', N''Local authority data preparation costs'', N''England'', 0.0, 999999999.99),
+    (N''LAPC-NIR'', N''Local authority data preparation costs'', N''Northern Ireland'', 0.0, 999999999.99),
+    (N''LAPC-SCT'', N''Local authority data preparation costs'', N''Scotland'', 0.0, 999999999.99),
+    (N''LAPC-WLS'', N''Local authority data preparation costs'', N''Wales'', 0.0, 999999999.99),
+    (N''LEVY-ENG'', N''Levy'', N''England'', 0.0, 999999999.99),
+    (N''LEVY-NIR'', N''Levy'', N''Northern Ireland'', 0.0, 999999999.99),
+    (N''LEVY-SCT'', N''Levy'', N''Scotland'', 0.0, 999999999.99),
+    (N''LEVY-WLS'', N''Levy'', N''Wales'', 0.0, 999999999.99),
+    (N''LRET-AL'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),
+    (N''LRET-FC'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),
+    (N''LRET-GL'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),
+    (N''LRET-OT'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),
+    (N''LRET-PC'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),
+    (N''LRET-PL'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),
+    (N''LRET-ST'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),
+    (N''LRET-WD'', N''Late reporting tonnage'', N''Aluminium'', 0.0, 999999999.99),
+    (N''MATT-AD'', N''Materiality threshold'', N''Amount Decrease'', 0.0, 999999999.99),
+    (N''MATT-AI'', N''Materiality threshold'', N''Amount Increase'', 0.0, 999999999.99),
+    (N''MATT-PD'', N''Materiality threshold'', N''Percent Decrease'', 0.0, -1000.0),
+    (N''MATT-PI'', N''Materiality threshold'', N''Percent Increase'', 0.0, 1000.0),
+    (N''SAOC-ENG'', N''Scheme administrator operating costs'', N''England'', 0.0, 999999999.99),
+    (N''SAOC-NIR'', N''Scheme administrator operating costs'', N''Northern Ireland'', 0.0, 999999999.99),
+    (N''SAOC-SCT'', N''Scheme administrator operating costs'', N''Scotland'', 0.0, 999999999.99),
+    (N''SAOC-WLS'', N''Scheme administrator operating costs'', N''Wales'', 0.0, 999999999.99),
+    (N''SCSC-ENG'', N''Scheme setup costs'', N''England'', 0.0, 999999999.99),
+    (N''SCSC-NIR'', N''Scheme setup costs'', N''Northern Ireland'', 0.0, 999999999.99),
+    (N''SCSC-SCT'', N''Scheme setup costs'', N''Scotland'', 0.0, 999999999.99),
+    (N''SCSC-WLS'', N''Scheme setup costs'', N''Wales'', 0.0, 999999999.99),
+    (N''TONT-AI'', N''Tonnage change threshold'', N''Amount Increase'', 0.0, 999999999.99),
+    (N''TONT-DI'', N''Tonnage change threshold'', N''Amount Decrease'', 0.0, 999999999.99),
+    (N''TONT-PD'', N''Tonnage change threshold'', N''Percent Decrease'', 0.0, -1000.0),
+    (N''TONT-PI'', N''Tonnage change threshold'', N''Percent Increase'', 0.0, 1000.0)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterCategory, @parameterType, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
 GO
