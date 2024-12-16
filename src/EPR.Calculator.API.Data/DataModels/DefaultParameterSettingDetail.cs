@@ -14,7 +14,7 @@ namespace EPR.Calculator.API.Data.DataModels
         [Column("default_parameter_setting_master_id")]
         public int DefaultParameterSettingMasterId { get; set; }
 
-        public required DefaultParameterSettingMaster DefaultParameterSettingMaster { get; set; }
+        public DefaultParameterSettingMaster? DefaultParameterSettingMaster { get; set; }
 
         [Column("parameter_unique_ref")]
         [StringLength(450)]
