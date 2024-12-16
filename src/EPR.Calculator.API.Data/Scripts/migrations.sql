@@ -388,51 +388,6 @@ IF NOT EXISTS (
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] ON;
-<<<<<<< HEAD
-    EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])'
-    +'VALUES (N''COMC-AL'', N''Aluminium'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''COMC-FC'', N''Fibre composite'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''COMC-GL'', N''Glass'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''COMC-PC'', N''Paper or card'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''COMC-PL'', N''Plastic'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''COMC-ST'', N''Steel'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''COMC-WD'', N''Wood'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''COMC-OT'', N''Other'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''SAOC-ENG'', N''England'', N''Scheme administrator operating costs'', 0.0, 999999999.99),'
-    +'(N''SAOC-WLS'', N''Wales'', N''Scheme administrator operating costs'', 0.0, 999999999.99),'
-    +'(N''SAOC-SCT'', N''Scotland'', N''Scheme administrator operating costs'', 0.0, 999999999.99),'
-    +'(N''SAOC-NIR'', N''Northern Ireland'', N''Scheme administrator operating costs'', 0.0, 999999999.99),'
-    +'(N''LAPC-ENG'', N''England'', N''Local authority data preparation costs'', 0.0, 999999999.99),'
-    +'(N''LAPC-WLS'', N''Wales'', N''Local authority data preparation costs'', 0.0, 999999999.99),'
-    +'(N''LAPC-SCT'', N''Scotland'', N''Local authority data preparation costs'', 0.0, 999999999.99),'
-    +'(N''LAPC-NIR'', N''Northern Ireland'', N''Local authority data preparation costs'', 0.0, 999999999.99),'
-    +'(N''SCSC-ENG'', N''England'', N''Scheme setup costs'', 0.0, 999999999.99),'
-    +'(N''SCSC-WLS'', N''Wales'', N''Scheme setup costs'', 0.0, 999999999.99),'
-    +'(N''SCSC-SCT'', N''Scotland'', N''Scheme setup costs'', 0.0, 999999999.99),'
-    +'(N''SCSC-NIR'', N''Northern Ireland'', N''Scheme setup costs'', 0.0, 999999999.99),'
-    +'(N''LRET-AL'', N''Aluminium'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''LRET-FC'', N''Fibre composite'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''LRET-GL'', N''Glass'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''LRET-PC'', N''Paper or card'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''LRET-PL'', N''Plastic'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''LRET-ST'', N''Steel'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''LRET-WD'', N''Wood'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''LRET-OT'', N''Other'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''BADEBT-P'', N''BadDebt'', N''Bad debt provision percentage'', 0.0, 999.99),'
-    +'(N''MATT-AI'', N''Amount Increase'', N''Materiality threshold'', 0.0, 999999999.99),'
-    +'(N''MATT-AD'', N''Amount Decrease'', N''Materiality threshold'', -999999999.99, 0.0),'
-    +'(N''MATT-PI'', N''Percent Increase'', N''Materiality threshold'', 0.0, 999.99),'
-    +'(N''MATT-PD'', N''Percent Decrease'', N''Materiality threshold'', -999.99, 0.0),'
-    +'(N''TONT-AI'', N''Amount Increase'', N''Tonnage change threshold'', 0.0, 999999999.99),'
-    +'(N''TONT-AD'', N''Amount Decrease'', N''Tonnage change threshold'', -999999999.99, 0.0),'
-    +'(N''TONT-PI'', N''Percent Increase'', N''Tonnage change threshold'', 0.0, 999.99),'
-    +'(N''TONT-PD'', N''Percent Decrease'', N''Tonnage change threshold'', -999.99, 0.0),'
-    +'(N''LEVY-ENG'', N''England'', N''Levy'', 0.0, 999999999.99),'
-    +'(N''LEVY-WLS'', N''Wales'', N''Levy'', 0.0, 999999999.99),'
-    +'(N''LEVY-SCT'', N''Scotland'', N''Levy'', 0.0, 999999999.99),'
-    +'(N''LEVY-NIR'', N''Northern Ireland'', N''Levy'', 0.0, 999999999.99)');
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterCategory, @parameterType, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
-=======
     EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])
     VALUES (N''COMC-AL'', N''Aluminium'', N''Communication costs'', 0.0, 999999999.99),
     (N''COMC-FC'', N''Fibre composite'', N''Communication costs'', 0.0, 999999999.99),
@@ -476,7 +431,6 @@ BEGIN
     (N''LEVY-SCT'', N''Scotland'', N''Levy'', 0.0, 999999999.99),
     (N''LEVY-NIR'', N''Northern Ireland'', N''Levy'', 0.0, 999999999.99)');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
->>>>>>> parent of dbf8c73 (Fix more warnings)
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
 GO
@@ -592,51 +546,6 @@ IF NOT EXISTS (
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] ON;
-<<<<<<< HEAD
-    EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])'
-    +'VALUES (N''COMC-AL'', N''Aluminium'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''COMC-FC'', N''Fibre composite'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''COMC-GL'', N''Glass'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''COMC-PC'', N''Paper or card'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''COMC-PL'', N''Plastic'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''COMC-ST'', N''Steel'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''COMC-WD'', N''Wood'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''COMC-OT'', N''Other'', N''Communication costs'', 0.0, 999999999.99),'
-    +'(N''SAOC-ENG'', N''England'', N''Scheme administrator operating costs'', 0.0, 999999999.99),'
-    +'(N''SAOC-WLS'', N''Wales'', N''Scheme administrator operating costs'', 0.0, 999999999.99),'
-    +'(N''SAOC-SCT'', N''Scotland'', N''Scheme administrator operating costs'', 0.0, 999999999.99),'
-    +'(N''SAOC-NIR'', N''Northern Ireland'', N''Scheme administrator operating costs'', 0.0, 999999999.99),'
-    +'(N''LAPC-ENG'', N''England'', N''Local authority data preparation costs'', 0.0, 999999999.99),'
-    +'(N''LAPC-WLS'', N''Wales'', N''Local authority data preparation costs'', 0.0, 999999999.99),'
-    +'(N''LAPC-SCT'', N''Scotland'', N''Local authority data preparation costs'', 0.0, 999999999.99),'
-    +'(N''LAPC-NIR'', N''Northern Ireland'', N''Local authority data preparation costs'', 0.0, 999999999.99),'
-    +'(N''SCSC-ENG'', N''England'', N''Scheme setup costs'', 0.0, 999999999.99),'
-    +'(N''SCSC-WLS'', N''Wales'', N''Scheme setup costs'', 0.0, 999999999.99),'
-    +'(N''SCSC-SCT'', N''Scotland'', N''Scheme setup costs'', 0.0, 999999999.99),'
-    +'(N''SCSC-NIR'', N''Northern Ireland'', N''Scheme setup costs'', 0.0, 999999999.99),'
-    +'(N''LRET-AL'', N''Aluminium'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''LRET-FC'', N''Fibre composite'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''LRET-GL'', N''Glass'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''LRET-PC'', N''Paper or card'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''LRET-PL'', N''Plastic'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''LRET-ST'', N''Steel'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''LRET-WD'', N''Wood'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''LRET-OT'', N''Other'', N''Late reporting tonnage'', 0.0, 999999999.999),'
-    +'(N''BADEBT-P'', N''BadDebt'', N''Bad debt provision percentage'', 0.0, 999.99),'
-    +'(N''MATT-AI'', N''Amount Increase'', N''Materiality threshold'', 0.0, 999999999.99),'
-    +'(N''MATT-AD'', N''Amount Decrease'', N''Materiality threshold'', -999999999.99, 0.0),'
-    +'(N''MATT-PI'', N''Percent Increase'', N''Materiality threshold'', 0.0, 999.99),'
-    +'(N''MATT-PD'', N''Percent Decrease'', N''Materiality threshold'', -999.99, 0.0),'
-    +'(N''TONT-AI'', N''Amount Increase'', N''Tonnage change threshold'', 0.0, 999999999.99),'
-    +'(N''TONT-AD'', N''Amount Decrease'', N''Tonnage change threshold'', -999999999.99, 0.0),'
-    +'(N''TONT-PI'', N''Percent Increase'', N''Tonnage change threshold'', 0.0, 999.99),'
-    +'(N''TONT-PD'', N''Percent Decrease'', N''Tonnage change threshold'', -999.99, 0.0),'
-    +'(N''LEVY-ENG'', N''England'', N''Levy'', 0.0, 999999999.99),'
-    +'(N''LEVY-WLS'', N''Wales'', N''Levy'', 0.0, 999999999.99),'
-    +'(N''LEVY-SCT'', N''Scotland'', N''Levy'', 0.0, 999999999.99),'
-    +'(N''LEVY-NIR'', N''Northern Ireland'', N''Levy'', 0.0, 999999999.99)');
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterCategory, @parameterType, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
-=======
     EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])
     VALUES (N''COMC-AL'', N''Aluminium'', N''Communication costs'', 0.0, 999999999.99),
     (N''COMC-FC'', N''Fibre composite'', N''Communication costs'', 0.0, 999999999.99),
@@ -680,7 +589,6 @@ BEGIN
     (N''LEVY-SCT'', N''Scotland'', N''Levy'', 0.0, 999999999.99),
     (N''LEVY-NIR'', N''Northern Ireland'', N''Levy'', 0.0, 999999999.99)');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
->>>>>>> parent of dbf8c73 (Fix more warnings)
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
 GO
@@ -772,12 +680,12 @@ IF NOT EXISTS (
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'created_at', N'created_by', N'status') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
         SET IDENTITY_INSERT [calculator_run_classification] ON;
-    EXEC(N'INSERT INTO [calculator_run_classification] ([id], [created_at], [created_by], [status])'
-    +'VALUES (1, ''2024-09-02T16:33:15.3358091+01:00'', N''Test User'', N''IN THE QUEUE''),'
-    +'(2, ''2024-09-02T16:33:15.3358097+01:00'', N''Test User'', N''RUNNING''),'
-    +'(3, ''2024-09-02T16:33:15.3358102+01:00'', N''Test User'', N''UNCLASSIFIED''),'
-    +'(4, ''2024-09-02T16:33:15.3358106+01:00'', N''Test User'', N''PLAY''),'
-    +'(5, ''2024-09-02T16:33:15.3358110+01:00'', N''Test User'', N''ERROR'')');
+    EXEC(N'INSERT INTO [calculator_run_classification] ([id], [created_at], [created_by], [status])
+    VALUES (1, ''2024-09-02T16:33:15.3358091+01:00'', N''Test User'', N''IN THE QUEUE''),
+    (2, ''2024-09-02T16:33:15.3358097+01:00'', N''Test User'', N''RUNNING''),
+    (3, ''2024-09-02T16:33:15.3358102+01:00'', N''Test User'', N''UNCLASSIFIED''),
+    (4, ''2024-09-02T16:33:15.3358106+01:00'', N''Test User'', N''PLAY''),
+    (5, ''2024-09-02T16:33:15.3358110+01:00'', N''Test User'', N''ERROR'')');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'created_at', N'created_by', N'status') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
         SET IDENTITY_INSERT [calculator_run_classification] OFF;
 END;
@@ -1009,39 +917,39 @@ IF NOT EXISTS (
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'unique_ref', N'country', N'material', N'total_cost_from', N'total_cost_to') AND [object_id] = OBJECT_ID(N'[lapcap_data_template_master]'))
         SET IDENTITY_INSERT [lapcap_data_template_master] ON;
-    EXEC(N'INSERT INTO [lapcap_data_template_master] ([unique_ref], [country], [material], [total_cost_from], [total_cost_to])'
-    +'VALUES (N''ENG-AL'', N''England'', N''Aluminium'', 0.0, 999999999.99),'
-    +'(N''ENG-FC'', N''England'', N''Fibre composite'', 0.0, 999999999.99),'
-    +'(N''ENG-GL'', N''England'', N''Glass'', 0.0, 999999999.99),'
-    +'(N''ENG-OT'', N''England'', N''Other'', 0.0, 999999999.99),'
-    +'(N''ENG-PC'', N''England'', N''Paper or card'', 0.0, 999999999.99),'
-    +'(N''ENG-PL'', N''England'', N''Plastic'', 0.0, 999999999.99),'
-    +'(N''ENG-ST'', N''England'', N''Steel'', 0.0, 999999999.99),'
-    +'(N''ENG-WD'', N''England'', N''Wood'', 0.0, 999999999.99),'
-    +'(N''NI-AL'', N''Northern Ireland'', N''Aluminium'', 0.0, 999999999.99),'
-    +'(N''NI-FC'', N''Northern Ireland'', N''Fibre composite'', 0.0, 999999999.99),'
-    +'(N''NI-GL'', N''Northern Ireland'', N''Glass'', 0.0, 999999999.99),'
-    +'(N''NI-OT'', N''Northern Ireland'', N''Other'', 0.0, 999999999.99),'
-    +'(N''NI-PC'', N''Northern Ireland'', N''Paper or card'', 0.0, 999999999.99),'
-    +'(N''NI-PL'', N''Northern Ireland'', N''Plastic'', 0.0, 999999999.99),'
-    +'(N''NI-ST'', N''Northern Ireland'', N''Steel'', 0.0, 999999999.99),'
-    +'(N''NI-WD'', N''Northern Ireland'', N''Wood'', 0.0, 999999999.99),'
-    +'(N''SCT-AL'', N''Scotland'', N''Aluminium'', 0.0, 999999999.99),'
-    +'(N''SCT-FC'', N''Scotland'', N''Fibre composite'', 0.0, 999999999.99),'
-    +'(N''SCT-GL'', N''Scotland'', N''Glass'', 0.0, 999999999.99),'
-    +'(N''SCT-OT'', N''Scotland'', N''Other'', 0.0, 999999999.99),'
-    +'(N''SCT-PC'', N''Scotland'', N''Paper or card'', 0.0, 999999999.99),'
-    +'(N''SCT-PL'', N''Scotland'', N''Plastic'', 0.0, 999999999.99),'
-    +'(N''SCT-ST'', N''Scotland'', N''Steel'', 0.0, 999999999.99),'
-    +'(N''SCT-WD'', N''Scotland'', N''Wood'', 0.0, 999999999.99),'
-    +'(N''WLS-AL'', N''Wales'', N''Aluminium'', 0.0, 999999999.99),'
-    +'(N''WLS-FC'', N''Wales'', N''Fibre composite'', 0.0, 999999999.99),'
-    +'(N''WLS-GL'', N''Wales'', N''Glass'', 0.0, 999999999.99),'
-    +'(N''WLS-OT'', N''Wales'', N''Other'', 0.0, 999999999.99),'
-    +'(N''WLS-PC'', N''Wales'', N''Paper or card'', 0.0, 999999999.99),'
-    +'(N''WLS-PL'', N''Wales'', N''Plastic'', 0.0, 999999999.99),'
-    +'(N''WLS-ST'', N''Wales'', N''Steel'', 0.0, 999999999.99),'
-    +'(N''WLS-WD'', N''Wales'', N''Wood'', 0.0, 999999999.99)');
+    EXEC(N'INSERT INTO [lapcap_data_template_master] ([unique_ref], [country], [material], [total_cost_from], [total_cost_to])
+    VALUES (N''ENG-AL'', N''England'', N''Aluminium'', 0.0, 999999999.99),
+    (N''ENG-FC'', N''England'', N''Fibre composite'', 0.0, 999999999.99),
+    (N''ENG-GL'', N''England'', N''Glass'', 0.0, 999999999.99),
+    (N''ENG-OT'', N''England'', N''Other'', 0.0, 999999999.99),
+    (N''ENG-PC'', N''England'', N''Paper or card'', 0.0, 999999999.99),
+    (N''ENG-PL'', N''England'', N''Plastic'', 0.0, 999999999.99),
+    (N''ENG-ST'', N''England'', N''Steel'', 0.0, 999999999.99),
+    (N''ENG-WD'', N''England'', N''Wood'', 0.0, 999999999.99),
+    (N''NI-AL'', N''Northern Ireland'', N''Aluminium'', 0.0, 999999999.99),
+    (N''NI-FC'', N''Northern Ireland'', N''Fibre composite'', 0.0, 999999999.99),
+    (N''NI-GL'', N''Northern Ireland'', N''Glass'', 0.0, 999999999.99),
+    (N''NI-OT'', N''Northern Ireland'', N''Other'', 0.0, 999999999.99),
+    (N''NI-PC'', N''Northern Ireland'', N''Paper or card'', 0.0, 999999999.99),
+    (N''NI-PL'', N''Northern Ireland'', N''Plastic'', 0.0, 999999999.99),
+    (N''NI-ST'', N''Northern Ireland'', N''Steel'', 0.0, 999999999.99),
+    (N''NI-WD'', N''Northern Ireland'', N''Wood'', 0.0, 999999999.99),
+    (N''SCT-AL'', N''Scotland'', N''Aluminium'', 0.0, 999999999.99),
+    (N''SCT-FC'', N''Scotland'', N''Fibre composite'', 0.0, 999999999.99),
+    (N''SCT-GL'', N''Scotland'', N''Glass'', 0.0, 999999999.99),
+    (N''SCT-OT'', N''Scotland'', N''Other'', 0.0, 999999999.99),
+    (N''SCT-PC'', N''Scotland'', N''Paper or card'', 0.0, 999999999.99),
+    (N''SCT-PL'', N''Scotland'', N''Plastic'', 0.0, 999999999.99),
+    (N''SCT-ST'', N''Scotland'', N''Steel'', 0.0, 999999999.99),
+    (N''SCT-WD'', N''Scotland'', N''Wood'', 0.0, 999999999.99),
+    (N''WLS-AL'', N''Wales'', N''Aluminium'', 0.0, 999999999.99),
+    (N''WLS-FC'', N''Wales'', N''Fibre composite'', 0.0, 999999999.99),
+    (N''WLS-GL'', N''Wales'', N''Glass'', 0.0, 999999999.99),
+    (N''WLS-OT'', N''Wales'', N''Other'', 0.0, 999999999.99),
+    (N''WLS-PC'', N''Wales'', N''Paper or card'', 0.0, 999999999.99),
+    (N''WLS-PL'', N''Wales'', N''Plastic'', 0.0, 999999999.99),
+    (N''WLS-ST'', N''Wales'', N''Steel'', 0.0, 999999999.99),
+    (N''WLS-WD'', N''Wales'', N''Wood'', 0.0, 999999999.99)');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'unique_ref', N'country', N'material', N'total_cost_from', N'total_cost_to') AND [object_id] = OBJECT_ID(N'[lapcap_data_template_master]'))
         SET IDENTITY_INSERT [lapcap_data_template_master] OFF;
 END;
@@ -1197,15 +1105,6 @@ IF NOT EXISTS (
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] ON;
-<<<<<<< HEAD
-    EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])'
-    +'VALUES (N''COMC-UK'', N''United Kingdom'', N''Communication costs by country'', 0.0, 999999999.99),'
-    +'(N''COMC-ENG'', N''England'', N''Communication costs by country'', 0.0, 999999999.99),'
-    +'(N''COMC-WLS'', N''Wales'', N''Communication costs by country'', 0.0, 999999999.99),'
-    +'(N''COMC-SCT'', N''Scotland'', N''Communication costs by country'', 0.0, 999999999.99),'
-    +'(N''COMC-NIR'', N''Northern Ireland'', N''Communication costs by country'', 0.0, 999999999.99)');
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (@parameterUniqueRef, @parameterCategory, @parameterType, @validRangeFrom, N'valid_Range_to') AND [object_id] = OBJECT_ID(@defaultParameterTemplateMaster))
-=======
     EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])
     VALUES (N''COMC-UK'', N''United Kingdom'', N''Communication costs by country'', 0.0, 999999999.99),
     (N''COMC-ENG'', N''England'', N''Communication costs by country'', 0.0, 999999999.99),
@@ -1213,7 +1112,6 @@ BEGIN
     (N''COMC-SCT'', N''Scotland'', N''Communication costs by country'', 0.0, 999999999.99),
     (N''COMC-NIR'', N''Northern Ireland'', N''Communication costs by country'', 0.0, 999999999.99)');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
->>>>>>> parent of dbf8c73 (Fix more warnings)
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
 GO
@@ -2625,15 +2523,15 @@ IF NOT EXISTS (
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'code', N'name', N'description') AND [object_id] = OBJECT_ID(N'[material]'))
         SET IDENTITY_INSERT [material] ON;
-    EXEC(N'INSERT INTO [material] ([id], [code], [name], [description])'
-    +'VALUES (1, N''AL'', N''Aluminium'', N''Aluminium''),'
-    +'(2, N''FC'', N''Fibre composite'', N''Fibre composite''),'
-    +'(3, N''GL'', N''Glass'', N''Glass''),'
-    +'(4, N''PC'', N''Paper or card'', N''Paper or card''),'
-    +'(5, N''PL'', N''Plastic'', N''Plastic''),'
-    +'(6, N''ST'', N''Steel'', N''Steel''),'
-    +'(7, N''WD'', N''Wood'', N''Wood''),'
-    +'(8, N''OT'', N''Other materials'', N''Other materials'')');
+    EXEC(N'INSERT INTO [material] ([id], [code], [name], [description])
+    VALUES (1, N''AL'', N''Aluminium'', N''Aluminium''),
+    (2, N''FC'', N''Fibre composite'', N''Fibre composite''),
+    (3, N''GL'', N''Glass'', N''Glass''),
+    (4, N''PC'', N''Paper or card'', N''Paper or card''),
+    (5, N''PL'', N''Plastic'', N''Plastic''),
+    (6, N''ST'', N''Steel'', N''Steel''),
+    (7, N''WD'', N''Wood'', N''Wood''),
+    (8, N''OT'', N''Other materials'', N''Other materials'')');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'code', N'name', N'description') AND [object_id] = OBJECT_ID(N'[material]'))
         SET IDENTITY_INSERT [material] OFF;
 END;
