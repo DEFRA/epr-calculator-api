@@ -90,7 +90,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
             return material == "Total"? producerData.Sum(t=>t.Tonnage).ToString()  : producerData.Where(t => t.Material == material).Sum(t => t.Tonnage).ToString();
         }
 
-        private string GetLateReportingTonnageDataByMaterial(string material, List<CalcResultLateReportingTonnageDetail> details)
+        private static string GetLateReportingTonnageDataByMaterial(string material, List<CalcResultLateReportingTonnageDetail> details)
         {
             return details.Where(t => t.Name == material).Sum(t => t.TotalLateReportingTonnage).ToString();
         }
@@ -113,7 +113,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
         }
 
 
-        private CalcResultLaDisposalCostDataDetail GetHeader()
+        private static CalcResultLaDisposalCostDataDetail GetHeader()
         {
             return new CalcResultLaDisposalCostDataDetail()
             {
@@ -132,12 +132,12 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
         }
 
 
-        private decimal GetDecimalValue(string value)
+        private static decimal GetDecimalValue(string value)
         {
             return decimal.Parse(value, CultureInfo.InvariantCulture);
         }
 
-        private decimal ConvertCurrencyToDecimal(string currency)
+        private static decimal ConvertCurrencyToDecimal(string currency)
         {
             decimal amount;
             decimal.TryParse(currency, NumberStyles.Currency, CultureInfo.GetCultureInfo("en-GB"), out amount);

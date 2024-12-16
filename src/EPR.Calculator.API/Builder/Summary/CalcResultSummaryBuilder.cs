@@ -121,7 +121,7 @@ namespace EPR.Calculator.API.Builder.Summary
             return result;
         }
 
-        private CalcResultSummaryProducerDisposalFees GetProducerTotalRow(List<ProducerDetail> producersAndSubsidiaries,
+        private static CalcResultSummaryProducerDisposalFees GetProducerTotalRow(List<ProducerDetail> producersAndSubsidiaries,
             List<MaterialDetail> materials,
             CalcResult calcResult,
             IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails,
@@ -275,7 +275,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
         }
 
-        private CalcResultSummaryProducerDisposalFees GetProducerRow(
+        private static CalcResultSummaryProducerDisposalFees GetProducerRow(
             List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup,
             ProducerDetail producer,
             List<MaterialDetail> materials,

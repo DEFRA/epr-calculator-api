@@ -115,9 +115,9 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var producerReportedMaterial = _context.ProducerReportedMaterial.FirstOrDefault();
             Assert.IsNotNull(producerReportedMaterial);
-            Assert.AreEqual(expectedResult.Material.Code, producerReportedMaterial.Material.Code);
+            Assert.AreEqual(expectedResult.Material.Code, producerReportedMaterial.Material!.Code);
             Assert.AreEqual(expectedResult.Material.Name, producerReportedMaterial.Material.Name);
-            Assert.AreEqual(expectedResult.ProducerDetail.ProducerId, producerReportedMaterial.ProducerDetail.ProducerId);
+            Assert.AreEqual(expectedResult.ProducerDetail.ProducerId, producerReportedMaterial.ProducerDetail!.ProducerId);
             Assert.AreEqual(expectedResult.ProducerDetail.ProducerName, producerReportedMaterial.ProducerDetail.ProducerName);
         }
 
@@ -202,7 +202,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var output = service.GetLatestOrganisationName(1, orgSubDetails, orgDetails);
             Assert.IsNotNull(output);
-            Assert.AreEqual(output, "Test1");
+            Assert.AreEqual("Test1", output);
         }
 
 
@@ -237,7 +237,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var output = service.GetLatestSubsidaryName(1, "1", orgSubDetails, orgDetails);
             Assert.IsNotNull(output);
-            Assert.AreEqual(output, "Test1");
+            Assert.AreEqual("Test1", output);
         }
 
         [TestMethod]
@@ -252,7 +252,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var output = service.GetLatestSubsidaryName(1, "1", orgSubDetails, orgDetails);
             Assert.IsNotNull(output);
-            Assert.AreEqual(output, "UPU LIMITED");
+            Assert.AreEqual("UPU LIMITED", output);
         }
 
 

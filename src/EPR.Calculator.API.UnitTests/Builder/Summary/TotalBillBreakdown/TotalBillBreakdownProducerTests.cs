@@ -615,7 +615,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TotalBillBreakdown
             _dbContext.SaveChanges();
         }
 
-        private IList<CalcResultSummaryProducerDisposalFees> GetProducerDisposalFees()
+        private static List<CalcResultSummaryProducerDisposalFees> GetProducerDisposalFees()
         {
             return new List<CalcResultSummaryProducerDisposalFees>()
             {
