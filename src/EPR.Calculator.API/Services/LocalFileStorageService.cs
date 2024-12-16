@@ -12,11 +12,11 @@
                 throw new NotImplementedException();
             }
 
-            public Task UploadResultFileContentAsync(string fileName, string content)
+            public Task<bool> UploadResultFileContentAsync(string fileName, string content)
             {
                 var path = $"{Directory.GetCurrentDirectory()}\\{fileName}";
                 File.WriteAllText(path, content, Encoding.UTF8);
-                return Task.CompletedTask;
+                return (Task<bool>)Task.CompletedTask;
             }
 
             public Task<IResult> DownloadFile(string fileName)

@@ -23,13 +23,15 @@ namespace EPR.Calculator.API.Controllers
         private readonly ICalcResultBuilder builder;
         private readonly ICalcResultsExporter<CalcResult> exporter;
         private readonly ITransposePomAndOrgDataService transposePomAndOrgDataService;
+        private readonly IStorageService storageService;
 
         public CalculatorInternalController(ApplicationDBContext context,
                                             IRpdStatusDataValidator rpdStatusDataValidator,
                                             IOrgAndPomWrapper wrapper,
                                             ICalcResultBuilder builder,
                                             ICalcResultsExporter<CalcResult> exporter,
-                                            ITransposePomAndOrgDataService transposePomAndOrgDataService)
+                                            ITransposePomAndOrgDataService transposePomAndOrgDataService,
+                                            IStorageService storageService)
         {
             this.context = context;
             this.rpdStatusDataValidator = rpdStatusDataValidator;
@@ -37,6 +39,7 @@ namespace EPR.Calculator.API.Controllers
             this.builder = builder;
             this.exporter = exporter;
             this.transposePomAndOrgDataService = transposePomAndOrgDataService;
+            this.storageService = storageService;
         }
 
         [HttpPost]
@@ -151,7 +154,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("prepareCalcResults")]
-        public IActionResult PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
+        public async Task<IActionResult> PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
             if (!ModelState.IsValid)
             {
@@ -169,22 +172,33 @@ namespace EPR.Calculator.API.Controllers
             {
                 this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
                 var results = this.builder.Build(resultsRequestDto);
-                this.exporter.Export(results);
+                var exportedResults = this.exporter.Export(results);
 
-                // Set the run to unclassified
-                calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
+                var fileName = new CalcResultsFileName(
+                    results.CalcResultDetail.RunId,
+                    results.CalcResultDetail.RunName,
+                    results.CalcResultDetail.RunDate);
+                var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
 
-                this.context.CalculatorRuns.Update(calculatorRun);
-                this.context.SaveChanges();
-
-                return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+                if (resultsFileWritten)
+                {
+                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
+                    this.context.CalculatorRuns.Update(calculatorRun);
+                    await this.context.SaveChangesAsync();
+                    return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+                }
             }
             catch (Exception exception)
             {
-                // TO DO: Set the run to error
-
+                calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
+                this.context.CalculatorRuns.Update(calculatorRun);
+                await this.context.SaveChangesAsync();
                 return StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
+            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
+            this.context.CalculatorRuns.Update(calculatorRun);
+            await this.context.SaveChangesAsync();
+            return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
 }
