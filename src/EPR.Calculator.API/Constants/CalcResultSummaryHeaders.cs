@@ -111,10 +111,5 @@ namespace EPR.Calculator.API.Constants
         public static readonly string WalesTotalWithBadDebtProvisionForComms2b = "Wales Total with Bad Debt provision";
         public static readonly string ScotlandTotalWithBadDebtProvisionForComms2b = "Scotland Total with Bad Debt provision";
         public static readonly string NorthernIrelandTotalWithBadDebtProvisionForComms2b = "Northern Ireland Total with Bad Debt provision";
-
-        // Total bill 1 + 2a + 2b + 2c
-        public static readonly string TotalBadDebtProvision1Plus2A = "Total (1+2a+2b+2c) with Bad Debt provision";
-        public static readonly string TotalProducer1Plus2ABadDebt = "Producer Total (1+2a+2b+2c) with Bad Debt provision";
-        public static readonly string TotalProducer1Plus2ABadDebtPercentage = "Producer Percentage of Overall Producer Cost for (1+2a+2b+2c)";
     }
 }
