@@ -12,14 +12,13 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class GlobalExceptionHandlerTests
     {
-        private Mock<ILogger<GlobalExceptionHandler>> _mockLogger;
-        private Mock<IHostEnvironment> _mockEnv;
-        private GlobalExceptionHandler _exceptionHandler;
-        private DefaultHttpContext _httpContext;
-        private CancellationToken _cancellationToken;
+        private readonly Mock<ILogger<GlobalExceptionHandler>> _mockLogger;
+        private readonly Mock<IHostEnvironment> _mockEnv;
+        private readonly GlobalExceptionHandler _exceptionHandler;
+        private readonly DefaultHttpContext _httpContext;
+        private readonly CancellationToken _cancellationToken;
 
-        [TestInitialize]
-        public void SetUp()
+        public GlobalExceptionHandlerTests()
         {
             _mockLogger = new Mock<ILogger<GlobalExceptionHandler>>();
             _mockEnv = new Mock<IHostEnvironment>();

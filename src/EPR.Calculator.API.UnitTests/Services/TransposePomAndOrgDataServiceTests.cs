@@ -13,12 +13,11 @@ namespace EPR.Calculator.API.UnitTests.Services
     [TestClass]
     public class TransposePomAndOrgDataServiceTests
     {
-        private ApplicationDBContext _context;
+        private readonly ApplicationDBContext _context;
 
-        private DbContextOptions<ApplicationDBContext> _dbContextOptions;
+        private readonly DbContextOptions<ApplicationDBContext> _dbContextOptions;
 
-        [TestInitialize]
-        public void SetUp()
+        public TransposePomAndOrgDataServiceTests()
         {
             _dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
@@ -33,7 +32,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         [TestCleanup]
         public void TearDown()
         {
-            _context?.Database.EnsureDeleted();
+            _context.Database.EnsureDeleted();
             _context.Dispose();
         }
 
