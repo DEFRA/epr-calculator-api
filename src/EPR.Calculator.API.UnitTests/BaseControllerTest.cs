@@ -80,6 +80,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             dbContext.SaveChanges();
         }
 
+        [TestMethod]
         public void CheckDbContext()
         {
             Assert.IsNotNull(dbContext);
