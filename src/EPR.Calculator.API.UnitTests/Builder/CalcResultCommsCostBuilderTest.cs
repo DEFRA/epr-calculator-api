@@ -13,11 +13,10 @@ namespace EPR.Calculator.API.UnitTests.Builder
     [TestClass]
     public class CalcResultCommsCostBuilderTest
     {
-        private CalcResultCommsCostBuilder builder;
-        private ApplicationDBContext dbContext;
+        private readonly CalcResultCommsCostBuilder builder;
+        private readonly ApplicationDBContext dbContext;
 
-        [TestInitialize]
-        public void SetUp()
+        public CalcResultCommsCostBuilderTest()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
@@ -74,27 +73,27 @@ namespace EPR.Calculator.API.UnitTests.Builder
             var headerApp = onePlusFourApp.First();
             Assert.IsTrue(string.IsNullOrEmpty(headerApp.Name));
 
-            Assert.AreEqual(headerApp.England, "England");
-            Assert.AreEqual(headerApp.Wales, "Wales");
-            Assert.AreEqual(headerApp.NorthernIreland, "Northern Ireland");
-            Assert.AreEqual(headerApp.Scotland, "Scotland");
+            Assert.AreEqual("England", headerApp.England);
+            Assert.AreEqual("Wales", headerApp.Wales);
+            Assert.AreEqual("Northern Ireland", headerApp.NorthernIreland);
+            Assert.AreEqual("Scotland", headerApp.Scotland);
 
-            Assert.AreEqual(headerApp.Total, "Total");
+            Assert.AreEqual("Total", headerApp.Total);
 
             var dataApp = result.CalcResultCommsCostOnePlusFourApportionment.Last();
             Assert.IsNotNull(dataApp);
 
-            Assert.AreEqual(dataApp.Name, "1 + 4 Apportionment %s");
-            Assert.AreEqual(dataApp.England, "40%");
-            Assert.AreEqual(dataApp.Wales, "20%");
-            Assert.AreEqual(dataApp.NorthernIreland, "20%");
-            Assert.AreEqual(dataApp.Scotland, "20%");
-            Assert.AreEqual(dataApp.Total, "100%");
+            Assert.AreEqual("1 + 4 Apportionment %s", dataApp.Name );
+            Assert.AreEqual("40%", dataApp.England);
+            Assert.AreEqual("20%", dataApp.Wales);
+            Assert.AreEqual("20%", dataApp.NorthernIreland);
+            Assert.AreEqual("20%", dataApp.Scotland);
+            Assert.AreEqual("100%", dataApp.Total);
 
 
             var materialCosts = result.CalcResultCommsCostCommsCostByMaterial.ToList();
             Assert.IsNotNull(materialCosts);
-            Assert.AreEqual(10, materialCosts.Count());
+            Assert.AreEqual(10, materialCosts.Count);
 
             var materialHeader = materialCosts.First();
 

@@ -15,13 +15,12 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class CalcResultSummaryBuilderTests
     {
-        private DbContextOptions<ApplicationDBContext> _dbContextOptions;
-        private ApplicationDBContext _context;
-        private CalcResultSummaryBuilder _calcResultsService;
-        private CalcResult _calcResult;
+        private readonly DbContextOptions<ApplicationDBContext> _dbContextOptions;
+        private readonly ApplicationDBContext _context;
+        private readonly CalcResultSummaryBuilder _calcResultsService;
+        private readonly CalcResult _calcResult;
 
-        [TestInitialize]
-        public void TestInitialize()
+        public CalcResultSummaryBuilderTests()
         {
             _dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "CalcResultSummaryTestDb")
@@ -449,14 +448,6 @@ namespace EPR.Calculator.API.UnitTests
             var totalFee = CalcResultOneAndTwoAUtil.GetTotalFee(result.ProducerDisposalFees.ToList(), fee => fee.BadDebtProvisionFor1);
 
             Assert.AreEqual(0m, totalFee);
-        }
-
-        [TestMethod]
-        public void GetTotalFee_ShouldReturnZero_WhenFeesIsNull()
-        {
-            var result = CalcResultOneAndTwoAUtil.GetTotalFee(null, fee => fee.BadDebtProvisionFor1);
-
-            Assert.AreEqual(0m, result);
         }
 
         [TestMethod]

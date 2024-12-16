@@ -16,10 +16,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
     public class CalcResultLapcapDataBuilderTest
     {
         public CalcResultLapcapDataBuilder builder;
-        protected ApplicationDBContext? dbContext;
+        protected ApplicationDBContext dbContext;
 
-        [TestInitialize]
-        public void DataSetup()
+        public CalcResultLapcapDataBuilderTest()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                                     .UseInMemoryDatabase(databaseName: "PayCal")
@@ -91,10 +90,10 @@ namespace EPR.Calculator.API.UnitTests.Builder
             var lapcapResults = builder.Construct(resultsDto);
 
             Assert.IsNotNull(lapcapResults);
-            Assert.AreEqual(lapcapResults.Name, CalcResultLapcapDataBuilder.LapcapHeader);
-            Assert.AreEqual(lapcapResults?.CalcResultLapcapDataDetails?.Count(), 5);
+            Assert.AreEqual(CalcResultLapcapDataBuilder.LapcapHeader, lapcapResults.Name);
+            Assert.AreEqual(5, lapcapResults.CalcResultLapcapDataDetails?.Count());
 
-            var headerRow = lapcapResults?.CalcResultLapcapDataDetails?.Single(x => x.OrderId == 1);
+            var headerRow = lapcapResults.CalcResultLapcapDataDetails?.Single(x => x.OrderId == 1);
             Assert.IsNotNull(headerRow);
             Assert.AreEqual(LapcapHeaderConstants.Name, headerRow.Name);
             Assert.AreEqual(LapcapHeaderConstants.EnglandDisposalCost, headerRow.EnglandDisposalCost);
@@ -103,7 +102,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual(LapcapHeaderConstants.NorthernIrelandDisposalCost, headerRow.NorthernIrelandDisposalCost);
             Assert.AreEqual(LapcapHeaderConstants.TotalDisposalCost, headerRow.TotalDisposalCost);
 
-            var aluminiumRow = lapcapResults?.CalcResultLapcapDataDetails?.Single(x => x.Name == aluminium);
+            var aluminiumRow = lapcapResults.CalcResultLapcapDataDetails?.Single(x => x.Name == aluminium);
             Assert.IsNotNull(aluminiumRow);
             Assert.AreEqual(aluminium, aluminiumRow.Name);
             Assert.AreEqual("£100.00", aluminiumRow.EnglandDisposalCost);
@@ -112,7 +111,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("£25.00", aluminiumRow.NorthernIrelandDisposalCost);
             Assert.AreEqual("£250.00", aluminiumRow.TotalDisposalCost);
 
-            var plasticRow = lapcapResults?.CalcResultLapcapDataDetails?.Single(x => x.Name == plastic);
+            var plasticRow = lapcapResults.CalcResultLapcapDataDetails?.Single(x => x.Name == plastic);
             Assert.IsNotNull(plasticRow);
             Assert.AreEqual(plastic, plasticRow.Name);
             Assert.AreEqual("£100.00", plasticRow.EnglandDisposalCost);
@@ -121,7 +120,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("£25.00", plasticRow.NorthernIrelandDisposalCost);
             Assert.AreEqual("£250.00", plasticRow.TotalDisposalCost);
 
-            var totalRow = lapcapResults?.CalcResultLapcapDataDetails?.Single(x => x.OrderId == 4);
+            var totalRow = lapcapResults.CalcResultLapcapDataDetails?.Single(x => x.OrderId == 4);
             Assert.IsNotNull(totalRow);
             Assert.AreEqual("Total", totalRow.Name);
             Assert.AreEqual("£200.00", totalRow.EnglandDisposalCost);
@@ -130,7 +129,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("£50.00", totalRow.NorthernIrelandDisposalCost);
             Assert.AreEqual("£500.00", totalRow.TotalDisposalCost);
 
-            var countryApp = lapcapResults?.CalcResultLapcapDataDetails?.Single(x => x.OrderId == 5);
+            var countryApp = lapcapResults.CalcResultLapcapDataDetails?.Single(x => x.OrderId == 5);
             Assert.IsNotNull(countryApp);
             Assert.AreEqual(CalcResultLapcapDataBuilder.CountryApportionment, countryApp.Name);
             Assert.AreEqual("40.00000000%", countryApp.EnglandDisposalCost);
@@ -146,25 +145,25 @@ namespace EPR.Calculator.API.UnitTests.Builder
             var englandApp = countryAppList.Single(x => x.CountryId == 1);
             Assert.IsNotNull(englandApp);
             Assert.AreEqual(englandApp.CalculatorRunId, run.Id);
-            Assert.AreEqual(englandApp.CostTypeId, 1);
+            Assert.AreEqual(1, englandApp.CostTypeId);
             Assert.AreEqual(englandApp.Apportionment, totalRow.EnglandCost);
 
             var walesApp = countryAppList.Single(x => x.CountryId == 2);
             Assert.IsNotNull(walesApp);
             Assert.AreEqual(walesApp.CalculatorRunId, run.Id);
-            Assert.AreEqual(walesApp.CostTypeId, 1);
+            Assert.AreEqual(1, walesApp.CostTypeId);
             Assert.AreEqual(walesApp.Apportionment, totalRow.WalesCost);
 
             var scotlandApp = countryAppList.Single(x => x.CountryId == 3);
             Assert.IsNotNull(scotlandApp);
             Assert.AreEqual(scotlandApp.CalculatorRunId, run.Id);
-            Assert.AreEqual(scotlandApp.CostTypeId, 1);
+            Assert.AreEqual(1, scotlandApp.CostTypeId);
             Assert.AreEqual(scotlandApp.Apportionment, totalRow.ScotlandCost);
 
             var niApp = countryAppList.Single(x => x.CountryId == 4);
             Assert.IsNotNull(niApp);
             Assert.AreEqual(niApp.CalculatorRunId, run.Id);
-            Assert.AreEqual(niApp.CostTypeId, 1);
+            Assert.AreEqual(1, niApp.CostTypeId);
             Assert.AreEqual(niApp.Apportionment, totalRow.NorthernIrelandCost);
 
         }

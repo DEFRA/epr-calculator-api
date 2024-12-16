@@ -14,11 +14,10 @@ namespace EPR.Calculator.API.UnitTests.Builder
     public class CalcResultParameterOtherCostBuilderTest
     {
         public CalcResultParameterOtherCostBuilder builder;
-        protected ApplicationDBContext? dbContext;
+        protected ApplicationDBContext dbContext;
        
 
-        [TestInitialize]
-        public void DataSetup()
+        public CalcResultParameterOtherCostBuilderTest()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
