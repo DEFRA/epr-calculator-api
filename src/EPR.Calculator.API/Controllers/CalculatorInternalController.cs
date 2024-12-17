@@ -168,10 +168,6 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status404NotFound };
             }
 
-            if (calculatorRun.CalculatorRunClassificationId != (int)RunClassification.RUNNING)
-            {
-                return StatusCode(StatusCodes.Status422UnprocessableEntity, "Run Classification Id should be RUNNING");
-            }
 
             try
             {

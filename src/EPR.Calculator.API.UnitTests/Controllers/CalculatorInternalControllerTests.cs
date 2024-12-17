@@ -228,7 +228,7 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public async void PrepareCalcResults_ShouldReturnNotFound()
+        public void PrepareCalcResults_ShouldReturnNotFound()
         {
             var requestDto = new CalcResultsRequestDto() { RunId = 0 };
             var calcResult = new CalcResult();
@@ -245,7 +245,8 @@ namespace EPR.Calculator.API.UnitTests
             );
 
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
-            var result = await controller.PrepareCalcResults(requestDto) as ObjectResult;
+            var task = controller.PrepareCalcResults(requestDto);
+            var result = task.Result as ObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(404, result.StatusCode);
         }

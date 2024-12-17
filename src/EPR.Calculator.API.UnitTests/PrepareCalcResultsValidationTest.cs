@@ -40,10 +40,12 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public async void PrepareCalcResults_Invalid_RunId()
+        public void PrepareCalcResults_Invalid_RunId()
         {
             controller.ModelState.AddModelError("InvalidRunId", CalcResultsRequestDtoValidator.ErrorMessage);
-            var result = await controller.PrepareCalcResults(new CalcResultsRequestDto { RunId = 0 }) as ObjectResult;
+            var task = controller.PrepareCalcResults(new CalcResultsRequestDto { RunId = 0 });
+            task.Wait();
+            var result = task.Result as ObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(400, result.StatusCode);
             var errors = result.Value as IEnumerable<ModelError>;
