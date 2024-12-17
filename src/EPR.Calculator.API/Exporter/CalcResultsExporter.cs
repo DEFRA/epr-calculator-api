@@ -29,41 +29,41 @@ namespace EPR.Calculator.API.Exporter
         {
             var csvContent = new StringBuilder();
             LoadCalcResultDetail(results, csvContent);
-            if (results?.CalcResultLapcapData != null)
+            if (results.CalcResultLapcapData != null)
             {
                 PrepareLapcapData(results.CalcResultLapcapData, csvContent);
             }
 
-            if (results?.CalcResultLateReportingTonnageData != null)
+            if (results.CalcResultLateReportingTonnageData != null)
             {
                 PrepareLateReportingData(results.CalcResultLateReportingTonnageData, csvContent);
             }
 
             csvContent.AppendLine();
 
-            if (results?.CalcResultParameterOtherCost != null)
+            if (results.CalcResultParameterOtherCost != null)
             {
                 PrepareOtherCosts(results.CalcResultParameterOtherCost, csvContent);
             }
 
-            if (results?.CalcResultOnePlusFourApportionment != null)
+            if (results.CalcResultOnePlusFourApportionment != null)
             {
                 PrepareOnePluseFourApportionment(results.CalcResultOnePlusFourApportionment, csvContent);
             }
 
             csvContent.AppendLine();
 
-            if (results?.CalcResultCommsCostReportDetail != null)
+            if (results.CalcResultCommsCostReportDetail != null)
             {
                 PrepareCommsCost(results.CalcResultCommsCostReportDetail, csvContent);
             }
 
-            if (results?.CalcResultLaDisposalCostData != null)
+            if (results.CalcResultLaDisposalCostData != null)
             {
                 PrepareLaDisposalCostData(results.CalcResultLaDisposalCostData, csvContent);
             }
 
-            if (results?.CalcResultSummary != null)
+            if (results.CalcResultSummary != null)
             {
                 PrepareSummaryData(results.CalcResultSummary, csvContent);
             }
