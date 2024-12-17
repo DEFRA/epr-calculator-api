@@ -184,7 +184,8 @@ namespace EPR.Calculator.API.UnitTests
                     mock.Object,
                     new Mock<ICalcResultBuilder>().Object,
                     new Mock<ICalcResultsExporter<CalcResult>>().Object,
-                    new Mock<ITransposePomAndOrgDataService>().Object
+                    new Mock<ITransposePomAndOrgDataService>().Object,
+                    new Mock<IStorageService>().Object
                 );
 
                 var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
@@ -202,7 +203,7 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void PrepareCalcResults_ShouldReturnCreatedStatus()
+        public async void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
             var requestDto = new CalcResultsRequestDto() { RunId = 1 };
             var calcResult = new CalcResult();
@@ -214,11 +215,12 @@ namespace EPR.Calculator.API.UnitTests
                wrapper,
                new Mock<ICalcResultBuilder>().Object,
                new Mock<ICalcResultsExporter<CalcResult>>().Object,
-               new Mock<ITransposePomAndOrgDataService>().Object
+               new Mock<ITransposePomAndOrgDataService>().Object,
+               new Mock<IStorageService>().Object
             );
 
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
-            var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
+            var result = await controller.PrepareCalcResults(requestDto) as ObjectResult;
             var calculatorRun = dbContext.CalculatorRuns.SingleOrDefault(run => run.Id == 1);
             Assert.IsNotNull(result);
             Assert.AreEqual((int)RunClassification.UNCLASSIFIED, calculatorRun?.CalculatorRunClassificationId);
@@ -226,7 +228,7 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void PrepareCalcResults_ShouldReturnNotFound()
+        public async void PrepareCalcResults_ShouldReturnNotFound()
         {
             var requestDto = new CalcResultsRequestDto() { RunId = 0 };
             var calcResult = new CalcResult();
@@ -238,11 +240,12 @@ namespace EPR.Calculator.API.UnitTests
                 wrapper,
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
-                new Mock<ITransposePomAndOrgDataService>().Object
+                new Mock<ITransposePomAndOrgDataService>().Object,
+                new Mock<IStorageService>().Object
             );
 
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
-            var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
+            var result = await controller.PrepareCalcResults(requestDto) as ObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(404, result.StatusCode);
         }

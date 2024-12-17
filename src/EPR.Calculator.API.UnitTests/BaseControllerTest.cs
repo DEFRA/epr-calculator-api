@@ -58,7 +58,8 @@ namespace EPR.Calculator.API.Tests.Controllers
                 wrapper,
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
-                new Mock<ITransposePomAndOrgDataService>().Object
+                new Mock<ITransposePomAndOrgDataService>().Object,
+                new Mock<IStorageService>().Object
             );
 
             var mockStorageService = new Mock<IStorageService>();
@@ -81,6 +82,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             dbContext.SaveChanges();
         }
 
+        [TestMethod]
         public void CheckDbContext()
         {
             Assert.IsNotNull(dbContext);

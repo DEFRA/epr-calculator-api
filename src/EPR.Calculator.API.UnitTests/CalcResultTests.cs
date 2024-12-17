@@ -59,7 +59,8 @@ namespace EPR.Calculator.API.UnitTests
                wrapper,
                mockCalcResultBuilder.Object,
                mockExporter.Object,
-               transposePomAndOrgDataService.Object
+               transposePomAndOrgDataService.Object,
+               new Mock<IStorageService>().Object
             );
 
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();
@@ -86,13 +87,13 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void PrepareCalcResults_ShouldReturnCreatedStatus()
+        public async void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
             var requestDto = new CalcResultsRequestDto() { RunId = 1 };
             var calcResult = new CalcResult();
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
 
-            var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
+            var result = await controller.PrepareCalcResults(requestDto) as ObjectResult;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(201, result.StatusCode);

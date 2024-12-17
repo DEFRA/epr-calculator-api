@@ -2,6 +2,7 @@
 {
     using System.IO;
     using System.Text;
+    using System.Threading.Tasks;
 
     namespace EPR.Calculator.API.Services
     {
@@ -16,7 +17,8 @@
             {
                 var path = $"{Directory.GetCurrentDirectory()}\\{fileName}";
                 File.WriteAllText(path, content, Encoding.UTF8);
-                return (Task<bool>)Task.CompletedTask;
+                var result = Task.FromResult(true);
+                return result;
             }
 
             public Task<IResult> DownloadFile(string fileName)
