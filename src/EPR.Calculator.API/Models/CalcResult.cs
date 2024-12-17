@@ -10,7 +10,7 @@
 
         public required CalcResultLateReportingTonnage CalcResultLateReportingTonnageData { get; set; }
 
-        public CalcResultParameterCommunicationCost? CalcResultParameterCommunicationCost { get; set; }
+        public CalcResultParameterCommunicationCost CalcResultParameterCommunicationCost { get; set; }
 
         public required CalcResultParameterOtherCost CalcResultParameterOtherCost { get; set; }
 

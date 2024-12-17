@@ -449,7 +449,7 @@ namespace EPR.Calculator.API.Exporter
         private static void PrepareSummaryDataHeader(CalcResultSummary resultSummary, StringBuilder csvContent)
         {
             // Add result summary header
-            csvContent.AppendLine(CsvSanitiser.SanitiseData(resultSummary.ResultSummaryHeader.Name));
+            csvContent.AppendLine(CsvSanitiser.SanitiseData(resultSummary.ResultSummaryHeader?.Name));
 
             // Add producer disposal fees header
             WriteSecondaryHeaders(csvContent, resultSummary.ProducerDisposalFeesHeaders);
