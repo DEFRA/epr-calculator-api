@@ -203,24 +203,41 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public async void PrepareCalcResults_ShouldReturnCreatedStatus()
+        public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
             var requestDto = new CalcResultsRequestDto() { RunId = 1 };
             var calcResult = new CalcResult();
+            var mockStorageService = new Mock<IStorageService>();
+            var mockExporter = new Mock<ICalcResultsExporter<CalcResult>>();
+            var mockBuilder = new Mock<ICalcResultBuilder>();
+            mockExporter.Setup(x => x.Export(It.IsAny<CalcResult>())).Returns("some");
+            mockBuilder.Setup(x => x.Build(It.IsAny<CalcResultsRequestDto>())).Returns(new CalcResult
+            {
+                CalcResultDetail = new CalcResultDetail
+                {
+                    RunId = 1,
+                    RunDate = DateTime.Now,
+                    RunName = "SomeRun"
+                }
+            });
 
             var mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
             var controller = new CalculatorInternalController(
                dbContext,
                new RpdStatusDataValidator(wrapper),
                wrapper,
-               new Mock<ICalcResultBuilder>().Object,
-               new Mock<ICalcResultsExporter<CalcResult>>().Object,
+               mockBuilder.Object,
+               mockExporter.Object,
                new Mock<ITransposePomAndOrgDataService>().Object,
-               new Mock<IStorageService>().Object
+               mockStorageService.Object
             );
 
+            mockStorageService.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
-            var result = await controller.PrepareCalcResults(requestDto) as ObjectResult;
+            var task = controller.PrepareCalcResults(requestDto);
+            task.Wait();
+            var result = task.Result as ObjectResult;
             var calculatorRun = dbContext.CalculatorRuns.SingleOrDefault(run => run.Id == 1);
             Assert.IsNotNull(result);
             Assert.AreEqual((int)RunClassification.UNCLASSIFIED, calculatorRun?.CalculatorRunClassificationId);

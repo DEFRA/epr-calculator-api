@@ -44,7 +44,7 @@ namespace EPR.Calculator.API.UnitTests
         private CalcResultsExporter exporter;
         protected IOrgAndPomWrapper? wrapper;
         private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockICalcResultOnePlusFourApportionmentBuilder;
-        private Mock<IStorageService> mockStorageservice;
+        private Mock<IStorageService>? mockStorageservice;
 
         [TestInitialize]
         public void Setup()
