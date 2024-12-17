@@ -11,11 +11,8 @@
     [TestClass]
     public class OnePlus2A2B2CProducerTests
     {
-        private ApplicationDBContext _dbContext;
-        private IEnumerable<MaterialDetail> _materials;
-        private CalcResult _calcResult;
-        private Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> _materialCostSummary;
-        private Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> _commsCostSummary;
+        private ApplicationDBContext? _dbContext;
+        private CalcResult? _calcResult;
 
         [TestInitialize]
         public void TestInitialize()
@@ -31,72 +28,14 @@
             CreateMaterials();
             CreateProducerDetail();
 
-            _materials = [
-                new MaterialDetail
-                {
-                    Id = 1,
-                    Code = "AL",
-                    Name = "Aluminium",
-                    Description = "Aluminium"
-                },
-                new MaterialDetail
-                {
-                    Id = 2,
-                    Code = "FC",
-                    Name = "Fibre composite",
-                    Description = "Fibre composite"
-                },
-                new MaterialDetail
-                {
-                    Id = 3,
-                    Code = "GL",
-                    Name = "Glass",
-                    Description = "Glass"
-                },
-                new MaterialDetail
-                {
-                    Id = 4,
-                    Code = "PC",
-                    Name = "Paper or card",
-                    Description = "Paper or card"
-                },
-                new MaterialDetail
-                {
-                    Id = 5,
-                    Code = "PL",
-                    Name = "Plastic",
-                    Description = "Plastic"
-                },
-                new MaterialDetail
-                {
-                    Id = 6,
-                    Code = "ST",
-                    Name = "Steel",
-                    Description = "Steel"
-                },
-                new MaterialDetail
-                {
-                    Id = 7,
-                    Code = "WD",
-                    Name = "Wood",
-                    Description = "Wood"
-                },
-                new MaterialDetail
-                {
-                    Id = 8,
-                    Code = "OT",
-                    Name = "Other materials",
-                    Description = "Other materials"
-                }
-            ];
-
             _calcResult = new CalcResult
             {
                 CalcResultParameterOtherCost = new CalcResultParameterOtherCost
                 {
                     BadDebtProvision = new KeyValuePair<string, string>("key1", "6%"),
                     BadDebtValue = 6m,
-                    Details = [
+                    Details =
+                    [
                         new CalcResultParameterOtherCostDetail
                         {
                             Name = "4 LA Data Prep Charge",
@@ -113,7 +52,8 @@
                             TotalValue = 100
                         }
                     ],
-                    Materiality = [
+                    Materiality =
+                    [
                         new CalcResultMateriality
                         {
                             Amount = "Amount £s",
@@ -124,7 +64,8 @@
                         }
                     ],
                     Name = "Parameters - Other",
-                    SaOperatingCost = [
+                    SaOperatingCost =
+                    [
                         new CalcResultParameterOtherCostDetail
                         {
                             Name = string.Empty,
@@ -141,7 +82,8 @@
                             TotalValue = 0
                         }
                     ],
-                    SchemeSetupCost = {
+                    SchemeSetupCost =
+                    {
                         Name = "5 Scheme set up cost Yearly Cost",
                         OrderId = 1,
                         England = "£40.00",
@@ -163,29 +105,29 @@
                     {
                         new CalcResultLaDisposalCostDataDetail()
                         {
-                            DisposalCostPricePerTonne="20",
-                            England="EnglandTest",
-                            Wales="WalesTest",
-                            Name="ScotlandTest",
-                            Scotland="ScotlandTest",
+                            DisposalCostPricePerTonne = "20",
+                            England = "EnglandTest",
+                            Wales = "WalesTest",
+                            Name = "ScotlandTest",
+                            Scotland = "ScotlandTest",
                             Material = "Material1"
                         },
                         new CalcResultLaDisposalCostDataDetail()
                         {
-                            DisposalCostPricePerTonne="20",
-                            England="EnglandTest",
-                            Wales="WalesTest",
-                            Name="Material1",
-                            Scotland="ScotlandTest",
+                            DisposalCostPricePerTonne = "20",
+                            England = "EnglandTest",
+                            Wales = "WalesTest",
+                            Name = "Material1",
+                            Scotland = "ScotlandTest",
 
                         },
                         new CalcResultLaDisposalCostDataDetail()
                         {
-                            DisposalCostPricePerTonne="10",
-                            England="EnglandTest",
-                            Wales="WalesTest",
-                            Name="Material2",
-                            Scotland="ScotlandTest",
+                            DisposalCostPricePerTonne = "10",
+                            England = "EnglandTest",
+                            Wales = "WalesTest",
+                            Name = "Material2",
+                            Scotland = "ScotlandTest",
 
                         }
                     }
@@ -202,68 +144,68 @@
                     [
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="1 + 4 Apportionment %s",
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 0.10M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 0.15M,
+                            WalesTotal = 020M,
+                            Name = "1 + 4 Apportionment %s",
                         },
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 0.10M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 0.15M,
+                            WalesTotal = 020M,
+                            Name = "Test",
                         },
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 0.10M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 0.15M,
+                            WalesTotal = 020M,
+                            Name = "Test",
                         },
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=14.53M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 14.53M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 0.15M,
+                            WalesTotal = 020M,
+                            Name = "Test",
                         },
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=14.53M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 14.53M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 0.15M,
+                            WalesTotal = 020M,
+                            Name = "Test",
                         }
                     ]
                 },
@@ -274,13 +216,15 @@
                     {
                         new()
                         {
-                            ProducerCommsFeesByMaterial =  new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>(){ },
-                            ProducerDisposalFeesByMaterial = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>(){ },
-                            ProducerId ="1",
-                            ProducerName ="Test",
-                            TotalProducerDisposalFeeWithBadDebtProvision =100,
-                            TotalProducerCommsFeeWithBadDebtProvision =100,
-                            SubsidiaryId ="1",
+                            ProducerCommsFeesByMaterial =
+                                new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>() { },
+                            ProducerDisposalFeesByMaterial =
+                                new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>() { },
+                            ProducerId = "1",
+                            ProducerName = "Test",
+                            TotalProducerDisposalFeeWithBadDebtProvision = 100,
+                            TotalProducerCommsFeeWithBadDebtProvision = 100,
+                            SubsidiaryId = "1",
                             TotalProducerFeeforLADisposalCostswithBadDebtprovision = 10,
                             TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision = 10,
                             TotalProducerFeeWithBadDebtFor2bComms = 10,
@@ -296,55 +240,21 @@
                 {
                     CalcResultCommsCostCommsCostByMaterial =
                     [
-                        new ()
+                        new()
                         {
-                            CommsCostByMaterialPricePerTonne="0.42",
-                            Name ="Aluminium",
+                            CommsCostByMaterialPricePerTonne = "0.42",
+                            Name = "Aluminium",
 
                         },
-                        new ()
+                        new()
                         {
-                            CommsCostByMaterialPricePerTonne="0.3",
-                            Name ="Glass",
+                            CommsCostByMaterialPricePerTonne = "0.3",
+                            Name = "Glass",
 
                         }
                     ]
                 }
             };
-
-            _materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
-            _commsCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>();
-
-            foreach (var material in _materials)
-            {
-                _materialCostSummary.Add(material, new CalcResultSummaryProducerDisposalFeesByMaterial
-                {
-                    HouseholdPackagingWasteTonnage = 1000,
-                    ManagedConsumerWasteTonnage = 90,
-                    NetReportedTonnage = 910,
-                    PricePerTonne = 0.6676m,
-                    ProducerDisposalFee = 607.52m,
-                    BadDebtProvision = 36.45m,
-                    ProducerDisposalFeeWithBadDebtProvision = 643.97m,
-                    EnglandWithBadDebtProvision = 348.06m,
-                    WalesWithBadDebtProvision = 78.46m,
-                    ScotlandWithBadDebtProvision = 156.28m,
-                    NorthernIrelandWithBadDebtProvision = 61.18m
-                });
-
-                _commsCostSummary.Add(material, new CalcResultSummaryProducerCommsFeesCostByMaterial
-                {
-                    HouseholdPackagingWasteTonnage = 1000,
-                    PriceperTonne = 0.6676m,
-                    ProducerTotalCostWithoutBadDebtProvision = 607.52m,
-                    BadDebtProvision = 36.45m,
-                    ProducerTotalCostwithBadDebtProvision = 643.97m,
-                    EnglandWithBadDebtProvision = 348.06m,
-                    WalesWithBadDebtProvision = 78.46m,
-                    ScotlandWithBadDebtProvision = 156.28m,
-                    NorthernIrelandWithBadDebtProvision = 61.18m
-                });
-            }
         }
 
         [TestCleanup]
