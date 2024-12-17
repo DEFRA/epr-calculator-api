@@ -275,7 +275,7 @@ namespace EPR.Calculator.API.UnitTests
             var result = _calcResultsService.Construct(requestDto, _calcResult);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
+            Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader?.Name);
             Assert.AreEqual(25, result.ProducerDisposalFeesHeaders.Count());
 
             Assert.IsNotNull(result);

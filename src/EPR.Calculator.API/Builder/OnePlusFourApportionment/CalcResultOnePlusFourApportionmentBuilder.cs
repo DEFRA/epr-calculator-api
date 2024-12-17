@@ -94,7 +94,7 @@ namespace EPR.Calculator.API.Builder.OnePlusFourApportionment
             };
         }
 
-        private CalcResultOnePlusFourApportionmentDetail CreateTotalRow(CalcResultLapcapDataDetails totalLACost, CalcResultParameterOtherCostDetail dataPrepCharge, int orderId)
+        private static CalcResultOnePlusFourApportionmentDetail CreateTotalRow(CalcResultLapcapDataDetails totalLACost, CalcResultParameterOtherCostDetail dataPrepCharge, int orderId)
         {
             var culture = CultureInfo.CreateSpecificCulture("en-GB");
             culture.NumberFormat.CurrencySymbol = "£";
@@ -117,7 +117,7 @@ namespace EPR.Calculator.API.Builder.OnePlusFourApportionment
             };
         }
 
-        private CalcResultOnePlusFourApportionmentDetail CalculateApportionment(CalcResultOnePlusFourApportionmentDetail apportionmentData, int orderId)
+        private static CalcResultOnePlusFourApportionmentDetail CalculateApportionment(CalcResultOnePlusFourApportionmentDetail apportionmentData, int orderId)
         {
             var englandTotal =
                 CalcResultLapcapDataBuilder.CalculateApportionment(apportionmentData.EnglandTotal,
