@@ -20,7 +20,7 @@ namespace EPR.Calculator.API.Builder.Summary
     {
         private readonly ApplicationDBContext context;
 
-        public static List<ProducerDetail> producerDetailList { get; set; }
+        public static List<ProducerDetail> producerDetailList { get; set; } = [];
 
         public CalcResultSummaryBuilder(ApplicationDBContext context)
         {

@@ -48,6 +48,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
             var apportionment = new CalcResultOnePlusFourApportionment
             {
+                Name = Fixture.Create<string>(),
                 CalcResultOnePlusFourApportionmentDetails = new List<CalcResultOnePlusFourApportionmentDetail>
                 {
                     new CalcResultOnePlusFourApportionmentDetail
@@ -160,7 +161,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("80.000", totalMaterialCost.LateReportingTonnage);
             Assert.AreEqual("36080.000",
                 totalMaterialCost.ProducerReportedHouseholdPlusLateReportingTonnage);
-            Assert.IsNull(totalMaterialCost.CommsCostByMaterialPricePerTonne);
+            Assert.IsTrue(string.IsNullOrEmpty(totalMaterialCost.CommsCostByMaterialPricePerTonne));
         }
 
         private void CreateProducerDetail()

@@ -12,9 +12,9 @@
 
         public required string ProducerReportedHouseholdPackagingWasteTonnage { get; set; }
 
-        public string? LateReportingTonnage { get; set; }
+        public string LateReportingTonnage { get; set; } = string.Empty;
 
-        public string? ProducerReportedHouseholdTonnagePlusLateReportingTonnage { get; set; }
+        public string ProducerReportedHouseholdTonnagePlusLateReportingTonnage { get; set; } = string.Empty;
 
         public string? DisposalCostPricePerTonne { get; set; }
 

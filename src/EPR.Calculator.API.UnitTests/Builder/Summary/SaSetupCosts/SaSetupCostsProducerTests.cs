@@ -216,6 +216,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                 },
                 CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment()
                 {
+                    Name = Fixture.Create<string>(),
                     CalcResultOnePlusFourApportionmentDetails =
                     [
                         new()

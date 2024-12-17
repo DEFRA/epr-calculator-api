@@ -69,7 +69,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
 
             foreach (var details in laDisposalCostDetails)
             {
-                details.LateReportingTonnage = GetLateReportingTonnageDataByMaterial(details.Name, calcResult?.CalcResultLateReportingTonnageData?.CalcResultLateReportingTonnageDetails?.ToList());
+                details.LateReportingTonnage = GetLateReportingTonnageDataByMaterial(details.Name, calcResult.CalcResultLateReportingTonnageData.CalcResultLateReportingTonnageDetails.ToList());
 
                 details.ProducerReportedHouseholdTonnagePlusLateReportingTonnage = GetProducerReportedHouseholdTonnagePlusLateReportingTonnage(details);
                 if (details.Name == CommonConstants.Total) continue;

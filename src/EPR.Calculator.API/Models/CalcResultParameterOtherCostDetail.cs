@@ -3,11 +3,11 @@
     public class CalcResultParameterOtherCostDetail
     {
         public string? Name { get; set; }
-        public string? England { get; set; }
-        public string? Wales { get; set; }
-        public string? Scotland { get; set; }
-        public string? NorthernIreland { get; set; }
-        public string? Total { get; set; }
+        public string England { get; set; } = string.Empty;
+        public string Wales { get; set; } = string.Empty;
+        public string Scotland { get; set; } = string.Empty;
+        public string NorthernIreland { get; set; } = string.Empty;
+        public string Total { get; set; } = string.Empty;
         public decimal EnglandValue { get; set; }
         public decimal WalesValue { get; set; }
         public decimal ScotlandValue { get; set; }

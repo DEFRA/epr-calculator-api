@@ -21,7 +21,10 @@
         public required CalcResultParameterOtherCost CalcResultParameterOtherCost { get; set; }
 
         public CalcResultOnePlusFourApportionment CalcResultOnePlusFourApportionment {  get; set; }
-            = new CalcResultOnePlusFourApportionment();
+            = new CalcResultOnePlusFourApportionment
+            {
+                Name = string.Empty
+            };
 
         public CalcResultLaDisposalCostData CalcResultLaDisposalCostData { get; set; }
             = new CalcResultLaDisposalCostData
