@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Data;
+﻿using AutoFixture;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -28,6 +29,8 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             SeedDatabase();            
         }
+
+        public Fixture Fixture { get; init; } = new Fixture();
 
         [TestCleanup]
         public void TearDown()
@@ -62,7 +65,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 ProducerId = 1,
                 ProducerName = "UPU LIMITED",
                 CalculatorRunId = 1,
-                CalculatorRun = new CalculatorRun()
+                CalculatorRun = Fixture.Create<CalculatorRun>(),
             };
 
 #pragma warning disable CS8604 // Possible null reference argument.
@@ -102,7 +105,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                     SubsidiaryId = "1",
                     ProducerName = "UPU LIMITED",
                     CalculatorRunId = 1,
-                    CalculatorRun = new CalculatorRun()
+                    CalculatorRun = Fixture.Create<CalculatorRun>(),
                 }
             };
 
@@ -131,7 +134,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 SubsidiaryId ="1",                
                 ProducerName = "Subsid2",
                 CalculatorRunId = 1,
-                CalculatorRun = new CalculatorRun()
+                CalculatorRun = Fixture.Create<CalculatorRun>(),
             };
 
 #pragma warning disable CS8604 // Possible null reference argument.
@@ -157,7 +160,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 ProducerId = 2,
                 ProducerName = "Subsid2",
                 CalculatorRunId = 1,
-                CalculatorRun = new CalculatorRun()
+                CalculatorRun = Fixture.Create<CalculatorRun>(),
             };
 
 #pragma warning disable CS8604 // Possible null reference argument.

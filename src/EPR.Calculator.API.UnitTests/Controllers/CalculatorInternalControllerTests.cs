@@ -265,6 +265,7 @@ namespace EPR.Calculator.API.UnitTests
         {
             CalculatorRun calcRun = new()
             {
+                Name = Fixture.Create<string>(),
                 Financial_Year = "2024-25"
             };
 
