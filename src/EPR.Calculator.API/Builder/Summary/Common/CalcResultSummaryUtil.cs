@@ -26,10 +26,10 @@ public static class CalcResultSummaryUtil
     public const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
     public const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
     //Section-(1) & (2a)
-    public const int decimalRoundUp = 2;
     public const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
-    //Section-(1) & (2a)
-    private const int CommsCost2bColumnIndex = 196;
+    //Section-(2b)
+    private const int CommsCost2bColumnIndex = 194;
+    public const int decimalRoundUp = 2;
 
     public static int GetLevelIndex(List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup, ProducerDetail producer)
     {
