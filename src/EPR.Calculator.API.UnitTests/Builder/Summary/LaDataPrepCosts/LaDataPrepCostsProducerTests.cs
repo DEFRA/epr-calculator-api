@@ -162,6 +162,7 @@
                 CalcResultDetail = new CalcResultDetail() { },
                 CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData()
                 {
+                    Name = Fixture.Create<string>(),
                     CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>()
                     {
                         new CalcResultLaDisposalCostDataDetail()
@@ -171,7 +172,11 @@
                             Wales="WalesTest",
                             Name="ScotlandTest",
                             Scotland="ScotlandTest",
-                            Material = "Material1"
+                            Material = "Material1",
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         },
                         new CalcResultLaDisposalCostDataDetail()
                         {
@@ -180,7 +185,10 @@
                             Wales="WalesTest",
                             Name="Material1",
                             Scotland="ScotlandTest",
-
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         },
                         new CalcResultLaDisposalCostDataDetail()
                         {
@@ -189,7 +197,10 @@
                             Wales="WalesTest",
                             Name="Material2",
                             Scotland="ScotlandTest",
-
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         }
                     }
                 },

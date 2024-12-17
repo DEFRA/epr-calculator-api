@@ -96,6 +96,7 @@ namespace EPR.Calculator.API.UnitTests
                 CalcResultDetail = new CalcResultDetail() { },
                 CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData()
                 {
+                    Name = Fixture.Create<string>(),
                     CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>()
                     {
                         new CalcResultLaDisposalCostDataDetail()
@@ -105,25 +106,35 @@ namespace EPR.Calculator.API.UnitTests
                             Wales="WalesTest",
                             Name="ScotlandTest",
                             Scotland="ScotlandTest",
-                            Material = "Material1"
+                            NorthernIreland = "NorthernIrelandTest",
+                            Material = "Material1",
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         },
                          new CalcResultLaDisposalCostDataDetail()
                         {
                             DisposalCostPricePerTonne="20",
                             England="EnglandTest",
                             Wales="WalesTest",
+                            NorthernIreland = "NorthernIrelandTest",
                             Name="Material1",
                             Scotland="ScotlandTest",
-
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         },
                           new CalcResultLaDisposalCostDataDetail()
                         {
                             DisposalCostPricePerTonne="10",
                             England="EnglandTest",
                             Wales="WalesTest",
+                            NorthernIreland = "NorthernIrelandTest",
                             Name="Material2",
                             Scotland="ScotlandTest",
-
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         }
                     }
                 },

@@ -14,7 +14,7 @@ namespace EPR.Calculator.API.Mappers
                 RunId = run.Id,
                 CreatedAt = run.CreatedAt,
                 FileExtension = FileExtension,
-                RunName = run.Name,
+                RunName = run.Name ?? string.Empty,
                 UpdatedBy = run.UpdatedAt,
                 UpdatedAt = run.UpdatedAt,
                 RunClassificationId = run.CalculatorRunClassificationId,

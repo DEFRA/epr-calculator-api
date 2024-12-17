@@ -34,7 +34,7 @@ namespace EPR.Calculator.API.Exporter
                 PrepareLapcapData(results.CalcResultLapcapData, csvContent);
             }
 
-            if (results.CalcResultLateReportingTonnageData != null)
+            if (results?.CalcResultLateReportingTonnageData != null)
             {
                 PrepareLateReportingData(results.CalcResultLateReportingTonnageData, csvContent);
             }
@@ -63,7 +63,7 @@ namespace EPR.Calculator.API.Exporter
                 PrepareLaDisposalCostData(results.CalcResultLaDisposalCostData, csvContent);
             }
 
-            if (results.CalcResultSummary != null)
+            if (results?.CalcResultSummary != null)
             {
                 PrepareSummaryData(results.CalcResultSummary, csvContent);
             }
@@ -82,7 +82,7 @@ namespace EPR.Calculator.API.Exporter
             }
         }
 
-        private void PrepareCommsCost(CalcResultCommsCost communicationCost, StringBuilder csvContent)
+        private static void PrepareCommsCost(CalcResultCommsCost communicationCost, StringBuilder csvContent)
         {
             csvContent.AppendLine();
             csvContent.AppendLine();
