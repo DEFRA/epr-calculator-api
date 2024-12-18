@@ -131,11 +131,11 @@ namespace EPR.Calculator.API.Controllers
                     };
 
                     // Send message to service bus
-                    var client = serviceBusClientFactory.CreateClient("calculator");
-                    ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
-                    var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
-                    ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
-                    await serviceBusSender.SendMessageAsync(serviceBusMessage);
+                    //var client = serviceBusClientFactory.CreateClient("calculator");
+                    //ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
+                    //var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
+                    //ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
+                    //await serviceBusSender.SendMessageAsync(serviceBusMessage);
 
                     // All good, commit transaction
                     transaction.Commit();
