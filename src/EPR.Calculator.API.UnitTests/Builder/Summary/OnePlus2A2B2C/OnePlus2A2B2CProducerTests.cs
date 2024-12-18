@@ -11,11 +11,10 @@
     [TestClass]
     public class OnePlus2A2B2CProducerTests
     {
-        private ApplicationDBContext? _dbContext;
-        private CalcResult? _calcResult;
+        private readonly ApplicationDBContext _dbContext;
+        private readonly CalcResult _calcResult;
 
-        [TestInitialize]
-        public void TestInitialize()
+        public OnePlus2A2B2CProducerTests()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
