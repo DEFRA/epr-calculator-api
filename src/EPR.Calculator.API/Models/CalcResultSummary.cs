@@ -1,6 +1,4 @@
-﻿using static Azure.Core.HttpHeader;
-
-namespace EPR.Calculator.API.Models
+﻿namespace EPR.Calculator.API.Models
 {
     public class CalcResultSummary
     {
@@ -30,7 +28,9 @@ namespace EPR.Calculator.API.Models
 
         public decimal TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A { get; set; }
 
-        public decimal TotalOnePlus2AFeeWithBadDebtProvision { get; set; }
+        // Section Total bill (1 + 2a + 2b + 2c)
+        public decimal TotalOnePlus2A2B2CFeeWithBadDebtProvision { get; set; }
+        // End Section Total bill (1 + 2a + 2b + 2c)
 
         // Section-3
         public decimal SAOperatingCostsWoTitleSection3 { get; set; }
@@ -38,7 +38,7 @@ namespace EPR.Calculator.API.Models
         public decimal SAOperatingCostsWithTitleSection3 { get; set; }
 
         public decimal BadDebtProvisionTitleSection3 { get; set; }
-        //Ends Section-3
+        //End Section-3
 
         // Section-4 LA data prep costs
         public decimal LaDataPrepCostsTitleSection4 { get; set; }

@@ -71,8 +71,6 @@
         //Section-(1) & (2a) End
 
         public decimal TwoCTotalProducerFeeForCommsCostsWithoutBadDebt { get; set; }
-        public decimal TwoCBadDebtProvisionHeader { get; set; }
-        public decimal TwoCBadDebtCommCostByCountry { get; set; }
         public decimal TwoCBadDebtProvision { get; set; }
         public decimal TwoCTotalProducerFeeForCommsCostsWithBadDebt { get; set; }
         public decimal TwoCEnglandTotalWithBadDebt { get; set; }
@@ -81,6 +79,12 @@
         public decimal TwoCNorthernIrelandTotalWithBadDebt { get; set; }
 
         public decimal PercentageofProducerReportedHHTonnagevsAllProducers { get; set; }
+
+        // Section Total bill (1 + 2a + 2b + 2c)
+        public decimal ProducerTotalOnePlus2A2B2CWithBadDeptProvision { get; set; }
+
+        public decimal ProducerOverallPercentageOfCostsForOnePlus2A2B2C { get; set; }
+        // End Section Total bill (1 + 2a + 2b + 2c)
 
         //Section-3
         public decimal Total3SAOperatingCostwoBadDebtprovision { get; set; }
@@ -131,9 +135,8 @@
         // End Section-5 SA setup costs
 
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
+
         public required Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> ProducerCommsFeesByMaterial { get; set; }
-        public decimal TotalOnePlus2AFeeWithBadDebtProvision { get; set; }
-        public decimal ProducerPercentageOfCosts { get; set; }
 
         public decimal TotalProducerFeeWithoutBadDebtFor2bComms { get; set; }
 
