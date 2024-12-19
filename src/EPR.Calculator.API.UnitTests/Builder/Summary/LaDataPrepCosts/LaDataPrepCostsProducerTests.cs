@@ -12,14 +12,10 @@
     [TestClass]
     public class LaDataPrepCostsProducerTests
     {
-        private ApplicationDBContext _dbContext;
-        private IEnumerable<MaterialDetail> _materials;
-        private CalcResult _calcResult;
-        private Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> _materialCostSummary;
-        private Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> _commsCostSummary;
+        private readonly ApplicationDBContext _dbContext;
+        private readonly CalcResult _calcResult;
 
-        [TestInitialize]
-        public void TestInitialize()
+        public LaDataPrepCostsProducerTests()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
@@ -31,65 +27,6 @@
 
             CreateMaterials();
             CreateProducerDetail();
-
-            _materials = [
-                new MaterialDetail
-                {
-                    Id = 1,
-                    Code = "AL",
-                    Name = "Aluminium",
-                    Description = "Aluminium"
-                },
-                new MaterialDetail
-                {
-                    Id = 2,
-                    Code = "FC",
-                    Name = "Fibre composite",
-                    Description = "Fibre composite"
-                },
-                new MaterialDetail
-                {
-                    Id = 3,
-                    Code = "GL",
-                    Name = "Glass",
-                    Description = "Glass"
-                },
-                new MaterialDetail
-                {
-                    Id = 4,
-                    Code = "PC",
-                    Name = "Paper or card",
-                    Description = "Paper or card"
-                },
-                new MaterialDetail
-                {
-                    Id = 5,
-                    Code = "PL",
-                    Name = "Plastic",
-                    Description = "Plastic"
-                },
-                new MaterialDetail
-                {
-                    Id = 6,
-                    Code = "ST",
-                    Name = "Steel",
-                    Description = "Steel"
-                },
-                new MaterialDetail
-                {
-                    Id = 7,
-                    Code = "WD",
-                    Name = "Wood",
-                    Description = "Wood"
-                },
-                new MaterialDetail
-                {
-                    Id = 8,
-                    Code = "OT",
-                    Name = "Other materials",
-                    Description = "Other materials"
-                }
-            ];
 
             _calcResult = new CalcResult
             {
@@ -111,6 +48,21 @@
                             NorthernIreland = "£10.00",
                             NorthernIrelandValue = 10,
                             Total = "£100.00",
+                            TotalValue = 100
+                        },
+                        new CalcResultParameterOtherCostDetail
+                        {
+                            Name = "4 Country Apportionment %s",
+                            OrderId = 1,
+                            England = "40.00%",
+                            EnglandValue = 40,
+                            Wales = "30.00%",
+                            WalesValue = 30,
+                            Scotland = "20.00%",
+                            ScotlandValue = 20,
+                            NorthernIreland = "10.00%",
+                            NorthernIrelandValue = 10,
+                            Total = "100.00%",
                             TotalValue = 100
                         }
                     ],
@@ -275,15 +227,33 @@
                     {
                         new()
                         {
-                            ProducerCommsFeesByMaterial =  new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>(){ },
-                            ProducerDisposalFeesByMaterial = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>(){ },
-                            ProducerId ="1",
-                            ProducerName ="Test",
-                            TotalProducerDisposalFeeWithBadDebtProvision =100,
-                            TotalProducerCommsFeeWithBadDebtProvision =100,
-                            SubsidiaryId ="1",
+                            ProducerCommsFeesByMaterial =
+                                new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>() { },
+                            ProducerDisposalFeesByMaterial =
+                                new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>() { },
+                            ProducerId = "1",
+                            ProducerName = "Test",
+                            TotalProducerDisposalFeeWithBadDebtProvision = 100,
+                            TotalProducerCommsFeeWithBadDebtProvision = 100,
+                            SubsidiaryId = "1",
+                            TotalProducerFeeforLADisposalCostswithBadDebtprovision = 10,
+                            TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision = 10,
+                            TotalProducerFeeWithBadDebtFor2bComms = 10,
+                            TwoCTotalProducerFeeForCommsCostsWithBadDebt = 10,
+                            ProducerOverallPercentageOfCostsForOnePlus2A2B2C = 100,
+                            LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = 100,
+                            LaDataPrepCostsBadDebtProvisionSection4 = 20,
+                            LaDataPrepCostsTotalWithBadDebtProvisionSection4 = 120,
+                            LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 = 20,
+                            LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4 = 20,
+                            LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 = 20,
+                            LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = 20,
                         }
-                    }
+                    },
+                    TotalFeeforLADisposalCostswithBadDebtprovision1 = 100,
+                    TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A = 100,
+                    CommsCostHeaderWithBadDebtFor2bTitle = 100,
+                    TwoCCommsCostsByCountryWithBadDebtProvision = 100,
                 },
                 CalcResultCommsCostReportDetail = new CalcResultCommsCost()
                 {
@@ -304,40 +274,6 @@
                     ]
                 }
             };
-
-            _materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
-            _commsCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>();
-
-            foreach (var material in _materials)
-            {
-                _materialCostSummary.Add(material, new CalcResultSummaryProducerDisposalFeesByMaterial
-                {
-                    HouseholdPackagingWasteTonnage = 1000,
-                    ManagedConsumerWasteTonnage = 90,
-                    NetReportedTonnage = 910,
-                    PricePerTonne = 0.6676m,
-                    ProducerDisposalFee = 607.52m,
-                    BadDebtProvision = 36.45m,
-                    ProducerDisposalFeeWithBadDebtProvision = 643.97m,
-                    EnglandWithBadDebtProvision = 348.06m,
-                    WalesWithBadDebtProvision = 78.46m,
-                    ScotlandWithBadDebtProvision = 156.28m,
-                    NorthernIrelandWithBadDebtProvision = 61.18m
-                });
-
-                _commsCostSummary.Add(material, new CalcResultSummaryProducerCommsFeesCostByMaterial
-                {
-                    HouseholdPackagingWasteTonnage = 1000,
-                    PriceperTonne = 0.6676m,
-                    ProducerTotalCostWithoutBadDebtProvision = 607.52m,
-                    BadDebtProvision = 36.45m,
-                    ProducerTotalCostwithBadDebtProvision = 643.97m,
-                    EnglandWithBadDebtProvision = 348.06m,
-                    WalesWithBadDebtProvision = 78.46m,
-                    ScotlandWithBadDebtProvision = 156.28m,
-                    NorthernIrelandWithBadDebtProvision = 61.18m
-                });
-            }
         }
 
         [TestCleanup]
@@ -381,143 +317,44 @@
         }
 
         [TestMethod]
-        public void CanCallGetLaDataPrepCostsProducerFeeWithoutBadDebtProvision()
+        public void CanCallGetSummaryHeaders()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsProducerFeeWithoutBadDebtProvision(_dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
+            var result = LaDataPrepCostsProducer.GetSummaryHeaders().ToList();
+
+            var expectedResult = new List<CalcResultSummaryHeader>();
+            expectedResult.AddRange([
+                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitle, ColumnIndex = 217 },
+                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.BadDebtProvisionTitle, ColumnIndex = 218 },
+                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.LaDataPrepCostsWithBadDebtProvisionTitle, ColumnIndex = 219 }
+            ]);
 
             // Assert
-            Assert.AreEqual((decimal)736.39, Math.Round(result, 2));
+            Assert.AreEqual(expectedResult[0].Name, result[0].Name);
+            Assert.AreEqual(expectedResult[0].ColumnIndex, result[0].ColumnIndex);
+            Assert.AreEqual(expectedResult[1].Name, result[1].Name);
+            Assert.AreEqual(expectedResult[1].ColumnIndex, result[1].ColumnIndex);
+            Assert.AreEqual(expectedResult[2].Name, result[2].Name);
+            Assert.AreEqual(expectedResult[2].ColumnIndex, result[2].ColumnIndex);
         }
 
         [TestMethod]
-        public void CanCallGetLaDataPrepCostsBadDebtProvision()
-        {
+        public void CanCallSetValues()
+        { 
             // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsBadDebtProvision(_dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
+            LaDataPrepCostsProducer.SetValues(_calcResult, _calcResult.CalcResultSummary);
 
             // Assert
-            Assert.AreEqual((decimal)44.18, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetLaDataPrepCostsProducerFeeWithBadDebtProvision()
-        {
-            // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsProducerFeeWithBadDebtProvision(_dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
-
-            // Assert
-            Assert.AreEqual((decimal)780.57, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetLaDataPrepCostsProducerFeeWithoutBadDebtProvisionTotal()
-        {
-            // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsProducerFeeWithoutBadDebtProvisionTotal(_dbContext.ProducerDetail, _dbContext.ProducerDetail, _materials, _calcResult);
-
-            // Assert
-            Assert.AreEqual(100, result);
-        }
-
-        [TestMethod]
-        public void CanCallGetLaDataPrepCostsBadDebtProvisionTotal()
-        {
-            // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsBadDebtProvisionTotal(_dbContext.ProducerDetail, _dbContext.ProducerDetail, _materials, _calcResult);
-
-            // Assert
-            Assert.AreEqual(6, result);
-        }
-
-        [TestMethod]
-        public void CanCallGetLaDataPrepCostsProducerFeeWithBadDebtProvisionTotal()
-        {
-            // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsProducerFeeWithBadDebtProvisionTotal(_dbContext.ProducerDetail, _dbContext.ProducerDetail, _materials, _calcResult);
-
-            // Assert
-            Assert.AreEqual(106, result);
-        }
-
-        [TestMethod]
-        public void CanCallGetLaDataPrepCostsEnglandTotalWithBadDebtProvision()
-        {
-            // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsEnglandTotalWithBadDebtProvision(_dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
-
-            // Assert
-            Assert.AreEqual((decimal)0.78, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetLaDataPrepCostsEnglandOverallTotalWithBadDebtProvision()
-        {
-            // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsEnglandOverallTotalWithBadDebtProvision(_dbContext.ProducerDetail, _dbContext.ProducerDetail, _materials, _calcResult);
-
-            // Assert
-            Assert.AreEqual((decimal)0.11, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetLaDataPrepCostsWalesTotalWithBadDebtProvision()
-        {
-            // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsWalesTotalWithBadDebtProvision(_dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
-
-            // Assert
-            Assert.AreEqual((decimal)156.11, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetLaDataPrepCostsWalesOverallTotalWithBadDebtProvision()
-        {
-            // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsWalesOverallTotalWithBadDebtProvision(_dbContext.ProducerDetail, _dbContext.ProducerDetail, _materials, _calcResult);
-
-            // Assert
-            Assert.AreEqual((decimal)21.20, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetLaDataPrepCostsScotlandTotalWithBadDebtProvision()
-        {
-            // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsScotlandTotalWithBadDebtProvision(_dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
-
-            // Assert
-            Assert.AreEqual((decimal)1.17, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetLaDataPrepCostsScotlandOverallTotalWithBadDebtProvision()
-        {
-            // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsScotlandOverallTotalWithBadDebtProvision(_dbContext.ProducerDetail, _dbContext.ProducerDetail, _materials, _calcResult);
-
-            // Assert
-            Assert.AreEqual((decimal)0.16, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvision()
-        {
-            // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvision(_dbContext.ProducerDetail, _materials, _calcResult, _materialCostSummary, _commsCostSummary);
-
-            // Assert
-            Assert.AreEqual((decimal)1.17, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetLaDataPrepCostsNorthernIrelandOverallTotalWithBadDebtProvision()
-        {
-            // Act
-            var result = LaDataPrepCostsProducer.GetLaDataPrepCostsNorthernIrelandOverallTotalWithBadDebtProvision(_dbContext.ProducerDetail, _dbContext.ProducerDetail, _materials, _calcResult);
-
-            // Assert
-            Assert.AreEqual((decimal)0.16, Math.Round(result, 2));
+            Assert.AreEqual(100, _calcResult.CalcResultSummary.LaDataPrepCostsTitleSection4);
+            Assert.AreEqual(6, _calcResult.CalcResultSummary.LaDataPrepCostsBadDebtProvisionTitleSection4);
+            Assert.AreEqual(106, _calcResult.CalcResultSummary.LaDataPrepCostsWithBadDebtProvisionTitleSection4);
+            Assert.AreEqual(100, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].LaDataPrepCostsTotalWithoutBadDebtProvisionSection4);
+            Assert.AreEqual(6, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].LaDataPrepCostsBadDebtProvisionSection4);
+            Assert.AreEqual(106, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].LaDataPrepCostsTotalWithBadDebtProvisionSection4);
+            Assert.AreEqual(42.40m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4);
+            Assert.AreEqual(31.80m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4);
+            Assert.AreEqual(21.20m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4);
+            Assert.AreEqual(10.60m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4);
         }
 
         private void CreateMaterials()

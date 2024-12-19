@@ -1,9 +1,7 @@
-﻿using EPR.Calculator.API.Builder.CommsCost;
-using EPR.Calculator.API.Builder.Summary.Common;
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Builder.Summary.Common;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
-using EPR.Calculator.API.Utils;
 
 namespace EPR.Calculator.API.Builder.Summary.LaDataPrepCosts
 {
@@ -24,217 +22,108 @@ namespace EPR.Calculator.API.Builder.Summary.LaDataPrepCosts
             ];
         }
 
-        public static decimal GetLaDataPrepCostsProducerFeeWithoutBadDebtProvision(IEnumerable<ProducerDetail> producers,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> materialCommsCostSummary)
+        public static IEnumerable<CalcResultSummaryHeader> GetSummaryHeaders()
         {
-            var laDataPrepCostsWithoutBadDebtProvision = LaDataPrepCostsSummary.GetLaDataPrepCostsWithoutBadDebtProvision(calcResult);
+            return [
+                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitle, ColumnIndex = ColumnIndex },
+                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.BadDebtProvisionTitle, ColumnIndex = ColumnIndex + 1 },
+                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.LaDataPrepCostsWithBadDebtProvisionTitle, ColumnIndex = ColumnIndex + 2 }
+            ];
+        }
 
-            var totalProducerDisposalFeeWithBadDebtProvision = CalcResultSummaryUtil.GetTotalProducerDisposalFeeWithBadDebtProvision(materialCostSummary);
-            var totalProducerCommsFeeWithBadDebtProvision = CalcResultSummaryUtil.GetTotalProducerCommsFeeWithBadDebtProvision(materialCommsCostSummary);
+        public static void SetValues(CalcResult calcResult, CalcResultSummary result)
+        {
+            result.LaDataPrepCostsTitleSection4 = GetLaDataPrepCostsWithoutBadDebtProvision(calcResult);
+            result.LaDataPrepCostsBadDebtProvisionTitleSection4 = GetBadDebtProvision(calcResult);
+            result.LaDataPrepCostsWithBadDebtProvisionTitleSection4 = GetLaDataPrepCostsWithBadDebtProvision(calcResult);
 
-            var total1Plus2ABadDebt = CalcResultSummaryUtil.GetTotal1Plus2ABadDebt(producers, materials, calcResult);
-
-            if (total1Plus2ABadDebt == 0)
+            foreach (var fee in result.ProducerDisposalFees)
             {
-                return 0;
+                fee.LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = GetTotalWithoutBadDebtProvision(result, fee);
+
+                fee.LaDataPrepCostsBadDebtProvisionSection4 = GetBadDebtProvision(calcResult, fee);
+
+                fee.LaDataPrepCostsTotalWithBadDebtProvisionSection4 = GetTotalWithBadDebtProvision(fee);
+
+                fee.LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 =
+                    GetCountryTotalWithBadDebtProvision(calcResult,
+                        result.LaDataPrepCostsTitleSection4,
+                        fee.ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.England);
+
+                fee.LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4 =
+                    GetCountryTotalWithBadDebtProvision(calcResult,
+                        result.LaDataPrepCostsTitleSection4,
+                        fee.ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.Wales);
+
+                fee.LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 =
+                    GetCountryTotalWithBadDebtProvision(calcResult,
+                        result.LaDataPrepCostsTitleSection4,
+                        fee.ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.Scotland);
+
+                fee.LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 =
+                    GetCountryTotalWithBadDebtProvision(calcResult,
+                        result.LaDataPrepCostsTitleSection4,
+                        fee.ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.NorthernIreland);
+            }
+        }
+
+        private static decimal GetLaDataPrepCostsWithoutBadDebtProvision(CalcResult calcResult)
+        {
+            var dataPrepCharge = calcResult.CalcResultParameterOtherCost.Details.FirstOrDefault(
+                cost => cost.Name == OnePlus4ApportionmentColumnHeaders.LADataPrepCharge);
+
+            if (dataPrepCharge != null)
+            {
+                return dataPrepCharge.TotalValue;
             }
 
-            var producerPercentageOfOverallProducerCosts = (totalProducerDisposalFeeWithBadDebtProvision + totalProducerCommsFeeWithBadDebtProvision) / total1Plus2ABadDebt;
-
-            return producerPercentageOfOverallProducerCosts * laDataPrepCostsWithoutBadDebtProvision;
+            return 0;
         }
 
-        public static decimal GetLaDataPrepCostsBadDebtProvision(IEnumerable<ProducerDetail> producers,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> materialCommsCostSummary)
+        private static decimal GetBadDebtProvision(CalcResult calcResult)
         {
-            return GetLaDataPrepCostsProducerFeeWithoutBadDebtProvision(producers, materials, calcResult, materialCostSummary, materialCommsCostSummary) *
-                calcResult.CalcResultParameterOtherCost.BadDebtValue / 100;
+            return GetLaDataPrepCostsWithoutBadDebtProvision(calcResult) * calcResult.CalcResultParameterOtherCost.BadDebtValue / 100;
         }
 
-        public static decimal GetLaDataPrepCostsProducerFeeWithBadDebtProvision(IEnumerable<ProducerDetail> producers,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> materialCommsCostSummary)
+        private static decimal GetLaDataPrepCostsWithBadDebtProvision(CalcResult calcResult)
         {
-            return GetLaDataPrepCostsProducerFeeWithoutBadDebtProvision(producers, materials, calcResult, materialCostSummary, materialCommsCostSummary) +
-                   GetLaDataPrepCostsBadDebtProvision(producers, materials, calcResult, materialCostSummary, materialCommsCostSummary);
+            return GetLaDataPrepCostsWithoutBadDebtProvision(calcResult) + GetBadDebtProvision(calcResult);
         }
 
-        public static decimal GetLaDataPrepCostsProducerFeeWithoutBadDebtProvisionTotal(IEnumerable<ProducerDetail> producers,
-            IEnumerable<ProducerDetail> producersAndSubsidiaries,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult)
+        private static decimal GetTotalWithoutBadDebtProvision(CalcResultSummary result, CalcResultSummaryProducerDisposalFees fee)
         {
-            var laDataPrepCostsWithoutBadDebtProvision = LaDataPrepCostsSummary.GetLaDataPrepCostsWithoutBadDebtProvision(calcResult);
-
-            var total1Plus2ABadDebtForAllProducers = CalcResultSummaryUtil.GetTotal1Plus2ABadDebt(producers, materials, calcResult);
-
-            if (total1Plus2ABadDebtForAllProducers == 0)
-            {
-                return 0;
-            }
-
-            var total1Plus2ABadDebtForProducersAndSubsidiaries = CalcResultSummaryUtil.GetTotal1Plus2ABadDebt(producersAndSubsidiaries, materials, calcResult);
-
-            var producerPercentageOfOverallProducerCosts = total1Plus2ABadDebtForProducersAndSubsidiaries / total1Plus2ABadDebtForAllProducers;
-
-            return producerPercentageOfOverallProducerCosts * laDataPrepCostsWithoutBadDebtProvision;
+            return (fee.ProducerOverallPercentageOfCostsForOnePlus2A2B2C * result.LaDataPrepCostsTitleSection4) / 100;
         }
 
-        public static decimal GetLaDataPrepCostsBadDebtProvisionTotal(IEnumerable<ProducerDetail> producers,
-            IEnumerable<ProducerDetail> producersAndSubsidiaries,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult)
+        private static decimal GetBadDebtProvision(CalcResult calcResult, CalcResultSummaryProducerDisposalFees fee)
         {
-            return GetLaDataPrepCostsProducerFeeWithoutBadDebtProvisionTotal(producers, producersAndSubsidiaries, materials, calcResult) *
-                calcResult.CalcResultParameterOtherCost.BadDebtValue / 100;
+            return (fee.LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 *
+                    calcResult.CalcResultParameterOtherCost.BadDebtValue) / 100;
         }
 
-        public static decimal GetLaDataPrepCostsProducerFeeWithBadDebtProvisionTotal(IEnumerable<ProducerDetail> producers,
-            IEnumerable<ProducerDetail> producersAndSubsidiaries,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult)
+        private static decimal GetTotalWithBadDebtProvision(CalcResultSummaryProducerDisposalFees fee)
         {
-            return GetLaDataPrepCostsProducerFeeWithoutBadDebtProvisionTotal(producers, producersAndSubsidiaries, materials, calcResult) +
-                GetLaDataPrepCostsBadDebtProvisionTotal(producers, producersAndSubsidiaries, materials, calcResult);
+            return fee.LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 +
+                   fee.LaDataPrepCostsBadDebtProvisionSection4;
         }
 
-        public static decimal GetLaDataPrepCostsEnglandTotalWithBadDebtProvision(IEnumerable<ProducerDetail> producers,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> materialCommsCostSummary)
-        {
-            return GetCountryTotalWithBadDebtProvision(producers, materials, calcResult, materialCostSummary,
-                materialCommsCostSummary, Countries.England);
-        }
-
-        public static decimal GetLaDataPrepCostsWalesTotalWithBadDebtProvision(IEnumerable<ProducerDetail> producers,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> materialCommsCostSummary)
-        {
-            return GetCountryTotalWithBadDebtProvision(producers, materials, calcResult, materialCostSummary,
-                materialCommsCostSummary, Countries.Wales);
-        }
-
-        public static decimal GetLaDataPrepCostsScotlandTotalWithBadDebtProvision(IEnumerable<ProducerDetail> producers,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> materialCommsCostSummary)
-        {
-            return GetCountryTotalWithBadDebtProvision(producers, materials, calcResult, materialCostSummary,
-                materialCommsCostSummary, Countries.Scotland);
-        }
-
-        public static decimal GetLaDataPrepCostsNorthernIrelandTotalWithBadDebtProvision(IEnumerable<ProducerDetail> producers,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> materialCommsCostSummary)
-        {
-            return GetCountryTotalWithBadDebtProvision(producers, materials, calcResult, materialCostSummary,
-                materialCommsCostSummary, Countries.NorthernIreland);
-        }
-
-        public static decimal GetLaDataPrepCostsEnglandOverallTotalWithBadDebtProvision(IEnumerable<ProducerDetail> producers,
-            IEnumerable<ProducerDetail> producersAndSubsidiaries,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult)
-        {
-            return GetCountryOverallTotalWithBadDebtProvision(producers, producersAndSubsidiaries, materials,
-                calcResult, Countries.England);
-        }
-
-        public static decimal GetLaDataPrepCostsWalesOverallTotalWithBadDebtProvision(IEnumerable<ProducerDetail> producers,
-            IEnumerable<ProducerDetail> producersAndSubsidiaries,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult)
-        {
-            return GetCountryOverallTotalWithBadDebtProvision(producers, producersAndSubsidiaries, materials,
-                calcResult, Countries.Wales);
-        }
-
-        public static decimal GetLaDataPrepCostsScotlandOverallTotalWithBadDebtProvision(IEnumerable<ProducerDetail> producers,
-            IEnumerable<ProducerDetail> producersAndSubsidiaries,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult)
-        {
-            return GetCountryOverallTotalWithBadDebtProvision(producers, producersAndSubsidiaries, materials,
-                calcResult, Countries.Scotland);
-        }
-
-        public static decimal GetLaDataPrepCostsNorthernIrelandOverallTotalWithBadDebtProvision(IEnumerable<ProducerDetail> producers,
-            IEnumerable<ProducerDetail> producersAndSubsidiaries,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult)
-        {
-            return GetCountryOverallTotalWithBadDebtProvision(producers, producersAndSubsidiaries, materials,
-                calcResult, Countries.NorthernIreland);
-        }
-
-        private static decimal GetCountryTotalWithBadDebtProvision(IEnumerable<ProducerDetail> producers,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary,
-            Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> materialCommsCostSummary,
+        public static decimal GetCountryTotalWithBadDebtProvision(CalcResult calcResult,
+            decimal laDataPrepCostsTitleSection4,
+            decimal producerOverallPercentageOfCostsForOnePlus2A2B2C,
             Countries country)
         {
-            var laDataPrepCostsProducerFeeWithoutBadDebtProvision = LaDataPrepCostsSummary.GetLaDataPrepCostsWithoutBadDebtProvision(calcResult);
+            var onePlusBadDebtProvision = 1 + (calcResult.CalcResultParameterOtherCost.BadDebtValue / 100);
 
-            var paramsOtherCalculated = 1 + (calcResult.CalcResultParameterOtherCost.BadDebtValue / 100);
-
-            var totalProducerDisposalFeeWithBadDebtProvision = CalcResultSummaryUtil.GetTotalProducerDisposalFeeWithBadDebtProvision(materialCostSummary);
-            var totalProducerCommsFeeWithBadDebtProvision = CalcResultSummaryUtil.GetTotalProducerCommsFeeWithBadDebtProvision(materialCommsCostSummary);
-
-            var total1Plus2ABadDebt = CalcResultSummaryUtil.GetTotal1Plus2ABadDebt(producers, materials, calcResult);
-
-            if (total1Plus2ABadDebt == 0)
+            if (producerOverallPercentageOfCostsForOnePlus2A2B2C == 0)
             {
                 return 0;
             }
 
-            var producerPercentageOfOverallProducerCosts = ((totalProducerDisposalFeeWithBadDebtProvision + totalProducerCommsFeeWithBadDebtProvision) / total1Plus2ABadDebt) / 100;
+            var result = laDataPrepCostsTitleSection4 * onePlusBadDebtProvision *
+                         (producerOverallPercentageOfCostsForOnePlus2A2B2C / 100) *
+                         CalcResultSummaryUtil.GetParamsOtherFourCountryApportionmentPercentage(calcResult, country);
 
-            return laDataPrepCostsProducerFeeWithoutBadDebtProvision *
-                   paramsOtherCalculated *
-                   producerPercentageOfOverallProducerCosts *
-                   CalcResultSummaryUtil.GetCountryOnePlusFourApportionment(calcResult, country);
-        }
-
-        private static decimal GetCountryOverallTotalWithBadDebtProvision(IEnumerable<ProducerDetail> producers,
-            IEnumerable<ProducerDetail> producersAndSubsidiaries,
-            IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult, Countries country)
-        {
-            var laDataPrepCostsProducerFeeWithoutBadDebtProvision = LaDataPrepCostsSummary.GetLaDataPrepCostsWithoutBadDebtProvision(calcResult);
-
-            var paramsOtherCalculated = 1 + (calcResult.CalcResultParameterOtherCost.BadDebtValue / 100);
-
-            var total1Plus2ABadDebtForAllProducers = CalcResultSummaryUtil.GetTotal1Plus2ABadDebt(producers, materials, calcResult);
-
-            if (total1Plus2ABadDebtForAllProducers == 0)
-            {
-                return 0;
-            }
-
-            var total1Plus2ABadDebtForProducersAndSubsidiaries = CalcResultSummaryUtil.GetTotal1Plus2ABadDebt(producersAndSubsidiaries, materials, calcResult);
-
-            var producerPercentageOfOverallProducerCosts = (total1Plus2ABadDebtForProducersAndSubsidiaries / total1Plus2ABadDebtForAllProducers) / 100;
-
-            return laDataPrepCostsProducerFeeWithoutBadDebtProvision *
-                   paramsOtherCalculated *
-                   producerPercentageOfOverallProducerCosts *
-                       CalcResultSummaryUtil.GetCountryOnePlusFourApportionment(calcResult, country);
+            return result == 0 ? 0 : result / 100;
         }
     }
 }
