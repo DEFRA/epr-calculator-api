@@ -3,6 +3,9 @@
     using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
     using Models;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using EPR.Calculator.API.Constants;
+    using EPR.Calculator.API.Builder.Summary.Common;
+    using EPR.Calculator.API.Enums;
 
     [TestClass]
     public class SaSetupCostsSummaryTests
@@ -176,8 +179,9 @@
                             EnglandTotal=14.53M,
                             NorthernIrelandTotal=0.15M,
                             ScotlandTotal=0.15M,
-                            WalesTotal=020M,
+                            WalesTotal=0.20M,
                             Name="Test",
+                            OrderId=4
                         }]
                 },
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
@@ -266,6 +270,6 @@
 
             // Assert
             Assert.AreEqual(106, result);
-        }
+        }       
     }
 }
