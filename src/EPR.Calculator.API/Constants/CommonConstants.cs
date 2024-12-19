@@ -16,6 +16,5 @@ namespace EPR.Calculator.API.Constants
         public const string DisposalCostPricePerTonne = "Disposal Cost Price Per Tonne";
         public const string LADisposalCostData = "LA Disposal Cost Data";
         public const string Household = "HH";
-        public const string PolicyName = "AllowAllOrigins";
     }
 }
