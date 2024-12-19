@@ -3,6 +3,7 @@
     using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
     using Models;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using EPR.Calculator.API.Constants;
 
     [TestClass]
     public class SaSetupCostsSummaryTests
@@ -176,8 +177,9 @@
                             EnglandTotal=14.53M,
                             NorthernIrelandTotal=0.15M,
                             ScotlandTotal=0.15M,
-                            WalesTotal=020M,
+                            WalesTotal=0.20M,
                             Name="Test",
+                            OrderId=4
                         }]
                 },
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
@@ -266,6 +268,47 @@
 
             // Assert
             Assert.AreEqual(106, result);
+        }
+
+
+        [TestMethod]
+        public void CanCallGetSaSetupCostsWithBadDebtProvisionEngland()
+        {
+            // Act
+            var result = SaSetupCostsSummary.GetOnePlusFourApportionmentByCountry(_calcResult, CommonConstants.England);
+
+            // Assert
+            Assert.AreEqual(14.53m, result);
+        }
+
+        [TestMethod]
+        public void CanCallGetSaSetupCostsWithBadDebtProvisionWales()
+        {
+            // Act
+            var result = SaSetupCostsSummary.GetOnePlusFourApportionmentByCountry(_calcResult, CommonConstants.Wales);
+
+            // Assert
+            Assert.AreEqual(0.20m, result);
+        }
+
+        [TestMethod]
+        public void CanCallGetSaSetupCostsWithBadDebtProvisionScotland()
+        {
+            // Act
+            var result = SaSetupCostsSummary.GetOnePlusFourApportionmentByCountry(_calcResult, CommonConstants.Scotland);
+
+            // Assert
+            Assert.AreEqual(0.15m, result);
+        }
+
+        [TestMethod]
+        public void CanCallGetSaSetupCostsWithBadDebtProvisionNI()
+        {
+            // Act
+            var result = SaSetupCostsSummary.GetOnePlusFourApportionmentByCountry(_calcResult, CommonConstants.NorthernIreland);
+
+            // Assert
+            Assert.AreEqual(0.15m, result);
         }
     }
 }

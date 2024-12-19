@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Models;
+﻿using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Models;
 
 namespace EPR.Calculator.API.Builder.Summary.SaSetupCosts
 {
@@ -28,6 +29,35 @@ namespace EPR.Calculator.API.Builder.Summary.SaSetupCosts
         public static decimal GetOneOffFeeSetupCostsWithBadDebtProvision(CalcResult calcResult)
         {
             return GetOneOffFeeSetupCostsWithoutBadDebtProvision(calcResult) + GetBadDebtProvision(calcResult);
+        }
+
+
+        public static decimal GetSetUpBadDebtProvision(CalcResult calcResult)
+        {
+            return calcResult.CalcResultParameterOtherCost.BadDebtValue;
+        }
+
+        public static decimal GetOnePlusFourApportionmentByCountry(CalcResult calcResult, string country)
+        {
+
+            var onePlusApprotionmentValue = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.FirstOrDefault(t => t.OrderId == 4);
+
+            if (onePlusApprotionmentValue != null)
+            {
+                switch (country)
+                {
+                    case CommonConstants.England:
+                        return onePlusApprotionmentValue.EnglandTotal;
+                    case CommonConstants.NorthernIreland:
+                        return onePlusApprotionmentValue.NorthernIrelandTotal;
+                    case CommonConstants.Scotland:
+                        return onePlusApprotionmentValue.ScotlandTotal;
+                    case CommonConstants.Wales: 
+                        return onePlusApprotionmentValue.WalesTotal;
+                }
+            }
+
+            return 0;
         }
     }
 }
