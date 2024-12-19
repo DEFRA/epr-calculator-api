@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Builder.CommsCost;
 using EPR.Calculator.API.Builder.Summary.CommsCostTwoA;
 using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
+using EPR.Calculator.API.Builder.Summary.OnePlus2A2B2C;
 using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
 using EPR.Calculator.API.Builder.Summary.ThreeSa;
 using EPR.Calculator.API.Builder.Summary.TotalBillBreakdown;
@@ -25,11 +26,10 @@ public static class CalcResultSummaryUtil
     public const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
     public const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
     //Section-(1) & (2a)
-    public const int decimalRoundUp = 2;
     public const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
-    //Section-(1) & (2a)
-    public const int Total1Plus2ABadDebt = 193;
-    private const int CommsCost2bColumnIndex = 196;
+    //Section-(2b)
+    private const int CommsCost2bColumnIndex = 194;
+    public const int decimalRoundUp = 2;
 
     public static int GetLevelIndex(List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup, ProducerDetail producer)
     {
@@ -434,7 +434,7 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwoBadDebtprovision2A, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 7 },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 8 },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwithBadDebtprovision2A,ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 9 },
-            new CalcResultSummaryHeader {Name = CalcResultSummaryHeaders.TotalBadDebtProvision1Plus2A, ColumnIndex = Total1Plus2ABadDebt },
+
             //Section-2b Title headers
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.CommsCostHeaderWithoutBadDebtFor2bTitle, ColumnIndex = CommsCost2bColumnIndex },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.CommsCostHeaderBadDebtProvisionFor2bTitle, ColumnIndex = CommsCost2bColumnIndex + 1 },
@@ -442,11 +442,17 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithout, ColumnIndex = TwoCCommsCostColumnIndex.Value },
             new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostBadBebtProvision, ColumnIndex = TwoCCommsCostColumnIndex.Value + 1 },
             new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithBadDebt, ColumnIndex = TwoCCommsCostColumnIndex.Value + 2 },
+
             //Section-3 Title headers
             new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.SAOperatingCostsWithoutBadDebtProvisionTitleSection3, ColumnIndex = ThreeSaCostColumnIndex.Index },
             new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.BadDebtProvisionTitleSection3, ColumnIndex = ThreeSaCostColumnIndex.Index + 1 },
             new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.SAOperatingCostsWithBadDebtProvisionTitleSection3,ColumnIndex = ThreeSaCostColumnIndex.Index + 2 },
         ]);
+
+        // Section Total bill (1 + 2a + 2b + 2c)
+        resultSummaryHeaders.AddRange(
+            OnePlus2A2B2CProducer.GetSummaryHeaders()
+        );
 
         // Section-4 Title headers
         resultSummaryHeaders.AddRange(
@@ -519,10 +525,6 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A, decimalRoundUp)}",ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex+9 }
         ]);
 
-        materialsBreakdownHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalOnePlus2AFeeWithBadDebtProvision, decimalRoundUp)}", ColumnIndex = Total1Plus2ABadDebt },
-        ]);
-
         // 2b comms total bill
         materialsBreakdownHeaders.AddRange([
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.CommsCostHeaderWithoutBadDebtFor2bTitle, decimalRoundUp)}", ColumnIndex = CommsCost2bColumnIndex },
@@ -534,6 +536,11 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TwoCCommsCostsByCountryWithoutBadDebtProvision, CalcResultSummaryUtil.decimalRoundUp)}", ColumnIndex = TwoCCommsCostColumnIndex.Value },
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TwoCBadDebtProvision, CalcResultSummaryUtil.decimalRoundUp)}",ColumnIndex = TwoCCommsCostColumnIndex.Value + 1 },
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TwoCCommsCostsByCountryWithBadDebtProvision, CalcResultSummaryUtil.decimalRoundUp)}",ColumnIndex = TwoCCommsCostColumnIndex.Value + 2 }
+        ]);
+
+        // Section Total bill (1 + 2a + 2b + 2c)
+        materialsBreakdownHeaders.AddRange([
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalOnePlus2A2B2CFeeWithBadDebtProvision, decimalRoundUp)}", ColumnIndex = OnePlus2A2B2CProducer.ColumnIndex },
         ]);
 
         //Section-3 -first header
@@ -644,12 +651,6 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalwithBadDebtprovision }
         ]);
 
-        // bad debt
-        columnHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducer1Plus2ABadDebt },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducer1Plus2ABadDebtPercentage }
-        ]);
-
         // Percentage of Producer Reported Household Tonnage vs All Producers
         columnHeaders.AddRange([
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PercentageofProducerReportedHHTonnagevsAllProducers },
@@ -676,6 +677,11 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostScotlandWithBadDebt },
             new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostNIWithBadDebt }
         ]);
+
+        // Section Total bill (1 + 2a + 2b + 2c)
+        columnHeaders.AddRange(
+            OnePlus2A2B2CProducer.GetHeaders()
+        );
 
         // SA operating cost section 3
         columnHeaders.AddRange([
