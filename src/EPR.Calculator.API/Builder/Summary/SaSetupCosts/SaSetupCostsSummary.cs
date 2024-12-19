@@ -36,28 +36,5 @@ namespace EPR.Calculator.API.Builder.Summary.SaSetupCosts
         {
             return calcResult.CalcResultParameterOtherCost.BadDebtValue;
         }
-
-        public static decimal GetOnePlusFourApportionmentByCountry(CalcResult calcResult, string country)
-        {
-
-            var onePlusApprotionmentValue = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails.FirstOrDefault(t => t.OrderId == 4);
-
-            if (onePlusApprotionmentValue != null)
-            {
-                switch (country)
-                {
-                    case CommonConstants.England:
-                        return onePlusApprotionmentValue.EnglandTotal;
-                    case CommonConstants.NorthernIreland:
-                        return onePlusApprotionmentValue.NorthernIrelandTotal;
-                    case CommonConstants.Scotland:
-                        return onePlusApprotionmentValue.ScotlandTotal;
-                    case CommonConstants.Wales: 
-                        return onePlusApprotionmentValue.WalesTotal;
-                }
-            }
-
-            return 0;
-        }
     }
 }

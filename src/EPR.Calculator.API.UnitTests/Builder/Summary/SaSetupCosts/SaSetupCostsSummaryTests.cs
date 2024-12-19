@@ -4,6 +4,8 @@
     using Models;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using EPR.Calculator.API.Constants;
+    using EPR.Calculator.API.Builder.Summary.Common;
+    using EPR.Calculator.API.Enums;
 
     [TestClass]
     public class SaSetupCostsSummaryTests
@@ -268,47 +270,6 @@
 
             // Assert
             Assert.AreEqual(106, result);
-        }
-
-
-        [TestMethod]
-        public void CanCallGetSaSetupCostsWithBadDebtProvisionEngland()
-        {
-            // Act
-            var result = SaSetupCostsSummary.GetOnePlusFourApportionmentByCountry(_calcResult, CommonConstants.England);
-
-            // Assert
-            Assert.AreEqual(14.53m, result);
-        }
-
-        [TestMethod]
-        public void CanCallGetSaSetupCostsWithBadDebtProvisionWales()
-        {
-            // Act
-            var result = SaSetupCostsSummary.GetOnePlusFourApportionmentByCountry(_calcResult, CommonConstants.Wales);
-
-            // Assert
-            Assert.AreEqual(0.20m, result);
-        }
-
-        [TestMethod]
-        public void CanCallGetSaSetupCostsWithBadDebtProvisionScotland()
-        {
-            // Act
-            var result = SaSetupCostsSummary.GetOnePlusFourApportionmentByCountry(_calcResult, CommonConstants.Scotland);
-
-            // Assert
-            Assert.AreEqual(0.15m, result);
-        }
-
-        [TestMethod]
-        public void CanCallGetSaSetupCostsWithBadDebtProvisionNI()
-        {
-            // Act
-            var result = SaSetupCostsSummary.GetOnePlusFourApportionmentByCountry(_calcResult, CommonConstants.NorthernIreland);
-
-            // Assert
-            Assert.AreEqual(0.15m, result);
-        }
+        }       
     }
 }
