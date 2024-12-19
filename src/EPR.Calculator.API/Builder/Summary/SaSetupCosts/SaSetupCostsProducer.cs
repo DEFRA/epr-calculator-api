@@ -37,10 +37,10 @@ namespace EPR.Calculator.API.Builder.Summary.SaSetupCosts
                 item.TotalProducerFeeWithoutBadDebtProvisionSection5 = GetTotalProducerFeeWithoutBadDebtProvisionSection5(summary, item);
                 item.BadDebtProvisionSection5 = GetBadDebtProvisionSection5(calcResult, item);
                 item.TotalProducerFeeWithBadDebtProvisionSection5 = item.TotalProducerFeeWithoutBadDebtProvisionSection5 + item.BadDebtProvisionSection5;
-                item.EnglandTotalWithBadDebtProvisionSection5 = GetCountryTotalWithBadDebtProvision(calcResult, summary.SaSetupCostsTitleSection5, SaSetupCostsSummary.GetSetUpBadDebtProvision(calcResult), item.ProducerOverallPercentageOfCostsForOnePlus2A2B2C, CommonConstants.England);
-                item.WalesTotalWithBadDebtProvisionSection5 = GetCountryTotalWithBadDebtProvision(calcResult, summary.SaSetupCostsTitleSection5, SaSetupCostsSummary.GetSetUpBadDebtProvision(calcResult), item.ProducerOverallPercentageOfCostsForOnePlus2A2B2C, CommonConstants.Wales);
-                item.ScotlandTotalWithBadDebtProvisionSection5 = GetCountryTotalWithBadDebtProvision(calcResult, summary.SaSetupCostsTitleSection5, SaSetupCostsSummary.GetSetUpBadDebtProvision(calcResult), item.ProducerOverallPercentageOfCostsForOnePlus2A2B2C, CommonConstants.Scotland);
-                item.NorthernIrelandTotalWithBadDebtProvisionSection5 = GetCountryTotalWithBadDebtProvision(calcResult, summary.SaSetupCostsTitleSection5, SaSetupCostsSummary.GetSetUpBadDebtProvision(calcResult), item.ProducerOverallPercentageOfCostsForOnePlus2A2B2C, CommonConstants.NorthernIreland);
+                item.EnglandTotalWithBadDebtProvisionSection5 = GetCountryTotalWithBadDebtProvision(calcResult, summary.SaSetupCostsTitleSection5, SaSetupCostsSummary.GetSetUpBadDebtProvision(calcResult), item.ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.England);
+                item.WalesTotalWithBadDebtProvisionSection5 = GetCountryTotalWithBadDebtProvision(calcResult, summary.SaSetupCostsTitleSection5, SaSetupCostsSummary.GetSetUpBadDebtProvision(calcResult), item.ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.Wales);
+                item.ScotlandTotalWithBadDebtProvisionSection5 = GetCountryTotalWithBadDebtProvision(calcResult, summary.SaSetupCostsTitleSection5, SaSetupCostsSummary.GetSetUpBadDebtProvision(calcResult), item.ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.Scotland);
+                item.NorthernIrelandTotalWithBadDebtProvisionSection5 = GetCountryTotalWithBadDebtProvision(calcResult, summary.SaSetupCostsTitleSection5, SaSetupCostsSummary.GetSetUpBadDebtProvision(calcResult), item.ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.NorthernIreland);
             }
         }
 
@@ -54,9 +54,9 @@ namespace EPR.Calculator.API.Builder.Summary.SaSetupCosts
             return (item.ProducerOverallPercentageOfCostsForOnePlus2A2B2C * summary.SaSetupCostsTitleSection5) / 100;
         }
 
-        public static decimal GetCountryTotalWithBadDebtProvision(CalcResult calcResult, decimal oneOffFeeSetupCostsWithoutBadDebtProvision, decimal badDebtProvisionSection5Setup, decimal ProducerOverallPercentageOfCostsForOnePlus2A2B2C, string country)
+        public static decimal GetCountryTotalWithBadDebtProvision(CalcResult calcResult, decimal oneOffFeeSetupCostsWithoutBadDebtProvision, decimal badDebtProvisionSection5Setup, decimal ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries country)
         {
-            var countryTotal = (SaSetupCostsSummary.GetOnePlusFourApportionmentByCountry(calcResult, country))/100;
+            var countryTotal = (CalcResultSummaryUtil.GetCountryOnePlusFourApportionment(calcResult, country))/100;
             return oneOffFeeSetupCostsWithoutBadDebtProvision * (1 + (badDebtProvisionSection5Setup/100)) * (ProducerOverallPercentageOfCostsForOnePlus2A2B2C/100) * countryTotal;
         }
 

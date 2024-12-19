@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Enums;
 
 namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
 {
@@ -208,9 +209,9 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                             ScotlandDisposalTotal="30",
                             WalesDisposalTotal="20",
                             AllTotal=0.1M,
-                            EnglandTotal=0.10M,
+                            EnglandTotal=14.53M,
                             NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
+                            ScotlandTotal=1.15M,
                             WalesTotal=020M,
                             Name="1 + 4 Apportionment %s",
                         },
@@ -404,7 +405,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
         {
             SaSetupCostsProducer.GetProducerSetUpCosts(_calcResult, _calcResult.CalcResultSummary);
             // Act
-            var result = SaSetupCostsProducer.GetCountryTotalWithBadDebtProvision(_calcResult, _calcResult.CalcResultSummary.SaSetupCostsTitleSection5, SaSetupCostsSummary.GetSetUpBadDebtProvision(_calcResult), _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].ProducerOverallPercentageOfCostsForOnePlus2A2B2C, CommonConstants.England);
+            var result = SaSetupCostsProducer.GetCountryTotalWithBadDebtProvision(_calcResult, _calcResult.CalcResultSummary.SaSetupCostsTitleSection5, SaSetupCostsSummary.GetSetUpBadDebtProvision(_calcResult), _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.England);
 
             // Assert
             Assert.AreEqual(0.15m, Math.Round(result, 2));
@@ -416,7 +417,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
             SaSetupCostsProducer.GetProducerSetUpCosts(_calcResult, _calcResult.CalcResultSummary);
             
             // Act
-            var result = SaSetupCostsProducer.GetCountryTotalWithBadDebtProvision(_calcResult, _calcResult.CalcResultSummary.SaSetupCostsTitleSection5, SaSetupCostsSummary.GetSetUpBadDebtProvision(_calcResult), _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].ProducerOverallPercentageOfCostsForOnePlus2A2B2C, CommonConstants.Scotland);
+            var result = SaSetupCostsProducer.GetCountryTotalWithBadDebtProvision(_calcResult, _calcResult.CalcResultSummary.SaSetupCostsTitleSection5, SaSetupCostsSummary.GetSetUpBadDebtProvision(_calcResult), _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.Scotland);
 
             // Assert
             Assert.AreEqual(0.01m, Math.Round(result, 2));
@@ -429,7 +430,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
             SaSetupCostsProducer.GetProducerSetUpCosts(_calcResult, _calcResult.CalcResultSummary);
 
             // Act
-            var result = SaSetupCostsProducer.GetCountryTotalWithBadDebtProvision(_calcResult, _calcResult.CalcResultSummary.SaSetupCostsTitleSection5, SaSetupCostsSummary.GetSetUpBadDebtProvision(_calcResult), _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].ProducerOverallPercentageOfCostsForOnePlus2A2B2C, CommonConstants.Wales);
+            var result = SaSetupCostsProducer.GetCountryTotalWithBadDebtProvision(_calcResult, _calcResult.CalcResultSummary.SaSetupCostsTitleSection5, SaSetupCostsSummary.GetSetUpBadDebtProvision(_calcResult), _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.Wales);
 
             // Assert
             Assert.AreEqual(0.21m, Math.Round(result, 2));
