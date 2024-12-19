@@ -101,16 +101,6 @@ builder.Services.AddAzureClients(builder =>
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 });
 
-// Add CORS services
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(CommonConstants.PolicyName,
-        policy => policy.AllowAnyOrigin()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .WithExposedHeaders("Content-Disposition"));
-});
-
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 var app = builder.Build();
@@ -125,6 +115,5 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.MapControllers();
-app.UseCors(CommonConstants.PolicyName);
 
 app.Run();
