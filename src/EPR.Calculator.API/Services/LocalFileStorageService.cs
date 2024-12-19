@@ -2,6 +2,7 @@
 {
     using System.IO;
     using System.Text;
+    using System.Threading.Tasks;
 
     namespace EPR.Calculator.API.Services
     {
@@ -12,11 +13,12 @@
                 throw new NotImplementedException();
             }
 
-            public Task UploadResultFileContentAsync(string fileName, string content)
+            public Task<bool> UploadResultFileContentAsync(string fileName, string content)
             {
                 var path = $"{Directory.GetCurrentDirectory()}\\{fileName}";
                 File.WriteAllText(path, content, Encoding.UTF8);
-                return Task.CompletedTask;
+                var result = Task.FromResult(true);
+                return result;
             }
 
             public Task<IResult> DownloadFile(string fileName)
