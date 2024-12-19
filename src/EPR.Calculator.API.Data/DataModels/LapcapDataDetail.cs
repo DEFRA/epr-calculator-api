@@ -16,13 +16,13 @@ namespace EPR.Calculator.API.Data.DataModels
 
         [Column("lapcap_data_template_master_unique_ref")]
         [StringLength(400)]
-        public string UniqueReference { get; set; }
+        public required string UniqueReference { get; set; }
 
         [Column("total_cost")]
         public decimal TotalCost { get; set; }
 
-        public LapcapDataMaster LapcapDataMaster { get; set; }
+        public required LapcapDataMaster LapcapDataMaster { get; set; }
 
-        public virtual LapcapDataTemplateMaster LapcapDataTemplateMaster { get; set; }
+        public virtual LapcapDataTemplateMaster? LapcapDataTemplateMaster { get; set; }
     }
 }

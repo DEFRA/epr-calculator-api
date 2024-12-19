@@ -66,7 +66,7 @@ namespace EPR.Calculator.API.UnitTests
                 }
             };
 
-        private string GetInvalidValueForUniqueRef(string parameterUniqueReferenceId)
+        private static string GetInvalidValueForUniqueRef(string parameterUniqueReferenceId)
         {
             switch (parameterUniqueReferenceId)
             {

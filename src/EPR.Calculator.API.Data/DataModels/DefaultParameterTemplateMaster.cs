@@ -13,18 +13,18 @@ namespace EPR.Calculator.API.Data.DataModels
         [Key]
         [NotNull]
         [StringLength(450)]
-        public string ParameterUniqueReferenceId { get; set; }
+        public required string ParameterUniqueReferenceId { get; set; }
 
 
         [Column("parameter_type")]
         [NotNull]
         [StringLength(250)]
-        public string ParameterType { get; set; }
+        public required string ParameterType { get; set; }
 
         [Column("parameter_category")]
         [StringLength(250)]
         [NotNull]
-        public string ParameterCategory { get; set; }
+        public required string ParameterCategory { get; set; }
 
         [Column("valid_Range_from", TypeName = "decimal(18, 3)")]
         [NotNull]

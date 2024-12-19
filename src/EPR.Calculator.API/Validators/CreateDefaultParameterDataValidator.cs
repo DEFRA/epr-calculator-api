@@ -19,11 +19,11 @@ namespace EPR.Calculator.API.Validators
 
             var errors = ValidateByValues(createDefaultParameterSettingDto);
             validationResult.Errors.AddRange(errors);
-            validationResult.IsInvalid = validationResult.Errors.Any();
+            validationResult.IsInvalid = validationResult.Errors.Count != 0;
             return validationResult;
         }
 
-        private IEnumerable<CreateDefaultParameterSettingErrorDto> ValidateByValues(CreateDefaultParameterSettingDto createDefaultParameterSettingDto)
+        private List<CreateDefaultParameterSettingErrorDto> ValidateByValues(CreateDefaultParameterSettingDto createDefaultParameterSettingDto)
         {
             IEnumerable<DefaultParameterTemplateMaster> defaultTemplateMasterList = this._context.DefaultParameterTemplateMasterList.ToList();
 
@@ -40,7 +40,7 @@ namespace EPR.Calculator.API.Validators
                     var error = Util.CreateErrorDto(defaultParameterTemplateMaster, errorMessage);
                     errors.Add(error);
                 }
-                else if (matchingTemplates.Count() == 0)
+                else if (!matchingTemplates.Any())
                 {
                     var errorMessage = Util.FormattedErrorForMissingValues(defaultParameterTemplateMaster);
                     var error = Util.CreateErrorDto(defaultParameterTemplateMaster, errorMessage);

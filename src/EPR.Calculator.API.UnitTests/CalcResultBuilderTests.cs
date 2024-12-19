@@ -17,19 +17,18 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class CalcResultBuilderTests
     {
-        private Mock<ICalcResultDetailBuilder> mockCalcResultDetailBuilder;
-        private Mock<ICalcResultLapcapDataBuilder> mockLapcapBuilder;
-        private Mock<ICalcResultLateReportingBuilder> mockLateReportingBuilder;
-        private Mock<ICalcRunLaDisposalCostBuilder> mockCalcRunLaDisposalCostBuilder;
-        private Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
-        private Mock<ICalcResultSummaryBuilder> mockSummaryBuilder;
-        private CalcResultBuilder calcResultBuilder;
+        private readonly Mock<ICalcResultDetailBuilder> mockCalcResultDetailBuilder;
+        private readonly Mock<ICalcResultLapcapDataBuilder> mockLapcapBuilder;
+        private readonly Mock<ICalcResultLateReportingBuilder> mockLateReportingBuilder;
+        private readonly Mock<ICalcRunLaDisposalCostBuilder> mockCalcRunLaDisposalCostBuilder;
+        private readonly Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
+        private readonly Mock<ICalcResultSummaryBuilder> mockSummaryBuilder;
+        private readonly CalcResultBuilder calcResultBuilder;
         
-        private Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
-        private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockOnePlusFourApportionmentBuilder;
+        private readonly Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
+        private readonly Mock<ICalcResultOnePlusFourApportionmentBuilder> mockOnePlusFourApportionmentBuilder;
 
-        [TestInitialize]
-        public void Setup()
+        public CalcResultBuilderTests()
         {
             mockCalcResultDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             mockLapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();

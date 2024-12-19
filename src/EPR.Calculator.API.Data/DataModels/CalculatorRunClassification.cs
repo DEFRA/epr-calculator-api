@@ -15,7 +15,7 @@ namespace EPR.Calculator.API.Data.DataModels
         [Column("status")]
         [StringLength(250)]
         [Required]
-        public string Status { get; set; }
+        public required string Status { get; set; }
 
         [Column("created_by")]
         [StringLength(400)]

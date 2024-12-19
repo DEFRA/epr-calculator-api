@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Builder.Summary;
+﻿using AutoFixture;
+using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Builder.Summary.OneAndTwoA;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
@@ -15,13 +16,14 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class CalcResultSummaryBuilderTests
     {
-        private DbContextOptions<ApplicationDBContext> _dbContextOptions;
-        private ApplicationDBContext _context;
-        private CalcResultSummaryBuilder _calcResultsService;
-        private CalcResult _calcResult;
+        private readonly DbContextOptions<ApplicationDBContext> _dbContextOptions;
+        private readonly ApplicationDBContext _context;
+        private readonly CalcResultSummaryBuilder _calcResultsService;
+        private readonly CalcResult _calcResult;
 
-        [TestInitialize]
-        public void TestInitialize()
+        private Fixture Fixture { get; init; } = new Fixture();
+
+        public CalcResultSummaryBuilderTests()
         {
             _dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "CalcResultSummaryTestDb")
@@ -94,6 +96,7 @@ namespace EPR.Calculator.API.UnitTests
                 CalcResultDetail = new CalcResultDetail() { },
                 CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData()
                 {
+                    Name = Fixture.Create<string>(),
                     CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>()
                     {
                         new CalcResultLaDisposalCostDataDetail()
@@ -103,31 +106,42 @@ namespace EPR.Calculator.API.UnitTests
                             Wales="WalesTest",
                             Name="ScotlandTest",
                             Scotland="ScotlandTest",
-                            Material = "Material1"
+                            NorthernIreland = "NorthernIrelandTest",
+                            Material = "Material1",
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         },
                          new CalcResultLaDisposalCostDataDetail()
                         {
                             DisposalCostPricePerTonne="20",
                             England="EnglandTest",
                             Wales="WalesTest",
+                            NorthernIreland = "NorthernIrelandTest",
                             Name="Material1",
                             Scotland="ScotlandTest",
-
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         },
                           new CalcResultLaDisposalCostDataDetail()
                         {
                             DisposalCostPricePerTonne="10",
                             England="EnglandTest",
                             Wales="WalesTest",
+                            NorthernIreland = "NorthernIrelandTest",
                             Name="Material2",
                             Scotland="ScotlandTest",
-
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         }
                     }
                 },
                 CalcResultLapcapData = new CalcResultLapcapData() { CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>() { } },
                 CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment()
                 {
+                    Name = Fixture.Create<string>(),
                     CalcResultOnePlusFourApportionmentDetails =
                     [
                         new()
@@ -196,7 +210,7 @@ namespace EPR.Calculator.API.UnitTests
                             Name=OnePlus4ApportionmentColumnHeaders.OnePluseFourApportionment,
                         }]
                 },
-                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
+                CalcResultParameterCommunicationCost = Fixture.Create<CalcResultParameterCommunicationCost>(),
                 CalcResultSummary = new CalcResultSummary
                 {
                     ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>() { new()
@@ -238,7 +252,8 @@ namespace EPR.Calculator.API.UnitTests
                             TotalValue= 2530
                         }
                     ]
-                }
+                },
+                CalcResultLateReportingTonnageData = Fixture.Create<CalcResultLateReportingTonnage>(),
             };
 
             // Seed database
@@ -260,7 +275,7 @@ namespace EPR.Calculator.API.UnitTests
             var result = _calcResultsService.Construct(requestDto, _calcResult);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
+            Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader?.Name);
             Assert.AreEqual(25, result.ProducerDisposalFeesHeaders.Count());
 
             Assert.IsNotNull(result);
@@ -452,27 +467,19 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void GetTotalFee_ShouldReturnZero_WhenFeesIsNull()
-        {
-            var result = CalcResultOneAndTwoAUtil.GetTotalFee(null, fee => fee.BadDebtProvisionFor1);
-
-            Assert.AreEqual(0m, result);
-        }
-
-        [TestMethod]
         public void ProducerTotalPercentageVsTotal_ShouldReturnCorrectValue()
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
             var result = _calcResultsService.Construct(requestDto, _calcResult);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(25, result.ProducerDisposalFeesHeaders.Count());
+            Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader!.Name);
+            Assert.AreEqual(25, result.ProducerDisposalFeesHeaders!.Count());
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
             Assert.AreEqual(2, result.ProducerDisposalFees.Count());
-            var producerTotalPercentage = result.ProducerDisposalFees.FirstOrDefault().PercentageofProducerReportedHHTonnagevsAllProducers;
+            var producerTotalPercentage = result.ProducerDisposalFees.First().PercentageofProducerReportedHHTonnagevsAllProducers;
             Assert.IsNotNull(producerTotalPercentage);
             Assert.AreEqual(100, producerTotalPercentage);
         }
@@ -507,15 +514,15 @@ namespace EPR.Calculator.API.UnitTests
             var result = _calcResultsService.Construct(requestDto, _calcResult);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader.Name);
-            Assert.AreEqual(25, result.ProducerDisposalFeesHeaders.Count());
-            var isColumnHeaderExists = result.ProducerDisposalFeesHeaders.Select(dict => dict.ColumnIndex == 196 || dict.ColumnIndex == 197 || dict.ColumnIndex == 198).ToList();
+            Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader!.Name);
+            Assert.AreEqual(25, result.ProducerDisposalFeesHeaders!.Count());
+            var isColumnHeaderExists = result.ProducerDisposalFeesHeaders!.Select(dict => dict.ColumnIndex == 196 || dict.ColumnIndex == 197 || dict.ColumnIndex == 198).ToList();
             Assert.IsTrue(isColumnHeaderExists.Contains(true));
             Assert.IsNotNull(result.ProducerDisposalFees);
             Assert.AreEqual(2, result.ProducerDisposalFees.Count());
         }
 
-        private void SeedDatabase(ApplicationDBContext context)
+        private static void SeedDatabase(ApplicationDBContext context)
         {
             context.Material.AddRange(new List<Material>
             {

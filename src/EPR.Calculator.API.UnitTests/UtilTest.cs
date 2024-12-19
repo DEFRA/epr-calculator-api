@@ -39,24 +39,24 @@ namespace EPR.Calculator.API.UnitTests
             };
             var parameterValue = Util.GetParameterValue(template, "£100");
             Assert.IsNotNull(parameterValue);
-            Assert.AreEqual(parameterValue, "100");
+            Assert.AreEqual("100", parameterValue);
         }
 
         [TestMethod]
         public void GetParameterValueTest_For_Percent()
         {
-            var parameterType = "Paramter Type 1 percent";
-            var parameterUniqueReferenceId = Guid.NewGuid().ToString();
-            var parameterCategory = "Parameter Category 1";
+            this.parameterType = "Paramter Type 1 percent";
+            this.parameterUniqueReferenceId = Guid.NewGuid().ToString();
+            this.parameterCategory = "Parameter Category 1";
             DefaultParameterTemplateMaster template = new DefaultParameterTemplateMaster
             {
-                ParameterType = parameterType,
-                ParameterUniqueReferenceId = parameterUniqueReferenceId,
-                ParameterCategory = parameterCategory
+                ParameterType = this.parameterType,
+                ParameterUniqueReferenceId = this.parameterUniqueReferenceId,
+                ParameterCategory = this.parameterCategory
             };
             var parameterValue = Util.GetParameterValue(template, "100%");
             Assert.IsNotNull(parameterValue);
-            Assert.AreEqual(parameterValue, "100");
+            Assert.AreEqual("100", parameterValue);
         }
 
         /// <summary>

@@ -37,7 +37,7 @@ namespace EPR.Calculator.API.Builder.OnePlusFourApportionment
             return new CalcResultOnePlusFourApportionment { Name = "1 + 4 Apportionment %s", CalcResultOnePlusFourApportionmentDetails = apportionmentDetails };
         }
 
-        private CalcResultOnePlusFourApportionmentDetail CreateHeaderRow(int orderId)
+        private static CalcResultOnePlusFourApportionmentDetail CreateHeaderRow(int orderId)
         {
             return new CalcResultOnePlusFourApportionmentDetail
             {
@@ -51,13 +51,13 @@ namespace EPR.Calculator.API.Builder.OnePlusFourApportionment
             };
         }
 
-        private CalcResultLapcapDataDetails GetTotalCost(CalcResult calcResult, string name)
+        private static CalcResultLapcapDataDetails GetTotalCost(CalcResult calcResult, string name)
         {
             return calcResult.CalcResultLapcapData.CalcResultLapcapDataDetails
                 .Single(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
-        private CalcResultOnePlusFourApportionmentDetail CreateDisposalDetailRow(string name, CalcResultLapcapDataDetails totalLACost, int orderId)
+        private static CalcResultOnePlusFourApportionmentDetail CreateDisposalDetailRow(string name, CalcResultLapcapDataDetails totalLACost, int orderId)
         {
             return new CalcResultOnePlusFourApportionmentDetail
             {
@@ -75,7 +75,7 @@ namespace EPR.Calculator.API.Builder.OnePlusFourApportionment
             };
         }
 
-        private CalcResultOnePlusFourApportionmentDetail CreateDataPrepChargeRow(CalcResultParameterOtherCostDetail dataPrepCharge, int orderId)
+        private static CalcResultOnePlusFourApportionmentDetail CreateDataPrepChargeRow(CalcResultParameterOtherCostDetail dataPrepCharge, int orderId)
         {
             return new CalcResultOnePlusFourApportionmentDetail
             {
@@ -94,7 +94,7 @@ namespace EPR.Calculator.API.Builder.OnePlusFourApportionment
             };
         }
 
-        private CalcResultOnePlusFourApportionmentDetail CreateTotalRow(CalcResultLapcapDataDetails totalLACost, CalcResultParameterOtherCostDetail dataPrepCharge, int orderId)
+        private static CalcResultOnePlusFourApportionmentDetail CreateTotalRow(CalcResultLapcapDataDetails totalLACost, CalcResultParameterOtherCostDetail dataPrepCharge, int orderId)
         {
             var culture = CultureInfo.CreateSpecificCulture("en-GB");
             culture.NumberFormat.CurrencySymbol = "£";
@@ -117,7 +117,7 @@ namespace EPR.Calculator.API.Builder.OnePlusFourApportionment
             };
         }
 
-        private CalcResultOnePlusFourApportionmentDetail CalculateApportionment(CalcResultOnePlusFourApportionmentDetail apportionmentData, int orderId)
+        private static CalcResultOnePlusFourApportionmentDetail CalculateApportionment(CalcResultOnePlusFourApportionmentDetail apportionmentData, int orderId)
         {
             var englandTotal =
                 CalcResultLapcapDataBuilder.CalculateApportionment(apportionmentData.EnglandTotal,

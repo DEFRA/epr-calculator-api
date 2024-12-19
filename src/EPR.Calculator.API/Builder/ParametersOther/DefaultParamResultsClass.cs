@@ -3,7 +3,7 @@
     internal class DefaultParamResultsClass
     {
         public decimal ParameterValue { get; set; }
-        public string ParameterCategory { get; set; }
-        public string ParameterType { get; set; }
+        public required string ParameterCategory { get; set; }
+        public required string ParameterType { get; set; }
     }
 }

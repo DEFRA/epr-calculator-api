@@ -3,6 +3,6 @@
     public class CalcResultLapcapData
     {
         public string Name { get; set; } = string.Empty;
-        public required IEnumerable<CalcResultLapcapDataDetails>? CalcResultLapcapDataDetails { get; set; }
+        public required IEnumerable<CalcResultLapcapDataDetails> CalcResultLapcapDataDetails { get; set; }
     }
 }

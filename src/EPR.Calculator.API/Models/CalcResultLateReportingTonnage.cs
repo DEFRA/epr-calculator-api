@@ -8,6 +8,7 @@
 
         public string TonnageHeading { get; set; } = string.Empty;
 
-        public required IEnumerable<CalcResultLateReportingTonnageDetail>? CalcResultLateReportingTonnageDetails { get; set; }
+        public required IEnumerable<CalcResultLateReportingTonnageDetail> CalcResultLateReportingTonnageDetails { get; set; }
+            = [];
     }
 }

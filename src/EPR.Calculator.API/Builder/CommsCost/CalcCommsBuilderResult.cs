@@ -3,6 +3,6 @@
 internal class CalcCommsBuilderResult
 {
     public decimal ParameterValue {get; set; }
-    public string ParameterType { get; set; }
-    public string ParameterCategory { get; set; }
+    public required string ParameterType { get; set; }
+    public required string ParameterCategory { get; set; }
 }

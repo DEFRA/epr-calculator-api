@@ -1,6 +1,7 @@
 namespace EPR.Calculator.API.UnitTests.Builder
 {
     using System;
+    using AutoFixture;
     using EPR.Calculator.API.Builder.LaDisposalCost;
     using EPR.Calculator.API.Constants;
     using EPR.Calculator.API.Data;
@@ -16,12 +17,12 @@ namespace EPR.Calculator.API.UnitTests.Builder
     [TestClass]
     public class CalcRunLaDisposalCostBuilderTests
     {
-        private CalcRunLaDisposalCostBuilder builder;
-        private ApplicationDBContext dbContext;       
+        private readonly CalcRunLaDisposalCostBuilder builder;
+        private readonly ApplicationDBContext dbContext;     
 
-        [TestInitialize]
-        public void DataSetup()
+        public CalcRunLaDisposalCostBuilderTests()
         {
+            this.Fixture = new Fixture();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                                     .UseInMemoryDatabase(databaseName: "PayCal")
                                     .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
@@ -37,6 +38,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
             builder = new CalcRunLaDisposalCostBuilder(dbContext);           
         }
+
+        private Fixture Fixture { get; init; }
 
         [TestCleanup]
         public void TearDown()
@@ -75,6 +78,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             var resultsDto = new CalcResultsRequestDto { RunId = 2 };
             var calcResult = new CalcResult
             {
+                CalcResultParameterOtherCost = Fixture.Create<CalcResultParameterOtherCost>(),
                 CalcResultDetail = new CalcResultDetail
                 {
                     RunName = "TestValue1471524307",
@@ -153,10 +157,10 @@ namespace EPR.Calculator.API.UnitTests.Builder
             var lapcapDisposalCostResults = builder.Construct(resultsDto, calcResult);
 
             Assert.IsNotNull(lapcapDisposalCostResults);
-            Assert.AreEqual(lapcapDisposalCostResults.Name, CommonConstants.LADisposalCostData);
-            Assert.AreEqual(lapcapDisposalCostResults?.CalcResultLaDisposalCostDetails?.Count(), 4);
+            Assert.AreEqual(CommonConstants.LADisposalCostData, lapcapDisposalCostResults.Name);
+            Assert.AreEqual(4, lapcapDisposalCostResults.CalcResultLaDisposalCostDetails?.Count());
 
-            var headerRow = lapcapDisposalCostResults?.CalcResultLaDisposalCostDetails?.Single(x => x.OrderId == 1);
+            var headerRow = lapcapDisposalCostResults.CalcResultLaDisposalCostDetails?.Single(x => x.OrderId == 1);
             Assert.IsNotNull(headerRow);
             Assert.AreEqual(CommonConstants.Material, headerRow.Name);
             Assert.AreEqual(CommonConstants.England, headerRow.England);
@@ -170,7 +174,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual(CommonConstants.DisposalCostPricePerTonne, headerRow.DisposalCostPricePerTonne);
 
 
-            var aluminiumRow = lapcapDisposalCostResults?.CalcResultLaDisposalCostDetails?.Single(x => x.Name == aluminium);
+            var aluminiumRow = lapcapDisposalCostResults.CalcResultLaDisposalCostDetails?.Single(x => x.Name == aluminium);
             Assert.IsNotNull(aluminiumRow);
             Assert.AreEqual(aluminium, aluminiumRow.Name);
             Assert.AreEqual("£100.00", aluminiumRow.England);
@@ -182,7 +186,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("8000.00", aluminiumRow.LateReportingTonnage);
             Assert.AreEqual("9000.00", aluminiumRow.ProducerReportedHouseholdTonnagePlusLateReportingTonnage);
 
-            var plasticRow = lapcapDisposalCostResults?.CalcResultLaDisposalCostDetails?.Single(x => x.Name == plastic);
+            var plasticRow = lapcapDisposalCostResults.CalcResultLaDisposalCostDetails?.Single(x => x.Name == plastic);
             Assert.IsNotNull(plasticRow);
             Assert.AreEqual(plastic, plasticRow.Name);
             Assert.AreEqual("£200.00", plasticRow.England);
@@ -194,7 +198,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("2000.00", plasticRow.LateReportingTonnage);
             Assert.AreEqual("4000.00", plasticRow.ProducerReportedHouseholdTonnagePlusLateReportingTonnage);
 
-            var totalRow = lapcapDisposalCostResults?.CalcResultLaDisposalCostDetails?.Single(x => x.Name == "Total");
+            var totalRow = lapcapDisposalCostResults.CalcResultLaDisposalCostDetails?.Single(x => x.Name == "Total");
             Assert.IsNotNull(aluminiumRow);
             Assert.AreEqual("Total", totalRow?.Name);
             Assert.AreEqual("£300.00", totalRow?.England);

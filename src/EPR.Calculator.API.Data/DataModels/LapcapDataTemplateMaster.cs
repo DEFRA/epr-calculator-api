@@ -11,15 +11,15 @@ namespace EPR.Calculator.API.Data.DataModels
         [Required]
         [Key]
         [StringLength(400)]
-        public string UniqueReference { get; set; }
+        public required string UniqueReference { get; set; }
 
         [Column("country")]
         [StringLength(400)]
-        public string Country { get; set; }
+        public required string Country { get; set; }
 
         [Column("material")]
         [StringLength(400)]
-        public string Material { get; set; }
+        public required string Material { get; set; }
 
         [Column("total_cost_from")]
         [Precision(18, 2)]

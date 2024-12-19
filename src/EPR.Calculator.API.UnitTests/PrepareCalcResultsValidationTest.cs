@@ -17,16 +17,15 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class PrepareCalcResultsValidationTest
     {
-        private CalculatorInternalController controller;
-        private ApplicationDBContext _context;
-        private Mock<IRpdStatusDataValidator> _rpdStatusDataValidator;
-        private Mock<IOrgAndPomWrapper> _wrapper;
-        private Mock<ICalcResultBuilder> _builder;
-        private Mock<ICalcResultsExporter<CalcResult>> _exporter;
-        private Mock<ITransposePomAndOrgDataService> _transposePomAndOrgDataService;
+        private readonly CalculatorInternalController controller;
+        private readonly ApplicationDBContext _context;
+        private readonly Mock<IRpdStatusDataValidator> _rpdStatusDataValidator;
+        private readonly Mock<IOrgAndPomWrapper> _wrapper;
+        private readonly Mock<ICalcResultBuilder> _builder;
+        private readonly Mock<ICalcResultsExporter<CalcResult>> _exporter;
+        private readonly Mock<ITransposePomAndOrgDataService> _transposePomAndOrgDataService;
 
-        [TestInitialize]
-        public void SetUp()
+        public PrepareCalcResultsValidationTest()
         {
             _context = new ApplicationDBContext();
             _rpdStatusDataValidator = new Mock<IRpdStatusDataValidator>();
