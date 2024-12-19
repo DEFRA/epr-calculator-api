@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.Builder.CommsCost;
+using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Builder.Summary.CommsCostTwoA;
 using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
 using EPR.Calculator.API.Builder.Summary.OnePlus2A2B2C;
@@ -839,7 +840,7 @@ public static class CalcResultSummaryUtil
     public static decimal GetParamsOtherFourCountryApportionmentPercentage(CalcResult calcResult, Countries country)
     {
         var fourCountryApportionment = calcResult.CalcResultParameterOtherCost.Details
-            .SingleOrDefault(x => x.Name == "4 Country Apportionment %s");
+            .SingleOrDefault(x => x.Name == CalcResultParameterOtherCostBuilder.FourCountryApportionmentPercentage);
 
         if (fourCountryApportionment == null)
         {
