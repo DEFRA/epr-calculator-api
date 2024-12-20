@@ -4,10 +4,11 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Exporter;
+using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
@@ -34,6 +35,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRun")]
+        [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
         {
             // Return bad request if the model is invalid
@@ -155,6 +157,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRuns")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
         {
             if (!ModelState.IsValid)
@@ -186,6 +189,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("calculatorRuns/{runId}")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult GetCalculatorRun(int runId)
         {
             if (!ModelState.IsValid)
@@ -223,6 +227,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPut]
         [Route("calculatorRuns")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
             if (!ModelState.IsValid)
@@ -270,6 +275,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("CheckCalcNameExists/{name}")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult GetCalculatorRunByName([FromRoute] string name)
         {
             if (!ModelState.IsValid)
@@ -295,6 +301,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("DownloadResult/{runId}")]
+        [Authorize(Roles = "SASuperUser")]
         public async Task<IResult> DownloadResultFile(int runId)
         {
             if (!ModelState.IsValid)
