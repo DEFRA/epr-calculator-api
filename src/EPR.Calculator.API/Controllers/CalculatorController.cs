@@ -314,7 +314,7 @@ namespace EPR.Calculator.API.Controllers
             {
                 var fileName = new CalcResultsFileName(
                     calcRun.Id,
-                    calcRun.Name,
+                    calcRun.Name ?? string.Empty,
                     calcRun.CreatedAt);
                 return await storageService.DownloadFile(fileName);
             }

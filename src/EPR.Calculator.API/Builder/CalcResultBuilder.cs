@@ -44,11 +44,14 @@ namespace EPR.Calculator.API.Builder
 
         public CalcResult Build(CalcResultsRequestDto resultsRequestDto)
         {
-            var result = new CalcResult();
-            result.CalcResultDetail = this.calcResultDetailBuilder.Construct(resultsRequestDto);
-            result.CalcResultLapcapData = this.lapcapBuilder.Construct(resultsRequestDto);
-            result.CalcResultLateReportingTonnageData = this.lateReportingBuilder.Construct(resultsRequestDto);
-            result.CalcResultParameterOtherCost = this.calcResultParameterOtherCostBuilder.Construct(resultsRequestDto);
+            var result = new CalcResult
+            {
+                CalcResultDetail = this.calcResultDetailBuilder.Construct(resultsRequestDto),
+                CalcResultLapcapData = this.lapcapBuilder.Construct(resultsRequestDto),
+                CalcResultLateReportingTonnageData = this.lateReportingBuilder.Construct(resultsRequestDto),
+                CalcResultParameterOtherCost = this.calcResultParameterOtherCostBuilder.Construct(resultsRequestDto),
+            };
+            
             result.CalcResultOnePlusFourApportionment = this.lapcapplusFourApportionmentBuilder.Construct(resultsRequestDto, result);
             result.CalcResultCommsCostReportDetail =
                 this.commsCostReportBuilder.Construct(resultsRequestDto, result.CalcResultOnePlusFourApportionment);

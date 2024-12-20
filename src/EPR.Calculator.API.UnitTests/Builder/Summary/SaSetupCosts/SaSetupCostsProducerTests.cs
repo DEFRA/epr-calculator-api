@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using AutoFixture;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Enums;
 
@@ -13,14 +14,15 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
     [TestClass]
     public class SaSetupCostsProducerTests
     {
-        private ApplicationDBContext dbContext;
-        private IEnumerable<MaterialDetail> _materials;
-        private CalcResult _calcResult;
-        private Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> _materialCostSummary;
-        private Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> _commsCostSummary;
+        private readonly ApplicationDBContext dbContext;
+        private readonly IEnumerable<MaterialDetail> _materials;
+        private readonly CalcResult _calcResult;
+        private readonly Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> _materialCostSummary;
+        private readonly Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> _commsCostSummary;
 
-        [TestInitialize]
-        public void TestInitialize()
+        private Fixture Fixture { get; init; } = new Fixture();
+
+        public SaSetupCostsProducerTests()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
@@ -161,6 +163,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                 CalcResultDetail = new CalcResultDetail() { },
                 CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData()
                 {
+                    Name = Fixture.Create<string>(),
                     CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>()
                     {
                         new CalcResultLaDisposalCostDataDetail()
@@ -170,7 +173,11 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                             Wales="WalesTest",
                             Name="ScotlandTest",
                             Scotland="ScotlandTest",
-                            Material = "Material1"
+                            Material = "Material1",
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         },
                         new CalcResultLaDisposalCostDataDetail()
                         {
@@ -179,7 +186,10 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                             Wales="WalesTest",
                             Name="Material1",
                             Scotland="ScotlandTest",
-
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         },
                         new CalcResultLaDisposalCostDataDetail()
                         {
@@ -188,7 +198,10 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                             Wales="WalesTest",
                             Name="Material2",
                             Scotland="ScotlandTest",
-
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         }
                     }
                 },
@@ -200,6 +213,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                 },
                 CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment()
                 {
+                    Name = Fixture.Create<string>(),
                     CalcResultOnePlusFourApportionmentDetails =
                     [
                         new()
@@ -270,7 +284,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                         }
                     ]
                 },
-                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
+                CalcResultParameterCommunicationCost = Fixture.Create<CalcResultParameterCommunicationCost>(),
                 CalcResultSummary = new CalcResultSummary
                 {
                     ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>()
@@ -305,7 +319,8 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
 
                         }
                     ]
-                }
+                },
+                CalcResultLateReportingTonnageData = Fixture.Create<CalcResultLateReportingTonnage>(),
             };
 
             _materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();

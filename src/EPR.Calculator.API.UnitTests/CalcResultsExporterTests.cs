@@ -11,21 +11,24 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class CalcResultsExporterTests
     {
-        private CalcResultsExporter _calcResultsExporter;
-        private Mock<IStorageService> _blobStorageServiceMock;
+        private readonly CalcResultsExporter _calcResultsExporter;
+        private readonly Mock<IStorageService> _blobStorageServiceMock;
 
-        [TestInitialize]
-        public void Setup()
+        public CalcResultsExporterTests()
         {
+            this.Fixture = new Fixture();
             _blobStorageServiceMock = new Mock<IStorageService>();
             _calcResultsExporter = new CalcResultsExporter(_blobStorageServiceMock.Object);
         }
+
+        private Fixture Fixture { get; init; }
 
         [TestMethod]
         public void Export_ShouldHandleIOExceptionGracefully()
         {
             var calcResult = new CalcResult
             {
+                CalcResultParameterOtherCost = Fixture.Create<CalcResultParameterOtherCost>(),
                 CalcResultDetail = new CalcResultDetail
                 {
                     RunName = "Test Run",
@@ -34,8 +37,10 @@ namespace EPR.Calculator.API.UnitTests
                     RunBy = "Tester",
                     FinancialYear = "2023-24",
                     LapcapFile = "Lapcap.csv,2023-10-01,John Doe",
-                    ParametersFile = "Params.csv,2023-10-02,Jane Doe"
-                }
+                    ParametersFile = "Params.csv,2023-10-02,Jane Doe",
+                },
+                CalcResultLapcapData = Fixture.Create<CalcResultLapcapData>(),
+                CalcResultLateReportingTonnageData = Fixture.Create<CalcResultLateReportingTonnage>(),
             };
 
             _blobStorageServiceMock
@@ -107,6 +112,7 @@ namespace EPR.Calculator.API.UnitTests
             // Arrange
             var calcResult = new CalcResult
             {
+                CalcResultParameterOtherCost = Fixture.Create<CalcResultParameterOtherCost>(),
                 CalcResultDetail = new CalcResultDetail
                 {
                     RunName = "Test Run",
@@ -128,7 +134,8 @@ namespace EPR.Calculator.API.UnitTests
                         new CalcResultLateReportingTonnageDetail { Name = "Fibre composite", TotalLateReportingTonnage = 200.000M },
                         new CalcResultLateReportingTonnageDetail { Name = "Total", TotalLateReportingTonnage = 300.000M }
                     }
-                }
+                },
+                CalcResultLapcapData = Fixture.Create<CalcResultLapcapData>(),
             };
 
             var expectedFileName = $"{calcResult.CalcResultDetail.RunId}" +

@@ -4,7 +4,7 @@ namespace EPR.Calculator.API.Models
 {
     public class CalcResultParameterCommunicationCost
     {
-        public string Name { get; set; }
+        public required string Name { get; set; }
         public IEnumerable<CalcResultParameterCommunicationCostDetail1> CalcResultParameterCommunicationCostDetails { get; set; } = 
             new List<CalcResultParameterCommunicationCostDetail1>();
         public IEnumerable<CalcResultParameterCommunicationCostDetail2> CalcResultParameterCommunicationCostDetails2 { get; set; } =

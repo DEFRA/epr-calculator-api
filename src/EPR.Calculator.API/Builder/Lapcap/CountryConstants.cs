@@ -2,9 +2,9 @@
 {
     public static class CountryConstants
     {
-        public static string England = "England";
-        public static string NI = "Northern Ireland";
-        public static string Wales = "Wales";
-        public static string Scotland = "Scotland";
+        public const string England = "England";
+        public const string NI = "Northern Ireland";
+        public const string Wales = "Wales";
+        public const string Scotland = "Scotland";
     }
 }

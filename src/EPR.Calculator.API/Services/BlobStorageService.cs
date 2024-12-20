@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using EPR.Calculator.API.Constants;
+using System.Configuration;
 using System.Text;
 namespace EPR.Calculator.API.Services
 {
@@ -14,10 +15,9 @@ namespace EPR.Calculator.API.Services
         public BlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration)
         {
             var settings = configuration.GetSection(BlobStorageSection).Get<BlobStorageSettings>() ??
-                           throw new ArgumentNullException(BlobSettingsMissingError);
+                throw new ConfigurationErrorsException(BlobSettingsMissingError);
             this.containerClient = blobServiceClient.GetBlobContainerClient(settings.ContainerName ??
-                                                                        throw new ArgumentNullException(
-                                                                            ContainerNameMissingError));
+                throw new ConfigurationErrorsException(ContainerNameMissingError));
         }
 
         public async Task UploadResultFileContentAsync(string fileName, string content)

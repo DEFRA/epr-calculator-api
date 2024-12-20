@@ -2,9 +2,9 @@
 {
     public class CalcResultMateriality
     {
-        public string SevenMateriality { get; set; }
-        public string Amount { get; set; }
-        public string Percentage { get; set; }
+        public required string SevenMateriality { get; set; }
+        public string Amount { get; set; } = string.Empty;
+        public string Percentage { get; set; } = string.Empty;
         public decimal AmountValue { get; set; }
         public decimal PercentageValue { get; set; }
     }

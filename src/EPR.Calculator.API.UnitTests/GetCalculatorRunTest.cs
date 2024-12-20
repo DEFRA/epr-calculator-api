@@ -17,13 +17,12 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class GetCalculatorRunTest
     {
-        private ApplicationDBContext context;
-        private Mock<IConfiguration> mockConfig;
-        private Mock<IAzureClientFactory<ServiceBusClient>> mockServiceBusFactory;
-        private Mock<IStorageService> mockStorageService;
+        private readonly ApplicationDBContext context;
+        private readonly Mock<IConfiguration> mockConfig;
+        private readonly Mock<IAzureClientFactory<ServiceBusClient>> mockServiceBusFactory;
+        private readonly Mock<IStorageService> mockStorageService;
 
-        [TestInitialize]
-        public void SetUp()
+        public GetCalculatorRunTest()
         {
             this.mockStorageService = new Mock<IStorageService>();
             this.mockConfig = new Mock<IConfiguration>();

@@ -78,9 +78,9 @@ namespace EPR.Calculator.API.UnitTests
             Assert.IsNotNull(errors);
             Assert.IsTrue(errors.Count() == 1);
             var firstError = errors.First();
-            Assert.AreEqual(firstError.ParameterUniqueRef, "BADEBT-P");
-            Assert.AreEqual(firstError.ParameterCategory, "Bad debt provision");
-            Assert.AreEqual(firstError.ParameterType, "Percentage");
+            Assert.AreEqual("BADEBT-P", firstError.ParameterUniqueRef);
+            Assert.AreEqual("Bad debt provision", firstError.ParameterCategory);
+            Assert.AreEqual("Percentage", firstError.ParameterType);
         }
     }
 }

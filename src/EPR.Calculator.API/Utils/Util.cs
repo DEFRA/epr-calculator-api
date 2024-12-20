@@ -134,51 +134,51 @@ namespace EPR.Calculator.API.Utils
 
         public static bool IsTonnage(DefaultParameterTemplateMaster defaultTemplate)
         {
-            return defaultTemplate.ParameterType.ToLower().Contains("tonnage")
-                && !defaultTemplate.ParameterCategory.ToLower().Contains("amount")
-                && !defaultTemplate.ParameterCategory.ToLower().Contains("percent");
+            return defaultTemplate.ParameterType.Contains("tonnage", StringComparison.OrdinalIgnoreCase)
+                && !defaultTemplate.ParameterCategory.Contains("amount", StringComparison.OrdinalIgnoreCase)
+                && !defaultTemplate.ParameterCategory.Contains("percent", StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool IsTonnageAmountIncrease(DefaultParameterTemplateMaster defaultTemplate)
         {
-            return defaultTemplate.ParameterType.ToLower().Contains("tonnage")
-                && defaultTemplate.ParameterCategory.ToLower().Contains("amount increase");
+            return defaultTemplate.ParameterType.Contains("tonnage", StringComparison.OrdinalIgnoreCase)
+                && defaultTemplate.ParameterCategory.Contains("amount increase", StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool IsTonnageAmountDecrease(DefaultParameterTemplateMaster defaultTemplate)
         {
-            return defaultTemplate.ParameterType.ToLower().Contains("tonnage")
-                && defaultTemplate.ParameterCategory.ToLower().Contains("amount decrease");
+            return defaultTemplate.ParameterType.Contains("tonnage", StringComparison.OrdinalIgnoreCase)
+                && defaultTemplate.ParameterCategory.Contains("amount decrease", StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool IsBadDebt(DefaultParameterTemplateMaster defaultTemplate)
         {
-            return defaultTemplate.ParameterType.ToLower().Contains("bad debt");
+            return defaultTemplate.ParameterType.Contains("bad debt", StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool IsPercentageIncrease(DefaultParameterTemplateMaster defaultTemplate)
         {
             return ((!string.IsNullOrEmpty(defaultTemplate.ParameterCategory)
-                && defaultTemplate.ParameterCategory.ToLower().Contains("percent")) ||
+                && defaultTemplate.ParameterCategory.Contains("percent", StringComparison.OrdinalIgnoreCase)) ||
                 (!string.IsNullOrEmpty(defaultTemplate.ParameterType)
-                && defaultTemplate.ParameterType.ToLower().Contains("percent"))) &&
+                && defaultTemplate.ParameterType.Contains("percent", StringComparison.OrdinalIgnoreCase))) &&
                 defaultTemplate.ValidRangeFrom >= 0;
         }
 
         public static bool IsPercentageDecrease(DefaultParameterTemplateMaster defaultTemplate)
         {
             return ((!string.IsNullOrEmpty(defaultTemplate.ParameterCategory)
-                && defaultTemplate.ParameterCategory.ToLower().Contains("percent")) ||
+                && defaultTemplate.ParameterCategory.Contains("percent", StringComparison.OrdinalIgnoreCase)) ||
                 (!string.IsNullOrEmpty(defaultTemplate.ParameterType)
-                && defaultTemplate.ParameterType.ToLower().Contains("percent"))) &&
+                && defaultTemplate.ParameterType.Contains("percent", StringComparison.OrdinalIgnoreCase))) &&
                 defaultTemplate.ValidRangeFrom < 0;
         }
 
         public static bool IsNotPercentage(DefaultParameterTemplateMaster defaultTemplate)
         {
             return !string.IsNullOrEmpty(defaultTemplate.ParameterCategory)
-                && !defaultTemplate.ParameterCategory.ToLower().Contains("percent")
-                && !defaultTemplate.ParameterType.ToLower().Contains("percent");
+                && !defaultTemplate.ParameterCategory.Contains("percent", StringComparison.OrdinalIgnoreCase)
+                && !defaultTemplate.ParameterType.Contains("percent", StringComparison.OrdinalIgnoreCase);
         }
 
         public static CreateLapcapDataErrorDto CreateLapcapDataErrorDto(string country,

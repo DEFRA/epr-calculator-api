@@ -28,10 +28,10 @@ namespace EPR.Calculator.API.Data.DataModels
         [Column("calculator_run_id")]
         public required int CalculatorRunId { get; set; }
 
-        public virtual Country Country { get; set; }
+        public virtual Country? Country { get; set; }
 
-        public virtual CostType CostType { get; set; }
+        public virtual CostType? CostType { get; set; }
 
-        public virtual CalculatorRun CalculatorRun { get; set; }
+        public virtual CalculatorRun? CalculatorRun { get; set; }
     }
 }

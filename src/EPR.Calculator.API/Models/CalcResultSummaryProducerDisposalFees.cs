@@ -8,7 +8,7 @@
 
         public required string ProducerName { get; set; }
 
-        public string Level { get; set; }
+        public string? Level { get; set; }
 
         public bool isTotalRow { get; set; } = false;
 

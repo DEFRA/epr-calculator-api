@@ -11,18 +11,6 @@ namespace EPR.Calculator.API.Tests.Controllers
         [TestMethod]
         public void Check_TheResult_Parmeter_Are_Equal_IsNotNullOf_ResultSet_WithDefaultSchemeParametersDto_WithCorrectYear()
         {
-            var details = new List<DefaultParameterSettingDetail>
-            {
-                new DefaultParameterSettingDetail
-                    {Id=150, DefaultParameterSettingMasterId = 200, ParameterUniqueReferenceId="BADEBT-P", ParameterValue=30.99m }
-            };
-            var detail = new DefaultParameterSettingDetail
-            {
-                Id = 150,
-                DefaultParameterSettingMasterId = 200,
-                ParameterUniqueReferenceId = "BADEBT-P",
-                ParameterValue = 30.99m,
-            };
             var defaultParameterSettingMaster = new DefaultParameterSettingMaster
             {
                 Id = 200,
@@ -30,6 +18,28 @@ namespace EPR.Calculator.API.Tests.Controllers
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
             };
+
+            var details = new List<DefaultParameterSettingDetail>
+            {
+                new DefaultParameterSettingDetail
+                {
+                    Id = 150, 
+                    DefaultParameterSettingMasterId = 200, 
+                    ParameterUniqueReferenceId = "BADEBT-P",
+                    ParameterValue = 30.99m,
+                    DefaultParameterSettingMaster = defaultParameterSettingMaster,
+                }
+            };
+            
+            var detail = new DefaultParameterSettingDetail
+            {
+                Id = 150,
+                DefaultParameterSettingMasterId = 200,
+                ParameterUniqueReferenceId = "BADEBT-P",
+                ParameterValue = 30.99m,
+                DefaultParameterSettingMaster = defaultParameterSettingMaster,
+            };
+
 
             details.ForEach(detail => defaultParameterSettingMaster.Details.Add(detail));
 

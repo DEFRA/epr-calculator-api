@@ -28,10 +28,10 @@ namespace EPR.Calculator.API.Builder.Detail
             if (calcResultDetail != null)
             {
                 results.RunId = calcResultDetail.Id;
-                results.RunName = calcResultDetail.Name;
+                results.RunName = calcResultDetail.Name ?? string.Empty;
                 results.RunBy = calcResultDetail.CreatedBy;
                 results.RunDate = calcResultDetail.CreatedAt;
-                results.FinancialYear = calcResultDetail.Financial_Year;
+                results.FinancialYear = calcResultDetail.Financial_Year?? string.Empty;
                 if (calcResultDetail.CalculatorRunOrganisationDataMaster != null)
                     results.RpdFileORG = calcResultDetail.CalculatorRunOrganisationDataMaster.CreatedAt.ToString(CalculationResults.DateFormat);
                 if (calcResultDetail.CalculatorRunPomDataMaster != null)

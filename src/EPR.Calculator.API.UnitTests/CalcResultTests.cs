@@ -21,32 +21,33 @@ using EPR.Calculator.API.Builder.Detail;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Tests.Controllers;
+using AutoFixture;
 
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
     public class CalcResultTests : BaseControllerTest
     {
-        private Mock<ICalcResultBuilder> mockCalcResultBuilder;
-        private Mock<ICalcResultsExporter<CalcResult>> mockExporter;
-        private Mock<ICalcResultDetailBuilder> mockDetailBuilder;
-        private Mock<ICalcResultLapcapDataBuilder> mockLapcapBuilder;
-        private Mock<ICalcResultSummaryBuilder> mockSummaryBuilder;
-        private Mock<ICalcResultLateReportingBuilder> mocklateReportingBuilder;
-        private Mock<ICalcRunLaDisposalCostBuilder> mockLaDisposalCostBuilder;
-        private Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
-        private Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
+        private readonly Mock<ICalcResultBuilder> mockCalcResultBuilder;
+        private readonly Mock<ICalcResultsExporter<CalcResult>> mockExporter;
+        private readonly Mock<ICalcResultDetailBuilder> mockDetailBuilder;
+        private readonly Mock<ICalcResultLapcapDataBuilder> mockLapcapBuilder;
+        private readonly Mock<ICalcResultSummaryBuilder> mockSummaryBuilder;
+        private readonly Mock<ICalcResultLateReportingBuilder> mocklateReportingBuilder;
+        private readonly Mock<ICalcRunLaDisposalCostBuilder> mockLaDisposalCostBuilder;
+        private readonly Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
+        private readonly Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
 
-        private Mock<ApplicationDBContext> mockContext;
-        private CalculatorInternalController controller;
-        private CalcResultBuilder calcResultBuilder;
-        private CalcResultDetailBuilder detailBuilder;
-        private CalcResultsExporter exporter;
-        protected IOrgAndPomWrapper? wrapper;
-        private Mock<ICalcResultOnePlusFourApportionmentBuilder> mockICalcResultOnePlusFourApportionmentBuilder;
+        private readonly Mock<ApplicationDBContext> mockContext;
+        private readonly CalculatorInternalController controller;
+        private readonly CalcResultBuilder calcResultBuilder;
+        private readonly CalcResultDetailBuilder detailBuilder;
+        protected readonly new IOrgAndPomWrapper? wrapper;
+        private readonly Mock<ICalcResultOnePlusFourApportionmentBuilder> mockICalcResultOnePlusFourApportionmentBuilder;
 
-        [TestInitialize]
-        public void Setup()
+        private Fixture Fixture { get; init; } = new Fixture();
+
+        public CalcResultTests()
         {
             mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
             mockExporter = new Mock<ICalcResultsExporter<CalcResult>>();
@@ -89,7 +90,7 @@ namespace EPR.Calculator.API.UnitTests
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
             var requestDto = new CalcResultsRequestDto() { RunId = 1 };
-            var calcResult = new CalcResult();
+            var calcResult = this.Fixture.Create<CalcResult>();
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
 
             var result = controller.PrepareCalcResults(requestDto) as ObjectResult;

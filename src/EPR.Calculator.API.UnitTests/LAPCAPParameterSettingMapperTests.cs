@@ -11,18 +11,6 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void Check_TheResult_IsNotNullOf_ResultSet_WithDefaultLAPCAPParametersDto_WithCorrectYear()
         {
-            var details = new List<LapcapDataDetail>
-                {
-                    new LapcapDataDetail
-                    {Id=1, LapcapDataMasterId = 1, UniqueReference = "ENG-AL", TotalCost = 30.99m, }
-                };
-            var detail = new LapcapDataDetail
-            {
-                Id = 1,
-                LapcapDataMasterId = 2,
-                UniqueReference = "ENG-AL",
-                TotalCost = 30.99m
-            };
             var defaultParameterSettingMaster = new LapcapDataMaster
             {
                 Id = 2,
@@ -30,6 +18,25 @@ namespace EPR.Calculator.API.UnitTests
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
+            };
+            var details = new List<LapcapDataDetail>
+            {
+                new LapcapDataDetail
+                {
+                    Id=1,
+                    LapcapDataMasterId = 1,
+                    LapcapDataMaster = defaultParameterSettingMaster,
+                    UniqueReference = "ENG-AL",
+                    TotalCost = 30.99m, 
+                }
+            };
+            var detail = new LapcapDataDetail
+            {
+                Id = 1,
+                LapcapDataMasterId = 2,
+                LapcapDataMaster = defaultParameterSettingMaster,
+                UniqueReference = "ENG-AL",
+                TotalCost = 30.99m
             };
 
             details.ForEach(detail => defaultParameterSettingMaster.Details.Add(detail));

@@ -45,7 +45,7 @@ namespace EPR.Calculator.API.UnitTests.Exporter
             // Act
             try
             {
-                new CalcResultsFileName(RunId, value, TimeStamp);
+                _ = new CalcResultsFileName(RunId, value, TimeStamp);
             }
             catch (Exception ex)
             {
@@ -104,6 +104,7 @@ namespace EPR.Calculator.API.UnitTests.Exporter
         {
             // Arrange
             var mockRun = Fixture.Create<CalculatorRun>();
+            mockRun.Name = Fixture.Create<string>();
             var context = new Mock<ApplicationDBContext>();
             context.Setup(c => c.CalculatorRuns).ReturnsDbSet([mockRun]);
             var expectedFileName = $"{mockRun.Id}" +

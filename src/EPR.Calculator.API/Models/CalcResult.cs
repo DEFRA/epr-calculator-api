@@ -3,21 +3,37 @@
     public class CalcResult
     {
         public CalcResultDetail CalcResultDetail { get; set; }
+            = new CalcResultDetail();
 
-        public CalcResultLapcapData CalcResultLapcapData { get; set; }
+        public required CalcResultLapcapData CalcResultLapcapData { get; set; }
 
         public CalcResultCommsCost CalcResultCommsCostReportDetail { get; set; }
+            = new CalcResultCommsCost();
 
-        public CalcResultLateReportingTonnage CalcResultLateReportingTonnageData { get; set; }
+        public required CalcResultLateReportingTonnage CalcResultLateReportingTonnageData { get; set; }
 
         public CalcResultParameterCommunicationCost CalcResultParameterCommunicationCost { get; set; }
+            = new CalcResultParameterCommunicationCost
+            {
+                Name = string.Empty
+            };
 
-        public CalcResultParameterOtherCost CalcResultParameterOtherCost { get; set; }
+        public required CalcResultParameterOtherCost CalcResultParameterOtherCost { get; set; }
 
         public CalcResultOnePlusFourApportionment CalcResultOnePlusFourApportionment {  get; set; }
+            = new CalcResultOnePlusFourApportionment
+            {
+                Name = string.Empty
+            };
 
         public CalcResultLaDisposalCostData CalcResultLaDisposalCostData { get; set; }
+            = new CalcResultLaDisposalCostData
+            {
+                Name = string.Empty,
+                CalcResultLaDisposalCostDetails = [],
+            };
 
         public CalcResultSummary CalcResultSummary { get; set; }
+            = new CalcResultSummary();
     }
 }

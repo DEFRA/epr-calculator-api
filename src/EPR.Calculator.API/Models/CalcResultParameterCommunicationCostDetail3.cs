@@ -2,11 +2,11 @@
 {
     public class CalcResultParameterCommunicationCostDetail3
     {
-        public string Name { get; set; }
-        public string England { get; set; }
-        public string Wales { get; set; }
-        public string Scotland { get; set; }
-        public string NorthernIreland { get; set; }
-        public string Total { get; set; }
+        public required string Name { get; set; }
+        public required string England { get; set; }
+        public required string Wales { get; set; }
+        public required string Scotland { get; set; }
+        public required string NorthernIreland { get; set; }
+        public required string Total { get; set; }
     }
 }

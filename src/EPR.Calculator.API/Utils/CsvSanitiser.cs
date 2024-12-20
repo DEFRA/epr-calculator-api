@@ -14,12 +14,12 @@ namespace EPR.Calculator.API.Utils
                 : JsonConvert.SerializeObject(value);
 
             // Remove newline, carriage returns, and commas, then trim
-            stringToSanitise = stringToSanitise.Replace(Environment.NewLine, string.Empty)
+            stringToSanitise = stringToSanitise?.Replace(Environment.NewLine, string.Empty)
                                    .Replace("\t", string.Empty)
                                    .Replace(",", string.Empty)
                                    .Trim();
 
-            return stringToSanitise;
+            return stringToSanitise ?? string.Empty;
         }
     }
 }
