@@ -1,5 +1,5 @@
-﻿using System.Globalization;
-using EPR.Calculator.API.Builder.CommsCost;
+﻿using EPR.Calculator.API.Builder.CommsCost;
+using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Builder.Summary.CommsCostTwoA;
 using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
 using EPR.Calculator.API.Builder.Summary.OnePlus2A2B2C;
@@ -12,6 +12,7 @@ using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
+using System.Globalization;
 
 namespace EPR.Calculator.API.Builder.Summary.Common;
 
@@ -446,7 +447,7 @@ public static class CalcResultSummaryUtil
 
         // Section-4 Title headers
         resultSummaryHeaders.AddRange(
-            LaDataPrepCostsSummary.GetHeaders()
+            LaDataPrepCostsProducer.GetSummaryHeaders()
         );
 
         // Section-5 Title headers
@@ -542,9 +543,9 @@ public static class CalcResultSummaryUtil
 
         // LA data prep costs section 4
         materialsBreakdownHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsTitleSection4, decimalRoundUp)}", ColumnIndex = LaDataPrepCostsSummary.ColumnIndex },
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsBadDebtProvisionTitleSection4, decimalRoundUp)}" ,ColumnIndex = LaDataPrepCostsSummary.ColumnIndex + 1 },
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsWithBadDebtProvisionTitleSection4, decimalRoundUp)}", ColumnIndex = LaDataPrepCostsSummary.ColumnIndex + 2 }
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsTitleSection4, decimalRoundUp)}", ColumnIndex = LaDataPrepCostsProducer.ColumnIndex },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsBadDebtProvisionTitleSection4, decimalRoundUp)}" ,ColumnIndex = LaDataPrepCostsProducer.ColumnIndex + 1 },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsWithBadDebtProvisionTitleSection4, decimalRoundUp)}", ColumnIndex = LaDataPrepCostsProducer.ColumnIndex + 2 }
         ]);
 
         // Scheme administrator setup costs section 5
@@ -821,6 +822,31 @@ public static class CalcResultSummaryUtil
                 return onePlusFourApportionment.ScotlandTotal;
             case Countries.NorthernIreland:
                 return onePlusFourApportionment.NorthernIrelandTotal;
+            default:
+                return 0;
+        }
+    }
+
+    public static decimal GetParamsOtherFourCountryApportionmentPercentage(CalcResult calcResult, Countries country)
+    {
+        var fourCountryApportionment = calcResult.CalcResultParameterOtherCost.Details
+            .SingleOrDefault(x => x.Name == CalcResultParameterOtherCostBuilder.FourCountryApportionmentPercentage);
+
+        if (fourCountryApportionment == null)
+        {
+            return 0;
+        }
+
+        switch (country)
+        {
+            case Countries.England:
+                return fourCountryApportionment.EnglandValue;
+            case Countries.Wales:
+                return fourCountryApportionment.WalesValue;
+            case Countries.Scotland:
+                return fourCountryApportionment.ScotlandValue;
+            case Countries.NorthernIreland:
+                return fourCountryApportionment.NorthernIrelandValue;
             default:
                 return 0;
         }
