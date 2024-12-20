@@ -1,10 +1,27 @@
 ﻿using EPR.Calculator.API.Builder.Summary.Common;
+using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
+using EPR.Calculator.API.Builder.Summary.ThreeSa;
 using EPR.Calculator.API.Models;
 
 namespace EPR.Calculator.API.Builder.Summary.ThreeSA
 {
-    public static class ThreeSaUtil
+    public static class ThreeSaCostsSummary
     {
+        public static readonly int ColumnIndex = 210;
+
+        public static IEnumerable<CalcResultSummaryHeader> GetHeaders()
+        {
+            return [
+                new CalcResultSummaryHeader { Name = ThreeSACostHeader.TotalSAOperatingCostsWoTitleSection3, ColumnIndex = ColumnIndex },
+                new CalcResultSummaryHeader { Name = ThreeSACostHeader.BadDebtProvisionSection3, ColumnIndex = ColumnIndex + 1 },
+                new CalcResultSummaryHeader { Name = ThreeSACostHeader.SAOperatingCostsWithTitleSection3, ColumnIndex = ColumnIndex + 2 },
+                new CalcResultSummaryHeader { Name = ThreeSACostHeader.EnglandTotalWithBadDebtProvisionSection3, ColumnIndex = ColumnIndex + 3 },
+                new CalcResultSummaryHeader { Name = ThreeSACostHeader.WalesTotalWithBadDebtProvisionSection3, ColumnIndex = ColumnIndex + 4 },
+                new CalcResultSummaryHeader { Name = ThreeSACostHeader.ScotlandTotalWithBadDebtProvisionSection3, ColumnIndex = ColumnIndex + 5 },
+                new CalcResultSummaryHeader { Name = ThreeSACostHeader.NorthernIrelandTotalWithBadDebtProvisionSection3, ColumnIndex = ColumnIndex + 6 }
+            ];
+        }
+
         public static decimal GetSAOperatingCostsScotlandTotalWithBadDebtProvisionSection3(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialsCostSummary, Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> costSummary, List<MaterialDetail> materials, CalcResult calcResult)
         {
             //1+paramOthers

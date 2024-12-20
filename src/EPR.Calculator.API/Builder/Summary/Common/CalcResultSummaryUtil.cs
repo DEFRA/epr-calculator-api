@@ -5,6 +5,7 @@ using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
 using EPR.Calculator.API.Builder.Summary.OnePlus2A2B2C;
 using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
 using EPR.Calculator.API.Builder.Summary.ThreeSa;
+using EPR.Calculator.API.Builder.Summary.ThreeSA;
 using EPR.Calculator.API.Builder.Summary.TotalBillBreakdown;
 using EPR.Calculator.API.Builder.Summary.TotalProducerBillBreakdown;
 using EPR.Calculator.API.Builder.Summary.TwoCCommsCost;
@@ -444,9 +445,9 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithBadDebt, ColumnIndex = TwoCCommsCostColumnIndex.Value + 2 },
 
             //Section-3 Title headers
-            new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.SAOperatingCostsWithoutBadDebtProvisionTitleSection3, ColumnIndex = ThreeSaCostColumnIndex.Index },
-            new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.BadDebtProvisionTitleSection3, ColumnIndex = ThreeSaCostColumnIndex.Index + 1 },
-            new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.SAOperatingCostsWithBadDebtProvisionTitleSection3,ColumnIndex = ThreeSaCostColumnIndex.Index + 2 },
+            new CalcResultSummaryHeader { Name = ThreeSACostHeader.SAOperatingCostsWithoutBadDebtProvisionTitleSection3, ColumnIndex = ThreeSaCostsSummary.ColumnIndex },
+            new CalcResultSummaryHeader { Name = ThreeSACostHeader.BadDebtProvisionTitleSection3, ColumnIndex = ThreeSaCostsSummary.ColumnIndex + 1 },
+            new CalcResultSummaryHeader { Name = ThreeSACostHeader.SAOperatingCostsWithBadDebtProvisionTitleSection3,ColumnIndex = ThreeSaCostsSummary.ColumnIndex + 2 },
         ]);
 
         // Section Total bill (1 + 2a + 2b + 2c)
@@ -545,9 +546,9 @@ public static class CalcResultSummaryUtil
 
         //Section-3 -first header
         materialsBreakdownHeaders.AddRange([
-           new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SAOperatingCostsWoTitleSection3, decimalRoundUp)}", ColumnIndex = ThreeSaCostColumnIndex.Index },
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionTitleSection3, decimalRoundUp)}" ,ColumnIndex = ThreeSaCostColumnIndex.Index +1},
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SAOperatingCostsWithTitleSection3, decimalRoundUp)}", ColumnIndex = ThreeSaCostColumnIndex.Index +2 }
+           new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SAOperatingCostsWoTitleSection3, decimalRoundUp)}", ColumnIndex = ThreeSaCostsSummary.ColumnIndex },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionTitleSection3, decimalRoundUp)}" ,ColumnIndex = ThreeSaCostsSummary.ColumnIndex +1},
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SAOperatingCostsWithTitleSection3, decimalRoundUp)}", ColumnIndex = ThreeSaCostsSummary.ColumnIndex +2 }
          ]);
 
         // LA data prep costs section 4
@@ -684,15 +685,9 @@ public static class CalcResultSummaryUtil
         );
 
         // SA operating cost section 3
-        columnHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.TotalSAOperatingCostsWoTitleSection3, ColumnIndex = ThreeSaCostColumnIndex.Index },
-            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.BadDebtProvisionSection3 },
-            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.SAOperatingCostsWithTitleSection3 },
-            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.EnglandTotalWithBadDebtProvisionSection3 },
-            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.WalesTotalWithBadDebtProvisionSection3 },
-            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.ScotlandTotalWithBadDebtProvisionSection3 },
-            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.NorthernIrelandTotalWithBadDebtProvisionSection3 }
-        ]);
+        columnHeaders.AddRange(
+            ThreeSaCostsSummary.GetHeaders()
+        );
 
         // Section-4 LA data prep costs column headers
         columnHeaders.AddRange(
