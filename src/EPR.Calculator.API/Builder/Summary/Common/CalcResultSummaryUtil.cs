@@ -81,11 +81,6 @@ public static class CalcResultSummaryUtil
         var householdPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material);
         var managedConsumerWasteTonnage = GetManagedConsumerWasteTonnage(producer, material);
 
-        if (householdPackagingWasteTonnage == 0 || managedConsumerWasteTonnage == 0)
-        {
-            return 0;
-        }
-
         return householdPackagingWasteTonnage - managedConsumerWasteTonnage;
     }
 
@@ -119,11 +114,6 @@ public static class CalcResultSummaryUtil
     {
         var netReportedTonnage = GetNetReportedTonnage(producer, material);
         var pricePerTonne = GetPricePerTonne(material, calcResult);
-
-        if (netReportedTonnage == 0 || pricePerTonne == 0)
-        {
-            return 0;
-        }
 
         return netReportedTonnage * pricePerTonne;
     }
