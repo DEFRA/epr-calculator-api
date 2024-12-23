@@ -515,7 +515,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
 
             foreach (var materialKv in materialDictionary)
             {
-                _dbContext.Material.Add(new Material
+                _dbContext?.Material.Add(new Material
                 {
                     Name = materialKv.Value,
                     Code = materialKv.Key,
@@ -523,7 +523,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                 });
             }
 
-            _dbContext.SaveChanges();
+            _dbContext?.SaveChanges();
         }
 
         private void CreateProducerDetail()
@@ -545,7 +545,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
             var producerId = 1;
             foreach (var producerName in producerNames)
             {
-                _dbContext.ProducerDetail.Add(new ProducerDetail
+                _dbContext?.ProducerDetail.Add(new ProducerDetail
                 {
                     ProducerId = producerId++,
                     SubsidiaryId = $"{producerId}-Sub",
@@ -554,7 +554,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                 });
             }
 
-            _dbContext.SaveChanges();
+            _dbContext?.SaveChanges();
 
             for (int producerDetailId = 1; producerDetailId <= 10; producerDetailId++)
             {
@@ -576,7 +576,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                     });
                 }
             }
-            _dbContext.SaveChanges();
+            _dbContext?.SaveChanges();
         }
     }
 }
