@@ -15,7 +15,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
     [TestClass]
     public class ThreeSaCostsProducerTests
     {
-        private ApplicationDBContext _dbContext;
+        private ApplicationDBContext? _dbContext;
         private IEnumerable<MaterialDetail>? _materials;
         private CalcResult? _calcResult;
         private Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>? _materialCostSummary;
@@ -209,7 +209,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
 
                         }
                     },
-                    Name = "null"
+                    Name = "some test"
                 },
                 CalcResultLapcapData = new CalcResultLapcapData()
                 {
@@ -288,11 +288,11 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             OrderId = 4
                         }
                     ],
-                    Name = "null"
+                    Name = "some test"
                 },
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost
                 {
-                    Name = "null"
+                    Name = "some test"
                 },
                 CalcResultSummary = new CalcResultSummary
                 {
@@ -335,7 +335,13 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                         }
                     ]
                 },
-                CalcResultLateReportingTonnageData = null
+                CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage()
+                {
+                    Name = string.Empty,
+                    CalcResultLateReportingTonnageDetails = new List<CalcResultLateReportingTonnageDetail>(),
+                    MaterialHeading = string.Empty,
+                    TonnageHeading = string.Empty
+                },
             };
 
             _materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
@@ -417,53 +423,81 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
         public void CanCallSaSetupCostsProducerFeeWithoutBadDebtProvision()
         {
             // Act
-            ThreeSaCostsProducer.GetProducerSetUpCostsSection3(_calcResult, _calcResult.CalcResultSummary);
+            if (_calcResult != null)
+            {
+                ThreeSaCostsProducer.GetProducerSetUpCostsSection3(_calcResult, _calcResult.CalcResultSummary);
 
-            // Assert
-            Assert.AreEqual(100, _calcResult.CalcResultSummary.SaOperatingCostsWoTitleSection3);
-            Assert.AreEqual(6, _calcResult.CalcResultSummary.BadDebtProvisionTitleSection3);
-            Assert.AreEqual(106, _calcResult.CalcResultSummary.SaOperatingCostsWithTitleSection3);
-            Assert.AreEqual(1, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].Total3SAOperatingCostwoBadDebtprovision);
-            Assert.AreEqual(0.06m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].BadDebtProvisionFor3);
-            Assert.AreEqual(1.06m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].Total3SAOperatingCostswithBadDebtprovision);
-
+                // Assert
+                Assert.AreEqual(100, _calcResult.CalcResultSummary.SaOperatingCostsWoTitleSection3);
+                Assert.AreEqual(6, _calcResult.CalcResultSummary.BadDebtProvisionTitleSection3);
+                Assert.AreEqual(106, _calcResult.CalcResultSummary.SaOperatingCostsWithTitleSection3);
+                Assert.AreEqual(1,
+                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]
+                        .Total3SAOperatingCostwoBadDebtprovision);
+                Assert.AreEqual(0.06m,
+                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].BadDebtProvisionFor3);
+                Assert.AreEqual(1.06m,
+                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]
+                        .Total3SAOperatingCostswithBadDebtprovision);
+            }
         }
 
 
         [TestMethod]
         public void CanCallGetSaSetupCostsEnglandOverallTotalWithBadDebtProvision()
         {
-            ThreeSaCostsProducer.GetProducerSetUpCostsSection3(_calcResult, _calcResult.CalcResultSummary);
-            // Act
-            var result = ThreeSaCostsProducer.GetCountryTotalWithBadDebtProvision(_calcResult, _calcResult.CalcResultSummary.SaOperatingCostsWoTitleSection3, ThreeSaCostsSummary.GetSetUpBadDebtProvision(_calcResult), _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.England);
+            if (_calcResult != null)
+            {
+                ThreeSaCostsProducer.GetProducerSetUpCostsSection3(_calcResult, _calcResult.CalcResultSummary);
+                // Act
+                var result = ThreeSaCostsProducer.GetCountryTotalWithBadDebtProvision(_calcResult,
+                    _calcResult.CalcResultSummary.SaOperatingCostsWoTitleSection3,
+                    ThreeSaCostsSummary.GetSetUpBadDebtProvision(_calcResult),
+                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]
+                        .ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.England);
 
-            // Assert
-            Assert.AreEqual(0.15m, Math.Round(result, 2));
+                // Assert
+                Assert.AreEqual(0.15m, Math.Round(result, 2));
+            }
         }
 
         [TestMethod]
         public void CanCallGetSaSetupCostsScotlandOverallTotalWithBadDebtProvision()
         {
-            ThreeSaCostsProducer.GetProducerSetUpCostsSection3(_calcResult, _calcResult.CalcResultSummary);
+            if (_calcResult != null)
+            {
+                ThreeSaCostsProducer.GetProducerSetUpCostsSection3(_calcResult, _calcResult.CalcResultSummary);
 
-            // Act
-            var result = ThreeSaCostsProducer.GetCountryTotalWithBadDebtProvision(_calcResult, _calcResult.CalcResultSummary.SaOperatingCostsWoTitleSection3, ThreeSaCostsSummary.GetSetUpBadDebtProvision(_calcResult), _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.Scotland);
+                // Act
+                var result = ThreeSaCostsProducer.GetCountryTotalWithBadDebtProvision(_calcResult,
+                    _calcResult.CalcResultSummary.SaOperatingCostsWoTitleSection3,
+                    ThreeSaCostsSummary.GetSetUpBadDebtProvision(_calcResult),
+                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]
+                        .ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.Scotland);
 
-            // Assert
-            Assert.AreEqual(0.01m, Math.Round(result, 2));
+                // Assert
+                Assert.AreEqual(0.01m, Math.Round(result, 2));
+            }
         }
 
 
         [TestMethod]
         public void CanCallGetSaSetupCostsWalesOverallTotalWithBadDebtProvision()
         {
-            ThreeSaCostsProducer.GetProducerSetUpCostsSection3(_calcResult, _calcResult.CalcResultSummary);
+            if (_calcResult != null)
+            {
+                ThreeSaCostsProducer.GetProducerSetUpCostsSection3(_calcResult, _calcResult.CalcResultSummary);
 
-            // Act
-            var result = ThreeSaCostsProducer.GetCountryTotalWithBadDebtProvision(_calcResult, _calcResult.CalcResultSummary.SaOperatingCostsWoTitleSection3, ThreeSaCostsSummary.GetSetUpBadDebtProvision(_calcResult), _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.Wales);
+                // Act
+                var result = ThreeSaCostsProducer.GetCountryTotalWithBadDebtProvision(_calcResult,
+                    _calcResult.CalcResultSummary.SaOperatingCostsWoTitleSection3,
+                    ThreeSaCostsSummary.GetSetUpBadDebtProvision(_calcResult),
+                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]
+                        .ProducerOverallPercentageOfCostsForOnePlus2A2B2C, Countries.Wales);
 
-            // Assert
-            Assert.AreEqual(0.21m, Math.Round(result, 2));
+                // Assert
+                Assert.AreEqual(0.21m, Math.Round(result, 2));
+            }
         }
 
 
