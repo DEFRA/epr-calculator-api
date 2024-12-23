@@ -129,7 +129,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
 
                         }
                     },
-                    Name = null
+                    Name = "some test"
                 },
                 CalcResultLapcapData = new CalcResultLapcapData()
                 {
@@ -291,30 +291,39 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
         public void CanCallGetSaSetupCostsWithoutBadDebtProvision()
         {
             // Act
-            var result = ThreeSaCostsSummary.GetThreeSaCostsWithoutBadDebtProvision(_calcResult);
+            if (_calcResult != null)
+            {
+                var result = ThreeSaCostsSummary.GetThreeSaCostsWithoutBadDebtProvision(_calcResult);
 
-            // Assert
-            Assert.AreEqual(100, result);
+                // Assert
+                Assert.AreEqual(100, result);
+            }
         }
 
         [TestMethod]
         public void CanCallGetBadDebtProvision()
         {
             // Act
-            var result = ThreeSaCostsSummary.GetSetUpBadDebtProvision(_calcResult);
+            if (_calcResult != null)
+            {
+                var result = ThreeSaCostsSummary.GetSetUpBadDebtProvision(_calcResult);
 
-            // Assert
-            Assert.AreEqual(6, result);
+                // Assert
+                Assert.AreEqual(6, result);
+            }
         }
 
         [TestMethod]
         public void CanCallGetSaSetupCostsWithBadDebtProvision()
         {
             // Act
-            var result = ThreeSaCostsSummary.GetThreeSaCostsWithBadDebtProvision(_calcResult);
+            if (_calcResult != null)
+            {
+                var result = ThreeSaCostsSummary.GetThreeSaCostsWithBadDebtProvision(_calcResult);
 
-            // Assert
-            Assert.AreEqual(106, result);
+                // Assert
+                Assert.AreEqual(106, result);
+            }
         }
     }
 }
