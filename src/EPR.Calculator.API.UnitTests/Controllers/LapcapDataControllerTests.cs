@@ -1,9 +1,12 @@
 ﻿using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Tests.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Security.Claims;
+using System.Security.Principal;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -15,6 +18,21 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void Get_RequestOkResult_WithLapCapParametersDto_WhenDataExist()
         {
             var createDefaultParameterDto = CreateDto();
+
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            lapcapDataController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
+
             lapcapDataController?.Create(createDefaultParameterDto);
 
             var tempdateData = new LapCapParameterDto()
@@ -75,6 +93,21 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void CreateTest_With_Records()
         {
             var createDefaultParameterDto = CreateDto();
+
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            lapcapDataController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
+
             var actionResult = lapcapDataController?.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(201, actionResult?.StatusCode);
 

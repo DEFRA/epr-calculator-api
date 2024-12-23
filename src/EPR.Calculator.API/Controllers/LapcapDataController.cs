@@ -25,6 +25,7 @@ namespace EPR.Calculator.API.Controllers
         [Authorize(Roles = "SASuperUser")]
         public IActionResult Create([FromBody] CreateLapcapDataDto request)
         {
+            var userName = User?.Claims?.FirstOrDefault(x => x.Type == "name")?.Value;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
@@ -45,7 +46,7 @@ namespace EPR.Calculator.API.Controllers
                     var lapcapDataMaster = new LapcapDataMaster
                     {
                         CreatedAt = DateTime.Now,
-                        CreatedBy = "Testuser",
+                        CreatedBy = userName,
                         EffectiveFrom = DateTime.Now,
                         EffectiveTo = null,
                         LapcapFileName = request.LapcapFileName,

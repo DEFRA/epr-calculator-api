@@ -38,6 +38,7 @@ namespace EPR.Calculator.API.Controllers
         [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
         {
+            var userName = User?.Claims?.FirstOrDefault(x => x.Type == "name")?.Value;
             // Return bad request if the model is invalid
             if (!ModelState.IsValid)
             {
@@ -113,7 +114,7 @@ namespace EPR.Calculator.API.Controllers
                     {
                         Name = request.CalculatorRunName,
                         Financial_Year = request.FinancialYear,
-                        CreatedBy = request.CreatedBy,
+                        CreatedBy = userName,
                         CreatedAt = DateTime.Now,
                         CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                         DefaultParameterSettingMasterId = activeDefaultParameterSettingsMasterId,
@@ -129,7 +130,7 @@ namespace EPR.Calculator.API.Controllers
                     {
                         CalculatorRunId = calculatorRun.Id,
                         FinancialYear = calculatorRun.Financial_Year,
-                        CreatedBy = User?.Identity?.Name ?? request.CreatedBy
+                        CreatedBy = User?.Identity?.Name ?? userName
                     };
 
                     // Send message to service bus
@@ -230,6 +231,7 @@ namespace EPR.Calculator.API.Controllers
         [Authorize(Roles = "SASuperUser")]
         public IActionResult PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
+            var userName = User?.Claims?.FirstOrDefault(x => x.Type == "name")?.Value;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
@@ -261,6 +263,8 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
+                calculatorRun.UpdatedAt = DateTime.Now;
+                calculatorRun.UpdatedBy = userName;
 
                 this.context.CalculatorRuns.Update(calculatorRun);
                 this.context.SaveChanges();

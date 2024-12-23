@@ -27,6 +27,7 @@ namespace EPR.Calculator.API.Controllers
         [Authorize(Roles = "SASuperUser")]
         public IActionResult Create([FromBody] CreateDefaultParameterSettingDto request)
         {
+            var userName = User?.Claims?.FirstOrDefault(x => x.Type == "name")?.Value;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
@@ -47,7 +48,7 @@ namespace EPR.Calculator.API.Controllers
                     var defaultParamSettingMaster = new DefaultParameterSettingMaster
                     {
                         CreatedAt = DateTime.Now,
-                        CreatedBy = "Testuser",
+                        CreatedBy = userName,
                         EffectiveFrom = DateTime.Now,
                         EffectiveTo = null,
                         ParameterYear = request.ParameterYear,

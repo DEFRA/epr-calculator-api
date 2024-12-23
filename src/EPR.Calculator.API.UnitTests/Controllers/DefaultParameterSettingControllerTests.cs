@@ -1,8 +1,11 @@
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Security.Claims;
+using System.Security.Principal;
 
 namespace EPR.Calculator.API.Tests.Controllers
 {
@@ -207,6 +210,19 @@ namespace EPR.Calculator.API.Tests.Controllers
                 ParameterYear = "2024-25",
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
                 ParameterFileName = "TestFileName"
+            };
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            defaultParameterSettingController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
             };
             var actionResult = defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
             return actionResult;
