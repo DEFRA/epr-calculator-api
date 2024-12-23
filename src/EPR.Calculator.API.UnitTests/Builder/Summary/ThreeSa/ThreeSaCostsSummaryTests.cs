@@ -9,7 +9,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
     [TestClass]
     public class ThreeSaCostsSummaryTests
     {
-        private CalcResult _calcResult;
+        private CalcResult? _calcResult;
 
         [TestInitialize]
         public void TestInitialize()
@@ -100,9 +100,9 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             Name = "ScotlandTest",
                             Scotland = "ScotlandTest",
                             Material = "Material1",
-                            NorthernIreland = null,
-                            Total = null,
-                            ProducerReportedHouseholdPackagingWasteTonnage = null
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "null",
+                            ProducerReportedHouseholdPackagingWasteTonnage = "null"
                         },
                         new CalcResultLaDisposalCostDataDetail
                         {
@@ -111,9 +111,9 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             Wales = "WalesTest",
                             Name = "Material1",
                             Scotland = "ScotlandTest",
-                            NorthernIreland = null,
-                            Total = null,
-                            ProducerReportedHouseholdPackagingWasteTonnage = null,
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "null",
+                            ProducerReportedHouseholdPackagingWasteTonnage = "null"
 
                         },
                         new CalcResultLaDisposalCostDataDetail
@@ -123,9 +123,9 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             Wales = "WalesTest",
                             Name = "Material2",
                             Scotland = "ScotlandTest",
-                            NorthernIreland = null,
-                            Total = null,
-                            ProducerReportedHouseholdPackagingWasteTonnage = null,
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "null",
+                            ProducerReportedHouseholdPackagingWasteTonnage = "null"
 
                         }
                     },
@@ -208,11 +208,11 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             OrderId = 4
                         }
                     ],
-                    Name = null
+                    Name = "some test"
                 },
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost
                 {
-                    Name = null
+                    Name = "some test"
                 },
                 CalcResultSummary = new CalcResultSummary
                 {
@@ -255,7 +255,13 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                         }
                     ]
                 },
-                CalcResultLateReportingTonnageData = null
+                CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage()
+                {
+                    Name = string.Empty,
+                    CalcResultLateReportingTonnageDetails = new List<CalcResultLateReportingTonnageDetail>(),
+                    MaterialHeading = string.Empty,
+                    TonnageHeading = string.Empty
+                },
             };
         }
 
