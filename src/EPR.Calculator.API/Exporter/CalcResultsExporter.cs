@@ -125,9 +125,9 @@ namespace EPR.Calculator.API.Exporter
 
             csvContent.AppendLine(otherCost.Name);
 
-            var saOperatinCosts = otherCost.SaOperatingCost.OrderBy(x => x.OrderId);
+            var saOperatingCosts = otherCost.SaOperatingCost.OrderBy(x => x.OrderId);
 
-            foreach (var saOperatingCost in saOperatinCosts)
+            foreach (var saOperatingCost in saOperatingCosts)
             {
                 csvContent.Append($"{CsvSanitiser.SanitiseData(saOperatingCost.Name)},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(saOperatingCost.England)},");
@@ -366,10 +366,6 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.ScotlandTotalWithBadDebtProvision2A, decimalRoundUp))},");
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.NorthernIrelandTotalWithBadDebtProvision2A, decimalRoundUp))},");
 
-                //bad debt Total
-                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TotalOnePlus2AFeeWithBadDebtProvision, decimalRoundUp))},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(Math.Round(producer.ProducerPercentageOfCosts, 8))}%,");
-
                 // Percentage of Producer Reported Household Tonnage vs All Producers
                 csvContent.Append($"{CsvSanitiser.SanitiseData(Math.Round(producer.PercentageofProducerReportedHHTonnagevsAllProducers, 8))}%,");
 
@@ -390,6 +386,10 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TwoCWalesTotalWithBadDebt, decimalRoundUp))},");
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TwoCScotlandTotalWithBadDebt, decimalRoundUp))},");
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.TwoCNorthernIrelandTotalWithBadDebt, decimalRoundUp))},");
+
+                // Total bill 1 + 2a + 2b + 2c
+                csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.ProducerTotalOnePlus2A2B2CWithBadDeptProvision, decimalRoundUp))},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(Math.Round(producer.ProducerOverallPercentageOfCostsForOnePlus2A2B2C, 8))}%,");
 
                 //Section 3 Exported row 101
                 csvContent.Append($"£{CsvSanitiser.SanitiseData(Math.Round(producer.Total3SAOperatingCostwoBadDebtprovision, decimalRoundUp))},");

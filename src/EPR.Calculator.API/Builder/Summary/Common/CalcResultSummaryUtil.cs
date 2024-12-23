@@ -1,7 +1,8 @@
-﻿using System.Globalization;
-using EPR.Calculator.API.Builder.CommsCost;
+﻿using EPR.Calculator.API.Builder.CommsCost;
+using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Builder.Summary.CommsCostTwoA;
 using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
+using EPR.Calculator.API.Builder.Summary.OnePlus2A2B2C;
 using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
 using EPR.Calculator.API.Builder.Summary.ThreeSa;
 using EPR.Calculator.API.Builder.Summary.TotalBillBreakdown;
@@ -11,6 +12,7 @@ using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
+using System.Globalization;
 
 namespace EPR.Calculator.API.Builder.Summary.Common;
 
@@ -25,11 +27,10 @@ public static class CalcResultSummaryUtil
     public const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
     public const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
     //Section-(1) & (2a)
-    public const int decimalRoundUp = 2;
     public const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
-    //Section-(1) & (2a)
-    public const int Total1Plus2ABadDebt = 193;
-    private const int CommsCost2bColumnIndex = 196;
+    //Section-(2b)
+    private const int CommsCost2bColumnIndex = 194;
+    public const int decimalRoundUp = 2;
 
     public static int GetLevelIndex(List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup, ProducerDetail producer)
     {
@@ -81,11 +82,6 @@ public static class CalcResultSummaryUtil
         var householdPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material);
         var managedConsumerWasteTonnage = GetManagedConsumerWasteTonnage(producer, material);
 
-        if (householdPackagingWasteTonnage == 0 || managedConsumerWasteTonnage == 0)
-        {
-            return 0;
-        }
-
         return householdPackagingWasteTonnage - managedConsumerWasteTonnage;
     }
 
@@ -119,11 +115,6 @@ public static class CalcResultSummaryUtil
     {
         var netReportedTonnage = GetNetReportedTonnage(producer, material);
         var pricePerTonne = GetPricePerTonne(material, calcResult);
-
-        if (netReportedTonnage == 0 || pricePerTonne == 0)
-        {
-            return 0;
-        }
 
         return netReportedTonnage * pricePerTonne;
     }
@@ -434,7 +425,7 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwoBadDebtprovision2A, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 7 },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision, ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 8 },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.FeeforCommsCostsbyMaterialwithBadDebtprovision2A,ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex + 9 },
-            new CalcResultSummaryHeader {Name = CalcResultSummaryHeaders.TotalBadDebtProvision1Plus2A, ColumnIndex = Total1Plus2ABadDebt },
+
             //Section-2b Title headers
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.CommsCostHeaderWithoutBadDebtFor2bTitle, ColumnIndex = CommsCost2bColumnIndex },
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.CommsCostHeaderBadDebtProvisionFor2bTitle, ColumnIndex = CommsCost2bColumnIndex + 1 },
@@ -442,15 +433,21 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithout, ColumnIndex = TwoCCommsCostColumnIndex.Value },
             new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostBadBebtProvision, ColumnIndex = TwoCCommsCostColumnIndex.Value + 1 },
             new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithBadDebt, ColumnIndex = TwoCCommsCostColumnIndex.Value + 2 },
+
             //Section-3 Title headers
             new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.SAOperatingCostsWithoutBadDebtProvisionTitleSection3, ColumnIndex = ThreeSaCostColumnIndex.Index },
             new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.BadDebtProvisionTitleSection3, ColumnIndex = ThreeSaCostColumnIndex.Index + 1 },
             new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.SAOperatingCostsWithBadDebtProvisionTitleSection3,ColumnIndex = ThreeSaCostColumnIndex.Index + 2 },
         ]);
 
+        // Section Total bill (1 + 2a + 2b + 2c)
+        resultSummaryHeaders.AddRange(
+            OnePlus2A2B2CProducer.GetSummaryHeaders()
+        );
+
         // Section-4 Title headers
         resultSummaryHeaders.AddRange(
-            LaDataPrepCostsSummary.GetHeaders()
+            LaDataPrepCostsProducer.GetSummaryHeaders()
         );
 
         // Section-5 Title headers
@@ -519,10 +516,6 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalFeeforCommsCostsbyMaterialwithBadDebtprovision2A, decimalRoundUp)}",ColumnIndex = DisposalFeeCommsCostsHeaderInitialColumnIndex+9 }
         ]);
 
-        materialsBreakdownHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalOnePlus2AFeeWithBadDebtProvision, decimalRoundUp)}", ColumnIndex = Total1Plus2ABadDebt },
-        ]);
-
         // 2b comms total bill
         materialsBreakdownHeaders.AddRange([
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.CommsCostHeaderWithoutBadDebtFor2bTitle, decimalRoundUp)}", ColumnIndex = CommsCost2bColumnIndex },
@@ -536,6 +529,11 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TwoCCommsCostsByCountryWithBadDebtProvision, CalcResultSummaryUtil.decimalRoundUp)}",ColumnIndex = TwoCCommsCostColumnIndex.Value + 2 }
         ]);
 
+        // Section Total bill (1 + 2a + 2b + 2c)
+        materialsBreakdownHeaders.AddRange([
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.TotalOnePlus2A2B2CFeeWithBadDebtProvision, decimalRoundUp)}", ColumnIndex = OnePlus2A2B2CProducer.ColumnIndex },
+        ]);
+
         //Section-3 -first header
         materialsBreakdownHeaders.AddRange([
            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SAOperatingCostsWoTitleSection3, decimalRoundUp)}", ColumnIndex = ThreeSaCostColumnIndex.Index },
@@ -545,9 +543,9 @@ public static class CalcResultSummaryUtil
 
         // LA data prep costs section 4
         materialsBreakdownHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsTitleSection4, decimalRoundUp)}", ColumnIndex = LaDataPrepCostsSummary.ColumnIndex },
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsBadDebtProvisionTitleSection4, decimalRoundUp)}" ,ColumnIndex = LaDataPrepCostsSummary.ColumnIndex + 1 },
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsWithBadDebtProvisionTitleSection4, decimalRoundUp)}", ColumnIndex = LaDataPrepCostsSummary.ColumnIndex + 2 }
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsTitleSection4, decimalRoundUp)}", ColumnIndex = LaDataPrepCostsProducer.ColumnIndex },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsBadDebtProvisionTitleSection4, decimalRoundUp)}" ,ColumnIndex = LaDataPrepCostsProducer.ColumnIndex + 1 },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.LaDataPrepCostsWithBadDebtProvisionTitleSection4, decimalRoundUp)}", ColumnIndex = LaDataPrepCostsProducer.ColumnIndex + 2 }
         ]);
 
         // Scheme administrator setup costs section 5
@@ -644,12 +642,6 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalwithBadDebtprovision }
         ]);
 
-        // bad debt
-        columnHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducer1Plus2ABadDebt },
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalProducer1Plus2ABadDebtPercentage }
-        ]);
-
         // Percentage of Producer Reported Household Tonnage vs All Producers
         columnHeaders.AddRange([
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PercentageofProducerReportedHHTonnagevsAllProducers },
@@ -676,6 +668,11 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostScotlandWithBadDebt },
             new CalcResultSummaryHeader { Name = TwoCCommsCostSubColumnHeader.TwoCCommsCostNIWithBadDebt }
         ]);
+
+        // Section Total bill (1 + 2a + 2b + 2c)
+        columnHeaders.AddRange(
+            OnePlus2A2B2CProducer.GetHeaders()
+        );
 
         // SA operating cost section 3
         columnHeaders.AddRange([
@@ -825,6 +822,31 @@ public static class CalcResultSummaryUtil
                 return onePlusFourApportionment.ScotlandTotal;
             case Countries.NorthernIreland:
                 return onePlusFourApportionment.NorthernIrelandTotal;
+            default:
+                return 0;
+        }
+    }
+
+    public static decimal GetParamsOtherFourCountryApportionmentPercentage(CalcResult calcResult, Countries country)
+    {
+        var fourCountryApportionment = calcResult.CalcResultParameterOtherCost.Details
+            .SingleOrDefault(x => x.Name == CalcResultParameterOtherCostBuilder.FourCountryApportionmentPercentage);
+
+        if (fourCountryApportionment == null)
+        {
+            return 0;
+        }
+
+        switch (country)
+        {
+            case Countries.England:
+                return fourCountryApportionment.EnglandValue;
+            case Countries.Wales:
+                return fourCountryApportionment.WalesValue;
+            case Countries.Scotland:
+                return fourCountryApportionment.ScotlandValue;
+            case Countries.NorthernIreland:
+                return fourCountryApportionment.NorthernIrelandValue;
             default:
                 return 0;
         }

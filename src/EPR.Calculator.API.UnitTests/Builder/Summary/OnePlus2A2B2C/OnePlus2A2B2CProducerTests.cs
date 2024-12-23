@@ -1,21 +1,20 @@
-﻿namespace EPR.Calculator.API.UnitTests.Builder.Summary.LaDataPrepCosts
+﻿namespace EPR.Calculator.API.UnitTests.Builder.Summary.OnePlus2A2B2C
 {
-    using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
+    using EPR.Calculator.API.Builder.Summary.OnePlus2A2B2C;
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.Models;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using System.Collections.Generic;
 
     [TestClass]
-    public class LaDataPrepCostsProducerTests
+    public class OnePlus2A2B2CProducerTests
     {
         private readonly ApplicationDBContext _dbContext;
         private readonly CalcResult _calcResult;
 
-        public LaDataPrepCostsProducerTests()
+        public OnePlus2A2B2CProducerTests()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
@@ -34,7 +33,8 @@
                 {
                     BadDebtProvision = new KeyValuePair<string, string>("key1", "6%"),
                     BadDebtValue = 6m,
-                    Details = [
+                    Details =
+                    [
                         new CalcResultParameterOtherCostDetail
                         {
                             Name = "4 LA Data Prep Charge",
@@ -49,24 +49,10 @@
                             NorthernIrelandValue = 10,
                             Total = "£100.00",
                             TotalValue = 100
-                        },
-                        new CalcResultParameterOtherCostDetail
-                        {
-                            Name = "4 Country Apportionment %s",
-                            OrderId = 1,
-                            England = "40.00%",
-                            EnglandValue = 40,
-                            Wales = "30.00%",
-                            WalesValue = 30,
-                            Scotland = "20.00%",
-                            ScotlandValue = 20,
-                            NorthernIreland = "10.00%",
-                            NorthernIrelandValue = 10,
-                            Total = "100.00%",
-                            TotalValue = 100
                         }
                     ],
-                    Materiality = [
+                    Materiality =
+                    [
                         new CalcResultMateriality
                         {
                             Amount = "Amount £s",
@@ -77,7 +63,8 @@
                         }
                     ],
                     Name = "Parameters - Other",
-                    SaOperatingCost = [
+                    SaOperatingCost =
+                    [
                         new CalcResultParameterOtherCostDetail
                         {
                             Name = string.Empty,
@@ -94,7 +81,8 @@
                             TotalValue = 0
                         }
                     ],
-                    SchemeSetupCost = {
+                    SchemeSetupCost =
+                    {
                         Name = "5 Scheme set up cost Yearly Cost",
                         OrderId = 1,
                         England = "£40.00",
@@ -116,29 +104,29 @@
                     {
                         new CalcResultLaDisposalCostDataDetail()
                         {
-                            DisposalCostPricePerTonne="20",
-                            England="EnglandTest",
-                            Wales="WalesTest",
-                            Name="ScotlandTest",
-                            Scotland="ScotlandTest",
+                            DisposalCostPricePerTonne = "20",
+                            England = "EnglandTest",
+                            Wales = "WalesTest",
+                            Name = "ScotlandTest",
+                            Scotland = "ScotlandTest",
                             Material = "Material1"
                         },
                         new CalcResultLaDisposalCostDataDetail()
                         {
-                            DisposalCostPricePerTonne="20",
-                            England="EnglandTest",
-                            Wales="WalesTest",
-                            Name="Material1",
-                            Scotland="ScotlandTest",
+                            DisposalCostPricePerTonne = "20",
+                            England = "EnglandTest",
+                            Wales = "WalesTest",
+                            Name = "Material1",
+                            Scotland = "ScotlandTest",
 
                         },
                         new CalcResultLaDisposalCostDataDetail()
                         {
-                            DisposalCostPricePerTonne="10",
-                            England="EnglandTest",
-                            Wales="WalesTest",
-                            Name="Material2",
-                            Scotland="ScotlandTest",
+                            DisposalCostPricePerTonne = "10",
+                            England = "EnglandTest",
+                            Wales = "WalesTest",
+                            Name = "Material2",
+                            Scotland = "ScotlandTest",
 
                         }
                     }
@@ -155,68 +143,68 @@
                     [
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="1 + 4 Apportionment %s",
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 0.10M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 0.15M,
+                            WalesTotal = 020M,
+                            Name = "1 + 4 Apportionment %s",
                         },
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 0.10M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 0.15M,
+                            WalesTotal = 020M,
+                            Name = "Test",
                         },
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 0.10M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 0.15M,
+                            WalesTotal = 020M,
+                            Name = "Test",
                         },
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=14.53M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 14.53M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 0.15M,
+                            WalesTotal = 020M,
+                            Name = "Test",
                         },
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=14.53M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 14.53M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 0.15M,
+                            WalesTotal = 020M,
+                            Name = "Test",
                         }
                     ]
                 },
@@ -239,15 +227,7 @@
                             TotalProducerFeeforLADisposalCostswithBadDebtprovision = 10,
                             TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision = 10,
                             TotalProducerFeeWithBadDebtFor2bComms = 10,
-                            TwoCTotalProducerFeeForCommsCostsWithBadDebt = 10,
-                            ProducerOverallPercentageOfCostsForOnePlus2A2B2C = 100,
-                            LaDataPrepCostsTotalWithoutBadDebtProvisionSection4 = 100,
-                            LaDataPrepCostsBadDebtProvisionSection4 = 20,
-                            LaDataPrepCostsTotalWithBadDebtProvisionSection4 = 120,
-                            LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4 = 20,
-                            LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4 = 20,
-                            LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4 = 20,
-                            LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = 20,
+                            TwoCTotalProducerFeeForCommsCostsWithBadDebt = 10
                         }
                     },
                     TotalFeeforLADisposalCostswithBadDebtprovision1 = 100,
@@ -259,16 +239,16 @@
                 {
                     CalcResultCommsCostCommsCostByMaterial =
                     [
-                        new ()
+                        new()
                         {
-                            CommsCostByMaterialPricePerTonne="0.42",
-                            Name ="Aluminium",
+                            CommsCostByMaterialPricePerTonne = "0.42",
+                            Name = "Aluminium",
 
                         },
-                        new ()
+                        new()
                         {
-                            CommsCostByMaterialPricePerTonne="0.3",
-                            Name ="Glass",
+                            CommsCostByMaterialPricePerTonne = "0.3",
+                            Name = "Glass",
 
                         }
                     ]
@@ -286,17 +266,12 @@
         public void CanCallGetHeaders()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetHeaders().ToList();
+            var result = OnePlus2A2B2CProducer.GetHeaders().ToList();
 
             var expectedResult = new List<CalcResultSummaryHeader>();
             expectedResult.AddRange([
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.TotalProducerFeeWithoutBadDebtProvision , ColumnIndex = 217 },
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.BadDebtProvision, ColumnIndex = 218 },
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.TotalProducerFeeWithBadDebtProvision, ColumnIndex = 219 },
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.EnglandTotalWithBadDebtProvision, ColumnIndex = 220 },
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.WalesTotalWithBadDebtProvision, ColumnIndex = 221 },
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.ScotlandTotalWithBadDebtProvision, ColumnIndex = 222 },
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.NorthernIrelandTotalWithBadDebtProvision, ColumnIndex = 223 }
+                new CalcResultSummaryHeader { Name = OnePlus2A2B2CHeaders.ProducerTotalWithBadDebtProvision, ColumnIndex = 208 },
+                new CalcResultSummaryHeader { Name = OnePlus2A2B2CHeaders.ProducerPercentageOfOverallProducerCost, ColumnIndex = 209 },
             ]);
 
             // Assert
@@ -304,57 +279,34 @@
             Assert.AreEqual(expectedResult[0].ColumnIndex, result[0].ColumnIndex);
             Assert.AreEqual(expectedResult[1].Name, result[1].Name);
             Assert.AreEqual(expectedResult[1].ColumnIndex, result[1].ColumnIndex);
-            Assert.AreEqual(expectedResult[2].Name, result[2].Name);
-            Assert.AreEqual(expectedResult[2].ColumnIndex, result[2].ColumnIndex);
-            Assert.AreEqual(expectedResult[3].Name, result[3].Name);
-            Assert.AreEqual(expectedResult[3].ColumnIndex, result[3].ColumnIndex);
-            Assert.AreEqual(expectedResult[4].Name, result[4].Name);
-            Assert.AreEqual(expectedResult[4].ColumnIndex, result[4].ColumnIndex);
-            Assert.AreEqual(expectedResult[5].Name, result[5].Name);
-            Assert.AreEqual(expectedResult[5].ColumnIndex, result[5].ColumnIndex);
-            Assert.AreEqual(expectedResult[6].Name, result[6].Name);
-            Assert.AreEqual(expectedResult[6].ColumnIndex, result[6].ColumnIndex);
         }
 
         [TestMethod]
         public void CanCallGetSummaryHeaders()
         {
             // Act
-            var result = LaDataPrepCostsProducer.GetSummaryHeaders().ToList();
+            var result = OnePlus2A2B2CProducer.GetSummaryHeaders().ToList();
 
             var expectedResult = new List<CalcResultSummaryHeader>();
             expectedResult.AddRange([
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.LaDataPrepCostsWithoutBadDebtProvisionTitle, ColumnIndex = 217 },
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.BadDebtProvisionTitle, ColumnIndex = 218 },
-                new CalcResultSummaryHeader { Name = LaDataPrepCostsHeaders.LaDataPrepCostsWithBadDebtProvisionTitle, ColumnIndex = 219 }
+                new CalcResultSummaryHeader { Name = OnePlus2A2B2CHeaders.TotalWithBadDebtProvision, ColumnIndex = 208 },
             ]);
 
             // Assert
             Assert.AreEqual(expectedResult[0].Name, result[0].Name);
             Assert.AreEqual(expectedResult[0].ColumnIndex, result[0].ColumnIndex);
-            Assert.AreEqual(expectedResult[1].Name, result[1].Name);
-            Assert.AreEqual(expectedResult[1].ColumnIndex, result[1].ColumnIndex);
-            Assert.AreEqual(expectedResult[2].Name, result[2].Name);
-            Assert.AreEqual(expectedResult[2].ColumnIndex, result[2].ColumnIndex);
         }
 
         [TestMethod]
         public void CanCallSetValues()
-        { 
+        {
             // Act
-            LaDataPrepCostsProducer.SetValues(_calcResult, _calcResult.CalcResultSummary);
+            OnePlus2A2B2CProducer.SetValues(_calcResult.CalcResultSummary);
 
             // Assert
-            Assert.AreEqual(100, _calcResult.CalcResultSummary.LaDataPrepCostsTitleSection4);
-            Assert.AreEqual(6, _calcResult.CalcResultSummary.LaDataPrepCostsBadDebtProvisionTitleSection4);
-            Assert.AreEqual(106, _calcResult.CalcResultSummary.LaDataPrepCostsWithBadDebtProvisionTitleSection4);
-            Assert.AreEqual(100, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].LaDataPrepCostsTotalWithoutBadDebtProvisionSection4);
-            Assert.AreEqual(6, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].LaDataPrepCostsBadDebtProvisionSection4);
-            Assert.AreEqual(106, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].LaDataPrepCostsTotalWithBadDebtProvisionSection4);
-            Assert.AreEqual(42.40m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].LaDataPrepCostsEnglandTotalWithBadDebtProvisionSection4);
-            Assert.AreEqual(31.80m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].LaDataPrepCostsWalesTotalWithBadDebtProvisionSection4);
-            Assert.AreEqual(21.20m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].LaDataPrepCostsScotlandTotalWithBadDebtProvisionSection4);
-            Assert.AreEqual(10.60m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4);
+            Assert.AreEqual(400, _calcResult.CalcResultSummary.TotalOnePlus2A2B2CFeeWithBadDebtProvision);
+            Assert.AreEqual(40, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].ProducerTotalOnePlus2A2B2CWithBadDeptProvision);
+            Assert.AreEqual(10.0m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].ProducerOverallPercentageOfCostsForOnePlus2A2B2C);
         }
 
         private void CreateMaterials()
