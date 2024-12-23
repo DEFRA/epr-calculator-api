@@ -1,8 +1,6 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace EPR.Calculator.API.Builder.LateReportingTonnages
 {
