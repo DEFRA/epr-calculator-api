@@ -560,14 +560,14 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
             {
                 for (int materialId = 1; materialId < 9; materialId++)
                 {
-                    _dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial
+                    _dbContext?.ProducerReportedMaterial.Add(new ProducerReportedMaterial
                     {
                         MaterialId = materialId,
                         ProducerDetailId = producerDetailId,
                         PackagingType = "HH",
                         PackagingTonnage = (materialId * 100)
                     });
-                    _dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial
+                    _dbContext?.ProducerReportedMaterial.Add(new ProducerReportedMaterial
                     {
                         MaterialId = materialId,
                         ProducerDetailId = producerDetailId,
