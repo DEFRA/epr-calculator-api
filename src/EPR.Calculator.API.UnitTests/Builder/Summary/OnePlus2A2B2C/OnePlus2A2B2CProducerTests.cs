@@ -1,5 +1,6 @@
 ﻿namespace EPR.Calculator.API.UnitTests.Builder.Summary.OnePlus2A2B2C
 {
+    using AutoFixture;
     using EPR.Calculator.API.Builder.Summary.OnePlus2A2B2C;
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Data.DataModels;
@@ -16,6 +17,7 @@
 
         public OnePlus2A2B2CProducerTests()
         {
+            this.Fixture = new Fixture();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
@@ -29,6 +31,7 @@
 
             _calcResult = new CalcResult
             {
+                CalcResultLateReportingTonnageData = Fixture.Create<CalcResultLateReportingTonnage>(),
                 CalcResultParameterOtherCost = new CalcResultParameterOtherCost
                 {
                     BadDebtProvision = new KeyValuePair<string, string>("key1", "6%"),
@@ -100,6 +103,7 @@
                 CalcResultDetail = new CalcResultDetail() { },
                 CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData()
                 {
+                    Name = Fixture.Create<string>(),
                     CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>()
                     {
                         new CalcResultLaDisposalCostDataDetail()
@@ -109,7 +113,10 @@
                             Wales = "WalesTest",
                             Name = "ScotlandTest",
                             Scotland = "ScotlandTest",
-                            Material = "Material1"
+                            NorthernIreland = "NorthernIrelandTest",
+                            Material = "Material1",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            Total = Fixture.Create<string>(),
                         },
                         new CalcResultLaDisposalCostDataDetail()
                         {
@@ -118,7 +125,9 @@
                             Wales = "WalesTest",
                             Name = "Material1",
                             Scotland = "ScotlandTest",
-
+                            NorthernIreland = "NorthernIrelandTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            Total = Fixture.Create<string>(),
                         },
                         new CalcResultLaDisposalCostDataDetail()
                         {
@@ -127,7 +136,9 @@
                             Wales = "WalesTest",
                             Name = "Material2",
                             Scotland = "ScotlandTest",
-
+                            NorthernIreland = "NorthernIrelandTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            Total = Fixture.Create<string>(),
                         }
                     }
                 },
@@ -139,6 +150,7 @@
                 },
                 CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment()
                 {
+                    Name = Fixture.Create<string>(),
                     CalcResultOnePlusFourApportionmentDetails =
                     [
                         new()
@@ -208,7 +220,7 @@
                         }
                     ]
                 },
-                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
+                CalcResultParameterCommunicationCost = Fixture.Create<CalcResultParameterCommunicationCost>(),
                 CalcResultSummary = new CalcResultSummary
                 {
                     ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>()
@@ -255,6 +267,8 @@
                 }
             };
         }
+
+        private Fixture Fixture { get; init; }
 
         [TestCleanup]
         public void TearDown()

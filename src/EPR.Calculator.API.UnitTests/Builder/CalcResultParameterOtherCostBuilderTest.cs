@@ -14,11 +14,10 @@ namespace EPR.Calculator.API.UnitTests.Builder
     public class CalcResultParameterOtherCostBuilderTest
     {
         public CalcResultParameterOtherCostBuilder builder;
-        protected ApplicationDBContext? dbContext;
+        protected ApplicationDBContext dbContext;
        
 
-        [TestInitialize]
-        public void DataSetup()
+        public CalcResultParameterOtherCostBuilderTest()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
@@ -70,7 +69,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 {
                     ParameterUniqueReferenceId = templateMaster.ParameterUniqueReferenceId,
                     ParameterValue = GetValue(templateMaster),
-                    DefaultParameterSettingMasterId = 1
+                    DefaultParameterSettingMasterId = 1,
+                    DefaultParameterSettingMaster = null,
                 };
                 dbContext.DefaultParameterSettingDetail.Add(defaultDetail);
             }
@@ -144,7 +144,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     .All(x => x.Amount == "£10.00" && x.Percentage == "10.00%"));
         }
             
-        private decimal GetValue(DefaultParameterTemplateMaster templateMaster)
+        private static decimal GetValue(DefaultParameterTemplateMaster templateMaster)
         {
             if (templateMaster.ParameterType == "Scheme setup costs" ||
                 templateMaster.ParameterType == "Scheme administrator operating costs" ||

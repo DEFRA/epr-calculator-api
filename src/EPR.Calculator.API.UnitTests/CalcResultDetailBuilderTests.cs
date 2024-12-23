@@ -12,11 +12,10 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class CalcResultDetailBuilderTests
     {
-        private ApplicationDBContext _context;
-        private CalcResultDetailBuilder _builder;
+        private readonly ApplicationDBContext _context;
+        private readonly CalcResultDetailBuilder _builder;
 
-        [TestInitialize]
-        public void SetUp()
+        public CalcResultDetailBuilderTests()
         {
             var options = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())

@@ -4,6 +4,6 @@ namespace EPR.Calculator.API.Builder.Summary;
 
 public class CalcResultsProducerAndReportMaterialDetail
 {
-    public ProducerDetail ProducerDetail { get; set; }
-    public ProducerReportedMaterial ProducerReportedMaterial { get; set; }
+    public required ProducerDetail ProducerDetail { get; set; }
+    public required ProducerReportedMaterial ProducerReportedMaterial { get; set; }
 }

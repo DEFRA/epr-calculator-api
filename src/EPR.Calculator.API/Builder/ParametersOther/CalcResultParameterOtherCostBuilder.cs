@@ -42,8 +42,10 @@ namespace EPR.Calculator.API.Builder.ParametersOther
 
             var schemeAdminCosts = results.Where(x => x.ParameterType == SchemeAdminOperatingCost);
 
-            var other = new CalcResultParameterOtherCost();
-            other.Name = "Parameters - Other";
+            var other = new CalcResultParameterOtherCost
+            {
+                Name = "Parameters - Other",
+            };
 
             var saDetails = new List<CalcResultParameterOtherCostDetail>();
             var saOperatinCostHeader = new CalcResultParameterOtherCostDetail
@@ -76,10 +78,12 @@ namespace EPR.Calculator.API.Builder.ParametersOther
             other.BadDebtValue = badDebtValue;
             other.BadDebtProvision = new KeyValuePair<string, string> (BadDebtProvisionHeader, $"{badDebtValue:0.00}%");
 
-            var materialityHeader = new CalcResultMateriality();
-            materialityHeader.SevenMateriality = "7 Materiality";
-            materialityHeader.Amount = "Amount £s";
-            materialityHeader.Percentage = "%";
+            var materialityHeader = new CalcResultMateriality
+            {
+                SevenMateriality = "7 Materiality",
+                Amount = "Amount £s",
+                Percentage = "%",
+            };
 
             var materialities = new List<CalcResultMateriality>();
             materialities.Add(materialityHeader);

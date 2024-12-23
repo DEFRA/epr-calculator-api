@@ -1,3 +1,4 @@
+using AutoFixture;
 using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data.DataModels;
@@ -19,6 +20,8 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class CalculatorInternalControllerTests : BaseControllerTest
     {
+        private Fixture Fixture { get; init; } = new Fixture();
+
         [TestMethod]
         public void UpdateRpdStatus_With_Missing_RunId()
         {
@@ -206,7 +209,30 @@ namespace EPR.Calculator.API.UnitTests
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
             var requestDto = new CalcResultsRequestDto() { RunId = 1 };
-            var calcResult = new CalcResult();
+            var calcResult = new CalcResult
+            {
+                CalcResultLapcapData = new CalcResultLapcapData
+                {
+                    Name = string.Empty,
+                    CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>()
+                },
+                CalcResultParameterOtherCost = new()
+                {
+                    BadDebtProvision = new KeyValuePair<string, string>(),
+                    Name = string.Empty,
+                    Details = new List<CalcResultParameterOtherCostDetail>(),
+                    Materiality = new List<CalcResultMateriality>(),
+                    SaOperatingCost = new List<CalcResultParameterOtherCostDetail>(),
+                    SchemeSetupCost = new CalcResultParameterOtherCostDetail()
+                },
+                CalcResultLateReportingTonnageData = new()
+                {
+                    Name = string.Empty,
+                    CalcResultLateReportingTonnageDetails = new List<CalcResultLateReportingTonnageDetail>(),
+                    MaterialHeading = string.Empty,
+                    TonnageHeading = string.Empty
+                }
+            };
             var mockStorageService = new Mock<IStorageService>();
             var mockExporter = new Mock<ICalcResultsExporter<CalcResult>>();
             var mockBuilder = new Mock<ICalcResultBuilder>();
@@ -218,6 +244,27 @@ namespace EPR.Calculator.API.UnitTests
                     RunId = 1,
                     RunDate = DateTime.Now,
                     RunName = "SomeRun"
+                },
+                CalcResultLapcapData = new CalcResultLapcapData
+                {
+                    Name = string.Empty,
+                    CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>()
+                },
+                CalcResultParameterOtherCost = new()
+                {
+                    BadDebtProvision = new KeyValuePair<string, string>(),
+                    Name = string.Empty,
+                    Details = new List<CalcResultParameterOtherCostDetail>(),
+                    Materiality = new List<CalcResultMateriality>(),
+                    SaOperatingCost = new List<CalcResultParameterOtherCostDetail>(),
+                    SchemeSetupCost = new CalcResultParameterOtherCostDetail()
+                },
+                CalcResultLateReportingTonnageData = new()
+                {
+                    Name = string.Empty,
+                    CalcResultLateReportingTonnageDetails = new List<CalcResultLateReportingTonnageDetail>(),
+                    MaterialHeading = string.Empty,
+                    TonnageHeading = string.Empty
                 }
             });
 
@@ -248,7 +295,7 @@ namespace EPR.Calculator.API.UnitTests
         public void PrepareCalcResults_ShouldReturnNotFound()
         {
             var requestDto = new CalcResultsRequestDto() { RunId = 0 };
-            var calcResult = new CalcResult();
+            var calcResult = Fixture.Create<CalcResult>();
 
             var mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
             var controller = new CalculatorInternalController(
@@ -283,6 +330,7 @@ namespace EPR.Calculator.API.UnitTests
         {
             CalculatorRun calcRun = new()
             {
+                Name = Fixture.Create<string>(),
                 Financial_Year = "2024-25"
             };
 

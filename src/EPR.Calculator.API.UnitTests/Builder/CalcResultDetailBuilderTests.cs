@@ -9,14 +9,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
     [TestClass]
     public class CalcResultDetailBuilderTests
     {
-        private CalcResultDetailBuilder _testClass;
-        private ApplicationDBContext _context;
+        private readonly ApplicationDBContext _context;
 
-        [TestInitialize]
-        public void SetUp()
+        public CalcResultDetailBuilderTests()
         {
             _context = new ApplicationDBContext();
-            _testClass = new CalcResultDetailBuilder(_context);
         }
 
         [TestMethod]
