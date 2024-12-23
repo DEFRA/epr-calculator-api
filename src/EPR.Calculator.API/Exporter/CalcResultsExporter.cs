@@ -1,6 +1,5 @@
 ﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Models;
-using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
 using System.Text;
 
@@ -8,7 +7,7 @@ namespace EPR.Calculator.API.Exporter
 {
     public class CalcResultsExporter : ICalcResultsExporter<CalcResult>
     {
-        private readonly IStorageService storageService;
+
         private const string RunName = "Run Name";
         private const string RunId = "Run Id";
         private const string RunDate = "Run Date";
@@ -21,11 +20,7 @@ namespace EPR.Calculator.API.Exporter
         private const string CountryApportionmentFile = "Country Apportionment File";
         private const int decimalRoundUp = 2;
 
-        public CalcResultsExporter(IStorageService storageService)
-        {
-            this.storageService = storageService;
-        }
-        public void Export(CalcResult results)
+        public string Export(CalcResult results)
         {
             var csvContent = new StringBuilder();
             LoadCalcResultDetail(results, csvContent);
@@ -68,18 +63,8 @@ namespace EPR.Calculator.API.Exporter
                 PrepareSummaryData(results.CalcResultSummary, csvContent);
             }
 
-            var fileName = new CalcResultsFileName(
-                results.CalcResultDetail.RunId,
-                results.CalcResultDetail.RunName,
-                results.CalcResultDetail.RunDate);
-            try
-            {
-                this.storageService.UploadResultFileContentAsync(fileName, csvContent.ToString());
-            }
-            catch (IOException ex)
-            {
-                throw new IOException($"File upload failed: {ex.Message}", ex);
-            }
+            return csvContent.ToString();
+
         }
 
         private void PrepareCommsCost(CalcResultCommsCost communicationCost, StringBuilder csvContent)
