@@ -168,7 +168,7 @@ namespace EPR.Calculator.API.Services
             }
         }
 
-        private IEnumerable<OrganisationDetails> GetOrganisationDetailsBySubmissionPeriod(IEnumerable<OrganisationDetails> organisationsList, IEnumerable<SubmissionDetails> submissionPeriodDetails)
+        private static List<OrganisationDetails> GetOrganisationDetailsBySubmissionPeriod(IEnumerable<OrganisationDetails> organisationsList, IEnumerable<SubmissionDetails> submissionPeriodDetails)
         {
             return (from org in organisationsList
                     join sub in submissionPeriodDetails on

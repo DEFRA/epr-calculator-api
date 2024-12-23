@@ -22,6 +22,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,7 +66,7 @@ builder.Services.AddSingleton<BlobServiceClient>(provider =>
     var connectionString = configuration.GetSection("BlobStorage:ConnectionString").Value;
     if (string.IsNullOrEmpty(connectionString))
     {
-        throw new ArgumentNullException("BlobStorage:ConnectionString", "Blob Storage connection string is not configured.");
+        throw new ConfigurationErrorsException("Blob Storage connection string is not configured.");
     }
     return new BlobServiceClient(connectionString);
 });

@@ -12,14 +12,13 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class GlobalExceptionHandlerTests
     {
-        private Mock<ILogger<GlobalExceptionHandler>> _mockLogger;
-        private Mock<IHostEnvironment> _mockEnv;
-        private GlobalExceptionHandler _exceptionHandler;
-        private DefaultHttpContext _httpContext;
-        private CancellationToken _cancellationToken;
+        private readonly Mock<ILogger<GlobalExceptionHandler>> _mockLogger;
+        private readonly Mock<IHostEnvironment> _mockEnv;
+        private readonly GlobalExceptionHandler _exceptionHandler;
+        private readonly DefaultHttpContext _httpContext;
+        private readonly CancellationToken _cancellationToken;
 
-        [TestInitialize]
-        public void SetUp()
+        public GlobalExceptionHandlerTests()
         {
             _mockLogger = new Mock<ILogger<GlobalExceptionHandler>>();
             _mockEnv = new Mock<IHostEnvironment>();
@@ -40,9 +39,9 @@ namespace EPR.Calculator.API.UnitTests
                logger => logger.Log(
                    LogLevel.Error,
                    It.IsAny<EventId>(),
-                   It.Is<It.IsAnyType>((state, t) => state.ToString().Contains("An unhandled exception occurred.")),
+                   It.Is<It.IsAnyType>((state, t) => state.ToString()!.Contains("An unhandled exception occurred.")),
                    exception,
-                   It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+                   It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                    Times.Once);
                 }
 

@@ -5,9 +5,9 @@ namespace EPR.Calculator.API.Dtos
     [ExcludeFromCodeCoverage]
     public class CreateDefaultParameterSettingErrorDto : ErrorDto
     {
-        public string ParameterUniqueRef { get; set; }
-        public string ParameterCategory { get; set; }
+        public required string ParameterUniqueRef { get; set; }
+        public required string ParameterCategory { get; set; }
 
-        public string ParameterType { get; set; }
+        public required string ParameterType { get; set; }
     }
 }

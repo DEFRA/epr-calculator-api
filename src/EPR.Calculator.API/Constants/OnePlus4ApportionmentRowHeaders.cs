@@ -1,12 +1,12 @@
 ﻿namespace EPR.Calculator.API.Constants
 {
-    public class OnePlus4ApportionmentRowHeaders
+    public static class OnePlus4ApportionmentRowHeaders
     {
-        public static string Name = " ";
-        public static string EnglandDisposalCost = "England";
-        public static string WalesDisposalCost = "Wales";
-        public static string ScotlandDisposalCost = "Scotland";
-        public static string NorthernIrelandDisposalCost = "Northern Ireland";
-        public static string Total = "Total";
+        public const string Name = " ";
+        public const string EnglandDisposalCost = "England";
+        public const string WalesDisposalCost = "Wales";
+        public const string ScotlandDisposalCost = "Scotland";
+        public const string NorthernIrelandDisposalCost = "Northern Ireland";
+        public const string Total = "Total";
     }
 }

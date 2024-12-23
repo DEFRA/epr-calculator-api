@@ -2,15 +2,18 @@
 {
     public class CalcResultSummary
     {
-        public CalcResultSummaryHeader ResultSummaryHeader { get; set; }
+        public CalcResultSummaryHeader? ResultSummaryHeader { get; set; }
 
         public IEnumerable<CalcResultSummaryHeader> ProducerDisposalFeesHeaders { get; set; }
+            = [];
 
-        public CalcResultSummaryHeader CommsCostHeader { get; set; }
+        public CalcResultSummaryHeader? CommsCostHeader { get; set; }
 
         public IEnumerable<CalcResultSummaryHeader> MaterialBreakdownHeaders { get; set; }
+            = [];
 
         public IEnumerable<CalcResultSummaryHeader> ColumnHeaders { get; set; }
+            = [];
 
         //Section-(1) & (2a)
         public decimal TotalFeeforLADisposalCostswoBadDebtprovision1 { get; set; }
@@ -66,5 +69,6 @@
         public decimal CommsCostHeaderBadDebtProvisionFor2bTitle { get; set; }
 
         public IEnumerable<CalcResultSummaryProducerDisposalFees> ProducerDisposalFees { get; set; }
+            = new List<CalcResultSummaryProducerDisposalFees>();
     }
 }

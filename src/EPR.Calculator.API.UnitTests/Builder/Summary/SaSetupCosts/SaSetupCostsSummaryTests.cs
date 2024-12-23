@@ -3,6 +3,7 @@
     using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
     using Models;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using AutoFixture;
     using EPR.Calculator.API.Constants;
     using EPR.Calculator.API.Builder.Summary.Common;
     using EPR.Calculator.API.Enums;
@@ -10,10 +11,11 @@
     [TestClass]
     public class SaSetupCostsSummaryTests
     {
-        private CalcResult _calcResult;
+        private readonly CalcResult _calcResult;
 
-        [TestInitialize]
-        public void TestInitialize()
+        private Fixture Fixture { get; init; } = new Fixture();
+
+        public SaSetupCostsSummaryTests()
         {
             _calcResult = new CalcResult
             {
@@ -81,6 +83,7 @@
                 CalcResultDetail = new CalcResultDetail() { },
                 CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData()
                 {
+                    Name = Fixture.Create<string>(),
                     CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>()
                     {
                         new CalcResultLaDisposalCostDataDetail()
@@ -90,7 +93,11 @@
                             Wales="WalesTest",
                             Name="ScotlandTest",
                             Scotland="ScotlandTest",
-                            Material = "Material1"
+                            Material = "Material1",
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         },
                          new CalcResultLaDisposalCostDataDetail()
                         {
@@ -99,7 +106,10 @@
                             Wales="WalesTest",
                             Name="Material1",
                             Scotland="ScotlandTest",
-
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         },
                           new CalcResultLaDisposalCostDataDetail()
                         {
@@ -108,13 +118,17 @@
                             Wales="WalesTest",
                             Name="Material2",
                             Scotland="ScotlandTest",
-
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "TotalTest",
+                            ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
                         }
                     }
                 },
                 CalcResultLapcapData = new CalcResultLapcapData() { CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>() { } },
                 CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment()
                 {
+                    Name = Fixture.Create<string>(),
                     CalcResultOnePlusFourApportionmentDetails =
                     [
                         new()
@@ -184,7 +198,7 @@
                             OrderId=4
                         }]
                 },
-                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
+                CalcResultParameterCommunicationCost = Fixture.Create<CalcResultParameterCommunicationCost>(),
                 CalcResultSummary = new CalcResultSummary
                 {
                     ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>() { new()
@@ -216,7 +230,8 @@
 
                         }
                     ]
-                }
+                },
+                CalcResultLateReportingTonnageData = Fixture.Create<CalcResultLateReportingTonnage>(),
             };
         }
 

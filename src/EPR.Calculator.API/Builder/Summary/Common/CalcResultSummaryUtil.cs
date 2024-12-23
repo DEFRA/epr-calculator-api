@@ -42,7 +42,7 @@ public static class CalcResultSummaryUtil
 
     public static decimal GetHouseholdPackagingWasteTonnage(ProducerDetail producer, MaterialDetail material)
     {
-        var householdPackagingMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material.Code == material.Code && p.PackagingType == "HH");
+        var householdPackagingMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == "HH");
 
         return householdPackagingMaterial != null ? householdPackagingMaterial.PackagingTonnage : 0;
     }
@@ -61,7 +61,7 @@ public static class CalcResultSummaryUtil
 
     public static decimal GetManagedConsumerWasteTonnage(ProducerDetail producer, MaterialDetail material)
     {
-        var consumerWastePackagingMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material.Code == material.Code && p.PackagingType == "CW");
+        var consumerWastePackagingMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == "CW");
 
         return consumerWastePackagingMaterial != null ? consumerWastePackagingMaterial.PackagingTonnage : 0;
     }

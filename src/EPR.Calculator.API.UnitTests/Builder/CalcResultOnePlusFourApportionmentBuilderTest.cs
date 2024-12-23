@@ -12,12 +12,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EPR.Calculator.API.Builder.OnePlusFourApportionment;
+using AutoFixture;
 
 namespace EPR.Calculator.API.UnitTests.Builder
 {
     [TestClass]
     public class CalcResultOnePlusFourApportionmentBuilderTest : CalcResultOnePlusFourApportionmentBuilder
     {
+        private Fixture Fixture { get; init; } = new Fixture();
+
         [TestMethod]
         public void Construct_ShouldReturnCorrectApportionment()
         {
@@ -69,7 +72,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
                              TotalValue=365.45m
                         } ,
                     }
-                }
+                },
+                CalcResultLateReportingTonnageData = Fixture.Create<CalcResultLateReportingTonnage>(),
             };
 
             var resultCalc = Construct(resultsDto, calcResult);

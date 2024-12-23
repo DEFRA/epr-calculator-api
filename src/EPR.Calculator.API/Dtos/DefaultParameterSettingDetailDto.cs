@@ -10,11 +10,11 @@ namespace EPR.Calculator.API.Dtos
     {
         public int Id { get; set; }
 
-        public string ParameterType { get; set; }
+        public required string ParameterType { get; set; }
 
-        public string ParameterCategory { get; set; }
-        public string ParameterUnit { get; set; }
+        public required string ParameterCategory { get; set; }
+        public required string ParameterUnit { get; set; }
 
-        public decimal ParameterValue { get; set; }
+        public required decimal ParameterValue { get; set; }
     }
 }

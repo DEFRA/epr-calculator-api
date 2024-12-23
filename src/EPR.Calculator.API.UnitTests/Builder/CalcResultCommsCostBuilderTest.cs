@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Builder.CommsCost;
+﻿using AutoFixture;
+using EPR.Calculator.API.Builder.CommsCost;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -13,11 +14,10 @@ namespace EPR.Calculator.API.UnitTests.Builder
     [TestClass]
     public class CalcResultCommsCostBuilderTest
     {
-        private CalcResultCommsCostBuilder builder;
-        private ApplicationDBContext dbContext;
+        private readonly CalcResultCommsCostBuilder builder;
+        private readonly ApplicationDBContext dbContext;
 
-        [TestInitialize]
-        public void SetUp()
+        public CalcResultCommsCostBuilderTest()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
@@ -28,6 +28,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
             dbContext.Database.EnsureCreated();
             builder = new CalcResultCommsCostBuilder(dbContext);
         }
+
+        private Fixture Fixture { get; init; } = new Fixture();
 
         [TestCleanup]
         public void TearDown()
@@ -46,10 +48,12 @@ namespace EPR.Calculator.API.UnitTests.Builder
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
             var apportionment = new CalcResultOnePlusFourApportionment
             {
+                Name = Fixture.Create<string>(),
                 CalcResultOnePlusFourApportionmentDetails = new List<CalcResultOnePlusFourApportionmentDetail>
                 {
                     new CalcResultOnePlusFourApportionmentDetail
                     {
+                        Name = Fixture.Create<string>(),
                         EnglandTotal = 40M,
                         ScotlandTotal = 20M,
                         WalesTotal = 20M,
@@ -74,27 +78,27 @@ namespace EPR.Calculator.API.UnitTests.Builder
             var headerApp = onePlusFourApp.First();
             Assert.IsTrue(string.IsNullOrEmpty(headerApp.Name));
 
-            Assert.AreEqual(headerApp.England, "England");
-            Assert.AreEqual(headerApp.Wales, "Wales");
-            Assert.AreEqual(headerApp.NorthernIreland, "Northern Ireland");
-            Assert.AreEqual(headerApp.Scotland, "Scotland");
+            Assert.AreEqual("England", headerApp.England);
+            Assert.AreEqual("Wales", headerApp.Wales);
+            Assert.AreEqual("Northern Ireland", headerApp.NorthernIreland);
+            Assert.AreEqual("Scotland", headerApp.Scotland);
 
-            Assert.AreEqual(headerApp.Total, "Total");
+            Assert.AreEqual("Total", headerApp.Total);
 
             var dataApp = result.CalcResultCommsCostOnePlusFourApportionment.Last();
             Assert.IsNotNull(dataApp);
 
-            Assert.AreEqual(dataApp.Name, "1 + 4 Apportionment %s");
-            Assert.AreEqual(dataApp.England, "40%");
-            Assert.AreEqual(dataApp.Wales, "20%");
-            Assert.AreEqual(dataApp.NorthernIreland, "20%");
-            Assert.AreEqual(dataApp.Scotland, "20%");
-            Assert.AreEqual(dataApp.Total, "100%");
+            Assert.AreEqual("1 + 4 Apportionment %s", dataApp.Name );
+            Assert.AreEqual("40%", dataApp.England);
+            Assert.AreEqual("20%", dataApp.Wales);
+            Assert.AreEqual("20%", dataApp.NorthernIreland);
+            Assert.AreEqual("20%", dataApp.Scotland);
+            Assert.AreEqual("100%", dataApp.Total);
 
 
             var materialCosts = result.CalcResultCommsCostCommsCostByMaterial.ToList();
             Assert.IsNotNull(materialCosts);
-            Assert.AreEqual(10, materialCosts.Count());
+            Assert.AreEqual(10, materialCosts.Count);
 
             var materialHeader = materialCosts.First();
 
@@ -157,7 +161,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("80.000", totalMaterialCost.LateReportingTonnage);
             Assert.AreEqual("36080.000",
                 totalMaterialCost.ProducerReportedHouseholdPlusLateReportingTonnage);
-            Assert.IsNull(totalMaterialCost.CommsCostByMaterialPricePerTonne);
+            Assert.IsTrue(string.IsNullOrEmpty(totalMaterialCost.CommsCostByMaterialPricePerTonne));
         }
 
         private void CreateProducerDetail()
@@ -296,7 +300,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 {
                     ParameterUniqueReferenceId = templateMaster.ParameterUniqueReferenceId,
                     ParameterValue = GetValue(templateMaster),
-                    DefaultParameterSettingMasterId = 1
+                    DefaultParameterSettingMasterId = 1,
+                    DefaultParameterSettingMaster = defaultMaster,
                 };
                 dbContext.DefaultParameterSettingDetail.Add(defaultDetail);
             }
