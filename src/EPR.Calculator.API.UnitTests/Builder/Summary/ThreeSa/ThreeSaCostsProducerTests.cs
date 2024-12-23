@@ -15,11 +15,11 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
     [TestClass]
     public class ThreeSaCostsProducerTests
     {
-        private ApplicationDBContext dbContext;
-        private IEnumerable<MaterialDetail> _materials;
-        private CalcResult _calcResult;
-        private Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> _materialCostSummary;
-        private Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> _commsCostSummary;
+        private ApplicationDBContext _dbContext;
+        private IEnumerable<MaterialDetail>? _materials;
+        private CalcResult? _calcResult;
+        private Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>? _materialCostSummary;
+        private Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>? _commsCostSummary;
 
         [TestInitialize]
         public void TestInitialize()
@@ -29,8 +29,8 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
 
-            dbContext = new ApplicationDBContext(dbContextOptions);
-            dbContext.Database.EnsureCreated();
+            _dbContext = new ApplicationDBContext(dbContextOptions);
+            _dbContext.Database.EnsureCreated();
 
             CreateMaterials();
             CreateProducerDetail();
@@ -180,9 +180,9 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             Name = "ScotlandTest",
                             Scotland = "ScotlandTest",
                             Material = "Material1",
-                            NorthernIreland = null,
-                            Total = null,
-                            ProducerReportedHouseholdPackagingWasteTonnage = null
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "null",
+                            ProducerReportedHouseholdPackagingWasteTonnage = "null"
                         },
                         new CalcResultLaDisposalCostDataDetail
                         {
@@ -191,9 +191,9 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             Wales = "WalesTest",
                             Name = "Material1",
                             Scotland = "ScotlandTest",
-                            NorthernIreland = null,
-                            Total = null,
-                            ProducerReportedHouseholdPackagingWasteTonnage = null,
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "null",
+                            ProducerReportedHouseholdPackagingWasteTonnage = "null",
 
                         },
                         new CalcResultLaDisposalCostDataDetail
@@ -203,13 +203,13 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             Wales = "WalesTest",
                             Name = "Material2",
                             Scotland = "ScotlandTest",
-                            NorthernIreland = null,
-                            Total = null,
-                            ProducerReportedHouseholdPackagingWasteTonnage = null,
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "100",
+                            ProducerReportedHouseholdPackagingWasteTonnage = "null",
 
                         }
                     },
-                    Name = null
+                    Name = "null"
                 },
                 CalcResultLapcapData = new CalcResultLapcapData()
                 {
@@ -288,11 +288,11 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             OrderId = 4
                         }
                     ],
-                    Name = null
+                    Name = "null"
                 },
                 CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost
                 {
-                    Name = null
+                    Name = "null"
                 },
                 CalcResultSummary = new CalcResultSummary
                 {
@@ -376,7 +376,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
         [TestCleanup]
         public void TearDown()
         {
-            dbContext?.Database.EnsureDeleted();
+            _dbContext?.Database.EnsureDeleted();
         }
 
         [TestMethod]
@@ -481,7 +481,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
 
             foreach (var materialKv in materialDictionary)
             {
-                dbContext.Material.Add(new Material
+                _dbContext.Material.Add(new Material
                 {
                     Name = materialKv.Value,
                     Code = materialKv.Key,
@@ -489,7 +489,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                 });
             }
 
-            dbContext.SaveChanges();
+            _dbContext.SaveChanges();
         }
 
         private void CreateProducerDetail()
@@ -511,7 +511,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
             var producerId = 1;
             foreach (var producerName in producerNames)
             {
-                dbContext.ProducerDetail.Add(new ProducerDetail
+                _dbContext.ProducerDetail.Add(new ProducerDetail
                 {
                     ProducerId = producerId++,
                     SubsidiaryId = $"{producerId}-Sub",
@@ -520,20 +520,20 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                 });
             }
 
-            dbContext.SaveChanges();
+            _dbContext.SaveChanges();
 
             for (int producerDetailId = 1; producerDetailId <= 10; producerDetailId++)
             {
                 for (int materialId = 1; materialId < 9; materialId++)
                 {
-                    dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial
+                    _dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial
                     {
                         MaterialId = materialId,
                         ProducerDetailId = producerDetailId,
                         PackagingType = "HH",
                         PackagingTonnage = (materialId * 100)
                     });
-                    dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial
+                    _dbContext.ProducerReportedMaterial.Add(new ProducerReportedMaterial
                     {
                         MaterialId = materialId,
                         ProducerDetailId = producerDetailId,
@@ -542,7 +542,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                     });
                 }
             }
-            dbContext.SaveChanges();
+            _dbContext.SaveChanges();
         }
     }
 }
