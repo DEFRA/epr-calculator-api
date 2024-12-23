@@ -20,11 +20,19 @@ namespace EPR.Calculator.API.Services
                 throw new ConfigurationErrorsException(ContainerNameMissingError));
         }
 
-        public async Task UploadResultFileContentAsync(string fileName, string content)
+        public async Task<bool> UploadResultFileContentAsync(string fileName, string content)
         {
-            var blobClient = this.containerClient.GetBlobClient(fileName);
-            var binaryData = BinaryData.FromString(content);
-            await blobClient.UploadAsync(binaryData);
+            try
+            {
+                var blobClient = this.containerClient.GetBlobClient(fileName);
+                var binaryData = BinaryData.FromString(content);
+                await blobClient.UploadAsync(binaryData);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         public async Task<IResult> DownloadFile(string fileName)

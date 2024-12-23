@@ -187,7 +187,8 @@ namespace EPR.Calculator.API.UnitTests
                     mock.Object,
                     new Mock<ICalcResultBuilder>().Object,
                     new Mock<ICalcResultsExporter<CalcResult>>().Object,
-                    new Mock<ITransposePomAndOrgDataService>().Object
+                    new Mock<ITransposePomAndOrgDataService>().Object,
+                    new Mock<IStorageService>().Object
                 );
 
                 var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
@@ -208,20 +209,82 @@ namespace EPR.Calculator.API.UnitTests
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
             var requestDto = new CalcResultsRequestDto() { RunId = 1 };
-            var calcResult = this.Fixture.Create<CalcResult>();
+            var calcResult = new CalcResult
+            {
+                CalcResultLapcapData = new CalcResultLapcapData
+                {
+                    Name = string.Empty,
+                    CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>()
+                },
+                CalcResultParameterOtherCost = new()
+                {
+                    BadDebtProvision = new KeyValuePair<string, string>(),
+                    Name = string.Empty,
+                    Details = new List<CalcResultParameterOtherCostDetail>(),
+                    Materiality = new List<CalcResultMateriality>(),
+                    SaOperatingCost = new List<CalcResultParameterOtherCostDetail>(),
+                    SchemeSetupCost = new CalcResultParameterOtherCostDetail()
+                },
+                CalcResultLateReportingTonnageData = new()
+                {
+                    Name = string.Empty,
+                    CalcResultLateReportingTonnageDetails = new List<CalcResultLateReportingTonnageDetail>(),
+                    MaterialHeading = string.Empty,
+                    TonnageHeading = string.Empty
+                }
+            };
+            var mockStorageService = new Mock<IStorageService>();
+            var mockExporter = new Mock<ICalcResultsExporter<CalcResult>>();
+            var mockBuilder = new Mock<ICalcResultBuilder>();
+            mockExporter.Setup(x => x.Export(It.IsAny<CalcResult>())).Returns("some");
+            mockBuilder.Setup(x => x.Build(It.IsAny<CalcResultsRequestDto>())).Returns(new CalcResult
+            {
+                CalcResultDetail = new CalcResultDetail
+                {
+                    RunId = 1,
+                    RunDate = DateTime.Now,
+                    RunName = "SomeRun"
+                },
+                CalcResultLapcapData = new CalcResultLapcapData
+                {
+                    Name = string.Empty,
+                    CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>()
+                },
+                CalcResultParameterOtherCost = new()
+                {
+                    BadDebtProvision = new KeyValuePair<string, string>(),
+                    Name = string.Empty,
+                    Details = new List<CalcResultParameterOtherCostDetail>(),
+                    Materiality = new List<CalcResultMateriality>(),
+                    SaOperatingCost = new List<CalcResultParameterOtherCostDetail>(),
+                    SchemeSetupCost = new CalcResultParameterOtherCostDetail()
+                },
+                CalcResultLateReportingTonnageData = new()
+                {
+                    Name = string.Empty,
+                    CalcResultLateReportingTonnageDetails = new List<CalcResultLateReportingTonnageDetail>(),
+                    MaterialHeading = string.Empty,
+                    TonnageHeading = string.Empty
+                }
+            });
 
             var mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
             var controller = new CalculatorInternalController(
                dbContext,
                new RpdStatusDataValidator(wrapper),
                wrapper,
-               new Mock<ICalcResultBuilder>().Object,
-               new Mock<ICalcResultsExporter<CalcResult>>().Object,
-               new Mock<ITransposePomAndOrgDataService>().Object
+               mockBuilder.Object,
+               mockExporter.Object,
+               new Mock<ITransposePomAndOrgDataService>().Object,
+               mockStorageService.Object
             );
 
+            mockStorageService.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
-            var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
+            var task = controller.PrepareCalcResults(requestDto);
+            task.Wait();
+            var result = task.Result as ObjectResult;
             var calculatorRun = dbContext.CalculatorRuns.SingleOrDefault(run => run.Id == 1);
             Assert.IsNotNull(result);
             Assert.AreEqual((int)RunClassification.UNCLASSIFIED, calculatorRun?.CalculatorRunClassificationId);
@@ -241,11 +304,13 @@ namespace EPR.Calculator.API.UnitTests
                 wrapper,
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
-                new Mock<ITransposePomAndOrgDataService>().Object
+                new Mock<ITransposePomAndOrgDataService>().Object,
+                new Mock<IStorageService>().Object
             );
 
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
-            var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
+            var task = controller.PrepareCalcResults(requestDto);
+            var result = task.Result as ObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(404, result.StatusCode);
         }

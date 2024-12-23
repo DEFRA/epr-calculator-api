@@ -1,27 +1,24 @@
 ﻿using EPR.Calculator.API.Builder;
+using EPR.Calculator.API.Builder.CommsCost;
+using EPR.Calculator.API.Builder.Detail;
 using EPR.Calculator.API.Builder.LaDisposalCost;
 using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
-using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.Builder.ParametersOther;
+using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Tests.Controllers;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using EPR.Calculator.API.Builder.CommsCost;
-using EPR.Calculator.API.Builder.Detail;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Tests.Controllers;
-using AutoFixture;
 
 namespace EPR.Calculator.API.UnitTests
 {
@@ -37,22 +34,27 @@ namespace EPR.Calculator.API.UnitTests
         private readonly Mock<ICalcRunLaDisposalCostBuilder> mockLaDisposalCostBuilder;
         private readonly Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
         private readonly Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
+        private CalculatorInternalController controller;
+        private CalcResultDetailBuilder detailBuilder;
 
         private readonly Mock<ApplicationDBContext> mockContext;
-        private readonly CalculatorInternalController controller;
         private readonly CalcResultBuilder calcResultBuilder;
-        private readonly CalcResultDetailBuilder detailBuilder;
         protected readonly new IOrgAndPomWrapper? wrapper;
         private readonly Mock<ICalcResultOnePlusFourApportionmentBuilder> mockICalcResultOnePlusFourApportionmentBuilder;
 
-        private Fixture Fixture { get; init; } = new Fixture();
+        private CalcResultsExporter exporter;
+        private Mock<IStorageService>? mockStorageservice;
 
         public CalcResultTests()
         {
             mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
             mockExporter = new Mock<ICalcResultsExporter<CalcResult>>();
+            mockExporter.Setup(x => x.Export(It.IsAny<CalcResult>())).Returns("Somevalue");
             wrapper = new Mock<IOrgAndPomWrapper>().Object;
             var transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
+            mockStorageservice = new Mock<IStorageService>();
+            mockStorageservice.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
 
             controller = new CalculatorInternalController(
                dbContext,
@@ -60,7 +62,8 @@ namespace EPR.Calculator.API.UnitTests
                wrapper,
                mockCalcResultBuilder.Object,
                mockExporter.Object,
-               transposePomAndOrgDataService.Object
+               transposePomAndOrgDataService.Object,
+               mockStorageservice.Object
             );
 
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();
@@ -90,10 +93,43 @@ namespace EPR.Calculator.API.UnitTests
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
             var requestDto = new CalcResultsRequestDto() { RunId = 1 };
-            var calcResult = this.Fixture.Create<CalcResult>();
-            mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
+            var calcResult = new CalcResult
+            {
+                CalcResultDetail = new CalcResultDetail
+                {
+                    RunId = 1,
+                    RunDate = DateTime.Now,
+                    RunName = "RunName"
+                },
+                CalcResultLapcapData = new CalcResultLapcapData
+                {
+                    Name = string.Empty,
+                    CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>()
+                },
+                CalcResultParameterOtherCost = new()
+                {
+                    BadDebtProvision = new KeyValuePair<string, string>(),
+                    Name = string.Empty,
+                    Details = new List<CalcResultParameterOtherCostDetail>(),
+                    Materiality = new List<CalcResultMateriality>(),
+                    SaOperatingCost = new List<CalcResultParameterOtherCostDetail>(),
+                    SchemeSetupCost = new CalcResultParameterOtherCostDetail()
+                },
+                CalcResultLateReportingTonnageData = new()
+                {
+                    Name = string.Empty,
+                    CalcResultLateReportingTonnageDetails = new List<CalcResultLateReportingTonnageDetail>(),
+                    MaterialHeading = string.Empty,
+                    TonnageHeading = string.Empty
+                }
+            };
 
-            var result = controller.PrepareCalcResults(requestDto) as ObjectResult;
+            mockCalcResultBuilder.Setup(b => b.Build(It.IsAny<CalcResultsRequestDto>())).Returns(calcResult);
+
+            var task = controller.PrepareCalcResults(requestDto);
+            task.Wait();
+
+            var result = task.Result as ObjectResult;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(201, result.StatusCode);

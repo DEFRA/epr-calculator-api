@@ -12,6 +12,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
         public const string LaPrepCharge = "Local authority data preparation costs";
         private const string SaOperatingCostHeader = "3 SA Operating Costs";
         private const string LaDataPrepChargeHeader = "4 LA Data Prep Charge";
+        public const string FourCountryApportionmentPercentage = "4 Country Apportionment %s";
         public const string SchemeSetupCost = "Scheme setup costs";
         private const string SchemeSetupYearlyCostHeader = "5 Scheme set up cost Yearly Cost";
         public const string BadDebtProvision = "Bad debt provision";
@@ -196,7 +197,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                         laDataPrep.ScotlandValue;
             var otherCostDetail = new CalcResultParameterOtherCostDetail
             {
-                Name = "4 Country Apportionment %s",
+                Name = FourCountryApportionmentPercentage,
                 EnglandValue = total != 0 ? ((laDataPrep.EnglandValue / total) * 100) : 0M,
                 NorthernIrelandValue = total != 0 ? (laDataPrep.NorthernIrelandValue / total) * 100 : 0M,
                 ScotlandValue = total != 0 ? (laDataPrep.ScotlandValue / total) * 100 : 0M,

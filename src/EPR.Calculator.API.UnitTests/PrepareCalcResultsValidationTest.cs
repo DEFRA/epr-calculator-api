@@ -33,14 +33,18 @@ namespace EPR.Calculator.API.UnitTests
             _builder = new Mock<ICalcResultBuilder>();
             _exporter = new Mock<ICalcResultsExporter<CalcResult>>();
             _transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
-            controller = new CalculatorInternalController(_context, _rpdStatusDataValidator.Object, _wrapper.Object, _builder.Object, _exporter.Object, _transposePomAndOrgDataService.Object);
+            var mockStorageService = new Mock<IStorageService>();
+            controller = new CalculatorInternalController(_context, _rpdStatusDataValidator.Object, _wrapper.Object,
+                _builder.Object, _exporter.Object, _transposePomAndOrgDataService.Object, mockStorageService.Object);
         }
 
         [TestMethod]
         public void PrepareCalcResults_Invalid_RunId()
         {
             controller.ModelState.AddModelError("InvalidRunId", CalcResultsRequestDtoValidator.ErrorMessage);
-            var result = controller.PrepareCalcResults(new CalcResultsRequestDto { RunId = 0 }) as ObjectResult;
+            var task = controller.PrepareCalcResults(new CalcResultsRequestDto { RunId = 0 });
+            task.Wait();
+            var result = task.Result as ObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(400, result.StatusCode);
             var errors = result.Value as IEnumerable<ModelError>;
