@@ -30,9 +30,9 @@
         // End Section Total bill (1 + 2a + 2b + 2c)
 
         // Section-3
-        public decimal SAOperatingCostsWoTitleSection3 { get; set; }
+        public decimal SaOperatingCostsWoTitleSection3 { get; set; }
 
-        public decimal SAOperatingCostsWithTitleSection3 { get; set; }
+        public decimal SaOperatingCostsWithTitleSection3 { get; set; }
 
         public decimal BadDebtProvisionTitleSection3 { get; set; }
         //End Section-3
