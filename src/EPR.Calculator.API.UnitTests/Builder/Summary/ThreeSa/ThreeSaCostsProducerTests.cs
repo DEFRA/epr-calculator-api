@@ -98,9 +98,11 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
             {
                 CalcResultParameterOtherCost = new CalcResultParameterOtherCost
                 {
-                    BadDebtProvision = new KeyValuePair<string, string>("key1", "6%"),
+                    BadDebtProvision = new KeyValuePair<string, string>("key1",
+                        "6%"),
                     BadDebtValue = 6m,
-                    Details = [
+                    Details =
+                    [
                         new CalcResultParameterOtherCostDetail
                         {
                             Name = "4 LA Data Prep Charge",
@@ -117,7 +119,8 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             TotalValue = 100
                         }
                     ],
-                    Materiality = [
+                    Materiality =
+                    [
                         new CalcResultMateriality
                         {
                             Amount = "Amount £s",
@@ -128,7 +131,8 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                         }
                     ],
                     Name = "Parameters - Other",
-                    SaOperatingCost = [
+                    SaOperatingCost =
+                    [
                         new CalcResultParameterOtherCostDetail
                         {
                             Name = string.Empty,
@@ -145,7 +149,8 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             TotalValue = 100
                         }
                     ],
-                    SchemeSetupCost = {
+                    SchemeSetupCost =
+                    {
                         Name = "5 Scheme set up cost Yearly Cost",
                         OrderId = 1,
                         England = "£40.00",
@@ -160,39 +165,51 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                         TotalValue = 100
                     }
                 },
-                CalcResultDetail = new CalcResultDetail() { },
-                CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData()
+                CalcResultDetail = new CalcResultDetail()
+                {
+                },
+                CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData
                 {
                     CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>()
                     {
-                        new CalcResultLaDisposalCostDataDetail()
+                        new CalcResultLaDisposalCostDataDetail
                         {
-                            DisposalCostPricePerTonne="20",
-                            England="EnglandTest",
-                            Wales="WalesTest",
-                            Name="ScotlandTest",
-                            Scotland="ScotlandTest",
-                            Material = "Material1"
+                            DisposalCostPricePerTonne = "20",
+                            England = "EnglandTest",
+                            Wales = "WalesTest",
+                            Name = "ScotlandTest",
+                            Scotland = "ScotlandTest",
+                            Material = "Material1",
+                            NorthernIreland = null,
+                            Total = null,
+                            ProducerReportedHouseholdPackagingWasteTonnage = null
                         },
-                        new CalcResultLaDisposalCostDataDetail()
+                        new CalcResultLaDisposalCostDataDetail
                         {
-                            DisposalCostPricePerTonne="20",
-                            England="EnglandTest",
-                            Wales="WalesTest",
-                            Name="Material1",
-                            Scotland="ScotlandTest",
+                            DisposalCostPricePerTonne = "20",
+                            England = "EnglandTest",
+                            Wales = "WalesTest",
+                            Name = "Material1",
+                            Scotland = "ScotlandTest",
+                            NorthernIreland = null,
+                            Total = null,
+                            ProducerReportedHouseholdPackagingWasteTonnage = null,
 
                         },
-                        new CalcResultLaDisposalCostDataDetail()
+                        new CalcResultLaDisposalCostDataDetail
                         {
-                            DisposalCostPricePerTonne="10",
-                            England="EnglandTest",
-                            Wales="WalesTest",
-                            Name="Material2",
-                            Scotland="ScotlandTest",
+                            DisposalCostPricePerTonne = "10",
+                            England = "EnglandTest",
+                            Wales = "WalesTest",
+                            Name = "Material2",
+                            Scotland = "ScotlandTest",
+                            NorthernIreland = null,
+                            Total = null,
+                            ProducerReportedHouseholdPackagingWasteTonnage = null,
 
                         }
-                    }
+                    },
+                    Name = null
                 },
                 CalcResultLapcapData = new CalcResultLapcapData()
                 {
@@ -200,92 +217,102 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                     {
                     }
                 },
-                CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment()
+                CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment
                 {
                     CalcResultOnePlusFourApportionmentDetails =
                     [
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=14.53M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=1.15M,
-                            WalesTotal=020M,
-                            Name="1 + 4 Apportionment %s",
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 14.53M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 1.15M,
+                            WalesTotal = 020M,
+                            Name = "1 + 4 Apportionment %s",
                         },
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 0.10M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 0.15M,
+                            WalesTotal = 020M,
+                            Name = "Test",
                         },
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=0.10M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 0.10M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 0.15M,
+                            WalesTotal = 020M,
+                            Name = "Test",
                         },
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=14.53M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=0.15M,
-                            WalesTotal=020M,
-                            Name="Test",
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 14.53M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 0.15M,
+                            WalesTotal = 020M,
+                            Name = "Test",
                         },
                         new()
                         {
-                            EnglandDisposalTotal="80",
-                            NorthernIrelandDisposalTotal="70",
-                            ScotlandDisposalTotal="30",
-                            WalesDisposalTotal="20",
-                            AllTotal=0.1M,
-                            EnglandTotal=14.53M,
-                            NorthernIrelandTotal=0.15M,
-                            ScotlandTotal=1.15M,
-                            WalesTotal=020M,
-                            Name="Test",
-                            OrderId=4
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 14.53M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 1.15M,
+                            WalesTotal = 020M,
+                            Name = "Test",
+                            OrderId = 4
                         }
-                    ]
+                    ],
+                    Name = null
                 },
-                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost { },
+                CalcResultParameterCommunicationCost = new CalcResultParameterCommunicationCost
+                {
+                    Name = null
+                },
                 CalcResultSummary = new CalcResultSummary
                 {
                     ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>()
                     {
                         new()
                         {
-                            ProducerCommsFeesByMaterial =  new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>(){ },
-                            ProducerDisposalFeesByMaterial = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>(){ },
-                            ProducerId ="1",
-                            ProducerName ="Test",
-                            TotalProducerDisposalFeeWithBadDebtProvision =100,
-                            TotalProducerCommsFeeWithBadDebtProvision =100,
-                            SubsidiaryId ="1",
+                            ProducerCommsFeesByMaterial =
+                                new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>()
+                                {
+                                },
+                            ProducerDisposalFeesByMaterial =
+                                new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>()
+                                {
+                                },
+                            ProducerId = "1",
+                            ProducerName = "Test",
+                            TotalProducerDisposalFeeWithBadDebtProvision = 100,
+                            TotalProducerCommsFeeWithBadDebtProvision = 100,
+                            SubsidiaryId = "1",
                             ProducerOverallPercentageOfCostsForOnePlus2A2B2C = 1
                         }
                     }
@@ -294,20 +321,21 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                 {
                     CalcResultCommsCostCommsCostByMaterial =
                     [
-                        new ()
+                        new()
                         {
-                            CommsCostByMaterialPricePerTonne="0.42",
-                            Name ="Aluminium",
+                            CommsCostByMaterialPricePerTonne = "0.42",
+                            Name = "Aluminium",
 
                         },
-                        new ()
+                        new()
                         {
-                            CommsCostByMaterialPricePerTonne="0.3",
-                            Name ="Glass",
+                            CommsCostByMaterialPricePerTonne = "0.3",
+                            Name = "Glass",
 
                         }
                     ]
-                }
+                },
+                CalcResultLateReportingTonnageData = null
             };
 
             _materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
