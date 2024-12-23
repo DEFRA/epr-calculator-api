@@ -20,7 +20,7 @@ namespace EPR.Calculator.API.Builder.Summary.ThreeSA
 
         public static decimal GetThreeSaCostsWithoutBadDebtProvision(CalcResult calcResult)
         {
-            return calcResult.CalcResultParameterOtherCost.SaOperatingCost.OrderByDescending(t => t.OrderId).FirstOrDefault().TotalValue;
+            return calcResult.CalcResultParameterOtherCost.SaOperatingCost.OrderByDescending(t => t.OrderId).First().TotalValue;
         }
 
         public static decimal GetBadDebtProvisionSection3(CalcResult calcResult)
