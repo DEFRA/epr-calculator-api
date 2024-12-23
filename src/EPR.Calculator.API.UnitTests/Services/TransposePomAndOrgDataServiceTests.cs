@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Data;
+﻿using AutoFixture;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -13,12 +14,11 @@ namespace EPR.Calculator.API.UnitTests.Services
     [TestClass]
     public class TransposePomAndOrgDataServiceTests
     {
-        private ApplicationDBContext _context;
+        private readonly ApplicationDBContext _context;
 
-        private DbContextOptions<ApplicationDBContext> _dbContextOptions;
+        private readonly DbContextOptions<ApplicationDBContext> _dbContextOptions;
 
-        [TestInitialize]
-        public void SetUp()
+        public TransposePomAndOrgDataServiceTests()
         {
             _dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
@@ -30,10 +30,12 @@ namespace EPR.Calculator.API.UnitTests.Services
             SeedDatabase();            
         }
 
+        public Fixture Fixture { get; init; } = new Fixture();
+
         [TestCleanup]
         public void TearDown()
         {
-            _context?.Database.EnsureDeleted();
+            _context.Database.EnsureDeleted();
             _context.Dispose();
         }
 
@@ -63,7 +65,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 ProducerId = 1,
                 ProducerName = "UPU LIMITED",
                 CalculatorRunId = 1,
-                CalculatorRun = new CalculatorRun()
+                CalculatorRun = Fixture.Create<CalculatorRun>(),
             };
 
 #pragma warning disable CS8604 // Possible null reference argument.
@@ -103,7 +105,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                     SubsidiaryId = "1",
                     ProducerName = "UPU LIMITED",
                     CalculatorRunId = 1,
-                    CalculatorRun = new CalculatorRun()
+                    CalculatorRun = Fixture.Create<CalculatorRun>(),
                 }
             };
 
@@ -116,9 +118,9 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var producerReportedMaterial = _context.ProducerReportedMaterial.FirstOrDefault();
             Assert.IsNotNull(producerReportedMaterial);
-            Assert.AreEqual(expectedResult.Material.Code, producerReportedMaterial.Material.Code);
+            Assert.AreEqual(expectedResult.Material.Code, producerReportedMaterial.Material!.Code);
             Assert.AreEqual(expectedResult.Material.Name, producerReportedMaterial.Material.Name);
-            Assert.AreEqual(expectedResult.ProducerDetail.ProducerId, producerReportedMaterial.ProducerDetail.ProducerId);
+            Assert.AreEqual(expectedResult.ProducerDetail.ProducerId, producerReportedMaterial.ProducerDetail!.ProducerId);
             Assert.AreEqual(expectedResult.ProducerDetail.ProducerName, producerReportedMaterial.ProducerDetail.ProducerName);
         }
 
@@ -132,7 +134,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 SubsidiaryId ="1",                
                 ProducerName = "Subsid2",
                 CalculatorRunId = 1,
-                CalculatorRun = new CalculatorRun()
+                CalculatorRun = Fixture.Create<CalculatorRun>(),
             };
 
 #pragma warning disable CS8604 // Possible null reference argument.
@@ -158,7 +160,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 ProducerId = 2,
                 ProducerName = "Subsid2",
                 CalculatorRunId = 1,
-                CalculatorRun = new CalculatorRun()
+                CalculatorRun = Fixture.Create<CalculatorRun>(),
             };
 
 #pragma warning disable CS8604 // Possible null reference argument.
@@ -203,7 +205,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var output = service.GetLatestOrganisationName(1, orgSubDetails, orgDetails);
             Assert.IsNotNull(output);
-            Assert.AreEqual(output, "Test1");
+            Assert.AreEqual("Test1", output);
         }
 
 
@@ -238,7 +240,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var output = service.GetLatestSubsidaryName(1, "1", orgSubDetails, orgDetails);
             Assert.IsNotNull(output);
-            Assert.AreEqual(output, "Test1");
+            Assert.AreEqual("Test1", output);
         }
 
         [TestMethod]
@@ -253,7 +255,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var output = service.GetLatestSubsidaryName(1, "1", orgSubDetails, orgDetails);
             Assert.IsNotNull(output);
-            Assert.AreEqual(output, "UPU LIMITED");
+            Assert.AreEqual("UPU LIMITED", output);
         }
 
 

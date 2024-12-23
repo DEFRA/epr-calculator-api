@@ -11,7 +11,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
     {
         internal class ProducerData
         {
-            public string Material { get; set; }
+            public required string Material { get; set; }
             public decimal Tonnage { get; set; }
         }
 
@@ -45,8 +45,8 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
                     Tonnage = producerMaterial.PackagingTonnage
                 }).ToList();
 
-            var lapcapDetails = calcResult?.CalcResultLapcapData?.CalcResultLapcapDataDetails
-                ?.Where(t => t.OrderId != 1 && t.Name != CalcResultLapcapDataBuilder.CountryApportionment).ToList();
+            var lapcapDetails = calcResult.CalcResultLapcapData.CalcResultLapcapDataDetails
+                .Where(t => t.OrderId != 1 && t.Name != CalcResultLapcapDataBuilder.CountryApportionment).ToList();
 
 
             foreach (var details in lapcapDetails)
@@ -69,7 +69,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
 
             foreach (var details in laDisposalCostDetails)
             {
-                details.LateReportingTonnage = GetLateReportingTonnageDataByMaterial(details.Name, calcResult?.CalcResultLateReportingTonnageData?.CalcResultLateReportingTonnageDetails?.ToList());
+                details.LateReportingTonnage = GetLateReportingTonnageDataByMaterial(details.Name, calcResult.CalcResultLateReportingTonnageData.CalcResultLateReportingTonnageDetails.ToList());
 
                 details.ProducerReportedHouseholdTonnagePlusLateReportingTonnage = GetProducerReportedHouseholdTonnagePlusLateReportingTonnage(details);
                 if (details.Name == CommonConstants.Total) continue;
@@ -90,18 +90,18 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
             return material == "Total"? producerData.Sum(t=>t.Tonnage).ToString()  : producerData.Where(t => t.Material == material).Sum(t => t.Tonnage).ToString();
         }
 
-        private string GetLateReportingTonnageDataByMaterial(string material, List<CalcResultLateReportingTonnageDetail> details)
+        private static string GetLateReportingTonnageDataByMaterial(string material, List<CalcResultLateReportingTonnageDetail> details)
         {
             return details.Where(t => t.Name == material).Sum(t => t.TotalLateReportingTonnage).ToString();
         }
 
-        private string GetProducerReportedHouseholdTonnagePlusLateReportingTonnage(CalcResultLaDisposalCostDataDetail detail)
+        private static string GetProducerReportedHouseholdTonnagePlusLateReportingTonnage(CalcResultLaDisposalCostDataDetail detail)
         {
             var value = GetDecimalValue(detail.LateReportingTonnage) + GetDecimalValue(detail.ProducerReportedHouseholdPackagingWasteTonnage);
             return value.ToString();
         }
 
-        private string CalculateDisposalCostPricePerTonne(CalcResultLaDisposalCostDataDetail detail)
+        private static string CalculateDisposalCostPricePerTonne(CalcResultLaDisposalCostDataDetail detail)
         {
             var HouseholdTonnagePlusLateReportingTonnage = GetDecimalValue(detail.ProducerReportedHouseholdTonnagePlusLateReportingTonnage);
             if (HouseholdTonnagePlusLateReportingTonnage == 0) return "0";
@@ -113,7 +113,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
         }
 
 
-        private CalcResultLaDisposalCostDataDetail GetHeader()
+        private static CalcResultLaDisposalCostDataDetail GetHeader()
         {
             return new CalcResultLaDisposalCostDataDetail()
             {
@@ -132,12 +132,12 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
         }
 
 
-        private decimal GetDecimalValue(string value)
+        private static decimal GetDecimalValue(string value)
         {
             return decimal.Parse(value, CultureInfo.InvariantCulture);
         }
 
-        private decimal ConvertCurrencyToDecimal(string currency)
+        private static decimal ConvertCurrencyToDecimal(string currency)
         {
             decimal amount;
             decimal.TryParse(currency, NumberStyles.Currency, CultureInfo.GetCultureInfo("en-GB"), out amount);

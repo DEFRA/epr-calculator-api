@@ -29,8 +29,8 @@ namespace EPR.Calculator.API.Data.DataModels
         [Precision(18, 3)]
         public decimal PackagingTonnage { get; set; }
 
-        public virtual ProducerDetail ProducerDetail { get; set; }
+        public virtual ProducerDetail? ProducerDetail { get; set; }
 
-        public virtual Material Material { get; set; }
+        public virtual Material? Material { get; set; }
     }
 }

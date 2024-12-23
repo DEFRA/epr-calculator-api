@@ -24,7 +24,7 @@ namespace EPR.Calculator.API.Exporter
         {
             var csvContent = new StringBuilder();
             LoadCalcResultDetail(results, csvContent);
-            if (results?.CalcResultLapcapData != null)
+            if (results.CalcResultLapcapData != null)
             {
                 PrepareLapcapData(results.CalcResultLapcapData, csvContent);
             }
@@ -36,24 +36,24 @@ namespace EPR.Calculator.API.Exporter
 
             csvContent.AppendLine();
 
-            if (results?.CalcResultParameterOtherCost != null)
+            if (results.CalcResultParameterOtherCost != null)
             {
                 PrepareOtherCosts(results.CalcResultParameterOtherCost, csvContent);
             }
 
-            if (results?.CalcResultOnePlusFourApportionment != null)
+            if (results.CalcResultOnePlusFourApportionment != null)
             {
                 PrepareOnePluseFourApportionment(results.CalcResultOnePlusFourApportionment, csvContent);
             }
 
             csvContent.AppendLine();
 
-            if (results?.CalcResultCommsCostReportDetail != null)
+            if (results.CalcResultCommsCostReportDetail != null)
             {
                 PrepareCommsCost(results.CalcResultCommsCostReportDetail, csvContent);
             }
 
-            if (results?.CalcResultLaDisposalCostData != null)
+            if (results.CalcResultLaDisposalCostData != null)
             {
                 PrepareLaDisposalCostData(results.CalcResultLaDisposalCostData, csvContent);
             }
@@ -67,7 +67,7 @@ namespace EPR.Calculator.API.Exporter
 
         }
 
-        private void PrepareCommsCost(CalcResultCommsCost communicationCost, StringBuilder csvContent)
+        private static void PrepareCommsCost(CalcResultCommsCost communicationCost, StringBuilder csvContent)
         {
             csvContent.AppendLine();
             csvContent.AppendLine();
@@ -434,7 +434,7 @@ namespace EPR.Calculator.API.Exporter
         private static void PrepareSummaryDataHeader(CalcResultSummary resultSummary, StringBuilder csvContent)
         {
             // Add result summary header
-            csvContent.AppendLine(CsvSanitiser.SanitiseData(resultSummary.ResultSummaryHeader.Name));
+            csvContent.AppendLine(CsvSanitiser.SanitiseData(resultSummary.ResultSummaryHeader?.Name));
 
             // Add producer disposal fees header
             WriteSecondaryHeaders(csvContent, resultSummary.ProducerDisposalFeesHeaders);

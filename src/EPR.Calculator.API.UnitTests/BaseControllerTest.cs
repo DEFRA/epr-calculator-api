@@ -21,15 +21,14 @@ namespace EPR.Calculator.API.Tests.Controllers
     [TestClass]
     public class BaseControllerTest
     {
-        protected ApplicationDBContext? dbContext;
-        protected DefaultParameterSettingController? defaultParameterSettingController;
-        protected LapcapDataController? lapcapDataController;
-        protected CalculatorController? calculatorController;
-        protected CalculatorInternalController? calculatorInternalController;
-        protected IOrgAndPomWrapper? wrapper;
+        protected ApplicationDBContext dbContext;
+        protected DefaultParameterSettingController defaultParameterSettingController;
+        protected LapcapDataController lapcapDataController;
+        protected CalculatorController calculatorController;
+        protected CalculatorInternalController calculatorInternalController;
+        protected IOrgAndPomWrapper wrapper;
 
-        [TestInitialize]
-        public void SetUp()
+        public BaseControllerTest()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
             .UseInMemoryDatabase(databaseName: "PayCal")

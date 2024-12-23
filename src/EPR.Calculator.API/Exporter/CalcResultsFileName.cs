@@ -57,7 +57,7 @@
                 .Where(run => run.Id == runId)
                 .Select(run => new { run.Name, run.CreatedAt}).Single();
 
-            return new CalcResultsFileName(runId, runDetails.Name, runDetails.CreatedAt);
+            return new CalcResultsFileName(runId, runDetails.Name ?? string.Empty, runDetails.CreatedAt);
         }
     }
 }
