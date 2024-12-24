@@ -13,6 +13,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
 using System.Globalization;
+using EPR.Calculator.API.Builder.Summary.ThreeSA;
 
 namespace EPR.Calculator.API.Builder.Summary.Common;
 
@@ -433,16 +434,16 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithout, ColumnIndex = TwoCCommsCostColumnIndex.Value },
             new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostBadBebtProvision, ColumnIndex = TwoCCommsCostColumnIndex.Value + 1 },
             new CalcResultSummaryHeader { Name = TwoCCommsConstantsHeader.TwoCCommsCostByCountryWithBadDebt, ColumnIndex = TwoCCommsCostColumnIndex.Value + 2 },
-
-            //Section-3 Title headers
-            new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.SAOperatingCostsWithoutBadDebtProvisionTitleSection3, ColumnIndex = ThreeSaCostColumnIndex.Index },
-            new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.BadDebtProvisionTitleSection3, ColumnIndex = ThreeSaCostColumnIndex.Index + 1 },
-            new CalcResultSummaryHeader { Name = ThreeSAConstantsHeader.SAOperatingCostsWithBadDebtProvisionTitleSection3,ColumnIndex = ThreeSaCostColumnIndex.Index + 2 },
         ]);
 
         // Section Total bill (1 + 2a + 2b + 2c)
         resultSummaryHeaders.AddRange(
             OnePlus2A2B2CProducer.GetSummaryHeaders()
+        );
+
+        // Section-3 Title headers
+        resultSummaryHeaders.AddRange(
+            ThreeSaCostsSummary.GetHeaders()
         );
 
         // Section-4 Title headers
@@ -536,9 +537,9 @@ public static class CalcResultSummaryUtil
 
         //Section-3 -first header
         materialsBreakdownHeaders.AddRange([
-           new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SAOperatingCostsWoTitleSection3, decimalRoundUp)}", ColumnIndex = ThreeSaCostColumnIndex.Index },
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionTitleSection3, decimalRoundUp)}" ,ColumnIndex = ThreeSaCostColumnIndex.Index +1},
-            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SAOperatingCostsWithTitleSection3, decimalRoundUp)}", ColumnIndex = ThreeSaCostColumnIndex.Index +2 }
+           new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SaOperatingCostsWoTitleSection3, decimalRoundUp)}", ColumnIndex = ThreeSaCostsSummary.ColumnIndex },
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.BadDebtProvisionTitleSection3, decimalRoundUp)}" ,ColumnIndex = ThreeSaCostsSummary.ColumnIndex +1},
+            new CalcResultSummaryHeader { Name = $"£{Math.Round(result.SaOperatingCostsWithTitleSection3, decimalRoundUp)}", ColumnIndex = ThreeSaCostsSummary.ColumnIndex +2 }
          ]);
 
         // LA data prep costs section 4
@@ -675,15 +676,9 @@ public static class CalcResultSummaryUtil
         );
 
         // SA operating cost section 3
-        columnHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.TotalSAOperatingCostsWoTitleSection3, ColumnIndex = ThreeSaCostColumnIndex.Index },
-            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.BadDebtProvisionSection3 },
-            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.SAOperatingCostsWithTitleSection3 },
-            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.EnglandTotalWithBadDebtProvisionSection3 },
-            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.WalesTotalWithBadDebtProvisionSection3 },
-            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.ScotlandTotalWithBadDebtProvisionSection3 },
-            new CalcResultSummaryHeader { Name = ThreeSAOperatingCostSubColumnHeader.NorthernIrelandTotalWithBadDebtProvisionSection3 }
-        ]);
+        columnHeaders.AddRange(
+            ThreeSaCostsProducer.GetHeaders()
+        );
 
         // Section-4 LA data prep costs column headers
         columnHeaders.AddRange(
