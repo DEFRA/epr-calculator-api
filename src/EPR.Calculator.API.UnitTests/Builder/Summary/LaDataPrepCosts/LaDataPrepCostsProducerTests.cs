@@ -14,10 +14,7 @@
     public class LaDataPrepCostsProducerTests
     {
         private readonly ApplicationDBContext _dbContext;
-        private readonly IEnumerable<MaterialDetail> _materials;
         private readonly CalcResult _calcResult;
-        private readonly Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> _materialCostSummary;
-        private readonly Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> _commsCostSummary;
 
         private Fixture Fixture { get; init; } = new Fixture();
 
