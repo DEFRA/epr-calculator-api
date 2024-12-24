@@ -4,6 +4,9 @@ using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+using System.Security.Principal;
 
 namespace EPR.Calculator.API.UnitTests
 {
@@ -13,6 +16,19 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void InvalidTest_With_NoRecords()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            defaultParameterSettingController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
@@ -35,6 +51,20 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void InvalidTest_With_Invalid_Data()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            defaultParameterSettingController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
+
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
@@ -54,6 +84,19 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void InvalidTest_With_Missing_Data()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            defaultParameterSettingController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             foreach (var uniqueRef in DefaultParameterUniqueReferences.UniqueReferences)
             {

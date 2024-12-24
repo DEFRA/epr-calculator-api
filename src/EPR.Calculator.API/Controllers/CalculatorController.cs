@@ -38,7 +38,13 @@ namespace EPR.Calculator.API.Controllers
         [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
         {
-            var userName = User?.Claims?.FirstOrDefault(x => x.Type == "name")?.Value;
+            var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
+            if (claim == null)
+            {
+                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+
+            var userName = claim.Value;
             // Return bad request if the model is invalid
             if (!ModelState.IsValid)
             {
@@ -231,7 +237,13 @@ namespace EPR.Calculator.API.Controllers
         [Authorize(Roles = "SASuperUser")]
         public IActionResult PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
-            var userName = User?.Claims?.FirstOrDefault(x => x.Type == "name")?.Value;
+            var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
+            if (claim == null)
+            {
+                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+
+            var userName = claim.Value;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));

@@ -118,6 +118,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public void CreateTest_With_Missing_Year()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            lapcapDataController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
             var createDefaultParameterDto = CreateDto();
             createDefaultParameterDto.ParameterYear = string.Empty;
             lapcapDataController?.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
@@ -128,6 +141,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public void CreateTest_With_Missing_Records()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            lapcapDataController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
             var uniqueRef = "ENG-WD";
             var createDefaultParameterDto = CreateDto([uniqueRef]);
             createDefaultParameterDto.LapcapDataTemplateValues = createDefaultParameterDto.LapcapDataTemplateValues;
@@ -142,6 +168,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public void CreateTest_With_More_Records()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            lapcapDataController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
             var createDefaultParameterDto = CreateDto();
             var list = new List<LapcapDataTemplateValueDto>(createDefaultParameterDto.LapcapDataTemplateValues);
             if (list != null)

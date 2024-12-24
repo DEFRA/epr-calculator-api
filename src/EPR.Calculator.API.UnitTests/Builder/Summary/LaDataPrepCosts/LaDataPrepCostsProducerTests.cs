@@ -2,9 +2,9 @@
 {
     using AutoFixture;
     using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
-    using EPR.Calculator.API.Data;
-    using EPR.Calculator.API.Data.DataModels;
-    using EPR.Calculator.API.Models;
+    using Data;
+    using Data.DataModels;
+    using Models;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,10 +14,7 @@
     public class LaDataPrepCostsProducerTests
     {
         private readonly ApplicationDBContext _dbContext;
-        private readonly IEnumerable<MaterialDetail> _materials;
         private readonly CalcResult _calcResult;
-        private readonly Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> _materialCostSummary;
-        private readonly Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> _commsCostSummary;
 
         private Fixture Fixture { get; init; } = new Fixture();
 

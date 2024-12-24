@@ -1,10 +1,10 @@
-﻿using EPR.Calculator.API.Validators;
-using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
-using Microsoft.AspNetCore.Mvc;
+using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -25,13 +25,19 @@ namespace EPR.Calculator.API.Controllers
         [Authorize(Roles = "SASuperUser")]
         public IActionResult Create([FromBody] CreateLapcapDataDto request)
         {
-            var userName = User?.Claims?.FirstOrDefault(x => x.Type == "name")?.Value;
+            var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
+            if (claim == null)
+            {
+                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+
+            var userName = claim.Value;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
             var validationResult = validator.Validate(request);
-            if (validationResult != null && validationResult.IsInvalid)
+            if (validationResult.IsInvalid)
             {
                 return BadRequest(validationResult.Errors);
             }

@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -11,6 +12,8 @@ using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Security.Claims;
+using System.Security.Principal;
 
 namespace EPR.Calculator.API.UnitTests
 {
@@ -45,7 +48,23 @@ namespace EPR.Calculator.API.UnitTests
         public void PutCalculatorRunStatusTest_422()
         {
             var controller =
-                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object, this.mockStorageService.Object);
+                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
+                    this.mockStorageService.Object);
+
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
+
             var runId = 999;
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
                 { ClassificationId = 6, RunId = runId }) as ObjectResult;
@@ -77,6 +96,20 @@ namespace EPR.Calculator.API.UnitTests
                 new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
                     this.mockStorageService.Object);
 
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
+
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
                 { ClassificationId = invalidClassificationId, RunId = runId }) as ObjectResult;
             Assert.IsNotNull(result);
@@ -106,6 +139,20 @@ namespace EPR.Calculator.API.UnitTests
             var controller =
                 new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
                     this.mockStorageService.Object);
+
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
 
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
                 { ClassificationId = validClassificationId, RunId = runId }) as StatusCodeResult;
@@ -139,6 +186,20 @@ namespace EPR.Calculator.API.UnitTests
             var controller =
                 new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
                     this.mockStorageService.Object);
+
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
 
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
                 { ClassificationId = classificationId, RunId = runId }) as ObjectResult;
