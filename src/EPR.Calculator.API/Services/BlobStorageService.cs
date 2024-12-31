@@ -43,10 +43,10 @@ namespace EPR.Calculator.API.Services
             {
                 return Results.NotFound(fileName);
             }
-
-            using var memoryStream = new MemoryStream();
-            await blobClient.DownloadToAsync(memoryStream);
-            return Results.File(memoryStream.ToArray(), OctetStream, fileName);
+            
+            var downloadResult = await blobClient.DownloadContentAsync();
+            var content = downloadResult.Value.Content.ToString();
+            return Results.File(Encoding.Unicode.GetBytes(content), OctetStream, fileName);
         }
     }
 }
