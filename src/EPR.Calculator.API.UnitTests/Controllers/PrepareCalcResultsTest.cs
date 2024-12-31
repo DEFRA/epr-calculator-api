@@ -13,17 +13,16 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
-using EPR.Calculator.API.UnitTests.Controllers;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace EPR.Calculator.API.UnitTests
+namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
-    public class CalcResultTests : BaseControllerTest
+    public class PrepareCalcResultsTest : BaseControllerTest
     {
         private readonly Mock<ICalcResultBuilder> mockCalcResultBuilder;
         private readonly Mock<ICalcResultsExporter<CalcResult>> mockExporter;
@@ -44,7 +43,7 @@ namespace EPR.Calculator.API.UnitTests
 
         private Mock<IStorageService>? mockStorageservice;
 
-        public CalcResultTests()
+        public PrepareCalcResultsTest()
         {
             mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
             mockExporter = new Mock<ICalcResultsExporter<CalcResult>>();
