@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace EPR.Calculator.API.UnitTests
+namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
     public class DownloadResultFileTest
@@ -23,28 +23,28 @@ namespace EPR.Calculator.API.UnitTests
 
         public DownloadResultFileTest()
         {
-            this.mockStorageService = new Mock<IStorageService>();
-            this.mockConfig = new Mock<IConfiguration>();
-            this.mockServiceBusFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
+            mockStorageService = new Mock<IStorageService>();
+            mockConfig = new Mock<IConfiguration>();
+            mockServiceBusFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
-            this.context = new ApplicationDBContext(dbContextOptions);
-            this.context.Database.EnsureCreated();
+            context = new ApplicationDBContext(dbContextOptions);
+            context.Database.EnsureCreated();
         }
 
         [TestCleanup]
         public void CleanUp()
         {
-            this.context.Database.EnsureDeleted();
+            context.Database.EnsureDeleted();
         }
 
         [TestMethod]
         public void DownloadResultFile_Test()
         {
             var date = new DateTime(2024, 11, 11);
-            this.context.CalculatorRuns.Add(new CalculatorRun
+            context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",
                 CalculatorRunClassificationId = 2,
@@ -54,13 +54,13 @@ namespace EPR.Calculator.API.UnitTests
                 DefaultParameterSettingMasterId = 1,
                 Financial_Year = "2024-25"
             });
-            this.context.SaveChanges();
+            context.SaveChanges();
 
             var controller =
-                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
-                    this.mockStorageService.Object);
+                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
+                    mockStorageService.Object);
             var mockResult = new Mock<IResult>();
-            this.mockStorageService.Setup(x => x.DownloadFile(It.IsAny<string>())).ReturnsAsync(mockResult.Object);
+            mockStorageService.Setup(x => x.DownloadFile(It.IsAny<string>())).ReturnsAsync(mockResult.Object);
 
             var downloadResultFile = controller.DownloadResultFile(1);
 
@@ -68,7 +68,7 @@ namespace EPR.Calculator.API.UnitTests
 
             var result1 = downloadResultFile.Result;
 
-            this.mockStorageService.Verify(x => x.DownloadFile("1-Calc RunName_Results File_20241111.csv"));
+            mockStorageService.Verify(x => x.DownloadFile("1-Calc RunName_Results File_20241111.csv"));
 
             Assert.AreEqual(mockResult.Object, result1);
         }
