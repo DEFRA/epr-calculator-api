@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Builder.Summary.HHTonnageVsAllProducer;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Models;
+using System;
 
 namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
 {
@@ -62,13 +63,13 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
             ProducerDetail producer, List<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails)
         {
             result.TwoCEnglandTotalWithBadDebt =
-                GetCommsEnglandWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
+                GetCommEnglandWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
             result.TwoCWalesTotalWithBadDebt =
-                GetCommsWalesWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
+                GetCommWalesWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
             result.TwoCNorthernIrelandTotalWithBadDebt =
-                GetCommsNIWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
+                GetCommNIWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
             result.TwoCScotlandTotalWithBadDebt =
-                GetCommsScotlandWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
+                GetCommScotlandWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
 
             result.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt =
                 calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().TotalValue *
@@ -103,7 +104,7 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
 
             foreach (var producer in producers)
             {
-                northernIrelandTotalwithBadDebtprovision += GetCommsEnglandWithBadDebt2C(calcResult, producer, allResults);
+                northernIrelandTotalwithBadDebtprovision += GetCommEnglandWithBadDebt2C(calcResult, producer, allResults);
             }
 
             return northernIrelandTotalwithBadDebtprovision;
@@ -115,7 +116,7 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
 
             foreach (var producer in producers)
             {
-                northernIrelandTotalwithBadDebtprovision += GetCommsWalesWithBadDebt2C(calcResult, producer, allResults);
+                northernIrelandTotalwithBadDebtprovision += GetCommWalesWithBadDebt2C(calcResult, producer, allResults);
             }
 
             return northernIrelandTotalwithBadDebtprovision;
@@ -127,7 +128,7 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
 
             foreach (var producer in producers)
             {
-                northernIrelandTotalwithBadDebtprovision += GetCommsNIWithBadDebt2C(calcResult, producer, allResults);
+                northernIrelandTotalwithBadDebtprovision += GetCommNIWithBadDebt2C(calcResult, producer, allResults);
             }
 
             return northernIrelandTotalwithBadDebtprovision;
@@ -139,53 +140,41 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
 
             foreach (var producer in producers)
             {
-                northernIrelandTotalwithBadDebtprovision += GetCommsScotlandWithBadDebt2C(calcResult, producer, allResults);
+                northernIrelandTotalwithBadDebtprovision += GetCommScotlandWithBadDebt2C(calcResult, producer, allResults);
             }
 
             return northernIrelandTotalwithBadDebtprovision;
         }
 
-        public static decimal GetCommsWalesWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        public static decimal GetCommWalesWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
         {
-            return GetCommsWithBadDebt2C(calcResult, producer, allResults, Wales);
+            decimal twoCCommCostsByCountryBadDebtProvision = calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().WalesValue;
+            return twoCCommCostsByCountryBadDebtProvision * GetCommWithBadDebt2C(calcResult, producer, allResults);
         }
 
-        public static decimal GetCommsNIWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        public static decimal GetCommNIWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
         {
-            return GetCommsWithBadDebt2C(calcResult, producer, allResults, NorthernIreland);
+            decimal twoCCommCostsByCountryBadDebtProvision = calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().NorthernIrelandValue;
+            return twoCCommCostsByCountryBadDebtProvision * GetCommWithBadDebt2C(calcResult, producer, allResults);
         }
 
-        public static decimal GetCommsScotlandWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        public static decimal GetCommScotlandWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
         {
-            return GetCommsWithBadDebt2C(calcResult, producer, allResults, Scotland);
+            decimal twoCCommCostsByCountryBadDebtProvision = calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().ScotlandValue;
+            return twoCCommCostsByCountryBadDebtProvision * GetCommWithBadDebt2C(calcResult, producer, allResults);
         }
 
-        public static decimal GetCommsEnglandWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        public static decimal GetCommEnglandWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
         {
-            return GetCommsWithBadDebt2C(calcResult, producer, allResults, England);
+            decimal twoCCommCostsByCountryBadDebtProvision = calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().EnglandValue;
+            return twoCCommCostsByCountryBadDebtProvision * GetCommWithBadDebt2C(calcResult, producer, allResults);
         }
 
-        public static decimal GetCommsWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults, string region)
+        public static decimal GetCommWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
         {
-            decimal twocCommsCostsbyCountryBadDebtprovision = calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().TotalValue;
-            decimal badDebtProvision = calcResult.CalcResultParameterOtherCost.BadDebtValue /100;
-            decimal percentageOfProducerReportedHHTonnagevsAllProducers = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducers(producer, allResults) / 100;
-            decimal regionApportionment = GetRegionApportionment2C(calcResult, region);
-            return twocCommsCostsbyCountryBadDebtprovision * (1 + badDebtProvision) * percentageOfProducerReportedHHTonnagevsAllProducers * regionApportionment;
-        }
-
-        public static decimal GetRegionApportionment2C(CalcResult calcResult, string region)
-        {
-            var apportionmentDetails = calcResult.CalcResultOnePlusFourApportionment.CalcResultOnePlusFourApportionmentDetails;
-
-            return region switch
-            {
-                England => Convert.ToDecimal(apportionmentDetails.Select(x => x.EnglandDisposalTotal).ToList()[4].Trim('%')) / 100,
-                Wales => Convert.ToDecimal(apportionmentDetails.Select(x => x.WalesDisposalTotal).ToList()[4].Trim('%')) / 100,
-                Scotland => Convert.ToDecimal(apportionmentDetails.Select(x => x.ScotlandDisposalTotal).ToList()[4].Trim('%')) / 100,
-                NorthernIreland => Convert.ToDecimal(apportionmentDetails.Select(x => x.NorthernIrelandDisposalTotal).ToList()[4].Trim('%')) / 100,
-                _ => throw new ArgumentException("Invalid region specified")
-            };
+            decimal badDebtProvision = calcResult.CalcResultParameterOtherCost.BadDebtValue / 100;
+            decimal percentageOfProducerReportedHhTonnageVsAllProducers = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducers(producer, allResults) / 100;
+            return (1 + badDebtProvision) * percentageOfProducerReportedHhTonnageVsAllProducers;
         }
     }
 }
