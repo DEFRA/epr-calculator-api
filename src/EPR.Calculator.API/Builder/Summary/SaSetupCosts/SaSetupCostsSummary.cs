@@ -1,5 +1,4 @@
-﻿using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Models;
+﻿using EPR.Calculator.API.Models;
 
 namespace EPR.Calculator.API.Builder.Summary.SaSetupCosts
 {
@@ -30,7 +29,6 @@ namespace EPR.Calculator.API.Builder.Summary.SaSetupCosts
         {
             return GetOneOffFeeSetupCostsWithoutBadDebtProvision(calcResult) + GetBadDebtProvision(calcResult);
         }
-
 
         public static decimal GetSetUpBadDebtProvision(CalcResult calcResult)
         {

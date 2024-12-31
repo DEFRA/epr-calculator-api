@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 namespace EPR.Calculator.API.UnitTests.Builder.Summary.TotalBillBreakdown
 {
     using AutoFixture;
+    using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
     using EPR.Calculator.API.Builder.Summary.TotalBillBreakdown;
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Data.DataModels;
@@ -359,13 +360,13 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TotalBillBreakdown
 
             var expectedResult = new List<CalcResultSummaryHeader>();
             expectedResult.AddRange([
-                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.TotalProducerBillwoBadDebtProvision , ColumnIndex = 231 },
-                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.BadDebtProvisionforTotalProducerBill, ColumnIndex = 232 },
-                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.TotalProducerBillwithBadDebtProvision, ColumnIndex = 233 },
-                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.EnglandTotalWithBadDebtProvisionSectionTB, ColumnIndex = 234 },
-                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.WalesTotalWithBadDebtProvisionSectionTB, ColumnIndex = 235 },
-                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.ScotlandTotalWithBadDebtProvisionSectionTB, ColumnIndex = 236 },
-                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.NorthernIrelandTotalWithBadDebtProvisionSectionTB, ColumnIndex = 237 }
+                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.TotalProducerBillWithoutBadDebtProvision , ColumnIndex = 231 },
+                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.BadDebtProvision, ColumnIndex = 232 },
+                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.TotalProducerBillWithBadDebtProvision, ColumnIndex = 233 },
+                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.EnglandTotalWithBadDebtProvision, ColumnIndex = 234 },
+                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.WalesTotalWithBadDebtProvision, ColumnIndex = 235 },
+                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.ScotlandTotalWithBadDebtProvision, ColumnIndex = 236 },
+                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.NorthernIrelandTotalWithBadDebtProvision, ColumnIndex = 237 }
             ]);
 
             // Assert
@@ -386,171 +387,35 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TotalBillBreakdown
         }
 
         [TestMethod]
-        public void CanCallGetTotalProducerBillWithoutBadDebtProvision()
+        public void CanCallGetSummaryHeaders()
         {
             // Act
-            var result =
-                TotalBillBreakdownProducer.GetTotalProducerBillWithoutBadDebtProvision(
-                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]);
+            var result = TotalBillBreakdownProducer.GetSummaryHeaders().ToList();
+
+            var expectedResult = new List<CalcResultSummaryHeader>();
+            expectedResult.AddRange([
+                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.TotalProducerBillBreakdown, ColumnIndex = 231 }
+            ]);
 
             // Assert
-            Assert.AreEqual((decimal)1250.89, Math.Round(result, 2));
+            Assert.AreEqual(expectedResult[0].Name, result[0].Name);
+            Assert.AreEqual(expectedResult[0].ColumnIndex, result[0].ColumnIndex);
         }
 
         [TestMethod]
-        public void CanCallGetBadDebtProvisionForTotalProducerBill()
+        public void CanCallSetValues()
         {
             // Act
-            var result =
-                TotalBillBreakdownProducer.GetBadDebtProvisionForTotalProducerBill(
-                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]);
+            TotalBillBreakdownProducer.SetValues(_calcResult.CalcResultSummary);
 
             // Assert
-            Assert.AreEqual((decimal)52.20, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetTotalProducerBillWithBadDebtProvision()
-        {
-            // Act
-            var result =
-                TotalBillBreakdownProducer.GetTotalProducerBillWithBadDebtProvision(
-                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]);
-
-            // Assert
-            Assert.AreEqual((decimal)0.00, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetEnglandTotalWithBadDebtProvision()
-        {
-            // Act
-            var result =
-                TotalBillBreakdownProducer.GetEnglandTotalWithBadDebtProvision(
-                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]);
-
-            // Assert
-            Assert.AreEqual((decimal)6051.00, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetWalesTotalWithBadDebtProvision()
-        {
-            // Act
-            var result =
-                TotalBillBreakdownProducer.GetWalesTotalWithBadDebtProvision(_calcResult.CalcResultSummary
-                    .ProducerDisposalFees.ToList()[0]);
-
-            // Assert
-            Assert.AreEqual((decimal)5217.00, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetScotlandTotalWithBadDebtProvision()
-        {
-            // Act
-            var result =
-                TotalBillBreakdownProducer.GetScotlandTotalWithBadDebtProvision(
-                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]);
-
-            // Assert
-            Assert.AreEqual((decimal)4518.00, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetNorthernIrelandTotalWithBadDebtProvision()
-        {
-            // Act
-            var result =
-                TotalBillBreakdownProducer.GetNorthernIrelandTotalWithBadDebtProvision(
-                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]);
-
-            // Assert
-            Assert.AreEqual((decimal)4039.00, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetTotalProducerBillWithoutBadDebtProvisionTotal()
-        {
-            // Act
-            var result =
-                TotalBillBreakdownProducer.GetTotalProducerBillWithoutBadDebtProvisionTotal(
-                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]);
-
-            // Assert
-            Assert.AreEqual((decimal)1250.89, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetBadDebtProvisionForTotalProducerBillTotal()
-        {
-            // Act
-            var result =
-                TotalBillBreakdownProducer.GetBadDebtProvisionForTotalProducerBillTotal(
-                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]);
-
-            // Assert
-            Assert.AreEqual((decimal)52.20, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetTotalProducerBillWithBadDebtProvisionTotal()
-        {
-            // Act
-            var result =
-                TotalBillBreakdownProducer.GetTotalProducerBillWithBadDebtProvisionTotal(
-                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]);
-
-            // Assert
-            Assert.AreEqual((decimal)0.00, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetEnglandTotalWithBadDebtProvisionTotal()
-        {
-            // Act
-            var result =
-                TotalBillBreakdownProducer.GetEnglandTotalWithBadDebtProvisionTotal(
-                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]);
-
-            // Assert
-            Assert.AreEqual((decimal)6051.00, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetWalesTotalWithBadDebtProvisionTotal()
-        {
-            // Act
-            var result =
-                TotalBillBreakdownProducer.GetWalesTotalWithBadDebtProvisionTotal(
-                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]);
-
-            // Assert
-            Assert.AreEqual((decimal)5217.00, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetScotlandTotalWithBadDebtProvisionTotal()
-        {
-            // Act
-            var result =
-                TotalBillBreakdownProducer.GetScotlandTotalWithBadDebtProvisionTotal(
-                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]);
-
-            // Assert
-            Assert.AreEqual((decimal)4518.00, Math.Round(result, 2));
-        }
-
-        [TestMethod]
-        public void CanCallGetNorthernIrelandTotalWithBadDebtProvisionTotal()
-        {
-            // Act
-            var result =
-                TotalBillBreakdownProducer.GetNorthernIrelandTotalWithBadDebtProvisionTotal(
-                    _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0]);
-
-            // Assert
-            Assert.AreEqual((decimal)4039.00, Math.Round(result, 2));
+            Assert.AreEqual(1250.89m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].TotalProducerBillWithoutBadDebtProvision);
+            Assert.AreEqual(6, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].BadDebtProvisionForTotalProducerBill);
+            Assert.AreEqual(106, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].TotalProducerBillWithBadDebtProvision);
+            Assert.AreEqual(42.40m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].EnglandTotalWithBadDebtProvisionTotalBill);
+            Assert.AreEqual(31.80m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].WalesTotalWithBadDebtProvisionTotalBill);
+            Assert.AreEqual(21.20m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].ScotlandTotalWithBadDebtProvisionTotalBill);
+            Assert.AreEqual(10.60m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].NorthernIrelandTotalWithBadDebtProvisionTotalBill);
         }
 
         private void CreateMaterials()

@@ -457,8 +457,8 @@ public static class CalcResultSummaryUtil
         );
 
         // Section Total bill headers
-        resultSummaryHeaders.Add(
-            new CalcResultSummaryHeader() { Name = TotalBillBreakdownHeaders.TotalProducerBillBreakdown, ColumnIndex = TotalBillBreakdownProducer.ColumnIndex }
+        resultSummaryHeaders.AddRange(
+            TotalBillBreakdownProducer.GetSummaryHeaders()
         );
 
         return resultSummaryHeaders;
