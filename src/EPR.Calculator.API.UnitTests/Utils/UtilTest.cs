@@ -2,7 +2,7 @@
 using EPR.Calculator.API.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace EPR.Calculator.API.UnitTests
+namespace EPR.Calculator.API.UnitTests.Utils
 {
     [TestClass]
     public class UtilTest
@@ -16,9 +16,9 @@ namespace EPR.Calculator.API.UnitTests
         {
             DefaultParameterTemplateMaster template = new DefaultParameterTemplateMaster
             {
-                ParameterType = this.parameterType,
-                ParameterUniqueReferenceId = this.parameterUniqueReferenceId,
-                ParameterCategory = this.parameterCategory
+                ParameterType = parameterType,
+                ParameterUniqueReferenceId = parameterUniqueReferenceId,
+                ParameterCategory = parameterCategory
             };
             string errorMessage = "Some error message";
             var errorDto = Util.CreateErrorDto(template, errorMessage);
@@ -33,9 +33,9 @@ namespace EPR.Calculator.API.UnitTests
         {
             DefaultParameterTemplateMaster template = new DefaultParameterTemplateMaster
             {
-                ParameterType = this.parameterType,
-                ParameterUniqueReferenceId = this.parameterUniqueReferenceId,
-                ParameterCategory = this.parameterCategory
+                ParameterType = parameterType,
+                ParameterUniqueReferenceId = parameterUniqueReferenceId,
+                ParameterCategory = parameterCategory
             };
             var parameterValue = Util.GetParameterValue(template, "£100");
             Assert.IsNotNull(parameterValue);
@@ -45,14 +45,14 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void GetParameterValueTest_For_Percent()
         {
-            this.parameterType = "Paramter Type 1 percent";
-            this.parameterUniqueReferenceId = Guid.NewGuid().ToString();
-            this.parameterCategory = "Parameter Category 1";
+            parameterType = "Paramter Type 1 percent";
+            parameterUniqueReferenceId = Guid.NewGuid().ToString();
+            parameterCategory = "Parameter Category 1";
             DefaultParameterTemplateMaster template = new DefaultParameterTemplateMaster
             {
-                ParameterType = this.parameterType,
-                ParameterUniqueReferenceId = this.parameterUniqueReferenceId,
-                ParameterCategory = this.parameterCategory
+                ParameterType = parameterType,
+                ParameterUniqueReferenceId = parameterUniqueReferenceId,
+                ParameterCategory = parameterCategory
             };
             var parameterValue = Util.GetParameterValue(template, "100%");
             Assert.IsNotNull(parameterValue);
@@ -68,7 +68,8 @@ namespace EPR.Calculator.API.UnitTests
         [DataRow("2024-25", "2024")]
         [DataRow("2023-24", "2023")]
         [DataRow("2022-23", "2022")]
-        public void GetFinancialYearAsYYYY_ValidString_ShouldReturnFirstYear(string financialYear, string expectedFinancialYear)
+        public void GetFinancialYearAsYYYY_ValidString_ShouldReturnFirstYear(string financialYear,
+            string expectedFinancialYear)
         {
             var result = Util.GetFinancialYearAsYYYY(financialYear);
             Assert.AreEqual(expectedFinancialYear, result);
@@ -85,7 +86,8 @@ namespace EPR.Calculator.API.UnitTests
         [DataRow("abcd-efgh")]
         public void GetFinancialYearAsYYYY_InvalidString_ShouldThrowFormatException(string financialYear)
         {
-            var exception = Assert.ThrowsException<FormatException>(() => Util.GetFinancialYearAsYYYY(financialYear));
+            var exception =
+                Assert.ThrowsException<FormatException>(() => Util.GetFinancialYearAsYYYY(financialYear));
             Assert.AreEqual("Financial year format is invalid. Expected format is 'YYYY-YY'.", exception.Message);
         }
 
@@ -99,7 +101,8 @@ namespace EPR.Calculator.API.UnitTests
         [DataRow(" ")]
         public void GetFinancialYearAsYYYY_NullOrEmptyString_ShouldThrowArgumentException(string financialYear)
         {
-            var exception = Assert.ThrowsException<ArgumentException>(() => Util.GetFinancialYearAsYYYY(financialYear));
+            var exception =
+                Assert.ThrowsException<ArgumentException>(() => Util.GetFinancialYearAsYYYY(financialYear));
             Assert.AreEqual("Financial year cannot be null or empty (Parameter 'value')", exception.Message);
         }
 
@@ -112,7 +115,8 @@ namespace EPR.Calculator.API.UnitTests
         [DataRow("2024-25", "2023")]
         [DataRow("2023-24", "2022")]
         [DataRow("2022-23", "2021")]
-        public void GetCalendarYear_ValidString_ShouldReturnPreviousYearAsString(string financialYear, string expectedCalendarYear)
+        public void GetCalendarYear_ValidString_ShouldReturnPreviousYearAsString(string financialYear,
+            string expectedCalendarYear)
         {
             var result = Util.GetCalendarYear(financialYear);
             Assert.AreEqual(expectedCalendarYear, result);

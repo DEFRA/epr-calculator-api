@@ -15,7 +15,7 @@ using Moq;
 using System.Security.Claims;
 using System.Security.Principal;
 
-namespace EPR.Calculator.API.UnitTests
+namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
     public class PutCalculatorRunStatusTest
@@ -27,9 +27,9 @@ namespace EPR.Calculator.API.UnitTests
 
         public PutCalculatorRunStatusTest()
         {
-            this.mockStorageService = new Mock<IStorageService>();
-            this.mockConfig = new Mock<IConfiguration>();
-            this.mockServiceBusFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
+            mockStorageService = new Mock<IStorageService>();
+            mockConfig = new Mock<IConfiguration>();
+            mockServiceBusFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
@@ -47,27 +47,23 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void PutCalculatorRunStatusTest_422()
         {
-            var controller =
-                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
-                    this.mockStorageService.Object);
-
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
             var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
+            var defaultContext = new DefaultHttpContext()
             {
                 User = principal
             };
+            var controller =
+                new CalculatorController(this.context, mockConfig.Object, mockServiceBusFactory.Object, mockStorageService.Object);
 
             controller.ControllerContext = new ControllerContext
             {
-                HttpContext = context
+                HttpContext = defaultContext
             };
-
             var runId = 999;
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
-                { ClassificationId = 6, RunId = runId }) as ObjectResult;
+            { ClassificationId = 6, RunId = runId }) as ObjectResult;
             Assert.IsNotNull(result);
 
             Assert.AreEqual(422, result.StatusCode);
@@ -93,8 +89,8 @@ namespace EPR.Calculator.API.UnitTests
             this.context.SaveChanges();
 
             var controller =
-                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
-                    this.mockStorageService.Object);
+                new CalculatorController(this.context, mockConfig.Object, mockServiceBusFactory.Object,
+                    mockStorageService.Object);
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -111,7 +107,7 @@ namespace EPR.Calculator.API.UnitTests
             };
 
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
-                { ClassificationId = invalidClassificationId, RunId = runId }) as ObjectResult;
+            { ClassificationId = invalidClassificationId, RunId = runId }) as ObjectResult;
             Assert.IsNotNull(result);
 
             Assert.AreEqual(422, result.StatusCode);
@@ -137,8 +133,8 @@ namespace EPR.Calculator.API.UnitTests
             this.context.SaveChanges();
 
             var controller =
-                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
-                    this.mockStorageService.Object);
+                new CalculatorController(this.context, mockConfig.Object, mockServiceBusFactory.Object,
+                    mockStorageService.Object);
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -155,7 +151,7 @@ namespace EPR.Calculator.API.UnitTests
             };
 
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
-                { ClassificationId = validClassificationId, RunId = runId }) as StatusCodeResult;
+            { ClassificationId = validClassificationId, RunId = runId }) as StatusCodeResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(201, result.StatusCode);
 
@@ -184,8 +180,8 @@ namespace EPR.Calculator.API.UnitTests
             this.context.SaveChanges();
 
             var controller =
-                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
-                    this.mockStorageService.Object);
+                new CalculatorController(this.context, mockConfig.Object, mockServiceBusFactory.Object,
+                    mockStorageService.Object);
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -202,7 +198,7 @@ namespace EPR.Calculator.API.UnitTests
             };
 
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
-                { ClassificationId = classificationId, RunId = runId }) as ObjectResult;
+            { ClassificationId = classificationId, RunId = runId }) as ObjectResult;
             Assert.IsNotNull(result);
 
             Assert.AreEqual(422, result.StatusCode);

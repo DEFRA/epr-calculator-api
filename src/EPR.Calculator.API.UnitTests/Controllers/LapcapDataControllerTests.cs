@@ -1,7 +1,6 @@
 ﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Tests.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

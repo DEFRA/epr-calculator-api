@@ -3,7 +3,6 @@ using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services;
-using EPR.Calculator.API.Tests.Controllers;
 using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;

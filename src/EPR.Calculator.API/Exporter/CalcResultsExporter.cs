@@ -34,8 +34,6 @@ namespace EPR.Calculator.API.Exporter
                 PrepareLateReportingData(results.CalcResultLateReportingTonnageData, csvContent);
             }
 
-            csvContent.AppendLine();
-
             if (results.CalcResultParameterOtherCost != null)
             {
                 PrepareOtherCosts(results.CalcResultParameterOtherCost, csvContent);
@@ -45,8 +43,6 @@ namespace EPR.Calculator.API.Exporter
             {
                 PrepareOnePluseFourApportionment(results.CalcResultOnePlusFourApportionment, csvContent);
             }
-
-            csvContent.AppendLine();
 
             if (results.CalcResultCommsCostReportDetail != null)
             {

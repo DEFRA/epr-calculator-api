@@ -16,7 +16,7 @@ using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Services;
 
-namespace EPR.Calculator.API.Tests.Controllers
+namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
     public class BaseControllerTest
@@ -33,13 +33,13 @@ namespace EPR.Calculator.API.Tests.Controllers
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
             .UseInMemoryDatabase(databaseName: "PayCal")
             .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-            .Options;           
+            .Options;
 
 
             dbContext = new ApplicationDBContext(dbContextOptions);
             dbContext.Database.EnsureCreated();
             dbContext.DefaultParameterTemplateMasterList.RemoveRange(dbContext.DefaultParameterTemplateMasterList);
-            dbContext.SaveChanges();          
+            dbContext.SaveChanges();
 
             dbContext.DefaultParameterTemplateMasterList.AddRange(GetDefaultParameterTemplateMasterData().ToList());
             dbContext.SaveChanges();
@@ -65,7 +65,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var mockClient = new Mock<ServiceBusClient>();
             var mockServiceBusSender = new Mock<ServiceBusSender>();
-            mockServiceBusSender.Setup(msbs => msbs.SendMessageAsync(It.IsAny<ServiceBusMessage>(), default(CancellationToken))).Returns(Task.CompletedTask);
+            mockServiceBusSender.Setup(msbs => msbs.SendMessageAsync(It.IsAny<ServiceBusMessage>(), default)).Returns(Task.CompletedTask);
             mockClient.Setup(mc => mc.CreateSender(It.IsAny<string>())).Returns(mockServiceBusSender.Object);
 
             mockFactory.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(mockClient.Object);
@@ -833,7 +833,7 @@ namespace EPR.Calculator.API.Tests.Controllers
                 LoadTimeStamp = DateTime.Now,
                 CalculatorRunPomDataMasterId = 1,
                 SubmissionPeriodDesc = "July to December 2023",
-                CalculatorRunPomDataMaster = BaseControllerTest.GetCalculatorRunPomDataMaster().ToList()[0]
+                CalculatorRunPomDataMaster = GetCalculatorRunPomDataMaster().ToList()[0]
             });
             return list;
         }
@@ -848,7 +848,7 @@ namespace EPR.Calculator.API.Tests.Controllers
                 EffectiveFrom = DateTime.Now,
                 CreatedBy = "Test user",
                 CreatedAt = DateTime.Now
-            });           
+            });
             return list;
         }
 
