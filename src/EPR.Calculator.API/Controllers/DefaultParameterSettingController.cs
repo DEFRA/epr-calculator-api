@@ -5,6 +5,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -23,8 +24,16 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("defaultParameterSetting")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult Create([FromBody] CreateDefaultParameterSettingDto request)
         {
+            var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
+            if (claim == null)
+            {
+                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+
+            var userName = claim.Value;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
@@ -45,7 +54,7 @@ namespace EPR.Calculator.API.Controllers
                     var defaultParamSettingMaster = new DefaultParameterSettingMaster
                     {
                         CreatedAt = DateTime.Now,
-                        CreatedBy = "Testuser",
+                        CreatedBy = userName,
                         EffectiveFrom = DateTime.Now,
                         EffectiveTo = null,
                         ParameterYear = request.ParameterYear,
@@ -77,6 +86,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("defaultParameterSetting/{parameterYear}")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult Get([FromRoute] string parameterYear)
         {
             if (!ModelState.IsValid)

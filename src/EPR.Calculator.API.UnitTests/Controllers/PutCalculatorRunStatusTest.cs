@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -11,6 +12,8 @@ using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Security.Claims;
+using System.Security.Principal;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -31,21 +34,33 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
-            context = new ApplicationDBContext(dbContextOptions);
-            context.Database.EnsureCreated();
+            this.context = new ApplicationDBContext(dbContextOptions);
+            this.context.Database.EnsureCreated();
         }
 
         [TestCleanup]
         public void CleanUp()
         {
-            context.Database.EnsureDeleted();
+            this.context.Database.EnsureDeleted();
         }
 
         [TestMethod]
         public void PutCalculatorRunStatusTest_422()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+            var defaultContext = new DefaultHttpContext()
+            {
+                User = principal
+            };
             var controller =
-                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object, mockStorageService.Object);
+                new CalculatorController(this.context, mockConfig.Object, mockServiceBusFactory.Object, mockStorageService.Object);
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = defaultContext
+            };
             var runId = 999;
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
             { ClassificationId = 6, RunId = runId }) as ObjectResult;
@@ -61,7 +76,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var runId = 1;
             var invalidClassificationId = 10;
             var date = DateTime.Now;
-            context.CalculatorRuns.Add(new CalculatorRun
+            this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",
                 CalculatorRunClassificationId = 2,
@@ -71,11 +86,25 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 DefaultParameterSettingMasterId = 1,
                 Financial_Year = "2024-25"
             });
-            context.SaveChanges();
+            this.context.SaveChanges();
 
             var controller =
-                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
+                new CalculatorController(this.context, mockConfig.Object, mockServiceBusFactory.Object,
                     mockStorageService.Object);
+
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
 
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
             { ClassificationId = invalidClassificationId, RunId = runId }) as ObjectResult;
@@ -91,7 +120,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var runId = 1;
             var validClassificationId = 5;
             var date = DateTime.Now;
-            context.CalculatorRuns.Add(new CalculatorRun
+            this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",
                 CalculatorRunClassificationId = 2,
@@ -101,18 +130,32 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 DefaultParameterSettingMasterId = 1,
                 Financial_Year = "2024-25"
             });
-            context.SaveChanges();
+            this.context.SaveChanges();
 
             var controller =
-                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
+                new CalculatorController(this.context, mockConfig.Object, mockServiceBusFactory.Object,
                     mockStorageService.Object);
+
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
 
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
             { ClassificationId = validClassificationId, RunId = runId }) as StatusCodeResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(201, result.StatusCode);
 
-            var run = context.CalculatorRuns.Single(x => x.Id == 1);
+            var run = this.context.CalculatorRuns.Single(x => x.Id == 1);
             Assert.IsNotNull(run);
 
             Assert.AreEqual(5, run.CalculatorRunClassificationId);
@@ -124,7 +167,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var runId = 1;
             var classificationId = 5;
             var date = DateTime.Now;
-            context.CalculatorRuns.Add(new CalculatorRun
+            this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",
                 CalculatorRunClassificationId = classificationId,
@@ -134,11 +177,25 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 DefaultParameterSettingMasterId = 1,
                 Financial_Year = "2024-25"
             });
-            context.SaveChanges();
+            this.context.SaveChanges();
 
             var controller =
-                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
+                new CalculatorController(this.context, mockConfig.Object, mockServiceBusFactory.Object,
                     mockStorageService.Object);
+
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
 
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
             { ClassificationId = classificationId, RunId = runId }) as ObjectResult;

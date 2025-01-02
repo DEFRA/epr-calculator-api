@@ -4,10 +4,11 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Exporter;
+using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
@@ -34,8 +35,16 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRun")]
+        [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
         {
+            var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
+            if (claim == null)
+            {
+                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+
+            var userName = claim.Value;
             // Return bad request if the model is invalid
             if (!ModelState.IsValid)
             {
@@ -111,7 +120,7 @@ namespace EPR.Calculator.API.Controllers
                     {
                         Name = request.CalculatorRunName,
                         Financial_Year = request.FinancialYear,
-                        CreatedBy = request.CreatedBy,
+                        CreatedBy = userName,
                         CreatedAt = DateTime.Now,
                         CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                         DefaultParameterSettingMasterId = activeDefaultParameterSettingsMasterId,
@@ -127,7 +136,7 @@ namespace EPR.Calculator.API.Controllers
                     {
                         CalculatorRunId = calculatorRun.Id,
                         FinancialYear = calculatorRun.Financial_Year,
-                        CreatedBy = User?.Identity?.Name ?? request.CreatedBy
+                        CreatedBy = User?.Identity?.Name ?? userName
                     };
 
                     // Send message to service bus
@@ -155,6 +164,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRuns")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
         {
             if (!ModelState.IsValid)
@@ -186,6 +196,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("calculatorRuns/{runId}")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult GetCalculatorRun(int runId)
         {
             if (!ModelState.IsValid)
@@ -223,8 +234,16 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPut]
         [Route("calculatorRuns")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
+            var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
+            if (claim == null)
+            {
+                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+
+            var userName = claim.Value;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
@@ -256,6 +275,8 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
+                calculatorRun.UpdatedAt = DateTime.Now;
+                calculatorRun.UpdatedBy = userName;
 
                 this.context.CalculatorRuns.Update(calculatorRun);
                 this.context.SaveChanges();
@@ -270,6 +291,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("CheckCalcNameExists/{name}")]
+        [Authorize(Roles = "SASuperUser")]
         public IActionResult GetCalculatorRunByName([FromRoute] string name)
         {
             if (!ModelState.IsValid)
@@ -295,6 +317,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("DownloadResult/{runId}")]
+        [Authorize(Roles = "SASuperUser")]
         public async Task<IResult> DownloadResultFile(int runId)
         {
             if (!ModelState.IsValid)
