@@ -1,5 +1,6 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.UnitTests.Controllers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 
