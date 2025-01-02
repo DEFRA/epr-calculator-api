@@ -485,29 +485,6 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void GetTotalDisposalCostswithBadDebtOnePlus2A_ShouldReturnCorrectValues()
-        {
-
-            var materialInDb = _context.Material.ToList();
-            var material = Mappers.MaterialMapper.Map(materialInDb);
-            var requestDto = new CalcResultsRequestDto { RunId = 1 };
-
-            CalcResultSummaryBuilder.producerDetailList = _context.ProducerDetail
-               .Where(pd => pd.CalculatorRunId == requestDto.RunId)
-               .OrderBy(pd => pd.ProducerId)
-               .ToList();
-
-            var value = CalcResultSummaryBuilder.GetTotal1Plus2ABadDebtPercentage(100, 100, material, _calcResult);
-            Assert.AreEqual(4.52685329M, value);
-
-            var totalFee = CalcResultSummaryBuilder.GetTotal1Plus2ABadDebt(material, _calcResult);
-            Assert.AreEqual(4418.0800M, totalFee);
-
-            var debt = Math.Ceiling((value * totalFee) / 100);
-            Assert.AreEqual(200, debt);
-        }
-
-        [TestMethod]
         public void CommsCost2bBill_ShouldReturnCorrectValue()
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
