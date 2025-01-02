@@ -30,7 +30,6 @@ namespace EPR.Calculator.API.UnitTests.Builder
             dbContext.DefaultParameterTemplateMasterList.RemoveRange(dbContext.DefaultParameterTemplateMasterList);
             dbContext.SaveChanges();
             dbContext.DefaultParameterTemplateMasterList.AddRange(BaseControllerTest.GetDefaultParameterTemplateMasterData().ToList());
-            // dbContext.LapcapDataTemplateMaster.AddRange(BaseControllerTest.GetLapcapTemplateMasterData().ToList());
             dbContext.SaveChanges();
 
             builder = new CalcResultLapcapDataBuilder(dbContext);
