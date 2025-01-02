@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace EPR.Calculator.API.UnitTests
+namespace EPR.Calculator.API.UnitTests.Validator
 {
     [TestClass]
     public class CreateDefaultParameterDataValidatorTest
@@ -94,17 +94,17 @@ namespace EPR.Calculator.API.UnitTests
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
-            this.context = new ApplicationDBContext(dbContextOptions);
-            this.context.DefaultParameterTemplateMasterList.AddRange(this.data);
-            this.context.SaveChanges();
-            this.context.Database.EnsureCreated();
-            this.validator = new CreateDefaultParameterDataValidator(context);
+            context = new ApplicationDBContext(dbContextOptions);
+            context.DefaultParameterTemplateMasterList.AddRange(data);
+            context.SaveChanges();
+            context.Database.EnsureCreated();
+            validator = new CreateDefaultParameterDataValidator(context);
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            this.context?.Database.EnsureDeleted();
+            context?.Database.EnsureDeleted();
         }
 
         [TestMethod]
@@ -117,8 +117,8 @@ namespace EPR.Calculator.API.UnitTests
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
                 ParameterFileName = "TestFileName"
             };
-            var vr = this.validator?.Validate(dto);
-            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Enter the")) == this.data.Count);
+            var vr = validator?.Validate(dto);
+            Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Enter the")) == data.Count);
         }
 
         [TestMethod]
@@ -142,7 +142,7 @@ namespace EPR.Calculator.API.UnitTests
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
                 ParameterFileName = "TestFileName"
             };
-            var vr = this.validator?.Validate(dto);
+            var vr = validator?.Validate(dto);
             Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Expecting only One with Parameter Type")) == 1);
         }
 
@@ -167,7 +167,7 @@ namespace EPR.Calculator.API.UnitTests
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
                 ParameterFileName = "TestFileName"
             };
-            var vr = this.validator?.Validate(dto);
+            var vr = validator?.Validate(dto);
             Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium can only include numbers, commas and decimal points")) == 1);
             Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("The Bad debt provision percentage percentage increase can only include numbers, commas, decimal points and a percentage symbol (%)")) == 1);
             Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Materiality threshold for Amount Decrease can only include numbers, commas and decimal points")) == 1);
@@ -182,9 +182,9 @@ namespace EPR.Calculator.API.UnitTests
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             foreach (var item in data)
             {
-                schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto 
-                { 
-                    ParameterUniqueReferenceId = item.ParameterUniqueReferenceId, 
+                schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                {
+                    ParameterUniqueReferenceId = item.ParameterUniqueReferenceId,
                     ParameterValue = GetInvalidValueForUniqueRef(item.ParameterUniqueReferenceId)
                 });
             }
@@ -196,7 +196,7 @@ namespace EPR.Calculator.API.UnitTests
                 ParameterFileName = "TestFileName"
             };
 
-            var vr = this.validator?.Validate(dto);
+            var vr = validator?.Validate(dto);
             Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("must be between")) == 6);
             Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium must be between £0.00 and £999,999,999.99")) == 1);
             Assert.IsTrue(vr?.Errors.Count(error => error.Message.Contains("The Bad debt provision percentage")) == 1);

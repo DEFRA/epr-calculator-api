@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace EPR.Calculator.API.UnitTests
+namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
     public class PrepareCalcResultsValidationTest
