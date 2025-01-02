@@ -410,12 +410,12 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TotalBillBreakdown
 
             // Assert
             Assert.AreEqual(1250.89m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].TotalProducerBillWithoutBadDebtProvision);
-            Assert.AreEqual(6, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].BadDebtProvisionForTotalProducerBill);
-            Assert.AreEqual(106, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].TotalProducerBillWithBadDebtProvision);
-            Assert.AreEqual(42.40m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].EnglandTotalWithBadDebtProvisionTotalBill);
-            Assert.AreEqual(31.80m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].WalesTotalWithBadDebtProvisionTotalBill);
-            Assert.AreEqual(21.20m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].ScotlandTotalWithBadDebtProvisionTotalBill);
-            Assert.AreEqual(10.60m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].NorthernIrelandTotalWithBadDebtProvisionTotalBill);
+            Assert.AreEqual(52.2m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].BadDebtProvisionForTotalProducerBill);
+            Assert.AreEqual(580.73m, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].TotalProducerBillWithBadDebtProvision);
+            Assert.AreEqual(6051, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].EnglandTotalWithBadDebtProvisionTotalBill);
+            Assert.AreEqual(5217, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].WalesTotalWithBadDebtProvisionTotalBill);
+            Assert.AreEqual(4518, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].ScotlandTotalWithBadDebtProvisionTotalBill);
+            Assert.AreEqual(4039, _calcResult.CalcResultSummary.ProducerDisposalFees.ToList()[0].NorthernIrelandTotalWithBadDebtProvisionTotalBill);
         }
 
         private void CreateMaterials()
@@ -511,6 +511,8 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TotalBillBreakdown
                     TotalProducerDisposalFeeWithBadDebtProvision = 100,
                     TotalProducerCommsFeeWithBadDebtProvision = 100,
                     SubsidiaryId = "1",
+                    BadDebtProvision = 6.0m,
+                    BadDebtProvisionComms = 6.5m,
                     BadDebtProvisionFor1 = 5.2m,
                     BadDebtProvisionFor2A = 6.7m,
                     BadDebtProvisionFor2bComms = 7.9m,
@@ -552,7 +554,14 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TotalBillBreakdown
                     TwoCNorthernIrelandTotalWithBadDebt = 335,
                     NorthernIrelandTotalWithBadDebtProvision3 = 451,
                     LaDataPrepCostsNorthernIrelandTotalWithBadDebtProvisionSection4 = 468,
-                    NorthernIrelandTotalWithBadDebtProvisionSection5 = 365
+                    NorthernIrelandTotalWithBadDebtProvisionSection5 = 365,
+                    TotalProducerFeeforLADisposalCostswithBadDebtprovision = 105,
+                    TotalProducerFeeforCommsCostsbyMaterialwithBadDebtprovision = 204,
+                    TotalProducerFeeWithBadDebtFor2bComms = 98,
+                    TwoCTotalProducerFeeForCommsCostsWithBadDebt = 23.54m,
+                    Total3SAOperatingCostswithBadDebtprovision = 35.87m,
+                    LaDataPrepCostsTotalWithBadDebtProvisionSection4 = 65,
+                    TotalProducerFeeWithBadDebtProvisionSection5 = 49.32m
                 }
             };
         }

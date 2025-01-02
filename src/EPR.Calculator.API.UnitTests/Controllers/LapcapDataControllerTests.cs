@@ -96,7 +96,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             var uniqueRef = "ENG-WD";
             var createDefaultParameterDto = CreateDto([uniqueRef]);
-            createDefaultParameterDto.LapcapDataTemplateValues = createDefaultParameterDto.LapcapDataTemplateValues;
             var actionResult = lapcapDataController?.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
             var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;
