@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services
 {
@@ -34,13 +35,12 @@ namespace EPR.Calculator.API.Services
             this.context = context;
         }
 
-        public void Transpose(CalcResultsRequestDto resultsRequestDto)
+        public async Task Transpose(CalcResultsRequestDto resultsRequestDto)
         {
             var newProducerDetails = new List<ProducerDetail>();
             var newProducerReportedMaterials = new List<ProducerReportedMaterial>();
-            var materials = this.context.Material.ToList();
-
-            var calcRunPomOrgDatadetails = (from run in this.context.CalculatorRuns
+            
+            var calcRunPomOrgDatadetails = await (from run in this.context.CalculatorRuns
                                             join pomMaster in this.context.CalculatorRunPomDataMaster on run.CalculatorRunPomDataMasterId equals pomMaster.Id
                                             join orgMaster in this.context.CalculatorRunOrganisationDataMaster on run.CalculatorRunOrganisationDataMasterId equals orgMaster.Id
                                             join pomDetail in this.context.CalculatorRunPomDataDetails on pomMaster.Id equals pomDetail.CalculatorRunPomDataMasterId
@@ -53,7 +53,9 @@ namespace EPR.Calculator.API.Services
                                                 orgMaster,
                                                 orgDetail,
                                                 pomDetail
-                                            }).ToList();
+                                            }).ToListAsync();
+            
+            var materials = await this.context.Material.ToListAsync();
 
             var calculatorRun = calcRunPomOrgDatadetails.Select(x => x.run).Distinct().Single();
             var calculatorRunPomDataDetails = calcRunPomOrgDatadetails.Select(x => x.pomDetail).Distinct();
@@ -163,13 +165,15 @@ namespace EPR.Calculator.API.Services
                     }
                 }
 
-                SaveNewProducerDetailAndMaterials(newProducerDetails, newProducerReportedMaterials);
+                await SaveNewProducerDetailAndMaterialsAsync(newProducerDetails, newProducerReportedMaterials);
             }
         }
 
-        public void SaveNewProducerDetailAndMaterials(List<ProducerDetail> newProducerDetails, List<ProducerReportedMaterial> newProducerReportedMaterials)
+        public async Task SaveNewProducerDetailAndMaterialsAsync(
+            IEnumerable<ProducerDetail> newProducerDetails,
+            IEnumerable<ProducerReportedMaterial> newProducerReportedMaterials)
         {
-            using (var transaction = this.context.Database.BeginTransaction())
+            using (var transaction = await this.context.Database.BeginTransactionAsync())
             {
                 try
                 {
@@ -177,15 +181,15 @@ namespace EPR.Calculator.API.Services
                     context.ProducerReportedMaterial.AddRange(newProducerReportedMaterials);
 
                     // Apply the database changes
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
 
                     // Success, commit transaction
-                    transaction.Commit();
+                    await transaction.CommitAsync();
                 }
                 catch (Exception)
                 {
                     // Error, rollback transaction
-                    transaction.Rollback();
+                    await transaction.RollbackAsync();
                     // TO DO: Decide upon the exception later during the complete integration
                     throw;
                 }
