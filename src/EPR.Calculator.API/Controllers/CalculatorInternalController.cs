@@ -171,7 +171,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
+                this.transposePomAndOrgDataService.TransposeAsync(resultsRequestDto);
                 var results = this.builder.Build(resultsRequestDto);
                 var exportedResults = this.exporter.Export(results);
 

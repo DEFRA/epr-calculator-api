@@ -1,101 +1,80 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
-using Microsoft.AspNetCore.Routing.Constraints;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services
 {
 
-    public class TransposePomAndOrgDataService : ITransposePomAndOrgDataService
+    public partial class TransposePomAndOrgDataService : ITransposePomAndOrgDataService
     {
         private readonly ApplicationDBContext context;
-
         private const string PeriodSeparator = "-P";
-
-        public class OrganisationDetails
-        {
-            public int? OrganisationId { get; set; }
-            public required string OrganisationName { get; set; }
-            public string? SubmissionPeriod { get; set; }
-            public string? SubmissionPeriodDescription { get; set; }
-
-            public string? SubsidaryId { get; set; }
-
-        }
-
-        internal class SubmissionDetails
-        {
-            public string? SubmissionPeriod { get; set; }
-            public string? SubmissionPeriodDesc { get; set; }
-        }
-
 
         public TransposePomAndOrgDataService(ApplicationDBContext context)
         {
             this.context = context;
         }
 
-        public void Transpose(CalcResultsRequestDto resultsRequestDto)
+        public async void TransposeAsync(CalcResultsRequestDto resultsRequestDto)
         {
-            var materials = this.context.Material.ToList();
+            var materials = await this.context.Material.ToListAsync();
 
-            var calculatorRun = this.context.CalculatorRuns.Single(cr => cr.Id == resultsRequestDto.RunId);
+            var calculatorRun = await this.context.CalculatorRuns.SingleAsync(cr => cr.Id == resultsRequestDto.RunId);
 
             if (calculatorRun.CalculatorRunPomDataMasterId != null)
             {
                 // Get the calculator run organisation data master record based on the CalculatorRunOrganisationDataMasterId
                 // from the calculator run table
-                var organisationDataMaster = context.CalculatorRunOrganisationDataMaster.Single(odm => odm.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);
+                var organisationDataMaster = await context.CalculatorRunOrganisationDataMaster
+                    .SingleAsync(odm => odm.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);
 
-              var SubmissionPeriodDetails = (from s in context.CalculatorRunPomDataDetails
-                                           where s.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId
-                                           select new SubmissionDetails
-                                           {
-                                               SubmissionPeriod = s.SubmissionPeriod,
-                                               SubmissionPeriodDesc = s.SubmissionPeriodDesc
-                                           }
-                                        ).Distinct().ToList();
-               
-             var OrganisationsList  = GetAllOrganisationsBasedonRunId(resultsRequestDto.RunId);
+                var SubmissionPeriodDetails = await (from s in context.CalculatorRunPomDataDetails
+                                                     where s.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId
+                                                     select new SubmissionDetails
+                                                     {
+                                                         SubmissionPeriod = s.SubmissionPeriod,
+                                                         SubmissionPeriodDesc = s.SubmissionPeriodDesc
+                                                     }
+                                          ).Distinct().ToListAsync();
 
-              var  OrganisationsBySubmissionPeriod = GetOrganisationDetailsBySubmissionPeriod(OrganisationsList, SubmissionPeriodDetails).ToList();
+                IEnumerable<OrganisationDetails> organisationsList = await GetAllOrganisationsBasedonRunIdAsync(resultsRequestDto.RunId);
+
+                var OrganisationsBySubmissionPeriod = GetOrganisationDetailsBySubmissionPeriod(organisationsList, SubmissionPeriodDetails).ToList();
 
                 // Get the calculator run organisation data details as we need the organisation name
-                var organisationDataDetails = context.CalculatorRunOrganisationDataDetails
-                    .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id && odd.OrganisationName != null && odd.OrganisationName !="")
+                var organisationDataDetails = await context.CalculatorRunOrganisationDataDetails
+                    .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id && odd.OrganisationName != null && odd.OrganisationName != "")
                     .OrderBy(odd => odd.OrganisationName)
                     .GroupBy(odd => new { odd.OrganisationId, odd.SubsidaryId })
                     .Select(odd => odd.First())
-                    .ToList();
-
-
-
+                    .ToListAsync();
 
                 // Get the calculator run pom data master record based on the CalculatorRunPomDataMasterId
-                var pomDataMaster = context.CalculatorRunPomDataMaster.Single(pdm => pdm.Id == calculatorRun.CalculatorRunPomDataMasterId);
+                var pomDataMaster = await context.CalculatorRunPomDataMaster.SingleAsync(pdm => pdm.Id == calculatorRun.CalculatorRunPomDataMasterId);
 
-                using (var transaction = this.context.Database.BeginTransaction())
+                using (var transaction = await this.context.Database.BeginTransactionAsync())
                 {
                     try
                     {
-                        foreach (var organisation in organisationDataDetails.Where(t=>!string.IsNullOrWhiteSpace(t.OrganisationName)))
+                        foreach (var organisation in organisationDataDetails.Where(t => !string.IsNullOrWhiteSpace(t.OrganisationName)))
                         {
                             // Initialise the producerReportedMaterials
                             var producerReportedMaterials = new List<ProducerReportedMaterial>();
 
                             // Get the calculator run pom data details related to the calculator run pom data master
-                            var calculatorRunPomDataDetails = context.CalculatorRunPomDataDetails.Where
+                            var calculatorRunPomDataDetails = await context.CalculatorRunPomDataDetails.Where
                                 (
                                     pdd => pdd.CalculatorRunPomDataMasterId == pomDataMaster.Id &&
                                     pdd.OrganisationId == organisation.OrganisationId &&
                                     pdd.SubsidaryId == organisation.SubsidaryId
-                                ).ToList();
+                                ).ToListAsync();
 
                             // Proceed further only if there is any pom data based on the pom data master id and organisation id
                             // TO DO: We have to record if there is no pom data in a separate table post Dec 2024
                             if (calculatorRunPomDataDetails.Count > 0)
                             {
-                                var organisations = organisationDataDetails.Where(odd => odd.OrganisationName == organisation.OrganisationName  && odd.SubsidaryId == organisation.SubsidaryId).OrderByDescending(odd => odd.SubmissionPeriodDesc);
+                                var organisations = organisationDataDetails.Where(odd => odd.OrganisationName == organisation.OrganisationName && odd.SubsidaryId == organisation.SubsidaryId).OrderByDescending(odd => odd.SubmissionPeriodDesc);
 
                                 // Get the producer based on the latest submission period
                                 var producer = organisations.FirstOrDefault();
@@ -109,7 +88,7 @@ namespace EPR.Calculator.API.Services
                                         CalculatorRunId = resultsRequestDto.RunId,
                                         ProducerId = producer.OrganisationId.Value,
                                         SubsidiaryId = producer.SubsidaryId,
-                                        ProducerName = string.IsNullOrWhiteSpace(producer.SubsidaryId) ? GetLatestOrganisationName(producer.OrganisationId.Value, OrganisationsBySubmissionPeriod, OrganisationsList) : GetLatestSubsidaryName(producer.OrganisationId.Value, producer.SubsidaryId, OrganisationsBySubmissionPeriod, OrganisationsList),
+                                        ProducerName = GetOrganisationName(organisationsList, OrganisationsBySubmissionPeriod, producer),
                                         CalculatorRun = calculatorRun
                                     };
 
@@ -152,20 +131,32 @@ namespace EPR.Calculator.API.Services
                         }
 
                         // Apply the database changes
-                        context.SaveChanges();
+                        await context.SaveChangesAsync();
 
                         // Success, commit transaction
-                        transaction.Commit();
+                        await transaction.CommitAsync();
                     }
                     catch (Exception)
                     {
                         // Error, rollback transaction
-                        transaction.Rollback();
+                        await transaction.RollbackAsync();
                         // TO DO: Decide upon the exception later during the complete integration
                         throw;
                     }
                 }
             }
+        }
+
+        private string? GetOrganisationName(
+            IEnumerable<OrganisationDetails> organisationsList,
+            IEnumerable<OrganisationDetails> OrganisationsBySubmissionPeriod,
+            CalculatorRunOrganisationDataDetail producer)
+        {
+            return string.IsNullOrWhiteSpace(producer.SubsidaryId)
+                ?
+                GetLatestOrganisationName(producer.OrganisationId.Value, OrganisationsBySubmissionPeriod, organisationsList)
+                :
+                GetLatestSubsidaryName(producer.OrganisationId.Value, producer.SubsidaryId, OrganisationsBySubmissionPeriod, organisationsList);
         }
 
         private static List<OrganisationDetails> GetOrganisationDetailsBySubmissionPeriod(IEnumerable<OrganisationDetails> organisationsList, IEnumerable<SubmissionDetails> submissionPeriodDetails)
@@ -183,9 +174,9 @@ namespace EPR.Calculator.API.Services
                     }).ToList();
         }
 
-        public IEnumerable<OrganisationDetails> GetAllOrganisationsBasedonRunId(int runId)
+        public Task<List<OrganisationDetails>> GetAllOrganisationsBasedonRunIdAsync(int runId)
         {
-            return [.. (from run in context.CalculatorRuns join
+            return (from run in context.CalculatorRuns join
                  org in context.CalculatorRunOrganisationDataDetails on run.CalculatorRunOrganisationDataMasterId equals org.CalculatorRunOrganisationDataMasterId
                     where (run.Id == runId && org.OrganisationName != null)
                     select new OrganisationDetails
@@ -194,21 +185,30 @@ namespace EPR.Calculator.API.Services
                         OrganisationName = org.OrganisationName,
                         SubmissionPeriodDescription = org.SubmissionPeriodDesc,
                         SubsidaryId = org.SubsidaryId
-                    }).Distinct()];
+                    }).Distinct().ToListAsync();
         }
 
-
-        public string? GetLatestOrganisationName(int orgId, List<OrganisationDetails> organisationsBySubmissionPeriod, IEnumerable<OrganisationDetails> organisationsList)
+        public string? GetLatestOrganisationName(
+            int orgId,
+            IEnumerable<OrganisationDetails> organisationsBySubmissionPeriod,
+            IEnumerable<OrganisationDetails> organisationsList)
         {
             if (organisationsBySubmissionPeriod is null) return string.Empty;
 
-            var organisations = organisationsBySubmissionPeriod.Where(t => t.OrganisationId == orgId && t.SubsidaryId == null).OrderByDescending(t => t.SubmissionPeriod?.Replace(PeriodSeparator, string.Empty)).ToList();
+            var organisations = organisationsBySubmissionPeriod
+                .Where(t => t.OrganisationId == orgId && t.SubsidaryId == null)
+                .OrderByDescending(t => t.SubmissionPeriod?.Replace(PeriodSeparator, string.Empty))
+                .ToList();
 
             var orgName = organisations?.FirstOrDefault(t => t.OrganisationId == orgId)?.OrganisationName;
             return string.IsNullOrWhiteSpace(orgName) ? organisationsList.FirstOrDefault(t => t.OrganisationId == orgId)?.OrganisationName : orgName;
         }
 
-        public string? GetLatestSubsidaryName(int orgId, string? subsidaryId, List<OrganisationDetails> organisationsBySubmissionPeriod, IEnumerable<OrganisationDetails> organisationsList)
+        public string? GetLatestSubsidaryName(
+            int orgId,
+            string? subsidaryId,
+            IEnumerable<OrganisationDetails> organisationsBySubmissionPeriod,
+            IEnumerable<OrganisationDetails> organisationsList)
         {
             if (organisationsBySubmissionPeriod is null) return string.Empty;
             var subsidaries = organisationsBySubmissionPeriod.Where(t => t.OrganisationId == orgId && t.SubsidaryId == subsidaryId).OrderByDescending(t => t.SubmissionPeriod?.Replace(PeriodSeparator, string.Empty)).ToList();

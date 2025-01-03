@@ -73,7 +73,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
-            service.Transpose(resultsRequestDto);
+            service.TransposeAsync(resultsRequestDto);
 
             var producerDetail = _context.ProducerDetail.FirstOrDefault();
             Assert.IsNotNull(producerDetail);
@@ -114,7 +114,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
-            service.Transpose(resultsRequestDto);
+            service.TransposeAsync(resultsRequestDto);
 
             var producerReportedMaterial = _context.ProducerReportedMaterial.FirstOrDefault();
             Assert.IsNotNull(producerReportedMaterial);
@@ -142,7 +142,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
-            service.Transpose(resultsRequestDto);
+            service.TransposeAsync(resultsRequestDto);
 
             var producerDetail = _context.ProducerDetail.FirstOrDefault(t=>t.SubsidiaryId != null);
             Assert.IsNotNull(producerDetail);
@@ -168,7 +168,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
-            service.Transpose(resultsRequestDto);
+            service.TransposeAsync(resultsRequestDto);
 
             var producerDetail = _context.ProducerDetail.FirstOrDefault();
             Assert.IsNotNull(producerDetail);
@@ -182,7 +182,9 @@ namespace EPR.Calculator.API.UnitTests.Services
             
             var service = new TransposePomAndOrgDataService(_context);
 
-            var orgDetails = service.GetAllOrganisationsBasedonRunId(3);
+            var task = service.GetAllOrganisationsBasedonRunIdAsync(3);
+            task.Wait();
+            var orgDetails = task.Result;
 
             var orgSubDetails = new List<OrganisationDetails>()
             {
@@ -215,7 +217,10 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var service = new TransposePomAndOrgDataService(_context);
 
-            var orgDetails = service.GetAllOrganisationsBasedonRunId(3);
+            var task = service.GetAllOrganisationsBasedonRunIdAsync(3);
+            task.Wait();
+
+            var orgDetails = task.Result;
 
             var orgSubDetails = new List<OrganisationDetails>()
             {
@@ -248,7 +253,9 @@ namespace EPR.Calculator.API.UnitTests.Services
         {
             var service = new TransposePomAndOrgDataService(_context);
 
-            var orgDetails = service.GetAllOrganisationsBasedonRunId(3);
+            var task = service.GetAllOrganisationsBasedonRunIdAsync(3);
+            task.Wait();
+            var orgDetails = task.Result;
 
             var orgSubDetails = new List<OrganisationDetails>();
             
