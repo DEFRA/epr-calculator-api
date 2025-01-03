@@ -39,16 +39,33 @@ namespace EPR.Calculator.API.Services
         {
             var materials = this.context.Material.ToList();
 
-            var calculatorRun = this.context.CalculatorRuns.Single(cr => cr.Id == resultsRequestDto.RunId);
+            var calcRunPomOrgDatadetails = (from run in this.context.CalculatorRuns
+                                            join pomMaster in this.context.CalculatorRunPomDataMaster on run.CalculatorRunPomDataMasterId equals pomMaster.Id
+                                            join orgMaster in this.context.CalculatorRunOrganisationDataMaster on run.CalculatorRunOrganisationDataMasterId equals orgMaster.Id
+                                            join pomDetail in this.context.CalculatorRunPomDataDetails on pomMaster.Id equals pomDetail.CalculatorRunPomDataMasterId
+                                            join orgDetail in this.context.CalculatorRunOrganisationDataDetails on orgMaster.Id equals orgDetail.CalculatorRunOrganisationDataMasterId
+                                            where run.Id == resultsRequestDto.RunId
+                                            select new
+                                            {
+                                                run,
+                                                pomMaster,
+                                                orgMaster,
+                                                orgDetail,
+                                                pomDetail
+                                            }).ToList();
+
+            var calculatorRun = calcRunPomOrgDatadetails.Select(x => x.run).Distinct().Single();
+            var calculatorRunPomDataDetails = calcRunPomOrgDatadetails.Select(x => x.pomDetail);
+            var calculatorRunOrgDataDetails = calcRunPomOrgDatadetails.Select(x => x.orgDetail);
 
             if (calculatorRun.CalculatorRunPomDataMasterId != null)
             {
                 // Get the calculator run organisation data master record based on the CalculatorRunOrganisationDataMasterId
                 // from the calculator run table
-                var organisationDataMaster = context.CalculatorRunOrganisationDataMaster.Single(odm => odm.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);
+                var organisationDataMaster = calcRunPomOrgDatadetails.Select(x => x.orgMaster).Distinct().Single();
 
-              var SubmissionPeriodDetails = (from s in context.CalculatorRunPomDataDetails
-                                           where s.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId
+                var SubmissionPeriodDetails = (from s in calculatorRunPomDataDetails
+                                               where s.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId
                                            select new SubmissionDetails
                                            {
                                                SubmissionPeriod = s.SubmissionPeriod,
@@ -56,23 +73,20 @@ namespace EPR.Calculator.API.Services
                                            }
                                         ).Distinct().ToList();
                
-             var OrganisationsList  = GetAllOrganisationsBasedonRunId(resultsRequestDto.RunId);
+             var OrganisationsList  = GetAllOrganisationsBasedonRunId(calculatorRunOrgDataDetails);
 
               var  OrganisationsBySubmissionPeriod = GetOrganisationDetailsBySubmissionPeriod(OrganisationsList, SubmissionPeriodDetails).ToList();
 
                 // Get the calculator run organisation data details as we need the organisation name
-                var organisationDataDetails = context.CalculatorRunOrganisationDataDetails
+                var organisationDataDetails = calculatorRunOrgDataDetails
                     .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id && odd.OrganisationName != null && odd.OrganisationName !="")
                     .OrderBy(odd => odd.OrganisationName)
                     .GroupBy(odd => new { odd.OrganisationId, odd.SubsidaryId })
                     .Select(odd => odd.First())
                     .ToList();
 
-
-
-
                 // Get the calculator run pom data master record based on the CalculatorRunPomDataMasterId
-                var pomDataMaster = context.CalculatorRunPomDataMaster.Single(pdm => pdm.Id == calculatorRun.CalculatorRunPomDataMasterId);
+                var pomDataMaster = calcRunPomOrgDatadetails.Select(x => x.pomMaster).Distinct().Single();
 
                 using (var transaction = this.context.Database.BeginTransaction())
                 {
@@ -84,7 +98,7 @@ namespace EPR.Calculator.API.Services
                             var producerReportedMaterials = new List<ProducerReportedMaterial>();
 
                             // Get the calculator run pom data details related to the calculator run pom data master
-                            var calculatorRunPomDataDetails = context.CalculatorRunPomDataDetails.Where
+                            var runPomDataDetailsForSubsidaryId = calculatorRunPomDataDetails.Where
                                 (
                                     pdd => pdd.CalculatorRunPomDataMasterId == pomDataMaster.Id &&
                                     pdd.OrganisationId == organisation.OrganisationId &&
@@ -93,7 +107,7 @@ namespace EPR.Calculator.API.Services
 
                             // Proceed further only if there is any pom data based on the pom data master id and organisation id
                             // TO DO: We have to record if there is no pom data in a separate table post Dec 2024
-                            if (calculatorRunPomDataDetails.Count > 0)
+                            if (runPomDataDetailsForSubsidaryId.Count > 0)
                             {
                                 var organisations = organisationDataDetails.Where(odd => odd.OrganisationName == organisation.OrganisationName  && odd.SubsidaryId == organisation.SubsidaryId).OrderByDescending(odd => odd.SubmissionPeriodDesc);
 
@@ -118,7 +132,7 @@ namespace EPR.Calculator.API.Services
 
                                     foreach (var material in materials)
                                     {
-                                        var pomDataDetailsByMaterial = calculatorRunPomDataDetails.Where(pdd => pdd.PackagingMaterial == material.Code).GroupBy(pdd => pdd.PackagingType);
+                                        var pomDataDetailsByMaterial = runPomDataDetailsForSubsidaryId.Where(pdd => pdd.PackagingMaterial == material.Code).GroupBy(pdd => pdd.PackagingType);
 
                                         foreach (var pomData in pomDataDetailsByMaterial)
                                         {
@@ -183,11 +197,11 @@ namespace EPR.Calculator.API.Services
                     }).ToList();
         }
 
-        public IEnumerable<OrganisationDetails> GetAllOrganisationsBasedonRunId(int runId)
+        public IEnumerable<OrganisationDetails> GetAllOrganisationsBasedonRunId(
+            IEnumerable<CalculatorRunOrganisationDataDetail> calculatorRunOrganisationDataDetails)
         {
-            return [.. (from run in context.CalculatorRuns join
-                 org in context.CalculatorRunOrganisationDataDetails on run.CalculatorRunOrganisationDataMasterId equals org.CalculatorRunOrganisationDataMasterId
-                    where (run.Id == runId && org.OrganisationName != null)
+            return [.. (from org in calculatorRunOrganisationDataDetails
+                    where (org.OrganisationName != null)
                     select new OrganisationDetails
                     {
                         OrganisationId = org.OrganisationId,
