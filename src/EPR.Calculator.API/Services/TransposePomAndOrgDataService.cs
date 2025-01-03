@@ -55,8 +55,8 @@ namespace EPR.Calculator.API.Services
                                             }).ToList();
 
             var calculatorRun = calcRunPomOrgDatadetails.Select(x => x.run).Distinct().Single();
-            var calculatorRunPomDataDetails = calcRunPomOrgDatadetails.Select(x => x.pomDetail);
-            var calculatorRunOrgDataDetails = calcRunPomOrgDatadetails.Select(x => x.orgDetail);
+            var calculatorRunPomDataDetails = calcRunPomOrgDatadetails.Select(x => x.pomDetail).Distinct();
+            var calculatorRunOrgDataDetails = calcRunPomOrgDatadetails.Select(x => x.orgDetail).Distinct();
 
             if (calculatorRun.CalculatorRunPomDataMasterId != null)
             {
