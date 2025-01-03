@@ -23,6 +23,11 @@ namespace EPR.Calculator.API.Exporter
         public string Export(CalcResult results)
         {
             var csvContent = new StringBuilder();
+            if (results == null)
+            {
+                return csvContent.ToString();
+            }
+
             LoadCalcResultDetail(results, csvContent);
 
             AppendDataIfNotNull(results.CalcResultLapcapData, PrepareLapcapData, csvContent);
@@ -35,14 +40,21 @@ namespace EPR.Calculator.API.Exporter
 
             csvContent.AppendLine();
 
-            AppendDataIfNotNull(results.CalcResultCommsCostReportDetail, PrepareCommCost, csvContent);
+            AppendDataIfNotNull(results.CalcResultCommsCostReportDetail, PrepareCommsCost, csvContent);
             AppendDataIfNotNull(results.CalcResultLaDisposalCostData, PrepareLaDisposalCostData, csvContent);
             AppendDataIfNotNull(results.CalcResultSummary, PrepareSummaryData, csvContent);
 
             return csvContent.ToString();
         }
+        public virtual void AppendDataIfNotNull<T>(T data, Action<T, StringBuilder> appendMethod, StringBuilder csvContent)
+        {
+            if (data != null)
+            {
+                appendMethod(data, csvContent);
+            }
+        }
 
-        private static void PrepareCommCost(CalcResultCommsCost communicationCost, StringBuilder csvContent)
+        private static void PrepareCommsCost(CalcResultCommsCost communicationCost, StringBuilder csvContent)
         {
             csvContent.AppendLine();
             csvContent.AppendLine();
@@ -444,13 +456,6 @@ namespace EPR.Calculator.API.Exporter
             foreach (var item in resultSummary.ColumnHeaders)
             {
                 csvContent.Append($"{CsvSanitiser.SanitiseData(item.Name)},");
-            }
-        }
-        private static void AppendDataIfNotNull<T>(T data, Action<T, StringBuilder> appendMethod, StringBuilder csvContent)
-        {
-            if (data != null)
-            {
-                appendMethod(data, csvContent);
             }
         }
     }

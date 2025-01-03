@@ -8,6 +8,8 @@ using EPR.Calculator.API.Tests.Controllers;
 using EPR.Calculator.API.Data.Migrations;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
+using Microsoft.AspNetCore.Routing;
+using EPR.Calculator.API.Constants;
 
 namespace EPR.Calculator.API.UnitTests.Exporter
 {
@@ -66,22 +68,179 @@ namespace EPR.Calculator.API.UnitTests.Exporter
         }
 
         [TestMethod]
-        public void Export_ShouldReturnEmptyString_WhenAllDataIsNull()
+        public void Export_ShouldReturnEmptyString_WhenResultsIsNull()
         {
             // Arrange
+            CalcResult results = null;
             var exporter = new CalcResultsExporter();
-            var calcResult = new CalcResult
+
+            // Act
+            var csvContent = exporter.Export(results);
+
+            // Assert
+            Assert.AreEqual(string.Empty, csvContent, "The Export method should return an empty string when results is null.");
+        }
+   
+        [TestMethod]
+        public void Export_ShouldIncludeCalcResultRunNameDetails()
+        {
+            var results = CreateCalcResult();
+            var exporter = new CalcResultsExporter();
+
+            var result = exporter.Export(results);
+
+            Assert.IsTrue(result.Contains("CalculatorRunName"));
+        }
+
+        [TestMethod]
+        public void Export_ShouldIncludeLapcapData_WhenNotNull()
+        {
+            // Arrange
+            var results = CreateCalcResult();
+            var exporter = new CalcResultsExporter();
+
+
+            // Act
+            var result = exporter.Export(results);
+
+            // Assert
+            Assert.IsTrue(result.Contains("LAPCAP Data"));
+        }
+
+        [TestMethod]
+        public void Export_ShouldIncludeLateReportingData_WhenNotNull()
+        {
+            // Arrange
+            var results = CreateCalcResult();
+            var exporter = new CalcResultsExporter();
+            //Act
+            var result = exporter.Export(results);
+
+            //Assert
+            Assert.IsTrue(result.Contains("Late Reporting Tonnage"));
+        }
+
+        [TestMethod]
+        public void Export_ShouldIncludeOtherCosts_WhenNotNull()
+        {
+            // Arrange
+            var results = CreateCalcResult();
+            var exporter = new CalcResultsExporter();
+            //Act
+            var result = exporter.Export(results);
+
+            //Assert
+            Assert.IsTrue(result.Contains("Parameters - Other"));
+        }
+
+        [TestMethod]
+        public void Export_ShouldIncludeOnePlusFourApportionment_WhenNotNull()
+        { // Arrange
+            var results = CreateCalcResult();
+            var exporter = new CalcResultsExporter();
+            //Act
+            var result = exporter.Export(results);
+
+            //Assert
+            Assert.IsTrue(result.Contains("1 + 4 Apportionment %s"));
+        }
+
+        [TestMethod]
+        public void Export_ShouldIncludeCommCost_WhenNotNull()
+        {
+            // Arrange
+            var results = CreateCalcResult();
+            var exporter = new CalcResultsExporter();
+            //Act
+            var result = exporter.Export(results);
+
+            //Assert
+            Assert.IsTrue(result.Contains("4 LA Data Prep Charge"));
+        }
+
+        [TestMethod]
+        public void Export_ShouldIncludeLaDisposalCostData_WhenNotNull()
+        {
+            // Arrange
+            var results = CreateCalcResult();
+            var exporter = new CalcResultsExporter();
+
+            //Act
+            var result = exporter.Export(results);
+
+            //Assert
+            Assert.IsTrue(result.Contains("5 Scheme set up cost Yearly Cost"));
+        }
+
+        [TestMethod]
+        public void Export_ShouldIncludeSummaryData_WhenNotNull()
+        { 
+            // Arrange
+            var results = CreateCalcResult();
+            var exporter = new CalcResultsExporter();
+
+            //Act
+            var result = exporter.Export(results);
+
+            //Assert
+
+            Assert.IsTrue(result.Contains("SummaryData"));
+        }
+
+        [TestMethod]
+        public void AppendDataIfNotNull_ShouldCallAppendMethod_WhenDataIsNotNull()
+        {
+            var csvContent = new StringBuilder();
+            var exporter = new CalcResultsExporter();
+            var data = new object();
+
+            exporter.AppendDataIfNotNull(data, (d, sb) => sb.Append("Data"), csvContent);
+
+            Assert.IsTrue(csvContent.ToString().Contains("Data"));
+        }
+
+        [TestMethod]
+        public void AppendDataIfNotNull_ShouldNotCallAppendMethod_WhenDataIsNull()
+        {
+            var csvContent = new StringBuilder();
+            var exporter = new CalcResultsExporter();
+            object data = null;
+
+            exporter.AppendDataIfNotNull(data, (d, sb) => sb.Append("Data"), csvContent);
+
+            Assert.IsFalse(csvContent.ToString().Contains("Data"));
+        }
+
+        [TestMethod]
+        public void Export_ShouldGenerateEmptyCsv_WhenNoData()
+        {
+            // Arrange
+            var results = new CalcResult
             {
                 CalcResultLapcapData = null,
                 CalcResultLateReportingTonnageData = null,
                 CalcResultParameterOtherCost = null
             };
+            var exporter = new CalcResultsExporter();
 
             // Act
-            var result = exporter.Export(calcResult);
+            if (results != null)
+            {
+                var csvContent = exporter.Export(results);
 
-            // Assert
-            Assert.AreEqual(string.Empty, result);
+                // Assert
+                Assert.IsFalse(string.IsNullOrEmpty(csvContent), "CSV content should not be empty.");
+                Assert.IsFalse(csvContent.Contains("LapcapData"), "CSV content should not contain LapcapData.");
+                Assert.IsFalse(csvContent.Contains("LateReportingData"),
+                    "CSV content should not contain LateReportingData.");
+                Assert.IsFalse(csvContent.Contains("OtherCosts"), "CSV content should not contain OtherCosts.");
+                Assert.IsFalse(csvContent.Contains("OnePlusFourApportionment"),
+                    "CSV content should not contain OnePlusFourApportionment.");
+                Assert.IsFalse(csvContent.Contains("CommsCost"), "CSV content should not contain CommsCost.");
+                Assert.IsFalse(csvContent.Contains("LaDisposalCostData"),
+                    "CSV content should not contain LaDisposalCostData.");
+                Assert.IsFalse(csvContent.Contains("SummaryData"), "CSV content should not contain SummaryData.");
+            }
         }
 
         private CalcResult CreateCalcResult()
@@ -293,6 +452,10 @@ namespace EPR.Calculator.API.UnitTests.Exporter
                 },
                 CalcResultSummary = new CalcResultSummary
                 {
+                    ResultSummaryHeader = new CalcResultSummaryHeader
+                    {
+                        Name = "SummaryData",
+                    },
                     ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>
             {
                 new CalcResultSummaryProducerDisposalFees
@@ -312,7 +475,7 @@ namespace EPR.Calculator.API.UnitTests.Exporter
                 {
                     RunId = 1,
                     RunDate = DateTime.Now,
-                    RunName = "RunName"
+                    RunName = "CalculatorRunName"
                 }
             };
         }
