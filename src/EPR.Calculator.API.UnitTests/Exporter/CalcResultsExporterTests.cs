@@ -68,22 +68,17 @@ namespace EPR.Calculator.API.UnitTests.Exporter
         }
 
         [TestMethod]
-        public void Export_ShouldReturnEmptyString_WhenResultsIsNull()
+        public void Export_ShouldThrowArgumentNullException_WhenResultsIsNull()
         {
             // Arrange
             CalcResult? results = null;
             var exporter = new CalcResultsExporter();
 
-            // Act
-            if (results != null)
-            {
-                var csvContent = exporter.Export(results);
-
-                // Assert
-                Assert.AreEqual(string.Empty, csvContent, "The Export method should return an empty string when results is null.");
-            }
+            // Act & Assert
+            var ex = Assert.ThrowsException<ArgumentNullException>(() => exporter.Export(results));
+            Assert.AreEqual("results", ex.ParamName);
         }
-   
+
         [TestMethod]
         public void Export_ShouldIncludeCalcResultRunNameDetails()
         {
@@ -138,7 +133,8 @@ namespace EPR.Calculator.API.UnitTests.Exporter
 
         [TestMethod]
         public void Export_ShouldIncludeOnePlusFourApportionment_WhenNotNull()
-        { // Arrange
+        {
+            // Arrange
             var results = CreateCalcResult();
             var exporter = new CalcResultsExporter();
             //Act
@@ -177,7 +173,7 @@ namespace EPR.Calculator.API.UnitTests.Exporter
 
         [TestMethod]
         public void Export_ShouldIncludeSummaryData_WhenNotNull()
-        { 
+        {
             // Arrange
             var results = CreateCalcResult();
             var exporter = new CalcResultsExporter();
@@ -197,7 +193,7 @@ namespace EPR.Calculator.API.UnitTests.Exporter
             var exporter = new CalcResultsExporter();
             var data = new object();
 
-            exporter.AppendDataIfNotNull(data, (d, sb) => sb.Append("Data"), csvContent);
+            exporter.AppendData(data, (d, sb) => sb.Append("Data"), csvContent);
 
             Assert.IsTrue(csvContent.ToString().Contains("Data"));
         }
@@ -211,7 +207,7 @@ namespace EPR.Calculator.API.UnitTests.Exporter
             object? data = null;
 
             // Act
-            exporter.AppendDataIfNotNull(data, (d, sb) => sb.Append("Data"), csvContent);
+            exporter.AppendData(data, (d, sb) => sb.Append("Data"), csvContent);
 
             // Assert
             Assert.IsFalse(csvContent.ToString().Contains("Data"));
@@ -257,22 +253,23 @@ namespace EPR.Calculator.API.UnitTests.Exporter
                 {
                     Name = "LAPCAP Data",
                     CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>
-            {
-                new CalcResultLapcapDataDetails
-                {
-                    Name = "Total",
-                    EnglandDisposalCost = "£13,280.45",
-                    WalesDisposalCost = "£210.28",
-                    ScotlandDisposalCost = "£161.07",
-                    NorthernIrelandDisposalCost = "£91.00",
-                    TotalDisposalCost = "£13,742.80",
-                    EnglandCost = 13280.45m,
-                    WalesCost = 210.28m,
-                    ScotlandCost = 91.00m,
-                    NorthernIrelandCost = 91.00m,
-                    TotalCost = 13742.80m
-                }
-            }
+                    {
+                        new CalcResultLapcapDataDetails
+                        {
+                            Name = "Total",
+                            EnglandDisposalCost = "£13,280.45",
+                            WalesDisposalCost = "£210.28",
+                            ScotlandDisposalCost = "£161.07",
+                            NorthernIrelandDisposalCost = "£91.00",
+                            TotalDisposalCost = "£13,742.80",
+                            EnglandCost = 13280.45m,
+                            WalesCost = 210.28m,
+                            ScotlandCost = 91.00m,
+                            NorthernIrelandCost = 91.00m,
+                            TotalCost = 13742.80m
+                        }
+
+                    }
                 },
                 CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
                 {
@@ -280,76 +277,77 @@ namespace EPR.Calculator.API.UnitTests.Exporter
                     MaterialHeading = string.Empty,
                     TonnageHeading = string.Empty,
                     CalcResultLateReportingTonnageDetails = new List<CalcResultLateReportingTonnageDetail>
-            {
-                new CalcResultLateReportingTonnageDetail
-                {
-                    Name = "Aluminium",
-                    TotalLateReportingTonnage = 8000.00m
-                },
-                new CalcResultLateReportingTonnageDetail
-                {
-                    Name = "Plastic",
-                    TotalLateReportingTonnage = 2000.00m
-                },
-                new CalcResultLateReportingTonnageDetail
-                {
-                    Name = "Total",
-                    TotalLateReportingTonnage = 10000.00m
-                }
-            }
+                    {
+                        new CalcResultLateReportingTonnageDetail
+                        {
+                            Name = "Aluminium",
+                            TotalLateReportingTonnage = 8000.00m
+                        },
+                        new CalcResultLateReportingTonnageDetail
+                        {
+                            Name = "Plastic",
+                            TotalLateReportingTonnage = 2000.00m
+                        },
+                        new CalcResultLateReportingTonnageDetail
+                        {
+                            Name = "Total",
+                            TotalLateReportingTonnage = 10000.00m
+                        }
+                    }
                 },
                 CalcResultParameterOtherCost = new CalcResultParameterOtherCost
                 {
                     BadDebtProvision = new KeyValuePair<string, string>("key1", "6%"),
                     BadDebtValue = 6m,
                     Details = new List<CalcResultParameterOtherCostDetail>
-            {
-                new CalcResultParameterOtherCostDetail
-                {
-                    Name = "4 LA Data Prep Charge",
-                    OrderId = 1,
-                    England = "£40.00",
-                    EnglandValue = 40,
-                    Wales = "£30.00",
-                    WalesValue = 30,
-                    Scotland = "£20.00",
-                    ScotlandValue = 20,
-                    NorthernIreland = "£10.00",
-                    NorthernIrelandValue = 10,
-                    Total = "£100.00",
-                    TotalValue = 100
-                }
-            },
+                    {
+                        new CalcResultParameterOtherCostDetail
+                        {
+                            Name = "4 LA Data Prep Charge",
+                            OrderId = 1,
+                            England = "£40.00",
+                            EnglandValue = 40,
+                            Wales = "£30.00",
+                            WalesValue = 30,
+                            Scotland = "£20.00",
+                            ScotlandValue = 20,
+                            NorthernIreland = "£10.00",
+                            NorthernIrelandValue = 10,
+                            Total = "£100.00",
+                            TotalValue = 100
+                        }
+
+                    },
                     Materiality = new List<CalcResultMateriality>
-            {
-                new CalcResultMateriality
-                {
-                    Amount = "Amount £s",
-                    AmountValue = 0,
-                    Percentage = "%",
-                    PercentageValue = 0,
-                    SevenMateriality = "7 Materiality"
-                }
-            },
+                    {
+                        new CalcResultMateriality
+                        {
+                            Amount = "Amount £s",
+                            AmountValue = 0,
+                            Percentage = "%",
+                            PercentageValue = 0,
+                            SevenMateriality = "7 Materiality"
+                        }
+                    },
                     Name = "Parameters - Other",
                     SaOperatingCost = new List<CalcResultParameterOtherCostDetail>
-            {
-                new CalcResultParameterOtherCostDetail
-                {
-                    Name = string.Empty,
-                    OrderId = 1,
-                    England = "£40.00",
-                    EnglandValue = 40,
-                    Wales = "£30.00",
-                    WalesValue = 30,
-                    Scotland = "£20.00",
-                    ScotlandValue = 20,
-                    NorthernIreland = "£10.00",
-                    NorthernIrelandValue = 10,
-                    Total = "£100.00",
-                    TotalValue = 100
-                }
-            },
+                    {
+                        new CalcResultParameterOtherCostDetail
+                        {
+                            Name = string.Empty,
+                            OrderId = 1,
+                            England = "£40.00",
+                            EnglandValue = 40,
+                            Wales = "£30.00",
+                            WalesValue = 30,
+                            Scotland = "£20.00",
+                            ScotlandValue = 20,
+                            NorthernIreland = "£10.00",
+                            NorthernIrelandValue = 10,
+                            Total = "£100.00",
+                            TotalValue = 100
+                        }
+                    },
                     SchemeSetupCost = new CalcResultParameterOtherCostDetail
                     {
                         Name = "5 Scheme set up cost Yearly Cost",
@@ -369,113 +367,115 @@ namespace EPR.Calculator.API.UnitTests.Exporter
                 CalcResultOnePlusFourApportionment = new CalcResultOnePlusFourApportionment
                 {
                     CalcResultOnePlusFourApportionmentDetails = new List<CalcResultOnePlusFourApportionmentDetail>
-            {
-                new CalcResultOnePlusFourApportionmentDetail
-                {
-                    EnglandDisposalTotal = "80",
-                    NorthernIrelandDisposalTotal = "70",
-                    ScotlandDisposalTotal = "30",
-                    WalesDisposalTotal = "20",
-                    AllTotal = 0.1M,
-                    EnglandTotal = 14.53M,
-                    NorthernIrelandTotal = 0.15M,
-                    ScotlandTotal = 1.15M,
-                    WalesTotal = 0.20M,
-                    Name = "1 + 4 Apportionment %s",
-                },
-                new CalcResultOnePlusFourApportionmentDetail
-                {
-                    EnglandDisposalTotal = "80",
-                    NorthernIrelandDisposalTotal = "70",
-                    ScotlandDisposalTotal = "30",
-                    WalesDisposalTotal = "20",
-                    AllTotal = 0.1M,
-                    EnglandTotal = 0.10M,
-                    NorthernIrelandTotal = 0.15M,
-                    ScotlandTotal = 0.15M,
-                    WalesTotal = 0.20M,
-                    Name = "Test",
-                }
-            },
+                    {
+                        new CalcResultOnePlusFourApportionmentDetail
+                        {
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 14.53M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 1.15M,
+                            WalesTotal = 0.20M,
+                            Name = "1 + 4 Apportionment %s",
+                        },
+                        new CalcResultOnePlusFourApportionmentDetail
+                        {
+                            EnglandDisposalTotal = "80",
+                            NorthernIrelandDisposalTotal = "70",
+                            ScotlandDisposalTotal = "30",
+                            WalesDisposalTotal = "20",
+                            AllTotal = 0.1M,
+                            EnglandTotal = 0.10M,
+                            NorthernIrelandTotal = 0.15M,
+                            ScotlandTotal = 0.15M,
+                            WalesTotal = 0.20M,
+                            Name = "Test",
+                        }
+                    },
                     Name = "some test"
                 },
                 CalcResultCommsCostReportDetail = new CalcResultCommsCost
                 {
                     CalcResultCommsCostCommsCostByMaterial = new List<CalcResultCommsCostCommsCostByMaterial>
-            {
-                new CalcResultCommsCostCommsCostByMaterial
-                {
-                    CommsCostByMaterialPricePerTonne = "0.42",
-                    Name = "Aluminium",
-                },
-                new CalcResultCommsCostCommsCostByMaterial
-                {
-                    CommsCostByMaterialPricePerTonne = "0.3",
-                    Name = "Glass",
-                }
-            }
+                    {
+                        new CalcResultCommsCostCommsCostByMaterial
+                        {
+                            CommsCostByMaterialPricePerTonne = "0.42",
+                            Name = "Aluminium",
+                        },
+                        new CalcResultCommsCostCommsCostByMaterial
+                        {
+                            CommsCostByMaterialPricePerTonne = "0.3",
+                            Name = "Glass",
+                        }
+                    }
                 },
                 CalcResultLaDisposalCostData = new CalcResultLaDisposalCostData
                 {
                     CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>
-            {
-                new CalcResultLaDisposalCostDataDetail
-                {
-                    DisposalCostPricePerTonne = "20",
-                    England = "EnglandTest",
-                    Wales = "WalesTest",
-                    Name = "ScotlandTest",
-                    Scotland = "ScotlandTest",
-                    Material = "Material1",
-                    NorthernIreland = "NorthernIrelandTest",
-                    Total = "null",
-                    ProducerReportedHouseholdPackagingWasteTonnage = "null"
-                },
-                new CalcResultLaDisposalCostDataDetail
-                {
-                    DisposalCostPricePerTonne = "20",
-                    England = "EnglandTest",
-                    Wales = "WalesTest",
-                    Name = "Material1",
-                    Scotland = "ScotlandTest",
-                    NorthernIreland = "NorthernIrelandTest",
-                    Total = "null",
-                    ProducerReportedHouseholdPackagingWasteTonnage = "null",
-                },
-                new CalcResultLaDisposalCostDataDetail
-                {
-                    DisposalCostPricePerTonne = "10",
-                    England = "EnglandTest",
-                    Wales = "WalesTest",
-                    Name = "Material2",
-                    Scotland = "ScotlandTest",
-                    NorthernIreland = "NorthernIrelandTest",
-                    Total = "100",
-                    ProducerReportedHouseholdPackagingWasteTonnage = "null",
-                }
-            },
+                    {
+                        new CalcResultLaDisposalCostDataDetail
+                        {
+                            DisposalCostPricePerTonne = "20",
+                            England = "EnglandTest",
+                            Wales = "WalesTest",
+                            Name = "ScotlandTest",
+                            Scotland = "ScotlandTest",
+                            Material = "Material1",
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "null",
+                            ProducerReportedHouseholdPackagingWasteTonnage = "null"
+                        },
+                        new CalcResultLaDisposalCostDataDetail
+                        {
+                            DisposalCostPricePerTonne = "20",
+                            England = "EnglandTest",
+                            Wales = "WalesTest",
+                            Name = "Material1",
+                            Scotland = "ScotlandTest",
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "null",
+                            ProducerReportedHouseholdPackagingWasteTonnage = "null",
+                        },
+                        new CalcResultLaDisposalCostDataDetail
+                        {
+                            DisposalCostPricePerTonne = "10",
+                            England = "EnglandTest",
+                            Wales = "WalesTest",
+                            Name = "Material2",
+                            Scotland = "ScotlandTest",
+                            NorthernIreland = "NorthernIrelandTest",
+                            Total = "100",
+                            ProducerReportedHouseholdPackagingWasteTonnage = "null",
+                        }
+                    },
                     Name = "some test"
                 },
                 CalcResultSummary = new CalcResultSummary
                 {
                     ResultSummaryHeader = new CalcResultSummaryHeader
                     {
-                        Name = "SummaryData",
+                        Name = "SummaryData"
                     },
                     ProducerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>
-            {
-                new CalcResultSummaryProducerDisposalFees
-                {
-                    ProducerCommsFeesByMaterial = new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>(),
-                    ProducerDisposalFeesByMaterial = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>(),
-                    ProducerId = "1",
-                    ProducerName = "Test",
-                    TotalProducerDisposalFeeWithBadDebtProvision = 100,
-                    TotalProducerCommsFeeWithBadDebtProvision = 100,
-                    SubsidiaryId = "1",
-                    ProducerOverallPercentageOfCostsForOnePlus2A2B2C = 1
-                }
-            }
+                    {
+                        new CalcResultSummaryProducerDisposalFees
+                        {
+                            ProducerCommsFeesByMaterial =
+                                new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>(),
+                            ProducerDisposalFeesByMaterial =
+                                new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>(),
+                            ProducerId = "1",
+                            ProducerName = "Test",
+                            TotalProducerDisposalFeeWithBadDebtProvision = 100,
+                            TotalProducerCommsFeeWithBadDebtProvision = 100,
+                            SubsidiaryId = "1",
+                            ProducerOverallPercentageOfCostsForOnePlus2A2B2C = 1
+                        }
+                    }
                 },
                 CalcResultDetail = new CalcResultDetail
                 {

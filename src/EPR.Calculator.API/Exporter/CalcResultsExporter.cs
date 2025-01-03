@@ -25,29 +25,29 @@ namespace EPR.Calculator.API.Exporter
             var csvContent = new StringBuilder();
             if (results == null)
             {
-                return csvContent.ToString();
+                throw new ArgumentNullException(nameof(results), "The results parameter cannot be null.");
             }
 
             LoadCalcResultDetail(results, csvContent);
 
-            AppendDataIfNotNull(results.CalcResultLapcapData, PrepareLapcapData, csvContent);
-            AppendDataIfNotNull(results.CalcResultLateReportingTonnageData, PrepareLateReportingData, csvContent);
+            AppendData(results.CalcResultLapcapData, PrepareLapcapData, csvContent);
+            AppendData(results.CalcResultLateReportingTonnageData, PrepareLateReportingData, csvContent);
 
             csvContent.AppendLine();
 
-            AppendDataIfNotNull(results.CalcResultParameterOtherCost, PrepareOtherCosts, csvContent);
-            AppendDataIfNotNull(results.CalcResultOnePlusFourApportionment, PrepareOnePluseFourApportionment, csvContent);
+            AppendData(results.CalcResultParameterOtherCost, PrepareOtherCosts, csvContent);
+            AppendData(results.CalcResultOnePlusFourApportionment, PrepareOnePluseFourApportionment, csvContent);
 
             csvContent.AppendLine();
 
-            AppendDataIfNotNull(results.CalcResultCommsCostReportDetail, PrepareCommsCost, csvContent);
-            AppendDataIfNotNull(results.CalcResultLaDisposalCostData, PrepareLaDisposalCostData, csvContent);
-            AppendDataIfNotNull(results.CalcResultSummary, PrepareSummaryData, csvContent);
+            AppendData(results.CalcResultCommsCostReportDetail, PrepareCommsCost, csvContent);
+            AppendData(results.CalcResultLaDisposalCostData, PrepareLaDisposalCostData, csvContent);
+            AppendData(results.CalcResultSummary, PrepareSummaryData, csvContent);
 
             return csvContent.ToString();
         }
 
-        public virtual void AppendDataIfNotNull<T>(T? data, Action<T, StringBuilder> appendMethod, StringBuilder csvContent) where T : class
+        public virtual void AppendData<T>(T? data, Action<T, StringBuilder> appendMethod, StringBuilder csvContent) where T : class
         {
             if (data != null)
             {
@@ -72,9 +72,9 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.AppendLine($"{CsvSanitiser.SanitiseData(onePlusFourApportionment.Total)}");
             }
             csvContent.AppendLine();
-            var comCostByMaterials = communicationCost.CalcResultCommsCostCommsCostByMaterial;
+            var commCostByMaterials = communicationCost.CalcResultCommsCostCommsCostByMaterial;
 
-            foreach (var commCostByMaterial in comCostByMaterials)
+            foreach (var commCostByMaterial in commCostByMaterials)
             {
                 csvContent.Append($"{CsvSanitiser.SanitiseData(commCostByMaterial.Name)},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(commCostByMaterial.England)},");
