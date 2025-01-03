@@ -9,18 +9,14 @@ namespace EPR.Calculator.API.Services
     public class TransposePomAndOrgDataService : ITransposePomAndOrgDataService
     {
         private readonly ApplicationDBContext context;
-
         private const string PeriodSeparator = "-P";
-
         public class OrganisationDetails
         {
             public int? OrganisationId { get; set; }
             public required string OrganisationName { get; set; }
             public string? SubmissionPeriod { get; set; }
             public string? SubmissionPeriodDescription { get; set; }
-
             public string? SubsidaryId { get; set; }
-
         }
 
         internal class SubmissionDetails
@@ -63,8 +59,6 @@ namespace EPR.Calculator.API.Services
 
             if (calculatorRun.CalculatorRunPomDataMasterId != null)
             {
-                // Get the calculator run organisation data master record based on the CalculatorRunOrganisationDataMasterId
-                // from the calculator run table
                 var organisationDataMaster = calcRunPomOrgDatadetails.Select(x => x.orgMaster).Distinct().Single();
 
                 var SubmissionPeriodDetails = (from s in calculatorRunPomDataDetails
@@ -80,7 +74,6 @@ namespace EPR.Calculator.API.Services
 
                 var OrganisationsBySubmissionPeriod = GetOrganisationDetailsBySubmissionPeriod(OrganisationsList, SubmissionPeriodDetails).ToList();
 
-                // Get the calculator run organisation data details as we need the organisation name
                 var organisationDataDetails = calculatorRunOrgDataDetails
                     .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id && odd.OrganisationName != null && odd.OrganisationName != "")
                     .OrderBy(odd => odd.OrganisationName)
@@ -196,7 +189,9 @@ namespace EPR.Calculator.API.Services
             }
         }
 
-        private static List<OrganisationDetails> GetOrganisationDetailsBySubmissionPeriod(IEnumerable<OrganisationDetails> organisationsList, IEnumerable<SubmissionDetails> submissionPeriodDetails)
+        private static List<OrganisationDetails> GetOrganisationDetailsBySubmissionPeriod(
+            IEnumerable<OrganisationDetails> organisationsList,
+            IEnumerable<SubmissionDetails> submissionPeriodDetails)
         {
             return (from org in organisationsList
                     join sub in submissionPeriodDetails on
@@ -214,17 +209,16 @@ namespace EPR.Calculator.API.Services
         public IEnumerable<OrganisationDetails> GetAllOrganisationsBasedonRunId(
             IEnumerable<CalculatorRunOrganisationDataDetail> calculatorRunOrganisationDataDetails)
         {
-            return [.. (from org in calculatorRunOrganisationDataDetails
-                    where (org.OrganisationName != null)
-                    select new OrganisationDetails
+            return calculatorRunOrganisationDataDetails.Where(org => org.OrganisationName != null)
+                .Select(org =>
+                    new OrganisationDetails
                     {
                         OrganisationId = org.OrganisationId,
                         OrganisationName = org.OrganisationName,
                         SubmissionPeriodDescription = org.SubmissionPeriodDesc,
                         SubsidaryId = org.SubsidaryId
-                    }).Distinct()];
+                    }).Distinct();
         }
-
 
         public string? GetLatestOrganisationName(int orgId, List<OrganisationDetails> organisationsBySubmissionPeriod, IEnumerable<OrganisationDetails> organisationsList)
         {
