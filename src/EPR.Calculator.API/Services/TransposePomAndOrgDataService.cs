@@ -1,7 +1,6 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
-using Microsoft.AspNetCore.Routing.Constraints;
 
 namespace EPR.Calculator.API.Services
 {
@@ -37,6 +36,8 @@ namespace EPR.Calculator.API.Services
 
         public void Transpose(CalcResultsRequestDto resultsRequestDto)
         {
+            var newProducerDetails = new List<ProducerDetail>();
+            var newProducerReportedMaterials = new List<ProducerReportedMaterial>();
             var materials = this.context.Material.ToList();
 
             var calcRunPomOrgDatadetails = (from run in this.context.CalculatorRuns
@@ -66,20 +67,20 @@ namespace EPR.Calculator.API.Services
 
                 var SubmissionPeriodDetails = (from s in calculatorRunPomDataDetails
                                                where s.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId
-                                           select new SubmissionDetails
-                                           {
-                                               SubmissionPeriod = s.SubmissionPeriod,
-                                               SubmissionPeriodDesc = s.SubmissionPeriodDesc
-                                           }
+                                               select new SubmissionDetails
+                                               {
+                                                   SubmissionPeriod = s.SubmissionPeriod,
+                                                   SubmissionPeriodDesc = s.SubmissionPeriodDesc
+                                               }
                                         ).Distinct().ToList();
-               
-             var OrganisationsList  = GetAllOrganisationsBasedonRunId(calculatorRunOrgDataDetails);
 
-              var  OrganisationsBySubmissionPeriod = GetOrganisationDetailsBySubmissionPeriod(OrganisationsList, SubmissionPeriodDetails).ToList();
+                var OrganisationsList = GetAllOrganisationsBasedonRunId(calculatorRunOrgDataDetails);
+
+                var OrganisationsBySubmissionPeriod = GetOrganisationDetailsBySubmissionPeriod(OrganisationsList, SubmissionPeriodDetails).ToList();
 
                 // Get the calculator run organisation data details as we need the organisation name
                 var organisationDataDetails = calculatorRunOrgDataDetails
-                    .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id && odd.OrganisationName != null && odd.OrganisationName !="")
+                    .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id && odd.OrganisationName != null && odd.OrganisationName != "")
                     .OrderBy(odd => odd.OrganisationName)
                     .GroupBy(odd => new { odd.OrganisationId, odd.SubsidaryId })
                     .Select(odd => odd.First())
@@ -88,96 +89,105 @@ namespace EPR.Calculator.API.Services
                 // Get the calculator run pom data master record based on the CalculatorRunPomDataMasterId
                 var pomDataMaster = calcRunPomOrgDatadetails.Select(x => x.pomMaster).Distinct().Single();
 
-                using (var transaction = this.context.Database.BeginTransaction())
+
+                foreach (var organisation in organisationDataDetails.Where(t => !string.IsNullOrWhiteSpace(t.OrganisationName)))
                 {
-                    try
+                    // Initialise the producerReportedMaterials
+                    var producerReportedMaterials = new List<ProducerReportedMaterial>();
+
+                    // Get the calculator run pom data details related to the calculator run pom data master
+                    var runPomDataDetailsForSubsidaryId = calculatorRunPomDataDetails.Where
+                        (
+                            pdd => pdd.CalculatorRunPomDataMasterId == pomDataMaster.Id &&
+                            pdd.OrganisationId == organisation.OrganisationId &&
+                            pdd.SubsidaryId == organisation.SubsidaryId
+                        ).ToList();
+
+                    // Proceed further only if there is any pom data based on the pom data master id and organisation id
+                    // TO DO: We have to record if there is no pom data in a separate table post Dec 2024
+                    if (runPomDataDetailsForSubsidaryId.Count > 0)
                     {
-                        foreach (var organisation in organisationDataDetails.Where(t=>!string.IsNullOrWhiteSpace(t.OrganisationName)))
+                        var organisations = organisationDataDetails.Where(odd => odd.OrganisationName == organisation.OrganisationName && odd.SubsidaryId == organisation.SubsidaryId).OrderByDescending(odd => odd.SubmissionPeriodDesc);
+
+                        // Get the producer based on the latest submission period
+                        var producer = organisations.FirstOrDefault();
+
+                        // Proceed further only if the organisation is not null and organisation id not null
+                        // TO DO: We have to record if the organisation name is null in a separate table post Dec 2024
+                        if (producer != null && producer.OrganisationId != null)
                         {
-                            // Initialise the producerReportedMaterials
-                            var producerReportedMaterials = new List<ProducerReportedMaterial>();
-
-                            // Get the calculator run pom data details related to the calculator run pom data master
-                            var runPomDataDetailsForSubsidaryId = calculatorRunPomDataDetails.Where
-                                (
-                                    pdd => pdd.CalculatorRunPomDataMasterId == pomDataMaster.Id &&
-                                    pdd.OrganisationId == organisation.OrganisationId &&
-                                    pdd.SubsidaryId == organisation.SubsidaryId
-                                ).ToList();
-
-                            // Proceed further only if there is any pom data based on the pom data master id and organisation id
-                            // TO DO: We have to record if there is no pom data in a separate table post Dec 2024
-                            if (runPomDataDetailsForSubsidaryId.Count > 0)
+                            var producerDetail = new ProducerDetail
                             {
-                                var organisations = organisationDataDetails.Where(odd => odd.OrganisationName == organisation.OrganisationName  && odd.SubsidaryId == organisation.SubsidaryId).OrderByDescending(odd => odd.SubmissionPeriodDesc);
+                                CalculatorRunId = resultsRequestDto.RunId,
+                                ProducerId = producer.OrganisationId.Value,
+                                SubsidiaryId = producer.SubsidaryId,
+                                ProducerName = string.IsNullOrWhiteSpace(producer.SubsidaryId) ? GetLatestOrganisationName(producer.OrganisationId.Value, OrganisationsBySubmissionPeriod, OrganisationsList) : GetLatestSubsidaryName(producer.OrganisationId.Value, producer.SubsidaryId, OrganisationsBySubmissionPeriod, OrganisationsList),
+                                CalculatorRun = calculatorRun
+                            };
 
-                                // Get the producer based on the latest submission period
-                                var producer = organisations.FirstOrDefault();
+                            // Add producer detail record to the database context
+                            newProducerDetails.Add(producerDetail);
 
-                                // Proceed further only if the organisation is not null and organisation id not null
-                                // TO DO: We have to record if the organisation name is null in a separate table post Dec 2024
-                                if (producer != null && producer.OrganisationId != null)
+                            foreach (var material in materials)
+                            {
+                                var pomDataDetailsByMaterial = runPomDataDetailsForSubsidaryId.Where(pdd => pdd.PackagingMaterial == material.Code).GroupBy(pdd => pdd.PackagingType);
+
+                                foreach (var pomData in pomDataDetailsByMaterial)
                                 {
-                                    var producerDetail = new ProducerDetail
+                                    var pom = pomData.AsEnumerable();
+                                    var packagingType = pom.FirstOrDefault()?.PackagingType;
+                                    var totalPackagingMaterialWeight = pom.Sum(x => x.PackagingMaterialWeight);
+
+                                    // Proceed further only if the packaging type and packaging material weight is not null
+                                    // TO DO: We have to record if the packaging type or packaging material weight is null in a separate table post Dec 2024
+                                    if (packagingType != null && totalPackagingMaterialWeight != null)
                                     {
-                                        CalculatorRunId = resultsRequestDto.RunId,
-                                        ProducerId = producer.OrganisationId.Value,
-                                        SubsidiaryId = producer.SubsidaryId,
-                                        ProducerName = string.IsNullOrWhiteSpace(producer.SubsidaryId) ? GetLatestOrganisationName(producer.OrganisationId.Value, OrganisationsBySubmissionPeriod, OrganisationsList) : GetLatestSubsidaryName(producer.OrganisationId.Value, producer.SubsidaryId, OrganisationsBySubmissionPeriod, OrganisationsList),
-                                        CalculatorRun = calculatorRun
-                                    };
-
-                                    // Add producer detail record to the database context
-                                    context.ProducerDetail.Add(producerDetail);
-
-                                    foreach (var material in materials)
-                                    {
-                                        var pomDataDetailsByMaterial = runPomDataDetailsForSubsidaryId.Where(pdd => pdd.PackagingMaterial == material.Code).GroupBy(pdd => pdd.PackagingType);
-
-                                        foreach (var pomData in pomDataDetailsByMaterial)
+                                        var producerReportedMaterial = new ProducerReportedMaterial
                                         {
-                                            var pom = pomData.AsEnumerable();
-                                            var packagingType = pom.FirstOrDefault()?.PackagingType;
-                                            var totalPackagingMaterialWeight = pom.Sum(x => x.PackagingMaterialWeight);
+                                            MaterialId = material.Id,
+                                            Material = material,
+                                            ProducerDetail = producerDetail,
+                                            PackagingType = packagingType,
+                                            PackagingTonnage = Math.Round((decimal)(totalPackagingMaterialWeight) / 1000, 3),
+                                        };
 
-                                            // Proceed further only if the packaging type and packaging material weight is not null
-                                            // TO DO: We have to record if the packaging type or packaging material weight is null in a separate table post Dec 2024
-                                            if (packagingType != null && totalPackagingMaterialWeight != null)
-                                            {
-                                                var producerReportedMaterial = new ProducerReportedMaterial
-                                                {
-                                                    MaterialId = material.Id,
-                                                    Material = material,
-                                                    ProducerDetail = producerDetail,
-                                                    PackagingType = packagingType,
-                                                    PackagingTonnage = Math.Round((decimal)(totalPackagingMaterialWeight) / 1000, 3),
-                                                };
-
-                                                // Populate the producer reported material list
-                                                producerReportedMaterials.Add(producerReportedMaterial);
-                                            }
-                                        }
+                                        // Populate the producer reported material list
+                                        producerReportedMaterials.Add(producerReportedMaterial);
                                     }
-
-                                    // Add the list of producer reported materials to the database context
-                                    context.ProducerReportedMaterial.AddRange(producerReportedMaterials);
                                 }
                             }
+
+                            // Add the list of producer reported materials to the database context
+                            newProducerReportedMaterials.AddRange(producerReportedMaterials);
                         }
-
-                        // Apply the database changes
-                        context.SaveChanges();
-
-                        // Success, commit transaction
-                        transaction.Commit();
                     }
-                    catch (Exception)
-                    {
-                        // Error, rollback transaction
-                        transaction.Rollback();
-                        // TO DO: Decide upon the exception later during the complete integration
-                        throw;
-                    }
+                }
+
+                SaveNewProducerDetailAndMaterials(newProducerDetails, newProducerReportedMaterials);
+            }
+        }
+
+        public void SaveNewProducerDetailAndMaterials(List<ProducerDetail> newProducerDetails, List<ProducerReportedMaterial> newProducerReportedMaterials)
+        {
+            using (var transaction = this.context.Database.BeginTransaction())
+            {
+                try
+                {
+                    context.ProducerDetail.AddRange(newProducerDetails);
+                    context.ProducerReportedMaterial.AddRange(newProducerReportedMaterials);
+
+                    // Apply the database changes
+                    context.SaveChanges();
+
+                    // Success, commit transaction
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    // Error, rollback transaction
+                    transaction.Rollback();
+                    // TO DO: Decide upon the exception later during the complete integration
+                    throw;
                 }
             }
         }
