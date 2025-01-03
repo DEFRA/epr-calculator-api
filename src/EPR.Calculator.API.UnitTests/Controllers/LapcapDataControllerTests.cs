@@ -1,6 +1,5 @@
 ﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Tests.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -97,7 +96,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             var uniqueRef = "ENG-WD";
             var createDefaultParameterDto = CreateDto([uniqueRef]);
-            createDefaultParameterDto.LapcapDataTemplateValues = createDefaultParameterDto.LapcapDataTemplateValues;
             var actionResult = lapcapDataController?.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
             var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;

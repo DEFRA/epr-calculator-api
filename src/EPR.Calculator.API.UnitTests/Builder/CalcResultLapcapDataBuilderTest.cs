@@ -4,7 +4,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Tests.Controllers;
+using EPR.Calculator.API.UnitTests.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -30,7 +30,6 @@ namespace EPR.Calculator.API.UnitTests.Builder
             dbContext.DefaultParameterTemplateMasterList.RemoveRange(dbContext.DefaultParameterTemplateMasterList);
             dbContext.SaveChanges();
             dbContext.DefaultParameterTemplateMasterList.AddRange(BaseControllerTest.GetDefaultParameterTemplateMasterData().ToList());
-            // dbContext.LapcapDataTemplateMaster.AddRange(BaseControllerTest.GetLapcapTemplateMasterData().ToList());
             dbContext.SaveChanges();
 
             builder = new CalcResultLapcapDataBuilder(dbContext);

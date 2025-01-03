@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace EPR.Calculator.API.UnitTests
+namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
     public class PutCalculatorRunStatusTest
@@ -24,31 +24,31 @@ namespace EPR.Calculator.API.UnitTests
 
         public PutCalculatorRunStatusTest()
         {
-            this.mockStorageService = new Mock<IStorageService>();
-            this.mockConfig = new Mock<IConfiguration>();
-            this.mockServiceBusFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
+            mockStorageService = new Mock<IStorageService>();
+            mockConfig = new Mock<IConfiguration>();
+            mockServiceBusFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
-            this.context = new ApplicationDBContext(dbContextOptions);
-            this.context.Database.EnsureCreated();
+            context = new ApplicationDBContext(dbContextOptions);
+            context.Database.EnsureCreated();
         }
 
         [TestCleanup]
         public void CleanUp()
         {
-            this.context.Database.EnsureDeleted();
+            context.Database.EnsureDeleted();
         }
 
         [TestMethod]
         public void PutCalculatorRunStatusTest_422()
         {
             var controller =
-                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object, this.mockStorageService.Object);
+                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object, mockStorageService.Object);
             var runId = 999;
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
-                { ClassificationId = 6, RunId = runId }) as ObjectResult;
+            { ClassificationId = 6, RunId = runId }) as ObjectResult;
             Assert.IsNotNull(result);
 
             Assert.AreEqual(422, result.StatusCode);
@@ -61,7 +61,7 @@ namespace EPR.Calculator.API.UnitTests
             var runId = 1;
             var invalidClassificationId = 10;
             var date = DateTime.Now;
-            this.context.CalculatorRuns.Add(new CalculatorRun
+            context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",
                 CalculatorRunClassificationId = 2,
@@ -71,14 +71,14 @@ namespace EPR.Calculator.API.UnitTests
                 DefaultParameterSettingMasterId = 1,
                 Financial_Year = "2024-25"
             });
-            this.context.SaveChanges();
+            context.SaveChanges();
 
             var controller =
-                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
-                    this.mockStorageService.Object);
+                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
+                    mockStorageService.Object);
 
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
-                { ClassificationId = invalidClassificationId, RunId = runId }) as ObjectResult;
+            { ClassificationId = invalidClassificationId, RunId = runId }) as ObjectResult;
             Assert.IsNotNull(result);
 
             Assert.AreEqual(422, result.StatusCode);
@@ -91,7 +91,7 @@ namespace EPR.Calculator.API.UnitTests
             var runId = 1;
             var validClassificationId = 5;
             var date = DateTime.Now;
-            this.context.CalculatorRuns.Add(new CalculatorRun
+            context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",
                 CalculatorRunClassificationId = 2,
@@ -101,18 +101,18 @@ namespace EPR.Calculator.API.UnitTests
                 DefaultParameterSettingMasterId = 1,
                 Financial_Year = "2024-25"
             });
-            this.context.SaveChanges();
+            context.SaveChanges();
 
             var controller =
-                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
-                    this.mockStorageService.Object);
+                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
+                    mockStorageService.Object);
 
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
-                { ClassificationId = validClassificationId, RunId = runId }) as StatusCodeResult;
+            { ClassificationId = validClassificationId, RunId = runId }) as StatusCodeResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(201, result.StatusCode);
 
-            var run = this.context.CalculatorRuns.Single(x => x.Id == 1);
+            var run = context.CalculatorRuns.Single(x => x.Id == 1);
             Assert.IsNotNull(run);
 
             Assert.AreEqual(5, run.CalculatorRunClassificationId);
@@ -124,7 +124,7 @@ namespace EPR.Calculator.API.UnitTests
             var runId = 1;
             var classificationId = 5;
             var date = DateTime.Now;
-            this.context.CalculatorRuns.Add(new CalculatorRun
+            context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",
                 CalculatorRunClassificationId = classificationId,
@@ -134,14 +134,14 @@ namespace EPR.Calculator.API.UnitTests
                 DefaultParameterSettingMasterId = 1,
                 Financial_Year = "2024-25"
             });
-            this.context.SaveChanges();
+            context.SaveChanges();
 
             var controller =
-                new CalculatorController(this.context, this.mockConfig.Object, this.mockServiceBusFactory.Object,
-                    this.mockStorageService.Object);
+                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
+                    mockStorageService.Object);
 
             var result = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
-                { ClassificationId = classificationId, RunId = runId }) as ObjectResult;
+            { ClassificationId = classificationId, RunId = runId }) as ObjectResult;
             Assert.IsNotNull(result);
 
             Assert.AreEqual(422, result.StatusCode);

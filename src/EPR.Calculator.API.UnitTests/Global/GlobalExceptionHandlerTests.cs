@@ -7,7 +7,7 @@ using Moq;
 using System.Runtime.ExceptionServices;
 using System.Text.Json;
 
-namespace EPR.Calculator.API.UnitTests
+namespace EPR.Calculator.API.UnitTests.Global
 {
     [TestClass]
     public class GlobalExceptionHandlerTests
@@ -43,7 +43,7 @@ namespace EPR.Calculator.API.UnitTests
                    exception,
                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                    Times.Once);
-                }
+        }
 
         [TestMethod]
         public async Task TryHandleAsync_SetsInternalServerErrorAndJsonContentType()

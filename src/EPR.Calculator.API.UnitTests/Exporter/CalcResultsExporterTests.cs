@@ -14,7 +14,7 @@ using EPR.Calculator.API.Constants;
 namespace EPR.Calculator.API.UnitTests.Exporter
 {
     [TestClass]
-    public class CalcResultsExporterTests : BaseControllerTest
+    public class CalcResultsExporterTests
     {
         [TestMethod]
         public void Export_ShouldReturnCsvContent_WhenAllDataIsPresent()

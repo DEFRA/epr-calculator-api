@@ -1,6 +1,5 @@
 namespace EPR.Calculator.API.UnitTests.Builder
 {
-    using System;
     using AutoFixture;
     using EPR.Calculator.API.Builder.LaDisposalCost;
     using EPR.Calculator.API.Constants;
@@ -9,10 +8,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
     using EPR.Calculator.API.Dtos;
     using EPR.Calculator.API.Enums;
     using EPR.Calculator.API.Models;
-    using EPR.Calculator.API.Tests.Controllers;
+    using EPR.Calculator.API.UnitTests.Controllers;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using System;
 
     [TestClass]
     public class CalcRunLaDisposalCostBuilderTests
@@ -33,7 +33,6 @@ namespace EPR.Calculator.API.UnitTests.Builder
             dbContext.DefaultParameterTemplateMasterList.RemoveRange(dbContext.DefaultParameterTemplateMasterList);
             dbContext.SaveChanges();
             dbContext.DefaultParameterTemplateMasterList.AddRange(BaseControllerTest.GetDefaultParameterTemplateMasterData().ToList());
-            // dbContext.LapcapDataTemplateMaster.AddRange(BaseControllerTest.GetLapcapTemplateMasterData().ToList());
             dbContext.SaveChanges();
 
             builder = new CalcRunLaDisposalCostBuilder(dbContext);           
