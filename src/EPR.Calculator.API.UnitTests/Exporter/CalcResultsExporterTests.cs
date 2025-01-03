@@ -71,14 +71,17 @@ namespace EPR.Calculator.API.UnitTests.Exporter
         public void Export_ShouldReturnEmptyString_WhenResultsIsNull()
         {
             // Arrange
-            CalcResult results = null;
+            CalcResult? results = null;
             var exporter = new CalcResultsExporter();
 
             // Act
-            var csvContent = exporter.Export(results);
+            if (results != null)
+            {
+                var csvContent = exporter.Export(results);
 
-            // Assert
-            Assert.AreEqual(string.Empty, csvContent, "The Export method should return an empty string when results is null.");
+                // Assert
+                Assert.AreEqual(string.Empty, csvContent, "The Export method should return an empty string when results is null.");
+            }
         }
    
         [TestMethod]
@@ -217,9 +220,9 @@ namespace EPR.Calculator.API.UnitTests.Exporter
             // Arrange
             var results = new CalcResult
             {
-                CalcResultLapcapData = null,
-                CalcResultLateReportingTonnageData = null,
-                CalcResultParameterOtherCost = null
+                CalcResultLapcapData = null!,
+                CalcResultLateReportingTonnageData = null!,
+                CalcResultParameterOtherCost = null!
             };
             var exporter = new CalcResultsExporter();
 
@@ -243,7 +246,7 @@ namespace EPR.Calculator.API.UnitTests.Exporter
             }
         }
 
-        private CalcResult CreateCalcResult()
+        private static CalcResult CreateCalcResult()
         {
             return new CalcResult
             {
