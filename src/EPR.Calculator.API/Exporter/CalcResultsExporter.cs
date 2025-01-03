@@ -46,14 +46,14 @@ namespace EPR.Calculator.API.Exporter
 
             return csvContent.ToString();
         }
-        public virtual void AppendDataIfNotNull<T>(T data, Action<T, StringBuilder> appendMethod, StringBuilder csvContent)
+
+        public virtual void AppendDataIfNotNull<T>(T? data, Action<T, StringBuilder> appendMethod, StringBuilder csvContent) where T : class
         {
             if (data != null)
             {
                 appendMethod(data, csvContent);
             }
         }
-
         private static void PrepareCommsCost(CalcResultCommsCost communicationCost, StringBuilder csvContent)
         {
             csvContent.AppendLine();

@@ -205,12 +205,15 @@ namespace EPR.Calculator.API.UnitTests.Exporter
         [TestMethod]
         public void AppendDataIfNotNull_ShouldNotCallAppendMethod_WhenDataIsNull()
         {
+            // Arrange
             var csvContent = new StringBuilder();
             var exporter = new CalcResultsExporter();
-            object data = null;
+            object? data = null;
 
+            // Act
             exporter.AppendDataIfNotNull(data, (d, sb) => sb.Append("Data"), csvContent);
 
+            // Assert
             Assert.IsFalse(csvContent.ToString().Contains("Data"));
         }
 
