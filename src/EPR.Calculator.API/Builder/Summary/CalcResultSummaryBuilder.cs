@@ -13,6 +13,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Builder.Summary
 {
@@ -27,15 +28,15 @@ namespace EPR.Calculator.API.Builder.Summary
             this.context = context;
         }
 
-        public CalcResultSummary Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult)
+        public async Task<CalcResultSummary> Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult)
         {
             var result = new CalcResultSummary();
 
             // Get and map materials from DB
-            var materialsFromDb = context.Material.ToList();
+            var materialsFromDb = await context.Material.ToListAsync();
             var materials = Mappers.MaterialMapper.Map(materialsFromDb);
 
-            var runProducerMaterialDetails = (from p in context.ProducerDetail
+            var runProducerMaterialDetails = await (from p in context.ProducerDetail
                                               join m in context.ProducerReportedMaterial
                                                   on p.Id equals m.ProducerDetailId
                                               where p.CalculatorRunId == resultsRequestDto.RunId
@@ -43,13 +44,13 @@ namespace EPR.Calculator.API.Builder.Summary
                                               {
                                                   ProducerDetail = p,
                                                   ProducerReportedMaterial = m
-                                              }).ToList();
+                                              }).ToListAsync();
 
             // Get the ordered list of producers associated with the calculator run id
-            producerDetailList = context.ProducerDetail
+            producerDetailList = await context.ProducerDetail
               .Where(pd => pd.CalculatorRunId == resultsRequestDto.RunId)
               .OrderBy(pd => pd.ProducerId)
-              .ToList();
+              .ToListAsync();
 
             if (producerDetailList.Count > 0)
             {

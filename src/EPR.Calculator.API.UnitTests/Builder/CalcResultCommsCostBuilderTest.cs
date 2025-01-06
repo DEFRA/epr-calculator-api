@@ -66,7 +66,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 }
             };
-            var result = builder.Construct(resultsRequestDto, apportionment);
+            var results = builder.Construct(resultsRequestDto, apportionment);
+            results.Wait();
+            var result = results.Result;
 
             Assert.IsNotNull(result);
 

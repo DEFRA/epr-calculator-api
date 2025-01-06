@@ -168,13 +168,12 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status404NotFound };
             }
 
-
             try
             {
                 var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
                 if (isTransposeSuccessful)
                 {
-                    var results = this.builder.Build(resultsRequestDto);
+                    var results = await this.builder.Build(resultsRequestDto);
                     var exportedResults = this.exporter.Export(results);
 
                     var fileName = new CalcResultsFileName(

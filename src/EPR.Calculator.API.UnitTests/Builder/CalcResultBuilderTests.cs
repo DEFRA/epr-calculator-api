@@ -81,23 +81,25 @@ namespace EPR.Calculator.API.UnitTests
             var mockCalcResultLaDisposalCostData = new Mock<CalcResultLaDisposalCostData>();
             var mockCalcResultSummary = new Mock<CalcResultSummary>();
 
-            mockCalcResultDetailBuilder.Setup(m => m.Construct(resultsRequestDto)).Returns(mockResultDetail.Object);
-            mockLapcapBuilder.Setup(m => m.Construct(resultsRequestDto)).Returns(mockLapcapData.Object);
+            mockCalcResultDetailBuilder.Setup(m => m.Construct(resultsRequestDto)).ReturnsAsync(mockResultDetail.Object);
+            mockLapcapBuilder.Setup(m => m.Construct(resultsRequestDto)).ReturnsAsync(mockLapcapData.Object);
             mockCalcResultParameterOtherCostBuilder.Setup(m => m.Construct(resultsRequestDto))
-                .Returns(mockOtherParams.Object);
+                .ReturnsAsync(mockOtherParams.Object);
             mockOnePlusFourApportionmentBuilder.Setup(m => m.Construct(resultsRequestDto, It.IsAny<CalcResult>()))
                 .Returns(mockOnePlusFourApp.Object);
             mockCommsCostReportBuilder
                 .Setup(m => m.Construct(resultsRequestDto, It.IsAny<CalcResultOnePlusFourApportionment>()))
-                .Returns(mockCalcResultCommsCost.Object);
+                .ReturnsAsync(mockCalcResultCommsCost.Object);
             mockLateReportingBuilder.Setup(m => m.Construct(resultsRequestDto))
-                .Returns(mockCalcResultLateReportingTonnage.Object);
+                .ReturnsAsync(mockCalcResultLateReportingTonnage.Object);
             mockCalcRunLaDisposalCostBuilder.Setup(m => m.Construct(resultsRequestDto, It.IsAny<CalcResult>()))
-                .Returns(mockCalcResultLaDisposalCostData.Object);
+                .ReturnsAsync(mockCalcResultLaDisposalCostData.Object);
             mockSummaryBuilder.Setup(x => x.Construct(resultsRequestDto, It.IsAny<CalcResult>()))
-                .Returns(mockCalcResultSummary.Object);
+                .ReturnsAsync(mockCalcResultSummary.Object);
 
-            var result = calcResultBuilder.Build(resultsRequestDto);
+            var results = calcResultBuilder.Build(resultsRequestDto);
+            results.Wait();
+            var result = results.Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(mockResultDetail.Object, result.CalcResultDetail);

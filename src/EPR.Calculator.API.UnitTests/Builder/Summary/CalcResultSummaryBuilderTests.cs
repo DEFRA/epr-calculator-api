@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Builder.Summary.OneAndTwoA;
 using EPR.Calculator.API.Constants;
@@ -272,8 +273,9 @@ namespace EPR.Calculator.API.UnitTests
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
 
-            var result = _calcResultsService.Construct(requestDto, _calcResult);
-
+            var results = _calcResultsService.Construct(requestDto, _calcResult);
+            results.Wait();
+            var result = results.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader?.Name);
             Assert.AreEqual(25, result.ProducerDisposalFeesHeaders.Count());
@@ -291,7 +293,10 @@ namespace EPR.Calculator.API.UnitTests
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
 
-            var result = _calcResultsService.Construct(requestDto, _calcResult);
+            var results = _calcResultsService.Construct(requestDto, _calcResult);
+
+            results.Wait();
+            var result = results.Result;
 
             Assert.AreEqual("Material1 Breakdown", result.MaterialBreakdownHeaders.First().Name);
         }
@@ -301,7 +306,10 @@ namespace EPR.Calculator.API.UnitTests
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
 
-            var result = _calcResultsService.Construct(requestDto, _calcResult);
+            var results = _calcResultsService.Construct(requestDto, _calcResult);
+
+            results.Wait();
+            var result = results.Result;
 
             Assert.IsTrue(result.ProducerDisposalFees.Any());
             Assert.AreEqual("Producer1", result.ProducerDisposalFees.First().ProducerName);
@@ -312,7 +320,10 @@ namespace EPR.Calculator.API.UnitTests
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
 
-            var result = _calcResultsService.Construct(requestDto, _calcResult);
+            var results = _calcResultsService.Construct(requestDto, _calcResult);
+
+            results.Wait();
+            var result = results.Result;
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
@@ -334,7 +345,10 @@ namespace EPR.Calculator.API.UnitTests
         {
             var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
 
-            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            var results = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+
+            results.Wait();
+            var result = results.Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.ProducerDisposalFees.Count());
@@ -346,8 +360,9 @@ namespace EPR.Calculator.API.UnitTests
         {
             var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
 
-            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
-
+            var results = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            results.Wait();
+            var result = results.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.ProducerDisposalFees.Count());
         }
@@ -357,8 +372,9 @@ namespace EPR.Calculator.API.UnitTests
         {
             var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
 
-            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
-
+            var results = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            results.Wait();
+            var result = results.Result;
             Assert.IsNotNull(result);
             var totalRow = result.ProducerDisposalFees.LastOrDefault();
             Assert.IsNotNull(totalRow);
@@ -368,7 +384,9 @@ namespace EPR.Calculator.API.UnitTests
         public void GetTotalBadDebtprovision1_ShouldReturnCorrectValue()
         {
             var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
-            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            var results = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            results.Wait();
+            var result = results.Result;
             Assert.IsNotNull(result);
 
             var totalRow = result.ProducerDisposalFees.LastOrDefault();
@@ -385,7 +403,9 @@ namespace EPR.Calculator.API.UnitTests
         public void GetTotalDisposalCostswithBadDebtprovision1_ShouldReturnCorrectValue()
         {
             var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
-            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            var results = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            results.Wait();
+            var result = results.Result;
             Assert.IsNotNull(result);
 
             var totalRow = result.ProducerDisposalFees.LastOrDefault();
@@ -402,7 +422,9 @@ namespace EPR.Calculator.API.UnitTests
         public void GetTotalCommsCostswoBadDebtprovision2A_ShouldReturnCorrectValue()
         {
             var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
-            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            var results = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            results.Wait();
+            var result = results.Result;
             Assert.IsNotNull(result);
 
             var totalRow = result.ProducerDisposalFees.LastOrDefault();
@@ -419,7 +441,9 @@ namespace EPR.Calculator.API.UnitTests
         public void GetTotalBadDebtprovision2A_ShouldReturnCorrectValue()
         {
             var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
-            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            var results = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            results.Wait();
+            var result = results.Result;
             Assert.IsNotNull(result);
 
             var totalRow = result.ProducerDisposalFees.LastOrDefault();
@@ -436,7 +460,9 @@ namespace EPR.Calculator.API.UnitTests
         public void GetTotalCommsCostswithBadDebtprovision2A_ShouldReturnCorrectValue()
         {
             var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
-            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            var results = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            results.Wait();
+            var result = results.Result;
             Assert.IsNotNull(result);
 
             var totalRow = result.ProducerDisposalFees.LastOrDefault();
@@ -453,7 +479,9 @@ namespace EPR.Calculator.API.UnitTests
         public void GetTotalFee_ShouldReturnZero_WhenNoTotalsLevel()
         {
             var calcResultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
-            var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            var results = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
+            results.Wait();
+            var result = results.Result;
             Assert.IsNotNull(result);
 
             var totalRow = result.ProducerDisposalFees.LastOrDefault();
@@ -470,7 +498,9 @@ namespace EPR.Calculator.API.UnitTests
         public void ProducerTotalPercentageVsTotal_ShouldReturnCorrectValue()
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
-            var result = _calcResultsService.Construct(requestDto, _calcResult);
+            var results = _calcResultsService.Construct(requestDto, _calcResult);
+            results.Wait();
+            var result = results.Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader!.Name);
@@ -511,7 +541,10 @@ namespace EPR.Calculator.API.UnitTests
         public void CommsCost2bBill_ShouldReturnCorrectValue()
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
-            var result = _calcResultsService.Construct(requestDto, _calcResult);
+            var results = _calcResultsService.Construct(requestDto, _calcResult);
+
+            results.Wait();
+            var result = results.Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader!.Name);

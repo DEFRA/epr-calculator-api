@@ -5,6 +5,6 @@ namespace EPR.Calculator.API.Builder.Lapcap
 {
     public interface ICalcResultLapcapDataBuilder
     {
-        public CalcResultLapcapData Construct(CalcResultsRequestDto resultsRequestDto);
+        public Task<CalcResultLapcapData> Construct(CalcResultsRequestDto resultsRequestDto);
     }
 }

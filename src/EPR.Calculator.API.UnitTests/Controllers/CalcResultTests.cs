@@ -124,7 +124,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 }
             };
 
-            mockCalcResultBuilder.Setup(b => b.Build(It.IsAny<CalcResultsRequestDto>())).Returns(calcResult);
+            mockCalcResultBuilder.Setup(b => b.Build(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(calcResult);
 
             var task = controller.PrepareCalcResults(requestDto);
             task.Wait();
@@ -141,9 +141,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             var requestDto = new CalcResultsRequestDto();
             var detail = new CalcResultDetail();
-            mockDetailBuilder.Setup(d => d.Construct(requestDto)).Returns(detail);
+            mockDetailBuilder.Setup(d => d.Construct(requestDto)).ReturnsAsync(detail);
 
-            var result = calcResultBuilder.Build(requestDto);
+            var results = calcResultBuilder.Build(requestDto);
+            results.Wait();
+            var result = results.Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(detail, result.CalcResultDetail);

@@ -3,6 +3,7 @@ using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
 namespace EPR.Calculator.API.Builder.LaDisposalCost
@@ -26,13 +27,12 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
         }
 
 
-        public CalcResultLaDisposalCostData Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult)
+        public async Task<CalcResultLaDisposalCostData> Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult)
         {
-
             var laDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>();
             var OrderId = 1;
 
-            producerData = (from run in context.CalculatorRuns
+            producerData = await (from run in context.CalculatorRuns
                 join producerDetail in context.ProducerDetail on run.Id equals producerDetail.CalculatorRunId
                 join producerMaterial in context.ProducerReportedMaterial on producerDetail.Id equals producerMaterial
                     .ProducerDetailId
@@ -43,7 +43,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
                 {
                     Material = material.Name,
                     Tonnage = producerMaterial.PackagingTonnage
-                }).ToList();
+                }).ToListAsync();
 
             var lapcapDetails = calcResult.CalcResultLapcapData.CalcResultLapcapDataDetails
                 .Where(t => t.OrderId != 1 && t.Name != CalcResultLapcapDataBuilder.CountryApportionment).ToList();
@@ -84,7 +84,6 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
 
         }
 
-
         private string GetTonnageDataByMaterial(string material)
         {
             return material == "Total"? producerData.Sum(t=>t.Tonnage).ToString()  : producerData.Where(t => t.Material == material).Sum(t => t.Tonnage).ToString();
@@ -112,7 +111,6 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
             return value.ToString("C4", culture);
         }
 
-
         private static CalcResultLaDisposalCostDataDetail GetHeader()
         {
             return new CalcResultLaDisposalCostDataDetail()
@@ -130,7 +128,6 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
                 OrderId = 1
             };
         }
-
 
         private static decimal GetDecimalValue(string value)
         {

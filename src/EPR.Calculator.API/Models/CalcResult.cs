@@ -7,7 +7,7 @@
         public required CalcResultLapcapData CalcResultLapcapData { get; set; } = new()
         {
             Name = string.Empty,
-            CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>()
+            CalcResultLapcapDataDetails = []
         };
 
         public CalcResultCommsCost CalcResultCommsCostReportDetail { get; set; } = new ();
