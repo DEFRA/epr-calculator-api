@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using EPR.Calculator.API.Builder.Summary;
+using EPR.Calculator.API.Builder.Summary.Common;
 using EPR.Calculator.API.Builder.Summary.OneAndTwoA;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
@@ -499,6 +500,68 @@ namespace EPR.Calculator.API.UnitTests
             Assert.AreEqual(2, result.ProducerDisposalFees.Count());
         }
 
+        [TestMethod]
+        public void MaterialMapper_ShouldReturnCorrectValue()
+        {
+            var materials = _context.Material.ToList();
+            var result = Mappers.MaterialMapper.Map(materials);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(materials.Count, result.Count);
+            var material = result[0];
+            var actualMaterial = materials[0];
+            Assert.IsNotNull(material);
+            Assert.IsNotNull(actualMaterial);
+            Assert.AreEqual(material.Name, actualMaterial.Name);
+            Assert.AreEqual(material.Code, actualMaterial.Code);
+        }
+
+        [TestMethod]
+        public void GetProducerRunMaterialDetails_ShouldReturnCorrectValue()
+        {
+            var result = CalcResultSummaryBuilder.GetProducerRunMaterialDetails(_context.ProducerDetail.ToList(),
+                _context.ProducerReportedMaterial.ToList(),
+                1);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count());
+            var producer = result.FirstOrDefault(t => t.ProducerDetail.Id == 1);
+            Assert.AreEqual(2, producer?.ProducerDetail.ProducerReportedMaterials.Count);
+            Assert.AreEqual("Producer1", producer?.ProducerDetail.ProducerName);
+        }
+
+        [TestMethod]
+        public void GetOrderedListOfProducersAssociatedRunId_ShouldReturnCorrectValue()
+        {
+            var result = CalcResultSummaryBuilder.GetOrderedListOfProducersAssociatedRunId(1,_context.ProducerDetail.ToList());
+            Assert.IsNotNull(result);   
+            Assert.AreEqual(3, result.Count());
+            Assert.AreEqual("Producer1", result.First().ProducerName);
+            Assert.AreEqual("Producer5", result.Last().ProducerName);
+        }
+
+        [TestMethod]
+        public void GetCalcResultSummary_ShouldReturnCorrectValue()
+        {
+            var orderedProducerDetails = CalcResultSummaryBuilder.GetOrderedListOfProducersAssociatedRunId(1, _context.ProducerDetail.ToList());
+            var runProducerMaterialDetails = CalcResultSummaryBuilder.GetProducerRunMaterialDetails(orderedProducerDetails,
+                _context.ProducerReportedMaterial.ToList(), 1);
+            var materials = Mappers.MaterialMapper.Map(_context.Material.ToList());
+            var result = CalcResultSummaryBuilder.GetCalcResultSummary(orderedProducerDetails, materials,
+                runProducerMaterialDetails, _calcResult);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(117,result.ColumnHeaders.Count());
+
+            var producerDisposalFees = result.ProducerDisposalFees;
+            Assert.IsNotNull(producerDisposalFees);
+
+            var totals = producerDisposalFees.First(t => t.Level == "Totals");
+            var producer = producerDisposalFees.First(t => t.Level == "1");
+            Assert.IsNotNull(producer);
+
+            Assert.AreEqual(string.Empty,totals?.ProducerName);
+            Assert.IsNotNull(producer.ProducerName);
+            Assert.AreEqual("Producer1", producer.ProducerName);
+        }
+
         private static void SeedDatabase(ApplicationDBContext context)
         {
             context.Material.AddRange(new List<Material>
@@ -511,7 +574,9 @@ namespace EPR.Calculator.API.UnitTests
             {
                 new() {  Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test1" } },
                 new() { Id = 2, ProducerName = "Producer2", CalculatorRunId = 2, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test2" } },
-                new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } }
+                new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } },
+                new() {  Id = 4, ProducerName = "Producer4", CalculatorRunId = 1 },
+                new() {  Id = 5, ProducerName = "Producer5", CalculatorRunId = 1 }
             });
 
             context.ProducerReportedMaterial.AddRange(new List<ProducerReportedMaterial>
