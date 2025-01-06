@@ -38,7 +38,6 @@ namespace EPR.Calculator.API.UnitTests
         {
             this.dbContext?.SaveChanges();
 
-            var organisationMaster = this.dbContext?.CalculatorRunOrganisationDataMaster.ToList();
             this.dbContext?.CalculatorRuns.Add(new CalculatorRun
             {
                 CalculatorRunClassificationId = 1,
@@ -90,7 +89,6 @@ namespace EPR.Calculator.API.UnitTests
 
             this.dbContext?.SaveChanges();
 
-            var organisationMaster = this.dbContext?.CalculatorRunOrganisationDataMaster.ToList();
             var calcRun = this.dbContext?.CalculatorRuns.Single(run => run.Id == 1);
             if (calcRun != null)
             {

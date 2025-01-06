@@ -108,6 +108,9 @@ namespace EPR.Calculator.API.Builder.Summary
 
                 // Section-5 SA setup costs
                 SaSetupCostsProducer.GetProducerSetUpCosts(calcResult, result);
+
+                // Total bill section
+                TotalBillBreakdownProducer.SetValues(result);
             }
 
             // Set headers with calculated column index
@@ -227,15 +230,6 @@ namespace EPR.Calculator.API.Builder.Summary
             TwoCCommsCostUtil.UpdateTwoCTotals(calcResult, producerDisposalFees, isOverAllTotalRow, totalRow,
                 producersAndSubsidiaries, runProducerMaterialDetails);
 
-            // Section-TotalBill
-            totalRow.TotalProducerBillWithoutBadDebtProvision = TotalBillBreakdownProducer.GetTotalProducerBillWithoutBadDebtProvisionTotal(totalRow);
-            totalRow.BadDebtProvisionForTotalProducerBill = TotalBillBreakdownProducer.GetBadDebtProvisionForTotalProducerBillTotal(totalRow);
-            totalRow.TotalProducerBillWithBadDebtProvision = TotalBillBreakdownProducer.GetTotalProducerBillWithBadDebtProvisionTotal(totalRow);
-            totalRow.EnglandTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetEnglandTotalWithBadDebtProvisionTotal(totalRow);
-            totalRow.WalesTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetWalesTotalWithBadDebtProvisionTotal(totalRow);
-            totalRow.ScotlandTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetScotlandTotalWithBadDebtProvisionTotal(totalRow);
-            totalRow.NorthernIrelandTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetNorthernIrelandTotalWithBadDebtProvisionTotal(totalRow);
-
             return totalRow;
         }
 
@@ -340,15 +334,6 @@ namespace EPR.Calculator.API.Builder.Summary
             };
 
             TwoCCommsCostUtil.UpdateTwoCRows(calcResult, result, producer, runProducerMaterialDetails);
-
-            // section-TotalBill
-            result.TotalProducerBillWithoutBadDebtProvision = TotalBillBreakdownProducer.GetTotalProducerBillWithoutBadDebtProvision(result);
-            result.BadDebtProvisionForTotalProducerBill = TotalBillBreakdownProducer.GetBadDebtProvisionForTotalProducerBill(result);
-            result.TotalProducerBillWithBadDebtProvision = TotalBillBreakdownProducer.GetTotalProducerBillWithBadDebtProvision(result);
-            result.EnglandTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetEnglandTotalWithBadDebtProvision(result);
-            result.WalesTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetWalesTotalWithBadDebtProvision(result);
-            result.ScotlandTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetScotlandTotalWithBadDebtProvision(result);
-            result.NorthernIrelandTotalWithBadDebtProvisionTotalBill = TotalBillBreakdownProducer.GetNorthernIrelandTotalWithBadDebtProvision(result);
 
             return result;
         }
