@@ -160,9 +160,6 @@ namespace EPR.Calculator.API.Builder.Lapcap
 
         internal static decimal GetMaterialDisposalCostPerCountry(string country, string material, IEnumerable<ResultsClass> results)
         {
-            var date = DateTime.Today;
-            var newDateTime = date.AddYears(-1);
-
             var totalSum = results.Where(x => x.Country.Equals(country, StringComparison.OrdinalIgnoreCase) &&
                 x.Material.Equals(material, StringComparison.OrdinalIgnoreCase))
                 .Sum(x => x.TotalCost);
