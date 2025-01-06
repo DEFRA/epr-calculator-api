@@ -266,6 +266,7 @@ namespace EPR.Calculator.API.UnitTests
                 }
             });
 
+            var mockTranspose = new Mock<ITransposePomAndOrgDataService>();
             var mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
             var controller = new CalculatorInternalController(
                dbContext,
@@ -273,10 +274,11 @@ namespace EPR.Calculator.API.UnitTests
                wrapper,
                mockBuilder.Object,
                mockExporter.Object,
-               new Mock<ITransposePomAndOrgDataService>().Object,
+               mockTranspose.Object,
                mockStorageService.Object
             );
 
+            mockTranspose.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(true);
             mockStorageService.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);

@@ -33,6 +33,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<ICalcRunLaDisposalCostBuilder> mockLaDisposalCostBuilder;
         private readonly Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
         private readonly Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
+        private readonly Mock<ITransposePomAndOrgDataService> transposePomAndOrgDataService;
         private CalculatorInternalController controller;
         private CalcResultDetailBuilder detailBuilder;
 
@@ -49,7 +50,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             mockExporter = new Mock<ICalcResultsExporter<CalcResult>>();
             mockExporter.Setup(x => x.Export(It.IsAny<CalcResult>())).Returns("Somevalue");
             wrapper = new Mock<IOrgAndPomWrapper>().Object;
-            var transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
+            transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
             mockStorageservice = new Mock<IStorageService>();
             mockStorageservice.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
@@ -90,6 +91,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
+            this.transposePomAndOrgDataService.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(true);
             var requestDto = new CalcResultsRequestDto() { RunId = 1 };
             var calcResult = new CalcResult
             {

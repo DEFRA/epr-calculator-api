@@ -31,10 +31,12 @@ namespace EPR.Calculator.API.Services
             this.context = context;
         }
 
-        public async Task Transpose(CalcResultsRequestDto resultsRequestDto)
+        public async Task<bool> Transpose(CalcResultsRequestDto resultsRequestDto)
         {
             var newProducerDetails = new List<ProducerDetail>();
             var newProducerReportedMaterials = new List<ProducerReportedMaterial>();
+
+            var result = false;
             
             var calcRunPomOrgDatadetails = await (from run in this.context.CalculatorRuns
                                             join pomMaster in this.context.CalculatorRunPomDataMaster on run.CalculatorRunPomDataMasterId equals pomMaster.Id
@@ -158,11 +160,12 @@ namespace EPR.Calculator.API.Services
                     }
                 }
 
-                await SaveNewProducerDetailAndMaterialsAsync(newProducerDetails, newProducerReportedMaterials);
+                result = await SaveNewProducerDetailAndMaterialsAsync(newProducerDetails, newProducerReportedMaterials);
             }
+            return result;
         }
 
-        public async Task SaveNewProducerDetailAndMaterialsAsync(
+        public async Task<bool> SaveNewProducerDetailAndMaterialsAsync(
             IEnumerable<ProducerDetail> newProducerDetails,
             IEnumerable<ProducerReportedMaterial> newProducerReportedMaterials)
         {
@@ -178,13 +181,14 @@ namespace EPR.Calculator.API.Services
 
                     // Success, commit transaction
                     await transaction.CommitAsync();
+                    return true;
                 }
                 catch (Exception)
                 {
                     // Error, rollback transaction
                     await transaction.RollbackAsync();
                     // TO DO: Decide upon the exception later during the complete integration
-                    throw;
+                    return false;
                 }
             }
         }

@@ -33,7 +33,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<ICalcRunLaDisposalCostBuilder> mockLaDisposalCostBuilder;
         private readonly Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
         private readonly Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
-        private CalculatorInternalController controller;
+        private readonly CalculatorInternalController controller;
         private CalcResultDetailBuilder detailBuilder;
 
         private readonly Mock<ApplicationDBContext> mockContext;
@@ -50,6 +50,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             mockExporter.Setup(x => x.Export(It.IsAny<CalcResult>())).Returns("Somevalue");
             wrapper = new Mock<IOrgAndPomWrapper>().Object;
             var transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
+            transposePomAndOrgDataService.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(true);
             mockStorageservice = new Mock<IStorageService>();
             mockStorageservice.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
