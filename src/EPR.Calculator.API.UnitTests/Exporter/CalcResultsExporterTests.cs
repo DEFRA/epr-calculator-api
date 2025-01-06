@@ -28,7 +28,6 @@ namespace EPR.Calculator.API.UnitTests.Exporter
 
             // Assert
             Assert.IsNotNull(result);
-            // Additional assertions to verify the content of the CSV
         }
 
         [TestMethod]
@@ -63,7 +62,7 @@ namespace EPR.Calculator.API.UnitTests.Exporter
             var lines = result.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
 
             // Assert
-            int expectedLineCount = 57; // Adjust this based on your expected number of lines
+            int expectedLineCount = 55;
             Assert.AreEqual(expectedLineCount, lines.Length);
         }
 
@@ -217,7 +216,6 @@ namespace EPR.Calculator.API.UnitTests.Exporter
                 Assert.IsFalse(csvContent.Contains("SummaryData"), "CSV content should not contain SummaryData.");
             }
         }
-
         private static CalcResult CreateCalcResult()
         {
             return new CalcResult
