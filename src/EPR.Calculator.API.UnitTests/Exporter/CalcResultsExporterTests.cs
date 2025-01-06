@@ -187,33 +187,6 @@ namespace EPR.Calculator.API.UnitTests.Exporter
         }
 
         [TestMethod]
-        public void AppendDataIfNotNull_ShouldCallAppendMethod_WhenDataIsNotNull()
-        {
-            var csvContent = new StringBuilder();
-            var exporter = new CalcResultsExporter();
-            var data = new object();
-
-            exporter.AppendData(data, (d, sb) => sb.Append("Data"), csvContent);
-
-            Assert.IsTrue(csvContent.ToString().Contains("Data"));
-        }
-
-        [TestMethod]
-        public void AppendDataIfNotNull_ShouldNotCallAppendMethod_WhenDataIsNull()
-        {
-            // Arrange
-            var csvContent = new StringBuilder();
-            var exporter = new CalcResultsExporter();
-            object? data = null;
-
-            // Act
-            exporter.AppendData(data, (d, sb) => sb.Append("Data"), csvContent);
-
-            // Assert
-            Assert.IsFalse(csvContent.ToString().Contains("Data"));
-        }
-
-        [TestMethod]
         public void Export_ShouldGenerateEmptyCsv_WhenNoData()
         {
             // Arrange

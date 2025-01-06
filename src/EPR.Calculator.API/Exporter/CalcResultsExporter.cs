@@ -22,38 +22,51 @@ namespace EPR.Calculator.API.Exporter
 
         public string Export(CalcResult results)
         {
-            var csvContent = new StringBuilder();
             if (results == null)
             {
                 throw new ArgumentNullException(nameof(results), "The results parameter cannot be null.");
             }
 
+            var csvContent = new StringBuilder();
             LoadCalcResultDetail(results, csvContent);
+            if (results.CalcResultLapcapData != null)
+            {
+                PrepareLapcapData(results.CalcResultLapcapData, csvContent);
+            }
 
-            AppendData(results.CalcResultLapcapData, PrepareLapcapData, csvContent);
-            AppendData(results.CalcResultLateReportingTonnageData, PrepareLateReportingData, csvContent);
+            if (results.CalcResultLateReportingTonnageData != null)
+            {
+                PrepareLateReportingData(results.CalcResultLateReportingTonnageData, csvContent);
+            }
 
-            csvContent.AppendLine();
+            if (results.CalcResultParameterOtherCost != null)
+            {
+                PrepareOtherCosts(results.CalcResultParameterOtherCost, csvContent);
+            }
 
-            AppendData(results.CalcResultParameterOtherCost, PrepareOtherCosts, csvContent);
-            AppendData(results.CalcResultOnePlusFourApportionment, PrepareOnePluseFourApportionment, csvContent);
+            if (results.CalcResultOnePlusFourApportionment != null)
+            {
+                PrepareOnePluseFourApportionment(results.CalcResultOnePlusFourApportionment, csvContent);
+            }
 
-            csvContent.AppendLine();
+            if (results.CalcResultCommsCostReportDetail != null)
+            {
+                PrepareCommsCost(results.CalcResultCommsCostReportDetail, csvContent);
+            }
 
-            AppendData(results.CalcResultCommsCostReportDetail, PrepareCommsCost, csvContent);
-            AppendData(results.CalcResultLaDisposalCostData, PrepareLaDisposalCostData, csvContent);
-            AppendData(results.CalcResultSummary, PrepareSummaryData, csvContent);
+            if (results.CalcResultLaDisposalCostData != null)
+            {
+                PrepareLaDisposalCostData(results.CalcResultLaDisposalCostData, csvContent);
+            }
+
+            if (results.CalcResultSummary != null)
+            {
+                PrepareSummaryData(results.CalcResultSummary, csvContent);
+            }
 
             return csvContent.ToString();
         }
 
-        public virtual void AppendData<T>(T? data, Action<T, StringBuilder> appendMethod, StringBuilder csvContent) where T : class
-        {
-            if (data != null)
-            {
-                appendMethod(data, csvContent);
-            }
-        }
         private static void PrepareCommsCost(CalcResultCommsCost communicationCost, StringBuilder csvContent)
         {
             csvContent.AppendLine();
