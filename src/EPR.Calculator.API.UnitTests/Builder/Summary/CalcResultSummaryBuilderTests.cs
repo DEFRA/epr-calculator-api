@@ -281,7 +281,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
-            Assert.AreEqual(5, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
             var firstProducer = result.ProducerDisposalFees.FirstOrDefault();
             Assert.IsNotNull(firstProducer);
             Assert.AreEqual("Producer1", firstProducer.ProducerName);
@@ -338,7 +338,7 @@ namespace EPR.Calculator.API.UnitTests
             var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(5, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
             Assert.IsFalse(result.ProducerDisposalFees.Any(fee => fee.ProducerName.Contains("Total")));
         }
 
@@ -350,7 +350,7 @@ namespace EPR.Calculator.API.UnitTests
             var result = _calcResultsService.Construct(calcResultsRequestDto, _calcResult);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(5, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
         }
 
         [TestMethod]
@@ -479,10 +479,10 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
-            Assert.AreEqual(5, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
             var producerTotalPercentage = result.ProducerDisposalFees.First().PercentageofProducerReportedHHTonnagevsAllProducers;
             Assert.IsNotNull(producerTotalPercentage);
-            Assert.AreEqual(300, producerTotalPercentage);
+            Assert.AreEqual(100, producerTotalPercentage);
         }
 
         [TestMethod]
@@ -497,7 +497,7 @@ namespace EPR.Calculator.API.UnitTests
             var isColumnHeaderExists = result.ProducerDisposalFeesHeaders!.Select(dict => dict.ColumnIndex == 196 || dict.ColumnIndex == 197 || dict.ColumnIndex == 198).ToList();
             Assert.IsTrue(isColumnHeaderExists.Contains(true));
             Assert.IsNotNull(result.ProducerDisposalFees);
-            Assert.AreEqual(5, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
         }
 
         [TestMethod]
@@ -572,11 +572,11 @@ namespace EPR.Calculator.API.UnitTests
 
             context.ProducerDetail.AddRange(new List<ProducerDetail>
             {
-                new() {  Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test1" } },
-                new() { Id = 2, ProducerName = "Producer2", CalculatorRunId = 2, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test2" } },
-                new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } },
-                new() {  Id = 4, ProducerName = "Producer4", CalculatorRunId = 1 },
-                new() {  Id = 5, ProducerName = "Producer5", CalculatorRunId = 1 }
+                new() {  Id = 1, ProducerName = "Producer1",ProducerId=1, CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test1" } },
+                new() { Id = 2, ProducerName = "Producer2", ProducerId=2,CalculatorRunId = 2, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test2" } },
+                new() {  Id = 3, ProducerName = "Producer3",ProducerId=3, CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } },
+                new() {  Id = 4, ProducerName = "Producer4",ProducerId=4, CalculatorRunId = 1 },
+                new() {  Id = 5, ProducerName = "Producer5",ProducerId=5, CalculatorRunId = 1 }
             });
 
             context.ProducerReportedMaterial.AddRange(new List<ProducerReportedMaterial>
@@ -584,7 +584,7 @@ namespace EPR.Calculator.API.UnitTests
                 new() { Id = 1, MaterialId = 1, PackagingType="HH", PackagingTonnage=400m,ProducerDetailId =1},
                 new(){ Id = 2, MaterialId = 2, PackagingType="HH", PackagingTonnage=400m,ProducerDetailId =2},
                 new(){ Id = 3, MaterialId = 1, PackagingType="CW", PackagingTonnage=200m,ProducerDetailId =1},
-                new(){ Id = 4, MaterialId = 2, PackagingType="CW", PackagingTonnage=200m,ProducerDetailId =2}
+                new(){ Id = 4, MaterialId = 2, PackagingType="CW", PackagingTonnage=200m,ProducerDetailId =2},
             });
             context.SaveChanges();
         }
