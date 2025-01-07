@@ -5,6 +5,6 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
 {
     public interface ICalcRunLaDisposalCostBuilder
     {
-        public Task<CalcResultLaDisposalCostData> Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult);
+        Task<CalcResultLaDisposalCostData> Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult);
     }
 }

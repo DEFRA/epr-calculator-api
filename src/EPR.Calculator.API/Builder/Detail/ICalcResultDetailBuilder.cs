@@ -5,6 +5,6 @@ namespace EPR.Calculator.API.Builder.Detail
 {
     public interface ICalcResultDetailBuilder
     {
-        public Task<CalcResultDetail> Construct(CalcResultsRequestDto resultsRequestDto);
+        Task<CalcResultDetail> Construct(CalcResultsRequestDto resultsRequestDto);
     }
 }

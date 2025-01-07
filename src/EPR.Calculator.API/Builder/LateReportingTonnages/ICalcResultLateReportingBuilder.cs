@@ -5,6 +5,6 @@ namespace EPR.Calculator.API.Builder.LateReportingTonnages
 {
     public interface ICalcResultLateReportingBuilder
     {
-        public Task<CalcResultLateReportingTonnage> Construct(CalcResultsRequestDto resultsRequestDto);
+        Task<CalcResultLateReportingTonnage> Construct(CalcResultsRequestDto resultsRequestDto);
     }
 }
