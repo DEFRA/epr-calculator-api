@@ -1,7 +1,7 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
-using Microsoft.AspNetCore.Routing.Constraints;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services
 {
@@ -9,18 +9,14 @@ namespace EPR.Calculator.API.Services
     public class TransposePomAndOrgDataService : ITransposePomAndOrgDataService
     {
         private readonly ApplicationDBContext context;
-
         private const string PeriodSeparator = "-P";
-
         public class OrganisationDetails
         {
             public int? OrganisationId { get; set; }
             public required string OrganisationName { get; set; }
             public string? SubmissionPeriod { get; set; }
             public string? SubmissionPeriodDescription { get; set; }
-
             public string? SubsidaryId { get; set; }
-
         }
 
         internal class SubmissionDetails
@@ -35,140 +31,171 @@ namespace EPR.Calculator.API.Services
             this.context = context;
         }
 
-        public void Transpose(CalcResultsRequestDto resultsRequestDto)
+        public async Task<bool> Transpose(CalcResultsRequestDto resultsRequestDto)
         {
-            var materials = this.context.Material.ToList();
+            var newProducerDetails = new List<ProducerDetail>();
+            var newProducerReportedMaterials = new List<ProducerReportedMaterial>();
 
-            var calculatorRun = this.context.CalculatorRuns.Single(cr => cr.Id == resultsRequestDto.RunId);
+            var result = false;
+            
+            var calcRunPomOrgDatadetails = await (from run in this.context.CalculatorRuns
+                                            join pomMaster in this.context.CalculatorRunPomDataMaster on run.CalculatorRunPomDataMasterId equals pomMaster.Id
+                                            join orgMaster in this.context.CalculatorRunOrganisationDataMaster on run.CalculatorRunOrganisationDataMasterId equals orgMaster.Id
+                                            join pomDetail in this.context.CalculatorRunPomDataDetails on pomMaster.Id equals pomDetail.CalculatorRunPomDataMasterId
+                                            join orgDetail in this.context.CalculatorRunOrganisationDataDetails on orgMaster.Id equals orgDetail.CalculatorRunOrganisationDataMasterId
+                                            where run.Id == resultsRequestDto.RunId
+                                            select new
+                                            {
+                                                run,
+                                                pomMaster,
+                                                orgMaster,
+                                                orgDetail,
+                                                pomDetail
+                                            }).ToListAsync();
+            
+            var materials = await this.context.Material.ToListAsync();
+
+            var calculatorRun = calcRunPomOrgDatadetails.Select(x => x.run).Distinct().Single();
+            var calculatorRunPomDataDetails = calcRunPomOrgDatadetails.Select(x => x.pomDetail).Distinct();
+            var calculatorRunOrgDataDetails = calcRunPomOrgDatadetails.Select(x => x.orgDetail).Distinct();
 
             if (calculatorRun.CalculatorRunPomDataMasterId != null)
             {
-                // Get the calculator run organisation data master record based on the CalculatorRunOrganisationDataMasterId
-                // from the calculator run table
-                var organisationDataMaster = context.CalculatorRunOrganisationDataMaster.Single(odm => odm.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);
+                var organisationDataMaster = calcRunPomOrgDatadetails.Select(x => x.orgMaster).Distinct().Single();
 
-              var SubmissionPeriodDetails = (from s in context.CalculatorRunPomDataDetails
-                                           where s.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId
-                                           select new SubmissionDetails
-                                           {
-                                               SubmissionPeriod = s.SubmissionPeriod,
-                                               SubmissionPeriodDesc = s.SubmissionPeriodDesc
-                                           }
+                var SubmissionPeriodDetails = (from s in calculatorRunPomDataDetails
+                                               where s.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId
+                                               select new SubmissionDetails
+                                               {
+                                                   SubmissionPeriod = s.SubmissionPeriod,
+                                                   SubmissionPeriodDesc = s.SubmissionPeriodDesc
+                                               }
                                         ).Distinct().ToList();
-               
-             var OrganisationsList  = GetAllOrganisationsBasedonRunId(resultsRequestDto.RunId);
 
-              var  OrganisationsBySubmissionPeriod = GetOrganisationDetailsBySubmissionPeriod(OrganisationsList, SubmissionPeriodDetails).ToList();
+                var OrganisationsList = GetAllOrganisationsBasedonRunId(calculatorRunOrgDataDetails);
 
-                // Get the calculator run organisation data details as we need the organisation name
-                var organisationDataDetails = context.CalculatorRunOrganisationDataDetails
-                    .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id && odd.OrganisationName != null && odd.OrganisationName !="")
+                var OrganisationsBySubmissionPeriod = GetOrganisationDetailsBySubmissionPeriod(OrganisationsList, SubmissionPeriodDetails).ToList();
+
+                var organisationDataDetails = calculatorRunOrgDataDetails
+                    .Where(odd => odd.CalculatorRunOrganisationDataMasterId == organisationDataMaster.Id && odd.OrganisationName != null && odd.OrganisationName != "")
                     .OrderBy(odd => odd.OrganisationName)
                     .GroupBy(odd => new { odd.OrganisationId, odd.SubsidaryId })
                     .Select(odd => odd.First())
                     .ToList();
 
-
-
-
                 // Get the calculator run pom data master record based on the CalculatorRunPomDataMasterId
-                var pomDataMaster = context.CalculatorRunPomDataMaster.Single(pdm => pdm.Id == calculatorRun.CalculatorRunPomDataMasterId);
+                var pomDataMaster = calcRunPomOrgDatadetails.Select(x => x.pomMaster).Distinct().Single();
 
-                using (var transaction = this.context.Database.BeginTransaction())
+
+                foreach (var organisation in organisationDataDetails.Where(t => !string.IsNullOrWhiteSpace(t.OrganisationName)))
                 {
-                    try
+                    // Initialise the producerReportedMaterials
+                    var producerReportedMaterials = new List<ProducerReportedMaterial>();
+
+                    // Get the calculator run pom data details related to the calculator run pom data master
+                    var runPomDataDetailsForSubsidaryId = calculatorRunPomDataDetails.Where
+                        (
+                            pdd => pdd.CalculatorRunPomDataMasterId == pomDataMaster.Id &&
+                            pdd.OrganisationId == organisation.OrganisationId &&
+                            pdd.SubsidaryId == organisation.SubsidaryId
+                        ).ToList();
+
+                    // Proceed further only if there is any pom data based on the pom data master id and organisation id
+                    // TO DO: We have to record if there is no pom data in a separate table post Dec 2024
+                    if (runPomDataDetailsForSubsidaryId.Count > 0)
                     {
-                        foreach (var organisation in organisationDataDetails.Where(t=>!string.IsNullOrWhiteSpace(t.OrganisationName)))
+                        var organisations = organisationDataDetails.Where(odd => odd.OrganisationName == organisation.OrganisationName && odd.SubsidaryId == organisation.SubsidaryId).OrderByDescending(odd => odd.SubmissionPeriodDesc);
+
+                        // Get the producer based on the latest submission period
+                        var producer = organisations.FirstOrDefault();
+
+                        // Proceed further only if the organisation is not null and organisation id not null
+                        // TO DO: We have to record if the organisation name is null in a separate table post Dec 2024
+                        if (producer != null && producer.OrganisationId != null)
                         {
-                            // Initialise the producerReportedMaterials
-                            var producerReportedMaterials = new List<ProducerReportedMaterial>();
-
-                            // Get the calculator run pom data details related to the calculator run pom data master
-                            var calculatorRunPomDataDetails = context.CalculatorRunPomDataDetails.Where
-                                (
-                                    pdd => pdd.CalculatorRunPomDataMasterId == pomDataMaster.Id &&
-                                    pdd.OrganisationId == organisation.OrganisationId &&
-                                    pdd.SubsidaryId == organisation.SubsidaryId
-                                ).ToList();
-
-                            // Proceed further only if there is any pom data based on the pom data master id and organisation id
-                            // TO DO: We have to record if there is no pom data in a separate table post Dec 2024
-                            if (calculatorRunPomDataDetails.Count > 0)
+                            var producerDetail = new ProducerDetail
                             {
-                                var organisations = organisationDataDetails.Where(odd => odd.OrganisationName == organisation.OrganisationName  && odd.SubsidaryId == organisation.SubsidaryId).OrderByDescending(odd => odd.SubmissionPeriodDesc);
+                                CalculatorRunId = resultsRequestDto.RunId,
+                                ProducerId = producer.OrganisationId.Value,
+                                SubsidiaryId = producer.SubsidaryId,
+                                ProducerName = string.IsNullOrWhiteSpace(producer.SubsidaryId) ? GetLatestOrganisationName(producer.OrganisationId.Value, OrganisationsBySubmissionPeriod, OrganisationsList) : GetLatestSubsidaryName(producer.OrganisationId.Value, producer.SubsidaryId, OrganisationsBySubmissionPeriod, OrganisationsList),
+                                CalculatorRun = calculatorRun
+                            };
 
-                                // Get the producer based on the latest submission period
-                                var producer = organisations.FirstOrDefault();
+                            // Add producer detail record to the database context
+                            newProducerDetails.Add(producerDetail);
 
-                                // Proceed further only if the organisation is not null and organisation id not null
-                                // TO DO: We have to record if the organisation name is null in a separate table post Dec 2024
-                                if (producer != null && producer.OrganisationId != null)
+                            foreach (var material in materials)
+                            {
+                                var pomDataDetailsByMaterial = runPomDataDetailsForSubsidaryId.Where(pdd => pdd.PackagingMaterial == material.Code).GroupBy(pdd => pdd.PackagingType);
+
+                                foreach (var pomData in pomDataDetailsByMaterial)
                                 {
-                                    var producerDetail = new ProducerDetail
+                                    var pom = pomData.AsEnumerable();
+                                    var packagingType = pom.FirstOrDefault()?.PackagingType;
+                                    var totalPackagingMaterialWeight = pom.Sum(x => x.PackagingMaterialWeight);
+
+                                    // Proceed further only if the packaging type and packaging material weight is not null
+                                    // TO DO: We have to record if the packaging type or packaging material weight is null in a separate table post Dec 2024
+                                    if (packagingType != null && totalPackagingMaterialWeight != null)
                                     {
-                                        CalculatorRunId = resultsRequestDto.RunId,
-                                        ProducerId = producer.OrganisationId.Value,
-                                        SubsidiaryId = producer.SubsidaryId,
-                                        ProducerName = string.IsNullOrWhiteSpace(producer.SubsidaryId) ? GetLatestOrganisationName(producer.OrganisationId.Value, OrganisationsBySubmissionPeriod, OrganisationsList) : GetLatestSubsidaryName(producer.OrganisationId.Value, producer.SubsidaryId, OrganisationsBySubmissionPeriod, OrganisationsList),
-                                        CalculatorRun = calculatorRun
-                                    };
-
-                                    // Add producer detail record to the database context
-                                    context.ProducerDetail.Add(producerDetail);
-
-                                    foreach (var material in materials)
-                                    {
-                                        var pomDataDetailsByMaterial = calculatorRunPomDataDetails.Where(pdd => pdd.PackagingMaterial == material.Code).GroupBy(pdd => pdd.PackagingType);
-
-                                        foreach (var pomData in pomDataDetailsByMaterial)
+                                        var producerReportedMaterial = new ProducerReportedMaterial
                                         {
-                                            var pom = pomData.AsEnumerable();
-                                            var packagingType = pom.FirstOrDefault()?.PackagingType;
-                                            var totalPackagingMaterialWeight = pom.Sum(x => x.PackagingMaterialWeight);
+                                            MaterialId = material.Id,
+                                            Material = material,
+                                            ProducerDetail = producerDetail,
+                                            PackagingType = packagingType,
+                                            PackagingTonnage = Math.Round((decimal)(totalPackagingMaterialWeight) / 1000, 3),
+                                        };
 
-                                            // Proceed further only if the packaging type and packaging material weight is not null
-                                            // TO DO: We have to record if the packaging type or packaging material weight is null in a separate table post Dec 2024
-                                            if (packagingType != null && totalPackagingMaterialWeight != null)
-                                            {
-                                                var producerReportedMaterial = new ProducerReportedMaterial
-                                                {
-                                                    MaterialId = material.Id,
-                                                    Material = material,
-                                                    ProducerDetail = producerDetail,
-                                                    PackagingType = packagingType,
-                                                    PackagingTonnage = Math.Round((decimal)(totalPackagingMaterialWeight) / 1000, 3),
-                                                };
-
-                                                // Populate the producer reported material list
-                                                producerReportedMaterials.Add(producerReportedMaterial);
-                                            }
-                                        }
+                                        // Populate the producer reported material list
+                                        producerReportedMaterials.Add(producerReportedMaterial);
                                     }
-
-                                    // Add the list of producer reported materials to the database context
-                                    context.ProducerReportedMaterial.AddRange(producerReportedMaterials);
                                 }
                             }
+
+                            // Add the list of producer reported materials to the database context
+                            newProducerReportedMaterials.AddRange(producerReportedMaterials);
                         }
-
-                        // Apply the database changes
-                        context.SaveChanges();
-
-                        // Success, commit transaction
-                        transaction.Commit();
                     }
-                    catch (Exception)
-                    {
-                        // Error, rollback transaction
-                        transaction.Rollback();
-                        // TO DO: Decide upon the exception later during the complete integration
-                        throw;
-                    }
+                }
+
+                result = await SaveNewProducerDetailAndMaterialsAsync(newProducerDetails, newProducerReportedMaterials);
+            }
+            return result;
+        }
+
+        public async Task<bool> SaveNewProducerDetailAndMaterialsAsync(
+            IEnumerable<ProducerDetail> newProducerDetails,
+            IEnumerable<ProducerReportedMaterial> newProducerReportedMaterials)
+        {
+            using (var transaction = await this.context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    context.ProducerDetail.AddRange(newProducerDetails);
+                    context.ProducerReportedMaterial.AddRange(newProducerReportedMaterials);
+
+                    // Apply the database changes
+                    await context.SaveChangesAsync();
+
+                    // Success, commit transaction
+                    await transaction.CommitAsync();
+                    return true;
+                }
+                catch (Exception)
+                {
+                    // Error, rollback transaction
+                    await transaction.RollbackAsync();
+                    // TO DO: Decide upon the exception later during the complete integration
+                    return false;
                 }
             }
         }
 
-        private static List<OrganisationDetails> GetOrganisationDetailsBySubmissionPeriod(IEnumerable<OrganisationDetails> organisationsList, IEnumerable<SubmissionDetails> submissionPeriodDetails)
+        private static List<OrganisationDetails> GetOrganisationDetailsBySubmissionPeriod(
+            IEnumerable<OrganisationDetails> organisationsList,
+            IEnumerable<SubmissionDetails> submissionPeriodDetails)
         {
             return (from org in organisationsList
                     join sub in submissionPeriodDetails on
@@ -183,20 +210,19 @@ namespace EPR.Calculator.API.Services
                     }).ToList();
         }
 
-        public IEnumerable<OrganisationDetails> GetAllOrganisationsBasedonRunId(int runId)
+        public IEnumerable<OrganisationDetails> GetAllOrganisationsBasedonRunId(
+            IEnumerable<CalculatorRunOrganisationDataDetail> calculatorRunOrganisationDataDetails)
         {
-            return [.. (from run in context.CalculatorRuns join
-                 org in context.CalculatorRunOrganisationDataDetails on run.CalculatorRunOrganisationDataMasterId equals org.CalculatorRunOrganisationDataMasterId
-                    where (run.Id == runId && org.OrganisationName != null)
-                    select new OrganisationDetails
+            return calculatorRunOrganisationDataDetails.Where(org => org.OrganisationName != null)
+                .Select(org =>
+                    new OrganisationDetails
                     {
                         OrganisationId = org.OrganisationId,
                         OrganisationName = org.OrganisationName,
                         SubmissionPeriodDescription = org.SubmissionPeriodDesc,
                         SubsidaryId = org.SubsidaryId
-                    }).Distinct()];
+                    }).Distinct();
         }
-
 
         public string? GetLatestOrganisationName(int orgId, List<OrganisationDetails> organisationsBySubmissionPeriod, IEnumerable<OrganisationDetails> organisationsList)
         {

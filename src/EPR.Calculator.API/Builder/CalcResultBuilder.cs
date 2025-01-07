@@ -42,21 +42,35 @@ namespace EPR.Calculator.API.Builder
             this.summaryBuilder = summaryBuilder;
         }
 
-        public CalcResult Build(CalcResultsRequestDto resultsRequestDto)
+        public async Task<CalcResult> Build(CalcResultsRequestDto resultsRequestDto)
         {
             var result = new CalcResult
             {
-                CalcResultDetail = this.calcResultDetailBuilder.Construct(resultsRequestDto),
-                CalcResultLapcapData = this.lapcapBuilder.Construct(resultsRequestDto),
-                CalcResultLateReportingTonnageData = this.lateReportingBuilder.Construct(resultsRequestDto),
-                CalcResultParameterOtherCost = this.calcResultParameterOtherCostBuilder.Construct(resultsRequestDto),
+                CalcResultLapcapData =
+                    new CalcResultLapcapData
+                    {
+                        CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>()
+                    },
+                CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage 
+                    { 
+                        CalcResultLateReportingTonnageDetails = new List<CalcResultLateReportingTonnageDetail>()
+                    },
+                CalcResultParameterOtherCost = new CalcResultParameterOtherCost 
+                    {
+                        Name = string.Empty
+                    }
             };
+
+            result.CalcResultDetail = await this.calcResultDetailBuilder.Construct(resultsRequestDto);
+            result.CalcResultLapcapData = await this.lapcapBuilder.Construct(resultsRequestDto);
+            result.CalcResultLateReportingTonnageData = await this.lateReportingBuilder.Construct(resultsRequestDto);
+            result.CalcResultParameterOtherCost = await this.calcResultParameterOtherCostBuilder.Construct(resultsRequestDto);
             
             result.CalcResultOnePlusFourApportionment = this.lapcapplusFourApportionmentBuilder.Construct(resultsRequestDto, result);
-            result.CalcResultCommsCostReportDetail =
-                this.commsCostReportBuilder.Construct(resultsRequestDto, result.CalcResultOnePlusFourApportionment);
-            result.CalcResultLaDisposalCostData = this.laDisposalCostBuilder.Construct(resultsRequestDto, result);
-            result.CalcResultSummary = this.summaryBuilder.Construct(resultsRequestDto, result);
+            result.CalcResultCommsCostReportDetail = await this.commsCostReportBuilder.Construct(
+                resultsRequestDto, result.CalcResultOnePlusFourApportionment);
+            result.CalcResultLaDisposalCostData = await this.laDisposalCostBuilder.Construct(resultsRequestDto, result);
+            result.CalcResultSummary = await this.summaryBuilder.Construct(resultsRequestDto, result);
             return result;
         }
     }

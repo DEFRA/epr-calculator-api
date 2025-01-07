@@ -64,8 +64,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
         [TestMethod]
         public void Construct_AllPropertiesPresent_ReturnsCorrectData()
         {
-            var result = _builder.Construct(new CalcResultsRequestDto() { RunId = 1 });
-
+            var results = _builder.Construct(new CalcResultsRequestDto() { RunId = 1 });
+            results.Wait();
+            var result = results.Result;
             Assert.AreEqual(1, result.RunId);
             Assert.AreEqual("TestRun", result.RunName);
             Assert.AreEqual("TestUser", result.RunBy);
@@ -95,8 +96,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
             _context.CalculatorRuns.Add(calculatorRun);
             _context.SaveChangesAsync();
 
-            var result = _builder.Construct(new CalcResultsRequestDto() { RunId = 2 });
-
+            var results = _builder.Construct(new CalcResultsRequestDto() { RunId = 2 });
+            results.Wait();
+            var result = results.Result;
             Assert.AreEqual(2, result.RunId);
             Assert.AreEqual("RunWithMissingProps", result.RunName);
             Assert.AreEqual("TestUser2", result.RunBy);

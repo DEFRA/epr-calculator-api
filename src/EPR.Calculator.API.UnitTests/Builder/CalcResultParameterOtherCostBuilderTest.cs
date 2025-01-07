@@ -92,7 +92,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
             dbContext.SaveChanges();
 
-            var otherCost = builder.Construct(new CalcResultsRequestDto { RunId = 1 });
+            var results = builder.Construct(new CalcResultsRequestDto { RunId = 1 });
+            results.Wait();
+            var otherCost = results.Result;
 
             Assert.IsNotNull(otherCost.SaOperatingCost);
             Assert.AreEqual(2, otherCost.SaOperatingCost.Count());

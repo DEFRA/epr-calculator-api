@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
 namespace EPR.Calculator.API.Builder.CommsCost
@@ -20,7 +21,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
         public const string EnGb = "en-GB";
         public const string PoundSign = "£";
 
-        public CalcResultCommsCost Construct(CalcResultsRequestDto resultsRequestDto,
+        public async Task<CalcResultCommsCost> Construct(CalcResultsRequestDto resultsRequestDto,
             CalcResultOnePlusFourApportionment apportionment)
         {
             var runId = resultsRequestDto.RunId;
@@ -35,11 +36,10 @@ namespace EPR.Calculator.API.Builder.CommsCost
             CalculateApportionment(apportionmentDetail, result);
             result.Name = Header;
 
-            var materials = context.Material.ToList();
+            var materials = await context.Material.ToListAsync();
             var materialNames = materials.Select(x => x.Name).ToList();
 
-            var allDefaultResults =
-                (from run in context.CalculatorRuns
+            var allDefaultResults = await (from run in context.CalculatorRuns
                     join defaultMaster in context.DefaultParameterSettings on run.DefaultParameterSettingMasterId equals
                         defaultMaster.Id
                     join defaultDetail in context.DefaultParameterSettingDetail on defaultMaster.Id equals defaultDetail
@@ -52,11 +52,11 @@ namespace EPR.Calculator.API.Builder.CommsCost
                         ParameterValue = defaultDetail.ParameterValue,
                         ParameterType = defaultTemplate.ParameterType,
                         ParameterCategory = defaultTemplate.ParameterCategory
-                    }).ToList();
+                    }).ToListAsync();
             var materialDefaults = allDefaultResults.Where(x =>
                 x.ParameterType == CommunicationCostByMaterial && materialNames.Contains(x.ParameterCategory));
 
-            var producerReportedMaterials = (from run in context.CalculatorRuns
+            var producerReportedMaterials = await (from run in context.CalculatorRuns
                 join pd in context.ProducerDetail on run.Id equals pd.CalculatorRunId
                 join mat in context.ProducerReportedMaterial on pd.Id equals mat.ProducerDetailId
                 where run.Id == runId && mat.PackagingType == CommonConstants.Household
@@ -65,7 +65,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
                     mat.Id,
                     mat.MaterialId,
                     mat.PackagingTonnage
-                }).Distinct().ToList();
+                }).Distinct().ToListAsync();
 
 
             var list = new List<CalcResultCommsCostCommsCostByMaterial>();

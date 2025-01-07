@@ -235,7 +235,7 @@ namespace EPR.Calculator.API.UnitTests
             var mockExporter = new Mock<ICalcResultsExporter<CalcResult>>();
             var mockBuilder = new Mock<ICalcResultBuilder>();
             mockExporter.Setup(x => x.Export(It.IsAny<CalcResult>())).Returns("some");
-            mockBuilder.Setup(x => x.Build(It.IsAny<CalcResultsRequestDto>())).Returns(new CalcResult
+            mockBuilder.Setup(x => x.Build(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(new CalcResult
             {
                 CalcResultDetail = new CalcResultDetail
                 {
@@ -266,6 +266,7 @@ namespace EPR.Calculator.API.UnitTests
                 }
             });
 
+            var mockTranspose = new Mock<ITransposePomAndOrgDataService>();
             var mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
             var controller = new CalculatorInternalController(
                dbContext,
@@ -273,13 +274,14 @@ namespace EPR.Calculator.API.UnitTests
                wrapper,
                mockBuilder.Object,
                mockExporter.Object,
-               new Mock<ITransposePomAndOrgDataService>().Object,
+               mockTranspose.Object,
                mockStorageService.Object
             );
 
+            mockTranspose.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(true);
             mockStorageService.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
+            mockCalcResultBuilder.Setup(b => b.Build(requestDto)).ReturnsAsync(calcResult);
             var task = controller.PrepareCalcResults(requestDto);
             task.Wait();
             var result = task.Result as ObjectResult;
@@ -306,7 +308,7 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<IStorageService>().Object
             );
 
-            mockCalcResultBuilder.Setup(b => b.Build(requestDto)).Returns(calcResult);
+            mockCalcResultBuilder.Setup(b => b.Build(requestDto)).ReturnsAsync(calcResult);
             var task = controller.PrepareCalcResults(requestDto);
             var result = task.Result as ObjectResult;
             Assert.IsNotNull(result);

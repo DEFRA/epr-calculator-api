@@ -13,6 +13,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Builder.Summary
 {
@@ -20,46 +21,53 @@ namespace EPR.Calculator.API.Builder.Summary
     {
         private readonly ApplicationDBContext context;
 
-        public static List<ProducerDetail> producerDetailList { get; set; } = [];
-
         public CalcResultSummaryBuilder(ApplicationDBContext context)
         {
             this.context = context;
         }
 
-        public CalcResultSummary Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult)
+        public async Task<CalcResultSummary> Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult)
+        {
+            // Get and map materials from DB
+            var materialsFromDb = await context.Material.ToListAsync();
+            var materials = Mappers.MaterialMapper.Map(materialsFromDb);
+            var producerDetails = await context.ProducerDetail.ToListAsync();
+            var producerReportedMaterials = await context.ProducerReportedMaterial.ToListAsync();
+            var runId = resultsRequestDto.RunId;
+
+            var runProducerMaterialDetails = GetProducerRunMaterialDetails(
+                producerDetails,
+                producerReportedMaterials,
+                runId);
+
+            var orderedProducerDetails = GetOrderedListOfProducersAssociatedRunId(
+                runId, producerDetails);
+
+            var result = GetCalcResultSummary(
+                orderedProducerDetails,
+                materials,
+                runProducerMaterialDetails,
+                calcResult);
+
+            return result;
+        }
+
+        public static CalcResultSummary GetCalcResultSummary(
+            IEnumerable<ProducerDetail> orderedProducerDetails,
+            IEnumerable<MaterialDetail> materials,
+            IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails,
+            CalcResult calcResult)
         {
             var result = new CalcResultSummary();
-
-            // Get and map materials from DB
-            var materialsFromDb = context.Material.ToList();
-            var materials = Mappers.MaterialMapper.Map(materialsFromDb);
-
-            var runProducerMaterialDetails = (from p in context.ProducerDetail
-                                              join m in context.ProducerReportedMaterial
-                                                  on p.Id equals m.ProducerDetailId
-                                              where p.CalculatorRunId == resultsRequestDto.RunId
-                                              select new CalcResultsProducerAndReportMaterialDetail
-                                              {
-                                                  ProducerDetail = p,
-                                                  ProducerReportedMaterial = m
-                                              }).ToList();
-
-            // Get the ordered list of producers associated with the calculator run id
-            producerDetailList = context.ProducerDetail
-              .Where(pd => pd.CalculatorRunId == resultsRequestDto.RunId)
-              .OrderBy(pd => pd.ProducerId)
-              .ToList();
-
-            if (producerDetailList.Count > 0)
+            if (orderedProducerDetails.Any())
             {
                 var producerDisposalFees = new List<CalcResultSummaryProducerDisposalFees>();
 
-                foreach (var producer in producerDetailList)
+                foreach (var producer in orderedProducerDetails)
                 {
                     // We have to write an additional row if a producer have at least one subsidiary
                     // This additional row will be the total of this producer and its subsidiaries
-                    var producersAndSubsidiaries = producerDetailList.Where(pd => pd.ProducerId == producer.ProducerId);
+                    var producersAndSubsidiaries = orderedProducerDetails.Where(pd => pd.ProducerId == producer.ProducerId);
                     // Make sure the total row is written only once
                     if (producersAndSubsidiaries.Count() > 1 &&
                         producerDisposalFees.Find(pdf => pdf.ProducerId == producer.ProducerId.ToString()) == null)
@@ -75,7 +83,7 @@ namespace EPR.Calculator.API.Builder.Summary
                 }
 
                 // Calculate the total for all the producers
-                var allTotalRow = GetProducerTotalRow(producerDetailList.ToList(), materials, calcResult,
+                var allTotalRow = GetProducerTotalRow(orderedProducerDetails.ToList(), materials, calcResult,
                     runProducerMaterialDetails, producerDisposalFees, true);
                 producerDisposalFees.Add(allTotalRow);
 
@@ -119,8 +127,31 @@ namespace EPR.Calculator.API.Builder.Summary
             return result;
         }
 
-        private static CalcResultSummaryProducerDisposalFees GetProducerTotalRow(List<ProducerDetail> producersAndSubsidiaries,
-            List<MaterialDetail> materials,
+        public static IEnumerable<ProducerDetail> GetOrderedListOfProducersAssociatedRunId(
+            int runId,
+            IEnumerable<ProducerDetail> producerDetails)
+        {
+            return producerDetails.Where(pd => pd.CalculatorRunId == runId).OrderBy(pd => pd.ProducerId).ToList();
+        }
+
+        public static IEnumerable<CalcResultsProducerAndReportMaterialDetail> GetProducerRunMaterialDetails(
+            IEnumerable<ProducerDetail> producerDetails,
+            IEnumerable<ProducerReportedMaterial> producerReportedmaterials,
+            int runId)
+        {
+            return (from p in producerDetails
+                    join m in producerReportedmaterials
+                 on p.Id equals m.ProducerDetailId
+                    where p.CalculatorRunId == runId
+                    select new CalcResultsProducerAndReportMaterialDetail
+                    {
+                        ProducerDetail = p,
+                        ProducerReportedMaterial = m
+                    }).ToList();
+        }
+
+        public static CalcResultSummaryProducerDisposalFees GetProducerTotalRow(List<ProducerDetail> producersAndSubsidiaries,
+            IEnumerable<MaterialDetail> materials,
             CalcResult calcResult,
             IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails,
             IEnumerable<CalcResultSummaryProducerDisposalFees> producerDisposalFees,
@@ -233,12 +264,12 @@ namespace EPR.Calculator.API.Builder.Summary
             return totalRow;
         }
 
-        private static CalcResultSummaryProducerDisposalFees GetProducerRow(
+        public static CalcResultSummaryProducerDisposalFees GetProducerRow(
             List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup,
             ProducerDetail producer,
-            List<MaterialDetail> materials,
+            IEnumerable<MaterialDetail> materials,
             CalcResult calcResult,
-            List<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails)
+            IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails)
         {
             var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
             var commsCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>();
@@ -336,31 +367,6 @@ namespace EPR.Calculator.API.Builder.Summary
             TwoCCommsCostUtil.UpdateTwoCRows(calcResult, result, producer, runProducerMaterialDetails);
 
             return result;
-        }
-
-        //section bad debt total
-        public static decimal GetTotal1Plus2ABadDebt(IEnumerable<MaterialDetail> materials, CalcResult calcResult)
-        {
-            decimal total = 0m;
-
-            foreach (MaterialDetail material in materials)
-            {
-                var laDisposalTotal = CalcResultSummaryUtil.GetProducerDisposalFeeWithBadDebtProvisionProducerTotal(producerDetailList, material, calcResult);
-                var twoAcommsDisposal = CalcResultSummaryCommsCostTwoA.GetProducerTotalCostwithBadDebtProvisionTotal(producerDetailList, material, calcResult);
-                total += laDisposalTotal + twoAcommsDisposal;
-            }
-
-            return total;
-        }
-
-        public static decimal GetTotal1Plus2ABadDebtPercentage(decimal totalLaDisposal, decimal total2aCommsCost, List<MaterialDetail> materials, CalcResult calcResult)
-        {
-            var total = GetTotal1Plus2ABadDebt(materials, calcResult);
-
-            if (total == 0) return 0;
-
-            return Math.Round((totalLaDisposal + total2aCommsCost) / total * 100, 8);
-
         }
     }
 }

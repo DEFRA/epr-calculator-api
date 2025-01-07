@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Builder.LateReportingTonnages
 {
@@ -17,9 +18,9 @@ namespace EPR.Calculator.API.Builder.LateReportingTonnages
             this.context = context;
         }
 
-        public CalcResultLateReportingTonnage Construct(CalcResultsRequestDto resultsRequestDto)
+        public async Task<CalcResultLateReportingTonnage> Construct(CalcResultsRequestDto resultsRequestDto)
         {
-            var result = (from run in context.CalculatorRuns
+            var result = await (from run in context.CalculatorRuns
                           join master in context.DefaultParameterSettings
                           on run.DefaultParameterSettingMasterId equals master.Id
                           join detail in context.DefaultParameterSettingDetail on master.Id equals detail.DefaultParameterSettingMasterId
@@ -29,7 +30,7 @@ namespace EPR.Calculator.API.Builder.LateReportingTonnages
                           {
                               Name = template.ParameterCategory,
                               TotalLateReportingTonnage = detail.ParameterValue
-                          }).ToList();
+                          }).ToListAsync();
 
             result.Add(new CalcResultLateReportingTonnageDetail
             {
