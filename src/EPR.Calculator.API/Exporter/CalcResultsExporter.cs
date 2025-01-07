@@ -22,6 +22,11 @@ namespace EPR.Calculator.API.Exporter
 
         public string Export(CalcResult results)
         {
+            if (results == null)
+            {
+                throw new ArgumentNullException(nameof(results), "The results parameter cannot be null.");
+            }
+
             var csvContent = new StringBuilder();
             LoadCalcResultDetail(results, csvContent);
             if (results.CalcResultLapcapData != null)
@@ -60,7 +65,6 @@ namespace EPR.Calculator.API.Exporter
             }
 
             return csvContent.ToString();
-
         }
 
         private static void PrepareCommsCost(CalcResultCommsCost communicationCost, StringBuilder csvContent)
@@ -69,9 +73,9 @@ namespace EPR.Calculator.API.Exporter
             csvContent.AppendLine();
             csvContent.AppendLine(communicationCost.Name);
 
-            var onePlusFourApportionments = communicationCost.CalcResultCommsCostOnePlusFourApportionment;
+            var apportionment = communicationCost.CalcResultCommsCostOnePlusFourApportionment;
 
-            foreach (var onePlusFourApportionment in onePlusFourApportionments)
+            foreach (var onePlusFourApportionment in apportionment)
             {
                 csvContent.Append($"{CsvSanitiser.SanitiseData(onePlusFourApportionment.Name)},");
                 csvContent.Append($"{CsvSanitiser.SanitiseData(onePlusFourApportionment.England)},");
@@ -81,24 +85,24 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.AppendLine($"{CsvSanitiser.SanitiseData(onePlusFourApportionment.Total)}");
             }
             csvContent.AppendLine();
-            var commsCostByMaterials = communicationCost.CalcResultCommsCostCommsCostByMaterial;
+            var commCostByMaterials = communicationCost.CalcResultCommsCostCommsCostByMaterial;
 
-            foreach (var commsCostByMaterial in commsCostByMaterials)
+            foreach (var commCostByMaterial in commCostByMaterials)
             {
-                csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.Name)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.England)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.Wales)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.Scotland)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.NorthernIreland)},");
-                csvContent.Append($"{CsvSanitiser.SanitiseData(commsCostByMaterial.Total)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(commCostByMaterial.Name)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(commCostByMaterial.England)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(commCostByMaterial.Wales)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(commCostByMaterial.Scotland)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(commCostByMaterial.NorthernIreland)},");
+                csvContent.Append($"{CsvSanitiser.SanitiseData(commCostByMaterial.Total)},");
                 csvContent.Append(
-                    $"{CsvSanitiser.SanitiseData(commsCostByMaterial.ProducerReportedHouseholdPackagingWasteTonnage)},");
+                    $"{CsvSanitiser.SanitiseData(commCostByMaterial.ProducerReportedHouseholdPackagingWasteTonnage)},");
                 csvContent.Append(
-                    $"{CsvSanitiser.SanitiseData(commsCostByMaterial.LateReportingTonnage)},");
+                    $"{CsvSanitiser.SanitiseData(commCostByMaterial.LateReportingTonnage)},");
                 csvContent.Append(
-                    $"{CsvSanitiser.SanitiseData(commsCostByMaterial.ProducerReportedHouseholdPlusLateReportingTonnage)},");
+                    $"{CsvSanitiser.SanitiseData(commCostByMaterial.ProducerReportedHouseholdPlusLateReportingTonnage)},");
                 csvContent.AppendLine(
-                    $"{CsvSanitiser.SanitiseData(commsCostByMaterial.CommsCostByMaterialPricePerTonne)}");
+                    $"{CsvSanitiser.SanitiseData(commCostByMaterial.CommsCostByMaterialPricePerTonne)}");
             }
 
             csvContent.AppendLine();
@@ -175,13 +179,13 @@ namespace EPR.Calculator.API.Exporter
             AppendCsvLine(csvContent, RunDate, results.CalcResultDetail.RunDate.ToString(CalculationResults.DateFormat));
             AppendCsvLine(csvContent, Runby, results.CalcResultDetail.RunBy);
             AppendCsvLine(csvContent, FinancialYear, results.CalcResultDetail.FinancialYear);
-            AppendRPDFileInfo(csvContent, RPDFileORG, RPDFilePOM, results.CalcResultDetail.RpdFileORG, results.CalcResultDetail.RpdFilePOM);
+            AppendRpdFileInfo(csvContent, RPDFileORG, RPDFilePOM, results.CalcResultDetail.RpdFileORG, results.CalcResultDetail.RpdFilePOM);
             AppendFileInfo(csvContent, LapcapFile, results.CalcResultDetail.LapcapFile);
             AppendFileInfo(csvContent, ParametersFile, results.CalcResultDetail.ParametersFile);
             AppendFileInfo(csvContent, CountryApportionmentFile, results.CalcResultDetail.CountryApportionmentFile);
         }
 
-        private static void AppendRPDFileInfo(StringBuilder csvContent, string rPDFileORG, string rPDFilePOM, string rpdFileORGValue, string rpdFilePOMValue)
+        private static void AppendRpdFileInfo(StringBuilder csvContent, string rPDFileORG, string rPDFilePOM, string rpdFileORGValue, string rpdFilePOMValue)
         {
             csvContent.AppendLine($"{rPDFileORG},{CsvSanitiser.SanitiseData(rpdFileORGValue)},{rPDFilePOM},{CsvSanitiser.SanitiseData(rpdFilePOMValue)}");
         }

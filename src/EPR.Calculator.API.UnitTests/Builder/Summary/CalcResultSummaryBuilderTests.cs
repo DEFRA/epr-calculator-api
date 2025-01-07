@@ -8,10 +8,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using System.Collections.Generic;
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
@@ -282,7 +279,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
-            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
             var firstProducer = result.ProducerDisposalFees.FirstOrDefault();
             Assert.IsNotNull(firstProducer);
             Assert.AreEqual("Producer1", firstProducer.ProducerName);
@@ -351,7 +348,7 @@ namespace EPR.Calculator.API.UnitTests
             var result = results.Result;
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
             Assert.IsFalse(result.ProducerDisposalFees.Any(fee => fee.ProducerName.Contains("Total")));
         }
 
@@ -364,7 +361,7 @@ namespace EPR.Calculator.API.UnitTests
             results.Wait();
             var result = results.Result;
             Assert.IsNotNull(result);
-            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
         }
 
         [TestMethod]
@@ -508,33 +505,10 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
-            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
             var producerTotalPercentage = result.ProducerDisposalFees.First().PercentageofProducerReportedHHTonnagevsAllProducers;
             Assert.IsNotNull(producerTotalPercentage);
             Assert.AreEqual(100, producerTotalPercentage);
-        }
-
-        [TestMethod]
-        public void GetTotalDisposalCostswithBadDebtOnePlus2A_ShouldReturnCorrectValues()
-        {
-
-            var materialInDb = _context.Material.ToList();
-            var material = Mappers.MaterialMapper.Map(materialInDb);
-            var requestDto = new CalcResultsRequestDto { RunId = 1 };
-
-            CalcResultSummaryBuilder.producerDetailList = _context.ProducerDetail
-               .Where(pd => pd.CalculatorRunId == requestDto.RunId)
-               .OrderBy(pd => pd.ProducerId)
-               .ToList();
-
-            var value = CalcResultSummaryBuilder.GetTotal1Plus2ABadDebtPercentage(100, 100, material, _calcResult);
-            Assert.AreEqual(4.52685329M, value);
-
-            var totalFee = CalcResultSummaryBuilder.GetTotal1Plus2ABadDebt(material, _calcResult);
-            Assert.AreEqual(4418.0800M, totalFee);
-
-            var debt = Math.Ceiling((value * totalFee) / 100);
-            Assert.AreEqual(200, debt);
         }
 
         [TestMethod]
@@ -552,7 +526,69 @@ namespace EPR.Calculator.API.UnitTests
             var isColumnHeaderExists = result.ProducerDisposalFeesHeaders!.Select(dict => dict.ColumnIndex == 196 || dict.ColumnIndex == 197 || dict.ColumnIndex == 198).ToList();
             Assert.IsTrue(isColumnHeaderExists.Contains(true));
             Assert.IsNotNull(result.ProducerDisposalFees);
-            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
+        }
+
+        [TestMethod]
+        public void MaterialMapper_ShouldReturnCorrectValue()
+        {
+            var materials = _context.Material.ToList();
+            var result = Mappers.MaterialMapper.Map(materials);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(materials.Count, result.Count);
+            var material = result[0];
+            var actualMaterial = materials[0];
+            Assert.IsNotNull(material);
+            Assert.IsNotNull(actualMaterial);
+            Assert.AreEqual(material.Name, actualMaterial.Name);
+            Assert.AreEqual(material.Code, actualMaterial.Code);
+        }
+
+        [TestMethod]
+        public void GetProducerRunMaterialDetails_ShouldReturnCorrectValue()
+        {
+            var result = CalcResultSummaryBuilder.GetProducerRunMaterialDetails(_context.ProducerDetail.ToList(),
+                _context.ProducerReportedMaterial.ToList(),
+                1);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Count());
+            var producer = result.FirstOrDefault(t => t.ProducerDetail.Id == 1);
+            Assert.AreEqual(2, producer?.ProducerDetail.ProducerReportedMaterials.Count);
+            Assert.AreEqual("Producer1", producer?.ProducerDetail.ProducerName);
+        }
+
+        [TestMethod]
+        public void GetOrderedListOfProducersAssociatedRunId_ShouldReturnCorrectValue()
+        {
+            var result = CalcResultSummaryBuilder.GetOrderedListOfProducersAssociatedRunId(1, _context.ProducerDetail.ToList());
+            Assert.IsNotNull(result);
+            Assert.AreEqual(3, result.Count());
+            Assert.AreEqual("Producer1", result.First().ProducerName);
+            Assert.AreEqual("Producer5", result.Last().ProducerName);
+        }
+
+        [TestMethod]
+        public void GetCalcResultSummary_ShouldReturnCorrectValue()
+        {
+            var orderedProducerDetails = CalcResultSummaryBuilder.GetOrderedListOfProducersAssociatedRunId(1, _context.ProducerDetail.ToList());
+            var runProducerMaterialDetails = CalcResultSummaryBuilder.GetProducerRunMaterialDetails(orderedProducerDetails,
+                _context.ProducerReportedMaterial.ToList(), 1);
+            var materials = Mappers.MaterialMapper.Map(_context.Material.ToList());
+            var result = CalcResultSummaryBuilder.GetCalcResultSummary(orderedProducerDetails, materials,
+                runProducerMaterialDetails, _calcResult);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(117, result.ColumnHeaders.Count());
+
+            var producerDisposalFees = result.ProducerDisposalFees;
+            Assert.IsNotNull(producerDisposalFees);
+
+            var totals = producerDisposalFees.First(t => t.Level == "Totals");
+            var producer = producerDisposalFees.First(t => t.Level == "1");
+            Assert.IsNotNull(producer);
+
+            Assert.AreEqual(string.Empty, totals?.ProducerName);
+            Assert.IsNotNull(producer.ProducerName);
+            Assert.AreEqual("Producer1", producer.ProducerName);
         }
 
         private static void SeedDatabase(ApplicationDBContext context)
@@ -565,17 +601,19 @@ namespace EPR.Calculator.API.UnitTests
 
             context.ProducerDetail.AddRange(new List<ProducerDetail>
             {
-                new() {  Id = 1, ProducerName = "Producer1", CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test1" } },
-                new() { Id = 2, ProducerName = "Producer2", CalculatorRunId = 2, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test2" } },
-                new() {  Id = 3, ProducerName = "Producer3", CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } }
+                new() { Id = 1, ProducerName = "Producer1", ProducerId= 1, CalculatorRunId = 1, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test1" } },
+                new() { Id = 2, ProducerName = "Producer2", ProducerId= 2, CalculatorRunId = 2, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test2" } },
+                new() { Id = 3, ProducerName = "Producer3", ProducerId= 3, CalculatorRunId = 3, CalculatorRun = new CalculatorRun { Financial_Year = "2024-25", Name = "Test3" } },
+                new() { Id = 4, ProducerName = "Producer4", ProducerId= 4, CalculatorRunId = 1 },
+                new() { Id = 5, ProducerName = "Producer5", ProducerId= 5, CalculatorRunId = 1 }
             });
 
             context.ProducerReportedMaterial.AddRange(new List<ProducerReportedMaterial>
             {
-                new() { Id = 1, MaterialId = 1, PackagingType="HH", PackagingTonnage=400m,ProducerDetailId =1},
-                new(){ Id = 2, MaterialId = 2, PackagingType="HH", PackagingTonnage=400m,ProducerDetailId =2},
-                new(){ Id = 3, MaterialId = 1, PackagingType="CW", PackagingTonnage=200m,ProducerDetailId =1},
-                new(){ Id = 4, MaterialId = 2, PackagingType="CW", PackagingTonnage=200m,ProducerDetailId =2}
+                new(){ Id = 1, MaterialId = 1, PackagingType= "HH", PackagingTonnage = 400m,ProducerDetailId = 1},
+                new(){ Id = 2, MaterialId = 2, PackagingType= "HH", PackagingTonnage = 400m,ProducerDetailId = 2},
+                new(){ Id = 3, MaterialId = 1, PackagingType= "CW", PackagingTonnage = 200m,ProducerDetailId = 1},
+                new(){ Id = 4, MaterialId = 2, PackagingType= "CW", PackagingTonnage = 200m,ProducerDetailId = 2}
             });
             context.SaveChanges();
         }

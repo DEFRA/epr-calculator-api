@@ -395,7 +395,7 @@ public static class CalcResultSummaryUtil
         return total;
     }
 
-    public static void SetHeaders(CalcResultSummary result, List<MaterialDetail> materials)
+    public static void SetHeaders(CalcResultSummary result, IEnumerable<MaterialDetail> materials)
     {
         result.ResultSummaryHeader = new CalcResultSummaryHeader
         {
@@ -464,7 +464,7 @@ public static class CalcResultSummaryUtil
         return resultSummaryHeaders;
     }
 
-    public static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(CalcResultSummary result, List<MaterialDetail> materials)
+    public static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(CalcResultSummary result, IEnumerable<MaterialDetail> materials)
     {
         var materialsBreakdownHeaders = new List<CalcResultSummaryHeader>();
         var columnIndex = MaterialsBreakdownHeaderInitialColumnIndex;
@@ -559,7 +559,7 @@ public static class CalcResultSummaryUtil
         return materialsBreakdownHeaders;
     }
 
-    public static List<CalcResultSummaryHeader> GetColumnHeaders(List<MaterialDetail> materials)
+    public static List<CalcResultSummaryHeader> GetColumnHeaders(IEnumerable<MaterialDetail> materials)
     {
         var columnHeaders = new List<CalcResultSummaryHeader>();
 

@@ -60,7 +60,7 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
         }
 
         public static void UpdateTwoCRows(CalcResult calcResult, CalcResultSummaryProducerDisposalFees result,
-            ProducerDetail producer, List<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails)
+            ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails)
         {
             result.TwoCEnglandTotalWithBadDebt =
                 GetCommEnglandWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
