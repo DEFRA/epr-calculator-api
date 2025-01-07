@@ -93,7 +93,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
         {
             var requestDto = new CalcResultsRequestDto { RunId = 1 };
 
-            var result = builder.Construct(requestDto);
+            var results = builder.Construct(requestDto);
+            results.Wait();
+            var result = results.Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultLateReportingBuilder.LateReportingHeader, result.Name);

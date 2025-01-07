@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
 namespace EPR.Calculator.API.Builder.ParametersOther
@@ -23,12 +24,12 @@ namespace EPR.Calculator.API.Builder.ParametersOther
             this.context = context;
         }
 
-        public CalcResultParameterOtherCost Construct(CalcResultsRequestDto resultsRequestDto)
+        public async Task<CalcResultParameterOtherCost> Construct(CalcResultsRequestDto resultsRequestDto)
         {
             var culture = CultureInfo.CreateSpecificCulture("en-GB");
             culture.NumberFormat.CurrencySymbol = "£";
             culture.NumberFormat.CurrencyPositivePattern = 0;
-            var results = (from run in context.CalculatorRuns
+            var results = await (from run in context.CalculatorRuns
                            join defaultMaster in context.DefaultParameterSettings on run.DefaultParameterSettingMasterId equals defaultMaster.Id
                            join defaultDetail in context.DefaultParameterSettingDetail on defaultMaster.Id equals defaultDetail.DefaultParameterSettingMasterId
                            join defaultTemplate in context.DefaultParameterTemplateMasterList on defaultDetail.ParameterUniqueReferenceId equals defaultTemplate.ParameterUniqueReferenceId
@@ -38,7 +39,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                                ParameterValue = defaultDetail.ParameterValue,
                                ParameterCategory = defaultTemplate.ParameterCategory,
                                ParameterType = defaultTemplate.ParameterType,
-                           }).ToList();
+                           }).ToListAsync();
 
             var schemeAdminCosts = results.Where(x => x.ParameterType == SchemeAdminOperatingCost);
 
@@ -150,9 +151,10 @@ namespace EPR.Calculator.API.Builder.ParametersOther
             materialities.Add(tonnageDecrease);
             other.Materiality = materialities;
 
-            var countries = context.Country.ToList();
+            var countries = await context.Country.ToListAsync();
 
-            var costTypeId = context.CostType.Single(x => x.Name == "LA Data Prep Charge").Id;
+            var costType = await context.CostType.SingleAsync(x => x.Name == "LA Data Prep Charge");
+            var costTypeId = costType.Id;
 
             context.CountryApportionment.Add(new CountryApportionment
             {
@@ -186,7 +188,7 @@ namespace EPR.Calculator.API.Builder.ParametersOther
                 Apportionment = laDataPrep.ScotlandValue
             });
 
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             return other;
         }

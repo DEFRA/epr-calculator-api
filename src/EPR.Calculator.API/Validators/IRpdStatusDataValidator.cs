@@ -5,7 +5,7 @@ namespace EPR.Calculator.API.Validators
 {
     public interface IRpdStatusDataValidator
     {
-        public RpdStatusValidation IsValidRun(CalculatorRun? calcRun, int runId, IEnumerable<CalculatorRunClassification> calculatorRunClassifications);
-        public RpdStatusValidation IsValidSuccessfulRun(int runId);
+        RpdStatusValidation IsValidRun(CalculatorRun? calcRun, int runId, IEnumerable<CalculatorRunClassification> calculatorRunClassifications);
+        RpdStatusValidation IsValidSuccessfulRun(int runId);
     }
 }

@@ -168,25 +168,27 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status404NotFound };
             }
 
-
             try
             {
-                this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
-                var results = this.builder.Build(resultsRequestDto);
-                var exportedResults = this.exporter.Export(results);
-
-                var fileName = new CalcResultsFileName(
-                    results.CalcResultDetail.RunId,
-                    results.CalcResultDetail.RunName,
-                    results.CalcResultDetail.RunDate);
-                var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
-
-                if (resultsFileWritten)
+                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
+                if (isTransposeSuccessful)
                 {
-                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
-                    this.context.CalculatorRuns.Update(calculatorRun);
-                    await this.context.SaveChangesAsync();
-                    return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+                    var results = await this.builder.Build(resultsRequestDto);
+                    var exportedResults = this.exporter.Export(results);
+
+                    var fileName = new CalcResultsFileName(
+                        results.CalcResultDetail.RunId,
+                        results.CalcResultDetail.RunName,
+                        results.CalcResultDetail.RunDate);
+                    var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
+
+                    if (resultsFileWritten)
+                    {
+                        calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
+                        this.context.CalculatorRuns.Update(calculatorRun);
+                        await this.context.SaveChangesAsync();
+                        return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+                    }
                 }
             }
             catch (Exception exception)

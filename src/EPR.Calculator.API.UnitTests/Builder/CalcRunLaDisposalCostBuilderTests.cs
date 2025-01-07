@@ -153,7 +153,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
 
 
 
-            var lapcapDisposalCostResults = builder.Construct(resultsDto, calcResult);
+            var results = builder.Construct(resultsDto, calcResult);
+            results.Wait();
+            var lapcapDisposalCostResults = results.Result;
 
             Assert.IsNotNull(lapcapDisposalCostResults);
             Assert.AreEqual(CommonConstants.LADisposalCostData, lapcapDisposalCostResults.Name);
