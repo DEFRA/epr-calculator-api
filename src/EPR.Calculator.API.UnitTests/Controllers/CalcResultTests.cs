@@ -33,6 +33,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<ICalcRunLaDisposalCostBuilder> mockLaDisposalCostBuilder;
         private readonly Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
         private readonly Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
+        private readonly Mock<ITransposePomAndOrgDataService> transposePomAndOrgDataService;
         private CalculatorInternalController controller;
         private CalcResultDetailBuilder detailBuilder;
 
@@ -49,7 +50,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             mockExporter = new Mock<ICalcResultsExporter<CalcResult>>();
             mockExporter.Setup(x => x.Export(It.IsAny<CalcResult>())).Returns("Somevalue");
             wrapper = new Mock<IOrgAndPomWrapper>().Object;
-            var transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
+            transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
             mockStorageservice = new Mock<IStorageService>();
             mockStorageservice.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
@@ -90,6 +91,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
+            this.transposePomAndOrgDataService.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(true);
             var requestDto = new CalcResultsRequestDto() { RunId = 1 };
             var calcResult = new CalcResult
             {
@@ -122,7 +124,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 }
             };
 
-            mockCalcResultBuilder.Setup(b => b.Build(It.IsAny<CalcResultsRequestDto>())).Returns(calcResult);
+            mockCalcResultBuilder.Setup(b => b.Build(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(calcResult);
 
             var task = controller.PrepareCalcResults(requestDto);
             task.Wait();
@@ -139,9 +141,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             var requestDto = new CalcResultsRequestDto();
             var detail = new CalcResultDetail();
-            mockDetailBuilder.Setup(d => d.Construct(requestDto)).Returns(detail);
+            mockDetailBuilder.Setup(d => d.Construct(requestDto)).ReturnsAsync(detail);
 
-            var result = calcResultBuilder.Build(requestDto);
+            var results = calcResultBuilder.Build(requestDto);
+            results.Wait();
+            var result = results.Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(detail, result.CalcResultDetail);

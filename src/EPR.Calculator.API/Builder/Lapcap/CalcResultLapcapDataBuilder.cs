@@ -3,6 +3,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using System.Globalization;
 using EPR.Calculator.API.Data.DataModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Builder.Lapcap
 {
@@ -18,7 +19,7 @@ namespace EPR.Calculator.API.Builder.Lapcap
             this.context = context;
         }
 
-        public CalcResultLapcapData Construct(CalcResultsRequestDto resultsRequestDto)
+        public async Task<CalcResultLapcapData> Construct(CalcResultsRequestDto resultsRequestDto)
         {
             var culture = CultureInfo.CreateSpecificCulture("en-GB");
             culture.NumberFormat.CurrencySymbol = "£";
@@ -36,7 +37,7 @@ namespace EPR.Calculator.API.Builder.Lapcap
                 TotalDisposalCost = LapcapHeaderConstants.TotalDisposalCost
             });
 
-            var results = (from run in context.CalculatorRuns
+            var results = await (from run in context.CalculatorRuns
                            join lapcapMaster in context.LapcapDataMaster on run.LapcapDataMasterId equals lapcapMaster.Id
                            join lapcapDetail in context.LapcapDataDetail on lapcapMaster.Id equals lapcapDetail.LapcapDataMasterId
                            join lapcapTemplate in context.LapcapDataTemplateMaster on lapcapDetail.UniqueReference equals lapcapTemplate.UniqueReference
@@ -46,13 +47,14 @@ namespace EPR.Calculator.API.Builder.Lapcap
                                Material = lapcapTemplate.Material,
                                Country = lapcapTemplate.Country,
                                TotalCost = lapcapDetail.TotalCost
-                           }).ToList();
+                           }).ToListAsync();
 
-            var materials = context.Material.Select(x => x.Name).ToList();
+            var materials = await context.Material.Select(x => x.Name).ToListAsync();
 
-            var countries = context.Country.ToList();
+            var countries = await context.Country.ToListAsync();
 
-            var costTypeId = context.CostType.Single(x => x.Name == "Fee for LA Disposal Costs").Id;
+            var costType = await context.CostType.SingleAsync(x => x.Name == "Fee for LA Disposal Costs");
+            var costTypeId = costType.Id;
 
             foreach (var material in materials)
             {
@@ -143,7 +145,7 @@ namespace EPR.Calculator.API.Builder.Lapcap
                 Apportionment = totalDetail.ScotlandCost
             });
 
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             return new CalcResultLapcapData { Name = LapcapHeader, CalcResultLapcapDataDetails = data };
         }

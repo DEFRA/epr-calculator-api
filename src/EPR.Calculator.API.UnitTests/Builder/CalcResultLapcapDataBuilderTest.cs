@@ -86,7 +86,12 @@ namespace EPR.Calculator.API.UnitTests.Builder
             dbContext.SaveChanges();
 
             var resultsDto = new CalcResultsRequestDto { RunId = 1 };
-            var lapcapResults = builder.Construct(resultsDto);
+            var results = builder.Construct(resultsDto);
+
+            results.Wait();
+            var lapcapDisposalCostResults = results.Result;
+
+            var lapcapResults = results.Result;
 
             Assert.IsNotNull(lapcapResults);
             Assert.AreEqual(CalcResultLapcapDataBuilder.LapcapHeader, lapcapResults.Name);

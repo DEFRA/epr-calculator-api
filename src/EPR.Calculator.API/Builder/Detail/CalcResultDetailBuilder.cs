@@ -14,9 +14,9 @@ namespace EPR.Calculator.API.Builder.Detail
             this.context = context;
         }
 
-        public CalcResultDetail Construct(CalcResultsRequestDto resultsRequestDto)
+        public async Task<CalcResultDetail> Construct(CalcResultsRequestDto resultsRequestDto)
         {
-            var calcResultDetails = context.CalculatorRuns
+            var calcResultDetails = await context.CalculatorRuns
                 .Include(o => o.CalculatorRunOrganisationDataMaster)
                 .Include(o => o.CalculatorRunPomDataMaster)
                 .Include(o => o.DefaultParameterSettingMaster)
@@ -24,7 +24,7 @@ namespace EPR.Calculator.API.Builder.Detail
                 .ToListAsync();
 
             var results = new CalcResultDetail();
-            var calcResultDetail = calcResultDetails.Result.Find(x => x.Id == resultsRequestDto.RunId);
+            var calcResultDetail = calcResultDetails.Find(x => x.Id == resultsRequestDto.RunId);
             if (calcResultDetail != null)
             {
                 results.RunId = calcResultDetail.Id;

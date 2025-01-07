@@ -13,6 +13,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Builder.Summary
 {
@@ -25,13 +26,13 @@ namespace EPR.Calculator.API.Builder.Summary
             this.context = context;
         }
 
-        public CalcResultSummary Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult)
+        public async Task<CalcResultSummary> Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult)
         {
             // Get and map materials from DB
-            var materialsFromDb = context.Material.ToList();
+            var materialsFromDb = await context.Material.ToListAsync();
             var materials = Mappers.MaterialMapper.Map(materialsFromDb);
-            var producerDetails = context.ProducerDetail.ToList();
-            var producerReportedMaterials = context.ProducerReportedMaterial.ToList();
+            var producerDetails = await context.ProducerDetail.ToListAsync();
+            var producerReportedMaterials = await context.ProducerReportedMaterial.ToListAsync();
             var runId = resultsRequestDto.RunId;
 
             var runProducerMaterialDetails = GetProducerRunMaterialDetails(
