@@ -44,7 +44,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("rpdStatus")]
-        public IActionResult UpdateRpdStatus([FromBody] UpdateRpdStatus request)
+        public async Task<IActionResult> UpdateRpdStatus([FromBody] UpdateRpdStatus request)
         {
             var runId = request.RunId;
             var calcRun = this.context.CalculatorRuns.SingleOrDefault(run => run.Id == runId);
@@ -139,8 +139,8 @@ namespace EPR.Calculator.API.Controllers
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                     calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
-                    this.context.SaveChanges();
-                    transaction.Commit();
+                    await this.context.SaveChangesAsync();
+                    await transaction.CommitAsync();
                     return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
                 }
                 catch (Exception)
