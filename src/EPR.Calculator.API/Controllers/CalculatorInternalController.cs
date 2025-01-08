@@ -10,6 +10,7 @@ using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -48,7 +49,7 @@ namespace EPR.Calculator.API.Controllers
         {
             var runId = request.RunId;
             var calcRun = this.context.CalculatorRuns.SingleOrDefault(run => run.Id == runId);
-            var runClassifications = this.context.CalculatorRunClassifications.ToList();
+            var runClassifications = await this.context.CalculatorRunClassifications.ToListAsync();
 
             var validationResult = this.rpdStatusDataValidator.IsValidRun(calcRun, runId, runClassifications);
             if (!validationResult.isValid)
@@ -59,7 +60,7 @@ namespace EPR.Calculator.API.Controllers
             if (!request.isSuccessful && calcRun != null)
             {
                 calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.ERROR.ToString()).Id;
-                this.context.SaveChanges();
+                await this.context.SaveChangesAsync();
                 return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
             }
 
@@ -71,11 +72,11 @@ namespace EPR.Calculator.API.Controllers
 
             string financialYear = calcRun?.Financial_Year ?? string.Empty;
 
-            using (var transaction = this.context.Database.BeginTransaction())
+            using (var transaction = await this.context.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    var stagingOrganisationData = this.wrapper.GetOrganisationData();
+                    var stagingOrganisationData = await this.wrapper.GetOrganisationDataAsync();
                     var calcOrganisationMaster = new CalculatorRunOrganisationDataMaster
                     {
                         CalendarYear = Util.GetCalendarYear(financialYear),
@@ -97,13 +98,13 @@ namespace EPR.Calculator.API.Controllers
                         };
 
 
-                        this.context.CalculatorRunOrganisationDataDetails.Add(calcOrganisationDataDetail);
+                        await this.context.CalculatorRunOrganisationDataDetails.AddAsync(calcOrganisationDataDetail);
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                         calcRun.CalculatorRunOrganisationDataMaster = calcOrganisationMaster;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
                     }
 
-                    var stagingPomData = this.wrapper.GetPomData();
+                    var stagingPomData = await this.wrapper.GetPomDataAsync();
                     var calcRunPomMaster = new CalculatorRunPomDataMaster
                     {
                         CalendarYear = Util.GetCalendarYear(financialYear),
@@ -129,7 +130,7 @@ namespace EPR.Calculator.API.Controllers
                             CalculatorRunPomDataMaster = calcRunPomMaster,
                         };
 
-                        this.context.CalculatorRunPomDataDetails.Add(calcRuntPomDataDetail);
+                        await this.context.CalculatorRunPomDataDetails.AddAsync(calcRuntPomDataDetail);
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                         calcRun.CalculatorRunPomDataMaster = calcRunPomMaster;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
@@ -145,7 +146,7 @@ namespace EPR.Calculator.API.Controllers
                 }
                 catch (Exception)
                 {
-                    transaction.Rollback();
+                    await transaction.RollbackAsync();
                     // return StatusCode(StatusCodes.Status500InternalServerError, ex);
                     throw;
                 }

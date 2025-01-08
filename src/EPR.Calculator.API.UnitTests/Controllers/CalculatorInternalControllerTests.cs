@@ -174,8 +174,8 @@ namespace EPR.Calculator.API.UnitTests
             var mock = new Mock<IOrgAndPomWrapper>();
             mock.Setup(x => x.AnyPomData()).Returns(true);
             mock.Setup(x => x.AnyOrganisationData()).Returns(true);
-            mock.Setup(x => x.GetOrganisationData()).Returns(organisationDataList);
-            mock.Setup(x => x.GetPomData()).Returns(pomDataList);
+            mock.Setup(x => x.GetOrganisationDataAsync()).ReturnsAsync(organisationDataList);
+            mock.Setup(x => x.GetPomDataAsync()).ReturnsAsync(pomDataList);
 
             if (dbContext != null)
             {

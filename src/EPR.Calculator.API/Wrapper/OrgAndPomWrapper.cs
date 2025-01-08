@@ -1,5 +1,6 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Wrapper
 {
@@ -18,14 +19,10 @@ namespace EPR.Calculator.API.Wrapper
             return this.context.PomData.Any();
         }
 
-        public IEnumerable<OrganisationData> GetOrganisationData()
-        {
-            return this.context.OrganisationData.ToList();
-        }
+        public async Task<IEnumerable<OrganisationData>> GetOrganisationDataAsync()
+            => await this.context.OrganisationData.ToListAsync();
 
-        public IEnumerable<PomData> GetPomData()
-        {
-            return this.context.PomData.ToList();
-        }
+        public async Task<IEnumerable<PomData>> GetPomDataAsync()
+            => await this.context.PomData.ToListAsync();
     }
 }
