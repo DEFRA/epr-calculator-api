@@ -48,7 +48,7 @@ namespace EPR.Calculator.API.Controllers
         public async Task<IActionResult> UpdateRpdStatus([FromBody] UpdateRpdStatus request)
         {
             var runId = request.RunId;
-            var calcRun = this.context.CalculatorRuns.SingleOrDefault(run => run.Id == runId);
+            var calcRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(run => run.Id == runId);
             var runClassifications = await this.context.CalculatorRunClassifications.ToListAsync();
 
             var validationResult = this.rpdStatusDataValidator.IsValidRun(calcRun, runId, runClassifications);
@@ -71,71 +71,76 @@ namespace EPR.Calculator.API.Controllers
             }
 
             string financialYear = calcRun?.Financial_Year ?? string.Empty;
+            var newCalculatorRunOrganisationDataDetails = new List<CalculatorRunOrganisationDataDetail>();
+            var newCalculatorRunPomDataDetails = new List<CalculatorRunPomDataDetail>();
+
+            var stagingOrganisationData = await this.wrapper.GetOrganisationDataAsync();
+            var calcOrganisationMaster = new CalculatorRunOrganisationDataMaster
+            {
+                CalendarYear = Util.GetCalendarYear(financialYear),
+                CreatedAt = DateTime.Now,
+                CreatedBy = request.UpdatedBy,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null,
+            };
+            foreach (var organisation in stagingOrganisationData)
+            {
+                var calcOrganisationDataDetail = new CalculatorRunOrganisationDataDetail
+                {
+                    OrganisationId = organisation.OrganisationId,
+                    SubsidaryId = organisation.SubsidaryId,
+                    LoadTimeStamp = organisation.LoadTimestamp,
+                    OrganisationName = organisation.OrganisationName,
+                    SubmissionPeriodDesc = organisation.SubmissionPeriodDesc,
+                    CalculatorRunOrganisationDataMaster = calcOrganisationMaster,
+                };
+
+
+                newCalculatorRunOrganisationDataDetails.Add(calcOrganisationDataDetail);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                calcRun.CalculatorRunOrganisationDataMaster = calcOrganisationMaster;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            }
+
+            var stagingPomData = await this.wrapper.GetPomDataAsync();
+            var calcRunPomMaster = new CalculatorRunPomDataMaster
+            {
+                CalendarYear = Util.GetCalendarYear(financialYear),
+                CreatedAt = DateTime.Now,
+                CreatedBy = request.UpdatedBy,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null,
+            };
+            foreach (var pomData in stagingPomData)
+            {
+                var calcRuntPomDataDetail = new CalculatorRunPomDataDetail
+                {
+                    OrganisationId = pomData.OrganisationId,
+                    SubsidaryId = pomData.SubsidaryId,
+                    LoadTimeStamp = pomData.LoadTimeStamp,
+                    SubmissionPeriod = pomData.SubmissionPeriod,
+                    PackagingActivity = pomData.PackagingActivity,
+                    PackagingType = pomData.PackagingType,
+                    PackagingClass = pomData.PackagingClass,
+                    PackagingMaterial = pomData.PackagingMaterial,
+                    PackagingMaterialWeight = pomData.PackagingMaterialWeight,
+                    SubmissionPeriodDesc = pomData.SubmissionPeriodDesc,
+                    CalculatorRunPomDataMaster = calcRunPomMaster,
+                };
+
+                await this.context.CalculatorRunPomDataDetails.AddAsync(calcRuntPomDataDetail);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                calcRun.CalculatorRunPomDataMaster = calcRunPomMaster;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            }
+
 
             using (var transaction = await this.context.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    var stagingOrganisationData = await this.wrapper.GetOrganisationDataAsync();
-                    var calcOrganisationMaster = new CalculatorRunOrganisationDataMaster
-                    {
-                        CalendarYear = Util.GetCalendarYear(financialYear),
-                        CreatedAt = DateTime.Now,
-                        CreatedBy = request.UpdatedBy,
-                        EffectiveFrom = DateTime.Now,
-                        EffectiveTo = null,
-                    };
-                    foreach (var organisation in stagingOrganisationData)
-                    {
-                        var calcOrganisationDataDetail = new CalculatorRunOrganisationDataDetail
-                        {
-                            OrganisationId = organisation.OrganisationId,
-                            SubsidaryId = organisation.SubsidaryId,
-                            LoadTimeStamp = organisation.LoadTimestamp,
-                            OrganisationName = organisation.OrganisationName,
-                            SubmissionPeriodDesc = organisation.SubmissionPeriodDesc,
-                            CalculatorRunOrganisationDataMaster = calcOrganisationMaster,
-                        };
-
-
-                        await this.context.CalculatorRunOrganisationDataDetails.AddAsync(calcOrganisationDataDetail);
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                        calcRun.CalculatorRunOrganisationDataMaster = calcOrganisationMaster;
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-                    }
-
-                    var stagingPomData = await this.wrapper.GetPomDataAsync();
-                    var calcRunPomMaster = new CalculatorRunPomDataMaster
-                    {
-                        CalendarYear = Util.GetCalendarYear(financialYear),
-                        CreatedAt = DateTime.Now,
-                        CreatedBy = request.UpdatedBy,
-                        EffectiveFrom = DateTime.Now,
-                        EffectiveTo = null,
-                    };
-                    foreach (var pomData in stagingPomData)
-                    {
-                        var calcRuntPomDataDetail = new CalculatorRunPomDataDetail
-                        {
-                            OrganisationId = pomData.OrganisationId,
-                            SubsidaryId = pomData.SubsidaryId,
-                            LoadTimeStamp = pomData.LoadTimeStamp,
-                            SubmissionPeriod = pomData.SubmissionPeriod,
-                            PackagingActivity = pomData.PackagingActivity,
-                            PackagingType = pomData.PackagingType,
-                            PackagingClass = pomData.PackagingClass,
-                            PackagingMaterial = pomData.PackagingMaterial,
-                            PackagingMaterialWeight = pomData.PackagingMaterialWeight,
-                            SubmissionPeriodDesc = pomData.SubmissionPeriodDesc,
-                            CalculatorRunPomDataMaster = calcRunPomMaster,
-                        };
-
-                        await this.context.CalculatorRunPomDataDetails.AddAsync(calcRuntPomDataDetail);
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                        calcRun.CalculatorRunPomDataMaster = calcRunPomMaster;
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-                    }
-
+                    await this.context.CalculatorRunPomDataDetails.AddRangeAsync(newCalculatorRunPomDataDetails);
+                    await this.context.CalculatorRunOrganisationDataDetails.AddRangeAsync(newCalculatorRunOrganisationDataDetails);
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                     calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
@@ -144,11 +149,10 @@ namespace EPR.Calculator.API.Controllers
                     await transaction.CommitAsync();
                     return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-                    // return StatusCode(StatusCodes.Status500InternalServerError, ex);
-                    throw;
+                    return StatusCode(StatusCodes.Status500InternalServerError, ex);
                 }
             }
         }
