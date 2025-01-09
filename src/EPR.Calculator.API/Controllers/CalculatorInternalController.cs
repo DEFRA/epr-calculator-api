@@ -97,9 +97,7 @@ namespace EPR.Calculator.API.Controllers
 
 
                 newCalculatorRunOrganisationDataDetails.Add(calcOrganisationDataDetail);
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                calcRun.CalculatorRunOrganisationDataMaster = calcOrganisationMaster;
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+                calcRun!.CalculatorRunOrganisationDataMaster = calcOrganisationMaster;
             }
 
             var stagingPomData = await this.wrapper.GetPomDataAsync();
@@ -129,9 +127,7 @@ namespace EPR.Calculator.API.Controllers
                 };
 
                 await this.context.CalculatorRunPomDataDetails.AddAsync(calcRuntPomDataDetail);
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                calcRun.CalculatorRunPomDataMaster = calcRunPomMaster;
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+                calcRun!.CalculatorRunPomDataMaster = calcRunPomMaster;
             }
 
 
@@ -142,9 +138,7 @@ namespace EPR.Calculator.API.Controllers
                     await this.context.CalculatorRunPomDataDetails.AddRangeAsync(newCalculatorRunPomDataDetails);
                     await this.context.CalculatorRunOrganisationDataDetails.AddRangeAsync(newCalculatorRunOrganisationDataDetails);
 
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                    calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+                    calcRun!.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
                     await this.context.SaveChangesAsync();
                     await transaction.CommitAsync();
                     return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
