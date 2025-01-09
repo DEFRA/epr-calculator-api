@@ -93,7 +93,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.HHTonnageVsAllProducer
             Assert.AreEqual(50, result);
         }
 
-        private IEnumerable<CalcResultsProducerAndReportMaterialDetail> GenerateAllResults(
+        private List<CalcResultsProducerAndReportMaterialDetail> GenerateAllResults(
             int testProducerId,
             int testCalculatorRunId,
             string testSubsidaryId)
