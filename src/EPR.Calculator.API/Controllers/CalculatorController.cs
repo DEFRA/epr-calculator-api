@@ -42,7 +42,7 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            bool isCalcAlreadyRunning = this.context.CalculatorRuns.Any(run => run.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
+            bool isCalcAlreadyRunning = await context.CalculatorRuns.AnyAsync(run => run.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
             if (isCalcAlreadyRunning)
             {
                 return new ObjectResult(new { Message = ErrorMessages.CalculationAlreadyRunning })
@@ -51,8 +51,7 @@ namespace EPR.Calculator.API.Controllers
                 };
             }
 
-#pragma warning disable S6966 // Awaitable method should be used
-            using (var transaction = this.context.Database.BeginTransaction())
+            using (var transaction = await this.context.Database.BeginTransactionAsync())
             {
                 try
                 {
@@ -100,11 +99,11 @@ namespace EPR.Calculator.API.Controllers
 
                     // Get active default parameter settings master id
                     var activeDefaultParameterSettingsMasterId = this.context.DefaultParameterSettings
-                        .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == request.FinancialYear)?.Id;
+                        .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.ParameterYear == request.FinancialYear)?.Id;
 
                     // Get active lapcap data master id
                     var activeLapcapDataMasterId = this.context.LapcapDataMaster
-                        .SingleOrDefault(data => data.ProjectionYear == request.FinancialYear && data.EffectiveTo == null)?.Id;
+                        .SingleOrDefaultAsync(data => data.ProjectionYear == request.FinancialYear && data.EffectiveTo == null)?.Id;
 
                     // Setup calculator run details
                     var calculatorRun = new CalculatorRun
@@ -120,7 +119,7 @@ namespace EPR.Calculator.API.Controllers
 
                     // Save calculator run details to the database
                     this.context.CalculatorRuns.Add(calculatorRun);
-                    this.context.SaveChanges();
+                    await this.context.SaveChangesAsync();
 
                     // Setup message
                     var calculatorRunMessage = new CalculatorRunMessage
@@ -130,24 +129,18 @@ namespace EPR.Calculator.API.Controllers
                         CreatedBy = User?.Identity?.Name ?? request.CreatedBy
                     };
 
-                    // Send message to service bus
-                    var client = serviceBusClientFactory.CreateClient("calculator");
-                    ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
-                    var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
-                    ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
-                    await serviceBusSender.SendMessageAsync(serviceBusMessage);
+                    await SendMessage(serviceBusQueueName, calculatorRunMessage);
 
                     // All good, commit transaction
-                    transaction.Commit();
+                    await transaction.CommitAsync();
                 }
                 catch (Exception exception)
                 {
                     // Error, rollback transaction
-                    transaction.Rollback();
+                    await transaction.RollbackAsync();
                     // Return error status code: Internal Server Error
                     return StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
-#pragma warning restore S6966 // Awaitable method should be used
             }
             // Return accepted status code: Accepted
             return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
@@ -368,6 +361,16 @@ namespace EPR.Calculator.API.Controllers
 
             // All good, return empty string
             return string.Empty;
+        }
+
+        private async Task SendMessage(string serviceBusQueueName, CalculatorRunMessage calculatorRunMessage)
+        {
+            // Send message to service bus
+            var client = serviceBusClientFactory.CreateClient(CommonConstants.ServiceBusClientName);
+            ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
+            var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
+            ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
+            await serviceBusSender.SendMessageAsync(serviceBusMessage);
         }
     }
 }
