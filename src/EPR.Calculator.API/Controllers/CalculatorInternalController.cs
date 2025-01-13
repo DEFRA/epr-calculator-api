@@ -125,8 +125,7 @@ namespace EPR.Calculator.API.Controllers
                     SubmissionPeriodDesc = pomData.SubmissionPeriodDesc,
                     CalculatorRunPomDataMaster = calcRunPomMaster,
                 };
-
-                await this.context.CalculatorRunPomDataDetails.AddAsync(calcRuntPomDataDetail);
+                newCalculatorRunPomDataDetails.Add(calcRuntPomDataDetail);
                 calcRun!.CalculatorRunPomDataMaster = calcRunPomMaster;
             }
 
