@@ -170,7 +170,7 @@ namespace EPR.Calculator.API.Controllers
 
             // Check for null values for all the required IDs
             var errorMessages = CheckForNullIds(calculatorRun);
-            if (errorMessages.Any())
+            if (errorMessages.Count > 0)
             {
                 return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Join(", ", errorMessages));
             }
