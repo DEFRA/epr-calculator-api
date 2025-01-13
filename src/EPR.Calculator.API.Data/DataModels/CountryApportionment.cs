@@ -6,7 +6,6 @@ using System.Runtime.InteropServices.Marshalling;
 
 namespace EPR.Calculator.API.Data.DataModels
 {
-    [ExcludeFromCodeCoverage]
     [Table("country_apportionment")]
     public class CountryApportionment
     {
