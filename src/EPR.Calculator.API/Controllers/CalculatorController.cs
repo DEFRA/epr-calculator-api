@@ -82,13 +82,13 @@ namespace EPR.Calculator.API.Controllers
                     throw new ConfigurationErrorsException("Configuration item not found: ServiceBus__QueueName");
                 }
 
-                // Get active default parameter settings master id
-                var activeDefaultParameterSettingsMasterId = this.context.DefaultParameterSettings
-                    .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.ParameterYear == request.FinancialYear)?.Id;
+                // Get active default parameter settings master
+                var activeDefaultParameterSettingsMaster = await this.context.DefaultParameterSettings
+                    .SingleAsync(x => x.EffectiveTo == null && x.ParameterYear == request.FinancialYear);
 
-                // Get active lapcap data master id
-                var activeLapcapDataMasterId = this.context.LapcapDataMaster
-                    .SingleOrDefaultAsync(data => data.ProjectionYear == request.FinancialYear && data.EffectiveTo == null)?.Id;
+                // Get active lapcap data master
+                var activeLapcapDataMaster = await this.context.LapcapDataMaster
+                    .SingleAsync(data => data.ProjectionYear == request.FinancialYear && data.EffectiveTo == null);
 
                 // Setup calculator run details
                 var calculatorRun = new CalculatorRun
@@ -98,8 +98,8 @@ namespace EPR.Calculator.API.Controllers
                     CreatedBy = request.CreatedBy,
                     CreatedAt = DateTime.Now,
                     CalculatorRunClassificationId = (int)RunClassification.RUNNING,
-                    DefaultParameterSettingMasterId = activeDefaultParameterSettingsMasterId,
-                    LapcapDataMasterId = activeLapcapDataMasterId
+                    DefaultParameterSettingMasterId = activeDefaultParameterSettingsMaster.Id,
+                    LapcapDataMasterId = activeLapcapDataMaster.Id
                 };
 
                 using (var transaction = await this.context.Database.BeginTransactionAsync())
