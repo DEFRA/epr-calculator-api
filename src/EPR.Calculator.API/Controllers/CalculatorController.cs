@@ -107,7 +107,7 @@ namespace EPR.Calculator.API.Controllers
                     try
                     {
                         // Save calculator run details to the database
-                        this.context.CalculatorRuns.Add(calculatorRun);
+                        await this.context.CalculatorRuns.AddAsync(calculatorRun);
                         await this.context.SaveChangesAsync();
 
                         // Setup message
