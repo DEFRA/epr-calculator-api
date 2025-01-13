@@ -29,7 +29,7 @@ namespace EPR.Calculator.API.Validators
 
             return new ValidationResult
             {
-                IsValid = !errorMessages.Any(),
+                IsValid = errorMessages.Count == 0,
                 ErrorMessages = errorMessages
             };
         }
