@@ -92,12 +92,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
             this.transposePomAndOrgDataService.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(true);
-            var requestDto = new CalcResultsRequestDto() { RunId = 1 };
+            var requestDto = new CalcResultsRequestDto() { RunId = 4 };
             var calcResult = new CalcResult
             {
                 CalcResultDetail = new CalcResultDetail
                 {
-                    RunId = 1,
+                    RunId = 4,
                     RunDate = DateTime.Now,
                     RunName = "RunName"
                 },
@@ -152,4 +152,3 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
     }
 }
-

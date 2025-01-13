@@ -206,7 +206,7 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
-            var requestDto = new CalcResultsRequestDto() { RunId = 1 };
+            var requestDto = new CalcResultsRequestDto() { RunId = 4 };
             var calcResult = new CalcResult
             {
                 CalcResultLapcapData = new CalcResultLapcapData
@@ -239,7 +239,7 @@ namespace EPR.Calculator.API.UnitTests
             {
                 CalcResultDetail = new CalcResultDetail
                 {
-                    RunId = 1,
+                    RunId = 4,
                     RunDate = DateTime.Now,
                     RunName = "SomeRun"
                 },
@@ -285,7 +285,7 @@ namespace EPR.Calculator.API.UnitTests
             var task = controller.PrepareCalcResults(requestDto);
             task.Wait();
             var result = task.Result as ObjectResult;
-            var calculatorRun = dbContext.CalculatorRuns.SingleOrDefault(run => run.Id == 1);
+            var calculatorRun = dbContext.CalculatorRuns.SingleOrDefault(run => run.Id == 4);
             Assert.IsNotNull(result);
             Assert.AreEqual((int)RunClassification.UNCLASSIFIED, calculatorRun?.CalculatorRunClassificationId);
             Assert.AreEqual(201, result.StatusCode);

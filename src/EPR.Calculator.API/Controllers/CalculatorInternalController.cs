@@ -165,7 +165,14 @@ namespace EPR.Calculator.API.Controllers
             if (calculatorRun == null)
             {
                 return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
-                    { StatusCode = StatusCodes.Status404NotFound };
+                { StatusCode = StatusCodes.Status404NotFound };
+            }
+
+            // Check for null values for all the required IDs
+            var errorMessages = CheckForNullIds(calculatorRun);
+            if (errorMessages.Any())
+            {
+                return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Join(", ", errorMessages));
             }
 
             try
@@ -202,6 +209,22 @@ namespace EPR.Calculator.API.Controllers
             this.context.CalculatorRuns.Update(calculatorRun);
             await this.context.SaveChangesAsync();
             return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
+        public static List<string> CheckForNullIds(CalculatorRun calculatorRun)
+        {
+            var requiredMasterIds = new Dictionary<string, int?>
+            {
+                { "CalculatorRunOrganisationDataMasterId", calculatorRun.CalculatorRunOrganisationDataMasterId },
+                { "DefaultParameterSettingMasterId", calculatorRun.DefaultParameterSettingMasterId },
+                { "CalculatorRunPomDataMasterId", calculatorRun.CalculatorRunPomDataMasterId },
+                { "LapcapDataMasterId", calculatorRun.LapcapDataMasterId }
+            };
+
+            return requiredMasterIds
+                .Where(id => id.Value == null)
+                .Select(id => $"{id.Key} is null")
+                .ToList();
         }
     }
 }

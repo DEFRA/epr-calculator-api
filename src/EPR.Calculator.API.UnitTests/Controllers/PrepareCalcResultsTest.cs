@@ -9,6 +9,7 @@ using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
@@ -91,12 +92,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
-            var requestDto = new CalcResultsRequestDto() { RunId = 1 };
+            var requestDto = new CalcResultsRequestDto() { RunId = 4 };
             var calcResult = new CalcResult
             {
                 CalcResultDetail = new CalcResultDetail
                 {
-                    RunId = 1,
+                    RunId = 4,
                     RunDate = DateTime.Now,
                     RunName = "RunName"
                 },
@@ -149,6 +150,50 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(result);
 
             Assert.AreEqual(detail, result.CalcResultDetail);
+        }
+
+        [TestMethod]
+        public void CheckForNullIds_ShouldReturnErrorMessages_WhenIdsAreNull()
+        {
+            // Arrange
+            var calculatorRun = new CalculatorRun
+            {
+                CalculatorRunOrganisationDataMasterId = null,
+                DefaultParameterSettingMasterId = null,
+                CalculatorRunPomDataMasterId = 1,
+                LapcapDataMasterId = null,
+                Name = "soe",
+                Financial_Year = "2024-25",
+            };
+            // Act
+            List<string> result = CalculatorInternalController.CheckForNullIds(calculatorRun);
+            // Assert
+            var expectedErrors = new List<string>
+            {
+                "CalculatorRunOrganisationDataMasterId is null",
+                "DefaultParameterSettingMasterId is null",
+                "LapcapDataMasterId is null"
+            };
+            CollectionAssert.AreEqual(expectedErrors, result);
+        }
+
+        [TestMethod]
+        public void CheckForNullIds_ShouldReturnEmptyList_WhenNoIdsAreNull()
+        {
+            // Arrange
+            var calculatorRun = new CalculatorRun
+            {
+                CalculatorRunOrganisationDataMasterId = 1,
+                DefaultParameterSettingMasterId = 1,
+                CalculatorRunPomDataMasterId = 1,
+                LapcapDataMasterId = 1,
+                Name = "soe",
+                Financial_Year = "2024-25",
+            };
+            // Act
+            var result = CalculatorInternalController.CheckForNullIds(calculatorRun);
+            // Assert
+            Assert.AreEqual(0, result.Count);
         }
     }
 }

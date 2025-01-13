@@ -730,6 +730,18 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             list.Add(new CalculatorRun
             {
                 CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+                Name = "Test 422 error",
+                Financial_Year = "2024-25",
+                CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
+                CreatedBy = "Test User",
+                CalculatorRunOrganisationDataMasterId = 2,
+                CalculatorRunPomDataMasterId = 2,
+                LapcapDataMasterId = 2,
+                DefaultParameterSettingMasterId = 2,
+            });
+            list.Add(new CalculatorRun
+            {
+                CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
                 Name = "Test Calculated Result",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
