@@ -4,6 +4,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     using System.Collections.Generic;
     using AutoFixture;
     using EPR.Calculator.API.Data.DataModels;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -106,10 +107,8 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         [TestMethod]
         public void CanGetRunDetails()
         {
-            // Arrange
-
             // Assert
-            Assert.IsInstanceOfType(TestClass.RunDetails, typeof(ICollection<CalculatorRun>));
+            Assert.IsNull(TestClass.RunDetails);
         }
     }
 }

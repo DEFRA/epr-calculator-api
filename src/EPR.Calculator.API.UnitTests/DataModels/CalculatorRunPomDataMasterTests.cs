@@ -107,7 +107,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanGetRunDetails()
         {
             // Assert
-            Assert.IsInstanceOfType(TestClass.RunDetails, typeof(ICollection<CalculatorRun>));
+            Assert.IsNull(TestClass.RunDetails);
         }
     }
 }

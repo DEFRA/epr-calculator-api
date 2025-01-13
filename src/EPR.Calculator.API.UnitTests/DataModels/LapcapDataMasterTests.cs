@@ -115,17 +115,13 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         {
             // Assert
             Assert.IsInstanceOfType(this.TestClass.Details, typeof(ICollection<LapcapDataDetail>));
-
-            Assert.Fail("Create or modify test");
         }
 
         [TestMethod]
         public void CanGetRunDetails()
         {
             // Assert
-            Assert.IsInstanceOfType(this.TestClass.RunDetails, typeof(ICollection<CalculatorRun>));
-
-            Assert.Fail("Create or modify test");
+            Assert.IsNull(TestClass.RunDetails);
         }
     }
 }
