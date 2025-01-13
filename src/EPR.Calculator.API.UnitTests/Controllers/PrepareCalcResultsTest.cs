@@ -177,11 +177,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Assert
             var expectedErrors = new List<string>
-    {
-        "CalculatorRunOrganisationDataMasterId is null",
-        "DefaultParameterSettingMasterId is null",
-        "LapcapDataMasterId is null"
-    };
+            {
+                "CalculatorRunOrganisationDataMasterId is null",
+                "DefaultParameterSettingMasterId is null",
+                "LapcapDataMasterId is null"
+            };
             CollectionAssert.AreEqual(expectedErrors, result.ErrorMessages.ToList());
             Assert.IsFalse(result.IsValid);
         }
