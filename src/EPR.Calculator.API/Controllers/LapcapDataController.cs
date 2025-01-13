@@ -21,7 +21,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("lapcapData")]
-        public IActionResult Create([FromBody] CreateLapcapDataDto request)
+        public async Task<IActionResult> Create([FromBody] CreateLapcapDataDto request)
         {
             if (!ModelState.IsValid)
             {
@@ -33,7 +33,7 @@ namespace EPR.Calculator.API.Controllers
                 return BadRequest(validationResult.Errors);
             }
             var templateMaster = context.LapcapDataTemplateMaster.ToList();
-            using (var transaction = context.Database.BeginTransaction())
+            using (var transaction = await context.Database.BeginTransactionAsync())
             {
                 try
                 {
@@ -63,12 +63,12 @@ namespace EPR.Calculator.API.Controllers
                             LapcapDataMaster = lapcapDataMaster
                         });
                     }
-                    this.context.SaveChanges();
-                    transaction.Commit();
+                    await this.context.SaveChangesAsync();
+                    await transaction.CommitAsync();
                 }
                 catch (Exception exception)
                 {
-                    transaction.Rollback();
+                    await transaction.RollbackAsync();
                     return StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
             }
