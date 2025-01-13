@@ -12,6 +12,7 @@ using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Amqp.Transaction;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -21,6 +22,12 @@ namespace EPR.Calculator.API.UnitTests
     public class CalculatorInternalControllerTests : BaseControllerTest
     {
         private Fixture Fixture { get; init; } = new Fixture();
+        private readonly Mock<CalculatorRunValidator> mockValidator;
+
+        public CalculatorInternalControllerTests()
+        {
+            mockValidator = new Mock<CalculatorRunValidator>();
+        }
 
         [TestMethod]
         public void UpdateRpdStatus_With_Missing_RunId()
@@ -177,6 +184,8 @@ namespace EPR.Calculator.API.UnitTests
             mock.Setup(x => x.GetOrganisationData()).Returns(organisationDataList);
             mock.Setup(x => x.GetPomData()).Returns(pomDataList);
 
+
+
             if (dbContext != null)
             {
                 var controller = new CalculatorInternalController(
@@ -186,7 +195,8 @@ namespace EPR.Calculator.API.UnitTests
                     new Mock<ICalcResultBuilder>().Object,
                     new Mock<ICalcResultsExporter<CalcResult>>().Object,
                     new Mock<ITransposePomAndOrgDataService>().Object,
-                    new Mock<IStorageService>().Object
+                    new Mock<IStorageService>().Object,
+                    new Mock<CalculatorRunValidator>().Object
                 );
 
                 var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
@@ -268,6 +278,8 @@ namespace EPR.Calculator.API.UnitTests
 
             var mockTranspose = new Mock<ITransposePomAndOrgDataService>();
             var mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
+            var mockValidator = new Mock<CalculatorRunValidator>();
+
             var controller = new CalculatorInternalController(
                dbContext,
                new RpdStatusDataValidator(wrapper),
@@ -275,7 +287,8 @@ namespace EPR.Calculator.API.UnitTests
                mockBuilder.Object,
                mockExporter.Object,
                mockTranspose.Object,
-               mockStorageService.Object
+               mockStorageService.Object,
+               mockValidator.Object
             );
 
             mockTranspose.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(true);
@@ -305,7 +318,9 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
-                new Mock<IStorageService>().Object
+                new Mock<IStorageService>().Object,
+                new Mock<CalculatorRunValidator>().Object
+
             );
 
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).ReturnsAsync(calcResult);

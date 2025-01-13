@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Builder;
+﻿using Azure.Core;
+using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -10,6 +11,7 @@ using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -24,6 +26,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly ICalcResultsExporter<CalcResult> exporter;
         private readonly ITransposePomAndOrgDataService transposePomAndOrgDataService;
         private readonly IStorageService storageService;
+        private readonly CalculatorRunValidator validatior;
 
         public CalculatorInternalController(ApplicationDBContext context,
                                             IRpdStatusDataValidator rpdStatusDataValidator,
@@ -31,7 +34,7 @@ namespace EPR.Calculator.API.Controllers
                                             ICalcResultBuilder builder,
                                             ICalcResultsExporter<CalcResult> exporter,
                                             ITransposePomAndOrgDataService transposePomAndOrgDataService,
-                                            IStorageService storageService)
+                                            IStorageService storageService,CalculatorRunValidator validationRules)
         {
             this.context = context;
             this.rpdStatusDataValidator = rpdStatusDataValidator;
@@ -40,6 +43,7 @@ namespace EPR.Calculator.API.Controllers
             this.exporter = exporter;
             this.transposePomAndOrgDataService = transposePomAndOrgDataService;
             this.storageService = storageService;
+            this.validatior = validationRules;
         }
 
         [HttpPost]
@@ -168,11 +172,12 @@ namespace EPR.Calculator.API.Controllers
                 { StatusCode = StatusCodes.Status404NotFound };
             }
 
-            // Check for null values for all the required IDs
-            var errorMessages = CheckForNullIds(calculatorRun);
-            if (errorMessages.Count > 0)
+            // Validate the result for all the required IDs
+
+            var validationResult = validatior.ValidateCalculatorRunIds(calculatorRun);
+            if (!validationResult.IsValid)
             {
-                return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Join(", ", errorMessages));
+                return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Join(", ", validationResult.ErrorMessages));
             }
 
             try
@@ -209,22 +214,6 @@ namespace EPR.Calculator.API.Controllers
             this.context.CalculatorRuns.Update(calculatorRun);
             await this.context.SaveChangesAsync();
             return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-
-        public static List<string> CheckForNullIds(CalculatorRun calculatorRun)
-        {
-            var requiredMasterIds = new Dictionary<string, int?>
-            {
-                { "CalculatorRunOrganisationDataMasterId", calculatorRun.CalculatorRunOrganisationDataMasterId },
-                { "DefaultParameterSettingMasterId", calculatorRun.DefaultParameterSettingMasterId },
-                { "CalculatorRunPomDataMasterId", calculatorRun.CalculatorRunPomDataMasterId },
-                { "LapcapDataMasterId", calculatorRun.LapcapDataMasterId }
-            };
-
-            return requiredMasterIds
-                .Where(id => id.Value == null)
-                .Select(id => $"{id.Key} is null")
-                .ToList();
         }
     }
 }

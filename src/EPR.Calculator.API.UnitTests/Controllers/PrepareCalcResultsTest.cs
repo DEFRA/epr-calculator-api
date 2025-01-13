@@ -36,6 +36,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
         private readonly CalculatorInternalController controller;
         private CalcResultDetailBuilder detailBuilder;
+        private readonly Mock<CalculatorRunValidator> mockValidator;
 
         private readonly Mock<ApplicationDBContext> mockContext;
         private readonly CalcResultBuilder calcResultBuilder;
@@ -56,6 +57,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             mockStorageservice.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
 
+            mockValidator = new Mock<CalculatorRunValidator>();
+
             controller = new CalculatorInternalController(
                dbContext,
                new RpdStatusDataValidator(wrapper),
@@ -63,7 +66,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                mockCalcResultBuilder.Object,
                mockExporter.Object,
                transposePomAndOrgDataService.Object,
-               mockStorageservice.Object
+               mockStorageservice.Object,
+               mockValidator.Object
             );
 
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();
@@ -165,16 +169,21 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Name = "soe",
                 Financial_Year = "2024-25",
             };
+
+            var validator = new CalculatorRunValidator();
+
             // Act
-            List<string> result = CalculatorInternalController.CheckForNullIds(calculatorRun);
+            ValidationResult result = validator.ValidateCalculatorRunIds(calculatorRun);
+
             // Assert
             var expectedErrors = new List<string>
-            {
-                "CalculatorRunOrganisationDataMasterId is null",
-                "DefaultParameterSettingMasterId is null",
-                "LapcapDataMasterId is null"
-            };
-            CollectionAssert.AreEqual(expectedErrors, result);
+    {
+        "CalculatorRunOrganisationDataMasterId is null",
+        "DefaultParameterSettingMasterId is null",
+        "LapcapDataMasterId is null"
+    };
+            CollectionAssert.AreEqual(expectedErrors, result.ErrorMessages.ToList());
+            Assert.IsFalse(result.IsValid);
         }
 
         [TestMethod]
@@ -190,11 +199,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Name = "soe",
                 Financial_Year = "2024-25",
             };
+
+            var validator = new CalculatorRunValidator();
+
             // Act
-            var result = CalculatorInternalController.CheckForNullIds(calculatorRun);
+            ValidationResult result = validator.ValidateCalculatorRunIds(calculatorRun);
+
             // Assert
-            Assert.AreEqual(0, result.Count);
+            Assert.AreEqual(0, result.ErrorMessages.Count());
+            Assert.IsTrue(result.IsValid);
         }
     }
 }
-

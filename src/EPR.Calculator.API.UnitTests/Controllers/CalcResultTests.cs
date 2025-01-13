@@ -36,6 +36,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<ITransposePomAndOrgDataService> transposePomAndOrgDataService;
         private CalculatorInternalController controller;
         private CalcResultDetailBuilder detailBuilder;
+        private readonly Mock<CalculatorRunValidator> mockValidator;
 
         private readonly Mock<ApplicationDBContext> mockContext;
         private readonly CalcResultBuilder calcResultBuilder;
@@ -54,6 +55,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             mockStorageservice = new Mock<IStorageService>();
             mockStorageservice.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
+            mockValidator = new Mock<CalculatorRunValidator>();
 
             controller = new CalculatorInternalController(
                dbContext,
@@ -62,7 +64,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                mockCalcResultBuilder.Object,
                mockExporter.Object,
                transposePomAndOrgDataService.Object,
-               mockStorageservice.Object
+               mockStorageservice.Object,
+               mockValidator.Object
             );
 
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();

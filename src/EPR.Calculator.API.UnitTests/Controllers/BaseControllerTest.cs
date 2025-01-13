@@ -58,7 +58,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
-                new Mock<IStorageService>().Object
+                new Mock<IStorageService>().Object,
+                new Mock<CalculatorRunValidator>().Object
             );
 
             var mockStorageService = new Mock<IStorageService>();
