@@ -9,13 +9,12 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoA
   [TestClass]
   public class CalcResultSummaryCommsCostTwoATests
   {
-    private List<ProducerDetail> _producers;
-    private MaterialDetail _material;
-    private CalcResult _calcResult;
+    private readonly List<ProducerDetail> _producers;
+    private readonly MaterialDetail _material;
+    private readonly CalcResult _calcResult;
     private Fixture Fixture { get; init; } = new Fixture();
 
-    [TestInitialize]
-    public void Setup()
+    public CalcResultSummaryCommsCostTwoATests()
     {
       _material = GetMaterial();
       _producers = GetProducers();
@@ -31,14 +30,6 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoA
         CalcResultCommsCostReportDetail = TestDataHelper.GetCalcResultCommsCostReportDetail(),
         CalcResultLateReportingTonnageData = GetCalcResultLateReportingTonnage(),
       };
-    }
-
-    [TestCleanup]
-    public void TestCleanup()
-    {
-      _producers = null;
-      _material = null;
-      _calcResult = null;
     }
 
     [TestMethod]
@@ -280,7 +271,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoA
       return this.Fixture.Create<CalcResultLateReportingTonnage>();
     }
 
-    private List<ProducerDetail> GetProducers()
+    private static List<ProducerDetail> GetProducers()
     {
       var producers = TestDataHelper.GetProducers();
 
@@ -302,7 +293,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoA
       return producers;
     }
 
-    private MaterialDetail GetMaterial()
+    private static MaterialDetail GetMaterial()
     {
       var material = new MaterialDetail
       {
