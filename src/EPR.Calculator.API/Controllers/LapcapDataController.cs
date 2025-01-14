@@ -49,14 +49,14 @@ namespace EPR.Calculator.API.Controllers
                         LapcapFileName = request.LapcapFileName,
                         ProjectionYear = request.ParameterYear
                     };
-                    this.context.LapcapDataMaster.Add(lapcapDataMaster);
+                    await this.context.LapcapDataMaster.AddAsync(lapcapDataMaster);
 
                     foreach (var templateValue in request.LapcapDataTemplateValues)
                     {
                         var uniqueReference = templateMaster.Single(x =>
                             x.Material == templateValue.Material && x.Country == templateValue.CountryName).UniqueReference;
 
-                        this.context.LapcapDataDetail.Add(new LapcapDataDetail
+                        await this.context.LapcapDataDetail.AddAsync(new LapcapDataDetail
                         {
                             TotalCost = decimal.Parse(templateValue.TotalCost.Replace("£", string.Empty)),
                             UniqueReference = uniqueReference,
