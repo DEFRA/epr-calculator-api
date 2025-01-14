@@ -82,13 +82,13 @@ namespace EPR.Calculator.API.Controllers
         [Route("defaultParameterSetting/{parameterYear}")]
         public async Task<IActionResult> Get([FromRoute] string parameterYear)
         {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+            
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
-                }
-
                 var currentDefaultSetting = await _context.DefaultParameterSettings
                     .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.ParameterYear == parameterYear);
 
