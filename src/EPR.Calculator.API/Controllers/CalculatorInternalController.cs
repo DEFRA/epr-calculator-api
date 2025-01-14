@@ -9,6 +9,7 @@ using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -71,71 +72,14 @@ namespace EPR.Calculator.API.Controllers
             }
 
             string financialYear = calcRun?.Financial_Year ?? string.Empty;
-            var newCalculatorRunOrganisationDataDetails = new List<CalculatorRunOrganisationDataDetail>();
-            var newCalculatorRunPomDataDetails = new List<CalculatorRunPomDataDetail>();
-
-            var stagingOrganisationData = await this.wrapper.GetOrganisationDataAsync();
-            var calcOrganisationMaster = new CalculatorRunOrganisationDataMaster
-            {
-                CalendarYear = Util.GetCalendarYear(financialYear),
-                CreatedAt = DateTime.Now,
-                CreatedBy = request.UpdatedBy,
-                EffectiveFrom = DateTime.Now,
-                EffectiveTo = null,
-            };
-            foreach (var organisation in stagingOrganisationData)
-            {
-                var calcOrganisationDataDetail = new CalculatorRunOrganisationDataDetail
-                {
-                    OrganisationId = organisation.OrganisationId,
-                    SubsidaryId = organisation.SubsidaryId,
-                    LoadTimeStamp = organisation.LoadTimestamp,
-                    OrganisationName = organisation.OrganisationName,
-                    SubmissionPeriodDesc = organisation.SubmissionPeriodDesc,
-                    CalculatorRunOrganisationDataMaster = calcOrganisationMaster,
-                };
-
-
-                newCalculatorRunOrganisationDataDetails.Add(calcOrganisationDataDetail);
-                calcRun!.CalculatorRunOrganisationDataMaster = calcOrganisationMaster;
-            }
-
-            var stagingPomData = await this.wrapper.GetPomDataAsync();
-            var calcRunPomMaster = new CalculatorRunPomDataMaster
-            {
-                CalendarYear = Util.GetCalendarYear(financialYear),
-                CreatedAt = DateTime.Now,
-                CreatedBy = request.UpdatedBy,
-                EffectiveFrom = DateTime.Now,
-                EffectiveTo = null,
-            };
-            foreach (var pomData in stagingPomData)
-            {
-                var calcRuntPomDataDetail = new CalculatorRunPomDataDetail
-                {
-                    OrganisationId = pomData.OrganisationId,
-                    SubsidaryId = pomData.SubsidaryId,
-                    LoadTimeStamp = pomData.LoadTimeStamp,
-                    SubmissionPeriod = pomData.SubmissionPeriod,
-                    PackagingActivity = pomData.PackagingActivity,
-                    PackagingType = pomData.PackagingType,
-                    PackagingClass = pomData.PackagingClass,
-                    PackagingMaterial = pomData.PackagingMaterial,
-                    PackagingMaterialWeight = pomData.PackagingMaterialWeight,
-                    SubmissionPeriodDesc = pomData.SubmissionPeriodDesc,
-                    CalculatorRunPomDataMaster = calcRunPomMaster,
-                };
-                newCalculatorRunPomDataDetails.Add(calcRuntPomDataDetail);
-                calcRun!.CalculatorRunPomDataMaster = calcRunPomMaster;
-            }
-
-
+            var calendarYear = Util.GetCalendarYear(financialYear);
+            var createdBy = request.UpdatedBy;
             using (var transaction = await this.context.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    await this.context.CalculatorRunPomDataDetails.AddRangeAsync(newCalculatorRunPomDataDetails);
-                    await this.context.CalculatorRunOrganisationDataDetails.AddRangeAsync(newCalculatorRunOrganisationDataDetails);
+                    await this.context.Database.ExecuteSqlAsync($"exec dbo.CreateRunOrganization @RunId ={runId}, @calendarYear = {calendarYear}, @createdBy = {createdBy}");
+                    await this.context.Database.ExecuteSqlAsync($"exec dbo.CreateRunPom @RunId ={runId}, @calendarYear = {calendarYear}, @createdBy = {createdBy}");
 
                     calcRun!.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
                     await this.context.SaveChangesAsync();
