@@ -362,5 +362,15 @@ namespace EPR.Calculator.API.Controllers
             // All good, return empty string
             return string.Empty;
         }
+
+        private async Task SendMessage(string serviceBusQueueName, CalculatorRunMessage calculatorRunMessage)
+        {
+            // Send message to service bus
+            var client = serviceBusClientFactory.CreateClient(CommonConstants.ServiceBusClientName);
+            ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
+            var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
+            ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
+            await serviceBusSender.SendMessageAsync(serviceBusMessage);
+        }
     }
 }

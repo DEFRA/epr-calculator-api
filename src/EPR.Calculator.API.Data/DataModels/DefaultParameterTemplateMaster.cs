@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace EPR.Calculator.API.Data.DataModels
 {
-    [ExcludeFromCodeCoverage]
     [Table("default_parameter_template_master")]
     public class DefaultParameterTemplateMaster
     {
