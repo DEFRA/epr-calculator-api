@@ -82,21 +82,21 @@ namespace EPR.Calculator.API.Controllers
         [Route("defaultParameterSetting/{parameterYear}")]
         public async Task<IActionResult> Get([FromRoute] string parameterYear)
         {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
-            }
-
-            var currentDefaultSetting = await _context.DefaultParameterSettings
-                .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.ParameterYear == parameterYear);
-
-            if (currentDefaultSetting == null)
-            {
-                return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
-            }
-
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+                }
+
+                var currentDefaultSetting = await _context.DefaultParameterSettings
+                    .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.ParameterYear == parameterYear);
+
+                if (currentDefaultSetting == null)
+                {
+                    return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
+                }
+            
                 var _pramSettingDetails = await _context.DefaultParameterSettingDetail
                     .Where(x => x.DefaultParameterSettingMasterId == currentDefaultSetting.Id)
                     .ToListAsync();
