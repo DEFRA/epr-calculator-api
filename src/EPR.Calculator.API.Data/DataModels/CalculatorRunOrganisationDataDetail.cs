@@ -4,9 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace EPR.Calculator.API.Data.DataModels
 {
-    [ExcludeFromCodeCoverage]
     [Table("calculator_run_organization_data_detail")]
-
     public class CalculatorRunOrganisationDataDetail
     {
         [Required]

@@ -30,10 +30,10 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void UpdateRpdStatus_With_Missing_RunId()
+        public async Task UpdateRpdStatus_With_Missing_RunId()
         {
             var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 999, UpdatedBy = "User1" };
-            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var result = await this.calculatorInternalController.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
             Assert.IsNotNull(objResult);
             Assert.AreEqual(400, objResult.StatusCode);
@@ -41,7 +41,7 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void UpdateRpdStatus_With_RunId_Having_OrganisationDataMasterId()
+        public async Task UpdateRpdStatus_With_RunId_Having_OrganisationDataMasterId()
         {
             this.dbContext?.SaveChanges();
 
@@ -61,7 +61,7 @@ namespace EPR.Calculator.API.UnitTests
 
 
             var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 3, UpdatedBy = "User1" };
-            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var result = await this.calculatorInternalController.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
             Assert.IsNotNull(objResult);
             Assert.AreEqual(422, objResult.StatusCode);
@@ -69,7 +69,7 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void UpdateRpdStatus_With_RunId_Having_PomDataMasterId()
+        public async Task UpdateRpdStatus_With_RunId_Having_PomDataMasterId()
         {
             var pomMaster = new CalculatorRunPomDataMaster
             {
@@ -106,7 +106,7 @@ namespace EPR.Calculator.API.UnitTests
             this.dbContext?.SaveChanges();
 
             var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 1, UpdatedBy = "User1" };
-            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var result = await this.calculatorInternalController.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
             Assert.IsNotNull(objResult);
             Assert.AreEqual(422, objResult.StatusCode);
@@ -114,7 +114,7 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void UpdateRpdStatus_With_RunId_With_Incorrect_Classification()
+        public async Task UpdateRpdStatus_With_RunId_With_Incorrect_Classification()
         {
             var calcRun = this.dbContext?.CalculatorRuns.Single(x => x.Id == 1);
             if (calcRun != null)
@@ -124,7 +124,7 @@ namespace EPR.Calculator.API.UnitTests
             }
 
             var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 1, UpdatedBy = "User1" };
-            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var result = await this.calculatorInternalController.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
             Assert.IsNotNull(objResult);
             Assert.AreEqual(422, objResult.StatusCode);
@@ -132,10 +132,10 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void UpdateRpdStatus_With_RunId_When_Not_Successful()
+        public async Task UpdateRpdStatus_With_RunId_When_Not_Successful()
         {
             var request = new Dtos.UpdateRpdStatus { isSuccessful = false, RunId = 1, UpdatedBy = "User1" };
-            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var result = await this.calculatorInternalController.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
             Assert.AreEqual(201, objResult?.StatusCode);
             var updatedRun = this.dbContext?.CalculatorRuns.Single(x => x.Id == 1);
@@ -144,17 +144,17 @@ namespace EPR.Calculator.API.UnitTests
         }
 
         [TestMethod]
-        public void UpdateRpdStatus_With_RunId_Having_Pom_Data_Missing()
+        public async Task UpdateRpdStatus_With_RunId_Having_Pom_Data_Missing()
         {
             var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
-            var result = this.calculatorInternalController?.UpdateRpdStatus(request);
+            var result = await this.calculatorInternalController.UpdateRpdStatus(request);
             var objResult = result as ObjectResult;
             Assert.AreEqual(422, objResult?.StatusCode);
             Assert.AreEqual("PomData or Organisation Data is missing", objResult?.Value);
         }
 
         [TestMethod]
-        public void UpdateRpdStatus_With_RunId_When_Successful()
+        public async Task UpdateRpdStatus_With_RunId_When_Successful()
         {
             var organisation = new OrganisationData
             {
@@ -181,8 +181,8 @@ namespace EPR.Calculator.API.UnitTests
             var mock = new Mock<IOrgAndPomWrapper>();
             mock.Setup(x => x.AnyPomData()).Returns(true);
             mock.Setup(x => x.AnyOrganisationData()).Returns(true);
-            mock.Setup(x => x.GetOrganisationData()).Returns(organisationDataList);
-            mock.Setup(x => x.GetPomData()).Returns(pomDataList);
+            mock.Setup(x => x.GetOrganisationDataAsync()).ReturnsAsync(organisationDataList);
+            mock.Setup(x => x.GetPomDataAsync()).ReturnsAsync(pomDataList);
 
 
 
@@ -200,7 +200,7 @@ namespace EPR.Calculator.API.UnitTests
                 );
 
                 var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
-                var result = controller?.UpdateRpdStatus(request);
+                var result = await controller.UpdateRpdStatus(request);
 
                 var objResult = result as ObjectResult;
                 Assert.AreEqual(201, objResult?.StatusCode);

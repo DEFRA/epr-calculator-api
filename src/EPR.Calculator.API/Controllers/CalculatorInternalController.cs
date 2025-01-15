@@ -11,6 +11,7 @@ using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace EPR.Calculator.API.Controllers
@@ -48,11 +49,11 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("rpdStatus")]
-        public IActionResult UpdateRpdStatus([FromBody] UpdateRpdStatus request)
+        public async Task<IActionResult> UpdateRpdStatus([FromBody] UpdateRpdStatus request)
         {
             var runId = request.RunId;
-            var calcRun = this.context.CalculatorRuns.SingleOrDefault(run => run.Id == runId);
-            var runClassifications = this.context.CalculatorRunClassifications.ToList();
+            var calcRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(run => run.Id == runId);
+            var runClassifications = await this.context.CalculatorRunClassifications.ToListAsync();
 
             var validationResult = this.rpdStatusDataValidator.IsValidRun(calcRun, runId, runClassifications);
             if (!validationResult.isValid)
@@ -63,7 +64,7 @@ namespace EPR.Calculator.API.Controllers
             if (!request.isSuccessful && calcRun != null)
             {
                 calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.ERROR.ToString()).Id;
-                this.context.SaveChanges();
+                await this.context.SaveChangesAsync();
                 return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
             }
 
@@ -74,84 +75,81 @@ namespace EPR.Calculator.API.Controllers
             }
 
             string financialYear = calcRun?.Financial_Year ?? string.Empty;
+            var newCalculatorRunOrganisationDataDetails = new List<CalculatorRunOrganisationDataDetail>();
+            var newCalculatorRunPomDataDetails = new List<CalculatorRunPomDataDetail>();
 
-            using (var transaction = this.context.Database.BeginTransaction())
+            var stagingOrganisationData = await this.wrapper.GetOrganisationDataAsync();
+            var calcOrganisationMaster = new CalculatorRunOrganisationDataMaster
+            {
+                CalendarYear = Util.GetCalendarYear(financialYear),
+                CreatedAt = DateTime.Now,
+                CreatedBy = request.UpdatedBy,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null,
+            };
+            foreach (var organisation in stagingOrganisationData)
+            {
+                var calcOrganisationDataDetail = new CalculatorRunOrganisationDataDetail
+                {
+                    OrganisationId = organisation.OrganisationId,
+                    SubsidaryId = organisation.SubsidaryId,
+                    LoadTimeStamp = organisation.LoadTimestamp,
+                    OrganisationName = organisation.OrganisationName,
+                    SubmissionPeriodDesc = organisation.SubmissionPeriodDesc,
+                    CalculatorRunOrganisationDataMaster = calcOrganisationMaster,
+                };
+
+
+                newCalculatorRunOrganisationDataDetails.Add(calcOrganisationDataDetail);
+                calcRun!.CalculatorRunOrganisationDataMaster = calcOrganisationMaster;
+            }
+
+            var stagingPomData = await this.wrapper.GetPomDataAsync();
+            var calcRunPomMaster = new CalculatorRunPomDataMaster
+            {
+                CalendarYear = Util.GetCalendarYear(financialYear),
+                CreatedAt = DateTime.Now,
+                CreatedBy = request.UpdatedBy,
+                EffectiveFrom = DateTime.Now,
+                EffectiveTo = null,
+            };
+            foreach (var pomData in stagingPomData)
+            {
+                var calcRuntPomDataDetail = new CalculatorRunPomDataDetail
+                {
+                    OrganisationId = pomData.OrganisationId,
+                    SubsidaryId = pomData.SubsidaryId,
+                    LoadTimeStamp = pomData.LoadTimeStamp,
+                    SubmissionPeriod = pomData.SubmissionPeriod,
+                    PackagingActivity = pomData.PackagingActivity,
+                    PackagingType = pomData.PackagingType,
+                    PackagingClass = pomData.PackagingClass,
+                    PackagingMaterial = pomData.PackagingMaterial,
+                    PackagingMaterialWeight = pomData.PackagingMaterialWeight,
+                    SubmissionPeriodDesc = pomData.SubmissionPeriodDesc,
+                    CalculatorRunPomDataMaster = calcRunPomMaster,
+                };
+                newCalculatorRunPomDataDetails.Add(calcRuntPomDataDetail);
+                calcRun!.CalculatorRunPomDataMaster = calcRunPomMaster;
+            }
+
+
+            using (var transaction = await this.context.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    var stagingOrganisationData = this.wrapper.GetOrganisationData();
-                    var calcOrganisationMaster = new CalculatorRunOrganisationDataMaster
-                    {
-                        CalendarYear = Util.GetCalendarYear(financialYear),
-                        CreatedAt = DateTime.Now,
-                        CreatedBy = request.UpdatedBy,
-                        EffectiveFrom = DateTime.Now,
-                        EffectiveTo = null,
-                    };
-                    foreach (var organisation in stagingOrganisationData)
-                    {
-                        var calcOrganisationDataDetail = new CalculatorRunOrganisationDataDetail
-                        {
-                            OrganisationId = organisation.OrganisationId,
-                            SubsidaryId = organisation.SubsidaryId,
-                            LoadTimeStamp = organisation.LoadTimestamp,
-                            OrganisationName = organisation.OrganisationName,
-                            SubmissionPeriodDesc = organisation.SubmissionPeriodDesc,
-                            CalculatorRunOrganisationDataMaster = calcOrganisationMaster,
-                        };
+                    await this.context.CalculatorRunPomDataDetails.AddRangeAsync(newCalculatorRunPomDataDetails);
+                    await this.context.CalculatorRunOrganisationDataDetails.AddRangeAsync(newCalculatorRunOrganisationDataDetails);
 
-
-                        this.context.CalculatorRunOrganisationDataDetails.Add(calcOrganisationDataDetail);
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                        calcRun.CalculatorRunOrganisationDataMaster = calcOrganisationMaster;
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-                    }
-
-                    var stagingPomData = this.wrapper.GetPomData();
-                    var calcRunPomMaster = new CalculatorRunPomDataMaster
-                    {
-                        CalendarYear = Util.GetCalendarYear(financialYear),
-                        CreatedAt = DateTime.Now,
-                        CreatedBy = request.UpdatedBy,
-                        EffectiveFrom = DateTime.Now,
-                        EffectiveTo = null,
-                    };
-                    foreach (var pomData in stagingPomData)
-                    {
-                        var calcRuntPomDataDetail = new CalculatorRunPomDataDetail
-                        {
-                            OrganisationId = pomData.OrganisationId,
-                            SubsidaryId = pomData.SubsidaryId,
-                            LoadTimeStamp = pomData.LoadTimeStamp,
-                            SubmissionPeriod = pomData.SubmissionPeriod,
-                            PackagingActivity = pomData.PackagingActivity,
-                            PackagingType = pomData.PackagingType,
-                            PackagingClass = pomData.PackagingClass,
-                            PackagingMaterial = pomData.PackagingMaterial,
-                            PackagingMaterialWeight = pomData.PackagingMaterialWeight,
-                            SubmissionPeriodDesc = pomData.SubmissionPeriodDesc,
-                            CalculatorRunPomDataMaster = calcRunPomMaster,
-                        };
-
-                        this.context.CalculatorRunPomDataDetails.Add(calcRuntPomDataDetail);
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                        calcRun.CalculatorRunPomDataMaster = calcRunPomMaster;
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-                    }
-
-
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                    calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-                    this.context.SaveChanges();
-                    transaction.Commit();
+                    calcRun!.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
+                    await this.context.SaveChangesAsync();
+                    await transaction.CommitAsync();
                     return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    transaction.Rollback();
-                    // return StatusCode(StatusCodes.Status500InternalServerError, ex);
-                    throw;
+                    await transaction.RollbackAsync();
+                    return StatusCode(StatusCodes.Status500InternalServerError, ex);
                 }
             }
         }
