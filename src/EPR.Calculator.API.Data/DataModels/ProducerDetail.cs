@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace EPR.Calculator.API.Data.DataModels
 {
-    [ExcludeFromCodeCoverage]
     [Table("producer_detail")]
     public class ProducerDetail
     {

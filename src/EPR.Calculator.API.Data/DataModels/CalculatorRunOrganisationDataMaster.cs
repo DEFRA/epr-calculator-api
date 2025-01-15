@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace EPR.Calculator.API.Data.DataModels
 {
-    [ExcludeFromCodeCoverage]
     [Table("calculator_run_organization_data_master")]
     public class CalculatorRunOrganisationDataMaster
     {
