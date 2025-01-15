@@ -100,8 +100,17 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var currentDefaultSetting = await this.context.LapcapDataMaster
-                .SingleOrDefaultAsync(setting => setting.EffectiveTo == null && setting.ProjectionYear == parameterYear);
+            var lapcapData = await (from lapcapMaster in this.context.LapcapDataMaster
+                                    join lapcapDetail in this.context.LapcapDataDetail on lapcapMaster.Id equals lapcapDetail.LapcapDataMasterId
+                                    join lapcapTemplate in this.context.LapcapDataTemplateMaster on lapcapDetail.UniqueReference equals lapcapTemplate.UniqueReference
+                                    where lapcapMaster.EffectiveTo == null && lapcapMaster.ProjectionYear == parameterYear
+                                    select new
+                                    {
+                                      lapcapMaster,
+                                      lapcapDetail
+                                    }).ToListAsync();
+
+            var currentDefaultSetting = lapcapData.Select(x => x.lapcapMaster).FirstOrDefault();
 
             if (currentDefaultSetting == null)
             {
@@ -110,7 +119,6 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                await this.context.LapcapDataDetail.Where(x => x.LapcapDataMasterId == currentDefaultSetting.Id).ToListAsync();
                 var _lapcaptemplateDetails = await this.context.LapcapDataTemplateMaster.ToListAsync();
                 var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(currentDefaultSetting, _lapcaptemplateDetails);
                 return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
