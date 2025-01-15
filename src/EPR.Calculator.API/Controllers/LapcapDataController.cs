@@ -100,7 +100,7 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var currentDefaultSetting =await  this.context.LapcapDataMaster
+            var currentDefaultSetting = await this.context.LapcapDataMaster
                 .SingleOrDefaultAsync(setting => setting.EffectiveTo == null && setting.ProjectionYear == parameterYear);
 
             if (currentDefaultSetting == null)
