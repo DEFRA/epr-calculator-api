@@ -1260,16 +1260,15 @@ IF NOT EXISTS (
 )
 BEGIN
     CREATE TABLE [pom_data] (
-        [organisation_id] nvarchar(400) NOT NULL,
-        [subsidiary_id] nvarchar(400) NOT NULL,
-        [submission_period] nvarchar(400) NOT NULL,
+        [organisation_id] nvarchar(400) NULL,
+        [subsidiary_id] nvarchar(400) NULL,
+        [submission_period] nvarchar(400) NULL,
         [packaging_activity] nvarchar(400) NULL,
         [packaging_type] nvarchar(400) NULL,
         [packaging_class] nvarchar(400) NULL,
         [packaging_material] nvarchar(400) NULL,
         [packaging_material_weight] nvarchar(400) NULL,
         [load_ts] datetime2 NOT NULL,
-        CONSTRAINT [PK_pom_data] PRIMARY KEY ([organisation_id], [subsidiary_id])
     );
 END;
 GO
@@ -1297,17 +1296,16 @@ IF NOT EXISTS (
 )
 BEGIN
     CREATE TABLE [calculator_run_pom_data_detail] (
-        [organisation_id] nvarchar(400) NOT NULL,
-        [subsidiary_id] nvarchar(400) NOT NULL,
-        [submission_period] nvarchar(400) NOT NULL,
+        [organisation_id] int NULL,
+        [subsidiary_id] nvarchar(400) NULL,
+        [submission_period] nvarchar(400) NULL,
         [packaging_activity] nvarchar(400) NULL,
         [packaging_type] nvarchar(400) NULL,
         [packaging_class] nvarchar(400) NULL,
         [packaging_material] nvarchar(400) NULL,
-        [packaging_material_weight] nvarchar(400) NULL,
+        [packaging_material_weight] float NULL,
         [load_ts] datetime2 NOT NULL,
         [calculator_run_pom_data_master_id] int NOT NULL,
-        CONSTRAINT [PK_calculator_run_pom_data_detail] PRIMARY KEY ([organisation_id], [subsidiary_id]),
         CONSTRAINT [FK_calculator_run_pom_data_detail_calculator_run_pom_data_master_calculator_run_pom_data_master_id] FOREIGN KEY ([calculator_run_pom_data_master_id]) REFERENCES [calculator_run_pom_data_master] ([id]) ON DELETE CASCADE
     );
 END;
@@ -2558,7 +2556,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
 )
 BEGIN
-    ALTER TABLE [pom_data] ADD [submission_period_desc] nvarchar(max) NOT NULL DEFAULT N'';
+    ALTER TABLE [pom_data] ADD [submission_period_desc] nvarchar(max) NULL DEFAULT N'';
 END;
 GO
 
@@ -2576,7 +2574,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
 )
 BEGIN
-    ALTER TABLE [calculator_run_pom_data_detail] ADD [submission_period_desc] nvarchar(max) NOT NULL DEFAULT N'';
+    ALTER TABLE [calculator_run_pom_data_detail] ADD [submission_period_desc] nvarchar(max) NULL DEFAULT N'';
 END;
 GO
 

@@ -20,7 +20,7 @@ namespace EPR.Calculator.API.Data.DataModels
 
         [Column("submission_period")]
         [StringLength(400)]
-        public required string SubmissionPeriod { get; set; }
+        public required string? SubmissionPeriod { get; set; }
 
         [Column("packaging_activity")]
         [StringLength(400)]
@@ -42,7 +42,7 @@ namespace EPR.Calculator.API.Data.DataModels
         public double? PackagingMaterialWeight { get; set; }
 
         [Column("submission_period_desc")]
-        public required string SubmissionPeriodDesc { get; set; }
+        public required string? SubmissionPeriodDesc { get; set; }
 
         [Column("load_ts")]
         public required DateTime LoadTimeStamp { get; set; }
