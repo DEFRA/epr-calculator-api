@@ -144,7 +144,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRuns")]
-        public IActionResult GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
+        public async Task<IActionResult> GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
         {
             if (!ModelState.IsValid)
             {
@@ -158,7 +158,10 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRuns = context.CalculatorRuns.Where(run => run.Financial_Year == request.FinancialYear).OrderByDescending(run => run.CreatedAt).ToList();
+                var calculatorRuns = await context.CalculatorRuns
+                    .Where(run => run.Financial_Year == request.FinancialYear)
+                    .OrderByDescending(run => run.CreatedAt)
+                    .ToListAsync();
 
                 if (calculatorRuns.Count == 0)
                 {
@@ -175,7 +178,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("calculatorRuns/{runId}")]
-        public IActionResult GetCalculatorRun(int runId)
+        public async Task<IActionResult> GetCalculatorRun(int runId)
         {
             if (!ModelState.IsValid)
             {
@@ -185,7 +188,7 @@ namespace EPR.Calculator.API.Controllers
             try
             {
                 var calculatorRunDetail =
-                    (from run in this.context.CalculatorRuns
+                    await (from run in this.context.CalculatorRuns
                      join classification in context.CalculatorRunClassifications
                          on run.CalculatorRunClassificationId equals classification.Id
                      where run.Id == runId
@@ -193,7 +196,8 @@ namespace EPR.Calculator.API.Controllers
                      {
                          Run = run,
                          Classification = classification
-                     }).SingleOrDefault();
+                     }).SingleOrDefaultAsync();
+
                 if (calculatorRunDetail == null)
                 {
                     return new NotFoundObjectResult($"Unable to find Run Id {runId}");
@@ -259,7 +263,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("CheckCalcNameExists/{name}")]
-        public IActionResult GetCalculatorRunByName([FromRoute] string name)
+        public async Task<IActionResult> GetCalculatorRunByName([FromRoute] string name)
         {
             if (!ModelState.IsValid)
             {
@@ -268,7 +272,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRun = context.CalculatorRuns.Count(run => EF.Functions.Like(run.Name, name));
+                var calculatorRun = await context.CalculatorRuns.CountAsync(run => EF.Functions.Like(run.Name, name));
 
                 if (calculatorRun <= 0)
                 {
