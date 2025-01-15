@@ -95,6 +95,39 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpPost]
+        [Route("transposeBeforeCalcResults")]
+        public async Task<IActionResult> TransposeBeforeCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
+        {
+            var startTime = DateTime.Now; 
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(run => run.Id == resultsRequestDto.RunId);
+            if (calculatorRun == null)
+            {
+                return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
+                { StatusCode = StatusCodes.Status404NotFound };
+            }
+
+            try
+            {
+                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
+                var endTime = DateTime.Now;
+                var timeDiff = startTime - endTime;
+                return new ObjectResult(timeDiff.TotalMinutes) { StatusCode = StatusCodes.Status201Created };
+            }
+            catch (Exception exception)
+            {
+                calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
+                this.context.CalculatorRuns.Update(calculatorRun);
+                await this.context.SaveChangesAsync();
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+        }
+
+        [HttpPost]
         [Route("prepareCalcResults")]
         public async Task<IActionResult> PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
@@ -103,7 +136,7 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var calculatorRun = this.context.CalculatorRuns.SingleOrDefault(run => run.Id == resultsRequestDto.RunId);
+            var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(run => run.Id == resultsRequestDto.RunId);
             if (calculatorRun == null)
             {
                 return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
@@ -112,25 +145,21 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
-                if (isTransposeSuccessful)
+                var results = await this.builder.Build(resultsRequestDto);
+                var exportedResults = this.exporter.Export(results);
+
+                var fileName = new CalcResultsFileName(
+                    results.CalcResultDetail.RunId,
+                    results.CalcResultDetail.RunName,
+                    results.CalcResultDetail.RunDate);
+                var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
+
+                if (resultsFileWritten)
                 {
-                    var results = await this.builder.Build(resultsRequestDto);
-                    var exportedResults = this.exporter.Export(results);
-
-                    var fileName = new CalcResultsFileName(
-                        results.CalcResultDetail.RunId,
-                        results.CalcResultDetail.RunName,
-                        results.CalcResultDetail.RunDate);
-                    var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
-
-                    if (resultsFileWritten)
-                    {
-                        calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
-                        this.context.CalculatorRuns.Update(calculatorRun);
-                        await this.context.SaveChangesAsync();
-                        return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
-                    }
+                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
+                    this.context.CalculatorRuns.Update(calculatorRun);
+                    await this.context.SaveChangesAsync();
+                    return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
                 }
             }
             catch (Exception exception)
