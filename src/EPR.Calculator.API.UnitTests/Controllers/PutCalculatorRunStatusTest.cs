@@ -21,7 +21,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         private readonly ApplicationDBContext context;
         private readonly Mock<IConfiguration> mockConfig;
-        private readonly Mock<IAzureClientFactory<ServiceBusClient>> mockServiceBusFactory;
         private readonly Mock<IStorageService> mockStorageService;
         private readonly Mock<IServiceBusService> mockServiceBusService;
 
@@ -29,7 +28,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             mockStorageService = new Mock<IStorageService>();
             mockConfig = new Mock<IConfiguration>();
-            mockServiceBusFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             mockServiceBusService = new Mock<IServiceBusService>();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
@@ -52,7 +50,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public async Task PutCalculatorRunStatusTest_422()
         {
             var controller =
-                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object, mockStorageService.Object, mockServiceBusService.Object);
+                new CalculatorController(context, mockConfig.Object, mockStorageService.Object, mockServiceBusService.Object);
             var runId = 0;
             var result = await controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
                 { ClassificationId = 5, RunId = runId }) as ObjectResult;
@@ -69,7 +67,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var invalidClassificationId = 10;
 
             var controller =
-                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
+                new CalculatorController(context, mockConfig.Object,
                     mockStorageService.Object, mockServiceBusService.Object);
 
             var result = await controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
@@ -99,7 +97,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context.SaveChanges();
 
             var controller =
-                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
+                new CalculatorController(context, mockConfig.Object,
                     mockStorageService.Object, mockServiceBusService.Object);
 
             var result = await controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
@@ -120,7 +118,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var classificationId = 5;
 
             var controller =
-                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
+                new CalculatorController(context, mockConfig.Object,
                     mockStorageService.Object, mockServiceBusService.Object);
 
             var result = await controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto

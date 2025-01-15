@@ -8,10 +8,17 @@ namespace EPR.Calculator.API.Services
 {
     public class ServiceBusService : IServiceBusService
     {
-        public async Task SendMessage(IAzureClientFactory<ServiceBusClient> serviceBusClientFactory, string serviceBusQueueName, CalculatorRunMessage calculatorRunMessage)
+        private readonly IAzureClientFactory<ServiceBusClient> serviceBusClientFactory;
+
+        public ServiceBusService(IAzureClientFactory<ServiceBusClient> serviceBusClientFactory)
+        {
+            this.serviceBusClientFactory = serviceBusClientFactory;
+        }
+
+        public async Task SendMessage(string serviceBusQueueName, CalculatorRunMessage calculatorRunMessage)
         {
             var client = serviceBusClientFactory.CreateClient(CommonConstants.ServiceBusClientName);
-            ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
+            var serviceBusSender = client.CreateSender(serviceBusQueueName);
             var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
             ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
             await serviceBusSender.SendMessageAsync(serviceBusMessage);

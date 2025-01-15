@@ -19,7 +19,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         private readonly ApplicationDBContext context;
         private readonly Mock<IConfiguration> mockConfig;
-        private readonly Mock<IAzureClientFactory<ServiceBusClient>> mockServiceBusFactory;
         private readonly Mock<IStorageService> mockStorageService;
         private readonly Mock<IServiceBusService> mockServiceBusService;
 
@@ -27,7 +26,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             mockStorageService = new Mock<IStorageService>();
             mockConfig = new Mock<IConfiguration>();
-            mockServiceBusFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             mockServiceBusService = new Mock<IServiceBusService>();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
@@ -60,7 +58,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context.SaveChanges();
 
             var controller =
-                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
+                new CalculatorController(context, mockConfig.Object,
                     mockStorageService.Object, mockServiceBusService.Object);
 
             var response = controller.GetCalculatorRun(1) as ObjectResult;
@@ -81,7 +79,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void GetCalculatorRunTest_Get_Invalid_Run()
         {
             var controller =
-                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
+                new CalculatorController(context, mockConfig.Object,
                     mockStorageService.Object, mockServiceBusService.Object);
 
             var response = controller.GetCalculatorRun(1) as ObjectResult;

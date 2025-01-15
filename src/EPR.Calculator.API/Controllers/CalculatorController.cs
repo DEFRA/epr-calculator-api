@@ -1,17 +1,14 @@
-﻿using Azure.Messaging.ServiceBus;
-using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Exporter;
+using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Azure;
-using Newtonsoft.Json;
 using System.Configuration;
 
 namespace EPR.Calculator.API.Controllers
@@ -21,17 +18,14 @@ namespace EPR.Calculator.API.Controllers
     {
         private readonly ApplicationDBContext context;
         private readonly IConfiguration configuration;
-        private readonly IAzureClientFactory<ServiceBusClient> serviceBusClientFactory;
         private readonly IStorageService storageService;
         private readonly IServiceBusService serviceBusService;
 
         public CalculatorController(ApplicationDBContext context, IConfiguration configuration,
-            IAzureClientFactory<ServiceBusClient> serviceBusClientFactory, IStorageService storageService,
-            IServiceBusService serviceBusService)
+            IStorageService storageService, IServiceBusService serviceBusService)
         {
             this.context = context;
             this.configuration = configuration;
-            this.serviceBusClientFactory = serviceBusClientFactory;
             this.storageService = storageService;
             this.serviceBusService = serviceBusService;
         }
@@ -122,7 +116,7 @@ namespace EPR.Calculator.API.Controllers
                         };
 
                         // Send message
-                        await serviceBusService.SendMessage(serviceBusClientFactory, serviceBusQueueName, calculatorRunMessage);
+                        await serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
 
                         // All good, commit transaction
                         await transaction.CommitAsync();
@@ -361,16 +355,6 @@ namespace EPR.Calculator.API.Controllers
 
             // All good, return empty string
             return string.Empty;
-        }
-
-        private async Task SendMessage(string serviceBusQueueName, CalculatorRunMessage calculatorRunMessage)
-        {
-            // Send message to service bus
-            var client = serviceBusClientFactory.CreateClient(CommonConstants.ServiceBusClientName);
-            ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
-            var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
-            ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
-            await serviceBusSender.SendMessageAsync(serviceBusMessage);
         }
     }
 }
