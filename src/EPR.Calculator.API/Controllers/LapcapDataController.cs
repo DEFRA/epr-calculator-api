@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -92,15 +93,15 @@ namespace EPR.Calculator.API.Controllers
         /// <response code="500">If an internal server error occurs.</response>
         [HttpGet]
         [Route("lapcapData/{parameterYear}")]
-        public IActionResult Get([FromRoute] string parameterYear)
+        public async Task<IActionResult> Get([FromRoute] string parameterYear)
         {
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var currentDefaultSetting = this.context.LapcapDataMaster
-                .SingleOrDefault(setting => setting.EffectiveTo == null && setting.ProjectionYear == parameterYear);
+            var currentDefaultSetting =await  this.context.LapcapDataMaster
+                .SingleOrDefaultAsync(setting => setting.EffectiveTo == null && setting.ProjectionYear == parameterYear);
 
             if (currentDefaultSetting == null)
             {
@@ -109,8 +110,8 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var _lapcappramSettingDetails = this.context.LapcapDataDetail.Where(x => x.LapcapDataMasterId == currentDefaultSetting.Id).ToList();
-                var _lapcaptemplateDetails = this.context.LapcapDataTemplateMaster.ToList();
+                await this.context.LapcapDataDetail.Where(x => x.LapcapDataMasterId == currentDefaultSetting.Id).ToListAsync();
+                var _lapcaptemplateDetails = await this.context.LapcapDataTemplateMaster.ToListAsync();
                 var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(currentDefaultSetting, _lapcaptemplateDetails);
                 return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
             }
