@@ -8,8 +8,8 @@ namespace EPR.Calculator.API.Wrapper
 
         bool AnyPomData();
 
-        IEnumerable<OrganisationData> GetOrganisationData();
+        Task<IEnumerable<OrganisationData>> GetOrganisationDataAsync();
 
-        IEnumerable<PomData> GetPomData();
+        Task<IEnumerable<PomData>> GetPomDataAsync();
     }
 }

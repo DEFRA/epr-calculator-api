@@ -74,7 +74,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void CreateTest_With_Records()
         {
             var createDefaultParameterDto = CreateDto();
-            var actionResult = lapcapDataController?.Create(createDefaultParameterDto) as ObjectResult;
+            var task = lapcapDataController.Create(createDefaultParameterDto);
+            task.Wait();
+            var actionResult = task.Result as ObjectResult;
             Assert.AreEqual(201, actionResult?.StatusCode);
 
             Assert.AreEqual(LapcapDataUniqueReferences.UniqueReferences.Length, dbContext?.LapcapDataDetail.Count());
@@ -86,8 +88,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             var createDefaultParameterDto = CreateDto();
             createDefaultParameterDto.ParameterYear = string.Empty;
-            lapcapDataController?.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
-            var actionResult = lapcapDataController?.Create(createDefaultParameterDto) as ObjectResult;
+            lapcapDataController.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
+            var task = lapcapDataController.Create(createDefaultParameterDto);
+            task.Wait();
+            var actionResult = task.Result as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
         }
 
@@ -96,7 +100,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             var uniqueRef = "ENG-WD";
             var createDefaultParameterDto = CreateDto([uniqueRef]);
-            var actionResult = lapcapDataController?.Create(createDefaultParameterDto) as ObjectResult;
+            var task = lapcapDataController.Create(createDefaultParameterDto);
+            task.Wait();
+            var actionResult = task.Result as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
             var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;
             Assert.IsNotNull(errors);
@@ -114,8 +120,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 list.Add(new LapcapDataTemplateValueDto { CountryName = "England", Material = "Wood", TotalCost = "9" });
                 createDefaultParameterDto.LapcapDataTemplateValues = list.AsEnumerable();
             }
-
-            var actionResult = lapcapDataController?.Create(createDefaultParameterDto) as ObjectResult;
+            var task = lapcapDataController.Create(createDefaultParameterDto);
+            task.Wait();
+            var actionResult = task.Result as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
             var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;
             Assert.IsNotNull(errors);

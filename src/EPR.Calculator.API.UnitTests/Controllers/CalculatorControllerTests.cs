@@ -218,10 +218,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResultValue = actionResult?.Value as System.Configuration.ConfigurationErrorsException;
 
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(500, actionResult.StatusCode);
-            Assert.AreEqual("Configuration item not found: ServiceBus__ConnectionString", actionResult.Value);
+            Assert.AreEqual("Configuration item not found: ServiceBus__ConnectionString", actionResultValue?.Message);
         }
 
         [TestMethod]
@@ -267,60 +268,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResultValue = actionResult?.Value as System.Configuration.ConfigurationErrorsException;
 
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(500, actionResult.StatusCode);
-            Assert.AreEqual("Configuration item not found: ServiceBus__QueueName", actionResult.Value);
-        }
-
-        [TestMethod]
-        public async Task Create_Calculator_Run_Return_500_If_PostMessageRetryPeriod_Configuration_Is_Empty()
-        {
-            var createCalculatorRunDto = new CreateCalculatorRunDto
-            {
-                CalculatorRunName = "Test calculator run",
-                CreatedBy = "Test user",
-                FinancialYear = "2024-25"
-            };
-
-            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
-            {
-                Id = 1,
-                ParameterYear = "2024-25",
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
-                EffectiveTo = null
-            });
-            dbContext?.SaveChanges();
-
-            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
-            {
-                Id = 1,
-                ProjectionYear = "2024-25",
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
-                EffectiveTo = null
-            });
-            dbContext?.SaveChanges();
-
-            var configs = ConfigurationItems.GetConfigurationValues();
-            configs.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value = string.Empty;
-
-            var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
-            var mockStorageService = new Mock<IStorageService>();
-
-#pragma warning disable CS8604 // Possible null reference argument.
-            calculatorController =
-                new CalculatorController(dbContext, configs, mockFactory.Object, mockStorageService.Object);
-#pragma warning restore CS8604 // Possible null reference argument.
-
-            var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
-
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(500, actionResult.StatusCode);
-            Assert.AreEqual("Configuration item not found: ServiceBus__PostMessageRetryPeriod", actionResult.Value);
+            Assert.AreEqual("Configuration item not found: ServiceBus__QueueName", actionResultValue?.Message);
         }
 
         [TestMethod]

@@ -17,5 +17,6 @@ namespace EPR.Calculator.API.Constants
         public const string LADisposalCostData = "LA Disposal Cost Data";
         public const string Household = "HH";
         public const string PolicyName = "AllowAllOrigins";
+        public const string ServiceBusClientName = "calculator";
     }
 }

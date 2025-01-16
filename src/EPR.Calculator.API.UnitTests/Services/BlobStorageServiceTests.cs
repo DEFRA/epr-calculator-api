@@ -15,13 +15,12 @@ namespace EPR.Calculator.API.UnitTests.Services
   [TestClass]
   public class BlobStorageServiceTests
   {
-    private Mock<BlobServiceClient> _mockBlobServiceClient;
-    private Mock<BlobContainerClient> _mockBlobContainerClient;
-    private Mock<BlobClient> _mockBlobClient;
-    private BlobStorageService _blobStorageService;
+    private readonly Mock<BlobServiceClient> _mockBlobServiceClient;
+    private readonly Mock<BlobContainerClient> _mockBlobContainerClient;
+    private readonly Mock<BlobClient> _mockBlobClient;
+    private readonly BlobStorageService _blobStorageService;
 
-    [TestInitialize]
-    public void Setup()
+    public BlobStorageServiceTests()
     {
       _mockBlobServiceClient = new Mock<BlobServiceClient>();
       _mockBlobContainerClient = new Mock<BlobContainerClient>();
@@ -35,15 +34,6 @@ namespace EPR.Calculator.API.UnitTests.Services
           .Returns(_mockBlobClient.Object);
 
       _blobStorageService = new BlobStorageService(_mockBlobServiceClient.Object, configs);
-    }
-
-    [TestCleanup]
-    public void TestCleanup()
-    {
-      _mockBlobServiceClient = null;
-      _mockBlobContainerClient = null;
-      _mockBlobClient = null;
-      _blobStorageService = null;
     }
 
     [TestMethod]
@@ -112,8 +102,8 @@ namespace EPR.Calculator.API.UnitTests.Services
           content: binaryData,
           details: downloadDetails);
 
-      _mockBlobClient.Setup(x => x.ExistsAsync(default)).ReturnsAsync(Response.FromValue(true, null));
-      _mockBlobClient.Setup(x => x.DownloadContentAsync()).ReturnsAsync(Response.FromValue(downloadResult, null));
+      _mockBlobClient.Setup(x => x.ExistsAsync(default)).ReturnsAsync(Response.FromValue(true, null!));
+      _mockBlobClient.Setup(x => x.DownloadContentAsync()).ReturnsAsync(Response.FromValue(downloadResult, null!));
 
       // Act
       var result = await _blobStorageService.DownloadFile(fileName);
@@ -130,7 +120,7 @@ namespace EPR.Calculator.API.UnitTests.Services
     {
       // Arrange
       var fileName = "test.txt";
-      _mockBlobClient.Setup(x => x.ExistsAsync(default)).ReturnsAsync(Response.FromValue(false, null));
+      _mockBlobClient.Setup(x => x.ExistsAsync(default)).ReturnsAsync(Response.FromValue(false, null!));
 
       // Act
       var result = await _blobStorageService.DownloadFile(fileName);
