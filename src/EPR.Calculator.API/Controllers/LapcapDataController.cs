@@ -110,9 +110,7 @@ namespace EPR.Calculator.API.Controllers
                     return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
                 }
             
-                var _lapcappramSettingDetails = await this.context.LapcapDataDetail
-                    .Where(x => x.LapcapDataMasterId == currentDefaultSetting.Id)
-                    .ToListAsync();
+                var _lapcappramSettingDetails = await this.context.LapcapDataDetail.Where(x => x.LapcapDataMasterId == currentDefaultSetting.Id).ToListAsync();
                 var _lapcaptemplateDetails = await this.context.LapcapDataTemplateMaster.ToListAsync();
                 var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(currentDefaultSetting, _lapcaptemplateDetails);
                 return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
