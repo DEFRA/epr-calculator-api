@@ -182,6 +182,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("organisation_name");
 
                     b.Property<string>("SubmissionPeriodDesc")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
 
@@ -278,11 +279,13 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("packaging_type");
 
                     b.Property<string>("SubmissionPeriod")
+                        .IsRequired()
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("submission_period");
 
                     b.Property<string>("SubmissionPeriodDesc")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
 
@@ -1334,11 +1337,13 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("packaging_type");
 
                     b.Property<string>("SubmissionPeriod")
+                        .IsRequired()
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("submission_period");
 
                     b.Property<string>("SubmissionPeriodDesc")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
 
