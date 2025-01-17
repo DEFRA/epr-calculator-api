@@ -53,9 +53,16 @@ builder.Services.AddScoped<ICalcResultParameterOtherCostBuilder, CalcResultParam
 builder.Services.AddScoped<ICalcResultCommsCostBuilder, CalcResultCommsCostBuilder>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
+
+// Configure the database context.
+int.TryParse(
+    builder.Configuration.GetSection("Timeouts").GetSection("DbCommand").Value,
+    out int commandTimeout);
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlServerOptions => sqlServerOptions.CommandTimeout(commandTimeout));
 });
 
 builder.Services.Configure<BlobStorageSettings>(
@@ -118,11 +125,10 @@ builder.Services.AddProblemDetails();
 
 // Configure endpoint timeout policies.
 int.TryParse(
-    builder.Configuration.GetSection("EndpointTimeouts").GetSection("PrepareCalcResults").Value,
+    builder.Configuration.GetSection("Timeouts").GetSection("PrepareCalcResults").Value,
     out int prepareCalcResultsTimeout);
 builder.Services.AddRequestTimeouts(options => 
 {
-    options.DefaultPolicy = new RequestTimeoutPolicy { Timeout = TimeSpan.FromMilliseconds(1500) };
     options.AddPolicy("PrepareCalcResults", TimeSpan.FromMinutes(prepareCalcResultsTimeout));
 });
 
