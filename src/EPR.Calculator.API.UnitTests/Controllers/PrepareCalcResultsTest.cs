@@ -15,6 +15,7 @@ using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -50,7 +51,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             mockExporter.Setup(x => x.Export(It.IsAny<CalcResult>())).Returns("Somevalue");
             wrapper = new Mock<IOrgAndPomWrapper>().Object;
             var transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
-            transposePomAndOrgDataService.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(true);
+            transposePomAndOrgDataService.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
             mockStorageservice = new Mock<IStorageService>();
             mockStorageservice.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
@@ -64,6 +65,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                transposePomAndOrgDataService.Object,
                mockStorageservice.Object
             );
+            controller.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();
             mockLapcapBuilder = new Mock<ICalcResultLapcapDataBuilder>();
