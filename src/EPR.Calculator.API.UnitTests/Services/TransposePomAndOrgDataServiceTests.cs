@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
+using Microsoft.ApplicationInsights;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -74,7 +75,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
-            service.Transpose(resultsRequestDto);
+            service.Transpose(resultsRequestDto, new TelemetryClient());
 
             var producerDetail = _context.ProducerDetail.FirstOrDefault();
             Assert.IsNotNull(producerDetail);
@@ -115,7 +116,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
-            service.Transpose(resultsRequestDto);
+            service.Transpose(resultsRequestDto, new TelemetryClient());
 
             var producerReportedMaterial = _context.ProducerReportedMaterial.FirstOrDefault();
             Assert.IsNotNull(producerReportedMaterial);
@@ -143,7 +144,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
-            service.Transpose(resultsRequestDto);
+            service.Transpose(resultsRequestDto, new TelemetryClient());
 
             var producerDetail = _context.ProducerDetail.FirstOrDefault(t=>t.SubsidiaryId != null);
             Assert.IsNotNull(producerDetail);
@@ -169,7 +170,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
-            service.Transpose(resultsRequestDto);
+            service.Transpose(resultsRequestDto, new TelemetryClient());
 
             var producerDetail = _context.ProducerDetail.FirstOrDefault();
             Assert.IsNotNull(producerDetail);

@@ -15,6 +15,7 @@ using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -65,7 +66,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                mockExporter.Object,
                transposePomAndOrgDataService.Object,
                mockStorageservice.Object,
-               mockValidator.Object
+               mockValidator.Object,
+               new TelemetryClient()
             );
 
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();
@@ -94,7 +96,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
-            this.transposePomAndOrgDataService.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(true);
+            this.transposePomAndOrgDataService.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>(), It.IsAny<TelemetryClient>())).ReturnsAsync(true);
             var requestDto = new CalcResultsRequestDto() { RunId = 4 };
             var calcResult = new CalcResult
             {

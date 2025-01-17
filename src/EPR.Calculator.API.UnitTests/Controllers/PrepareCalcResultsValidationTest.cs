@@ -7,6 +7,7 @@ using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -37,7 +38,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             _runValidator = new CalculatorRunValidator();
             var mockStorageService = new Mock<IStorageService>();
             controller = new CalculatorInternalController(_context, _rpdStatusDataValidator.Object, _wrapper.Object,
-                _builder.Object, _exporter.Object, _transposePomAndOrgDataService.Object, mockStorageService.Object, _runValidator);
+                _builder.Object, _exporter.Object, _transposePomAndOrgDataService.Object, mockStorageService.Object, _runValidator, new TelemetryClient());
         }
 
         [TestMethod]

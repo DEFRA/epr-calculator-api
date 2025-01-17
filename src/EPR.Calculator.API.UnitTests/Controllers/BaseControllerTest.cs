@@ -15,6 +15,7 @@ using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Services;
+using Microsoft.ApplicationInsights;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -59,7 +60,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
                 new Mock<IStorageService>().Object,
-                new Mock<CalculatorRunValidator>().Object
+                new Mock<CalculatorRunValidator>().Object,
+                new TelemetryClient()
             );
 
             var mockStorageService = new Mock<IStorageService>();

@@ -11,6 +11,7 @@ using EPR.Calculator.API.UnitTests.Controllers;
 using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Amqp.Transaction;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -196,7 +197,8 @@ namespace EPR.Calculator.API.UnitTests
                     new Mock<ICalcResultsExporter<CalcResult>>().Object,
                     new Mock<ITransposePomAndOrgDataService>().Object,
                     new Mock<IStorageService>().Object,
-                    new Mock<CalculatorRunValidator>().Object
+                    new Mock<CalculatorRunValidator>().Object,
+                    new TelemetryClient()
                 );
 
                 var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
@@ -288,10 +290,11 @@ namespace EPR.Calculator.API.UnitTests
                mockExporter.Object,
                mockTranspose.Object,
                mockStorageService.Object,
-               mockValidator.Object
+               mockValidator.Object,
+               new TelemetryClient()
             );
 
-            mockTranspose.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(true);
+            mockTranspose.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>(), It.IsAny<TelemetryClient>())).ReturnsAsync(true);
             mockStorageService.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).ReturnsAsync(calcResult);
@@ -319,7 +322,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
                 new Mock<IStorageService>().Object,
-                new Mock<CalculatorRunValidator>().Object
+                new Mock<CalculatorRunValidator>().Object,
+                new TelemetryClient()
 
             );
 
