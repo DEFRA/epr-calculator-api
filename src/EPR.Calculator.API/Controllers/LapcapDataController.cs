@@ -97,22 +97,23 @@ namespace EPR.Calculator.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+                return BadRequest(ModelState.Values.SelectMany(x => x.Errors));
             }
 
             try
             {
-                var currentDefaultSetting = await this.context.LapcapDataMaster
+                var currentDefaultSetting = await context.LapcapDataMaster
                     .SingleOrDefaultAsync(setting => setting.EffectiveTo == null && setting.ProjectionYear == parameterYear);
 
                 if (currentDefaultSetting == null)
                 {
-                    return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
+                    return NotFound("No data available for the specified year. Please check the year and try again.");
                 }
-            
-                var lapcapTemplateDetails = await this.context.LapcapDataTemplateMaster.ToListAsync();
+
+                var lapcapTemplateDetails = await context.LapcapDataTemplateMaster.ToListAsync();
                 var lapcapDataValues = LapcapDataParameterSettingMapper.Map(currentDefaultSetting, lapcapTemplateDetails);
-                return new ObjectResult(lapcapDataValues) { StatusCode = StatusCodes.Status200OK };
+                
+                return Ok(lapcapDataValues);
             }
             catch (Exception exception)
             {
