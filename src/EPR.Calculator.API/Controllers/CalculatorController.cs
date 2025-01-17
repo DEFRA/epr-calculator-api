@@ -215,7 +215,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpPut]
-        [Route("calculatorRun")]
+        [Route("calculatorRuns")]
         public IActionResult PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
             if (!ModelState.IsValid)
@@ -262,7 +262,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("checkCalcNameExists/{name}")]
+        [Route("CheckCalcNameExists/{name}")]
         public async Task<IActionResult> GetCalculatorRunByName([FromRoute] string name)
         {
             if (!ModelState.IsValid)
@@ -287,7 +287,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("downloadResult/{runId}")]
+        [Route("DownloadResult/{runId}")]
         public async Task<IResult> DownloadResultFile(int runId)
         {
             if (!ModelState.IsValid)
