@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using Microsoft.ApplicationInsights;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services
@@ -31,13 +32,14 @@ namespace EPR.Calculator.API.Services
             this.context = context;
         }
 
-        public async Task<bool> Transpose(CalcResultsRequestDto resultsRequestDto)
+        public async Task<bool> Transpose(CalcResultsRequestDto resultsRequestDto, TelemetryClient telemetryClient)
         {
             var newProducerDetails = new List<ProducerDetail>();
             var newProducerReportedMaterials = new List<ProducerReportedMaterial>();
 
             var result = false;
-            
+
+            telemetryClient.TrackTrace("Getting data from pom and org tables.");
             var calcRunPomOrgDatadetails = await (from run in this.context.CalculatorRuns
                                             join pomMaster in this.context.CalculatorRunPomDataMaster on run.CalculatorRunPomDataMasterId equals pomMaster.Id
                                             join orgMaster in this.context.CalculatorRunOrganisationDataMaster on run.CalculatorRunOrganisationDataMasterId equals orgMaster.Id
@@ -52,7 +54,8 @@ namespace EPR.Calculator.API.Services
                                                 orgDetail,
                                                 pomDetail
                                             }).ToListAsync();
-            
+
+            telemetryClient.TrackTrace("Getting materials.");
             var materials = await this.context.Material.ToListAsync();
 
             var calculatorRun = calcRunPomOrgDatadetails.Select(x => x.run).Distinct().Single();
@@ -63,6 +66,7 @@ namespace EPR.Calculator.API.Services
             {
                 var organisationDataMaster = calcRunPomOrgDatadetails.Select(x => x.orgMaster).Distinct().Single();
 
+                telemetryClient.TrackTrace("Getting submission period details.");
                 var SubmissionPeriodDetails = (from s in calculatorRunPomDataDetails
                                                where s.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId
                                                select new SubmissionDetails
@@ -84,6 +88,7 @@ namespace EPR.Calculator.API.Services
                     .ToList();
 
                 // Get the calculator run pom data master record based on the CalculatorRunPomDataMasterId
+                telemetryClient.TrackTrace("Getting calculator run pom data master record.");
                 var pomDataMaster = calcRunPomOrgDatadetails.Select(x => x.pomMaster).Distinct().Single();
 
 
@@ -160,6 +165,7 @@ namespace EPR.Calculator.API.Services
                     }
                 }
 
+                telemetryClient.TrackTrace("Saving new producer detail and materials.");
                 result = await SaveNewProducerDetailAndMaterialsAsync(newProducerDetails, newProducerReportedMaterials);
             }
             return result;

@@ -10,6 +10,7 @@ using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
@@ -28,6 +29,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly ITransposePomAndOrgDataService transposePomAndOrgDataService;
         private readonly IStorageService storageService;
         private readonly CalculatorRunValidator validatior;
+        private readonly TelemetryClient telemetryClient;
 
         public CalculatorInternalController(ApplicationDBContext context,
                                             IRpdStatusDataValidator rpdStatusDataValidator,
@@ -35,7 +37,8 @@ namespace EPR.Calculator.API.Controllers
                                             ICalcResultBuilder builder,
                                             ICalcResultsExporter<CalcResult> exporter,
                                             ITransposePomAndOrgDataService transposePomAndOrgDataService,
-                                            IStorageService storageService,CalculatorRunValidator validationRules)
+                                            IStorageService storageService,CalculatorRunValidator validationRules,
+                                            TelemetryClient telemetryClient)
         {
             this.context = context;
             this.rpdStatusDataValidator = rpdStatusDataValidator;
@@ -45,6 +48,7 @@ namespace EPR.Calculator.API.Controllers
             this.transposePomAndOrgDataService = transposePomAndOrgDataService;
             this.storageService = storageService;
             this.validatior = validationRules;
+            this.telemetryClient = telemetryClient;
         }
 
         [HttpPost]
@@ -163,6 +167,7 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
+            telemetryClient.TrackTrace($"Looking for run with ID {resultsRequestDto.RunId}.");
             var calculatorRun = this.context.CalculatorRuns.SingleOrDefault(run => run.Id == resultsRequestDto.RunId);
             if (calculatorRun == null)
             {
@@ -171,7 +176,7 @@ namespace EPR.Calculator.API.Controllers
             }
 
             // Validate the result for all the required IDs
-
+            telemetryClient.TrackTrace("Validating IDs");
             var validationResult = validatior.ValidateCalculatorRunIds(calculatorRun);
             if (!validationResult.IsValid)
             {
@@ -180,21 +185,31 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
+                telemetryClient.TrackTrace("Transposing.");
+                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(
+                    resultsRequestDto,
+                    telemetryClient);
                 if (isTransposeSuccessful)
                 {
                     var results = await this.builder.Build(resultsRequestDto);
                     var exportedResults = this.exporter.Export(results);
 
+                    telemetryClient.TrackTrace("Results of transpose:");
+                    telemetryClient.TrackTrace($"RunId: {results.CalcResultDetail.RunId}");
+                    telemetryClient.TrackTrace($"RunName: {results.CalcResultDetail.RunName}");
+                    telemetryClient.TrackTrace($"RunDate: {results.CalcResultDetail.RunDate}");
+
                     var fileName = new CalcResultsFileName(
                         results.CalcResultDetail.RunId,
                         results.CalcResultDetail.RunName,
                         results.CalcResultDetail.RunDate);
+                    telemetryClient.TrackTrace("Uploading result file.");
                     var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
 
                     if (resultsFileWritten)
                     {
                         calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
+                        telemetryClient.TrackTrace("Successful, updating calculation run record.");
                         this.context.CalculatorRuns.Update(calculatorRun);
                         await this.context.SaveChangesAsync();
                         return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
@@ -204,11 +219,13 @@ namespace EPR.Calculator.API.Controllers
             catch (Exception exception)
             {
                 calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
+                telemetryClient.TrackTrace("Exception thrown, updating calculator run record.");
                 this.context.CalculatorRuns.Update(calculatorRun);
                 await this.context.SaveChangesAsync();
                 return StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
+            telemetryClient.TrackTrace("Error occured, updating calculation run record.");
             this.context.CalculatorRuns.Update(calculatorRun);
             await this.context.SaveChangesAsync();
             return StatusCode(StatusCodes.Status500InternalServerError);
