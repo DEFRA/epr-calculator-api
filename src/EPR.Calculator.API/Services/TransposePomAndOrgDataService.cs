@@ -39,32 +39,20 @@ namespace EPR.Calculator.API.Services
 
             var result = false;
 
-            telemetryClient.TrackTrace("Getting data from pom and org tables.");
-            var calcRunPomOrgDatadetails = await (from run in this.context.CalculatorRuns
-                                            join pomMaster in this.context.CalculatorRunPomDataMaster on run.CalculatorRunPomDataMasterId equals pomMaster.Id
-                                            join orgMaster in this.context.CalculatorRunOrganisationDataMaster on run.CalculatorRunOrganisationDataMasterId equals orgMaster.Id
-                                            join pomDetail in this.context.CalculatorRunPomDataDetails on pomMaster.Id equals pomDetail.CalculatorRunPomDataMasterId
-                                            join orgDetail in this.context.CalculatorRunOrganisationDataDetails on orgMaster.Id equals orgDetail.CalculatorRunOrganisationDataMasterId
-                                            where run.Id == resultsRequestDto.RunId
-                                            select new
-                                            {
-                                                run,
-                                                pomMaster,
-                                                orgMaster,
-                                                orgDetail,
-                                                pomDetail
-                                            }).ToListAsync();
+            telemetryClient.TrackTrace("Getting data CalculatorRuns");
+            var calculatorRun = await context.CalculatorRuns.Where(x => x.Id == resultsRequestDto.RunId).SingleAsync();
+            telemetryClient.TrackTrace("Getting data CalculatorRunPomDataDetails");
+            var calculatorRunPomDataDetails = await context.CalculatorRunPomDataDetails.Where(x => x.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId).OrderBy(x => x.SubmissionPeriodDesc).ToListAsync();
+            telemetryClient.TrackTrace("Getting data from CalculatorRunOrganisationDataDetails");
+            var calculatorRunOrgDataDetails = await context.CalculatorRunOrganisationDataDetails.Where(x => x.CalculatorRunOrganisationDataMasterId == calculatorRun.CalculatorRunOrganisationDataMasterId).OrderBy(x => x.SubmissionPeriodDesc).ToListAsync();
 
             telemetryClient.TrackTrace("Getting materials.");
             var materials = await this.context.Material.ToListAsync();
 
-            var calculatorRun = calcRunPomOrgDatadetails.Select(x => x.run).Distinct().Single();
-            var calculatorRunPomDataDetails = calcRunPomOrgDatadetails.Select(x => x.pomDetail).Distinct();
-            var calculatorRunOrgDataDetails = calcRunPomOrgDatadetails.Select(x => x.orgDetail).Distinct();
-
             if (calculatorRun.CalculatorRunPomDataMasterId != null)
             {
-                var organisationDataMaster = calcRunPomOrgDatadetails.Select(x => x.orgMaster).Distinct().Single();
+                telemetryClient.TrackTrace("Getting data from CalculatorRunOrganisationDataMaster.");
+                var organisationDataMaster = await context.CalculatorRunOrganisationDataMaster.SingleAsync(x => x.Id == calculatorRun.CalculatorRunOrganisationDataMasterId);
 
                 telemetryClient.TrackTrace("Getting submission period details.");
                 var SubmissionPeriodDetails = (from s in calculatorRunPomDataDetails
@@ -89,7 +77,7 @@ namespace EPR.Calculator.API.Services
 
                 // Get the calculator run pom data master record based on the CalculatorRunPomDataMasterId
                 telemetryClient.TrackTrace("Getting calculator run pom data master record.");
-                var pomDataMaster = calcRunPomOrgDatadetails.Select(x => x.pomMaster).Distinct().Single();
+                var pomDataMaster = await context.CalculatorRunPomDataMaster.SingleAsync(x => x.Id == calculatorRun.CalculatorRunPomDataMasterId);
 
 
                 foreach (var organisation in organisationDataDetails.Where(t => !string.IsNullOrWhiteSpace(t.OrganisationName)))
