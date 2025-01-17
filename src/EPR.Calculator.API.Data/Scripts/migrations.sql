@@ -926,14 +926,14 @@ BEGIN
     (N''ENG-PL'', N''England'', N''Plastic'', 0.0, 999999999.99),
     (N''ENG-ST'', N''England'', N''Steel'', 0.0, 999999999.99),
     (N''ENG-WD'', N''England'', N''Wood'', 0.0, 999999999.99),
-    (N''NI-AL'', N''Northern Ireland'', N''Aluminium'', 0.0, 999999999.99),
-    (N''NI-FC'', N''Northern Ireland'', N''Fibre composite'', 0.0, 999999999.99),
-    (N''NI-GL'', N''Northern Ireland'', N''Glass'', 0.0, 999999999.99),
-    (N''NI-OT'', N''Northern Ireland'', N''Other'', 0.0, 999999999.99),
-    (N''NI-PC'', N''Northern Ireland'', N''Paper or card'', 0.0, 999999999.99),
-    (N''NI-PL'', N''Northern Ireland'', N''Plastic'', 0.0, 999999999.99),
-    (N''NI-ST'', N''Northern Ireland'', N''Steel'', 0.0, 999999999.99),
-    (N''NI-WD'', N''Northern Ireland'', N''Wood'', 0.0, 999999999.99),
+    (N''NI-AL'', N''NI'', N''Aluminium'', 0.0, 999999999.99),
+    (N''NI-FC'', N''NI'', N''Fibre composite'', 0.0, 999999999.99),
+    (N''NI-GL'', N''NI'', N''Glass'', 0.0, 999999999.99),
+    (N''NI-OT'', N''NI'', N''Other'', 0.0, 999999999.99),
+    (N''NI-PC'', N''NI'', N''Paper or card'', 0.0, 999999999.99),
+    (N''NI-PL'', N''NI'', N''Plastic'', 0.0, 999999999.99),
+    (N''NI-ST'', N''NI'', N''Steel'', 0.0, 999999999.99),
+    (N''NI-WD'', N''NI'', N''Wood'', 0.0, 999999999.99),
     (N''SCT-AL'', N''Scotland'', N''Aluminium'', 0.0, 999999999.99),
     (N''SCT-FC'', N''Scotland'', N''Fibre composite'', 0.0, 999999999.99),
     (N''SCT-GL'', N''Scotland'', N''Glass'', 0.0, 999999999.99),
@@ -1260,15 +1260,16 @@ IF NOT EXISTS (
 )
 BEGIN
     CREATE TABLE [pom_data] (
-        [organisation_id] nvarchar(400) NULL,
-        [subsidiary_id] nvarchar(400) NULL,
-        [submission_period] nvarchar(400) NULL,
+        [organisation_id] nvarchar(400) NOT NULL,
+        [subsidiary_id] nvarchar(400) NOT NULL,
+        [submission_period] nvarchar(400) NOT NULL,
         [packaging_activity] nvarchar(400) NULL,
         [packaging_type] nvarchar(400) NULL,
         [packaging_class] nvarchar(400) NULL,
         [packaging_material] nvarchar(400) NULL,
         [packaging_material_weight] nvarchar(400) NULL,
         [load_ts] datetime2 NOT NULL,
+        CONSTRAINT [PK_pom_data] PRIMARY KEY ([organisation_id], [subsidiary_id])
     );
 END;
 GO
@@ -1296,16 +1297,17 @@ IF NOT EXISTS (
 )
 BEGIN
     CREATE TABLE [calculator_run_pom_data_detail] (
-        [organisation_id] int NULL,
-        [subsidiary_id] nvarchar(400) NULL,
-        [submission_period] nvarchar(400) NULL,
+        [organisation_id] nvarchar(400) NOT NULL,
+        [subsidiary_id] nvarchar(400) NOT NULL,
+        [submission_period] nvarchar(400) NOT NULL,
         [packaging_activity] nvarchar(400) NULL,
         [packaging_type] nvarchar(400) NULL,
         [packaging_class] nvarchar(400) NULL,
         [packaging_material] nvarchar(400) NULL,
-        [packaging_material_weight] float NULL,
+        [packaging_material_weight] nvarchar(400) NULL,
         [load_ts] datetime2 NOT NULL,
         [calculator_run_pom_data_master_id] int NOT NULL,
+        CONSTRAINT [PK_calculator_run_pom_data_detail] PRIMARY KEY ([organisation_id], [subsidiary_id]),
         CONSTRAINT [FK_calculator_run_pom_data_detail_calculator_run_pom_data_master_calculator_run_pom_data_master_id] FOREIGN KEY ([calculator_run_pom_data_master_id]) REFERENCES [calculator_run_pom_data_master] ([id]) ON DELETE CASCADE
     );
 END;
@@ -2556,7 +2558,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
 )
 BEGIN
-    ALTER TABLE [pom_data] ADD [submission_period_desc] nvarchar(max) NULL DEFAULT N'';
+    ALTER TABLE [pom_data] ADD [submission_period_desc] nvarchar(max) NOT NULL DEFAULT N'';
 END;
 GO
 
@@ -2574,7 +2576,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
 )
 BEGIN
-    ALTER TABLE [calculator_run_pom_data_detail] ADD [submission_period_desc] nvarchar(max) NULL DEFAULT N'';
+    ALTER TABLE [calculator_run_pom_data_detail] ADD [submission_period_desc] nvarchar(max) NOT NULL DEFAULT N'';
 END;
 GO
 
@@ -2910,6 +2912,110 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241120130054_LapCapNorthernIrelandRename'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [country] = N''Northern Ireland''
+    WHERE [unique_ref] = N''NI-AL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241120130054_LapCapNorthernIrelandRename'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [country] = N''Northern Ireland''
+    WHERE [unique_ref] = N''NI-FC'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241120130054_LapCapNorthernIrelandRename'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [country] = N''Northern Ireland''
+    WHERE [unique_ref] = N''NI-GL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241120130054_LapCapNorthernIrelandRename'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [country] = N''Northern Ireland''
+    WHERE [unique_ref] = N''NI-OT'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241120130054_LapCapNorthernIrelandRename'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [country] = N''Northern Ireland''
+    WHERE [unique_ref] = N''NI-PC'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241120130054_LapCapNorthernIrelandRename'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [country] = N''Northern Ireland''
+    WHERE [unique_ref] = N''NI-PL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241120130054_LapCapNorthernIrelandRename'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [country] = N''Northern Ireland''
+    WHERE [unique_ref] = N''NI-ST'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241120130054_LapCapNorthernIrelandRename'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [country] = N''Northern Ireland''
+    WHERE [unique_ref] = N''NI-WD'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20241120130054_LapCapNorthernIrelandRename'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20241120130054_LapCapNorthernIrelandRename', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241129145454_AddNewClassficationStatus'
 )
 BEGIN
@@ -2929,6 +3035,97 @@ IF NOT EXISTS (
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
     VALUES (N'20241129145454_AddNewClassficationStatus', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250117164554_AllowNullSubmissionPeriodForPom'
+)
+BEGIN
+    DECLARE @var20 sysname;
+    SELECT @var20 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[pom_data]') AND [c].[name] = N'submission_period_desc');
+    IF @var20 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT [' + @var20 + '];');
+    ALTER TABLE [pom_data] ALTER COLUMN [submission_period_desc] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250117164554_AllowNullSubmissionPeriodForPom'
+)
+BEGIN
+    DECLARE @var21 sysname;
+    SELECT @var21 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[pom_data]') AND [c].[name] = N'submission_period');
+    IF @var21 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT [' + @var21 + '];');
+    ALTER TABLE [pom_data] ALTER COLUMN [submission_period] nvarchar(400) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250117164554_AllowNullSubmissionPeriodForPom'
+)
+BEGIN
+    DECLARE @var22 sysname;
+    SELECT @var22 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_pom_data_detail]') AND [c].[name] = N'submission_period_desc');
+    IF @var22 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT [' + @var22 + '];');
+    ALTER TABLE [calculator_run_pom_data_detail] ALTER COLUMN [submission_period_desc] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250117164554_AllowNullSubmissionPeriodForPom'
+)
+BEGIN
+    DECLARE @var23 sysname;
+    SELECT @var23 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_pom_data_detail]') AND [c].[name] = N'submission_period');
+    IF @var23 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT [' + @var23 + '];');
+    ALTER TABLE [calculator_run_pom_data_detail] ALTER COLUMN [submission_period] nvarchar(400) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250117164554_AllowNullSubmissionPeriodForPom'
+)
+BEGIN
+    DECLARE @var24 sysname;
+    SELECT @var24 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organization_data_detail]') AND [c].[name] = N'submission_period_desc');
+    IF @var24 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT [' + @var24 + '];');
+    ALTER TABLE [calculator_run_organization_data_detail] ALTER COLUMN [submission_period_desc] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250117164554_AllowNullSubmissionPeriodForPom'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250117164554_AllowNullSubmissionPeriodForPom', N'8.0.7');
 END;
 GO
 
