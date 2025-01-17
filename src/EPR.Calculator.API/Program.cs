@@ -20,6 +20,7 @@ using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Http.Timeouts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using System.Configuration;
@@ -114,6 +115,17 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+
+// Configure endpoint timeout policies.
+int.TryParse(
+    builder.Configuration.GetSection("EndpointTimeouts").GetSection("PrepareCalcResults").Value,
+    out int prepareCalcResultsTimeout);
+builder.Services.AddRequestTimeouts(options => 
+{
+    options.DefaultPolicy = new RequestTimeoutPolicy { Timeout = TimeSpan.FromMilliseconds(1500) };
+    options.AddPolicy("PrepareCalcResults", TimeSpan.FromMinutes(prepareCalcResultsTimeout));
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -127,5 +139,6 @@ app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.MapControllers();
 app.UseCors(CommonConstants.PolicyName);
+app.UseRequestTimeouts();
 
 app.Run();

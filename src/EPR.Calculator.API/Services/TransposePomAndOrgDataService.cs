@@ -31,7 +31,7 @@ namespace EPR.Calculator.API.Services
             this.context = context;
         }
 
-        public async Task<bool> Transpose(CalcResultsRequestDto resultsRequestDto)
+        public async Task<bool> Transpose(CalcResultsRequestDto resultsRequestDto, CancellationToken cancellationToken)
         {
             var newProducerDetails = new List<ProducerDetail>();
             var newProducerReportedMaterials = new List<ProducerReportedMaterial>();
@@ -51,9 +51,9 @@ namespace EPR.Calculator.API.Services
                                                 orgMaster,
                                                 orgDetail,
                                                 pomDetail
-                                            }).ToListAsync();
+                                            }).ToListAsync(cancellationToken);
             
-            var materials = await this.context.Material.ToListAsync();
+            var materials = await this.context.Material.ToListAsync(cancellationToken);
 
             var calculatorRun = calcRunPomOrgDatadetails.Select(x => x.run).Distinct().Single();
             var calculatorRunPomDataDetails = calcRunPomOrgDatadetails.Select(x => x.pomDetail).Distinct();

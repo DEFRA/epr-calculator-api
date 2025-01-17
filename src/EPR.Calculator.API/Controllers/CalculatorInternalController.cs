@@ -9,6 +9,7 @@ using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using Microsoft.AspNetCore.Http.Timeouts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -152,6 +153,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("prepareCalcResults")]
+        [RequestTimeout("PrepareCalcResults")]
         public async Task<IActionResult> PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
             if (!ModelState.IsValid)
@@ -168,7 +170,9 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
+                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(
+                    resultsRequestDto,
+                    HttpContext.RequestAborted);
                 if (isTransposeSuccessful)
                 {
                     var results = await this.builder.Build(resultsRequestDto);
@@ -184,7 +188,7 @@ namespace EPR.Calculator.API.Controllers
                     {
                         calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
                         this.context.CalculatorRuns.Update(calculatorRun);
-                        await this.context.SaveChangesAsync();
+                        await this.context.SaveChangesAsync(HttpContext.RequestAborted);
                         return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
                     }
                 }
@@ -193,12 +197,12 @@ namespace EPR.Calculator.API.Controllers
             {
                 calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
                 this.context.CalculatorRuns.Update(calculatorRun);
-                await this.context.SaveChangesAsync();
+                await this.context.SaveChangesAsync(HttpContext.RequestAborted);
                 return StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
             this.context.CalculatorRuns.Update(calculatorRun);
-            await this.context.SaveChangesAsync();
+            await this.context.SaveChangesAsync(HttpContext.RequestAborted);
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
