@@ -23,7 +23,7 @@ namespace EPR.Calculator.API.Controllers
         [HttpPost]
         [Route("lapcapData")]
         [Authorize(Roles = "SASuperUser")]
-        public IActionResult Create([FromBody] CreateLapcapDataDto request)
+        public async Task<IActionResult> Create([FromBody] CreateLapcapDataDto request)
         {
             var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
@@ -42,7 +42,7 @@ namespace EPR.Calculator.API.Controllers
                 return BadRequest(validationResult.Errors);
             }
             var templateMaster = context.LapcapDataTemplateMaster.ToList();
-            using (var transaction = context.Database.BeginTransaction())
+            using (var transaction = await context.Database.BeginTransactionAsync())
             {
                 try
                 {
@@ -58,26 +58,26 @@ namespace EPR.Calculator.API.Controllers
                         LapcapFileName = request.LapcapFileName,
                         ProjectionYear = request.ParameterYear
                     };
-                    this.context.LapcapDataMaster.Add(lapcapDataMaster);
+                    await this.context.LapcapDataMaster.AddAsync(lapcapDataMaster);
 
                     foreach (var templateValue in request.LapcapDataTemplateValues)
                     {
                         var uniqueReference = templateMaster.Single(x =>
                             x.Material == templateValue.Material && x.Country == templateValue.CountryName).UniqueReference;
 
-                        this.context.LapcapDataDetail.Add(new LapcapDataDetail
+                        await this.context.LapcapDataDetail.AddAsync(new LapcapDataDetail
                         {
                             TotalCost = decimal.Parse(templateValue.TotalCost.Replace("£", string.Empty)),
                             UniqueReference = uniqueReference,
                             LapcapDataMaster = lapcapDataMaster
                         });
                     }
-                    this.context.SaveChanges();
-                    transaction.Commit();
+                    await this.context.SaveChangesAsync();
+                    await transaction.CommitAsync();
                 }
                 catch (Exception exception)
                 {
-                    transaction.Rollback();
+                    await transaction.RollbackAsync();
                     return StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
             }

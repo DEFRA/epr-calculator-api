@@ -5,6 +5,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 
 namespace EPR.Calculator.API.Controllers
@@ -25,7 +26,7 @@ namespace EPR.Calculator.API.Controllers
         [HttpPost]
         [Route("defaultParameterSetting")]
         [Authorize(Roles = "SASuperUser")]
-        public IActionResult Create([FromBody] CreateDefaultParameterSettingDto request)
+        public async Task<IActionResult> Create([FromBody] CreateDefaultParameterSettingDto request)
         {
             var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
@@ -44,11 +45,11 @@ namespace EPR.Calculator.API.Controllers
                 return BadRequest(validationResult.Errors);
             }
 
-            using (var transaction = _context.Database.BeginTransaction())
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    var oldDefaultSettings = this._context.DefaultParameterSettings.Where(x => x.EffectiveTo == null).ToList();
+                    var oldDefaultSettings = await _context.DefaultParameterSettings.Where(x => x.EffectiveTo == null).ToListAsync();
                     oldDefaultSettings.ForEach(x => { x.EffectiveTo = DateTime.Now; });
 
                     var defaultParamSettingMaster = new DefaultParameterSettingMaster
@@ -60,23 +61,25 @@ namespace EPR.Calculator.API.Controllers
                         ParameterYear = request.ParameterYear,
                         ParameterFileName = request.ParameterFileName
                     };
-                    this._context.DefaultParameterSettings.Add(defaultParamSettingMaster);
+                    await _context.DefaultParameterSettings.AddAsync(defaultParamSettingMaster);
 
-                    foreach (var templateValue in request.SchemeParameterTemplateValues)
+                    var defaultParameterSettingDetails = request.SchemeParameterTemplateValues
+                    .Select(templateValue => new DefaultParameterSettingDetail
                     {
-                        this._context.DefaultParameterSettingDetail.Add(new DefaultParameterSettingDetail
-                        {
-                            ParameterValue = decimal.Parse(templateValue.ParameterValue.TrimEnd('%').Replace("£", string.Empty)),
-                            ParameterUniqueReferenceId = templateValue.ParameterUniqueReferenceId,
-                            DefaultParameterSettingMaster = defaultParamSettingMaster
-                        });
-                    }
-                    this._context.SaveChanges();
-                    transaction.Commit();
+                        ParameterValue = decimal.Parse(templateValue.ParameterValue.TrimEnd('%').Replace("£", string.Empty)),
+                        ParameterUniqueReferenceId = templateValue.ParameterUniqueReferenceId,
+                        DefaultParameterSettingMaster = defaultParamSettingMaster
+                    })
+                    .ToList();
+
+                    await _context.DefaultParameterSettingDetail.AddRangeAsync(defaultParameterSettingDetails);
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
                 }
                 catch (Exception exception)
                 {
-                    transaction.Rollback();
+                    await transaction.RollbackAsync();
                     return StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
             }
@@ -87,25 +90,29 @@ namespace EPR.Calculator.API.Controllers
         [HttpGet]
         [Route("defaultParameterSetting/{parameterYear}")]
         [Authorize(Roles = "SASuperUser")]
-        public IActionResult Get([FromRoute] string parameterYear)
+        public async Task<IActionResult> Get([FromRoute] string parameterYear)
         {
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
-
-            var currentDefaultSetting = _context.DefaultParameterSettings
-                .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == parameterYear);
-
-            if (currentDefaultSetting == null)
-            {
-                return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
-            }
-
+            
             try
             {
-                var _pramSettingDetails = _context.DefaultParameterSettingDetail.Where(x => x.DefaultParameterSettingMasterId == currentDefaultSetting.Id).ToList();
-                var _templateDetails = _context.DefaultParameterTemplateMasterList.ToList();
+                var currentDefaultSetting = await _context.DefaultParameterSettings
+                    .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.ParameterYear == parameterYear);
+
+                if (currentDefaultSetting == null)
+                {
+                    return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
+                }
+            
+                var _pramSettingDetails = await _context.DefaultParameterSettingDetail
+                    .Where(x => x.DefaultParameterSettingMasterId == currentDefaultSetting.Id)
+                    .ToListAsync();
+
+                var _templateDetails = await _context.DefaultParameterTemplateMasterList.ToListAsync();
+
                 var schemeParameters = CreateDefaultParameterSettingMapper.Map(currentDefaultSetting, _templateDetails);
                 return new ObjectResult(schemeParameters) { StatusCode = StatusCodes.Status200OK };
             }
@@ -113,7 +120,6 @@ namespace EPR.Calculator.API.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
-
         }
     }
 }

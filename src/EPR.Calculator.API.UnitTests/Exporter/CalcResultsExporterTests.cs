@@ -74,7 +74,7 @@ namespace EPR.Calculator.API.UnitTests.Exporter
             var exporter = new CalcResultsExporter();
 
             // Act & Assert
-            var ex = Assert.ThrowsException<ArgumentNullException>(() => exporter.Export(results));
+            var ex = Assert.ThrowsException<ArgumentNullException>(() => exporter.Export(results!));
             Assert.AreEqual("results", ex.ParamName);
         }
 
