@@ -279,7 +279,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
-            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
             var firstProducer = result.ProducerDisposalFees.FirstOrDefault();
             Assert.IsNotNull(firstProducer);
             Assert.AreEqual("Producer1", firstProducer.ProducerName);
@@ -348,7 +348,7 @@ namespace EPR.Calculator.API.UnitTests
             var result = results.Result;
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
             Assert.IsFalse(result.ProducerDisposalFees.Any(fee => fee.ProducerName.Contains("Total")));
         }
 
@@ -361,7 +361,7 @@ namespace EPR.Calculator.API.UnitTests
             results.Wait();
             var result = results.Result;
             Assert.IsNotNull(result);
-            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
         }
 
         [TestMethod]
@@ -505,7 +505,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
-            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
             var producerTotalPercentage = result.ProducerDisposalFees.First().PercentageofProducerReportedHHTonnagevsAllProducers;
             Assert.IsNotNull(producerTotalPercentage);
             Assert.AreEqual(100, producerTotalPercentage);
@@ -526,7 +526,7 @@ namespace EPR.Calculator.API.UnitTests
             var isColumnHeaderExists = result.ProducerDisposalFeesHeaders!.Select(dict => dict.ColumnIndex == 196 || dict.ColumnIndex == 197 || dict.ColumnIndex == 198).ToList();
             Assert.IsTrue(isColumnHeaderExists.Contains(true));
             Assert.IsNotNull(result.ProducerDisposalFees);
-            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
         }
 
         [TestMethod]

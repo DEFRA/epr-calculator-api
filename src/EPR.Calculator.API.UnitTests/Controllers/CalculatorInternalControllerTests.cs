@@ -175,8 +175,7 @@ namespace EPR.Calculator.API.UnitTests
             var mock = new Mock<IOrgAndPomWrapper>();
             mock.Setup(x => x.AnyPomData()).Returns(true);
             mock.Setup(x => x.AnyOrganisationData()).Returns(true);
-            mock.Setup(x => x.GetOrganisationDataAsync()).ReturnsAsync(organisationDataList);
-            mock.Setup(x => x.GetPomDataAsync()).ReturnsAsync(pomDataList);
+            mock.Setup(x => x.ExecuteSqlAsync(It.IsAny<FormattableString>())).ReturnsAsync(-1);
 
             if (dbContext != null)
             {
@@ -198,8 +197,7 @@ namespace EPR.Calculator.API.UnitTests
                 var calcRun = dbContext.CalculatorRuns.Single(x => x.Id == 1);
                 Assert.IsNotNull(calcRun);
                 Assert.AreEqual(2, calcRun.CalculatorRunClassificationId);
-                Assert.IsNotNull(calcRun.CalculatorRunOrganisationDataMasterId);
-                Assert.IsNotNull(calcRun.CalculatorRunPomDataMasterId);
+                mock.Verify(x => x.ExecuteSqlAsync(It.IsAny<FormattableString>()), Times.Exactly(2));
             }
 
         }

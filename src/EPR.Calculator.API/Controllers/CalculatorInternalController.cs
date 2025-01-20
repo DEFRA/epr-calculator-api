@@ -1,6 +1,5 @@
 ﻿using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exporter;
@@ -72,71 +71,16 @@ namespace EPR.Calculator.API.Controllers
             }
 
             string financialYear = calcRun?.Financial_Year ?? string.Empty;
-            var newCalculatorRunOrganisationDataDetails = new List<CalculatorRunOrganisationDataDetail>();
-            var newCalculatorRunPomDataDetails = new List<CalculatorRunPomDataDetail>();
-
-            var stagingOrganisationData = await this.wrapper.GetOrganisationDataAsync();
-            var calcOrganisationMaster = new CalculatorRunOrganisationDataMaster
-            {
-                CalendarYear = Util.GetCalendarYear(financialYear),
-                CreatedAt = DateTime.Now,
-                CreatedBy = request.UpdatedBy,
-                EffectiveFrom = DateTime.Now,
-                EffectiveTo = null,
-            };
-            foreach (var organisation in stagingOrganisationData)
-            {
-                var calcOrganisationDataDetail = new CalculatorRunOrganisationDataDetail
-                {
-                    OrganisationId = organisation.OrganisationId,
-                    SubsidaryId = organisation.SubsidaryId,
-                    LoadTimeStamp = organisation.LoadTimestamp,
-                    OrganisationName = organisation.OrganisationName,
-                    SubmissionPeriodDesc = organisation.SubmissionPeriodDesc,
-                    CalculatorRunOrganisationDataMaster = calcOrganisationMaster,
-                };
-
-
-                newCalculatorRunOrganisationDataDetails.Add(calcOrganisationDataDetail);
-                calcRun!.CalculatorRunOrganisationDataMaster = calcOrganisationMaster;
-            }
-
-            var stagingPomData = await this.wrapper.GetPomDataAsync();
-            var calcRunPomMaster = new CalculatorRunPomDataMaster
-            {
-                CalendarYear = Util.GetCalendarYear(financialYear),
-                CreatedAt = DateTime.Now,
-                CreatedBy = request.UpdatedBy,
-                EffectiveFrom = DateTime.Now,
-                EffectiveTo = null,
-            };
-            foreach (var pomData in stagingPomData)
-            {
-                var calcRuntPomDataDetail = new CalculatorRunPomDataDetail
-                {
-                    OrganisationId = pomData.OrganisationId,
-                    SubsidaryId = pomData.SubsidaryId,
-                    LoadTimeStamp = pomData.LoadTimeStamp,
-                    SubmissionPeriod = pomData.SubmissionPeriod,
-                    PackagingActivity = pomData.PackagingActivity,
-                    PackagingType = pomData.PackagingType,
-                    PackagingClass = pomData.PackagingClass,
-                    PackagingMaterial = pomData.PackagingMaterial,
-                    PackagingMaterialWeight = pomData.PackagingMaterialWeight,
-                    SubmissionPeriodDesc = pomData.SubmissionPeriodDesc,
-                    CalculatorRunPomDataMaster = calcRunPomMaster,
-                };
-                newCalculatorRunPomDataDetails.Add(calcRuntPomDataDetail);
-                calcRun!.CalculatorRunPomDataMaster = calcRunPomMaster;
-            }
-
-
+            var calendarYear = Util.GetCalendarYear(financialYear);
+            var createdBy = request.UpdatedBy;
             using (var transaction = await this.context.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    await this.context.CalculatorRunPomDataDetails.AddRangeAsync(newCalculatorRunPomDataDetails);
-                    await this.context.CalculatorRunOrganisationDataDetails.AddRangeAsync(newCalculatorRunOrganisationDataDetails);
+                    var  createRunOrgCommand = Util.GetFormattedSqlString("dbo.CreateRunOrganization", runId, calendarYear, createdBy);
+                    await this.wrapper.ExecuteSqlAsync(createRunOrgCommand);
+                    var createRunPomCommand = Util.GetFormattedSqlString("dbo.CreateRunPom", runId, calendarYear, createdBy);
+                    await this.wrapper.ExecuteSqlAsync(createRunPomCommand);
 
                     calcRun!.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
                     await this.context.SaveChangesAsync();
@@ -152,6 +96,43 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpPost]
+        [Route("transposeBeforeCalcResults")]
+        public async Task<IActionResult> TransposeBeforeCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
+        {
+            var startTime = DateTime.Now; 
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(
+                run => run.Id == resultsRequestDto.RunId,
+                HttpContext.RequestAborted);
+            if (calculatorRun == null)
+            {
+                return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
+                { StatusCode = StatusCodes.Status404NotFound };
+            }
+
+            try
+            {
+                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(
+                    resultsRequestDto,
+                    HttpContext.RequestAborted);
+                var endTime = DateTime.Now;
+                var timeDiff = startTime - endTime;
+                return new ObjectResult(timeDiff.TotalMinutes) { StatusCode = StatusCodes.Status201Created };
+            }
+            catch (Exception exception)
+            {
+                calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
+                this.context.CalculatorRuns.Update(calculatorRun);
+                await this.context.SaveChangesAsync();
+                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+        }
+
+        [HttpPost]
         [Route("prepareCalcResults")]
         [RequestTimeout("PrepareCalcResults")]
         public async Task<IActionResult> PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
@@ -161,7 +142,7 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var calculatorRun = this.context.CalculatorRuns.SingleOrDefault(run => run.Id == resultsRequestDto.RunId);
+            var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(run => run.Id == resultsRequestDto.RunId);
             if (calculatorRun == null)
             {
                 return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
@@ -170,19 +151,14 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(
-                    resultsRequestDto,
-                    HttpContext.RequestAborted);
-                if (isTransposeSuccessful)
-                {
-                    var results = await this.builder.Build(resultsRequestDto);
-                    var exportedResults = this.exporter.Export(results);
+                var results = await this.builder.Build(resultsRequestDto);
+                var exportedResults = this.exporter.Export(results);
 
-                    var fileName = new CalcResultsFileName(
-                        results.CalcResultDetail.RunId,
-                        results.CalcResultDetail.RunName,
-                        results.CalcResultDetail.RunDate);
-                    var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
+                var fileName = new CalcResultsFileName(
+                    results.CalcResultDetail.RunId,
+                    results.CalcResultDetail.RunName,
+                    results.CalcResultDetail.RunDate);
+                var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
 
                     if (resultsFileWritten)
                     {
@@ -191,7 +167,6 @@ namespace EPR.Calculator.API.Controllers
                         await this.context.SaveChangesAsync(HttpContext.RequestAborted);
                         return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
                     }
-                }
             }
             catch (Exception exception)
             {
