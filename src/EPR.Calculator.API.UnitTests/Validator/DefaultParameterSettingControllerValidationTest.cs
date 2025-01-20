@@ -11,7 +11,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
     public class DefaultParameterSettingControllerValidationTest : BaseControllerTest
     {
         [TestMethod]
-        public void InvalidTest_With_NoRecords()
+        public async Task InvalidTest_With_NoRecordsAsync()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
@@ -23,7 +23,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
             defaultParameterSettingController?.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
             defaultParameterSettingController?.ModelState.AddModelError("SchemeParameterTemplateValues", ErrorMessages.SchemeParameterTemplateValuesMissing);
-            var actionResult = defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
+            var actionResult = await defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
 
             var modelErrors = actionResult?.Value as IEnumerable<ModelError>;
@@ -33,7 +33,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        public void InvalidTest_With_Invalid_Data()
+        public async Task InvalidTest_With_Invalid_DataAsync()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
@@ -43,7 +43,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 ParameterFileName = "TestFileName"
             };
 
-            var actionResult = defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
+            var actionResult = await defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
 
             var errors = actionResult?.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
@@ -52,7 +52,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        public void InvalidTest_With_Missing_Data()
+        public async Task InvalidTest_With_Missing_DataAsync()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             foreach (var uniqueRef in DefaultParameterUniqueReferences.UniqueReferences)
@@ -71,7 +71,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 ParameterFileName = "TestFileName"
             };
 
-            var actionResult = defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
+            var actionResult = await defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
 
             var errors = actionResult?.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
