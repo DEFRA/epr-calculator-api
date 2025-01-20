@@ -78,9 +78,9 @@ namespace EPR.Calculator.API.Controllers
             {
                 try
                 {
-                    var  createRunOrgCommand = Util.GetFormattedString("dbo.CreateRunOrganization", runId, calendarYear, createdBy);
+                    var  createRunOrgCommand = Util.GetFormattedSqlString("dbo.CreateRunOrganization", runId, calendarYear, createdBy);
                     await this.wrapper.ExecuteSqlAsync(createRunOrgCommand);
-                    var createRunPomCommand = Util.GetFormattedString("dbo.CreateRunPom", runId, calendarYear, createdBy);
+                    var createRunPomCommand = Util.GetFormattedSqlString("dbo.CreateRunPom", runId, calendarYear, createdBy);
                     await this.wrapper.ExecuteSqlAsync(createRunPomCommand);
 
                     calcRun!.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
