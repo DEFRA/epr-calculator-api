@@ -109,7 +109,8 @@ namespace EPR.Calculator.API.Controllers
                 {
                     return NotFound("No data available for the specified year. Please check the year and try again.");
                 }
-                
+
+                // Load LapcapDataDetail records related to the currentDefaultSetting to ensure necessary data is available for subsequent operations.
                 await context.LapcapDataDetail.Where(x => x.LapcapDataMasterId == currentDefaultSetting.Id).ToListAsync();
                 var lapcapTemplateDetails = await context.LapcapDataTemplateMaster.ToListAsync();
                 var lapcapDataValues = LapcapDataParameterSettingMapper.Map(currentDefaultSetting, lapcapTemplateDetails);
