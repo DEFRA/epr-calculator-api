@@ -62,6 +62,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             );
 
             var mockStorageService = new Mock<IStorageService>();
+            var mockServiceBusService = new Mock<IServiceBusService>();
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var mockClient = new Mock<ServiceBusClient>();
             var mockServiceBusSender = new Mock<ServiceBusSender>();
@@ -73,7 +74,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
             dbContext.SaveChanges();
             calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(),
-                mockFactory.Object, mockStorageService.Object);
+                mockStorageService.Object, mockServiceBusService.Object);
 
             dbContext.Material.RemoveRange(dbContext.Material.ToList());
             dbContext.SaveChanges();
