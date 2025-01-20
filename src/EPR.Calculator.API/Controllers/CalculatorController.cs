@@ -1,5 +1,4 @@
-﻿using Azure.Messaging.ServiceBus;
-using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -11,8 +10,6 @@ using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Azure;
-using Newtonsoft.Json;
 using System.Configuration;
 
 namespace EPR.Calculator.API.Controllers
@@ -22,16 +19,16 @@ namespace EPR.Calculator.API.Controllers
     {
         private readonly ApplicationDBContext context;
         private readonly IConfiguration configuration;
-        private readonly IAzureClientFactory<ServiceBusClient> serviceBusClientFactory;
         private readonly IStorageService storageService;
+        private readonly IServiceBusService serviceBusService;
 
         public CalculatorController(ApplicationDBContext context, IConfiguration configuration,
-            IAzureClientFactory<ServiceBusClient> serviceBusClientFactory, IStorageService storageService)
+            IStorageService storageService, IServiceBusService serviceBusService)
         {
             this.context = context;
             this.configuration = configuration;
-            this.serviceBusClientFactory = serviceBusClientFactory;
             this.storageService = storageService;
+            this.serviceBusService = serviceBusService;
         }
 
         [HttpPost]
@@ -128,7 +125,7 @@ namespace EPR.Calculator.API.Controllers
                         };
 
                         // Send message
-                        await SendMessage(serviceBusQueueName, calculatorRunMessage);
+                        await serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
 
                         // All good, commit transaction
                         await transaction.CommitAsync();
@@ -224,7 +221,7 @@ namespace EPR.Calculator.API.Controllers
         [HttpPut]
         [Route("calculatorRuns")]
         [Authorize(Roles = "SASuperUser")]
-        public IActionResult PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
+        public async Task<IActionResult> PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
             var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
@@ -240,7 +237,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRun = context.CalculatorRuns.SingleOrDefault(x => x.Id == runStatusUpdateDto.RunId);
+                var calculatorRun = await context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runStatusUpdateDto.RunId);
                 if (calculatorRun == null)
                 {
                     return new ObjectResult($"Unable to find Run Id {runStatusUpdateDto.RunId}")
@@ -248,8 +245,9 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 var classification =
-                    this.context.CalculatorRunClassifications.SingleOrDefault(x =>
+                    await this.context.CalculatorRunClassifications.SingleOrDefaultAsync(x =>
                         x.Id == runStatusUpdateDto.ClassificationId);
+
                 if (classification == null)
                 {
                     return new ObjectResult($"Unable to find Classification Id {runStatusUpdateDto.ClassificationId}")
@@ -268,7 +266,7 @@ namespace EPR.Calculator.API.Controllers
                 calculatorRun.UpdatedBy = userName;
 
                 this.context.CalculatorRuns.Update(calculatorRun);
-                this.context.SaveChanges();
+                await this.context.SaveChangesAsync();
 
                 return StatusCode(201);
             }
@@ -380,16 +378,6 @@ namespace EPR.Calculator.API.Controllers
 
             // All good, return empty string
             return string.Empty;
-        }
-
-        private async Task SendMessage(string serviceBusQueueName, CalculatorRunMessage calculatorRunMessage)
-        {
-            // Send message to service bus
-            var client = serviceBusClientFactory.CreateClient(CommonConstants.ServiceBusClientName);
-            ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
-            var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
-            ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
-            await serviceBusSender.SendMessageAsync(serviceBusMessage);
         }
     }
 }

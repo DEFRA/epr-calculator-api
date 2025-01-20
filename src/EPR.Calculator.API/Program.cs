@@ -51,6 +51,7 @@ builder.Services.AddScoped<ICalcRunLaDisposalCostBuilder, CalcRunLaDisposalCostB
 builder.Services.AddScoped<ICalcResultOnePlusFourApportionmentBuilder, CalcResultOnePlusFourApportionmentBuilder>();
 builder.Services.AddScoped<ICalcResultParameterOtherCostBuilder, CalcResultParameterOtherCostBuilder>();
 builder.Services.AddScoped<ICalcResultCommsCostBuilder, CalcResultCommsCostBuilder>();
+builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 
 
 // Add services to the container.
