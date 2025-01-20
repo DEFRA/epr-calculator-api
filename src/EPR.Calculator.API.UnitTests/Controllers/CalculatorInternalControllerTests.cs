@@ -307,6 +307,7 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ITransposePomAndOrgDataService>().Object,
                 new Mock<IStorageService>().Object
             );
+            controller.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).ReturnsAsync(calcResult);
             var task = controller.PrepareCalcResults(requestDto);
