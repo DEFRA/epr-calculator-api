@@ -119,7 +119,6 @@ namespace EPR.Calculator.API.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
-
         }
     }
 }

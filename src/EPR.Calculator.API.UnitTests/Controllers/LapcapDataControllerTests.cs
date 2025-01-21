@@ -70,6 +70,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(okResult);
             Assert.AreEqual(StatusCodes.Status404NotFound, okResult.StatusCode);
         }
+
         [TestMethod]
         public void CreateTest_With_Records()
         {
