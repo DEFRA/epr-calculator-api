@@ -55,14 +55,15 @@ builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
 
 // Configure the database context.
-int.TryParse(
+double.TryParse(
     builder.Configuration.GetSection("Timeouts").GetSection("DbCommand").Value,
-    out int commandTimeout);
+    out double commandTimeoutInMinutes);
+var commandTimeOutInSeconds = (int)(commandTimeoutInMinutes * 60);
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlServerOptions => sqlServerOptions.CommandTimeout(commandTimeout));
+        sqlServerOptions => sqlServerOptions.CommandTimeout(commandTimeOutInSeconds));
 });
 
 builder.Services.Configure<BlobStorageSettings>(
@@ -124,12 +125,16 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 // Configure endpoint timeout policies.
-int.TryParse(
+double.TryParse(
     builder.Configuration.GetSection("Timeouts").GetSection("PrepareCalcResults").Value,
-    out int prepareCalcResultsTimeout);
+    out double prepareCalcResultsTimeout);
+double.TryParse(
+    builder.Configuration.GetSection("Timeouts").GetSection("Transpose").Value,
+    out double transposeTimeout);
 builder.Services.AddRequestTimeouts(options => 
 {
     options.AddPolicy("PrepareCalcResults", TimeSpan.FromMinutes(prepareCalcResultsTimeout));
+    options.AddPolicy("Transpose", TimeSpan.FromMinutes(transposeTimeout));
 });
 
 var app = builder.Build();
