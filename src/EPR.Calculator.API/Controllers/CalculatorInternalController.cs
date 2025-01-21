@@ -174,7 +174,7 @@ namespace EPR.Calculator.API.Controllers
             var validationResult = validatior.ValidateCalculatorRunIds(calculatorRun);
             if (!validationResult.IsValid)
             {
-                return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Join(", ", validationResult.ErrorMessages));
+                return StatusCode(StatusCodes.Status422UnprocessableEntity, validationResult.ErrorMessages.ToArray());
             }
 
             try
