@@ -42,7 +42,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void GetCalculatorRunTest_Get_Valid_Run()
+        public async Task GetCalculatorRunTest_Get_Valid_Run()
         {
             var date = DateTime.Now;
             context.CalculatorRuns.Add(new CalculatorRun
@@ -61,7 +61,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 new CalculatorController(context, mockConfig.Object,
                     mockStorageService.Object, mockServiceBusService.Object);
 
-            var response = controller.GetCalculatorRun(1) as ObjectResult;
+            var response = await controller.GetCalculatorRun(1) as ObjectResult;
             Assert.IsNotNull(response);
             var run = response.Value as CalculatorRunDto;
 
@@ -76,13 +76,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void GetCalculatorRunTest_Get_Invalid_Run()
+        public async Task GetCalculatorRunTest_Get_Invalid_Run()
         {
             var controller =
                 new CalculatorController(context, mockConfig.Object,
                     mockStorageService.Object, mockServiceBusService.Object);
 
-            var response = controller.GetCalculatorRun(1) as ObjectResult;
+            var response = await controller.GetCalculatorRun(1) as ObjectResult;
             Assert.IsNotNull(response);
             Assert.AreEqual(404, response.StatusCode);
             Assert.AreEqual("Unable to find Run Id 1", response.Value);
