@@ -15,12 +15,12 @@ namespace EPR.Calculator.API.Validators
             var errorMessages = new List<string>();
 
             var requiredMasterIds = new Dictionary<string, int?>
-        {
-            { "CalculatorRunOrganisationDataMasterId", calculatorRun.CalculatorRunOrganisationDataMasterId },
-            { "DefaultParameterSettingMasterId", calculatorRun.DefaultParameterSettingMasterId },
-            { "CalculatorRunPomDataMasterId", calculatorRun.CalculatorRunPomDataMasterId },
-            { "LapcapDataMasterId", calculatorRun.LapcapDataMasterId }
-        };
+            {
+                { "CalculatorRunOrganisationDataMasterId", calculatorRun.CalculatorRunOrganisationDataMasterId },
+                { "DefaultParameterSettingMasterId", calculatorRun.DefaultParameterSettingMasterId },
+                { "CalculatorRunPomDataMasterId", calculatorRun.CalculatorRunPomDataMasterId },
+                { "LapcapDataMasterId", calculatorRun.LapcapDataMasterId }
+            };
 
             errorMessages.AddRange(requiredMasterIds
                 .Where(id => id.Value == null)
