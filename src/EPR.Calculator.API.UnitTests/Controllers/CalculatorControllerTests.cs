@@ -209,12 +209,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var configs = ConfigurationItems.GetConfigurationValues();
             configs.GetSection("ServiceBus").GetSection("ConnectionString").Value = string.Empty;
 
-            var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
+            var mockServiceBusService = new Mock<IServiceBusService>();
             var mockStorageService = new Mock<IStorageService>();
 
 #pragma warning disable CS8604 // Possible null reference argument.
             calculatorController =
-                new CalculatorController(dbContext, configs, mockFactory.Object, mockStorageService.Object);
+                new CalculatorController(dbContext, configs, mockStorageService.Object, mockServiceBusService.Object);
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
@@ -260,11 +260,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var configs = ConfigurationItems.GetConfigurationValues();
             configs.GetSection("ServiceBus").GetSection("QueueName").Value = string.Empty;
 
-            var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
+            var mockServiceBusService = new Mock<IServiceBusService>();
             var mockStorageService = new Mock<IStorageService>();
 #pragma warning disable CS8604 // Possible null reference argument.
             calculatorController =
-                new CalculatorController(dbContext, configs, mockFactory.Object, mockStorageService.Object);
+                new CalculatorController(dbContext, configs, mockStorageService.Object, mockServiceBusService.Object);
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;

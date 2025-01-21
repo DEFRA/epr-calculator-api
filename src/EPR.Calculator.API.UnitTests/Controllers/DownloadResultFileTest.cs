@@ -18,14 +18,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         private readonly ApplicationDBContext context;
         private readonly Mock<IConfiguration> mockConfig;
-        private readonly Mock<IAzureClientFactory<ServiceBusClient>> mockServiceBusFactory;
         private readonly Mock<IStorageService> mockStorageService;
+        private readonly Mock<IServiceBusService> mockServiceBusService;
 
         public DownloadResultFileTest()
         {
             mockStorageService = new Mock<IStorageService>();
+            mockServiceBusService = new Mock<IServiceBusService>();
             mockConfig = new Mock<IConfiguration>();
-            mockServiceBusFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
@@ -57,8 +57,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context.SaveChanges();
 
             var controller =
-                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
-                    mockStorageService.Object);
+                new CalculatorController(context, mockConfig.Object,
+                    mockStorageService.Object, mockServiceBusService.Object);
             var mockResult = new Mock<IResult>();
             mockStorageService.Setup(x => x.DownloadFile(It.IsAny<string>())).ReturnsAsync(mockResult.Object);
 
