@@ -97,25 +97,23 @@ namespace EPR.Calculator.API.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState.Values.SelectMany(x => x.Errors));
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            var lapcapDataMaster = await context.LapcapDataMaster
+              .Include(m => m.Details)
+              .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.ProjectionYear == parameterYear);
+
+            if (lapcapDataMaster == null)
+            {
+                return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
             }
 
             try
             {
-                var currentDefaultSetting = await context.LapcapDataMaster
-                    .SingleOrDefaultAsync(setting => setting.EffectiveTo == null && setting.ProjectionYear == parameterYear);
-
-                if (currentDefaultSetting == null)
-                {
-                    return NotFound("No data available for the specified year. Please check the year and try again.");
-                }
-
-                // Load LapcapDataDetail records related to the currentDefaultSetting to ensure necessary data is available for subsequent operations.
-                await context.LapcapDataDetail.Where(x => x.LapcapDataMasterId == currentDefaultSetting.Id).ToListAsync();
-                var lapcapTemplateDetails = await context.LapcapDataTemplateMaster.ToListAsync();
-                var lapcapDataValues = LapcapDataParameterSettingMapper.Map(currentDefaultSetting, lapcapTemplateDetails);
-
-                return Ok(lapcapDataValues);
+                var _lapcaptemplateDetails = await this.context.LapcapDataTemplateMaster.ToListAsync();
+                var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(lapcapDataMaster, _lapcaptemplateDetails);
+                return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
             }
             catch (Exception exception)
             {
