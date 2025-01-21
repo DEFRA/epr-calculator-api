@@ -1,5 +1,6 @@
 ﻿using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exporter;
@@ -104,18 +105,20 @@ namespace EPR.Calculator.API.Controllers
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
-
-            var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(
-                run => run.Id == resultsRequestDto.RunId,
-                HttpContext.RequestAborted);
-            if (calculatorRun == null)
-            {
-                return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
-                { StatusCode = StatusCodes.Status404NotFound };
-            }
-
+            
+            CalculatorRun? calculatorRun = null;
             try
             {
+                calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(
+                run => run.Id == resultsRequestDto.RunId,
+                HttpContext.RequestAborted);
+                if (calculatorRun == null)
+                {
+                    return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
+                    { StatusCode = StatusCodes.Status404NotFound };
+                }
+
+
                 var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(
                     resultsRequestDto,
                     HttpContext.RequestAborted);
@@ -123,11 +126,24 @@ namespace EPR.Calculator.API.Controllers
                 var timeDiff = startTime - endTime;
                 return new ObjectResult(timeDiff.TotalMinutes) { StatusCode = StatusCodes.Status201Created };
             }
+            catch (OperationCanceledException exception)
+            {
+                if (calculatorRun != null)
+                {
+                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
+                    this.context.CalculatorRuns.Update(calculatorRun);
+                    await this.context.SaveChangesAsync();
+                }
+                return StatusCode(StatusCodes.Status408RequestTimeout, exception);
+            }
             catch (Exception exception)
             {
-                calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
-                this.context.CalculatorRuns.Update(calculatorRun);
-                await this.context.SaveChangesAsync();
+                if (calculatorRun != null)
+                {
+                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
+                    this.context.CalculatorRuns.Update(calculatorRun);
+                    await this.context.SaveChangesAsync();
+                }
                 return StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
         }
@@ -142,15 +158,18 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(run => run.Id == resultsRequestDto.RunId);
-            if (calculatorRun == null)
-            {
-                return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
-                    { StatusCode = StatusCodes.Status404NotFound };
-            }
-
+            CalculatorRun? calculatorRun = null;
             try
             {
+                calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(
+                run => run.Id == resultsRequestDto.RunId,
+                HttpContext.RequestAborted);
+                if (calculatorRun == null)
+                {
+                    return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
+                        { StatusCode = StatusCodes.Status404NotFound };
+                }
+
                 var results = await this.builder.Build(resultsRequestDto);
                 var exportedResults = this.exporter.Export(results);
 
@@ -168,16 +187,29 @@ namespace EPR.Calculator.API.Controllers
                         return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
                     }
             }
+            catch (OperationCanceledException exception)
+            {
+                if (calculatorRun != null)
+                {
+                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
+                    this.context.CalculatorRuns.Update(calculatorRun);
+                    await this.context.SaveChangesAsync();
+                }
+                return StatusCode(StatusCodes.Status408RequestTimeout, exception);
+            }
             catch (Exception exception)
             {
-                calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
-                this.context.CalculatorRuns.Update(calculatorRun);
-                await this.context.SaveChangesAsync(HttpContext.RequestAborted);
+                if (calculatorRun != null)
+                {
+                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
+                    this.context.CalculatorRuns.Update(calculatorRun);
+                    await this.context.SaveChangesAsync();
+                }
                 return StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
             this.context.CalculatorRuns.Update(calculatorRun);
-            await this.context.SaveChangesAsync(HttpContext.RequestAborted);
+            await this.context.SaveChangesAsync();
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
