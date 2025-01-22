@@ -14,10 +14,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         //GET API
         [TestMethod]
-        public void Get_RequestOkResult_WithLapCapParametersDto_WhenDataExist()
+        public async Task Get_RequestOkResult_WithLapCapParametersDto_WhenDataExist()
         {
             var createDefaultParameterDto = CreateDto();
-
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
             var principal = new ClaimsPrincipal(identity);
@@ -31,8 +30,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 HttpContext = context
             };
-
-            lapcapDataController?.Create(createDefaultParameterDto);
+            await lapcapDataController.Create(createDefaultParameterDto);
 
             var tempdateData = new LapCapParameterDto()
             {
@@ -51,7 +49,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
 
             //Act
-            var actionResult1 = lapcapDataController?.Get("2024-25") as ObjectResult;
+            var actionResult1 = await lapcapDataController.Get("2024-25") as ObjectResult;
 
             //Assert
             var okResult = actionResult1 as ObjectResult;
@@ -67,11 +65,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void Get_InvalidModelState_ReturnsBadRequest()
+        public async Task Get_InvalidModelState_ReturnsBadRequest()
         {
-            lapcapDataController?.ModelState.AddModelError("parameterYear", "Invalid year");
+            lapcapDataController.ModelState.AddModelError("parameterYear", "Invalid year");
             //Act
-            var result = lapcapDataController?.Get("2024") as ObjectResult;
+            var result = await lapcapDataController.Get("2024") as ObjectResult;
             //Assert
             var okResult = result as ObjectResult;
             Assert.IsNotNull(okResult);
@@ -79,15 +77,16 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void Get_NoDataForYear_ReturnsNotFound()
+        public async Task Get_NoDataForYear_ReturnsNotFound()
         {
             //Act
-            var result = lapcapDataController?.Get("2028-25") as ObjectResult;
+            var result = await lapcapDataController.Get("2028-25") as ObjectResult;
             //Assert
             var okResult = result as ObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(StatusCodes.Status404NotFound, okResult.StatusCode);
         }
+
         [TestMethod]
         public void CreateTest_With_Records()
         {

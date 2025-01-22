@@ -358,37 +358,37 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void Get_Calculator_Runs_Return_Results_Test()
+        public async Task Get_Calculator_Runs_Return_Results_Test()
         {
             var runParams = new CalculatorRunsParamsDto
             {
                 FinancialYear = "2024-25"
             };
-            var actionResult = calculatorController?.GetCalculatorRuns(runParams) as ObjectResult;
+            var actionResult = await calculatorController?.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.StatusCode);
         }
 
         [TestMethod]
-        public void Get_Calculator_Runs_Return_Not_Found_Test()
+        public async Task Get_Calculator_Runs_Return_Not_Found_Test()
         {
             var runParams = new CalculatorRunsParamsDto
             {
                 FinancialYear = "2022-23"
             };
-            var actionResult = calculatorController?.GetCalculatorRuns(runParams) as ObjectResult;
+            var actionResult = await calculatorController?.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(404, actionResult.StatusCode);
         }
 
         [TestMethod]
-        public void Get_Calculator_Runs_Return_Bad_Request_Test()
+        public async Task Get_Calculator_Runs_Return_Bad_Request_Test()
         {
             var runParams = new CalculatorRunsParamsDto
             {
                 FinancialYear = string.Empty
             };
-            var actionResult = calculatorController?.GetCalculatorRuns(runParams) as ObjectResult;
+            var actionResult = await calculatorController?.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(400, actionResult.StatusCode);
         }
@@ -405,31 +405,31 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void Get_Calculator_Run_Return_Results_By_Name_Test()
+        public async Task Get_Calculator_Run_Return_Results_By_Name_Test()
         {
             string calculatorRunName = "Test Run";
 
-            var actionResult = calculatorController?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
+            var actionResult = await calculatorController?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.Value);
         }
 
         [TestMethod]
-        public void Get_Calculator_Run_Return_Results_Not_found()
+        public async Task Get_Calculator_Run_Return_Results_Not_found()
         {
             string calculatorRunName = "test 45610";
 
-            var actionResult = calculatorController?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
+            var actionResult = await calculatorController?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(404, actionResult.StatusCode);
         }
 
         [TestMethod]
-        public void Get_Calculator_Run_Return_Result_With_String_Comparison_CaseInsensitive()
+        public async Task Get_Calculator_Run_Return_Result_With_String_Comparison_CaseInsensitive()
         {
             string calculatorRunName = "TEST run";
 
-            var actionResult = calculatorController?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
+            var actionResult = await calculatorController?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.Value);
         }

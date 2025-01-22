@@ -5,6 +5,7 @@ using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -102,33 +103,32 @@ namespace EPR.Calculator.API.Controllers
         [HttpGet]
         [Route("lapcapData/{parameterYear}")]
         [Authorize(Roles = "SASuperUser")]
-        public IActionResult Get([FromRoute] string parameterYear)
+        public async Task<IActionResult> Get([FromRoute] string parameterYear)
         {
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var currentDefaultSetting = this.context.LapcapDataMaster
-                .SingleOrDefault(setting => setting.EffectiveTo == null && setting.ProjectionYear == parameterYear);
+            var lapcapDataMaster = await context.LapcapDataMaster
+              .Include(m => m.Details)
+              .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.ProjectionYear == parameterYear);
 
-            if (currentDefaultSetting == null)
+            if (lapcapDataMaster == null)
             {
                 return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
             }
 
             try
             {
-                var _lapcappramSettingDetails = this.context.LapcapDataDetail.Where(x => x.LapcapDataMasterId == currentDefaultSetting.Id).ToList();
-                var _lapcaptemplateDetails = this.context.LapcapDataTemplateMaster.ToList();
-                var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(currentDefaultSetting, _lapcaptemplateDetails);
+                var _lapcaptemplateDetails = await this.context.LapcapDataTemplateMaster.ToListAsync();
+                var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(lapcapDataMaster, _lapcaptemplateDetails);
                 return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
             }
             catch (Exception exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
-
         }
     }
 }
