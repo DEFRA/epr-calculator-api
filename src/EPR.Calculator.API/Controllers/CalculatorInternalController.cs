@@ -46,6 +46,7 @@ namespace EPR.Calculator.API.Controllers
         [Route("rpdStatus")]
         public async Task<IActionResult> UpdateRpdStatus([FromBody] UpdateRpdStatus request)
         {
+            var startTime = DateTime.Now;
             var runId = request.RunId;
             var calcRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(run => run.Id == runId);
             var runClassifications = await this.context.CalculatorRunClassifications.ToListAsync();
@@ -84,7 +85,8 @@ namespace EPR.Calculator.API.Controllers
                     calcRun!.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
                     await this.context.SaveChangesAsync();
                     await transaction.CommitAsync();
-                    return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+                    var timeDiff = startTime - DateTime.Now;
+                    return new ObjectResult(timeDiff.TotalSeconds) { StatusCode = StatusCodes.Status201Created };
                 }
                 catch (Exception ex)
                 {
@@ -131,6 +133,7 @@ namespace EPR.Calculator.API.Controllers
         [Route("prepareCalcResults")]
         public async Task<IActionResult> PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
+            var startTime = DateTime.Now;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
@@ -159,7 +162,8 @@ namespace EPR.Calculator.API.Controllers
                     calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
                     this.context.CalculatorRuns.Update(calculatorRun);
                     await this.context.SaveChangesAsync();
-                    return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+                    var timeDiff = startTime - DateTime.Now;
+                    return new ObjectResult(timeDiff.Minutes) { StatusCode = StatusCodes.Status201Created };
                 }
             }
             catch (Exception exception)
