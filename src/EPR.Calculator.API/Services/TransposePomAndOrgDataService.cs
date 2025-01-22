@@ -40,7 +40,9 @@ namespace EPR.Calculator.API.Services
             var result = false;
             var materials = await this.context.Material.ToListAsync(cancellationToken);
 
-            var calculatorRun = await context.CalculatorRuns.Where(x => x.Id == resultsRequestDto.RunId).SingleAsync();
+            var calculatorRun = await context.CalculatorRuns
+                .Where(x => x.Id == resultsRequestDto.RunId)
+                .SingleAsync(cancellationToken);
             var calculatorRunPomDataDetails = await context.CalculatorRunPomDataDetails
                 .Where(x => x.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId)
                 .OrderBy(x => x.SubmissionPeriodDesc)

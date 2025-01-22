@@ -23,6 +23,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Http.Timeouts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
+using Microsoft.Extensions.Options;
 using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,7 +45,7 @@ builder.Services.AddScoped<ICalcResultBuilder, CalcResultBuilder>();
 builder.Services.AddScoped<ICalcResultsExporter<CalcResult>, CalcResultsExporter>();
 builder.Services.AddScoped<ICalcResultLapcapDataBuilder, CalcResultLapcapDataBuilder>();
 builder.Services.AddScoped<ICalcResultSummaryBuilder, CalcResultSummaryBuilder>();
-builder.Services.AddScoped<IStorageService, BlobStorageService>();
+builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
 builder.Services.AddScoped<ITransposePomAndOrgDataService, TransposePomAndOrgDataService>();
 builder.Services.AddScoped<ICalcResultLateReportingBuilder, CalcResultLateReportingBuilder>();
 builder.Services.AddScoped<ICalcRunLaDisposalCostBuilder, CalcRunLaDisposalCostBuilder>();
@@ -121,21 +122,18 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 // Configure endpoint timeout policies.
-double.TryParse(
-    builder.Configuration.GetSection("Timeouts").GetSection("RpdStatus").Value,
-    out double rpdStatusTimeout);
-double.TryParse(
-    builder.Configuration.GetSection("Timeouts").GetSection("PrepareCalcResults").Value,
-    out double prepareCalcResultsTimeout);
-double.TryParse(
-    builder.Configuration.GetSection("Timeouts").GetSection("Transpose").Value,
-    out double transposeTimeout);
-builder.Services.AddRequestTimeouts(options => 
+foreach (string policy in new[] {"RpdStatus", "PrepareCalcResults", "Transpose" })
 {
-    options.AddPolicy("RpdStatus", TimeSpan.FromMinutes(rpdStatusTimeout));
-    options.AddPolicy("PrepareCalcResults", TimeSpan.FromMinutes(prepareCalcResultsTimeout));
-    options.AddPolicy("Transpose", TimeSpan.FromMinutes(transposeTimeout));
-});
+    if (double.TryParse(
+        builder.Configuration.GetSection("Timeouts").GetSection(policy).Value,
+        out double timeout))
+    {
+        builder.Services.AddRequestTimeouts(options =>
+        {
+            options.AddPolicy(policy, TimeSpan.FromMinutes(timeout));
+        });
+    };
+}
 
 var app = builder.Build();
 
