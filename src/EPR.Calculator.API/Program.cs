@@ -124,15 +124,11 @@ builder.Services.AddProblemDetails();
 // Configure endpoint timeout policies.
 foreach (string policy in new[] {"RpdStatus", "PrepareCalcResults", "Transpose" })
 {
-    if (double.TryParse(
-        builder.Configuration.GetSection("Timeouts").GetSection(policy).Value,
-        out double timeout))
+    var timeout = builder.Configuration.GetSection("Timeouts").GetValue<double>(policy);
+    builder.Services.AddRequestTimeouts(options =>
     {
-        builder.Services.AddRequestTimeouts(options =>
-        {
-            options.AddPolicy(policy, TimeSpan.FromMinutes(timeout));
-        });
-    };
+        options.AddPolicy(policy, TimeSpan.FromMinutes(timeout));
+    });
 }
 
 var app = builder.Build();
