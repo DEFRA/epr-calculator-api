@@ -57,6 +57,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
+                var startTime = DateTime.Now;
                 var runId = request.RunId;
                 var calcRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(
                     run => run.Id == runId,
@@ -98,7 +99,9 @@ namespace EPR.Calculator.API.Controllers
                         calcRun!.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
                         await this.context.SaveChangesAsync(HttpContext.RequestAborted);
                         await transaction.CommitAsync(HttpContext.RequestAborted);
-                        return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+                        var timeDiff = startTime - DateTime.Now;
+
+                        return new ObjectResult(timeDiff.TotalSeconds) { StatusCode = StatusCodes.Status201Created };
                     }
                     catch (OperationCanceledException ex)
                     {
@@ -178,6 +181,7 @@ namespace EPR.Calculator.API.Controllers
         [RequestTimeout("PrepareCalcResults")]
         public async Task<IActionResult> PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
+            var startTime = DateTime.Now;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
@@ -211,7 +215,8 @@ namespace EPR.Calculator.API.Controllers
                     calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
                     this.context.CalculatorRuns.Update(calculatorRun);
                     await this.context.SaveChangesAsync(HttpContext.RequestAborted);
-                    return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+                    var timeDiff = startTime - DateTime.Now;
+                    return new ObjectResult(timeDiff.Minutes) { StatusCode = StatusCodes.Status201Created };
                 }
             }
             catch (OperationCanceledException exception)
