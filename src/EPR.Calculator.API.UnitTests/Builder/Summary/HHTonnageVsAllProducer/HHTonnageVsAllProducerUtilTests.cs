@@ -32,9 +32,9 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.HHTonnageVsAllProducer
             producers.First().SubsidiaryId = testSubsidaryId;
             producers.First().CalculatorRunId = testCalculatorRunId;
 
-
+            var hhTotalPackagingTonnage = CalcResultSummaryBuilder.GetHhTotalPackagingTonnagePerRun(allResults, producers.First().CalculatorRunId);
             // Act
-            var result = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducersTotal(producers, allResults);
+            var result = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducersTotal(producers, hhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(50, result);

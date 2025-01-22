@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Builder.Summary;
+using EPR.Calculator.API.Builder.Summary.HHTonnageVsAllProducer;
 using EPR.Calculator.API.Builder.Summary.OneAndTwoA;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
@@ -573,9 +574,13 @@ namespace EPR.Calculator.API.UnitTests
             var orderedProducerDetails = CalcResultSummaryBuilder.GetOrderedListOfProducersAssociatedRunId(1, _context.ProducerDetail.ToList());
             var runProducerMaterialDetails = CalcResultSummaryBuilder.GetProducerRunMaterialDetails(orderedProducerDetails,
                 _context.ProducerReportedMaterial.ToList(), 1);
+
+            var hhTotalPackagingTonnage = CalcResultSummaryBuilder.GetHhTotalPackagingTonnagePerRun(runProducerMaterialDetails, 1);
+
             var materials = Mappers.MaterialMapper.Map(_context.Material.ToList());
+
             var result = CalcResultSummaryBuilder.GetCalcResultSummary(orderedProducerDetails, materials,
-                runProducerMaterialDetails, _calcResult);
+                runProducerMaterialDetails, _calcResult, hhTotalPackagingTonnage);
             Assert.IsNotNull(result);
             Assert.AreEqual(117, result.ColumnHeaders.Count());
 

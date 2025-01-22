@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using EPR.Calculator.API.Builder.Summary.CommsCostTwoBTotalBill;
 using EPR.Calculator.API.Builder.Summary;
+using EPR.Calculator.API.Builder.Summary.HHTonnageVsAllProducer;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -92,6 +93,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
                     }
                 }
             };
+
         }
 
         [TestCleanup]
