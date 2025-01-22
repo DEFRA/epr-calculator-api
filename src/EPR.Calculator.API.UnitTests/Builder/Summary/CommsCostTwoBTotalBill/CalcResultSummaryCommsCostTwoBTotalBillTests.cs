@@ -14,6 +14,8 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
         private CalcResult _calcResult;
         private List<ProducerDetail> _producers;
         private List<CalcResultsProducerAndReportMaterialDetail> _allResults;
+        public IEnumerable<HHTotalPackagingTonnagePerRun> HhTotalPackagingTonnage;
+
         private Fixture Fixture { get; init; } = new Fixture();
 
         [TestInitialize]
@@ -94,6 +96,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
                 }
             };
 
+            HhTotalPackagingTonnage = CalcResultSummaryBuilder.GetHHTotalPackagingTonnagePerRun(_allResults, 1);
         }
 
         [TestCleanup]
@@ -108,10 +111,10 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
         public void GetCommsProducerFeeWithoutBadDebtFor2bTotalsRow_ShouldReturnCorrectTotal()
         {
             // Arrange
-            decimal expectedValue = 253.0m;
+            const decimal expectedValue = 253.0m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithoutBadDebtFor2bTotalsRow(_calcResult, _producers, _allResults);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithoutBadDebtFor2bTotalsRow(_calcResult, _producers, HhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -124,7 +127,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 25.300m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsBadDebtProvisionFor2bTotalsRow(_calcResult, _producers, _allResults);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsBadDebtProvisionFor2bTotalsRow(_calcResult, _producers, HhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -137,7 +140,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 278.300m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithBadDebtFor2bTotalsRow(_calcResult, _producers, _allResults);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithBadDebtFor2bTotalsRow(_calcResult, _producers, HhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -150,7 +153,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 139.1500m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsEnglandWithBadDebtTotalsRow(_calcResult, _producers, _allResults);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsEnglandWithBadDebtTotalsRow(_calcResult, _producers, HhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -163,7 +166,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 55.6600m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsWalesWithBadDebtTotalsRow(_calcResult, _producers, _allResults);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsWalesWithBadDebtTotalsRow(_calcResult, _producers, HhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -176,7 +179,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 55.6600m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsScotlandWithBadDebtTotalsRow(_calcResult, _producers, _allResults);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsScotlandWithBadDebtTotalsRow(_calcResult, _producers, HhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -189,7 +192,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 27.8300m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsNorthernIrelandWithBadDebtTotalsRow(_calcResult, _producers, _allResults);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsNorthernIrelandWithBadDebtTotalsRow(_calcResult, _producers, HhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -202,7 +205,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 139.1500m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsEnglandWithBadDebt(_calcResult, _producers[0], _allResults);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsEnglandWithBadDebt(_calcResult, _producers[0], HhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -215,7 +218,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 55.6600m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsWalesWithBadDebt(_calcResult, _producers[0], _allResults);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsWalesWithBadDebt(_calcResult, _producers[0], HhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -228,7 +231,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 55.6600m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsScotlandWithBadDebt(_calcResult, _producers[0], _allResults);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsScotlandWithBadDebt(_calcResult, _producers[0], HhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -241,7 +244,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 27.8300m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsNorthernIrelandWithBadDebt(_calcResult, _producers[0], _allResults);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsNorthernIrelandWithBadDebt(_calcResult, _producers[0], HhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -254,7 +257,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 139.1500m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsWithBadDebt(_calcResult, _producers[0], _allResults, "England");
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsWithBadDebt(_calcResult, _producers[0], HhTotalPackagingTonnage, "England");
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -280,7 +283,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 25.300m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsBadDebtProvisionFor2b(_calcResult, _producers[0], _allResults);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsBadDebtProvisionFor2b(_calcResult, _producers[0], HhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -293,7 +296,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 278.300m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithBadDebtFor2b(_calcResult, _producers[0], _allResults);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithBadDebtFor2b(_calcResult, _producers[0], HhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -306,7 +309,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 253.0m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.CalculateProducerFee(_calcResult, _producers[0], _allResults, false);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.CalculateProducerFee(_calcResult, _producers[0], HhTotalPackagingTonnage, false);
 
             // Assert
             Assert.AreEqual(expectedValue, result);
@@ -319,7 +322,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
             decimal expectedValue = 253.0m;
 
             // Act
-            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithoutBadDebtFor2b(_calcResult, _producers[0], _allResults);
+            var result = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithoutBadDebtFor2b(_calcResult, _producers[0], HhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(expectedValue, result);

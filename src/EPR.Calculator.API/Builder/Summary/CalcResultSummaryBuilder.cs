@@ -47,7 +47,7 @@ namespace EPR.Calculator.API.Builder.Summary
             var orderedProducerDetails = GetOrderedListOfProducersAssociatedRunId(
                 runId, producerDetails);
 
-            var hhTotalPackagingTonnage = GetHhTotalPackagingTonnagePerRun(runProducerMaterialDetails,runId);
+            var hhTotalPackagingTonnage = GetHHTotalPackagingTonnagePerRun(runProducerMaterialDetails,runId);
 
             var result = GetCalcResultSummary(
                 orderedProducerDetails,
@@ -380,7 +380,7 @@ namespace EPR.Calculator.API.Builder.Summary
             return result;
         }
 
-        public static IEnumerable<HHTotalPackagingTonnagePerRun> GetHhTotalPackagingTonnagePerRun(IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults, int runId)
+        public static IEnumerable<HHTotalPackagingTonnagePerRun> GetHHTotalPackagingTonnagePerRun(IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults, int runId)
         {
             var allProducerDetails = allResults.Select(x => x.ProducerDetail);
             var allProducerReportedMaterials = allResults.Select(x => x.ProducerReportedMaterial);

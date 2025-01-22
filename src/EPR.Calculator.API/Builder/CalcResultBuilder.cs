@@ -45,9 +45,6 @@ namespace EPR.Calculator.API.Builder
 
         public async Task<CalcResult> Build(CalcResultsRequestDto resultsRequestDto)
         {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
             var result = new CalcResult
             {
                 CalcResultLapcapData =
@@ -76,8 +73,6 @@ namespace EPR.Calculator.API.Builder
             result.CalcResultLaDisposalCostData = await this.laDisposalCostBuilder.Construct(resultsRequestDto, result);
             result.CalcResultSummary = await this.summaryBuilder.Construct(resultsRequestDto, result);
 
-            stopwatch.Stop();
-            Debug.WriteLine($"Time taken whole Build: {stopwatch.ElapsedMilliseconds} ms");
             return result;
         }
     }
