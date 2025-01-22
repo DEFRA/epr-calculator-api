@@ -23,7 +23,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("lapcapData")]
-        [Authorize(Roles = "SASuperUser")]
+        [Authorize()]
         public async Task<IActionResult> Create([FromBody] CreateLapcapDataDto request)
         {
             var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
@@ -102,7 +102,7 @@ namespace EPR.Calculator.API.Controllers
         /// <response code="500">If an internal server error occurs.</response>
         [HttpGet]
         [Route("lapcapData/{parameterYear}")]
-        [Authorize(Roles = "SASuperUser")]
+        [Authorize()]
         public async Task<IActionResult> Get([FromRoute] string parameterYear)
         {
             if (!ModelState.IsValid)
