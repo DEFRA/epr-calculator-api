@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Builder;
+﻿using Castle.Core.Configuration;
+using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Builder.CommsCost;
 using EPR.Calculator.API.Builder.Detail;
 using EPR.Calculator.API.Builder.LaDisposalCost;
@@ -17,6 +18,7 @@ using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -63,7 +65,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                mockCalcResultBuilder.Object,
                mockExporter.Object,
                transposePomAndOrgDataService.Object,
-               mockStorageservice.Object
+               mockStorageservice.Object,
+               new ConfigurationBuilder().Build()
             );
             controller.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 

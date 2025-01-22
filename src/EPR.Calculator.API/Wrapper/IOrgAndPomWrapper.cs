@@ -8,6 +8,6 @@ namespace EPR.Calculator.API.Wrapper
         bool AnyPomData();
         Task<IEnumerable<OrganisationData>> GetOrganisationDataAsync();
         Task<IEnumerable<PomData>> GetPomDataAsync();
-        Task<int> ExecuteSqlAsync(FormattableString sql);
+        Task<int> ExecuteSqlAsync(FormattableString sql, CancellationToken cancellationToken);
     }
 }

@@ -12,6 +12,7 @@ using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Http.Timeouts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -26,6 +27,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly ICalcResultsExporter<CalcResult> exporter;
         private readonly ITransposePomAndOrgDataService transposePomAndOrgDataService;
         private readonly IStorageService storageService;
+        private readonly IConfiguration configuration;
 
         public CalculatorInternalController(ApplicationDBContext context,
                                             IRpdStatusDataValidator rpdStatusDataValidator,
@@ -33,7 +35,8 @@ namespace EPR.Calculator.API.Controllers
                                             ICalcResultBuilder builder,
                                             ICalcResultsExporter<CalcResult> exporter,
                                             ITransposePomAndOrgDataService transposePomAndOrgDataService,
-                                            IStorageService storageService)
+                                            IStorageService storageService,
+                                            IConfiguration configuration)
         {
             this.context = context;
             this.rpdStatusDataValidator = rpdStatusDataValidator;
@@ -42,57 +45,76 @@ namespace EPR.Calculator.API.Controllers
             this.exporter = exporter;
             this.transposePomAndOrgDataService = transposePomAndOrgDataService;
             this.storageService = storageService;
+            this.configuration = configuration;
         }
 
         [HttpPost]
         [Route("rpdStatus")]
+        [RequestTimeout("RpdStatus")]
         public async Task<IActionResult> UpdateRpdStatus([FromBody] UpdateRpdStatus request)
         {
-            var runId = request.RunId;
-            var calcRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(run => run.Id == runId);
-            var runClassifications = await this.context.CalculatorRunClassifications.ToListAsync();
+            SetCommandTimeout("RpdStatusCommand");
 
-            var validationResult = this.rpdStatusDataValidator.IsValidRun(calcRun, runId, runClassifications);
-            if (!validationResult.isValid)
+            try
             {
-                return StatusCode(validationResult.StatusCode, validationResult.ErrorMessage);
-            }
+                var runId = request.RunId;
+                var calcRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(
+                    run => run.Id == runId,
+                    HttpContext.RequestAborted);
+                var runClassifications = await this.context.CalculatorRunClassifications
+                    .ToListAsync(HttpContext.RequestAborted);
 
-            if (!request.isSuccessful && calcRun != null)
-            {
-                calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.ERROR.ToString()).Id;
-                await this.context.SaveChangesAsync();
-                return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
-            }
-
-            var vr = this.rpdStatusDataValidator.IsValidSuccessfulRun(runId);
-            if (!vr.isValid)
-            {
-                return StatusCode(vr.StatusCode, vr.ErrorMessage);
-            }
-
-            string financialYear = calcRun?.Financial_Year ?? string.Empty;
-            var calendarYear = Util.GetCalendarYear(financialYear);
-            var createdBy = request.UpdatedBy;
-            using (var transaction = await this.context.Database.BeginTransactionAsync())
-            {
-                try
+                var validationResult = this.rpdStatusDataValidator.IsValidRun(calcRun, runId, runClassifications);
+                if (!validationResult.isValid)
                 {
-                    var  createRunOrgCommand = Util.GetFormattedSqlString("dbo.CreateRunOrganization", runId, calendarYear, createdBy);
-                    await this.wrapper.ExecuteSqlAsync(createRunOrgCommand);
-                    var createRunPomCommand = Util.GetFormattedSqlString("dbo.CreateRunPom", runId, calendarYear, createdBy);
-                    await this.wrapper.ExecuteSqlAsync(createRunPomCommand);
+                    return StatusCode(validationResult.StatusCode, validationResult.ErrorMessage);
+                }
 
-                    calcRun!.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
-                    await this.context.SaveChangesAsync();
-                    await transaction.CommitAsync();
+                if (!request.isSuccessful && calcRun != null)
+                {
+                    calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.ERROR.ToString()).Id;
+                    await this.context.SaveChangesAsync(HttpContext.RequestAborted);
                     return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
                 }
-                catch (Exception ex)
+
+                var vr = this.rpdStatusDataValidator.IsValidSuccessfulRun(runId);
+                if (!vr.isValid)
                 {
-                    await transaction.RollbackAsync();
-                    return StatusCode(StatusCodes.Status500InternalServerError, ex);
+                    return StatusCode(vr.StatusCode, vr.ErrorMessage);
                 }
+
+                string financialYear = calcRun?.Financial_Year ?? string.Empty;
+                var calendarYear = Util.GetCalendarYear(financialYear);
+                var createdBy = request.UpdatedBy;
+                using (var transaction = await this.context.Database.BeginTransactionAsync(HttpContext.RequestAborted))
+                {
+                    try
+                    {
+                        var createRunOrgCommand = Util.GetFormattedSqlString("dbo.CreateRunOrganization", runId, calendarYear, createdBy);
+                        await this.wrapper.ExecuteSqlAsync(createRunOrgCommand, HttpContext.RequestAborted);
+                        var createRunPomCommand = Util.GetFormattedSqlString("dbo.CreateRunPom", runId, calendarYear, createdBy);
+                        await this.wrapper.ExecuteSqlAsync(createRunPomCommand, HttpContext.RequestAborted);
+
+                        calcRun!.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
+                        await this.context.SaveChangesAsync(HttpContext.RequestAborted);
+                        await transaction.CommitAsync(HttpContext.RequestAborted);
+                        return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+                    }
+                    catch (OperationCanceledException ex)
+                    {
+                        await transaction.RollbackAsync();
+                        return StatusCode(StatusCodes.Status408RequestTimeout, ex.ToString());
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        return StatusCode(StatusCodes.Status500InternalServerError, ex);
+                    }
+                }
+            }
+            catch (OperationCanceledException ex)
+            {
+                return StatusCode(StatusCodes.Status408RequestTimeout, ex.ToString());
             }
         }
 
@@ -106,7 +128,9 @@ namespace EPR.Calculator.API.Controllers
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
-            
+
+            SetCommandTimeout("TransposeCommand");
+
             CalculatorRun? calculatorRun = null;
             try
             {
@@ -159,6 +183,8 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
+            SetCommandTimeout("PrepareCalcResultsCommand");
+
             CalculatorRun? calculatorRun = null;
             try
             {
@@ -168,7 +194,7 @@ namespace EPR.Calculator.API.Controllers
                 if (calculatorRun == null)
                 {
                     return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
-                        { StatusCode = StatusCodes.Status404NotFound };
+                    { StatusCode = StatusCodes.Status404NotFound };
                 }
 
                 var results = await this.builder.Build(resultsRequestDto);
@@ -212,6 +238,17 @@ namespace EPR.Calculator.API.Controllers
             this.context.CalculatorRuns.Update(calculatorRun);
             await this.context.SaveChangesAsync();
             return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
+        private void SetCommandTimeout(string key)
+        {
+            var commandTimeout = this.configuration
+                .GetSection("Timeouts")
+                .GetValue<double>(key);
+            if (commandTimeout > 0)
+            {
+                context.Database.SetCommandTimeout(TimeSpan.FromMinutes(commandTimeout));
+            }
         }
     }
 }

@@ -15,6 +15,7 @@ using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Services.EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using FluentValidation;
@@ -55,15 +56,10 @@ builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
 
 // Configure the database context.
-double.TryParse(
-    builder.Configuration.GetSection("Timeouts").GetSection("DbCommand").Value,
-    out double commandTimeoutInMinutes);
-var commandTimeOutInSeconds = (int)(commandTimeoutInMinutes * 60);
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlServerOptions => sqlServerOptions.CommandTimeout(commandTimeOutInSeconds));
+        builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.Configure<BlobStorageSettings>(
@@ -126,6 +122,9 @@ builder.Services.AddProblemDetails();
 
 // Configure endpoint timeout policies.
 double.TryParse(
+    builder.Configuration.GetSection("Timeouts").GetSection("RpdStatus").Value,
+    out double rpdStatusTimeout);
+double.TryParse(
     builder.Configuration.GetSection("Timeouts").GetSection("PrepareCalcResults").Value,
     out double prepareCalcResultsTimeout);
 double.TryParse(
@@ -133,6 +132,7 @@ double.TryParse(
     out double transposeTimeout);
 builder.Services.AddRequestTimeouts(options => 
 {
+    options.AddPolicy("RpdStatus", TimeSpan.FromMinutes(rpdStatusTimeout));
     options.AddPolicy("PrepareCalcResults", TimeSpan.FromMinutes(prepareCalcResultsTimeout));
     options.AddPolicy("Transpose", TimeSpan.FromMinutes(transposeTimeout));
 });

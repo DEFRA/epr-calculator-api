@@ -19,7 +19,8 @@ namespace EPR.Calculator.API.Wrapper
             return this.context.PomData.Any();
         }
 
-        public async Task<int> ExecuteSqlAsync(FormattableString sql) => await this.context.Database.ExecuteSqlAsync(sql);
+        public async Task<int> ExecuteSqlAsync(FormattableString sql, CancellationToken cancellationToken)
+            => await this.context.Database.ExecuteSqlAsync(sql, cancellationToken);
 
         public async Task<IEnumerable<OrganisationData>> GetOrganisationDataAsync()
             => await this.context.OrganisationData.ToListAsync();

@@ -13,6 +13,8 @@ using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.InMemory.Internal;
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestPlatform.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -25,6 +27,8 @@ namespace EPR.Calculator.API.UnitTests
     public class CalculatorInternalControllerTests : BaseControllerTest
     {
         private Fixture Fixture { get; init; } = new Fixture();
+
+        private IConfiguration Configuration { get; init; } = new ConfigurationBuilder().Build();
 
         [TestMethod]
         public async Task UpdateRpdStatus_With_Missing_RunId()
@@ -178,7 +182,8 @@ namespace EPR.Calculator.API.UnitTests
             var mock = new Mock<IOrgAndPomWrapper>();
             mock.Setup(x => x.AnyPomData()).Returns(true);
             mock.Setup(x => x.AnyOrganisationData()).Returns(true);
-            mock.Setup(x => x.ExecuteSqlAsync(It.IsAny<FormattableString>())).ReturnsAsync(-1);
+            mock.Setup(x => x.ExecuteSqlAsync(It.IsAny<FormattableString>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(-1);
 
             if (dbContext != null)
             {
@@ -189,8 +194,10 @@ namespace EPR.Calculator.API.UnitTests
                     new Mock<ICalcResultBuilder>().Object,
                     new Mock<ICalcResultsExporter<CalcResult>>().Object,
                     new Mock<ITransposePomAndOrgDataService>().Object,
-                    new Mock<IStorageService>().Object
+                    new Mock<IStorageService>().Object,
+                    Configuration
                 );
+                controller.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
                 var request = new Dtos.UpdateRpdStatus { isSuccessful = true, RunId = 1, UpdatedBy = "User1" };
                 var result = await controller.UpdateRpdStatus(request);
@@ -200,7 +207,9 @@ namespace EPR.Calculator.API.UnitTests
                 var calcRun = dbContext.CalculatorRuns.Single(x => x.Id == 1);
                 Assert.IsNotNull(calcRun);
                 Assert.AreEqual(2, calcRun.CalculatorRunClassificationId);
-                mock.Verify(x => x.ExecuteSqlAsync(It.IsAny<FormattableString>()), Times.Exactly(2));
+                mock.Verify(x => x.ExecuteSqlAsync(
+                    It.IsAny<FormattableString>(), It.IsAny<CancellationToken>()),
+                    Times.Exactly(2));
             }
 
         }
@@ -277,7 +286,8 @@ namespace EPR.Calculator.API.UnitTests
                mockBuilder.Object,
                mockExporter.Object,
                mockTranspose.Object,
-               mockStorageService.Object
+               mockStorageService.Object,
+               Configuration
             );
             controller.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
@@ -308,7 +318,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
-                new Mock<IStorageService>().Object
+                new Mock<IStorageService>().Object,
+                Configuration
             );
             controller.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
@@ -334,7 +345,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
-                new Mock<IStorageService>().Object
+                new Mock<IStorageService>().Object,
+                Configuration
             );
             var context = new Mock<HttpContext>();
             context.Setup(c => c.RequestAborted).Returns(new CancellationToken(true));
@@ -370,7 +382,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 transposeService.Object,
-                new Mock<IStorageService>().Object
+                new Mock<IStorageService>().Object,
+                Configuration
             );
             var context = new Mock<HttpContext>();
             context.SetupSequence(c => c.RequestAborted)
@@ -402,7 +415,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
-                new Mock<IStorageService>().Object
+                new Mock<IStorageService>().Object,
+                Configuration
             );
             var context = new Mock<HttpContext>();
             context.SetupSequence(c => c.RequestAborted).Throws(new Exception("A test error occured."));
@@ -438,7 +452,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 transposeService.Object,
-                new Mock<IStorageService>().Object
+                new Mock<IStorageService>().Object,
+                Configuration
             );
             var context = new Mock<HttpContext>();
             context.SetupSequence(c => c.RequestAborted)
@@ -472,7 +487,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
-                new Mock<IStorageService>().Object
+                new Mock<IStorageService>().Object,
+                Configuration
             );
             var httpContext = new Mock<HttpContext>();
             httpContext.Setup(Object => Object.RequestAborted).Returns(new CancellationToken(true));
@@ -513,7 +529,8 @@ namespace EPR.Calculator.API.UnitTests
                 mockCalcResultBuilder.Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
-                mockStorage.Object
+                mockStorage.Object,
+                Configuration
             );
             var httpContext = new Mock<HttpContext>();
             httpContext.SetupSequence(Object => Object.RequestAborted)
@@ -540,7 +557,6 @@ namespace EPR.Calculator.API.UnitTests
         {
             // Arrange
             var requestDto = new CalcResultsRequestDto() { RunId = 0 };
-            //var calcResult = Fixture.Create<CalcResult>();
 
             var controller = new CalculatorInternalController(
                 dbContext,
@@ -549,7 +565,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
-                new Mock<IStorageService>().Object
+                new Mock<IStorageService>().Object,
+                Configuration
             );
             var httpContext = new Mock<HttpContext>();
             httpContext.Setup(Object => Object.RequestAborted)
@@ -591,7 +608,8 @@ namespace EPR.Calculator.API.UnitTests
                 mockCalcResultBuilder.Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
-                mockStorage.Object
+                mockStorage.Object,
+                Configuration
             );
             var httpContext = new Mock<HttpContext>();
             httpContext.SetupSequence(Object => Object.RequestAborted)

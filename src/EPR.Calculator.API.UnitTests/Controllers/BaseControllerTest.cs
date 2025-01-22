@@ -15,6 +15,10 @@ using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Services;
+using Castle.Core.Configuration;
+using System.Configuration;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Http;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -58,8 +62,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
-                new Mock<IStorageService>().Object
+                new Mock<IStorageService>().Object,
+                new ConfigurationBuilder().Build()
             );
+            calculatorInternalController.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
             var mockStorageService = new Mock<IStorageService>();
             var mockServiceBusService = new Mock<IServiceBusService>();
