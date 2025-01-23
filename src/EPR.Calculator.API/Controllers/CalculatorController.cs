@@ -7,6 +7,7 @@ using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Configuration;
@@ -32,8 +33,16 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRun")]
+        [Authorize()]
         public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
         {
+            var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
+            if (claim == null)
+            {
+                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+
+            var userName = claim.Value;
             try
             {
                 // Return bad request if the model is invalid
@@ -92,7 +101,7 @@ namespace EPR.Calculator.API.Controllers
                 {
                     Name = request.CalculatorRunName,
                     Financial_Year = request.FinancialYear,
-                    CreatedBy = request.CreatedBy,
+                    CreatedBy = userName,
                     CreatedAt = DateTime.Now,
                     CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                     DefaultParameterSettingMasterId = activeDefaultParameterSettingsMaster.Id,
@@ -112,7 +121,7 @@ namespace EPR.Calculator.API.Controllers
                         {
                             CalculatorRunId = calculatorRun.Id,
                             FinancialYear = calculatorRun.Financial_Year,
-                            CreatedBy = User?.Identity?.Name ?? request.CreatedBy
+                            CreatedBy = User?.Identity?.Name ?? userName
                         };
 
                         // Send message
@@ -141,6 +150,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRuns")]
+        [Authorize()]
         public async Task<IActionResult> GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
         {
             if (!ModelState.IsValid)
@@ -175,6 +185,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("calculatorRuns/{runId}")]
+        [Authorize()]
         public async Task<IActionResult> GetCalculatorRun(int runId)
         {
             if (!ModelState.IsValid)
@@ -213,8 +224,16 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPut]
         [Route("calculatorRuns")]
+        [Authorize()]
         public async Task<IActionResult> PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
+            var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
+            if (claim == null)
+            {
+                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+
+            var userName = claim.Value;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
@@ -247,6 +266,8 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
+                calculatorRun.UpdatedAt = DateTime.Now;
+                calculatorRun.UpdatedBy = userName;
 
                 this.context.CalculatorRuns.Update(calculatorRun);
                 await this.context.SaveChangesAsync();
@@ -261,6 +282,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("CheckCalcNameExists/{name}")]
+        [Authorize()]
         public async Task<IActionResult> GetCalculatorRunByName([FromRoute] string name)
         {
             if (!ModelState.IsValid)
@@ -286,6 +308,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("DownloadResult/{runId}")]
+        [Authorize()]
         public async Task<IResult> DownloadResultFile(int runId)
         {
             if (!ModelState.IsValid)

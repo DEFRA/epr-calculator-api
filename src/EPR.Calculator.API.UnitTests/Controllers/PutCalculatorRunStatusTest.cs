@@ -5,6 +5,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -13,6 +14,8 @@ using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Security.Claims;
+using System.Security.Principal;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -43,17 +46,30 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestCleanup]
         public void CleanUp()
         {
-            context.Database.EnsureDeleted();
+            this.context.Database.EnsureDeleted();
         }
 
         [TestMethod]
-        public async Task PutCalculatorRunStatusTest_422()
+        public void PutCalculatorRunStatusTest_422()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+            var defaultContext = new DefaultHttpContext()
+            {
+                User = principal
+            };
             var controller =
                 new CalculatorController(context, mockConfig.Object, mockStorageService.Object, mockServiceBusService.Object);
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = defaultContext
+            };
             var runId = 0;
-            var result = await controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
-                { ClassificationId = 5, RunId = runId }) as ObjectResult;
+            var task = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
+                { ClassificationId = 5, RunId = runId });
+            task.Wait();
+            var result = task.Result as ObjectResult;
             Assert.IsNotNull(result);
 
             Assert.AreEqual(422, result.StatusCode);
@@ -61,28 +77,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task PutCalculatorRunStatusTest_Invalid_Classification_Id()
+        public void PutCalculatorRunStatusTest_Invalid_Classification_Id()
         {
             var runId = 1;
             var invalidClassificationId = 10;
-
-            var controller =
-                new CalculatorController(context, mockConfig.Object,
-                    mockStorageService.Object, mockServiceBusService.Object);
-
-            var result = await controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
-                { ClassificationId = invalidClassificationId, RunId = runId }) as ObjectResult;
-            Assert.IsNotNull(result);
-
-            Assert.AreEqual(422, result.StatusCode);
-            Assert.AreEqual($"Unable to find Classification Id {invalidClassificationId}", result.Value);
-        }
-
-        [TestMethod]
-        public async Task PutCalculatorRunStatusTest_Valid_Run_Classification_Id()
-        {
-            var runId = 1;
-            var validClassificationId = 5;
             var date = DateTime.Now;
             context.CalculatorRuns.Add(new CalculatorRun
             {
@@ -100,12 +98,72 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 new CalculatorController(context, mockConfig.Object,
                     mockStorageService.Object, mockServiceBusService.Object);
 
-            var result = await controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
-            { ClassificationId = validClassificationId, RunId = runId }) as StatusCodeResult;
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var userContext = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = userContext
+            };
+            var task = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
+                { ClassificationId = invalidClassificationId, RunId = runId });
+            task.Wait();
+            var result = task.Result as ObjectResult;
+            Assert.IsNotNull(result);
+
+            Assert.AreEqual(422, result.StatusCode);
+            Assert.AreEqual($"Unable to find Classification Id {invalidClassificationId}", result.Value);
+        }
+
+        [TestMethod]
+        public void PutCalculatorRunStatusTest_Valid_Run_Classification_Id()
+        {
+            var runId = 1;
+            var validClassificationId = 5;
+            var date = DateTime.Now;
+            this.context.CalculatorRuns.Add(new CalculatorRun
+            {
+                Name = "Calc RunName",
+                CalculatorRunClassificationId = 2,
+                CreatedAt = date,
+                CreatedBy = "User23",
+                LapcapDataMasterId = 1,
+                DefaultParameterSettingMasterId = 1,
+                Financial_Year = "2024-25"
+            });
+            this.context.SaveChanges();
+
+            var controller =
+                new CalculatorController(context, mockConfig.Object,
+                    mockStorageService.Object, mockServiceBusService.Object);
+
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var userContext = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = userContext
+            };
+            var task = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
+            { ClassificationId = validClassificationId, RunId = runId });
+            task.Wait();
+            var result = task.Result as StatusCodeResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(201, result.StatusCode);
 
-            var run = context.CalculatorRuns.Single(x => x.Id == 1);
+            var run = this.context.CalculatorRuns.Single(x => x.Id == 1);
             Assert.IsNotNull(run);
 
             Assert.AreEqual(5, run.CalculatorRunClassificationId);
@@ -116,13 +174,40 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             var runId = 2;
             var classificationId = 5;
+            var date = DateTime.Now;
+            context.CalculatorRuns.Add(new CalculatorRun
+            {
+                Name = "Calc RunName",
+                CalculatorRunClassificationId = classificationId,
+                CreatedAt = date,
+                CreatedBy = "User23",
+                LapcapDataMasterId = 1,
+                DefaultParameterSettingMasterId = 1,
+                Financial_Year = "2024-25"
+            });
+            context.SaveChanges();
 
             var controller =
                 new CalculatorController(context, mockConfig.Object,
                     mockStorageService.Object, mockServiceBusService.Object);
 
-            var result = await controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
-                { ClassificationId = classificationId, RunId = runId }) as ObjectResult;
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var userContext = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = userContext
+            };
+
+            var task = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
+            { ClassificationId = classificationId, RunId = runId });
+            var result = task.Result as ObjectResult;
             Assert.IsNotNull(result);
 
             Assert.AreEqual(422, result.StatusCode);

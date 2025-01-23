@@ -9,6 +9,5 @@ namespace EPR.Calculator.API.Dtos
 
         public required string FinancialYear { get; set; }
 
-        public required string CreatedBy { get; set; }
     }
 }

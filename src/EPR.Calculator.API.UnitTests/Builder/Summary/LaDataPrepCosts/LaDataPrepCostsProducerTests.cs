@@ -2,9 +2,9 @@
 {
     using AutoFixture;
     using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
-    using EPR.Calculator.API.Data;
-    using EPR.Calculator.API.Data.DataModels;
-    using EPR.Calculator.API.Models;
+    using Data;
+    using Data.DataModels;
+    using Models;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.VisualStudio.TestTools.UnitTesting;

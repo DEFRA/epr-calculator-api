@@ -1,8 +1,9 @@
-﻿using EPR.Calculator.API.Validators;
-using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Validators;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,14 +23,22 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("lapcapData")]
+        [Authorize()]
         public async Task<IActionResult> Create([FromBody] CreateLapcapDataDto request)
         {
+            var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
+            if (claim == null)
+            {
+                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+
+            var userName = claim.Value;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
             var validationResult = validator.Validate(request);
-            if (validationResult != null && validationResult.IsInvalid)
+            if (validationResult.IsInvalid)
             {
                 return BadRequest(validationResult.Errors);
             }
@@ -44,7 +53,7 @@ namespace EPR.Calculator.API.Controllers
                     var lapcapDataMaster = new LapcapDataMaster
                     {
                         CreatedAt = DateTime.Now,
-                        CreatedBy = "Testuser",
+                        CreatedBy = userName,
                         EffectiveFrom = DateTime.Now,
                         EffectiveTo = null,
                         LapcapFileName = request.LapcapFileName,
@@ -93,6 +102,7 @@ namespace EPR.Calculator.API.Controllers
         /// <response code="500">If an internal server error occurs.</response>
         [HttpGet]
         [Route("lapcapData/{parameterYear}")]
+        [Authorize()]
         public async Task<IActionResult> Get([FromRoute] string parameterYear)
         {
             if (!ModelState.IsValid)
