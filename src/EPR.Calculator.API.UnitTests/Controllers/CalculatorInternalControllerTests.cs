@@ -1,4 +1,5 @@
 using AutoFixture;
+using Castle.Components.DictionaryAdapter.Xml;
 using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data.DataModels;
@@ -11,8 +12,10 @@ using EPR.Calculator.API.UnitTests.Controllers;
 using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Amqp.Transaction;
 using Microsoft.EntityFrameworkCore.InMemory.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestPlatform.Common;
@@ -27,8 +30,25 @@ namespace EPR.Calculator.API.UnitTests
     public class CalculatorInternalControllerTests : BaseControllerTest
     {
         private Fixture Fixture { get; init; } = new Fixture();
+        private readonly Mock<CalculatorRunValidator> mockValidator;
 
         private IConfiguration Configuration { get; init; } = new ConfigurationBuilder().Build();
+
+        public CalculatorInternalControllerTests()
+        {
+            mockValidator = new Mock<CalculatorRunValidator>();
+            MockTransposeService = new Mock<ITransposePomAndOrgDataService>();
+            MockTransposeService.Setup(t => t.Transpose(
+                It.IsAny<CalcResultsRequestDto>(),
+                new CancellationToken(false)))
+                .ReturnsAsync(true);
+            MockTransposeService.Setup(t => t.Transpose(
+                It.IsAny<CalcResultsRequestDto>(),
+                new CancellationToken(true)))
+                .ThrowsAsync(new TaskCanceledException("Timed out."));
+        }
+
+        private Mock<ITransposePomAndOrgDataService> MockTransposeService { get; init; }
 
         [TestMethod]
         public async Task UpdateRpdStatus_With_Missing_RunId()
@@ -195,7 +215,8 @@ namespace EPR.Calculator.API.UnitTests
                     new Mock<ICalcResultsExporter<CalcResult>>().Object,
                     new Mock<ITransposePomAndOrgDataService>().Object,
                     new Mock<IStorageService>().Object,
-                    Configuration
+                    Configuration,
+                    new Mock<CalculatorRunValidator>().Object
                 );
                 controller.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
@@ -217,7 +238,7 @@ namespace EPR.Calculator.API.UnitTests
         [TestMethod]
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
-            var requestDto = new CalcResultsRequestDto() { RunId = 1 };
+            var requestDto = new CalcResultsRequestDto() { RunId = 4 };
             var calcResult = new CalcResult
             {
                 CalcResultLapcapData = new CalcResultLapcapData
@@ -250,7 +271,7 @@ namespace EPR.Calculator.API.UnitTests
             {
                 CalcResultDetail = new CalcResultDetail
                 {
-                    RunId = 1,
+                    RunId = 4,
                     RunDate = DateTime.Now,
                     RunName = "SomeRun"
                 },
@@ -279,6 +300,8 @@ namespace EPR.Calculator.API.UnitTests
 
             var mockTranspose = new Mock<ITransposePomAndOrgDataService>();
             var mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
+            var mockValidator = new Mock<CalculatorRunValidator>();
+
             var controller = new CalculatorInternalController(
                dbContext,
                new RpdStatusDataValidator(wrapper),
@@ -287,7 +310,8 @@ namespace EPR.Calculator.API.UnitTests
                mockExporter.Object,
                mockTranspose.Object,
                mockStorageService.Object,
-               Configuration
+               Configuration,
+               mockValidator.Object
             );
             controller.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
@@ -298,7 +322,7 @@ namespace EPR.Calculator.API.UnitTests
             var task = controller.PrepareCalcResults(requestDto);
             task.Wait();
             var result = task.Result as ObjectResult;
-            var calculatorRun = dbContext.CalculatorRuns.SingleOrDefault(run => run.Id == 1);
+            var calculatorRun = dbContext.CalculatorRuns.SingleOrDefault(run => run.Id == 4);
             Assert.IsNotNull(result);
             Assert.AreEqual((int)RunClassification.UNCLASSIFIED, calculatorRun?.CalculatorRunClassificationId);
             Assert.AreEqual(201, result.StatusCode);
@@ -319,7 +343,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
                 new Mock<IStorageService>().Object,
-                Configuration
+                Configuration,
+                new Mock<CalculatorRunValidator>().Object
             );
             controller.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
@@ -344,9 +369,10 @@ namespace EPR.Calculator.API.UnitTests
                 wrapper,
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
-                new Mock<ITransposePomAndOrgDataService>().Object,
+                MockTransposeService.Object,
                 new Mock<IStorageService>().Object,
-                Configuration
+                Configuration,
+                mockValidator.Object
             );
             var context = new Mock<HttpContext>();
             context.Setup(c => c.RequestAborted).Returns(new CancellationToken(true));
@@ -369,21 +395,16 @@ namespace EPR.Calculator.API.UnitTests
         public async Task TransposeBeforeCalcResults_ShouldReturn408_WhenTransposeTimesOut()
         {
             // Arrange
-            var transposeService = new Mock<ITransposePomAndOrgDataService>();
-            transposeService.Setup(t => t.Transpose(
-                It.IsAny<CalcResultsRequestDto>(),
-                new CancellationToken(true)))
-                .ThrowsAsync(new TaskCanceledException("Timed out."));
-
             var controller = new CalculatorInternalController(
                 dbContext,
                 new RpdStatusDataValidator(wrapper),
                 wrapper,
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
-                transposeService.Object,
+                MockTransposeService.Object,
                 new Mock<IStorageService>().Object,
-                Configuration
+                Configuration,
+                mockValidator.Object
             );
             var context = new Mock<HttpContext>();
             context.SetupSequence(c => c.RequestAborted)
@@ -416,7 +437,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
                 new Mock<IStorageService>().Object,
-                Configuration
+                Configuration,
+                mockValidator.Object
             );
             var context = new Mock<HttpContext>();
             context.SetupSequence(c => c.RequestAborted).Throws(new Exception("A test error occured."));
@@ -439,21 +461,16 @@ namespace EPR.Calculator.API.UnitTests
         public async Task TransposeBeforeCalcResults_ShouldReturn500_WhenTransposeMiscError()
         {
             // Arrange
-            var transposeService = new Mock<ITransposePomAndOrgDataService>();
-            transposeService.Setup(t => t.Transpose(
-                It.IsAny<CalcResultsRequestDto>(),
-                new CancellationToken(true)))
-                .ThrowsAsync(new TaskCanceledException("Timed out."));
-
             var controller = new CalculatorInternalController(
                 dbContext,
                 new RpdStatusDataValidator(wrapper),
                 wrapper,
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
-                transposeService.Object,
+                MockTransposeService.Object,
                 new Mock<IStorageService>().Object,
-                Configuration
+                Configuration,
+                mockValidator.Object
             );
             var context = new Mock<HttpContext>();
             context.SetupSequence(c => c.RequestAborted)
@@ -488,7 +505,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
                 new Mock<IStorageService>().Object,
-                Configuration
+                Configuration,
+                mockValidator.Object
             );
             var httpContext = new Mock<HttpContext>();
             httpContext.Setup(Object => Object.RequestAborted).Returns(new CancellationToken(true));
@@ -503,13 +521,13 @@ namespace EPR.Calculator.API.UnitTests
             Assert.AreEqual((int)HttpStatusCode.RequestTimeout, result.StatusCode);
         }
 
-        /// <summary>
+        // <summary>
         /// Checks that when that when
         /// <see cref="CalculatorInternalController.PrepareCalcResults(CalcResultsRequestDto)"/>
         /// calls to update the calculator run record, but times out, the controller returns a 408 status code.
         /// </summary>
         [TestMethod]
-        public async Task PrepareCalcResults_ShouldReturn408_WhenUpdateCalculatorRunTimesOut()
+        public async Task PrepareCalcResults_ShouldReturn408_WhenTransposeTimesOut()
         {
             // Arrange
             var requestDto = new CalcResultsRequestDto() { RunId = 4 };
@@ -528,12 +546,59 @@ namespace EPR.Calculator.API.UnitTests
                 wrapper,
                 mockCalcResultBuilder.Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
-                new Mock<ITransposePomAndOrgDataService>().Object,
+                MockTransposeService.Object,
                 mockStorage.Object,
-                Configuration
+                Configuration,
+                mockValidator.Object
             );
             var httpContext = new Mock<HttpContext>();
-            httpContext.SetupSequence(Object => Object.RequestAborted)
+            httpContext.SetupSequence(c => c.RequestAborted)
+                .Returns(new CancellationToken(false))
+                .Returns(new CancellationToken(true));
+
+            controller.ControllerContext.HttpContext = httpContext.Object;
+
+            // Act
+            var task = await controller.PrepareCalcResults(requestDto);
+            var result = (ObjectResult)task;
+
+            // Assert
+            Assert.AreEqual((int)HttpStatusCode.RequestTimeout, result.StatusCode);
+        }
+
+        /// <summary>
+        /// Checks that when that when
+        /// <see cref="CalculatorInternalController.PrepareCalcResults(CalcResultsRequestDto)"/>
+        /// calls to update the calculator run record, but times out, the controller returns a 408 status code.
+        /// </summary>
+        [TestMethod]
+        public async Task PrepareCalcResults_ShouldReturn408_WhenUpdateCalculatorRecordTimesOut()
+        {
+            // Arrange
+            var requestDto = new CalcResultsRequestDto() { RunId = 4 };
+            var calcResult = Fixture.Create<CalcResult>();
+
+            var mockCalcResultBuilder = new Mock<ICalcResultBuilder>();
+            mockCalcResultBuilder.Setup(b => b.Build(requestDto)).ReturnsAsync(calcResult);
+
+            var mockStorage = new Mock<IStorageService>();
+            mockStorage.Setup(m => m.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(true));
+
+            var controller = new CalculatorInternalController(
+                dbContext,
+                new RpdStatusDataValidator(wrapper),
+                wrapper,
+                mockCalcResultBuilder.Object,
+                new Mock<ICalcResultsExporter<CalcResult>>().Object,
+                MockTransposeService.Object,
+                mockStorage.Object,
+                Configuration,
+                mockValidator.Object
+            );
+            var httpContext = new Mock<HttpContext>();
+            httpContext.SetupSequence(c => c.RequestAborted)
+                .Returns(new CancellationToken(false))
                 .Returns(new CancellationToken(false))
                 .Returns(new CancellationToken(true));
             controller.ControllerContext.HttpContext = httpContext.Object;
@@ -564,9 +629,10 @@ namespace EPR.Calculator.API.UnitTests
                 wrapper,
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
-                new Mock<ITransposePomAndOrgDataService>().Object,
+                MockTransposeService.Object,
                 new Mock<IStorageService>().Object,
-                Configuration
+                Configuration,
+                mockValidator.Object
             );
             var httpContext = new Mock<HttpContext>();
             httpContext.Setup(Object => Object.RequestAborted)
@@ -607,9 +673,10 @@ namespace EPR.Calculator.API.UnitTests
                 wrapper,
                 mockCalcResultBuilder.Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
-                new Mock<ITransposePomAndOrgDataService>().Object,
+                MockTransposeService.Object,
                 mockStorage.Object,
-                Configuration
+                Configuration,
+                mockValidator.Object
             );
             var httpContext = new Mock<HttpContext>();
             httpContext.SetupSequence(Object => Object.RequestAborted)

@@ -10,6 +10,7 @@ using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
@@ -38,6 +39,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
         private readonly CalculatorInternalController controller;
         private CalcResultDetailBuilder detailBuilder;
+        private readonly Mock<CalculatorRunValidator> mockValidator;
 
         private readonly Mock<ApplicationDBContext> mockContext;
         private readonly CalcResultBuilder calcResultBuilder;
@@ -58,6 +60,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             mockStorageservice.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
 
+            mockValidator = new Mock<CalculatorRunValidator>();
+
             controller = new CalculatorInternalController(
                dbContext,
                new RpdStatusDataValidator(wrapper),
@@ -66,7 +70,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                mockExporter.Object,
                transposePomAndOrgDataService.Object,
                mockStorageservice.Object,
-               new ConfigurationBuilder().Build()
+               new ConfigurationBuilder().Build(),
+               mockValidator.Object
             );
             controller.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
@@ -96,12 +101,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
-            var requestDto = new CalcResultsRequestDto() { RunId = 1 };
+            var requestDto = new CalcResultsRequestDto() { RunId = 4 };
             var calcResult = new CalcResult
             {
                 CalcResultDetail = new CalcResultDetail
                 {
-                    RunId = 1,
+                    RunId = 4,
                     RunDate = DateTime.Now,
                     RunName = "RunName"
                 },
@@ -155,6 +160,59 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             Assert.AreEqual(detail, result.CalcResultDetail);
         }
+
+        [TestMethod]
+        public void CheckForNullIds_ShouldReturnErrorMessages_WhenIdsAreNull()
+        {
+            // Arrange
+            var calculatorRun = new CalculatorRun
+            {
+                CalculatorRunOrganisationDataMasterId = null,
+                DefaultParameterSettingMasterId = null,
+                CalculatorRunPomDataMasterId = 1,
+                LapcapDataMasterId = null,
+                Name = "soe",
+                Financial_Year = "2024-25",
+            };
+
+            var validator = new CalculatorRunValidator();
+
+            // Act
+            ValidationResult result = validator.ValidateCalculatorRunIds(calculatorRun);
+
+            // Assert
+            var expectedErrors = new List<string>
+            {
+                "CalculatorRunOrganisationDataMasterId is null",
+                "DefaultParameterSettingMasterId is null",
+                "LapcapDataMasterId is null"
+            };
+            CollectionAssert.AreEqual(expectedErrors, result.ErrorMessages.ToList());
+            Assert.IsFalse(result.IsValid);
+        }
+
+        [TestMethod]
+        public void CheckForNullIds_ShouldReturnEmptyList_WhenNoIdsAreNull()
+        {
+            // Arrange
+            var calculatorRun = new CalculatorRun
+            {
+                CalculatorRunOrganisationDataMasterId = 1,
+                DefaultParameterSettingMasterId = 1,
+                CalculatorRunPomDataMasterId = 1,
+                LapcapDataMasterId = 1,
+                Name = "soe",
+                Financial_Year = "2024-25",
+            };
+
+            var validator = new CalculatorRunValidator();
+
+            // Act
+            ValidationResult result = validator.ValidateCalculatorRunIds(calculatorRun);
+
+            // Assert
+            Assert.AreEqual(0, result.ErrorMessages.Count());
+            Assert.IsTrue(result.IsValid);
+        }
     }
 }
-

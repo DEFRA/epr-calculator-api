@@ -26,6 +26,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<ICalcResultBuilder> _builder;
         private readonly Mock<ICalcResultsExporter<CalcResult>> _exporter;
         private readonly Mock<ITransposePomAndOrgDataService> _transposePomAndOrgDataService;
+        private readonly CalculatorRunValidator _runValidator;
 
         public PrepareCalcResultsValidationTest()
         {
@@ -35,6 +36,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             _builder = new Mock<ICalcResultBuilder>();
             _exporter = new Mock<ICalcResultsExporter<CalcResult>>();
             _transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
+            _runValidator = new CalculatorRunValidator();
             var mockStorageService = new Mock<IStorageService>();
             controller = new CalculatorInternalController(
                 _context,
@@ -44,7 +46,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 _exporter.Object, 
                 _transposePomAndOrgDataService.Object, 
                 mockStorageService.Object,
-                new ConfigurationBuilder().Build());
+                new ConfigurationBuilder().Build(),
+                _runValidator);
         }
 
         [TestMethod]

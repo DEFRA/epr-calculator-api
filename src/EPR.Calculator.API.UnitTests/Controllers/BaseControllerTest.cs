@@ -19,6 +19,7 @@ using Castle.Core.Configuration;
 using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Http;
+using Microsoft.ApplicationInsights;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -63,7 +64,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
                 new Mock<IStorageService>().Object,
-                new ConfigurationBuilder().Build()
+                new ConfigurationBuilder().Build(),
+                new Mock<CalculatorRunValidator>().Object
             );
             calculatorInternalController.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
@@ -733,6 +735,18 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CreatedBy = "Test User",
                 CalculatorRunOrganisationDataMasterId = 1,
                 CalculatorRunPomDataMasterId = 1,
+            });
+            list.Add(new CalculatorRun
+            {
+                CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+                Name = "Test 422 error",
+                Financial_Year = "2024-25",
+                CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
+                CreatedBy = "Test User",
+                CalculatorRunOrganisationDataMasterId = 2,
+                CalculatorRunPomDataMasterId = 2,
+                LapcapDataMasterId = 2,
+                DefaultParameterSettingMasterId = 2,
             });
             list.Add(new CalculatorRun
             {

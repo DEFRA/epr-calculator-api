@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EPR.Calculator.API.UnitTests.Controllers;
+using System.Security.Principal;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace EPR.Calculator.API.UnitTests.Validator
 {
@@ -13,6 +16,19 @@ namespace EPR.Calculator.API.UnitTests.Validator
         [TestMethod]
         public async Task InvalidTest_With_NoRecordsAsync()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            defaultParameterSettingController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
@@ -35,6 +51,20 @@ namespace EPR.Calculator.API.UnitTests.Validator
         [TestMethod]
         public async Task InvalidTest_With_Invalid_DataAsync()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            defaultParameterSettingController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
+
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
@@ -54,6 +84,19 @@ namespace EPR.Calculator.API.UnitTests.Validator
         [TestMethod]
         public async Task InvalidTest_With_Missing_DataAsync()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            defaultParameterSettingController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             foreach (var uniqueRef in DefaultParameterUniqueReferences.UniqueReferences)
             {

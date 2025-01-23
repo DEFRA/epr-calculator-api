@@ -9,6 +9,8 @@ using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Timeouts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +30,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly ITransposePomAndOrgDataService transposePomAndOrgDataService;
         private readonly IStorageService storageService;
         private readonly IConfiguration configuration;
+        private readonly CalculatorRunValidator validatior;
 
         public CalculatorInternalController(ApplicationDBContext context,
                                             IRpdStatusDataValidator rpdStatusDataValidator,
@@ -36,7 +39,8 @@ namespace EPR.Calculator.API.Controllers
                                             ICalcResultsExporter<CalcResult> exporter,
                                             ITransposePomAndOrgDataService transposePomAndOrgDataService,
                                             IStorageService storageService,
-                                            IConfiguration configuration)
+                                            IConfiguration configuration,
+                                            CalculatorRunValidator validationRules)
         {
             this.context = context;
             this.rpdStatusDataValidator = rpdStatusDataValidator;
@@ -46,6 +50,7 @@ namespace EPR.Calculator.API.Controllers
             this.transposePomAndOrgDataService = transposePomAndOrgDataService;
             this.storageService = storageService;
             this.configuration = configuration;
+            this.validatior = validationRules;
         }
 
         [HttpPost]
@@ -201,23 +206,36 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status404NotFound };
                 }
 
-                var results = await this.builder.Build(resultsRequestDto);
-                var exportedResults = this.exporter.Export(results);
-
-                var fileName = new CalcResultsFileName(
-                    results.CalcResultDetail.RunId,
-                    results.CalcResultDetail.RunName,
-                    results.CalcResultDetail.RunDate);
-                var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
-
-                if (resultsFileWritten)
+                // Validate the result for all the required IDs
+                var validationResult = validatior.ValidateCalculatorRunIds(calculatorRun);
+                if (!validationResult.IsValid)
                 {
-                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
-                    this.context.CalculatorRuns.Update(calculatorRun);
-                    await this.context.SaveChangesAsync(HttpContext.RequestAborted);
-                    var timeDiff = startTime - DateTime.Now;
-                    return new ObjectResult(timeDiff.Minutes) { StatusCode = StatusCodes.Status201Created };
+                    return StatusCode(StatusCodes.Status422UnprocessableEntity, validationResult.ErrorMessages.ToArray());
                 }
+
+                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(
+                    resultsRequestDto,
+                    HttpContext.RequestAborted);
+                if (isTransposeSuccessful)
+                {
+                    var results = await this.builder.Build(resultsRequestDto);
+                    var exportedResults = this.exporter.Export(results);
+
+                    var fileName = new CalcResultsFileName(
+                        results.CalcResultDetail.RunId,
+                        results.CalcResultDetail.RunName,
+                        results.CalcResultDetail.RunDate);
+                    var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
+
+                    if (resultsFileWritten)
+                    {
+                        calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
+                        this.context.CalculatorRuns.Update(calculatorRun);
+                        await this.context.SaveChangesAsync(HttpContext.RequestAborted);
+                        var timeDiff = startTime - DateTime.Now;
+                        return new ObjectResult(timeDiff.Minutes) { StatusCode = StatusCodes.Status201Created };
+                    }
+                } 
             }
             catch (OperationCanceledException exception)
             {
