@@ -237,5 +237,10 @@ namespace EPR.Calculator.API.Utils
             int year = int.Parse(GetFinancialYearAsYYYY(financialYear));
             return (year - 1).ToString();
         }
+
+        public static FormattableString GetFormattedSqlString(string procedureName, int runId, string calendarYear, string createdBy)
+        {
+            return $"exec {procedureName} @RunId ={runId}, @calendarYear = {calendarYear}, @createdBy = {createdBy}";
+        }
     }
 }

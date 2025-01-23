@@ -29,16 +29,19 @@ namespace EPR.Calculator.API.Builder.Summary
         public async Task<CalcResultSummary> Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult)
         {
             // Get and map materials from DB
+            var runId = resultsRequestDto.RunId;
             var materialsFromDb = await context.Material.ToListAsync();
             var materials = Mappers.MaterialMapper.Map(materialsFromDb);
-            var producerDetails = await context.ProducerDetail.ToListAsync();
-            var producerReportedMaterials = await context.ProducerReportedMaterial.ToListAsync();
-            var runId = resultsRequestDto.RunId;
 
-            var runProducerMaterialDetails = GetProducerRunMaterialDetails(
-                producerDetails,
-                producerReportedMaterials,
-                runId);
+            var runProducerMaterialDetails = await (from pd in context.ProducerDetail
+                           join prm in context.ProducerReportedMaterial on pd.Id equals prm.ProducerDetailId
+                           where pd.CalculatorRunId == runId
+                           select new CalcResultsProducerAndReportMaterialDetail
+                           {
+                               ProducerDetail = pd,
+                               ProducerReportedMaterial = prm
+                           }).ToListAsync();
+            var producerDetails = runProducerMaterialDetails.Select(x => x.ProducerDetail).Distinct().ToList();
 
             var orderedProducerDetails = GetOrderedListOfProducersAssociatedRunId(
                 runId, producerDetails);
