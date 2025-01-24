@@ -1,17 +1,15 @@
-﻿using Azure.Messaging.ServiceBus;
-using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Exporter;
+using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Azure;
-using Newtonsoft.Json;
 using System.Configuration;
 
 namespace EPR.Calculator.API.Controllers
@@ -21,22 +19,30 @@ namespace EPR.Calculator.API.Controllers
     {
         private readonly ApplicationDBContext context;
         private readonly IConfiguration configuration;
-        private readonly IAzureClientFactory<ServiceBusClient> serviceBusClientFactory;
         private readonly IStorageService storageService;
+        private readonly IServiceBusService serviceBusService;
 
         public CalculatorController(ApplicationDBContext context, IConfiguration configuration,
-            IAzureClientFactory<ServiceBusClient> serviceBusClientFactory, IStorageService storageService)
+            IStorageService storageService, IServiceBusService serviceBusService)
         {
             this.context = context;
             this.configuration = configuration;
-            this.serviceBusClientFactory = serviceBusClientFactory;
             this.storageService = storageService;
+            this.serviceBusService = serviceBusService;
         }
 
         [HttpPost]
         [Route("calculatorRun")]
+        [Authorize()]
         public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
         {
+            var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
+            if (claim == null)
+            {
+                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+
+            var userName = claim.Value;
             try
             {
                 // Return bad request if the model is invalid
@@ -95,7 +101,7 @@ namespace EPR.Calculator.API.Controllers
                 {
                     Name = request.CalculatorRunName,
                     Financial_Year = request.FinancialYear,
-                    CreatedBy = request.CreatedBy,
+                    CreatedBy = userName,
                     CreatedAt = DateTime.Now,
                     CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                     DefaultParameterSettingMasterId = activeDefaultParameterSettingsMaster.Id,
@@ -115,11 +121,11 @@ namespace EPR.Calculator.API.Controllers
                         {
                             CalculatorRunId = calculatorRun.Id,
                             FinancialYear = calculatorRun.Financial_Year,
-                            CreatedBy = User?.Identity?.Name ?? request.CreatedBy
+                            CreatedBy = User?.Identity?.Name ?? userName
                         };
 
                         // Send message
-                        await SendMessage(serviceBusQueueName, calculatorRunMessage);
+                        await serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
 
                         // All good, commit transaction
                         await transaction.CommitAsync();
@@ -144,7 +150,8 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRuns")]
-        public IActionResult GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
+        [Authorize()]
+        public async Task<IActionResult> GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
         {
             if (!ModelState.IsValid)
             {
@@ -158,7 +165,10 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRuns = context.CalculatorRuns.Where(run => run.Financial_Year == request.FinancialYear).OrderByDescending(run => run.CreatedAt).ToList();
+                var calculatorRuns = await context.CalculatorRuns
+                    .Where(run => run.Financial_Year == request.FinancialYear)
+                    .OrderByDescending(run => run.CreatedAt)
+                    .ToListAsync();
 
                 if (calculatorRuns.Count == 0)
                 {
@@ -175,7 +185,8 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("calculatorRuns/{runId}")]
-        public IActionResult GetCalculatorRun(int runId)
+        [Authorize()]
+        public async Task<IActionResult> GetCalculatorRun(int runId)
         {
             if (!ModelState.IsValid)
             {
@@ -185,7 +196,7 @@ namespace EPR.Calculator.API.Controllers
             try
             {
                 var calculatorRunDetail =
-                    (from run in this.context.CalculatorRuns
+                    await (from run in this.context.CalculatorRuns
                      join classification in context.CalculatorRunClassifications
                          on run.CalculatorRunClassificationId equals classification.Id
                      where run.Id == runId
@@ -193,7 +204,8 @@ namespace EPR.Calculator.API.Controllers
                      {
                          Run = run,
                          Classification = classification
-                     }).SingleOrDefault();
+                     }).SingleOrDefaultAsync();
+
                 if (calculatorRunDetail == null)
                 {
                     return new NotFoundObjectResult($"Unable to find Run Id {runId}");
@@ -212,8 +224,16 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPut]
         [Route("calculatorRuns")]
-        public IActionResult PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
+        [Authorize()]
+        public async Task<IActionResult> PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
+            var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
+            if (claim == null)
+            {
+                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+
+            var userName = claim.Value;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
@@ -221,7 +241,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRun = context.CalculatorRuns.SingleOrDefault(x => x.Id == runStatusUpdateDto.RunId);
+                var calculatorRun = await context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runStatusUpdateDto.RunId);
                 if (calculatorRun == null)
                 {
                     return new ObjectResult($"Unable to find Run Id {runStatusUpdateDto.RunId}")
@@ -229,8 +249,9 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 var classification =
-                    this.context.CalculatorRunClassifications.SingleOrDefault(x =>
+                    await this.context.CalculatorRunClassifications.SingleOrDefaultAsync(x =>
                         x.Id == runStatusUpdateDto.ClassificationId);
+
                 if (classification == null)
                 {
                     return new ObjectResult($"Unable to find Classification Id {runStatusUpdateDto.ClassificationId}")
@@ -245,9 +266,11 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
+                calculatorRun.UpdatedAt = DateTime.Now;
+                calculatorRun.UpdatedBy = userName;
 
                 this.context.CalculatorRuns.Update(calculatorRun);
-                this.context.SaveChanges();
+                await this.context.SaveChangesAsync();
 
                 return StatusCode(201);
             }
@@ -259,7 +282,8 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("CheckCalcNameExists/{name}")]
-        public IActionResult GetCalculatorRunByName([FromRoute] string name)
+        [Authorize()]
+        public async Task<IActionResult> GetCalculatorRunByName([FromRoute] string name)
         {
             if (!ModelState.IsValid)
             {
@@ -268,7 +292,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRun = context.CalculatorRuns.Count(run => EF.Functions.Like(run.Name, name));
+                var calculatorRun = await context.CalculatorRuns.CountAsync(run => EF.Functions.Like(run.Name, name));
 
                 if (calculatorRun <= 0)
                 {
@@ -284,6 +308,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("DownloadResult/{runId}")]
+        [Authorize()]
         public async Task<IResult> DownloadResultFile(int runId)
         {
             if (!ModelState.IsValid)
@@ -357,16 +382,6 @@ namespace EPR.Calculator.API.Controllers
 
             // All good, return empty string
             return string.Empty;
-        }
-
-        private async Task SendMessage(string serviceBusQueueName, CalculatorRunMessage calculatorRunMessage)
-        {
-            // Send message to service bus
-            var client = serviceBusClientFactory.CreateClient(CommonConstants.ServiceBusClientName);
-            ServiceBusSender serviceBusSender = client.CreateSender(serviceBusQueueName);
-            var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
-            ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
-            await serviceBusSender.SendMessageAsync(serviceBusMessage);
         }
     }
 }

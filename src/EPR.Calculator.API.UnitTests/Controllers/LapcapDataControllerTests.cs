@@ -1,8 +1,11 @@
 ﻿using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Security.Claims;
+using System.Security.Principal;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -11,10 +14,23 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         //GET API
         [TestMethod]
-        public void Get_RequestOkResult_WithLapCapParametersDto_WhenDataExist()
+        public async Task Get_RequestOkResult_WithLapCapParametersDto_WhenDataExist()
         {
             var createDefaultParameterDto = CreateDto();
-            lapcapDataController?.Create(createDefaultParameterDto);
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            lapcapDataController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
+            await lapcapDataController.Create(createDefaultParameterDto);
 
             var tempdateData = new LapCapParameterDto()
             {
@@ -33,7 +49,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
 
             //Act
-            var actionResult1 = lapcapDataController?.Get("2024-25") as ObjectResult;
+            var actionResult1 = await lapcapDataController.Get("2024-25") as ObjectResult;
 
             //Assert
             var okResult = actionResult1 as ObjectResult;
@@ -49,11 +65,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void Get_InvalidModelState_ReturnsBadRequest()
+        public async Task Get_InvalidModelState_ReturnsBadRequest()
         {
-            lapcapDataController?.ModelState.AddModelError("parameterYear", "Invalid year");
+            lapcapDataController.ModelState.AddModelError("parameterYear", "Invalid year");
             //Act
-            var result = lapcapDataController?.Get("2024") as ObjectResult;
+            var result = await lapcapDataController.Get("2024") as ObjectResult;
             //Assert
             var okResult = result as ObjectResult;
             Assert.IsNotNull(okResult);
@@ -61,18 +77,32 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void Get_NoDataForYear_ReturnsNotFound()
+        public async Task Get_NoDataForYear_ReturnsNotFound()
         {
             //Act
-            var result = lapcapDataController?.Get("2028-25") as ObjectResult;
+            var result = await lapcapDataController.Get("2028-25") as ObjectResult;
             //Assert
             var okResult = result as ObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(StatusCodes.Status404NotFound, okResult.StatusCode);
         }
+
         [TestMethod]
         public void CreateTest_With_Records()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            lapcapDataController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
             var createDefaultParameterDto = CreateDto();
             var task = lapcapDataController.Create(createDefaultParameterDto);
             task.Wait();
@@ -86,6 +116,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public void CreateTest_With_Missing_Year()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            lapcapDataController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
             var createDefaultParameterDto = CreateDto();
             createDefaultParameterDto.ParameterYear = string.Empty;
             lapcapDataController.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
@@ -98,6 +141,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public void CreateTest_With_Missing_Records()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            lapcapDataController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
             var uniqueRef = "ENG-WD";
             var createDefaultParameterDto = CreateDto([uniqueRef]);
             var task = lapcapDataController.Create(createDefaultParameterDto);
@@ -113,6 +169,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public void CreateTest_With_More_Records()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            lapcapDataController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
             var createDefaultParameterDto = CreateDto();
             var list = new List<LapcapDataTemplateValueDto>(createDefaultParameterDto.LapcapDataTemplateValues);
             if (list != null)

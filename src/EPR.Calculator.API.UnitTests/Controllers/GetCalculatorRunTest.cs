@@ -19,14 +19,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         private readonly ApplicationDBContext context;
         private readonly Mock<IConfiguration> mockConfig;
-        private readonly Mock<IAzureClientFactory<ServiceBusClient>> mockServiceBusFactory;
         private readonly Mock<IStorageService> mockStorageService;
+        private readonly Mock<IServiceBusService> mockServiceBusService;
 
         public GetCalculatorRunTest()
         {
             mockStorageService = new Mock<IStorageService>();
             mockConfig = new Mock<IConfiguration>();
-            mockServiceBusFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
+            mockServiceBusService = new Mock<IServiceBusService>();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
@@ -42,7 +42,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void GetCalculatorRunTest_Get_Valid_Run()
+        public async Task GetCalculatorRunTest_Get_Valid_Run()
         {
             var date = DateTime.Now;
             context.CalculatorRuns.Add(new CalculatorRun
@@ -58,10 +58,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context.SaveChanges();
 
             var controller =
-                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
-                    mockStorageService.Object);
+                new CalculatorController(context, mockConfig.Object,
+                    mockStorageService.Object, mockServiceBusService.Object);
 
-            var response = controller.GetCalculatorRun(1) as ObjectResult;
+            var response = await controller.GetCalculatorRun(1) as ObjectResult;
             Assert.IsNotNull(response);
             var run = response.Value as CalculatorRunDto;
 
@@ -76,13 +76,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void GetCalculatorRunTest_Get_Invalid_Run()
+        public async Task GetCalculatorRunTest_Get_Invalid_Run()
         {
             var controller =
-                new CalculatorController(context, mockConfig.Object, mockServiceBusFactory.Object,
-                    mockStorageService.Object);
+                new CalculatorController(context, mockConfig.Object,
+                    mockStorageService.Object, mockServiceBusService.Object);
 
-            var response = controller.GetCalculatorRun(1) as ObjectResult;
+            var response = await controller.GetCalculatorRun(1) as ObjectResult;
             Assert.IsNotNull(response);
             Assert.AreEqual(404, response.StatusCode);
             Assert.AreEqual("Unable to find Run Id 1", response.Value);

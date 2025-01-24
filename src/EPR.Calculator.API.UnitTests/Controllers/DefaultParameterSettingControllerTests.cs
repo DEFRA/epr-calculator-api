@@ -2,8 +2,11 @@ using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.UnitTests.Controllers;
 using EPR.Calculator.API.Validators;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Security.Claims;
+using System.Security.Principal;
 
 namespace EPR.Calculator.API.Tests.Controllers
 {
@@ -11,9 +14,9 @@ namespace EPR.Calculator.API.Tests.Controllers
     public class DefaultParameterSettingControllerTests : BaseControllerTest
     {
         [TestMethod]
-        public void CreateTest_With_Records()
+        public async Task CreateTest_With_Records()
         {
-            var actionResult = DataPostCall();
+            var actionResult = await DataPostCallAsync();
             Assert.AreEqual(201, actionResult?.StatusCode);
 
             Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterSettingDetail.Count());
@@ -22,12 +25,12 @@ namespace EPR.Calculator.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void CreateTest_With_Records_When_Existing_Updates()
+        public async Task CreateTest_With_Records_When_Existing_Updates()
         {
-            var actionResult1 = DataPostCall();
+            var actionResult1 = await DataPostCallAsync();
             Assert.AreEqual(201, actionResult1?.StatusCode);
 
-            var actionResult2 = DataPostCall();
+            var actionResult2 = await DataPostCallAsync();
             Assert.AreEqual(201, actionResult2?.StatusCode);
 
             var expectedLength = DefaultParameterUniqueReferences.UniqueReferences.Length * 2;
@@ -38,11 +41,12 @@ namespace EPR.Calculator.API.Tests.Controllers
             Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2));
             Assert.AreEqual(1, dbContext?.DefaultParameterSettings.Count(a => a.EffectiveTo == null));
         }
+
         //GET API
         [TestMethod]
-        public void Get_RequestOkResult_WithDefaultSchemeParametersDto_WhenDataExist()
+        public async Task Get_RequestOkResult_WithDefaultSchemeParametersDto_WhenDataExist()
         {
-            DataPostCall();
+            await DataPostCallAsync();
 
             var tempdateData = new DefaultSchemeParametersDto()
             {
@@ -62,7 +66,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             };
 
             //Act
-            var actionResult1 = defaultParameterSettingController?.Get("2024-25") as ObjectResult;
+            var actionResult1 = await defaultParameterSettingController?.Get("2024-25") as ObjectResult;
 
             //Assert
             var okResult = actionResult1 as ObjectResult;
@@ -78,13 +82,14 @@ namespace EPR.Calculator.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetSchemeParameter_ReturnNotFound_WithDefaultSchemeParametersDoesNotExist()
+        public async Task GetSchemeParameter_ReturnNotFound_WithDefaultSchemeParametersDoesNotExist()
         {
-            DataPostCall();
+            await DataPostCallAsync();
 
             // Return 404 error if the year does not exist
             //Act
-            var result = defaultParameterSettingController?.Get("2028-25");
+            var result = await defaultParameterSettingController?.Get("2028-25") as ObjectResult;
+
             //Assert
             var okResult = result as ObjectResult;
             Assert.IsNotNull(okResult);
@@ -128,11 +133,11 @@ namespace EPR.Calculator.API.Tests.Controllers
 
                 }
             }
-           
+
 
             CreateDefaultParameterSettingValidator _validator = new CreateDefaultParameterSettingValidator();
-            CreateDefaultParameterSettingDto  _parameter =  new CreateDefaultParameterSettingDto()
-            { ParameterFileName = string.Empty, ParameterYear="2024-25", SchemeParameterTemplateValues = schemeParameterTemplateValues  };
+            CreateDefaultParameterSettingDto _parameter = new CreateDefaultParameterSettingDto()
+            { ParameterFileName = string.Empty, ParameterYear = "2024-25", SchemeParameterTemplateValues = schemeParameterTemplateValues };
             var result = _validator.Validate(_parameter);
 
             Assert.IsNotNull(result);
@@ -179,8 +184,22 @@ namespace EPR.Calculator.API.Tests.Controllers
 
 
         // Private Methods
-        public ObjectResult? DataPostCall()
+        public async Task<ObjectResult?> DataPostCallAsync()
         {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var context = new DefaultHttpContext()
+            {
+                User = principal
+            };
+
+            defaultParameterSettingController.ControllerContext = new ControllerContext
+            {
+                HttpContext = context
+            };
+
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             foreach (var item in DefaultParameterUniqueReferences.UniqueReferences)
             {
@@ -209,8 +228,8 @@ namespace EPR.Calculator.API.Tests.Controllers
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
                 ParameterFileName = "TestFileName"
             };
-            var actionResult = defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
-            return actionResult;
+            var actionResult = await defaultParameterSettingController?.Create(createDefaultParameterDto);
+            return actionResult as ObjectResult;
         }
     }
 }

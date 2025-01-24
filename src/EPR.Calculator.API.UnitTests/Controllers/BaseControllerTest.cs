@@ -15,6 +15,7 @@ using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Services;
+using Microsoft.ApplicationInsights;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -58,10 +59,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 new Mock<ICalcResultBuilder>().Object,
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
-                new Mock<IStorageService>().Object
+                new Mock<IStorageService>().Object,
+                new Mock<CalculatorRunValidator>().Object
             );
 
             var mockStorageService = new Mock<IStorageService>();
+            var mockServiceBusService = new Mock<IServiceBusService>();
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var mockClient = new Mock<ServiceBusClient>();
             var mockServiceBusSender = new Mock<ServiceBusSender>();
@@ -73,7 +76,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
             dbContext.SaveChanges();
             calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(),
-                mockFactory.Object, mockStorageService.Object);
+                mockStorageService.Object, mockServiceBusService.Object);
 
             dbContext.Material.RemoveRange(dbContext.Material.ToList());
             dbContext.SaveChanges();
@@ -726,6 +729,18 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CreatedBy = "Test User",
                 CalculatorRunOrganisationDataMasterId = 1,
                 CalculatorRunPomDataMasterId = 1,
+            });
+            list.Add(new CalculatorRun
+            {
+                CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+                Name = "Test 422 error",
+                Financial_Year = "2024-25",
+                CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
+                CreatedBy = "Test User",
+                CalculatorRunOrganisationDataMasterId = 2,
+                CalculatorRunPomDataMasterId = 2,
+                LapcapDataMasterId = 2,
+                DefaultParameterSettingMasterId = 2,
             });
             list.Add(new CalculatorRun
             {

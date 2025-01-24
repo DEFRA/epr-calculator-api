@@ -1,9 +1,11 @@
-﻿using EPR.Calculator.API.Validators;
-using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Validators;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -21,14 +23,22 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("lapcapData")]
+        [Authorize()]
         public async Task<IActionResult> Create([FromBody] CreateLapcapDataDto request)
         {
+            var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
+            if (claim == null)
+            {
+                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+
+            var userName = claim.Value;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
             var validationResult = validator.Validate(request);
-            if (validationResult != null && validationResult.IsInvalid)
+            if (validationResult.IsInvalid)
             {
                 return BadRequest(validationResult.Errors);
             }
@@ -43,7 +53,7 @@ namespace EPR.Calculator.API.Controllers
                     var lapcapDataMaster = new LapcapDataMaster
                     {
                         CreatedAt = DateTime.Now,
-                        CreatedBy = "Testuser",
+                        CreatedBy = userName,
                         EffectiveFrom = DateTime.Now,
                         EffectiveTo = null,
                         LapcapFileName = request.LapcapFileName,
@@ -92,33 +102,33 @@ namespace EPR.Calculator.API.Controllers
         /// <response code="500">If an internal server error occurs.</response>
         [HttpGet]
         [Route("lapcapData/{parameterYear}")]
-        public IActionResult Get([FromRoute] string parameterYear)
+        [Authorize()]
+        public async Task<IActionResult> Get([FromRoute] string parameterYear)
         {
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var currentDefaultSetting = this.context.LapcapDataMaster
-                .SingleOrDefault(setting => setting.EffectiveTo == null && setting.ProjectionYear == parameterYear);
+            var lapcapDataMaster = await context.LapcapDataMaster
+              .Include(m => m.Details)
+              .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.ProjectionYear == parameterYear);
 
-            if (currentDefaultSetting == null)
+            if (lapcapDataMaster == null)
             {
                 return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
             }
 
             try
             {
-                var _lapcappramSettingDetails = this.context.LapcapDataDetail.Where(x => x.LapcapDataMasterId == currentDefaultSetting.Id).ToList();
-                var _lapcaptemplateDetails = this.context.LapcapDataTemplateMaster.ToList();
-                var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(currentDefaultSetting, _lapcaptemplateDetails);
+                var _lapcaptemplateDetails = await this.context.LapcapDataTemplateMaster.ToListAsync();
+                var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(lapcapDataMaster, _lapcaptemplateDetails);
                 return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
             }
             catch (Exception exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
-
         }
     }
 }

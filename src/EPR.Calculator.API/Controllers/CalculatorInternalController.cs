@@ -9,6 +9,7 @@ using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,14 +27,16 @@ namespace EPR.Calculator.API.Controllers
         private readonly ICalcResultsExporter<CalcResult> exporter;
         private readonly ITransposePomAndOrgDataService transposePomAndOrgDataService;
         private readonly IStorageService storageService;
+        private readonly CalculatorRunValidator validatior;
 
         public CalculatorInternalController(ApplicationDBContext context,
                                             IRpdStatusDataValidator rpdStatusDataValidator,
                                             IOrgAndPomWrapper wrapper,
                                             ICalcResultBuilder builder,
                                             ICalcResultsExporter<CalcResult> exporter,
-                                            ITransposePomAndOrgDataService transposePomAndOrgDataService,
-                                            IStorageService storageService)
+                                            ITransposePomAndOrgDataService transposePomAndOrgDataService,                                            
+                                            IStorageService storageService,
+                                            CalculatorRunValidator validationRules)
         {
             this.context = context;
             this.rpdStatusDataValidator = rpdStatusDataValidator;
@@ -42,6 +45,7 @@ namespace EPR.Calculator.API.Controllers
             this.exporter = exporter;
             this.transposePomAndOrgDataService = transposePomAndOrgDataService;
             this.storageService = storageService;
+            this.validatior = validationRules;
         }
 
         [HttpPost]
@@ -143,6 +147,13 @@ namespace EPR.Calculator.API.Controllers
             {
                 return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
                     { StatusCode = StatusCodes.Status404NotFound };
+            }
+
+            // Validate the result for all the required IDs
+            var validationResult = validatior.ValidateCalculatorRunIds(calculatorRun);
+            if (!validationResult.IsValid)
+            {
+                return StatusCode(StatusCodes.Status422UnprocessableEntity, validationResult.ErrorMessages.ToArray());
             }
 
             try

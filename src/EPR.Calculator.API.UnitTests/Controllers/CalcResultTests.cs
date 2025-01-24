@@ -36,6 +36,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<ITransposePomAndOrgDataService> transposePomAndOrgDataService;
         private CalculatorInternalController controller;
         private CalcResultDetailBuilder detailBuilder;
+        private readonly Mock<CalculatorRunValidator> mockValidator;
 
         private readonly Mock<ApplicationDBContext> mockContext;
         private readonly CalcResultBuilder calcResultBuilder;
@@ -55,6 +56,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             mockStorageservice.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
 
+            mockValidator = new Mock<CalculatorRunValidator>();
+
             controller = new CalculatorInternalController(
                dbContext,
                new RpdStatusDataValidator(wrapper),
@@ -62,7 +65,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                mockCalcResultBuilder.Object,
                mockExporter.Object,
                transposePomAndOrgDataService.Object,
-               mockStorageservice.Object
+               mockStorageservice.Object,
+               mockValidator.Object
             );
 
             mockDetailBuilder = new Mock<ICalcResultDetailBuilder>();
@@ -92,12 +96,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void PrepareCalcResults_ShouldReturnCreatedStatus()
         {
             this.transposePomAndOrgDataService.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(true);
-            var requestDto = new CalcResultsRequestDto() { RunId = 1 };
+            var requestDto = new CalcResultsRequestDto() { RunId = 4 };
             var calcResult = new CalcResult
             {
                 CalcResultDetail = new CalcResultDetail
                 {
-                    RunId = 1,
+                    RunId = 4,
                     RunDate = DateTime.Now,
                     RunName = "RunName"
                 },
@@ -152,4 +156,3 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
     }
 }
-
