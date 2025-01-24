@@ -1,12 +1,9 @@
 ﻿namespace EPR.Calculator.API.UnitTests.Builder.Summary.SchemeAdministratorSetupCosts
 {
-    using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
-    using Models;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
     using AutoFixture;
-    using EPR.Calculator.API.Constants;
-    using EPR.Calculator.API.Builder.Summary.Common;
-    using EPR.Calculator.API.Enums;
+    using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Models;
 
     [TestClass]
     public class SaSetupCostsSummaryTests
@@ -97,7 +94,7 @@
                             NorthernIreland = "NorthernIrelandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
+                            ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         },
                          new CalcResultLaDisposalCostDataDetail()
                         {
@@ -109,7 +106,7 @@
                             NorthernIreland = "NorthernIrelandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
+                            ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         },
                           new CalcResultLaDisposalCostDataDetail()
                         {
@@ -121,7 +118,7 @@
                             NorthernIreland = "NorthernIrelandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
+                            ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         }
                     }
                 },

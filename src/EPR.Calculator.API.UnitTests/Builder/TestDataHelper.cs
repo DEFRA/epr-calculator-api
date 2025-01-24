@@ -157,7 +157,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         Total = "Total",
                         ProducerReportedHouseholdPackagingWasteTonnage = "Producer Reported Household Packaging Waste Tonnage",
                         LateReportingTonnage = "Late Reporting Tonnage",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "Producer Reported Household Tonnage + Late Reporting Tonnage",
+                        ProducerReportedTotalTonnage = "Producer Reported Household Tonnage + Late Reporting Tonnage",
                         DisposalCostPricePerTonne = "Disposal Cost Price Per Tonne",
                         OrderId = 1
                     },
@@ -171,7 +171,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         Total = "£10,000.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "6980.000",
                         LateReportingTonnage = "8000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "14980.000",
+                        ProducerReportedTotalTonnage = "14980.000",
                         DisposalCostPricePerTonne = "£0.6676",
                         OrderId = 2
                     },
@@ -185,7 +185,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         Total = "£14,750.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "11850.000",
                         LateReportingTonnage = "7000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "18850.000",
+                        ProducerReportedTotalTonnage = "18850.000",
                         DisposalCostPricePerTonne = "£0.7825",
                         OrderId = 3
                     },
@@ -199,7 +199,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         Total = "£70,200.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "4900.000",
                         LateReportingTonnage = "6000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "10900.000",
+                        ProducerReportedTotalTonnage = "10900.000",
                         DisposalCostPricePerTonne = "£6.4404",
                         OrderId = 4
                     },
@@ -213,7 +213,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         Total = "£22,700.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "4270.000",
                         LateReportingTonnage = "5000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "9270.000",
+                        ProducerReportedTotalTonnage = "9270.000",
                         DisposalCostPricePerTonne = "£2.4488",
                         OrderId = 5
                     },
@@ -227,7 +227,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         Total = "£36,300.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "12805.000",
                         LateReportingTonnage = "4000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "16805.000",
+                        ProducerReportedTotalTonnage = "16805.000",
                         DisposalCostPricePerTonne = "£2.1601",
                         OrderId = 6
                     },
@@ -241,7 +241,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         Total = "£21,200.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "7700.000",
                         LateReportingTonnage = "3000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "10700.000",
+                        ProducerReportedTotalTonnage = "10700.000",
                         DisposalCostPricePerTonne = "£1.9813",
                         OrderId = 7
                     },
@@ -255,7 +255,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         Total = "£17,600.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "6800.000",
                         LateReportingTonnage = "2000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "8800.000",
+                        ProducerReportedTotalTonnage = "8800.000",
                         DisposalCostPricePerTonne = "£2.0000",
                         OrderId = 8
                     },
@@ -269,7 +269,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         Total = "£10,400.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "7700.000",
                         LateReportingTonnage = "1000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "8700.000",
+                        ProducerReportedTotalTonnage = "8700.000",
                         DisposalCostPricePerTonne = "£1.1954",
                         OrderId = 9
                     },
@@ -283,7 +283,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         Total = "£203,150.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "63005.000",
                         LateReportingTonnage = "36000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "99005.000",
+                        ProducerReportedTotalTonnage = "99005.000",
                         DisposalCostPricePerTonne = null,
                         OrderId = 10
                     }

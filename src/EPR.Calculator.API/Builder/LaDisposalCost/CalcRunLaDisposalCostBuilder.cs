@@ -16,7 +16,6 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
             public decimal Tonnage { get; set; }
         }
 
-
         private readonly ApplicationDBContext context;
         private List<ProducerData> producerData;
 
@@ -38,7 +37,13 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
                     .ProducerDetailId
                 join material in context.Material on producerMaterial.MaterialId equals material.Id
                 where run.Id == resultsRequestDto.RunId && producerMaterial.PackagingType != null &&
-                      producerMaterial.PackagingType == CommonConstants.Household
+                    (
+                        producerMaterial.PackagingType == PackagingTypes.Household ||
+                        producerMaterial.PackagingType == PackagingTypes.PublicBin ||
+                        (
+                            producerMaterial.PackagingType == PackagingTypes.HouseholdDrinksContainers && material.Code == "GL"
+                        )
+                    )
                 select new ProducerData
                 {
                     Material = material.Name,
@@ -63,7 +68,6 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
                     OrderId = ++OrderId
                 };
                 laDisposalCostDetails.Add(laDiposalDetail);
-
             }
 
 
@@ -71,7 +75,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
             {
                 details.LateReportingTonnage = GetLateReportingTonnageDataByMaterial(details.Name, calcResult.CalcResultLateReportingTonnageData.CalcResultLateReportingTonnageDetails.ToList());
 
-                details.ProducerReportedHouseholdTonnagePlusLateReportingTonnage = GetProducerReportedHouseholdTonnagePlusLateReportingTonnage(details);
+                details.ProducerReportedTotalTonnage = GetProducerReportedTotalTonnage(details);
                 if (details.Name == CommonConstants.Total) continue;
                 details.DisposalCostPricePerTonne = CalculateDisposalCostPricePerTonne(details);
             }
@@ -80,13 +84,20 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
             var header = GetHeader();
             laDisposalCostDetails.Insert(0, header);
 
-            return new CalcResultLaDisposalCostData() { Name = CommonConstants.LADisposalCostData, CalcResultLaDisposalCostDetails = laDisposalCostDetails.AsEnumerable() };
-
+            return new CalcResultLaDisposalCostData()
+            {
+                Name = CommonConstants.LADisposalCostData,
+                CalcResultLaDisposalCostDetails = laDisposalCostDetails.AsEnumerable()
+            };
         }
 
         private string GetTonnageDataByMaterial(string material)
         {
-            return material == "Total"? producerData.Sum(t=>t.Tonnage).ToString()  : producerData.Where(t => t.Material == material).Sum(t => t.Tonnage).ToString();
+            var abc = producerData;
+
+            return material == "Total"
+                ? producerData.Sum(t => t.Tonnage).ToString()
+                : producerData.Where(t => t.Material == material).Sum(t => t.Tonnage).ToString();
         }
 
         private static string GetLateReportingTonnageDataByMaterial(string material, List<CalcResultLateReportingTonnageDetail> details)
@@ -94,7 +105,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
             return details.Where(t => t.Name == material).Sum(t => t.TotalLateReportingTonnage).ToString();
         }
 
-        private static string GetProducerReportedHouseholdTonnagePlusLateReportingTonnage(CalcResultLaDisposalCostDataDetail detail)
+        private static string GetProducerReportedTotalTonnage(CalcResultLaDisposalCostDataDetail detail)
         {
             var value = GetDecimalValue(detail.LateReportingTonnage) + GetDecimalValue(detail.ProducerReportedHouseholdPackagingWasteTonnage);
             return value.ToString();
@@ -102,7 +113,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
 
         private static string CalculateDisposalCostPricePerTonne(CalcResultLaDisposalCostDataDetail detail)
         {
-            var HouseholdTonnagePlusLateReportingTonnage = GetDecimalValue(detail.ProducerReportedHouseholdTonnagePlusLateReportingTonnage);
+            var HouseholdTonnagePlusLateReportingTonnage = GetDecimalValue(detail.ProducerReportedTotalTonnage);
             if (HouseholdTonnagePlusLateReportingTonnage == 0) return "0";
             var value = Math.Round(ConvertCurrencyToDecimal(detail.Total) / HouseholdTonnagePlusLateReportingTonnage, 4);
             var culture = CultureInfo.CreateSpecificCulture("en-GB");
@@ -122,8 +133,11 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
                 NorthernIreland = CommonConstants.NorthernIreland,
                 Total = CommonConstants.Total,
                 ProducerReportedHouseholdPackagingWasteTonnage = CommonConstants.ProducerReportedHouseholdPackagingWasteTonnage,
+                ReportedPublicBinTonnage = CommonConstants.ReportedPublicBinTonnage,
+                HouseholdDrinkContainers = CommonConstants.HouseholdDrinkContainers,
                 LateReportingTonnage = CommonConstants.LateReportingTonnage,
-                ProducerReportedHouseholdTonnagePlusLateReportingTonnage = CommonConstants.ProduceLateTonnage,
+                TotalReportedTonnage = CommonConstants.TotalReportedTonnage,
+                ProducerReportedTotalTonnage = CommonConstants.ProduceLateTonnage,
                 DisposalCostPricePerTonne = CommonConstants.DisposalCostPricePerTonne,
                 OrderId = 1
             };

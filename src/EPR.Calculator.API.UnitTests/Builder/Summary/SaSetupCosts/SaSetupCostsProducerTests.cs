@@ -1,13 +1,12 @@
-﻿using EPR.Calculator.API.Data.DataModels;
+﻿using AutoFixture;
+using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using AutoFixture;
-using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Enums;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
 {
@@ -177,7 +176,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                             NorthernIreland = "NorthernIrelandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
+                            ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         },
                         new CalcResultLaDisposalCostDataDetail()
                         {
@@ -189,7 +188,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                             NorthernIreland = "NorthernIrelandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
+                            ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         },
                         new CalcResultLaDisposalCostDataDetail()
                         {
@@ -201,7 +200,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                             NorthernIreland = "NorthernIrelandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
+                            ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         }
                     }
                 },

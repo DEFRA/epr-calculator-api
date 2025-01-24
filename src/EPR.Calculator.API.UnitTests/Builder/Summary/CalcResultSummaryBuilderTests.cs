@@ -1,5 +1,4 @@
 ﻿using AutoFixture;
-using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Builder.Summary.OneAndTwoA;
 using EPR.Calculator.API.Constants;
@@ -9,6 +8,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
@@ -108,7 +108,7 @@ namespace EPR.Calculator.API.UnitTests
                             Material = "Material1",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
+                            ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         },
                          new CalcResultLaDisposalCostDataDetail()
                         {
@@ -120,7 +120,7 @@ namespace EPR.Calculator.API.UnitTests
                             Scotland="ScotlandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
+                            ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         },
                           new CalcResultLaDisposalCostDataDetail()
                         {
@@ -132,7 +132,7 @@ namespace EPR.Calculator.API.UnitTests
                             Scotland="ScotlandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
+                            ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         }
                     }
                 },
