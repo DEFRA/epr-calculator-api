@@ -31,37 +31,31 @@ namespace EPR.Calculator.API.Services
             this.context = context;
         }
 
-        public async Task<bool> Transpose(CalcResultsRequestDto resultsRequestDto)
+        public async Task<bool> Transpose(CalcResultsRequestDto resultsRequestDto, CancellationToken cancellationToken)
         {
+            context.ChangeTracker.AutoDetectChangesEnabled = false;
             var newProducerDetails = new List<ProducerDetail>();
             var newProducerReportedMaterials = new List<ProducerReportedMaterial>();
 
             var result = false;
-            
-            var calcRunPomOrgDatadetails = await (from run in this.context.CalculatorRuns
-                                            join pomMaster in this.context.CalculatorRunPomDataMaster on run.CalculatorRunPomDataMasterId equals pomMaster.Id
-                                            join orgMaster in this.context.CalculatorRunOrganisationDataMaster on run.CalculatorRunOrganisationDataMasterId equals orgMaster.Id
-                                            join pomDetail in this.context.CalculatorRunPomDataDetails on pomMaster.Id equals pomDetail.CalculatorRunPomDataMasterId
-                                            join orgDetail in this.context.CalculatorRunOrganisationDataDetails on orgMaster.Id equals orgDetail.CalculatorRunOrganisationDataMasterId
-                                            where run.Id == resultsRequestDto.RunId
-                                            select new
-                                            {
-                                                run,
-                                                pomMaster,
-                                                orgMaster,
-                                                orgDetail,
-                                                pomDetail
-                                            }).ToListAsync();
-            
-            var materials = await this.context.Material.ToListAsync();
+            var materials = await this.context.Material.ToListAsync(cancellationToken);
 
-            var calculatorRun = calcRunPomOrgDatadetails.Select(x => x.run).Distinct().Single();
-            var calculatorRunPomDataDetails = calcRunPomOrgDatadetails.Select(x => x.pomDetail).Distinct();
-            var calculatorRunOrgDataDetails = calcRunPomOrgDatadetails.Select(x => x.orgDetail).Distinct();
+            var calculatorRun = await context.CalculatorRuns
+                .Where(x => x.Id == resultsRequestDto.RunId)
+                .SingleAsync(cancellationToken);
+            var calculatorRunPomDataDetails = await context.CalculatorRunPomDataDetails
+                .Where(x => x.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId)
+                .OrderBy(x => x.SubmissionPeriodDesc)
+                .ToListAsync(cancellationToken);
+            var calculatorRunOrgDataDetails = await context.CalculatorRunOrganisationDataDetails
+                .Where(x => x.CalculatorRunOrganisationDataMasterId == calculatorRun.CalculatorRunOrganisationDataMasterId)
+                .OrderBy(x => x.SubmissionPeriodDesc)
+                .ToListAsync(cancellationToken);
 
             if (calculatorRun.CalculatorRunPomDataMasterId != null)
             {
-                var organisationDataMaster = calcRunPomOrgDatadetails.Select(x => x.orgMaster).Distinct().Single();
+                var organisationDataMaster = await context.CalculatorRunOrganisationDataMaster
+                    .SingleAsync(x => x.Id == calculatorRun.CalculatorRunOrganisationDataMasterId, cancellationToken);
 
                 var SubmissionPeriodDetails = (from s in calculatorRunPomDataDetails
                                                where s.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId
@@ -84,7 +78,8 @@ namespace EPR.Calculator.API.Services
                     .ToList();
 
                 // Get the calculator run pom data master record based on the CalculatorRunPomDataMasterId
-                var pomDataMaster = calcRunPomOrgDatadetails.Select(x => x.pomMaster).Distinct().Single();
+                var pomDataMaster = await context.CalculatorRunPomDataMaster
+                    .SingleAsync(x => x.Id == calculatorRun.CalculatorRunPomDataMasterId, cancellationToken);
 
 
                 foreach (var organisation in organisationDataDetails.Where(t => !string.IsNullOrWhiteSpace(t.OrganisationName)))
@@ -160,16 +155,20 @@ namespace EPR.Calculator.API.Services
                     }
                 }
 
-                result = await SaveNewProducerDetailAndMaterialsAsync(newProducerDetails, newProducerReportedMaterials);
+                result = await SaveNewProducerDetailAndMaterialsAsync(
+                    newProducerDetails, 
+                    newProducerReportedMaterials,
+                    cancellationToken);
             }
             return result;
         }
 
         public async Task<bool> SaveNewProducerDetailAndMaterialsAsync(
             IEnumerable<ProducerDetail> newProducerDetails,
-            IEnumerable<ProducerReportedMaterial> newProducerReportedMaterials)
+            IEnumerable<ProducerReportedMaterial> newProducerReportedMaterials,
+            CancellationToken cancellationToken)
         {
-            using (var transaction = await this.context.Database.BeginTransactionAsync())
+            using (var transaction = await this.context.Database.BeginTransactionAsync(cancellationToken))
             {
                 try
                 {
@@ -177,10 +176,10 @@ namespace EPR.Calculator.API.Services
                     context.ProducerReportedMaterial.AddRange(newProducerReportedMaterials);
 
                     // Apply the database changes
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync(cancellationToken);
 
                     // Success, commit transaction
-                    await transaction.CommitAsync();
+                    await transaction.CommitAsync(cancellationToken);
                     return true;
                 }
                 catch (Exception)
@@ -197,17 +196,23 @@ namespace EPR.Calculator.API.Services
             IEnumerable<OrganisationDetails> organisationsList,
             IEnumerable<SubmissionDetails> submissionPeriodDetails)
         {
-            return (from org in organisationsList
-                    join sub in submissionPeriodDetails on
-                    org.SubmissionPeriodDescription equals sub.SubmissionPeriodDesc
-                    select new OrganisationDetails
+            var list = new List<OrganisationDetails>();
+            foreach (var org in organisationsList)
+            {
+                if (submissionPeriodDetails.Any(x => x.SubmissionPeriodDesc == org.SubmissionPeriodDescription))
+                {
+                    var sub = submissionPeriodDetails.First(x => x.SubmissionPeriodDesc == org.SubmissionPeriodDescription);
+                    list.Add(new OrganisationDetails
                     {
                         OrganisationId = org.OrganisationId,
                         OrganisationName = org.OrganisationName,
                         SubmissionPeriodDescription = org.SubmissionPeriodDescription,
                         SubmissionPeriod = sub.SubmissionPeriod,
                         SubsidaryId = org.SubsidaryId
-                    }).ToList();
+                    });
+                }
+            }
+            return list;
         }
 
         public IEnumerable<OrganisationDetails> GetAllOrganisationsBasedonRunId(
