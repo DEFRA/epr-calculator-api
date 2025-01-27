@@ -215,8 +215,8 @@ namespace EPR.Calculator.API.UnitTests
                     new Mock<ICalcResultsExporter<CalcResult>>().Object,
                     new Mock<ITransposePomAndOrgDataService>().Object,
                     new Mock<IStorageService>().Object,
-                    Configuration,
-                    new Mock<CalculatorRunValidator>().Object
+                    new Mock<CalculatorRunValidator>().Object,
+                    new CommandTimeoutService(this.Configuration)
                 );
                 controller.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
@@ -310,8 +310,8 @@ namespace EPR.Calculator.API.UnitTests
                mockExporter.Object,
                mockTranspose.Object,
                mockStorageService.Object,
-               Configuration,
-               mockValidator.Object
+               mockValidator.Object,
+               new CommandTimeoutService(this.Configuration)
             );
             controller.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
@@ -343,8 +343,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
                 new Mock<IStorageService>().Object,
-                Configuration,
-                new Mock<CalculatorRunValidator>().Object
+                new Mock<CalculatorRunValidator>().Object,
+                new CommandTimeoutService(this.Configuration)
             );
             controller.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
@@ -371,8 +371,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 MockTransposeService.Object,
                 new Mock<IStorageService>().Object,
-                Configuration,
-                mockValidator.Object
+                mockValidator.Object,
+                new CommandTimeoutService(this.Configuration)
             );
             var context = new Mock<HttpContext>();
             context.Setup(c => c.RequestAborted).Returns(new CancellationToken(true));
@@ -403,8 +403,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 MockTransposeService.Object,
                 new Mock<IStorageService>().Object,
-                Configuration,
-                mockValidator.Object
+                mockValidator.Object,
+                new CommandTimeoutService(this.Configuration)
             );
             var context = new Mock<HttpContext>();
             context.SetupSequence(c => c.RequestAborted)
@@ -437,8 +437,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
                 new Mock<IStorageService>().Object,
-                Configuration,
-                mockValidator.Object
+                mockValidator.Object,
+                new CommandTimeoutService(this.Configuration)
             );
             var context = new Mock<HttpContext>();
             context.SetupSequence(c => c.RequestAborted).Throws(new Exception("A test error occured."));
@@ -469,8 +469,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 MockTransposeService.Object,
                 new Mock<IStorageService>().Object,
-                Configuration,
-                mockValidator.Object
+                mockValidator.Object,
+                new CommandTimeoutService(this.Configuration)
             );
             var context = new Mock<HttpContext>();
             context.SetupSequence(c => c.RequestAborted)
@@ -505,8 +505,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
                 new Mock<IStorageService>().Object,
-                Configuration,
-                mockValidator.Object
+                mockValidator.Object,
+                new CommandTimeoutService(this.Configuration)
             );
             var httpContext = new Mock<HttpContext>();
             httpContext.Setup(Object => Object.RequestAborted).Returns(new CancellationToken(true));
@@ -548,8 +548,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 MockTransposeService.Object,
                 mockStorage.Object,
-                Configuration,
-                mockValidator.Object
+                mockValidator.Object,
+                new CommandTimeoutService(this.Configuration)
             );
             var httpContext = new Mock<HttpContext>();
             httpContext.SetupSequence(c => c.RequestAborted)
@@ -593,8 +593,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 MockTransposeService.Object,
                 mockStorage.Object,
-                Configuration,
-                mockValidator.Object
+                mockValidator.Object,
+                new CommandTimeoutService(this.Configuration)
             );
             var httpContext = new Mock<HttpContext>();
             httpContext.SetupSequence(c => c.RequestAborted)
@@ -631,8 +631,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 MockTransposeService.Object,
                 new Mock<IStorageService>().Object,
-                Configuration,
-                mockValidator.Object
+                mockValidator.Object,
+                new CommandTimeoutService(this.Configuration)
             );
             var httpContext = new Mock<HttpContext>();
             httpContext.Setup(Object => Object.RequestAborted)
@@ -675,8 +675,8 @@ namespace EPR.Calculator.API.UnitTests
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 MockTransposeService.Object,
                 mockStorage.Object,
-                Configuration,
-                mockValidator.Object
+                mockValidator.Object,
+                new CommandTimeoutService(this.Configuration)
             );
             var httpContext = new Mock<HttpContext>();
             httpContext.SetupSequence(Object => Object.RequestAborted)

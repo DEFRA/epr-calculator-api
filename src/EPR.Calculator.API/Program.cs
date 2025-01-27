@@ -55,6 +55,7 @@ builder.Services.AddScoped<ICalcResultOnePlusFourApportionmentBuilder, CalcResul
 builder.Services.AddScoped<ICalcResultParameterOtherCostBuilder, CalcResultParameterOtherCostBuilder>();
 builder.Services.AddScoped<ICalcResultCommsCostBuilder, CalcResultCommsCostBuilder>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
+builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
 
 
 // Add services to the container.
@@ -138,7 +139,7 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 // Configure endpoint timeout policies.
-foreach (string policy in new[] {"RpdStatus", "PrepareCalcResults", "Transpose" })
+foreach (string policy in TimeoutPolicies.AllPolicies)
 {
     var timeout = builder.Configuration.GetSection("Timeouts").GetValue<double>(policy);
     builder.Services.AddRequestTimeouts(options =>

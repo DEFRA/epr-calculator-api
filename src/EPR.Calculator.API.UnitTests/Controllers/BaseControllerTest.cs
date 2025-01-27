@@ -64,8 +64,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 new Mock<ICalcResultsExporter<CalcResult>>().Object,
                 new Mock<ITransposePomAndOrgDataService>().Object,
                 new Mock<IStorageService>().Object,
-                new ConfigurationBuilder().Build(),
-                new Mock<CalculatorRunValidator>().Object
+                new Mock<CalculatorRunValidator>().Object,
+                new CommandTimeoutService(new ConfigurationBuilder().Build())
             );
             calculatorInternalController.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 

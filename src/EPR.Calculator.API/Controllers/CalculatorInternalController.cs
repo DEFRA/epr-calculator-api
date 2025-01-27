@@ -29,8 +29,8 @@ namespace EPR.Calculator.API.Controllers
         private readonly ICalcResultsExporter<CalcResult> exporter;
         private readonly ITransposePomAndOrgDataService transposePomAndOrgDataService;
         private readonly IStorageService storageService;
-        private readonly IConfiguration configuration;
         private readonly CalculatorRunValidator validatior;
+        private readonly ICommandTimeoutService commandTimeoutService;
 
         public CalculatorInternalController(ApplicationDBContext context,
                                             IRpdStatusDataValidator rpdStatusDataValidator,
@@ -39,8 +39,8 @@ namespace EPR.Calculator.API.Controllers
                                             ICalcResultsExporter<CalcResult> exporter,
                                             ITransposePomAndOrgDataService transposePomAndOrgDataService,
                                             IStorageService storageService,
-                                            IConfiguration configuration,
-                                            CalculatorRunValidator validationRules)
+                                            CalculatorRunValidator validationRules,
+                                            ICommandTimeoutService commandTimeoutService)
         {
             this.context = context;
             this.rpdStatusDataValidator = rpdStatusDataValidator;
@@ -49,8 +49,8 @@ namespace EPR.Calculator.API.Controllers
             this.exporter = exporter;
             this.transposePomAndOrgDataService = transposePomAndOrgDataService;
             this.storageService = storageService;
-            this.configuration = configuration;
             this.validatior = validationRules;
+            this.commandTimeoutService = commandTimeoutService;
         }
 
         [HttpPost]
@@ -58,7 +58,7 @@ namespace EPR.Calculator.API.Controllers
         [RequestTimeout("RpdStatus")]
         public async Task<IActionResult> UpdateRpdStatus([FromBody] UpdateRpdStatus request)
         {
-            SetCommandTimeout("RpdStatusCommand");
+            commandTimeoutService.SetCommandTimeout(context.Database, "RpdStatusCommand"); 
 
             try
             {
@@ -137,7 +137,7 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            SetCommandTimeout("TransposeCommand");
+            commandTimeoutService.SetCommandTimeout(context.Database, "TransposeCommand");
 
             CalculatorRun? calculatorRun = null;
             try
@@ -192,7 +192,7 @@ namespace EPR.Calculator.API.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            SetCommandTimeout("PrepareCalcResultsCommand");
+            commandTimeoutService.SetCommandTimeout(context.Database, "PrepareCalcResultsCommand");
 
             CalculatorRun? calculatorRun = null;
             try
@@ -261,17 +261,6 @@ namespace EPR.Calculator.API.Controllers
             this.context.CalculatorRuns.Update(calculatorRun);
             await this.context.SaveChangesAsync();
             return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-
-        private void SetCommandTimeout(string key)
-        {
-            var commandTimeout = this.configuration
-                .GetSection("Timeouts")
-                .GetValue<double>(key);
-            if (commandTimeout > 0)
-            {
-                context.Database.SetCommandTimeout(TimeSpan.FromMinutes(commandTimeout));
-            }
         }
     }
 }

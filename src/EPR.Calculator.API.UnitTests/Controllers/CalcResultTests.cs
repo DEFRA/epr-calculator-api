@@ -69,8 +69,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                mockExporter.Object,
                transposePomAndOrgDataService.Object,
                mockStorageservice.Object,
-               new ConfigurationBuilder().Build(),
-               mockValidator.Object
+               mockValidator.Object,
+               new CommandTimeoutService()
             );
             controller.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 

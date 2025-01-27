@@ -46,8 +46,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 _exporter.Object, 
                 _transposePomAndOrgDataService.Object, 
                 mockStorageService.Object,
-                new ConfigurationBuilder().Build(),
-                _runValidator);
+                _runValidator,
+                new CommandTimeoutService(new ConfigurationBuilder().Build()));
         }
 
         [TestMethod]
