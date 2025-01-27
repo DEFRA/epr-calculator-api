@@ -238,7 +238,7 @@ namespace EPR.Calculator.API.Utils
             return (year - 1).ToString();
         }
 
-        public static FormattableString GetFormattedString(string procedureName, int runId, string calendarYear, string createdBy)
+        public static FormattableString GetFormattedSqlString(string procedureName, int runId, string calendarYear, string createdBy)
         {
             return $"exec {procedureName} @RunId ={runId}, @calendarYear = {calendarYear}, @createdBy = {createdBy}";
         }

@@ -15,13 +15,16 @@ using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Services.EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Timeouts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
+using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
 using System.Configuration;
 
@@ -52,6 +55,7 @@ builder.Services.AddScoped<ICalcResultOnePlusFourApportionmentBuilder, CalcResul
 builder.Services.AddScoped<ICalcResultParameterOtherCostBuilder, CalcResultParameterOtherCostBuilder>();
 builder.Services.AddScoped<ICalcResultCommsCostBuilder, CalcResultCommsCostBuilder>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
+builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
 
 
 // Add services to the container.
@@ -68,9 +72,12 @@ builder.Services.AddSwaggerGen();
 
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
+
+// Configure the database context.
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.Configure<BlobStorageSettings>(
@@ -130,6 +137,17 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+
+// Configure endpoint timeout policies.
+foreach (string policy in TimeoutPolicies.AllPolicies)
+{
+    var timeout = builder.Configuration.GetSection("Timeouts").GetValue<double>(policy);
+    builder.Services.AddRequestTimeouts(options =>
+    {
+        options.AddPolicy(policy, TimeSpan.FromMinutes(timeout));
+    });
+}
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -143,5 +161,6 @@ app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.MapControllers();
 app.UseCors(CommonConstants.PolicyName);
+app.UseRequestTimeouts();
 
 app.Run();
