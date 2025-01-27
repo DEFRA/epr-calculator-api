@@ -17,7 +17,7 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
         public static void UpdateTwoCTotals(CalcResult calcResult,
             IEnumerable<CalcResultSummaryProducerDisposalFees> producerDisposalFees, bool isOverAllTotalRow,
             CalcResultSummaryProducerDisposalFees totalRow, List<ProducerDetail> producersAndSubsidiaries,
-            IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails)
+            IEnumerable<HHTotalPackagingTonnagePerRun> hhTotalPackagingTonnage)
         {
             if (isOverAllTotalRow)
             {
@@ -47,29 +47,29 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
 
             totalRow.TwoCEnglandTotalWithBadDebt =
                 GetCommsEnglandWithBadDebtTotalsRow2C(calcResult, producersAndSubsidiaries,
-                    runProducerMaterialDetails);
+                    hhTotalPackagingTonnage);
             totalRow.TwoCWalesTotalWithBadDebt =
                 GetCommsWalesWithBadDebtTotalsRow2C(calcResult, producersAndSubsidiaries,
-                    runProducerMaterialDetails);
+                    hhTotalPackagingTonnage);
             totalRow.TwoCNorthernIrelandTotalWithBadDebt =
                 GetCommsNIWithBadDebtTotalsRow2C(calcResult, producersAndSubsidiaries,
-                    runProducerMaterialDetails);
+                    hhTotalPackagingTonnage);
             totalRow.TwoCScotlandTotalWithBadDebt =
                 GetCommsScotlandWithBadDebtTotalsRow2C(calcResult, producersAndSubsidiaries,
-                    runProducerMaterialDetails);
+                    hhTotalPackagingTonnage);
         }
 
         public static void UpdateTwoCRows(CalcResult calcResult, CalcResultSummaryProducerDisposalFees result,
-            ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails)
+            ProducerDetail producer, IEnumerable<HHTotalPackagingTonnagePerRun> hhTotalPackagingTonnage)
         {
             result.TwoCEnglandTotalWithBadDebt =
-                GetCommEnglandWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
+                GetCommEnglandWithBadDebt2C(calcResult, producer, hhTotalPackagingTonnage);
             result.TwoCWalesTotalWithBadDebt =
-                GetCommWalesWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
+                GetCommWalesWithBadDebt2C(calcResult, producer, hhTotalPackagingTonnage);
             result.TwoCNorthernIrelandTotalWithBadDebt =
-                GetCommNIWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
+                GetCommNIWithBadDebt2C(calcResult, producer, hhTotalPackagingTonnage);
             result.TwoCScotlandTotalWithBadDebt =
-                GetCommScotlandWithBadDebt2C(calcResult, producer, runProducerMaterialDetails);
+                GetCommScotlandWithBadDebt2C(calcResult, producer, hhTotalPackagingTonnage);
 
             result.TwoCTotalProducerFeeForCommsCostsWithoutBadDebt =
                 calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().TotalValue *
@@ -98,82 +98,82 @@ namespace EPR.Calculator.API.Builder.Summary.TwoCCommsCost
                 result.TwoCCommsCostsByCountryWithoutBadDebtProvision + result.TwoCBadDebtProvision;
         }
 
-        public static decimal GetCommsEnglandWithBadDebtTotalsRow2C(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        public static decimal GetCommsEnglandWithBadDebtTotalsRow2C(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<HHTotalPackagingTonnagePerRun> hhTotalPackagingTonnage)
         {
             decimal northernIrelandTotalwithBadDebtprovision = 0;
 
             foreach (var producer in producers)
             {
-                northernIrelandTotalwithBadDebtprovision += GetCommEnglandWithBadDebt2C(calcResult, producer, allResults);
+                northernIrelandTotalwithBadDebtprovision += GetCommEnglandWithBadDebt2C(calcResult, producer, hhTotalPackagingTonnage);
             }
 
             return northernIrelandTotalwithBadDebtprovision;
         }
 
-        public static decimal GetCommsWalesWithBadDebtTotalsRow2C(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        public static decimal GetCommsWalesWithBadDebtTotalsRow2C(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<HHTotalPackagingTonnagePerRun> hhTotalPackagingTonnage)
         {
             decimal northernIrelandTotalwithBadDebtprovision = 0;
 
             foreach (var producer in producers)
             {
-                northernIrelandTotalwithBadDebtprovision += GetCommWalesWithBadDebt2C(calcResult, producer, allResults);
+                northernIrelandTotalwithBadDebtprovision += GetCommWalesWithBadDebt2C(calcResult, producer, hhTotalPackagingTonnage);
             }
 
             return northernIrelandTotalwithBadDebtprovision;
         }
 
-        public static decimal GetCommsNIWithBadDebtTotalsRow2C(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        public static decimal GetCommsNIWithBadDebtTotalsRow2C(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<HHTotalPackagingTonnagePerRun> hhTotalPackagingTonnage)
         {
             decimal northernIrelandTotalwithBadDebtprovision = 0;
 
             foreach (var producer in producers)
             {
-                northernIrelandTotalwithBadDebtprovision += GetCommNIWithBadDebt2C(calcResult, producer, allResults);
+                northernIrelandTotalwithBadDebtprovision += GetCommNIWithBadDebt2C(calcResult, producer, hhTotalPackagingTonnage);
             }
 
             return northernIrelandTotalwithBadDebtprovision;
         }
 
-        public static decimal GetCommsScotlandWithBadDebtTotalsRow2C(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        public static decimal GetCommsScotlandWithBadDebtTotalsRow2C(CalcResult calcResult, IEnumerable<ProducerDetail> producers, IEnumerable<HHTotalPackagingTonnagePerRun> hhTotalPackagingTonnage)
         {
             decimal northernIrelandTotalwithBadDebtprovision = 0;
 
             foreach (var producer in producers)
             {
-                northernIrelandTotalwithBadDebtprovision += GetCommScotlandWithBadDebt2C(calcResult, producer, allResults);
+                northernIrelandTotalwithBadDebtprovision += GetCommScotlandWithBadDebt2C(calcResult, producer, hhTotalPackagingTonnage);
             }
 
             return northernIrelandTotalwithBadDebtprovision;
         }
 
-        public static decimal GetCommWalesWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        public static decimal GetCommWalesWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<HHTotalPackagingTonnagePerRun> hhTotalPackagingTonnage)
         {
             decimal twoCCommCostsByCountryBadDebtProvision = calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().WalesValue;
-            return twoCCommCostsByCountryBadDebtProvision * GetCommWithBadDebt2C(calcResult, producer, allResults);
+            return twoCCommCostsByCountryBadDebtProvision * GetCommWithBadDebt2C(calcResult, producer, hhTotalPackagingTonnage);
         }
 
-        public static decimal GetCommNIWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        public static decimal GetCommNIWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<HHTotalPackagingTonnagePerRun> hhTotalPackagingTonnage)
         {
             decimal twoCCommCostsByCountryBadDebtProvision = calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().NorthernIrelandValue;
-            return twoCCommCostsByCountryBadDebtProvision * GetCommWithBadDebt2C(calcResult, producer, allResults);
+            return twoCCommCostsByCountryBadDebtProvision * GetCommWithBadDebt2C(calcResult, producer, hhTotalPackagingTonnage);
         }
 
-        public static decimal GetCommScotlandWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        public static decimal GetCommScotlandWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<HHTotalPackagingTonnagePerRun> hhTotalPackagingTonnage)
         {
             decimal twoCCommCostsByCountryBadDebtProvision = calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().ScotlandValue;
-            return twoCCommCostsByCountryBadDebtProvision * GetCommWithBadDebt2C(calcResult, producer, allResults);
+            return twoCCommCostsByCountryBadDebtProvision * GetCommWithBadDebt2C(calcResult, producer, hhTotalPackagingTonnage);
         }
 
-        public static decimal GetCommEnglandWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        public static decimal GetCommEnglandWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<HHTotalPackagingTonnagePerRun> hhTotalPackagingTonnage)
         {
             decimal twoCCommCostsByCountryBadDebtProvision = calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.Last().EnglandValue;
-            return twoCCommCostsByCountryBadDebtProvision * GetCommWithBadDebt2C(calcResult, producer, allResults);
+            return twoCCommCostsByCountryBadDebtProvision * GetCommWithBadDebt2C(calcResult, producer, hhTotalPackagingTonnage);
         }
 
-        public static decimal GetCommWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults)
+        public static decimal GetCommWithBadDebt2C(CalcResult calcResult, ProducerDetail producer, IEnumerable<HHTotalPackagingTonnagePerRun> hhTotalPackagingTonnage)
         {
             decimal badDebtProvision = calcResult.CalcResultParameterOtherCost.BadDebtValue / 100;
-            decimal percentageOfProducerReportedHhTonnageVsAllProducers = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducers(producer, allResults) / 100;
+            decimal percentageOfProducerReportedHhTonnageVsAllProducers = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducers(producer, hhTotalPackagingTonnage) / 100;
             return (1 + badDebtProvision) * percentageOfProducerReportedHhTonnageVsAllProducers;
         }
     }

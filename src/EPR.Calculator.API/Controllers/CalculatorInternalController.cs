@@ -10,8 +10,12 @@ using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.ApplicationInsights;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Timeouts;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -27,15 +31,17 @@ namespace EPR.Calculator.API.Controllers
         private readonly ITransposePomAndOrgDataService transposePomAndOrgDataService;
         private readonly IStorageService storageService;
         private readonly CalculatorRunValidator validatior;
+        private readonly ICommandTimeoutService commandTimeoutService;
 
         public CalculatorInternalController(ApplicationDBContext context,
                                             IRpdStatusDataValidator rpdStatusDataValidator,
                                             IOrgAndPomWrapper wrapper,
                                             ICalcResultBuilder builder,
                                             ICalcResultsExporter<CalcResult> exporter,
-                                            ITransposePomAndOrgDataService transposePomAndOrgDataService,                                            
+                                            ITransposePomAndOrgDataService transposePomAndOrgDataService,
                                             IStorageService storageService,
-                                            CalculatorRunValidator validationRules)
+                                            CalculatorRunValidator validationRules,
+                                            ICommandTimeoutService commandTimeoutService)
         {
             this.context = context;
             this.rpdStatusDataValidator = rpdStatusDataValidator;
@@ -45,141 +51,172 @@ namespace EPR.Calculator.API.Controllers
             this.transposePomAndOrgDataService = transposePomAndOrgDataService;
             this.storageService = storageService;
             this.validatior = validationRules;
+            this.commandTimeoutService = commandTimeoutService;
         }
 
         [HttpPost]
         [Route("rpdStatus")]
+        [RequestTimeout("RpdStatus")]
         public async Task<IActionResult> UpdateRpdStatus([FromBody] UpdateRpdStatus request)
         {
-            var runId = request.RunId;
-            var calcRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(run => run.Id == runId);
-            var runClassifications = await this.context.CalculatorRunClassifications.ToListAsync();
+            commandTimeoutService.SetCommandTimeout(context.Database, "RpdStatusCommand"); 
 
-            var validationResult = this.rpdStatusDataValidator.IsValidRun(calcRun, runId, runClassifications);
-            if (!validationResult.isValid)
+            try
             {
-                return StatusCode(validationResult.StatusCode, validationResult.ErrorMessage);
-            }
+                var startTime = DateTime.Now;
+                var runId = request.RunId;
+                var calcRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(
+                    run => run.Id == runId,
+                    HttpContext.RequestAborted);
+                var runClassifications = await this.context.CalculatorRunClassifications
+                    .ToListAsync(HttpContext.RequestAborted);
 
-            if (!request.isSuccessful && calcRun != null)
-            {
-                calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.ERROR.ToString()).Id;
-                await this.context.SaveChangesAsync();
-                return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
-            }
-
-            var vr = this.rpdStatusDataValidator.IsValidSuccessfulRun(runId);
-            if (!vr.isValid)
-            {
-                return StatusCode(vr.StatusCode, vr.ErrorMessage);
-            }
-
-            string financialYear = calcRun?.Financial_Year ?? string.Empty;
-            var newCalculatorRunOrganisationDataDetails = new List<CalculatorRunOrganisationDataDetail>();
-            var newCalculatorRunPomDataDetails = new List<CalculatorRunPomDataDetail>();
-
-            var stagingOrganisationData = await this.wrapper.GetOrganisationDataAsync();
-            var calcOrganisationMaster = new CalculatorRunOrganisationDataMaster
-            {
-                CalendarYear = Util.GetCalendarYear(financialYear),
-                CreatedAt = DateTime.Now,
-                CreatedBy = request.UpdatedBy,
-                EffectiveFrom = DateTime.Now,
-                EffectiveTo = null,
-            };
-            foreach (var organisation in stagingOrganisationData)
-            {
-                var calcOrganisationDataDetail = new CalculatorRunOrganisationDataDetail
+                var validationResult = this.rpdStatusDataValidator.IsValidRun(calcRun, runId, runClassifications);
+                if (!validationResult.isValid)
                 {
-                    OrganisationId = organisation.OrganisationId,
-                    SubsidaryId = organisation.SubsidaryId,
-                    LoadTimeStamp = organisation.LoadTimestamp,
-                    OrganisationName = organisation.OrganisationName,
-                    SubmissionPeriodDesc = organisation.SubmissionPeriodDesc,
-                    CalculatorRunOrganisationDataMaster = calcOrganisationMaster,
-                };
+                    return StatusCode(validationResult.StatusCode, validationResult.ErrorMessage);
+                }
 
-
-                newCalculatorRunOrganisationDataDetails.Add(calcOrganisationDataDetail);
-                calcRun!.CalculatorRunOrganisationDataMaster = calcOrganisationMaster;
-            }
-
-            var stagingPomData = await this.wrapper.GetPomDataAsync();
-            var calcRunPomMaster = new CalculatorRunPomDataMaster
-            {
-                CalendarYear = Util.GetCalendarYear(financialYear),
-                CreatedAt = DateTime.Now,
-                CreatedBy = request.UpdatedBy,
-                EffectiveFrom = DateTime.Now,
-                EffectiveTo = null,
-            };
-            foreach (var pomData in stagingPomData)
-            {
-                var calcRuntPomDataDetail = new CalculatorRunPomDataDetail
+                if (!request.isSuccessful && calcRun != null)
                 {
-                    OrganisationId = pomData.OrganisationId,
-                    SubsidaryId = pomData.SubsidaryId,
-                    LoadTimeStamp = pomData.LoadTimeStamp,
-                    SubmissionPeriod = pomData.SubmissionPeriod,
-                    PackagingActivity = pomData.PackagingActivity,
-                    PackagingType = pomData.PackagingType,
-                    PackagingClass = pomData.PackagingClass,
-                    PackagingMaterial = pomData.PackagingMaterial,
-                    PackagingMaterialWeight = pomData.PackagingMaterialWeight,
-                    SubmissionPeriodDesc = pomData.SubmissionPeriodDesc,
-                    CalculatorRunPomDataMaster = calcRunPomMaster,
-                };
-                newCalculatorRunPomDataDetails.Add(calcRuntPomDataDetail);
-                calcRun!.CalculatorRunPomDataMaster = calcRunPomMaster;
-            }
-
-
-            using (var transaction = await this.context.Database.BeginTransactionAsync())
-            {
-                try
-                {
-                    await this.context.CalculatorRunPomDataDetails.AddRangeAsync(newCalculatorRunPomDataDetails);
-                    await this.context.CalculatorRunOrganisationDataDetails.AddRangeAsync(newCalculatorRunOrganisationDataDetails);
-
-                    calcRun!.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
-                    await this.context.SaveChangesAsync();
-                    await transaction.CommitAsync();
+                    calcRun.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.ERROR.ToString()).Id;
+                    await this.context.SaveChangesAsync(HttpContext.RequestAborted);
                     return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
                 }
-                catch (Exception ex)
+
+                var vr = this.rpdStatusDataValidator.IsValidSuccessfulRun(runId);
+                if (!vr.isValid)
                 {
-                    await transaction.RollbackAsync();
-                    return StatusCode(StatusCodes.Status500InternalServerError, ex);
+                    return StatusCode(vr.StatusCode, vr.ErrorMessage);
                 }
+
+                string financialYear = calcRun?.Financial_Year ?? string.Empty;
+                var calendarYear = Util.GetCalendarYear(financialYear);
+                var createdBy = request.UpdatedBy;
+                using (var transaction = await this.context.Database.BeginTransactionAsync(HttpContext.RequestAborted))
+                {
+                    try
+                    {
+                        var createRunOrgCommand = Util.GetFormattedSqlString("dbo.CreateRunOrganization", runId, calendarYear, createdBy);
+                        await this.wrapper.ExecuteSqlAsync(createRunOrgCommand, HttpContext.RequestAborted);
+                        var createRunPomCommand = Util.GetFormattedSqlString("dbo.CreateRunPom", runId, calendarYear, createdBy);
+                        await this.wrapper.ExecuteSqlAsync(createRunPomCommand, HttpContext.RequestAborted);
+
+                        calcRun!.CalculatorRunClassificationId = runClassifications.Single(x => x.Status == RunClassification.RUNNING.ToString()).Id;
+                        await this.context.SaveChangesAsync(HttpContext.RequestAborted);
+                        await transaction.CommitAsync(HttpContext.RequestAborted);
+                        var timeDiff = startTime - DateTime.Now;
+
+                        return new ObjectResult(timeDiff.TotalSeconds) { StatusCode = StatusCodes.Status201Created };
+                    }
+                    catch (OperationCanceledException ex)
+                    {
+                        await transaction.RollbackAsync();
+                        return StatusCode(StatusCodes.Status408RequestTimeout, ex.ToString());
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        return StatusCode(StatusCodes.Status500InternalServerError, ex);
+                    }
+                }
+            }
+            catch (OperationCanceledException ex)
+            {
+                return StatusCode(StatusCodes.Status408RequestTimeout, ex.ToString());
             }
         }
 
         [HttpPost]
-        [Route("prepareCalcResults")]
-        public async Task<IActionResult> PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
+        [Route("transposeBeforeCalcResults")]
+        [RequestTimeout("Transpose")]
+        public async Task<IActionResult> TransposeBeforeCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
+            var startTime = DateTime.Now; 
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var calculatorRun = this.context.CalculatorRuns.SingleOrDefault(run => run.Id == resultsRequestDto.RunId);
-            if (calculatorRun == null)
-            {
-                return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
-                    { StatusCode = StatusCodes.Status404NotFound };
-            }
+            commandTimeoutService.SetCommandTimeout(context.Database, "TransposeCommand");
 
-            // Validate the result for all the required IDs
-            var validationResult = validatior.ValidateCalculatorRunIds(calculatorRun);
-            if (!validationResult.IsValid)
-            {
-                return StatusCode(StatusCodes.Status422UnprocessableEntity, validationResult.ErrorMessages.ToArray());
-            }
-
+            CalculatorRun? calculatorRun = null;
             try
             {
-                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(resultsRequestDto);
+                calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(
+                run => run.Id == resultsRequestDto.RunId,
+                HttpContext.RequestAborted);
+                if (calculatorRun == null)
+                {
+                    return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
+                    { StatusCode = StatusCodes.Status404NotFound };
+                }
+
+
+                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(
+                    resultsRequestDto,
+                    HttpContext.RequestAborted);
+                var endTime = DateTime.Now;
+                var timeDiff = startTime - endTime;
+                return new ObjectResult(timeDiff.TotalMinutes) { StatusCode = StatusCodes.Status201Created };
+            }
+            catch (OperationCanceledException exception)
+            {
+                if (calculatorRun != null)
+                {
+                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
+                    this.context.CalculatorRuns.Update(calculatorRun);
+                    await this.context.SaveChangesAsync();
+                }
+                return StatusCode(StatusCodes.Status408RequestTimeout, exception.ToString());
+            }
+            catch (Exception exception)
+            {
+                if (calculatorRun != null)
+                {
+                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
+                    this.context.CalculatorRuns.Update(calculatorRun);
+                    await this.context.SaveChangesAsync();
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+            }
+        }
+
+        [HttpPost]
+        [Route("prepareCalcResults")]
+        [RequestTimeout("PrepareCalcResults")]
+        public async Task<IActionResult> PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
+        {
+            var startTime = DateTime.Now;
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            commandTimeoutService.SetCommandTimeout(context.Database, "PrepareCalcResultsCommand");
+
+            CalculatorRun? calculatorRun = null;
+            try
+            {
+                calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(
+                    run => run.Id == resultsRequestDto.RunId,
+                    HttpContext.RequestAborted);
+                if (calculatorRun == null)
+                {
+                    return new ObjectResult($"Unable to find Run Id {resultsRequestDto.RunId}")
+                    { StatusCode = StatusCodes.Status404NotFound };
+                }
+
+                // Validate the result for all the required IDs
+                var validationResult = validatior.ValidateCalculatorRunIds(calculatorRun);
+                if (!validationResult.IsValid)
+                {
+                    return StatusCode(StatusCodes.Status422UnprocessableEntity, validationResult.ErrorMessages.ToArray());
+                }
+
+                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(
+                    resultsRequestDto,
+                    HttpContext.RequestAborted);
                 if (isTransposeSuccessful)
                 {
                     var results = await this.builder.Build(resultsRequestDto);
@@ -195,17 +232,31 @@ namespace EPR.Calculator.API.Controllers
                     {
                         calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
                         this.context.CalculatorRuns.Update(calculatorRun);
-                        await this.context.SaveChangesAsync();
-                        return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+                        await this.context.SaveChangesAsync(HttpContext.RequestAborted);
+                        var timeDiff = startTime - DateTime.Now;
+                        return new ObjectResult(timeDiff.Minutes) { StatusCode = StatusCodes.Status201Created };
                     }
+                } 
+            }
+            catch (OperationCanceledException exception)
+            {
+                if (calculatorRun != null)
+                {
+                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
+                    this.context.CalculatorRuns.Update(calculatorRun);
+                    await this.context.SaveChangesAsync();
                 }
+                return StatusCode(StatusCodes.Status408RequestTimeout, exception.ToString());
             }
             catch (Exception exception)
             {
-                calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
-                this.context.CalculatorRuns.Update(calculatorRun);
-                await this.context.SaveChangesAsync();
-                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+                if (calculatorRun != null)
+                {
+                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
+                    this.context.CalculatorRuns.Update(calculatorRun);
+                    await this.context.SaveChangesAsync();
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
             }
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
             this.context.CalculatorRuns.Update(calculatorRun);

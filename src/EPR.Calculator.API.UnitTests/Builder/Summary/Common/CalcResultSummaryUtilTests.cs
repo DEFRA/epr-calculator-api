@@ -575,8 +575,9 @@
         [TestMethod]
         public void CanGetCommsCostHeaderBadDebtProvisionFor2bTitle()
         {
+            _calcResult.CalcResultSummary.CommsCostHeaderWithoutBadDebtFor2bTitle = CalcResultSummaryUtil.GetCommsCostHeaderWithoutBadDebtFor2bTitle(_calcResult);
             // Act
-            var result = CalcResultSummaryUtil.GetCommsCostHeaderBadDebtProvisionFor2bTitle(_calcResult);
+            var result = CalcResultSummaryUtil.GetCommsCostHeaderBadDebtProvisionFor2bTitle(_calcResult,_calcResult.CalcResultSummary);
 
             // Assert
             Assert.AreEqual(151.80m, result);
@@ -585,8 +586,11 @@
         [TestMethod]
         public void CanGetCommsCostHeaderWithBadDebtFor2bTitle()
         {
+            _calcResult.CalcResultSummary.CommsCostHeaderWithoutBadDebtFor2bTitle = CalcResultSummaryUtil.GetCommsCostHeaderWithoutBadDebtFor2bTitle(_calcResult);
+            _calcResult.CalcResultSummary.CommsCostHeaderBadDebtProvisionFor2bTitle = CalcResultSummaryUtil.GetCommsCostHeaderBadDebtProvisionFor2bTitle(_calcResult, _calcResult.CalcResultSummary);
+
             // Act
-            var result = CalcResultSummaryUtil.GetCommsCostHeaderWithBadDebtFor2bTitle(_calcResult);
+            var result = CalcResultSummaryUtil.GetCommsCostHeaderWithBadDebtFor2bTitle(_calcResult.CalcResultSummary);
 
             // Assert
             Assert.AreEqual(2681.80m, result);

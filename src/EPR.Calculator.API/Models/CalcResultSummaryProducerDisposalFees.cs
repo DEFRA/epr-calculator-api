@@ -134,9 +134,9 @@
         public decimal NorthernIrelandTotalWithBadDebtProvisionSection5 { get; set; }
         // End Section-5 SA setup costs
 
-        public required Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> ProducerDisposalFeesByMaterial { get; set; }
+        public Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>? ProducerDisposalFeesByMaterial { get; set; }
 
-        public required Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> ProducerCommsFeesByMaterial { get; set; }
+        public Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>? ProducerCommsFeesByMaterial { get; set; }
 
         public decimal TotalProducerFeeWithoutBadDebtFor2bComms { get; set; }
 

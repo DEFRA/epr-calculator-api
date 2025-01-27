@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Builder;
+﻿using Castle.Core.Configuration;
+using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
@@ -9,6 +10,7 @@ using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -36,8 +38,16 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             _transposePomAndOrgDataService = new Mock<ITransposePomAndOrgDataService>();
             _runValidator = new CalculatorRunValidator();
             var mockStorageService = new Mock<IStorageService>();
-            controller = new CalculatorInternalController(_context, _rpdStatusDataValidator.Object, _wrapper.Object,
-                            _builder.Object, _exporter.Object, _transposePomAndOrgDataService.Object, mockStorageService.Object, _runValidator);
+            controller = new CalculatorInternalController(
+                _context,
+                _rpdStatusDataValidator.Object, 
+                _wrapper.Object,
+                _builder.Object, 
+                _exporter.Object, 
+                _transposePomAndOrgDataService.Object, 
+                mockStorageService.Object,
+                _runValidator,
+                new CommandTimeoutService(new ConfigurationBuilder().Build()));
         }
 
         [TestMethod]
