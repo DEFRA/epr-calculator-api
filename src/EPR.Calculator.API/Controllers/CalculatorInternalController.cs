@@ -137,6 +137,7 @@ namespace EPR.Calculator.API.Controllers
         [Route("prepareCalcResults")]
         public async Task<IActionResult> PrepareCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
+            var startTime = DateTime.Now;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
@@ -172,7 +173,9 @@ namespace EPR.Calculator.API.Controllers
                     calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
                     this.context.CalculatorRuns.Update(calculatorRun);
                     await this.context.SaveChangesAsync();
-                    return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+                    var endTime = DateTime.Now;
+                    var timeDiff = startTime - endTime;
+                    return new ObjectResult(timeDiff.Minutes) { StatusCode = StatusCodes.Status201Created };
                 }
             }
             catch (Exception exception)
