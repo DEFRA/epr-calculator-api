@@ -171,7 +171,7 @@
             Assert.AreEqual(CommonConstants.Total, headerRow.Total);
             Assert.AreEqual(CommonConstants.ProducerReportedHouseholdPackagingWasteTonnage, headerRow.ProducerReportedHouseholdPackagingWasteTonnage);
             Assert.AreEqual(CommonConstants.LateReportingTonnage, headerRow.LateReportingTonnage);
-            Assert.AreEqual(CommonConstants.ProduceLateTonnage, headerRow.ProducerReportedTotalTonnage);
+            Assert.AreEqual(CommonConstants.ProducerReportedTotalTonnage, headerRow.ProducerReportedTotalTonnage);
             Assert.AreEqual(CommonConstants.DisposalCostPricePerTonne, headerRow.DisposalCostPricePerTonne);
 
 
