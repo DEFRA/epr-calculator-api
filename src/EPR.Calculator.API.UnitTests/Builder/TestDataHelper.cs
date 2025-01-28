@@ -4,14 +4,26 @@ using EPR.Calculator.API.Models;
 
 namespace EPR.Calculator.API.UnitTests.Builder
 {
-  public static class TestDataHelper
-  {
-    public static CalcResultParameterOtherCost GetCalcResultParameterOtherCost()
+    public static class TestDataHelper
     {
-      return new CalcResultParameterOtherCost
-      {
-        Name = "Parameters - Other",
-        SaOperatingCost = new List<CalcResultParameterOtherCostDetail> {
+        public static CalcResult GetCalcResult()
+        {
+            return new CalcResult
+            {
+                CalcResultParameterOtherCost = GetCalcResultParameterOtherCost(),
+                CalcResultDetail = GetCalcResultDetail(),
+                CalcResultLapcapData = GetCalcResultLapcapData(),
+                CalcResultLateReportingTonnageData = GetCalcResultLateReportingTonnage(),
+
+            };
+        }
+
+        public static CalcResultParameterOtherCost GetCalcResultParameterOtherCost()
+        {
+            return new CalcResultParameterOtherCost
+            {
+                Name = "Parameters - Other",
+                SaOperatingCost = new List<CalcResultParameterOtherCostDetail> {
                     new CalcResultParameterOtherCostDetail
                     {
                         Name = null,
@@ -42,7 +54,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         OrderId = 2
                     }
                 },
-        Details = new List<CalcResultParameterOtherCostDetail> {
+                Details = new List<CalcResultParameterOtherCostDetail> {
                     new CalcResultParameterOtherCostDetail {
                         Name = "4 LA Data Prep Charge",
                         England = "£16,000.00",
@@ -72,7 +84,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         OrderId = 2
                     }
                 },
-        SchemeSetupCost = {
+                SchemeSetupCost = {
                     Name = "5 Scheme set up cost Yearly Cost",
                     England = "£17,500.00",
                     Wales = "£23,400.00",
@@ -86,8 +98,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     TotalValue = 62750,
                     OrderId = 1
                 },
-        BadDebtProvision = new KeyValuePair<string, string>("6 Bad Debt Provision", "6.00%"),
-        Materiality = new List<CalcResultMateriality> {
+                BadDebtProvision = new KeyValuePair<string, string>("6 Bad Debt Provision", "6.00%"),
+                Materiality = new List<CalcResultMateriality> {
                     new CalcResultMateriality {
                         SevenMateriality = "7 Materiality",
                         Amount = "Amount £s",
@@ -131,21 +143,21 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         PercentageValue = -0.5m
                     }
                 },
-        BadDebtValue = 6
-      };
-    }
+                BadDebtValue = 6
+            };
+        }
 
-    public static CalcResultDetail GetCalcResultDetail()
-    {
-      return new CalcResultDetail() { };
-    }
+        public static CalcResultDetail GetCalcResultDetail()
+        {
+            return new CalcResultDetail() { };
+        }
 
-    public static CalcResultLaDisposalCostData GetCalcResultLaDisposalCostData()
-    {
-      return new CalcResultLaDisposalCostData()
-      {
-        Name = "Disposal Cost Data",
-        CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>()
+        public static CalcResultLaDisposalCostData GetCalcResultLaDisposalCostData()
+        {
+            return new CalcResultLaDisposalCostData()
+            {
+                Name = "Disposal Cost Data",
+                CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>()
                 {
                     new CalcResultLaDisposalCostDataDetail() {
                         Name = "Material",
@@ -288,15 +300,15 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         OrderId = 10
                     }
                 }
-      };
-    }
+            };
+        }
 
-    public static CalcResultLapcapData GetCalcResultLapcapData()
-    {
-      return new CalcResultLapcapData()
-      {
-        Name = "LAPCAP Data",
-        CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>()
+        public static CalcResultLapcapData GetCalcResultLapcapData()
+        {
+            return new CalcResultLapcapData()
+            {
+                Name = "LAPCAP Data",
+                CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>()
                 {
                     new CalcResultLapcapDataDetails {
                         Name = "Material",
@@ -453,15 +465,15 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         OrderId = 11
                     }
                 }
-      };
-    }
+            };
+        }
 
-    public static CalcResultOnePlusFourApportionment GetCalcResultOnePlusFourApportionment()
-    {
-      return new CalcResultOnePlusFourApportionment()
-      {
-        Name = "One Plus Four Apportionment",
-        CalcResultOnePlusFourApportionmentDetails = new List<CalcResultOnePlusFourApportionmentDetail> {
+        public static CalcResultOnePlusFourApportionment GetCalcResultOnePlusFourApportionment()
+        {
+            return new CalcResultOnePlusFourApportionment()
+            {
+                Name = "One Plus Four Apportionment",
+                CalcResultOnePlusFourApportionmentDetails = new List<CalcResultOnePlusFourApportionmentDetail> {
                     new CalcResultOnePlusFourApportionmentDetail()
                     {
                         EnglandDisposalTotal = "80",
@@ -528,29 +540,27 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         Name = OnePlus4ApportionmentColumnHeaders.OnePluseFourApportionment,
                     }
                 }
-      };
-    }
+            };
+        }
 
-    public static CalcResultCommsCost GetCalcResultCommsCostReportDetail()
-    {
-      return new CalcResultCommsCost()
-      {
-        CalcResultCommsCostCommsCostByMaterial = [
-              new ()
+        public static CalcResultCommsCost GetCalcResultCommsCostReportDetail()
+        {
+            return new CalcResultCommsCost()
+            {
+                CalcResultCommsCostCommsCostByMaterial = [
+                    new ()
                     {
                         CommsCostByMaterialPricePerTonne="0.42",
                         Name ="Material1",
-
                     },
                     new ()
                     {
                         CommsCostByMaterialPricePerTonne="0.3",
                         Name ="Material2",
-
                     }
-          ],
-        CommsCostByCountry = [
-              new()
+                ],
+                CommsCostByCountry = [
+                    new()
                     {
                         Total= "Total"
                     },
@@ -558,24 +568,50 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     {
                         TotalValue= 2530
                     }
-          ]
-      };
-    }
+                ]
+            };
+        }
 
-    public static CalcResultSummary GetCalcResultSummary()
-    {
-      return new CalcResultSummary
-      {
-        BadDebtProvisionFor1 = 6021.3677166M,
-        BadDebtProvisionFor2A = 2098.887360M,
-        BadDebtProvisionTitleSection3 = 3900.000000M,
-        ProducerDisposalFees = GetProducerDisposalFees()
-      };
-    }
+        public static CalcResultLateReportingTonnage GetCalcResultLateReportingTonnage()
+        {
+            return new CalcResultLateReportingTonnage
+            {
+                Name = "Late Reporting Tonnage",
+                CalcResultLateReportingTonnageDetails = new[]
+                {
+                    new CalcResultLateReportingTonnageDetail()
+                    {
+                        Name = "Aluminium",
+                        TotalLateReportingTonnage = 8000.00m
+                    },
+                    new CalcResultLateReportingTonnageDetail()
+                    {
+                        Name = "Plastic",
+                        TotalLateReportingTonnage = 2000.00m
+                    },
+                    new CalcResultLateReportingTonnageDetail()
+                    {
+                        Name = "Total",
+                        TotalLateReportingTonnage = 10000.00m
+                    }
+                }
+            };
+        }
 
-    public static List<CalcResultSummaryProducerDisposalFees> GetProducerDisposalFees()
-    {
-      return new List<CalcResultSummaryProducerDisposalFees>()
+        public static CalcResultSummary GetCalcResultSummary()
+        {
+            return new CalcResultSummary
+            {
+                BadDebtProvisionFor1 = 6021.3677166M,
+                BadDebtProvisionFor2A = 2098.887360M,
+                BadDebtProvisionTitleSection3 = 3900.000000M,
+                ProducerDisposalFees = GetProducerDisposalFees()
+            };
+        }
+
+        public static List<CalcResultSummaryProducerDisposalFees> GetProducerDisposalFees()
+        {
+            return new List<CalcResultSummaryProducerDisposalFees>()
             {
                 new CalcResultSummaryProducerDisposalFees()
                 {
@@ -661,11 +697,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     ProducerCommsFeesByMaterial = GetProducerCommsFeesByMaterial()
                 }
             };
-    }
+        }
 
-    public static Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> GetProducerDisposalFeesByMaterial()
-    {
-      return new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>
+        public static Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> GetProducerDisposalFeesByMaterial()
+        {
+            return new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>
             {
                 {
                     new MaterialDetail
@@ -852,11 +888,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 }
             };
-    }
+        }
 
-    public static Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> GetProducerCommsFeesByMaterial()
-    {
-      return new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>
+        public static Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> GetProducerCommsFeesByMaterial()
+        {
+            return new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>
             {
                 {
                     new MaterialDetail
@@ -1027,11 +1063,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 }
             };
-    }
+        }
 
-    public static List<MaterialDetail> GetMaterials()
-    {
-      return new List<MaterialDetail>
+        public static List<MaterialDetail> GetMaterials()
+        {
+            return new List<MaterialDetail>
             {
                 new MaterialDetail
                 {
@@ -1090,11 +1126,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     Description = "Other materials"
                 }
             };
-    }
+        }
 
-    public static List<ProducerDetail> GetProducers()
-    {
-      var producers = new List<ProducerDetail>
+        public static List<ProducerDetail> GetProducers()
+        {
+            var producers = new List<ProducerDetail>
             {
                 new ProducerDetail
                 {
@@ -1119,21 +1155,21 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 }
             };
 
-      var producerReportedMaterials = GetProducerReportedMaterials();
+            var producerReportedMaterials = GetProducerReportedMaterials();
 
-      producers.ForEach(producer => {
-        producerReportedMaterials.ForEach(producerReportedMaterial =>
+            producers.ForEach(producer => {
+                producerReportedMaterials.ForEach(producerReportedMaterial =>
+                {
+                    producer.ProducerReportedMaterials.Add(producerReportedMaterial);
+                });
+            });
+
+            return producers;
+        }
+
+        public static List<ProducerReportedMaterial> GetProducerReportedMaterials()
         {
-          producer.ProducerReportedMaterials.Add(producerReportedMaterial);
-        });
-      });
-
-      return producers;
-    }
-
-    public static List<ProducerReportedMaterial> GetProducerReportedMaterials()
-    {
-      return new List<ProducerReportedMaterial>()
+            return new List<ProducerReportedMaterial>()
             {
                 new ProducerReportedMaterial
                 {
@@ -1152,6 +1188,6 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     ProducerDetail = null
                 }
             };
+        }
     }
-  }
 }
