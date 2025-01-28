@@ -144,7 +144,7 @@
             Assert.AreEqual("£17.5500", laDisposalCost.DisposalCostPricePerTonne);
         }
 
-        private static IList<ProducerReportedMaterial> GetProducerReportedMaterials()
+        private static List<ProducerReportedMaterial> GetProducerReportedMaterials()
         {
             var run = new CalculatorRun
             {
