@@ -99,20 +99,20 @@
             var lapcapDisposalCostResults = results.Result;
 
             // Assert
-            var laDisposalCost = lapcapDisposalCostResults.CalcResultLaDisposalCostDetails?.Single(x => x.Name == "Plastic");
+            var laDisposalCost = lapcapDisposalCostResults.CalcResultLaDisposalCostDetails?.Single(x => x.Name == MaterialNames.Plastic);
             Assert.IsNotNull(laDisposalCost);
-            Assert.AreEqual("Plastic", laDisposalCost.Name);
+            Assert.AreEqual(MaterialNames.Plastic, laDisposalCost.Name);
             Assert.AreEqual("£23,000.00", laDisposalCost.England);
             Assert.AreEqual("£4,500.00", laDisposalCost.Wales);
             Assert.AreEqual("£6,700.00", laDisposalCost.Scotland);
             Assert.AreEqual("£2,100.00", laDisposalCost.NorthernIreland);
             Assert.AreEqual("£36,300.00", laDisposalCost.Total);
-            Assert.AreEqual("4000.00", laDisposalCost.ProducerReportedHouseholdPackagingWasteTonnage);
+            Assert.AreEqual("2000.00", laDisposalCost.ProducerReportedHouseholdPackagingWasteTonnage);
             Assert.AreEqual("2000.00", laDisposalCost.ReportedPublicBinTonnage);
             Assert.AreEqual(string.Empty, laDisposalCost.HouseholdDrinkContainers);
             Assert.AreEqual("2000.00", laDisposalCost.LateReportingTonnage);
-            Assert.AreEqual("8000.00", laDisposalCost.ProducerReportedTotalTonnage);
-            Assert.AreEqual("£4.5375", laDisposalCost.DisposalCostPricePerTonne);
+            Assert.AreEqual("6000.00", laDisposalCost.ProducerReportedTotalTonnage);
+            Assert.AreEqual("£6.0500", laDisposalCost.DisposalCostPricePerTonne);
         }
 
         [TestMethod]
@@ -128,23 +128,23 @@
             var lapcapDisposalCostResults = results.Result;
 
             // Assert
-            var laDisposalCost = lapcapDisposalCostResults.CalcResultLaDisposalCostDetails?.Single(x => x.Name == "Glass");
+            var laDisposalCost = lapcapDisposalCostResults.CalcResultLaDisposalCostDetails?.Single(x => x.Name == MaterialNames.Glass);
             Assert.IsNotNull(laDisposalCost);
-            Assert.AreEqual("Glass", laDisposalCost.Name);
+            Assert.AreEqual(MaterialNames.Glass, laDisposalCost.Name);
             Assert.AreEqual("£45,000.00", laDisposalCost.England);
             Assert.AreEqual("£0.00", laDisposalCost.Wales);
             Assert.AreEqual("£20,700.00", laDisposalCost.Scotland);
             Assert.AreEqual("£4,500.00", laDisposalCost.NorthernIreland);
             Assert.AreEqual("£70,200.00", laDisposalCost.Total);
-            Assert.AreEqual("4000.00", laDisposalCost.ProducerReportedHouseholdPackagingWasteTonnage);
+            Assert.AreEqual("2000.00", laDisposalCost.ProducerReportedHouseholdPackagingWasteTonnage);
             Assert.AreEqual("0", laDisposalCost.ReportedPublicBinTonnage);
             Assert.AreEqual("2000.00", laDisposalCost.HouseholdDrinkContainers);
             Assert.AreEqual("0", laDisposalCost.LateReportingTonnage);
-            Assert.AreEqual("6000.00", laDisposalCost.ProducerReportedTotalTonnage);
-            Assert.AreEqual("£11.7000", laDisposalCost.DisposalCostPricePerTonne);
+            Assert.AreEqual("4000.00", laDisposalCost.ProducerReportedTotalTonnage);
+            Assert.AreEqual("£17.5500", laDisposalCost.DisposalCostPricePerTonne);
         }
 
-        private IEnumerable<ProducerReportedMaterial> GetProducerReportedMaterials()
+        private static IList<ProducerReportedMaterial> GetProducerReportedMaterials()
         {
             var run = new CalculatorRun
             {
@@ -157,11 +157,32 @@
                 LapcapDataMasterId = 2
             };
 
-            var aluminiumMaterial = new Material() { Code = "AL", Name = "Aluminium", Description = "Aluminium" };
-            var plasticMaterial = new Material() { Code = "PL", Name = "Plastic", Description = "Plastic" };
-            var glassMaterial = new Material() { Code = "GL", Name = "Glass", Description = "Glass" };
+            var aluminiumMaterial = new Material()
+            {
+                Code = MaterialCodes.Aluminium,
+                Name = MaterialNames.Aluminium,
+                Description = MaterialNames.Aluminium
+            };
+            var plasticMaterial = new Material()
+            {
+                Code = MaterialCodes.Plastic,
+                Name = MaterialNames.Plastic,
+                Description = MaterialNames.Plastic
+            };
+            var glassMaterial = new Material()
+            {
+                Code = MaterialCodes.Glass,
+                Name = MaterialNames.Glass,
+                Description = MaterialNames.Glass
+            };
 
-            var producer = new ProducerDetail { CalculatorRunId = 2, ProducerId = 1, ProducerName = "Producer Name", CalculatorRun = run };
+            var producer = new ProducerDetail
+            {
+                CalculatorRunId = 2,
+                ProducerId = 1,
+                ProducerName = "Producer Name",
+                CalculatorRun = run
+            };
 
             return new List<ProducerReportedMaterial>()
             {

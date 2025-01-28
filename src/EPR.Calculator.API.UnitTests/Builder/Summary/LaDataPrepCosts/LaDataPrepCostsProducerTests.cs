@@ -129,6 +129,7 @@
                             NorthernIreland = "NorthernIrelandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage = Fixture.Create<string>(),
                             ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         },
                         new CalcResultLaDisposalCostDataDetail()
@@ -141,6 +142,7 @@
                             NorthernIreland = "NorthernIrelandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage = Fixture.Create<string>(),
                             ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         },
                         new CalcResultLaDisposalCostDataDetail()
@@ -153,6 +155,7 @@
                             NorthernIreland = "NorthernIrelandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage = Fixture.Create<string>(),
                             ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         }
                     }

@@ -108,6 +108,7 @@ namespace EPR.Calculator.API.UnitTests
                             Material = "Material1",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage = Fixture.Create<string>(),
                             ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         },
                          new CalcResultLaDisposalCostDataDetail()
@@ -120,6 +121,7 @@ namespace EPR.Calculator.API.UnitTests
                             Scotland="ScotlandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage = Fixture.Create<string>(),
                             ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         },
                           new CalcResultLaDisposalCostDataDetail()
@@ -132,6 +134,7 @@ namespace EPR.Calculator.API.UnitTests
                             Scotland="ScotlandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage = Fixture.Create<string>(),
                             ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         }
                     }

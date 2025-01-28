@@ -18,9 +18,9 @@
 
         public required string ProducerReportedHouseholdPackagingWasteTonnage { get; set; }
 
-        public string ReportedPublicBinTonnage { get; set; }
+        public required string ReportedPublicBinTonnage { get; set; }
 
-        public string? HouseholdDrinkContainers { get; set; } = string.Empty;
+        public string HouseholdDrinkContainers { get; set; } = string.Empty;
 
         public string LateReportingTonnage { get; set; } = string.Empty;
 

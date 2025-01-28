@@ -178,6 +178,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TotalBillBreakdown
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
                             ProducerReportedTotalTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage= Fixture.Create<string>(),
                         },
                         new()
                         {
@@ -190,6 +191,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TotalBillBreakdown
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
                             ProducerReportedTotalTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage= Fixture.Create<string>(),
                         },
                         new()
                         {
@@ -202,6 +204,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TotalBillBreakdown
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
                             ProducerReportedTotalTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage= Fixture.Create<string>(),
                         }
                     }
                 },

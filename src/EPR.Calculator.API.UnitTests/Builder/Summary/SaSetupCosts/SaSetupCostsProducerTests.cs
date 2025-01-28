@@ -176,6 +176,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                             NorthernIreland = "NorthernIrelandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage = Fixture.Create<string>(),
                             ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         },
                         new CalcResultLaDisposalCostDataDetail()
@@ -188,6 +189,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                             NorthernIreland = "NorthernIrelandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage = Fixture.Create<string>(),
                             ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         },
                         new CalcResultLaDisposalCostDataDetail()
@@ -200,6 +202,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                             NorthernIreland = "NorthernIrelandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage = Fixture.Create<string>(),
                             ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         }
                     }
