@@ -74,7 +74,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
-            service.Transpose(resultsRequestDto);
+            service.Transpose(resultsRequestDto, CancellationToken.None);
 
             var producerDetail = _context.ProducerDetail.FirstOrDefault();
             Assert.IsNotNull(producerDetail);
@@ -115,7 +115,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
-            service.Transpose(resultsRequestDto);
+            service.Transpose(resultsRequestDto, CancellationToken.None);
 
             var producerReportedMaterial = _context.ProducerReportedMaterial.FirstOrDefault();
             Assert.IsNotNull(producerReportedMaterial);
@@ -143,7 +143,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
-            service.Transpose(resultsRequestDto);
+            service.Transpose(resultsRequestDto, CancellationToken.None);
 
             var producerDetail = _context.ProducerDetail.FirstOrDefault(t=>t.SubsidiaryId != null);
             Assert.IsNotNull(producerDetail);
@@ -169,7 +169,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
-            service.Transpose(resultsRequestDto);
+            service.Transpose(resultsRequestDto, CancellationToken.None);
 
             var producerDetail = _context.ProducerDetail.FirstOrDefault();
             Assert.IsNotNull(producerDetail);

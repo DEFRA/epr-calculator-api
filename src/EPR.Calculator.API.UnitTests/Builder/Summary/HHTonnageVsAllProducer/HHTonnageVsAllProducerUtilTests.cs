@@ -32,9 +32,9 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.HHTonnageVsAllProducer
             producers.First().SubsidiaryId = testSubsidaryId;
             producers.First().CalculatorRunId = testCalculatorRunId;
 
-
+            var hhTotalPackagingTonnage = CalcResultSummaryBuilder.GetHHTotalPackagingTonnagePerRun(allResults, producers.First().CalculatorRunId);
             // Act
-            var result = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducersTotal(producers, allResults);
+            var result = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducersTotal(producers, hhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(50, result);
@@ -61,9 +61,10 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.HHTonnageVsAllProducer
             allResults.First().ProducerDetail.CalculatorRunId = testCalculatorRunId;
             allResults.First().ProducerReportedMaterial.PackagingType = "HH";
 
+            var hhTotalPackagingTonnage = CalcResultSummaryBuilder.GetHHTotalPackagingTonnagePerRun(allResults, testCalculatorRunId);
 
             // Act
-            var result = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducersTotal(producers, allResults);
+            var result = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducersTotal(producers, hhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(0, result);
@@ -84,10 +85,12 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.HHTonnageVsAllProducer
             producer.SubsidiaryId = testSubsidaryId;
             producer.CalculatorRunId = testCalculatorRunId;
 
+            var hhTotalPackagingTonnage = CalcResultSummaryBuilder.GetHHTotalPackagingTonnagePerRun(allResults, testCalculatorRunId);
+
             // Act
             var result = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducers(
-                producer, 
-                allResults);
+                producer,
+                hhTotalPackagingTonnage);
 
             // Assert
             Assert.AreEqual(50, result);

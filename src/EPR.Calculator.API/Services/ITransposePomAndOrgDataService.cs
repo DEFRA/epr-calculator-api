@@ -4,6 +4,6 @@ namespace EPR.Calculator.API.Services
 {
     public interface ITransposePomAndOrgDataService
     {
-        Task<bool> Transpose(CalcResultsRequestDto resultsRequestDto);
+        Task<bool> Transpose(CalcResultsRequestDto resultsRequestDto, CancellationToken cancellationToken);
     }
 }
