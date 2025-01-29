@@ -214,29 +214,23 @@ namespace EPR.Calculator.API.Controllers
                     return StatusCode(StatusCodes.Status422UnprocessableEntity, validationResult.ErrorMessages.ToArray());
                 }
 
-                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(
-                    resultsRequestDto,
-                    HttpContext.RequestAborted);
-                if (isTransposeSuccessful)
+                var results = await this.builder.Build(resultsRequestDto);
+                var exportedResults = this.exporter.Export(results);
+
+                var fileName = new CalcResultsFileName(
+                    results.CalcResultDetail.RunId,
+                    results.CalcResultDetail.RunName,
+                    results.CalcResultDetail.RunDate);
+                var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
+
+                if (resultsFileWritten)
                 {
-                    var results = await this.builder.Build(resultsRequestDto);
-                    var exportedResults = this.exporter.Export(results);
-
-                    var fileName = new CalcResultsFileName(
-                        results.CalcResultDetail.RunId,
-                        results.CalcResultDetail.RunName,
-                        results.CalcResultDetail.RunDate);
-                    var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
-
-                    if (resultsFileWritten)
-                    {
-                        calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
-                        this.context.CalculatorRuns.Update(calculatorRun);
-                        await this.context.SaveChangesAsync(HttpContext.RequestAborted);
-                        var timeDiff = startTime - DateTime.Now;
-                        return new ObjectResult(timeDiff.Minutes) { StatusCode = StatusCodes.Status201Created };
-                    }
-                } 
+                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
+                    this.context.CalculatorRuns.Update(calculatorRun);
+                    await this.context.SaveChangesAsync(HttpContext.RequestAborted);
+                    var timeDiff = startTime - DateTime.Now;
+                    return new ObjectResult(timeDiff.Minutes) { StatusCode = StatusCodes.Status201Created };
+                }
             }
             catch (OperationCanceledException exception)
             {
