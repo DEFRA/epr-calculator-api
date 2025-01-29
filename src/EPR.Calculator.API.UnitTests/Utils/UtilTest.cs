@@ -135,5 +135,15 @@ namespace EPR.Calculator.API.UnitTests.Utils
             var exception = Assert.ThrowsException<ArgumentException>(() => Util.GetCalendarYear(financialYear));
             Assert.AreEqual("Financial year cannot be null or empty (Parameter 'financialYear')", exception.Message);
         }
+
+        [TestMethod]
+        public void GetFormattedSqlStringTest()
+        {
+            var runId = 21;
+            var calendarYear = "2024";
+            var createdBy = "username";
+            var sqlString = Util.GetFormattedSqlString("procedureName", runId, calendarYear, createdBy);
+            Assert.AreEqual($"exec procedureName @RunId ={runId}, @calendarYear = {calendarYear}, @createdBy = {createdBy}", sqlString.ToString());
+        }
     }
 }

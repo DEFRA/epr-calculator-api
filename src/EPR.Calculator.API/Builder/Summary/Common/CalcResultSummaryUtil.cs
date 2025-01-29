@@ -785,17 +785,17 @@ public static class CalcResultSummaryUtil
         return calcResult.CalcResultCommsCostReportDetail.CommsCostByCountry.ToList()[1].TotalValue;
     }
 
-    public static decimal GetCommsCostHeaderBadDebtProvisionFor2bTitle(CalcResult calcResult)
+    public static decimal GetCommsCostHeaderBadDebtProvisionFor2bTitle(CalcResult calcResult, CalcResultSummary calcResultSummary)
     {
-        var commsCost = GetCommsCostHeaderWithoutBadDebtFor2bTitle(calcResult);
+        var commsCost = calcResultSummary.CommsCostHeaderWithoutBadDebtFor2bTitle;
         var badDebtProvision = Convert.ToDecimal(calcResult.CalcResultParameterOtherCost.BadDebtProvision.Value.Trim('%')) / 100;
         return commsCost * badDebtProvision;
     }
 
-    public static decimal GetCommsCostHeaderWithBadDebtFor2bTitle(CalcResult calcResult)
+    public static decimal GetCommsCostHeaderWithBadDebtFor2bTitle(CalcResultSummary calcResultSummary)
     {
-        var commsCostHeaderWithoutBadDebt = GetCommsCostHeaderWithoutBadDebtFor2bTitle(calcResult);
-        var commsCostHeaderBadDebtProvision = GetCommsCostHeaderBadDebtProvisionFor2bTitle(calcResult);
+        var commsCostHeaderWithoutBadDebt = calcResultSummary.CommsCostHeaderWithoutBadDebtFor2bTitle;
+        var commsCostHeaderBadDebtProvision = calcResultSummary.CommsCostHeaderBadDebtProvisionFor2bTitle;
         return commsCostHeaderWithoutBadDebt + commsCostHeaderBadDebtProvision;
     }
 

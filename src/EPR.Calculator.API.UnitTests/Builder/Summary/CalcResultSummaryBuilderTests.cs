@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using EPR.Calculator.API.Builder.Summary;
+using EPR.Calculator.API.Builder.Summary.HHTonnageVsAllProducer;
 using EPR.Calculator.API.Builder.Summary.OneAndTwoA;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
@@ -282,7 +283,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
-            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
             var firstProducer = result.ProducerDisposalFees.FirstOrDefault();
             Assert.IsNotNull(firstProducer);
             Assert.AreEqual("Producer1", firstProducer.ProducerName);
@@ -351,7 +352,7 @@ namespace EPR.Calculator.API.UnitTests
             var result = results.Result;
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
             Assert.IsFalse(result.ProducerDisposalFees.Any(fee => fee.ProducerName.Contains("Total")));
         }
 
@@ -364,7 +365,7 @@ namespace EPR.Calculator.API.UnitTests
             results.Wait();
             var result = results.Result;
             Assert.IsNotNull(result);
-            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
         }
 
         [TestMethod]
@@ -508,7 +509,7 @@ namespace EPR.Calculator.API.UnitTests
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
-            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
             var producerTotalPercentage = result.ProducerDisposalFees.First().PercentageofProducerReportedHHTonnagevsAllProducers;
             Assert.IsNotNull(producerTotalPercentage);
             Assert.AreEqual(100, producerTotalPercentage);
@@ -529,7 +530,7 @@ namespace EPR.Calculator.API.UnitTests
             var isColumnHeaderExists = result.ProducerDisposalFeesHeaders!.Select(dict => dict.ColumnIndex == 196 || dict.ColumnIndex == 197 || dict.ColumnIndex == 198).ToList();
             Assert.IsTrue(isColumnHeaderExists.Contains(true));
             Assert.IsNotNull(result.ProducerDisposalFees);
-            Assert.AreEqual(4, result.ProducerDisposalFees.Count());
+            Assert.AreEqual(2, result.ProducerDisposalFees.Count());
         }
 
         [TestMethod]
@@ -576,9 +577,13 @@ namespace EPR.Calculator.API.UnitTests
             var orderedProducerDetails = CalcResultSummaryBuilder.GetOrderedListOfProducersAssociatedRunId(1, _context.ProducerDetail.ToList());
             var runProducerMaterialDetails = CalcResultSummaryBuilder.GetProducerRunMaterialDetails(orderedProducerDetails,
                 _context.ProducerReportedMaterial.ToList(), 1);
+
+            var hhTotalPackagingTonnage = CalcResultSummaryBuilder.GetHHTotalPackagingTonnagePerRun(runProducerMaterialDetails, 1);
+
             var materials = Mappers.MaterialMapper.Map(_context.Material.ToList());
+
             var result = CalcResultSummaryBuilder.GetCalcResultSummary(orderedProducerDetails, materials,
-                runProducerMaterialDetails, _calcResult);
+                runProducerMaterialDetails, _calcResult, hhTotalPackagingTonnage);
             Assert.IsNotNull(result);
             Assert.AreEqual(117, result.ColumnHeaders.Count());
 
