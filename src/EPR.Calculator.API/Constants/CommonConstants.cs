@@ -2,7 +2,7 @@
 
 namespace EPR.Calculator.API.Constants
 {
-    public class CommonConstants
+    public static class CommonConstants
     {
         public const string Material = "Material";
         public const string England = "England";
@@ -12,7 +12,7 @@ namespace EPR.Calculator.API.Constants
         public const string Total = "Total";
         public const string ProducerReportedHouseholdPackagingWasteTonnage = "Producer Reported Household Packaging Waste Tonnage";
         public const string LateReportingTonnage = "Late Reporting Tonnage";
-        public const string ProduceLateTonnage =   "Producer Reported Household Tonnage + Late Reporting Tonnage";
+        public const string ProduceLateTonnage = "Producer Reported Household Packaging Waste Tonnage + Late Reporting Tonnage + Reported Public Bin Tonnage + Household Drinks Containers";
         public const string DisposalCostPricePerTonne = "Disposal Cost Price Per Tonne";
         public const string LADisposalCostData = "LA Disposal Cost Data";
         public const string Household = "HH";
