@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace EPR.Calculator.API.Services
 {
@@ -155,41 +156,147 @@ namespace EPR.Calculator.API.Services
                     }
                 }
 
-                result = await SaveNewProducerDetailAndMaterialsAsync(
-                    newProducerDetails, 
-                    newProducerReportedMaterials,
-                    cancellationToken);
+                result = await BulkCopyAsync(newProducerDetails, newProducerReportedMaterials, resultsRequestDto.RunId);
             }
             return result;
         }
 
-        public async Task<bool> SaveNewProducerDetailAndMaterialsAsync(
+        public async Task<bool> BulkCopyAsync(
             IEnumerable<ProducerDetail> newProducerDetails,
             IEnumerable<ProducerReportedMaterial> newProducerReportedMaterials,
-            CancellationToken cancellationToken)
+            int calculatorRunId)
         {
-            using (var transaction = await this.context.Database.BeginTransactionAsync(cancellationToken))
+            var connectionString = this.context.Database.GetConnectionString();
+            var producerDetailTable = MakeproducerDetailTable(newProducerDetails, calculatorRunId);
+
+            using (var bulkCopy = new Microsoft.Data.SqlClient.SqlBulkCopy(connectionString,
+                Microsoft.Data.SqlClient.SqlBulkCopyOptions.Default))
             {
+                bulkCopy.DestinationTableName = "dbo.producer_detail";
+
                 try
                 {
-                    context.ProducerDetail.AddRange(newProducerDetails);
-                    context.ProducerReportedMaterial.AddRange(newProducerReportedMaterials);
-
-                    // Apply the database changes
-                    await context.SaveChangesAsync(cancellationToken);
-
-                    // Success, commit transaction
-                    await transaction.CommitAsync(cancellationToken);
-                    return true;
+                    await bulkCopy.WriteToServerAsync(producerDetailTable, DataRowState.Unchanged);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // Error, rollback transaction
-                    await transaction.RollbackAsync();
-                    // TO DO: Decide upon the exception later during the complete integration
+                    Console.WriteLine(ex.Message);
                     return false;
                 }
             }
+
+            var producerReportedMaterialsTable = MakeproducerReportedTable(newProducerReportedMaterials);
+            using (var bulkCopy = new Microsoft.Data.SqlClient.SqlBulkCopy(
+                connectionString,
+                Microsoft.Data.SqlClient.SqlBulkCopyOptions.Default))
+            {
+                bulkCopy.DestinationTableName = "dbo.producer_reported_material";
+
+                try
+                {
+                    await bulkCopy.WriteToServerAsync(producerReportedMaterialsTable, DataRowState.Unchanged);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return false;
+                }
+            }
+        }
+
+        private DataTable MakeproducerReportedTable(IEnumerable<ProducerReportedMaterial> producerReportedMaterials)
+        {
+            DataTable producerDetails = new DataTable("producer_detail");
+
+            DataColumn id = new DataColumn();
+            id.DataType = Type.GetType("System.Int32");
+            id.ColumnName = "id";
+            id.AutoIncrement = true;
+            producerDetails.Columns.Add(id);
+
+            DataColumn materialId = new DataColumn();
+            materialId.DataType = Type.GetType("System.Int32");
+            materialId.ColumnName = "material_id";
+            producerDetails.Columns.Add(materialId);
+
+            DataColumn producerDetailId = new DataColumn();
+            producerDetailId.DataType = Type.GetType("System.Int32");
+            producerDetailId.ColumnName = "producer_detail_id";
+            producerDetails.Columns.Add(producerDetailId);
+
+            DataColumn packagingType = new DataColumn();
+            packagingType.DataType = Type.GetType("System.String");
+            packagingType.ColumnName = "packaging_type";
+            producerDetails.Columns.Add(packagingType);
+
+            DataColumn packagingTonnage = new DataColumn();
+            packagingTonnage.DataType = Type.GetType("System.Decimal");
+            packagingTonnage.ColumnName = "packaging_tonnage";
+            producerDetails.Columns.Add(packagingTonnage);
+
+            foreach (var producerDetail in producerReportedMaterials)
+            {
+                DataRow row = producerDetails.NewRow();
+                row["id"] = producerDetail.Id;
+                row["material_id"] = producerDetail.MaterialId;
+                row["producer_detail_id"] = producerDetail.ProducerDetailId;
+                row["packaging_type"] = producerDetail.PackagingType;
+                row["packaging_tonnage"] = producerDetail.PackagingTonnage;
+                producerDetails.Rows.Add(row);
+            }
+
+            producerDetails.AcceptChanges();
+
+            // Return the new DataTable.
+            return producerDetails;
+        }
+
+        private DataTable MakeproducerDetailTable(IEnumerable<ProducerDetail> newProducerDetails, int calculatorRunId)
+        {
+            DataTable producerDetails = new DataTable("producer_detail");
+
+            DataColumn id = new DataColumn();
+            id.DataType = Type.GetType("System.Int32");
+            id.ColumnName = "id";
+            id.AutoIncrement = true;
+            producerDetails.Columns.Add(id);
+
+            DataColumn producerId = new DataColumn();
+            producerId.DataType = Type.GetType("System.Int32");
+            producerId.ColumnName = "producer_id";
+            producerDetails.Columns.Add(producerId);
+
+            DataColumn subsidaryId = new DataColumn();
+            subsidaryId.DataType = Type.GetType("System.String");
+            subsidaryId.ColumnName = "subsidiary_id";
+            producerDetails.Columns.Add(subsidaryId);
+
+            DataColumn producerName = new DataColumn();
+            producerName.DataType = Type.GetType("System.String");
+            producerName.ColumnName = "producer_name";
+            producerDetails.Columns.Add(producerName);
+
+            DataColumn calcRunId = new DataColumn();
+            calcRunId.DataType = Type.GetType("System.Int32");
+            calcRunId.ColumnName = "calculator_run_id";
+            producerDetails.Columns.Add(calcRunId);
+
+            foreach (var producerDetail in newProducerDetails)
+            {
+                DataRow row = producerDetails.NewRow();
+                row["id"] = producerDetail.Id;
+                row["producer_id"] = producerDetail.ProducerId;
+                row["subsidiary_id"] = producerDetail.SubsidiaryId;
+                row["producer_name"] = producerDetail.ProducerName;
+                row["calculator_run_id"] = calculatorRunId;
+                producerDetails.Rows.Add(row);
+            }
+
+            producerDetails.AcceptChanges();
+
+            // Return the new DataTable.
+            return producerDetails;
         }
 
         private static List<OrganisationDetails> GetOrganisationDetailsBySubmissionPeriod(
