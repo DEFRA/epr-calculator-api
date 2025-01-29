@@ -1,11 +1,11 @@
+using EPR.Calculator.API.Builder.CommsCost;
+using EPR.Calculator.API.Builder.Detail;
 using EPR.Calculator.API.Builder.LaDisposalCost;
 using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
-using EPR.Calculator.API.Builder.Summary;
-using EPR.Calculator.API.Builder.CommsCost;
-using EPR.Calculator.API.Builder.Detail;
 using EPR.Calculator.API.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.Builder.ParametersOther;
+using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 
@@ -71,6 +71,7 @@ namespace EPR.Calculator.API.Builder
                 resultsRequestDto, result.CalcResultOnePlusFourApportionment);
             result.CalcResultLaDisposalCostData = await this.laDisposalCostBuilder.Construct(resultsRequestDto, result);
             result.CalcResultSummary = await this.summaryBuilder.Construct(resultsRequestDto, result);
+
             return result;
         }
     }
