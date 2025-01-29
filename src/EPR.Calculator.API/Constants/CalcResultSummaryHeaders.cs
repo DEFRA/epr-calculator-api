@@ -23,6 +23,11 @@ namespace EPR.Calculator.API.Constants
         public static readonly string ReportedHouseholdPackagingWasteTonnage =
             "Reported Household Packaging Waste Tonnage";
 
+        public static readonly string ReportedPublicBinTonnage = "Reported Public Bin Tonnage";
+        public static readonly string TotalReportedTonnage = "Total Reported Tonnage";
+        public static readonly string HouseholdDrinksContainers = "Household Drinks Containers - Glass";
+
+
         public static readonly string ReportedSelfManagedConsumerWasteTonnage =
             "Reported Self Managed Consumer Waste Tonnage";
 
