@@ -51,16 +51,12 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
                     HouseholdDrinkContainers = GetReportedHouseholdDrinksContainerTonnage(details.Name),
                     OrderId = ++OrderId
                 };
+                laDiposalDetail.LateReportingTonnage = GetLateReportingTonnageDataByMaterial(laDiposalDetail.Name, calcResult.CalcResultLateReportingTonnageData.CalcResultLateReportingTonnageDetails.ToList());
+                laDiposalDetail.ProducerReportedTotalTonnage = GetProducerReportedTotalTonnage(laDiposalDetail);
+                laDiposalDetail.DisposalCostPricePerTonne = laDiposalDetail.Name == CommonConstants.Total
+                    ? string.Empty
+                    : CalculateDisposalCostPricePerTonne(laDiposalDetail);
                 laDisposalCostDetails.Add(laDiposalDetail);
-            }
-
-            foreach (var details in laDisposalCostDetails)
-            {
-                details.LateReportingTonnage = GetLateReportingTonnageDataByMaterial(details.Name, calcResult.CalcResultLateReportingTonnageData.CalcResultLateReportingTonnageDetails.ToList());
-
-                details.ProducerReportedTotalTonnage = GetProducerReportedTotalTonnage(details);
-                if (details.Name == CommonConstants.Total) continue;
-                details.DisposalCostPricePerTonne = CalculateDisposalCostPricePerTonne(details);
             }
 
             var header = GetHeader();
@@ -75,7 +71,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
 
         private string GetReportedHouseholdDrinksContainerTonnage(string materialName)
         {
-            if (materialName == "Total")
+            if (materialName == CommonConstants.Total)
             {
                 var householdDrinksContainerData = producerData
                     .Where(p => p.PackagingType == PackagingTypes.HouseholdDrinksContainers);
@@ -97,7 +93,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
 
         private string GetReportedPublicBinTonnage(string materialName)
         {
-            return materialName == "Total"
+            return materialName == CommonConstants.Total
                 ? producerData
                     .Where(p => p.PackagingType == PackagingTypes.PublicBin)
                     .Sum(p => p.Tonnage).ToString()
@@ -108,7 +104,7 @@ namespace EPR.Calculator.API.Builder.LaDisposalCost
 
         private string GetTonnageDataByMaterial(string materialName)
         {
-            return materialName == "Total"
+            return materialName == CommonConstants.Total
                 ? producerData.Where(t => t.PackagingType == PackagingTypes.Household).Sum(t => t.Tonnage).ToString()
                 : producerData.Where(t => t.MaterialName == materialName && t.PackagingType == PackagingTypes.Household).Sum(t => t.Tonnage).ToString();
         }
