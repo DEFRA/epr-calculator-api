@@ -101,8 +101,9 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             Scotland = "ScotlandTest",
                             Material = "Material1",
                             NorthernIreland = "NorthernIrelandTest",
-                            Total = "null",
-                            ProducerReportedHouseholdPackagingWasteTonnage = "null"
+                            Total = string.Empty,
+                            ProducerReportedHouseholdPackagingWasteTonnage = string.Empty,
+                            ReportedPublicBinTonnage = string.Empty
                         },
                         new CalcResultLaDisposalCostDataDetail
                         {
@@ -112,9 +113,9 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             Name = "Material1",
                             Scotland = "ScotlandTest",
                             NorthernIreland = "NorthernIrelandTest",
-                            Total = "null",
-                            ProducerReportedHouseholdPackagingWasteTonnage = "null"
-
+                            Total = string.Empty,
+                            ProducerReportedHouseholdPackagingWasteTonnage = string.Empty,
+                            ReportedPublicBinTonnage = string.Empty
                         },
                         new CalcResultLaDisposalCostDataDetail
                         {
@@ -124,9 +125,9 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             Name = "Material2",
                             Scotland = "ScotlandTest",
                             NorthernIreland = "NorthernIrelandTest",
-                            Total = "null",
-                            ProducerReportedHouseholdPackagingWasteTonnage = "null"
-
+                            Total = string.Empty,
+                            ProducerReportedHouseholdPackagingWasteTonnage = string.Empty,
+                            ReportedPublicBinTonnage = string.Empty
                         }
                     },
                     Name = "some test"
