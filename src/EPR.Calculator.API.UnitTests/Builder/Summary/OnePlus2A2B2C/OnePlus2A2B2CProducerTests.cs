@@ -284,8 +284,8 @@
 
             var expectedResult = new List<CalcResultSummaryHeader>();
             expectedResult.AddRange([
-                new CalcResultSummaryHeader { Name = OnePlus2A2B2CHeaders.ProducerTotalWithBadDebtProvision, ColumnIndex = 208 },
-                new CalcResultSummaryHeader { Name = OnePlus2A2B2CHeaders.ProducerPercentageOfOverallProducerCost, ColumnIndex = 209 },
+                new CalcResultSummaryHeader { Name = OnePlus2A2B2CHeaders.ProducerTotalWithBadDebtProvision, ColumnIndex = 225 },
+                new CalcResultSummaryHeader { Name = OnePlus2A2B2CHeaders.ProducerPercentageOfOverallProducerCost, ColumnIndex = 226 },
             ]);
 
             // Assert
@@ -303,7 +303,7 @@
 
             var expectedResult = new List<CalcResultSummaryHeader>();
             expectedResult.AddRange([
-                new CalcResultSummaryHeader { Name = OnePlus2A2B2CHeaders.TotalWithBadDebtProvision, ColumnIndex = 208 },
+                new CalcResultSummaryHeader { Name = OnePlus2A2B2CHeaders.TotalWithBadDebtProvision, ColumnIndex = 225 },
             ]);
 
             // Assert
