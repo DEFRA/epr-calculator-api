@@ -1,7 +1,5 @@
 ﻿using AutoFixture;
-using EPR.Calculator.API.Builder;
 using EPR.Calculator.API.Builder.Summary;
-using EPR.Calculator.API.Builder.Summary.HHTonnageVsAllProducer;
 using EPR.Calculator.API.Builder.Summary.OneAndTwoA;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
@@ -507,7 +505,7 @@ namespace EPR.Calculator.API.UnitTests
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.ProducerDisposalFees);
             Assert.AreEqual(2, result.ProducerDisposalFees.Count());
-            var producerTotalPercentage = result.ProducerDisposalFees.First().PercentageofProducerReportedHHTonnagevsAllProducers;
+            var producerTotalPercentage = result.ProducerDisposalFees.First().PercentageofProducerReportedTonnagevsAllProducers;
             Assert.IsNotNull(producerTotalPercentage);
             Assert.AreEqual(100, producerTotalPercentage);
         }
@@ -579,8 +577,10 @@ namespace EPR.Calculator.API.UnitTests
 
             var materials = Mappers.MaterialMapper.Map(_context.Material.ToList());
 
+			var TotalPackagingTonnage = CalcResultSummaryBuilder.GetTotalPackagingTonnagePerRun(runProducerMaterialDetails, materials, 1);
+
             var result = CalcResultSummaryBuilder.GetCalcResultSummary(orderedProducerDetails, materials,
-                runProducerMaterialDetails, _calcResult, hhTotalPackagingTonnage);
+                runProducerMaterialDetails, _calcResult, hhTotalPackagingTonnage, TotalPackagingTonnage);
             Assert.IsNotNull(result);
             Assert.AreEqual(117, result.ColumnHeaders.Count());
 

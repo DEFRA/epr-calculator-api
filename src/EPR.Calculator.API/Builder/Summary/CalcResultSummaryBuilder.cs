@@ -1,7 +1,7 @@
 ﻿using EPR.Calculator.API.Builder.Summary.Common;
 using EPR.Calculator.API.Builder.Summary.CommsCostTwoA;
 using EPR.Calculator.API.Builder.Summary.CommsCostTwoBTotalBill;
-using EPR.Calculator.API.Builder.Summary.HHTonnageVsAllProducer;
+using EPR.Calculator.API.Builder.Summary.TonnageVsAllProducer;
 using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
 using EPR.Calculator.API.Builder.Summary.OneAndTwoA;
 using EPR.Calculator.API.Builder.Summary.OnePlus2A2B2C;
@@ -9,6 +9,7 @@ using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
 using EPR.Calculator.API.Builder.Summary.ThreeSA;
 using EPR.Calculator.API.Builder.Summary.TotalBillBreakdown;
 using EPR.Calculator.API.Builder.Summary.TwoCCommsCost;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -47,13 +48,18 @@ namespace EPR.Calculator.API.Builder.Summary
             var orderedProducerDetails = GetOrderedListOfProducersAssociatedRunId(
                 runId, producerDetails);
 
-            var hhTotalPackagingTonnage = GetHHTotalPackagingTonnagePerRun(runProducerMaterialDetails,runId);
+            var hhTotalPackagingTonnage = GetHHTotalPackagingTonnagePerRun(runProducerMaterialDetails, runId);
+
+            // Household + Publicbin + HDC
+			var TotalPackagingTonnage = GetTotalPackagingTonnagePerRun(runProducerMaterialDetails, materials, runId);
 
             var result = GetCalcResultSummary(
                 orderedProducerDetails,
                 materials,
                 runProducerMaterialDetails,
-                calcResult, hhTotalPackagingTonnage);
+                calcResult,
+                hhTotalPackagingTonnage,
+                TotalPackagingTonnage);
 
             return result;
         }
@@ -62,7 +68,9 @@ namespace EPR.Calculator.API.Builder.Summary
             IEnumerable<ProducerDetail> orderedProducerDetails,
             IEnumerable<MaterialDetail> materials,
             IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails,
-            CalcResult calcResult, IEnumerable<HHTotalPackagingTonnagePerRun> hhTotalPackagingTonnage)
+            CalcResult calcResult,
+            IEnumerable<TotalPackagingTonnagePerRun> hhTotalPackagingTonnage,
+			IEnumerable<TotalPackagingTonnagePerRun> TotalPackagingTonnage)
         {
             var result = new CalcResultSummary();
             if (orderedProducerDetails.Any())
@@ -79,19 +87,19 @@ namespace EPR.Calculator.API.Builder.Summary
                         producerDisposalFees.Find(pdf => pdf.ProducerId == producer.ProducerId.ToString()) == null)
                     {
                         var totalRow = GetProducerTotalRow(producersAndSubsidiaries.ToList(), materials, calcResult,
-                            runProducerMaterialDetails, producerDisposalFees, false, hhTotalPackagingTonnage);
+                            runProducerMaterialDetails, producerDisposalFees, false, hhTotalPackagingTonnage, TotalPackagingTonnage);
                         producerDisposalFees.Add(totalRow);
                     }
 
                     // Calculate the values for the producer
                     producerDisposalFees.Add(GetProducerRow(producerDisposalFees, producer, materials, calcResult,
-                        runProducerMaterialDetails, hhTotalPackagingTonnage));
+                        runProducerMaterialDetails, hhTotalPackagingTonnage, TotalPackagingTonnage));
                 }
                
 
                 // Calculate the total for all the producers
                 var allTotalRow = GetProducerTotalRow(orderedProducerDetails.ToList(), materials, calcResult,
-                    runProducerMaterialDetails, producerDisposalFees, true, hhTotalPackagingTonnage);
+                    runProducerMaterialDetails, producerDisposalFees, true, hhTotalPackagingTonnage, TotalPackagingTonnage);
                 producerDisposalFees.Add(allTotalRow);
                 
                 result.ProducerDisposalFees = producerDisposalFees;
@@ -163,7 +171,8 @@ namespace EPR.Calculator.API.Builder.Summary
             IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails,
             IEnumerable<CalcResultSummaryProducerDisposalFees> producerDisposalFees,
             bool isOverAllTotalRow,
-            IEnumerable<HHTotalPackagingTonnagePerRun> hhTotalPackagingTonnage)
+            IEnumerable<TotalPackagingTonnagePerRun> hhTotalPackagingTonnage,
+			IEnumerable<TotalPackagingTonnagePerRun> TotalPackagingTonnage)
         {
             var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
             var commsCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>();
@@ -260,8 +269,8 @@ namespace EPR.Calculator.API.Builder.Summary
                 NorthernIrelandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsNorthernIrelandWithBadDebtTotalsRow(calcResult, producersAndSubsidiaries, hhTotalPackagingTonnage),
 
                 //Section-3
-                // Percentage of Producer Reported Household Tonnage vs All Producers
-                PercentageofProducerReportedHHTonnagevsAllProducers = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducersTotal(producersAndSubsidiaries, hhTotalPackagingTonnage),
+                // Percentage of Producer Reported Tonnage vs All Producers
+                PercentageofProducerReportedTonnagevsAllProducers = TonnageVsAllProducerUtil.GetPercentageofProducerReportedTonnagevsAllProducersTotal(producersAndSubsidiaries, TotalPackagingTonnage),
 
                 isTotalRow = true
             };
@@ -278,7 +287,8 @@ namespace EPR.Calculator.API.Builder.Summary
             IEnumerable<MaterialDetail> materials,
             CalcResult calcResult,
             IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails, 
-            IEnumerable<HHTotalPackagingTonnagePerRun> hhTotalPackagingTonnage)
+            IEnumerable<TotalPackagingTonnagePerRun> hhTotalPackagingTonnage,
+			IEnumerable<TotalPackagingTonnagePerRun> TotalPackagingTonnage)
         {
             var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
             var commsCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>();
@@ -363,8 +373,8 @@ namespace EPR.Calculator.API.Builder.Summary
 
 
             //Section-3
-            // Percentage of Producer Reported Household Tonnage vs All Producers
-            result.PercentageofProducerReportedHHTonnagevsAllProducers = HHTonnageVsAllProducerUtil.GetPercentageofProducerReportedHHTonnagevsAllProducers(producer, hhTotalPackagingTonnage);
+            // Percentage of Producer Reported Tonnage vs All Producers
+            result.PercentageofProducerReportedTonnagevsAllProducers = TonnageVsAllProducerUtil.GetPercentageofProducerReportedTonnagevsAllProducers(producer, TotalPackagingTonnage);
 
             ////Total Bill for 2b
             result.TotalProducerFeeWithoutBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithoutBadDebtFor2b(calcResult, producer, hhTotalPackagingTonnage);
@@ -380,26 +390,60 @@ namespace EPR.Calculator.API.Builder.Summary
             return result;
         }
 
-        public static IEnumerable<HHTotalPackagingTonnagePerRun> GetHHTotalPackagingTonnagePerRun(IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults, int runId)
+        public static IEnumerable<TotalPackagingTonnagePerRun> GetHHTotalPackagingTonnagePerRun(
+            IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults,
+			int runId)
         {
-            var allProducerDetails = allResults.Select(x => x.ProducerDetail);
+            var allProducerDetails = allResults.Select(x => x.ProducerDetail).Distinct();
             var allProducerReportedMaterials = allResults.Select(x => x.ProducerReportedMaterial);
 
-            var result =
-                (from p in allProducerDetails
-                    join m in allProducerReportedMaterials
-                        on p.Id equals m.ProducerDetailId
-                    where p.CalculatorRunId == runId && m.PackagingType == "HH"
-                    group new { m, p } by new { p.ProducerId, p.SubsidiaryId }
-                    into g
-                    select new HHTotalPackagingTonnagePerRun
-                    {
-                        ProducerId = g.Key.ProducerId,
-                        SubsidiaryId = g.Key.SubsidiaryId,
-                        TotalPackagingTonnage = g.Sum(x => x.m.PackagingTonnage)
-                    }).ToList();
+			var result =
+				(from p in allProducerDetails
+				 join m in allProducerReportedMaterials
+					 on p.Id equals m.ProducerDetailId
+				 where p.CalculatorRunId == runId && m.PackagingType == PackagingTypes.Household
+				 group new { m, p } by new { p.ProducerId, p.SubsidiaryId }
+					into g
+				 select new TotalPackagingTonnagePerRun
+				 {
+					 ProducerId = g.Key.ProducerId,
+					 SubsidiaryId = g.Key.SubsidiaryId,
+					 TotalPackagingTonnage = g.Sum(x => x.m.PackagingTonnage)
+				 }).ToList();
 
-            return result;
+			return result;
+        }
+
+        public static IEnumerable<TotalPackagingTonnagePerRun> GetTotalPackagingTonnagePerRun(
+            IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults,
+			IEnumerable<MaterialDetail> materials,
+			int runId)
+        {
+            var allProducerDetails = allResults.Select(x => x.ProducerDetail).Distinct();
+            var allProducerReportedMaterials = allResults.Select(x => x.ProducerReportedMaterial);
+
+			var result =
+				(from p in allProducerDetails
+				 join pm in allProducerReportedMaterials on p.Id equals pm.ProducerDetailId
+				 join m in materials on pm.MaterialId equals m.Id
+				 where p.CalculatorRunId == runId &&
+                 (
+				    pm.PackagingType == PackagingTypes.Household ||
+					pm.PackagingType == PackagingTypes.PublicBin ||
+                    (
+                        pm.PackagingType == PackagingTypes.HouseholdDrinksContainers && m.Code == MaterialCodes.Glass
+					)
+                 )
+                 group new { m=pm, p } by new { p.ProducerId, p.SubsidiaryId }
+					into g
+				 select new TotalPackagingTonnagePerRun
+				 {
+					 ProducerId = g.Key.ProducerId,
+					 SubsidiaryId = g.Key.SubsidiaryId,
+					 TotalPackagingTonnage = g.Sum(x => x.m.PackagingTonnage)
+				 }).ToList();
+
+			return result;
         }
     }
 }

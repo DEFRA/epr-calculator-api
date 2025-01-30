@@ -1,6 +1,6 @@
-﻿namespace EPR.Calculator.API.Builder.Summary.HHTonnageVsAllProducer;
+﻿namespace EPR.Calculator.API.Builder.Summary.TonnageVsAllProducer;
 
-public record HHTotalPackagingTonnagePerRun
+public record TotalPackagingTonnagePerRun
 {
     public int ProducerId { get; set; }
     public required string SubsidiaryId { get; set; }
