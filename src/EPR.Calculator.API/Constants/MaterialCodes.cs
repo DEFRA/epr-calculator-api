@@ -1,6 +1,6 @@
 ﻿namespace EPR.Calculator.API.Constants
 {
-    public class MaterialCodes
+    public static class MaterialCodes
     {
         public const string Aluminium = "AL";
         public const string FibreComposite = "FC";

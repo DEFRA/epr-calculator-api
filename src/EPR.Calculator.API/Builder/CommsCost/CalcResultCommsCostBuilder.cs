@@ -5,7 +5,6 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
-using static EPR.Calculator.API.Builder.LaDisposalCost.CalcRunLaDisposalCostBuilder;
 
 namespace EPR.Calculator.API.Builder.CommsCost
 {
@@ -42,43 +41,23 @@ namespace EPR.Calculator.API.Builder.CommsCost
             var materialNames = materials.Select(x => x.Name).ToList();
 
             var allDefaultResults = await (from run in context.CalculatorRuns
-                    join defaultMaster in context.DefaultParameterSettings on run.DefaultParameterSettingMasterId equals
-                        defaultMaster.Id
-                    join defaultDetail in context.DefaultParameterSettingDetail on defaultMaster.Id equals defaultDetail
-                        .DefaultParameterSettingMasterId
-                    join defaultTemplate in context.DefaultParameterTemplateMasterList on defaultDetail
-                        .ParameterUniqueReferenceId equals defaultTemplate.ParameterUniqueReferenceId
-                    where run.Id == runId
-                    select new CalcCommsBuilderResult
-                    {
-                        ParameterValue = defaultDetail.ParameterValue,
-                        ParameterType = defaultTemplate.ParameterType,
-                        ParameterCategory = defaultTemplate.ParameterCategory
-                    }).ToListAsync();
+                                           join defaultMaster in context.DefaultParameterSettings on run.DefaultParameterSettingMasterId equals
+                                               defaultMaster.Id
+                                           join defaultDetail in context.DefaultParameterSettingDetail on defaultMaster.Id equals defaultDetail
+                                               .DefaultParameterSettingMasterId
+                                           join defaultTemplate in context.DefaultParameterTemplateMasterList on defaultDetail
+                                               .ParameterUniqueReferenceId equals defaultTemplate.ParameterUniqueReferenceId
+                                           where run.Id == runId
+                                           select new CalcCommsBuilderResult
+                                           {
+                                               ParameterValue = defaultDetail.ParameterValue,
+                                               ParameterType = defaultTemplate.ParameterType,
+                                               ParameterCategory = defaultTemplate.ParameterCategory
+                                           }).ToListAsync();
             var materialDefaults = allDefaultResults.Where(x =>
                 x.ParameterType == CommunicationCostByMaterial && materialNames.Contains(x.ParameterCategory));
 
-            var producerReportedMaterials = await (from run in context.CalculatorRuns
-                join pd in context.ProducerDetail on run.Id equals pd.CalculatorRunId
-                join mat in context.ProducerReportedMaterial on pd.Id equals mat.ProducerDetailId
-                join material in context.Material on mat.MaterialId equals material.Id
-                where run.Id == runId &&
-                    mat.PackagingType != null &&
-                    (
-                        mat.PackagingType == PackagingTypes.Household ||
-                        mat.PackagingType == PackagingTypes.PublicBin ||
-                        (
-                            mat.PackagingType == PackagingTypes.HouseholdDrinksContainers &&
-                            material.Code == MaterialCodes.Glass
-                        )
-                    )
-                     select new
-                      {
-                        mat.Id,
-                        mat.MaterialId,
-                        mat.PackagingTonnage,
-                        mat.PackagingType,
-                     }).Distinct().ToListAsync();
+            var producerReportedMaterials = await GetProducerReportedMaterials(context, runId);
 
             var list = new List<CalcResultCommsCostCommsCostByMaterial>();
 
@@ -173,6 +152,27 @@ namespace EPR.Calculator.API.Builder.CommsCost
             result.CommsCostByCountry = commsCostByCountryList;
 
             return result;
+        }
+
+        public async Task<List<ProducerReportedMaterial>> GetProducerReportedMaterials(ApplicationDBContext context, int runId)
+        {
+            return await (from run in context.CalculatorRuns
+                          join pd in context.ProducerDetail on run.Id equals pd.CalculatorRunId
+                          join mat in context.ProducerReportedMaterial on pd.Id equals mat.ProducerDetailId
+                          join material in context.Material on mat.MaterialId equals material.Id
+                          where run.Id == runId &&
+                                mat.PackagingType != null &&
+                                (mat.PackagingType == PackagingTypes.Household ||
+                                 mat.PackagingType == PackagingTypes.PublicBin ||
+                                 (mat.PackagingType == PackagingTypes.HouseholdDrinksContainers &&
+                                  material.Code == MaterialCodes.Glass))
+                          select new ProducerReportedMaterial
+                          {
+                              Id = mat.Id,
+                              MaterialId = mat.MaterialId,
+                              PackagingTonnage = mat.PackagingTonnage,
+                              PackagingType = mat.PackagingType
+                          }).Distinct().ToListAsync();
         }
 
         private static CalcResultCommsCostCommsCostByMaterial GetTotalRow(IEnumerable<CalcResultCommsCostCommsCostByMaterial> list,

@@ -1,6 +1,6 @@
 ﻿namespace EPR.Calculator.API.Constants
 {
-    public class PackagingTypes
+    public static class PackagingTypes
     {
         public const string Household = "HH";
         public const string ConsumerWaste = "CW";
