@@ -21,7 +21,7 @@ public static class CalcResultSummaryUtil
     public const int ProducerDisposalFeesHeaderColumnIndex = 5;
     public const int CommsCostHeaderColumnIndex = 100;
     public const int MaterialsBreakdownHeaderInitialColumnIndex = 5;
-    public const int MaterialsBreakdownHeaderIncrementalColumnIndex = 11;
+    public const int MaterialsBreakdownHeaderIncrementalColumnIndex = 13;
     public const int DisposalFeeSummaryColumnIndex = 93;
     public const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
     public const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
@@ -45,6 +45,29 @@ public static class CalcResultSummaryUtil
         return householdPackagingMaterial != null ? householdPackagingMaterial.PackagingTonnage : 0;
     }
 
+    public static decimal GetPublicBinTonnage(ProducerDetail producer, MaterialDetail material)
+    {
+        var publicBinTonnageMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == "PB");
+
+        return publicBinTonnageMaterial?.PackagingTonnage ?? 0;
+    }
+
+    public static decimal GetHouseholdDrinksContainersTonnage(ProducerDetail producer, MaterialDetail material)
+    {
+        var holdDrinksContainersMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == "HDC");
+
+        return holdDrinksContainersMaterial?.PackagingTonnage ?? 0;
+    }
+
+    public static decimal GetReportedTonnage(ProducerDetail producer, MaterialDetail material)
+    {
+        var householdPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material);
+        var publicBinTonnageMaterial = GetPublicBinTonnage(producer, material);
+        var householdDrinksContainers = GetHouseholdDrinksContainersTonnage(producer, material);
+
+        return material.Code != "GL" ? householdPackagingWasteTonnage + publicBinTonnageMaterial : householdPackagingWasteTonnage + publicBinTonnageMaterial + householdDrinksContainers;
+    }
+
     public static decimal GetHouseholdPackagingWasteTonnageProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material)
     {
         decimal totalCost = 0;
@@ -55,6 +78,21 @@ public static class CalcResultSummaryUtil
         }
 
         return totalCost;
+    }
+
+    public static decimal GetPublicBinTonnageProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material)
+    {
+        return producers.Sum(producer => GetPublicBinTonnage(producer, material));
+    }
+
+    public static decimal GetHouseholdDrinksContainersTonnageProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material)
+    {
+        return producers.Sum(producer => GetHouseholdDrinksContainersTonnage(producer, material));
+    }
+
+    public static decimal GetReportedTonnageProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material)
+    {
+        return producers.Sum(producer => GetReportedTonnage(producer, material));
     }
 
     public static decimal GetManagedConsumerWasteTonnage(ProducerDetail producer, MaterialDetail material)
@@ -78,10 +116,10 @@ public static class CalcResultSummaryUtil
 
     public static decimal GetNetReportedTonnage(ProducerDetail producer, MaterialDetail material)
     {
-        var householdPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material);
+        var reportedTonnage = GetReportedTonnage(producer, material);
         var managedConsumerWasteTonnage = GetManagedConsumerWasteTonnage(producer, material);
 
-        return householdPackagingWasteTonnage - managedConsumerWasteTonnage;
+        return reportedTonnage - managedConsumerWasteTonnage;
     }
 
     public static decimal GetNetReportedTonnageProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material)
@@ -570,19 +608,29 @@ public static class CalcResultSummaryUtil
 
         foreach (var material in materials)
         {
-            columnHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ReportedHouseholdPackagingWasteTonnage },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ReportedSelfManagedConsumerWasteTonnage },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NetReportedTonnage },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PricePerTonne },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ProducerDisposalFee },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ProducerDisposalFeeWithBadDebtProvision },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.EnglandWithBadDebtProvision },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.WalesWithBadDebtProvision },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ScotlandWithBadDebtProvision },
-                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision }
-            ]);
+            var columnHeadersList = new List<CalcResultSummaryHeader>
+            {
+                new() { Name = CalcResultSummaryHeaders.ReportedHouseholdPackagingWasteTonnage },
+                new() { Name = CalcResultSummaryHeaders.ReportedPublicBinTonnage },
+                new() { Name = CalcResultSummaryHeaders.TotalReportedTonnage },
+                new() { Name = CalcResultSummaryHeaders.ReportedSelfManagedConsumerWasteTonnage },
+                new() { Name = CalcResultSummaryHeaders.NetReportedTonnage },
+                new() { Name = CalcResultSummaryHeaders.PricePerTonne },
+                new() { Name = CalcResultSummaryHeaders.ProducerDisposalFee },
+                new() { Name = CalcResultSummaryHeaders.BadDebtProvision },
+                new() { Name = CalcResultSummaryHeaders.ProducerDisposalFeeWithBadDebtProvision },
+                new() { Name = CalcResultSummaryHeaders.EnglandWithBadDebtProvision },
+                new() { Name = CalcResultSummaryHeaders.WalesWithBadDebtProvision },
+                new() { Name = CalcResultSummaryHeaders.ScotlandWithBadDebtProvision },
+                new() { Name = CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision }
+            };
+
+            if (material.Code == "GL")
+            {
+                columnHeadersList.Insert(2, new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.HouseholdDrinksContainersTonnage });
+            }
+
+            columnHeaders.AddRange(columnHeadersList);
         }
 
         columnHeaders.AddRange([

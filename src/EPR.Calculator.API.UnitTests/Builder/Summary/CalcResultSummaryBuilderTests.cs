@@ -585,7 +585,7 @@ namespace EPR.Calculator.API.UnitTests
             var result = CalcResultSummaryBuilder.GetCalcResultSummary(orderedProducerDetails, materials,
                 runProducerMaterialDetails, _calcResult, hhTotalPackagingTonnage);
             Assert.IsNotNull(result);
-            Assert.AreEqual(117, result.ColumnHeaders.Count());
+            Assert.AreEqual(121, result.ColumnHeaders.Count());
 
             var producerDisposalFees = result.ProducerDisposalFees;
             Assert.IsNotNull(producerDisposalFees);
