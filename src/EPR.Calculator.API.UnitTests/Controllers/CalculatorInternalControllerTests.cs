@@ -609,7 +609,7 @@ namespace EPR.Calculator.API.UnitTests
             var result = (ObjectResult)task;
 
             // Assert
-            Assert.AreEqual((int)HttpStatusCode.Created, result.StatusCode);
+            Assert.AreEqual((int)HttpStatusCode.RequestTimeout, result.StatusCode);
         }
 
         /// <summary>

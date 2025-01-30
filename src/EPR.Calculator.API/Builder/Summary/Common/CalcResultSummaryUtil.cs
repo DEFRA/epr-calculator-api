@@ -496,7 +496,7 @@ public static class CalcResultSummaryUtil
                 Name = $"{material.Name} Breakdown",
                 ColumnIndex = commsCostColumnIndex
             });
-            commsCostColumnIndex = commsCostColumnIndex + (material.Code == "GL" ? MaterialsBreakdownHeaderCommsIncrementalColumnIndex + 1 : MaterialsBreakdownHeaderCommsIncrementalColumnIndex);           
+            commsCostColumnIndex = commsCostColumnIndex + (material.Code == MaterialCodes.Glass ? MaterialsBreakdownHeaderCommsIncrementalColumnIndex + 1 : MaterialsBreakdownHeaderCommsIncrementalColumnIndex);           
         }
 
         materialsBreakdownHeaders.Add(new CalcResultSummaryHeader
@@ -614,7 +614,7 @@ public static class CalcResultSummaryUtil
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision }
             ]);
 
-            if(material.Code=="GL")
+            if(material.Code==MaterialCodes.Glass)
             {
               int? index =  columnHeaders.FindLastIndex(t => t.Name.Equals(CalcResultSummaryHeaders.ReportedPublicBinTonnage));
                int t = (int)(index + 1);

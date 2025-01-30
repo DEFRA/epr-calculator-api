@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using EPR.Calculator.API.Builder.Summary.Common;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Models;
 
@@ -158,9 +159,9 @@ public static class CalcResultSummaryCommsCostTwoA
         decimal hdcTonnage = 0;
         var hhPackagingWasteTonnage = CalcResultSummaryUtil.GetHouseholdPackagingWasteTonnage(producer, material);
         var reportedPublicBinTonnage = CalcResultSummaryUtil.GetReportedPublicBinTonnage(producer, material);
-        if (material.Code == "GL") hdcTonnage = CalcResultSummaryUtil.GetHDCGlassTonnage(producer, material);
+        if (material.Code == MaterialCodes.Glass) hdcTonnage = CalcResultSummaryUtil.GetHDCGlassTonnage(producer, material);
 
-        return material.Code == "GL" ? hdcTonnage + reportedPublicBinTonnage +hhPackagingWasteTonnage : hhPackagingWasteTonnage + reportedPublicBinTonnage;
+        return material.Code == MaterialCodes.Glass ? hdcTonnage + reportedPublicBinTonnage +hhPackagingWasteTonnage : hhPackagingWasteTonnage + reportedPublicBinTonnage;
     }
 
     public static decimal GetTotalReportedTonnageTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material)

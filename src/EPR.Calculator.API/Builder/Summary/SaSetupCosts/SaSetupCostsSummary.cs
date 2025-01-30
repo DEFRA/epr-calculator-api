@@ -4,7 +4,7 @@ namespace EPR.Calculator.API.Builder.Summary.SaSetupCosts
 {
     public static class SaSetupCostsSummary
     {
-        public static readonly int ColumnIndex = 224;
+        public static readonly int ColumnIndex = 241;
 
         public static IEnumerable<CalcResultSummaryHeader> GetHeaders()
         {

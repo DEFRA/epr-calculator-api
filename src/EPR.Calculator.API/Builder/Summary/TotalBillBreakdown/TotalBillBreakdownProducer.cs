@@ -5,7 +5,7 @@ namespace EPR.Calculator.API.Builder.Summary.TotalBillBreakdown
 {
     public static class TotalBillBreakdownProducer
     {
-        public static readonly int ColumnIndex = 231;
+        public static readonly int ColumnIndex = 248;
     
         public static IEnumerable<CalcResultSummaryHeader> GetHeaders()
         {

@@ -9,6 +9,7 @@ using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
 using EPR.Calculator.API.Builder.Summary.ThreeSA;
 using EPR.Calculator.API.Builder.Summary.TotalBillBreakdown;
 using EPR.Calculator.API.Builder.Summary.TwoCCommsCost;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -204,7 +205,7 @@ namespace EPR.Calculator.API.Builder.Summary
                             calcResult)
                 });
 
-                if (material.Code == "GL" && commsCostSummary.TryGetValue(material, out var comm))
+                if (material.Code == MaterialCodes.Glass && commsCostSummary.TryGetValue(material, out var comm))
                 { comm.HouseholdDrinksContainers = CalcResultSummaryUtil.GetHDCGlassTonnageTotal(producersAndSubsidiaries, material); }
 
             }
@@ -339,7 +340,7 @@ namespace EPR.Calculator.API.Builder.Summary
 
                 commsCostSummary.Add(material, calcResultSummaryProducerCommsFeesCostByMaterial);
 
-                if (material.Code == "GL" && commsCostSummary.TryGetValue(material, out var comm))
+                if (material.Code == MaterialCodes.Glass && commsCostSummary.TryGetValue(material, out var comm))
                 {                    
                     comm.HouseholdDrinksContainers = CalcResultSummaryUtil.GetHDCGlassTonnage(producer, material); 
                 }
