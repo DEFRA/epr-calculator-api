@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using EPR.Calculator.API.Builder.Summary;
+using EPR.Calculator.API.Builder.Summary.HHTonnageVsAllProducer;
 using EPR.Calculator.API.Builder.Summary.OneAndTwoA;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;

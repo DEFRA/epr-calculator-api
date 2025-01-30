@@ -14,7 +14,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.CommsCostTwoBTotalBill
         private CalcResult _calcResult;
         private List<ProducerDetail> _producers;
         private List<CalcResultsProducerAndReportMaterialDetail> _allResults;
-        public IEnumerable<TotalPackagingTonnagePerRun> HhTotalPackagingTonnage;
+        public required IEnumerable<TotalPackagingTonnagePerRun> HhTotalPackagingTonnage;
 
         private Fixture Fixture { get; init; } = new Fixture();
 
