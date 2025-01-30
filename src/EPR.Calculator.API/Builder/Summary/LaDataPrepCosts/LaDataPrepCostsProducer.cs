@@ -7,7 +7,7 @@ namespace EPR.Calculator.API.Builder.Summary.LaDataPrepCosts
 {
     public static class LaDataPrepCostsProducer
     {
-        public static readonly int ColumnIndex = 234;
+        public static readonly int ColumnIndex = 251;
 
         public static IEnumerable<CalcResultSummaryHeader> GetHeaders()
         {

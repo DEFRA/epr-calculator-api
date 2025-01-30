@@ -468,7 +468,7 @@
             var result = CalcResultSummaryUtil.GetTotal1Plus2ABadDebt(producers, materials, _calcResult);
 
             // Assert
-            Assert.AreEqual(2080.50864000m, result);
+            Assert.AreEqual(3241.91460000m, result);
         }
 
         [TestMethod]

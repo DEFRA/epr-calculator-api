@@ -358,7 +358,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TotalBillBreakdown
         {
             // Act
             var result = TotalBillBreakdownProducer.GetHeaders().ToList();
-            var columnIndex = 248;
+            var columnIndex = 265;
 
             var expectedResult = new List<CalcResultSummaryHeader>();
             expectedResult.AddRange([
@@ -396,7 +396,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TotalBillBreakdown
 
             var expectedResult = new List<CalcResultSummaryHeader>();
             expectedResult.AddRange([
-                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.TotalProducerBillBreakdown, ColumnIndex = 248 }
+                new CalcResultSummaryHeader { Name = TotalBillBreakdownHeaders.TotalProducerBillBreakdown, ColumnIndex = 265 }
             ]);
 
             // Assert

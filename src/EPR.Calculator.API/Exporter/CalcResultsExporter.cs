@@ -467,7 +467,7 @@ namespace EPR.Calculator.API.Exporter
 
         private static void WriteSecondaryHeaders(StringBuilder csvContent, IEnumerable<CalcResultSummaryHeader> headers)
         {
-            const int maxColumnSize = 253;
+            const int maxColumnSize = 270;
             var headerRows = new string[maxColumnSize];
             foreach (var item in headers)
             {

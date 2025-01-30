@@ -527,7 +527,7 @@ namespace EPR.Calculator.API.UnitTests
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader!.Name);
             Assert.AreEqual(25, result.ProducerDisposalFeesHeaders!.Count());
-            var isColumnHeaderExists = result.ProducerDisposalFeesHeaders!.Select(dict => dict.ColumnIndex == 196 || dict.ColumnIndex == 197 || dict.ColumnIndex == 198).ToList();
+            var isColumnHeaderExists = result.ProducerDisposalFeesHeaders!.Select(dict => dict.ColumnIndex == 213 || dict.ColumnIndex == 214 || dict.ColumnIndex == 215).ToList();
             Assert.IsTrue(isColumnHeaderExists.Contains(true));
             Assert.IsNotNull(result.ProducerDisposalFees);
             Assert.AreEqual(2, result.ProducerDisposalFees.Count());
@@ -585,7 +585,7 @@ namespace EPR.Calculator.API.UnitTests
             var result = CalcResultSummaryBuilder.GetCalcResultSummary(orderedProducerDetails, materials,
                 runProducerMaterialDetails, _calcResult, hhTotalPackagingTonnage);
             Assert.IsNotNull(result);
-            Assert.AreEqual(121, result.ColumnHeaders.Count());
+            Assert.AreEqual(125, result.ColumnHeaders.Count());
 
             var producerDisposalFees = result.ProducerDisposalFees;
             Assert.IsNotNull(producerDisposalFees);
