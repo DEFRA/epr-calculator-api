@@ -85,17 +85,16 @@ namespace EPR.Calculator.API.Builder.CommsCost
             {
                 var commsCost = GetCommsCost(materialDefaults, materialName, apportionmentDetail, culture);
                 var currentMaterial = materials.Single(x => x.Name == materialName);
-                var producerReportedTon = producerReportedMaterials.Where(x => x.MaterialId == currentMaterial.Id)
+                var producerReportedTon = producerReportedMaterials.Where(x => x.MaterialId == currentMaterial.Id && x.PackagingType != PackagingTypes.PublicBin && x.PackagingType != PackagingTypes.HouseholdDrinksContainers)
                     .Sum(x => x.PackagingTonnage);
                 var lateReportingTonnage = allDefaultResults.Single(x =>
                     x.ParameterType == LateReportingTonnage && x.ParameterCategory == materialName);
                 var publicBinTonnage = producerReportedMaterials.Where(p => p.MaterialId == currentMaterial.Id && p.PackagingType == PackagingTypes.PublicBin).Sum(p => p.PackagingTonnage);
                 var householdcontainers = producerReportedMaterials.Where(p => p.MaterialId == currentMaterial.Id && p.PackagingType == PackagingTypes.HouseholdDrinksContainers).Sum(p => p.PackagingTonnage);
-
+                commsCost.ProducerReportedHouseholdPackagingWasteTonnageValue = producerReportedTon;
                 commsCost.ReportedPublicBinTonnageValue = publicBinTonnage;
                 commsCost.HouseholdDrinksContainersValue = householdcontainers;
 
-                commsCost.ProducerReportedHouseholdPackagingWasteTonnageValue = producerReportedTon;
                 commsCost.LateReportingTonnageValue = lateReportingTonnage.ParameterValue;
                 commsCost.ProducerReportedTotalTonnage =
                     commsCost.ProducerReportedHouseholdPackagingWasteTonnageValue +
