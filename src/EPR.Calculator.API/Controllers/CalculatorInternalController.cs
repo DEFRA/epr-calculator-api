@@ -213,7 +213,6 @@ namespace EPR.Calculator.API.Controllers
                 {
                     return StatusCode(StatusCodes.Status422UnprocessableEntity, validationResult.ErrorMessages.ToArray());
                 }
-
                 var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(
                     resultsRequestDto,
                     HttpContext.RequestAborted);
@@ -236,7 +235,7 @@ namespace EPR.Calculator.API.Controllers
                         var timeDiff = startTime - DateTime.Now;
                         return new ObjectResult(timeDiff.Minutes) { StatusCode = StatusCodes.Status201Created };
                     }
-                } 
+                }
             }
             catch (OperationCanceledException exception)
             {

@@ -114,8 +114,10 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("Total", materialHeader.Total);
             Assert.AreEqual("Producer Reported Household Packaging Waste Tonnage",
                 materialHeader.ProducerReportedHouseholdPackagingWasteTonnage);
+            Assert.AreEqual("Reported Public Bin Tonnage", materialHeader.ReportedPublicBinTonnage);
+            Assert.AreEqual("Household Drinks Containers", materialHeader.HouseholdDrinksContainers);
             Assert.AreEqual("Late Reporting Tonnage", materialHeader.LateReportingTonnage);
-            Assert.AreEqual("Producer Reported Household Tonnage + Late Reporting Tonnage",
+            Assert.AreEqual("Producer Reported Household Packaging Waste Tonnage + Late Reporting Tonnage + Report Public Bin Tonnage + Household Drinks Containers",
                 materialHeader.ProducerReportedHouseholdPlusLateReportingTonnage);
             Assert.AreEqual("Comms Cost - by Material Price Per Tonne",
                 materialHeader.CommsCostByMaterialPricePerTonne);
