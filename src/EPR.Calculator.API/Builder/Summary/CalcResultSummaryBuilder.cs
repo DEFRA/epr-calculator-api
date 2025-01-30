@@ -1,12 +1,12 @@
 ﻿using EPR.Calculator.API.Builder.Summary.Common;
 using EPR.Calculator.API.Builder.Summary.CommsCostTwoA;
 using EPR.Calculator.API.Builder.Summary.CommsCostTwoBTotalBill;
-using EPR.Calculator.API.Builder.Summary.TonnageVsAllProducer;
 using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
 using EPR.Calculator.API.Builder.Summary.OneAndTwoA;
 using EPR.Calculator.API.Builder.Summary.OnePlus2A2B2C;
 using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
 using EPR.Calculator.API.Builder.Summary.ThreeSA;
+using EPR.Calculator.API.Builder.Summary.TonnageVsAllProducer;
 using EPR.Calculator.API.Builder.Summary.TotalBillBreakdown;
 using EPR.Calculator.API.Builder.Summary.TwoCCommsCost;
 using EPR.Calculator.API.Constants;
@@ -15,11 +15,10 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 
 namespace EPR.Calculator.API.Builder.Summary
 {
-    public class CalcResultSummaryBuilder : ICalcResultSummaryBuilder
+	public class CalcResultSummaryBuilder : ICalcResultSummaryBuilder
     {
         private readonly ApplicationDBContext context;
 
@@ -390,12 +389,10 @@ namespace EPR.Calculator.API.Builder.Summary
             return result;
         }
 
-        public static IEnumerable<TotalPackagingTonnagePerRun> GetHHTotalPackagingTonnagePerRun(
-            IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults,
-			int runId)
-        {
-            var allProducerDetails = allResults.Select(x => x.ProducerDetail).Distinct();
-            var allProducerReportedMaterials = allResults.Select(x => x.ProducerReportedMaterial);
+		public static IEnumerable<TotalPackagingTonnagePerRun> GetHHTotalPackagingTonnagePerRun(IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults, int runId)
+		{
+			var allProducerDetails = allResults.Select(x => x.ProducerDetail);
+			var allProducerReportedMaterials = allResults.Select(x => x.ProducerReportedMaterial);
 
 			var result =
 				(from p in allProducerDetails
@@ -412,9 +409,9 @@ namespace EPR.Calculator.API.Builder.Summary
 				 }).ToList();
 
 			return result;
-        }
+		}
 
-        public static IEnumerable<TotalPackagingTonnagePerRun> GetTotalPackagingTonnagePerRun(
+		public static IEnumerable<TotalPackagingTonnagePerRun> GetTotalPackagingTonnagePerRun(
             IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults,
 			IEnumerable<MaterialDetail> materials,
 			int runId)
