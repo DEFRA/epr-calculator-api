@@ -294,7 +294,8 @@ namespace EPR.Calculator.API.UnitTests
 
             mockTranspose.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>())).ReturnsAsync(true);
             mockStorageService.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(true);
+                .ReturnsAsync("expected result");
+
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).ReturnsAsync(calcResult);
             var task = controller.PrepareCalcResults(requestDto);
             task.Wait();

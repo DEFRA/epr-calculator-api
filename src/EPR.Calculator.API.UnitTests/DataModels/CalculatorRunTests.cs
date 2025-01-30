@@ -11,11 +11,16 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     {
         private CalculatorRun TestClass { get; init; }
 
-        private Fixture Fixture { get; } = new Fixture();
+        private Fixture Fixture { get; }
 
         public CalculatorRunTests()
         {
-            TestClass = this.Fixture.Create<CalculatorRun>();
+            Fixture = new Fixture();
+            Fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+                .ForEach(b => Fixture.Behaviors.Remove(b));
+            Fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+            this.TestClass = Fixture.Create<CalculatorRun>();
         }
 
         [TestMethod]

@@ -1,7 +1,4 @@
-﻿using EPR.Calculator.API.Data.DataModels;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace EPR.Calculator.API.Data.DataModels
@@ -15,7 +12,7 @@ namespace EPR.Calculator.API.Data.DataModels
         public int Id { get; set; }
 
         [Column("filename")]
-        [StringLength(400)]
+        [StringLength(500)]
         [Required]
         public required string FileName { get; set; }
 

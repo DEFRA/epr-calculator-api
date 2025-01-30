@@ -12,16 +12,15 @@
             {
                 throw new NotImplementedException();
             }
-
-            public Task<bool> UploadResultFileContentAsync(string fileName, string content)
+            
+            public Task<string> UploadResultFileContentAsync(string fileName, string content)
             {
-                var path = $"{Directory.GetCurrentDirectory()}\\{fileName}";
+                var path = Path.Combine(Directory.GetCurrentDirectory(), fileName);
                 File.WriteAllText(path, content, Encoding.UTF8);
-                var result = Task.FromResult(true);
-                return result;
+                return Task.FromResult(path);
             }
 
-            public Task<IResult> DownloadFile(string fileName)
+            public Task<IResult> DownloadFile(string fileName, string blobUri)
             {
                 throw new NotImplementedException();
             }
