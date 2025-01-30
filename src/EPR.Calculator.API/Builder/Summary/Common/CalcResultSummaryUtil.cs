@@ -19,14 +19,15 @@ public static class CalcResultSummaryUtil
 {
     public const int ResultSummaryHeaderColumnIndex = 1;
     public const int ProducerDisposalFeesHeaderColumnIndex = 5;
-    public const int CommsCostHeaderColumnIndex = 100;
+    public const int CommsCostHeaderColumnIndex = 117;
     public const int MaterialsBreakdownHeaderInitialColumnIndex = 5;
     public const int MaterialsBreakdownHeaderIncrementalColumnIndex = 13;
-    public const int DisposalFeeSummaryColumnIndex = 93;
-    public const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 100;
+
+    public const int DisposalFeeSummaryColumnIndex = 110;
+    public const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 117;
     public const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
     //Section-(1) & (2a)
-    public const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 179;
+    public const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 196;
     //Section-(2b)
     private const int CommsCost2bColumnIndex = 194;
     public const int decimalRoundUp = 2;
@@ -65,7 +66,7 @@ public static class CalcResultSummaryUtil
         var publicBinTonnageMaterial = GetPublicBinTonnage(producer, material);
         var householdDrinksContainers = GetHouseholdDrinksContainersTonnage(producer, material);
 
-        return material.Code != "GL" ? householdPackagingWasteTonnage + publicBinTonnageMaterial : householdPackagingWasteTonnage + publicBinTonnageMaterial + householdDrinksContainers;
+        return material.Code != MaterialCodes.Glass ? householdPackagingWasteTonnage + publicBinTonnageMaterial : householdPackagingWasteTonnage + publicBinTonnageMaterial + householdDrinksContainers;
     }
 
     public static decimal GetHouseholdPackagingWasteTonnageProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material)
@@ -512,7 +513,10 @@ public static class CalcResultSummaryUtil
                 Name = $"{material.Name} Breakdown",
                 ColumnIndex = columnIndex
             });
-            columnIndex = columnIndex + MaterialsBreakdownHeaderIncrementalColumnIndex;
+
+            columnIndex = material.Code == MaterialCodes.Glass
+                ? columnIndex + MaterialsBreakdownHeaderIncrementalColumnIndex + 1
+                : columnIndex + MaterialsBreakdownHeaderIncrementalColumnIndex;
         }
 
         // Add disposal fee summary header
@@ -625,7 +629,7 @@ public static class CalcResultSummaryUtil
                 new() { Name = CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision }
             };
 
-            if (material.Code == "GL")
+            if (material.Code == MaterialCodes.Glass)
             {
                 columnHeadersList.Insert(2, new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.HouseholdDrinksContainersTonnage });
             }

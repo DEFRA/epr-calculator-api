@@ -9,12 +9,12 @@ using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
 using EPR.Calculator.API.Builder.Summary.ThreeSA;
 using EPR.Calculator.API.Builder.Summary.TotalBillBreakdown;
 using EPR.Calculator.API.Builder.Summary.TwoCCommsCost;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 
 namespace EPR.Calculator.API.Builder.Summary
 {
@@ -176,7 +176,7 @@ namespace EPR.Calculator.API.Builder.Summary
                     PublicBinTonnage = CalcResultSummaryUtil.GetPublicBinTonnageProducerTotal(producersAndSubsidiaries, material),
                 };
 
-                if (material.Code == "GL")
+                if (material.Code == MaterialCodes.Glass)
                 {
                     materialSummary.HouseholdDrinksContainersTonnage = CalcResultSummaryUtil.GetHouseholdDrinksContainersTonnageProducerTotal(producersAndSubsidiaries, material);
                 }
@@ -299,7 +299,7 @@ namespace EPR.Calculator.API.Builder.Summary
             foreach (var material in materials)
             {
                 var calcResultSummaryProducerDisposalFeesByMaterial = new CalcResultSummaryProducerDisposalFeesByMaterial();
-                if (material.Code == "GL")
+                if (material.Code == MaterialCodes.Glass)
                 {
                     calcResultSummaryProducerDisposalFeesByMaterial.HouseholdPackagingWasteTonnage = CalcResultSummaryUtil.GetHouseholdPackagingWasteTonnage(producer, material);
                     calcResultSummaryProducerDisposalFeesByMaterial.PublicBinTonnage = CalcResultSummaryUtil.GetPublicBinTonnage(producer, material);
