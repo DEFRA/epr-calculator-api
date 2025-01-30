@@ -1,13 +1,22 @@
 ﻿using AutoFixture;
+using EPR.Calculator.API.Builder;
+using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Exporter;
+using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Validators;
+using FluentValidation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Net;
 using static EPR.Calculator.API.Services.TransposePomAndOrgDataService;
 
 namespace EPR.Calculator.API.UnitTests.Services
@@ -28,10 +37,10 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             _context = new ApplicationDBContext(_dbContextOptions);
 
-            SeedDatabase();            
+            SeedDatabase();
         }
 
-        public Fixture Fixture { get; init; } = new Fixture();
+        public Fixture Fixture { get; init; }
 
         [TestCleanup]
         public void TearDown()
@@ -60,6 +69,11 @@ namespace EPR.Calculator.API.UnitTests.Services
         [TestMethod]
         public void Transpose_Should_Return_Correct_Producer_Detail()
         {
+            var fixture = new Fixture();
+            fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+                .ForEach(b => fixture.Behaviors.Remove(b));
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
             var expectedResult = new ProducerDetail
             {
                 Id = 1,
@@ -74,7 +88,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
-            service.Transpose(resultsRequestDto);
+            service.Transpose(resultsRequestDto, CancellationToken.None);
 
             var producerDetail = _context.ProducerDetail.FirstOrDefault();
             Assert.IsNotNull(producerDetail);
@@ -115,7 +129,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 3 };
-            service.Transpose(resultsRequestDto);
+            service.Transpose(resultsRequestDto, CancellationToken.None);
 
             var producerReportedMaterial = _context.ProducerReportedMaterial.FirstOrDefault();
             Assert.IsNotNull(producerReportedMaterial);
@@ -143,7 +157,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
-            service.Transpose(resultsRequestDto);
+            service.Transpose(resultsRequestDto, CancellationToken.None);
 
             var producerDetail = _context.ProducerDetail.FirstOrDefault(t=>t.SubsidiaryId != null);
             Assert.IsNotNull(producerDetail);
@@ -169,7 +183,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var resultsRequestDto = new CalcResultsRequestDto { RunId = 1 };
-            service.Transpose(resultsRequestDto);
+            service.Transpose(resultsRequestDto, CancellationToken.None);
 
             var producerDetail = _context.ProducerDetail.FirstOrDefault();
             Assert.IsNotNull(producerDetail);
