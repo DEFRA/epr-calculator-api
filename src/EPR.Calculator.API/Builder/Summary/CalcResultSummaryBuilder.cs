@@ -389,58 +389,55 @@ namespace EPR.Calculator.API.Builder.Summary
             return result;
         }
 
-		public static IEnumerable<TotalPackagingTonnagePerRun> GetHHTotalPackagingTonnagePerRun(IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults, int runId)
-		{
-			var allProducerDetails = allResults.Select(x => x.ProducerDetail);
-			var allProducerReportedMaterials = allResults.Select(x => x.ProducerReportedMaterial);
-
-			var result =
-				(from p in allProducerDetails
-				 join m in allProducerReportedMaterials
-					 on p.Id equals m.ProducerDetailId
-				 where p.CalculatorRunId == runId && m.PackagingType == PackagingTypes.Household
-				 group new { m, p } by new { p.ProducerId, p.SubsidiaryId }
-					into g
-				 select new TotalPackagingTonnagePerRun
-				 {
-					 ProducerId = g.Key.ProducerId,
-					 SubsidiaryId = g.Key.SubsidiaryId,
-					 TotalPackagingTonnage = g.Sum(x => x.m.PackagingTonnage)
-				 }).ToList();
-
-			return result;
-		}
-
-		public static IEnumerable<TotalPackagingTonnagePerRun> GetTotalPackagingTonnagePerRun(
-            IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults,
-			IEnumerable<MaterialDetail> materials,
-			int runId)
+        public static IEnumerable<TotalPackagingTonnagePerRun> GetHHTotalPackagingTonnagePerRun(IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults, int runId)
         {
-            var allProducerDetails = allResults.Select(x => x.ProducerDetail).Distinct();
+            var allProducerDetails = allResults.Select(x => x.ProducerDetail);
             var allProducerReportedMaterials = allResults.Select(x => x.ProducerReportedMaterial);
+            
+             var result = (from p in allProducerDetails
+             join m in allProducerReportedMaterials on p.Id equals m.ProducerDetailId
+             where p.CalculatorRunId == runId && m.PackagingType == PackagingTypes.Household
+             group new { m, p } by new { p.ProducerId, p.SubsidiaryId }
+             into g
+             select new TotalPackagingTonnagePerRun
+             {
+                  ProducerId = g.Key.ProducerId,
+                  SubsidiaryId = g.Key.SubsidiaryId,
+                  TotalPackagingTonnage = g.Sum(x => x.m.PackagingTonnage)
+             }).ToList();
 
-			var result =
-				(from p in allProducerDetails
-				 join pm in allProducerReportedMaterials on p.Id equals pm.ProducerDetailId
-				 join m in materials on pm.MaterialId equals m.Id
-				 where p.CalculatorRunId == runId &&
+            return result;
+        }
+
+        public static IEnumerable<TotalPackagingTonnagePerRun> GetTotalPackagingTonnagePerRun(
+           IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults,
+           IEnumerable<MaterialDetail> materials,
+           int runId)
+        {
+             var allProducerDetails = allResults.Select(x => x.ProducerDetail).Distinct();
+             var allProducerReportedMaterials = allResults.Select(x => x.ProducerReportedMaterial);
+
+             var result = (from p in allProducerDetails
+             join pm in allProducerReportedMaterials on p.Id equals pm.ProducerDetailId
+             join m in materials on pm.MaterialId equals m.Id
+             where p.CalculatorRunId == runId &&
                  (
-				    pm.PackagingType == PackagingTypes.Household ||
-					pm.PackagingType == PackagingTypes.PublicBin ||
+             pm.PackagingType == PackagingTypes.Household ||
+             pm.PackagingType == PackagingTypes.PublicBin ||
                     (
                         pm.PackagingType == PackagingTypes.HouseholdDrinksContainers && m.Code == MaterialCodes.Glass
-					)
+             )
                  )
                  group new { m=pm, p } by new { p.ProducerId, p.SubsidiaryId }
-					into g
-				 select new TotalPackagingTonnagePerRun
-				 {
-					 ProducerId = g.Key.ProducerId,
-					 SubsidiaryId = g.Key.SubsidiaryId,
-					 TotalPackagingTonnage = g.Sum(x => x.m.PackagingTonnage)
-				 }).ToList();
+             into g
+             select new TotalPackagingTonnagePerRun
+             {
+             ProducerId = g.Key.ProducerId,
+             SubsidiaryId = g.Key.SubsidiaryId,
+             TotalPackagingTonnage = g.Sum(x => x.m.PackagingTonnage)
+             }).ToList();
 
-			return result;
+             return result;
         }
     }
 }
