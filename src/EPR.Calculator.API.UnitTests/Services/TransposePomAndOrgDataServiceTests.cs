@@ -40,7 +40,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             SeedDatabase();
         }
 
-        public Fixture Fixture { get; init; }
+        public Fixture Fixture { get; init; } = new Fixture();
 
         [TestCleanup]
         public void TearDown()
@@ -68,12 +68,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
         [TestMethod]
         public void Transpose_Should_Return_Correct_Producer_Detail()
-        {
-            var fixture = new Fixture();
-            fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
-                .ForEach(b => fixture.Behaviors.Remove(b));
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-
+        {   
             var expectedResult = new ProducerDetail
             {
                 Id = 1,

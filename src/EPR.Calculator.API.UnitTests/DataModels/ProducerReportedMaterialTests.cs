@@ -14,10 +14,6 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public ProducerReportedMaterialTests()
         {
             Fixture = new Fixture();
-            Fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
-                .ForEach(b => Fixture.Behaviors.Remove(b));
-            Fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-
             this.TestClass = Fixture.Create<ProducerReportedMaterial>();
         }
 

@@ -1,9 +1,7 @@
-﻿using Azure.Identity;
-using Azure.Storage;
+﻿using Azure.Storage;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.Constants;
 using System.Configuration;
-using System.IO;
 using System.Text;
 namespace EPR.Calculator.API.Services
 {

@@ -64,7 +64,5 @@ namespace EPR.Calculator.API.Data.DataModels
         public ICollection<ProducerDetail> ProducerDetails { get; } = new List<ProducerDetail>();
 
         public ICollection<CountryApportionment> CountryApportionments { get; } = new List<CountryApportionment>();
-
-        public virtual ICollection<CalculatorRunCsvFileMetadata>? CsvFileMetadata { get; set; }
     }
 }
