@@ -125,7 +125,7 @@ namespace EPR.Calculator.API.Controllers
                         };
 
                         // Send message
-                        //await serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
+                        await serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
 
                         // All good, commit transaction
                         await transaction.CommitAsync();
