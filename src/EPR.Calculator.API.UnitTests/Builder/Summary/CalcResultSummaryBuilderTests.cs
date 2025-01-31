@@ -576,8 +576,8 @@ namespace EPR.Calculator.API.UnitTests
             var hhTotalPackagingTonnage = CalcResultSummaryBuilder.GetHHTotalPackagingTonnagePerRun(runProducerMaterialDetails, 1);
 
             var materials = Mappers.MaterialMapper.Map(_context.Material.ToList());
-
-			var TotalPackagingTonnage = CalcResultSummaryBuilder.GetTotalPackagingTonnagePerRun(runProducerMaterialDetails, materials, 1);
+	    
+	    var TotalPackagingTonnage = CalcResultSummaryBuilder.GetTotalPackagingTonnagePerRun(runProducerMaterialDetails, materials, 1);
 
             var result = CalcResultSummaryBuilder.GetCalcResultSummary(orderedProducerDetails, materials,
                 runProducerMaterialDetails, _calcResult, hhTotalPackagingTonnage, TotalPackagingTonnage);
