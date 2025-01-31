@@ -59,7 +59,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
             var producerReportedMaterials = await (from run in context.CalculatorRuns
                 join pd in context.ProducerDetail on run.Id equals pd.CalculatorRunId
                 join mat in context.ProducerReportedMaterial on pd.Id equals mat.ProducerDetailId
-                where run.Id == runId && mat.PackagingType == CommonConstants.Household
+                where run.Id == runId && mat.PackagingType == PackagingTypes.Household
                 select new
                 {
                     mat.Id,
