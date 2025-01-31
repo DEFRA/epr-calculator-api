@@ -46,27 +46,30 @@ namespace EPR.Calculator.API.Services
 
         public async Task<IResult> DownloadFile(string fileName, string blobUri)
         {
-            BlobClient blobClient;
-            try
+            BlobClient? blobClient = null;
+
+            if (!string.IsNullOrEmpty(blobUri))
             {
-                blobClient = new BlobClient(new Uri(blobUri), sharedKeyCredential);
+                try
+                {
+                    blobClient = new BlobClient(new Uri(blobUri), sharedKeyCredential);
+                }
+                catch (UriFormatException) { /*Ignore this exception*/ }
             }
-            catch
+            try 
             {
-                blobClient = this.containerClient.GetBlobClient(fileName);
-            }
+                blobClient ??= this.containerClient.GetBlobClient(fileName);
             
-            if (!await blobClient.ExistsAsync())
-            {
-                return Results.NotFound(fileName);
-            }
-            try
-            {
+                if (!await blobClient.ExistsAsync())
+                {
+                    return Results.NotFound(fileName);
+                }
+            
                 var downloadResult = await blobClient.DownloadContentAsync();
                 var content = downloadResult.Value.Content.ToString();
                 return Results.File(Encoding.Unicode.GetBytes(content), OctetStream, fileName);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return Results.Problem($"An error occurred while downloading the file: {ex.Message}");
             }
