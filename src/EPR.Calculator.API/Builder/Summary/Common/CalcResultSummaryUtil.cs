@@ -4,16 +4,14 @@ using EPR.Calculator.API.Builder.Summary.CommsCostTwoA;
 using EPR.Calculator.API.Builder.Summary.LaDataPrepCosts;
 using EPR.Calculator.API.Builder.Summary.OnePlus2A2B2C;
 using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
-using EPR.Calculator.API.Builder.Summary.ThreeSa;
+using EPR.Calculator.API.Builder.Summary.ThreeSA;
 using EPR.Calculator.API.Builder.Summary.TotalBillBreakdown;
-using EPR.Calculator.API.Builder.Summary.TotalProducerBillBreakdown;
 using EPR.Calculator.API.Builder.Summary.TwoCCommsCost;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
 using System.Globalization;
-using EPR.Calculator.API.Builder.Summary.ThreeSA;
 
 namespace EPR.Calculator.API.Builder.Summary.Common;
 
