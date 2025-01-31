@@ -18,7 +18,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Builder.Summary
 {
-	public class CalcResultSummaryBuilder : ICalcResultSummaryBuilder
+    public class CalcResultSummaryBuilder : ICalcResultSummaryBuilder
     {
         private readonly ApplicationDBContext context;
 
@@ -394,17 +394,19 @@ namespace EPR.Calculator.API.Builder.Summary
             var allProducerDetails = allResults.Select(x => x.ProducerDetail);
             var allProducerReportedMaterials = allResults.Select(x => x.ProducerReportedMaterial);
             
-             var result = (from p in allProducerDetails
-             join m in allProducerReportedMaterials on p.Id equals m.ProducerDetailId
-             where p.CalculatorRunId == runId && m.PackagingType == PackagingTypes.Household
-             group new { m, p } by new { p.ProducerId, p.SubsidiaryId }
-             into g
-             select new TotalPackagingTonnagePerRun
-             {
-                  ProducerId = g.Key.ProducerId,
-                  SubsidiaryId = g.Key.SubsidiaryId,
-                  TotalPackagingTonnage = g.Sum(x => x.m.PackagingTonnage)
-             }).ToList();
+             var result =
+                (from p in allProducerDetails
+                    join m in allProducerReportedMaterials
+                        on p.Id equals m.ProducerDetailId
+                    where p.CalculatorRunId == runId && m.PackagingType == "HH"
+                    group new { m, p } by new { p.ProducerId, p.SubsidiaryId }
+                    into g
+                    select new TotalPackagingTonnagePerRun
+                    {
+                        ProducerId = g.Key.ProducerId,
+                        SubsidiaryId = g.Key.SubsidiaryId,
+                        TotalPackagingTonnage = g.Sum(x => x.m.PackagingTonnage)
+                    }).ToList();
 
             return result;
         }
