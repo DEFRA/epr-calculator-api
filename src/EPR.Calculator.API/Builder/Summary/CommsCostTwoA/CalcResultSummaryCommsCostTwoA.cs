@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using EPR.Calculator.API.Builder.Summary.Common;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Models;
 
@@ -127,10 +128,11 @@ public static class CalcResultSummaryCommsCostTwoA
     public static decimal GetProducerTotalCostWithoutBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
     {
         var hhPackagingWasteTonnage = CalcResultSummaryUtil.GetHouseholdPackagingWasteTonnage(producer, material);
+        var reportedPublicBinTonnage = CalcResultSummaryUtil.GetReportedPublicBinTonnage(producer, material);
         var priceperTonne = CalcResultSummaryCommsCostTwoA.GetPriceperTonneForComms(material, calcResult);
 
-        return hhPackagingWasteTonnage * priceperTonne;
-    }
+        return (hhPackagingWasteTonnage + reportedPublicBinTonnage) * priceperTonne;
+    }   
 
     public static decimal GetBadDebtProvisionForCommsCost(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
     {
@@ -150,4 +152,28 @@ public static class CalcResultSummaryCommsCostTwoA
 
         return totalCost;
     }
+
+
+    public static decimal GetTotalReportedTonnage(ProducerDetail producer, MaterialDetail material)
+    {
+        decimal hdcTonnage = 0;
+        var hhPackagingWasteTonnage = CalcResultSummaryUtil.GetHouseholdPackagingWasteTonnage(producer, material);
+        var reportedPublicBinTonnage = CalcResultSummaryUtil.GetReportedPublicBinTonnage(producer, material);
+        if (material.Code == MaterialCodes.Glass) hdcTonnage = CalcResultSummaryUtil.GetHDCGlassTonnage(producer, material);
+
+        return material.Code == MaterialCodes.Glass ?
+            hdcTonnage + reportedPublicBinTonnage +hhPackagingWasteTonnage : 
+            hhPackagingWasteTonnage + reportedPublicBinTonnage;
+    }
+
+    public static decimal GetTotalReportedTonnageTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material)
+    {
+        decimal totalCost = 0;
+        foreach (var producer in producers)
+        {
+            totalCost += GetTotalReportedTonnage(producer, material);
+        }
+        return totalCost;
+    }
+
 }

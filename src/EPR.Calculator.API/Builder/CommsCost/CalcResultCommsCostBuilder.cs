@@ -5,6 +5,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using static EPR.Calculator.API.Builder.LaDisposalCost.CalcRunLaDisposalCostBuilder;
 
 namespace EPR.Calculator.API.Builder.CommsCost
 {
@@ -91,6 +92,10 @@ namespace EPR.Calculator.API.Builder.CommsCost
                     x.ParameterType == LateReportingTonnage && x.ParameterCategory == materialName);
                 var publicBinTonnage = producerReportedMaterials.Where(p => p.MaterialId == currentMaterial.Id && p.PackagingType == PackagingTypes.PublicBin).Sum(p => p.PackagingTonnage);
                 var householdcontainers = producerReportedMaterials.Where(p => p.MaterialId == currentMaterial.Id && p.PackagingType == PackagingTypes.HouseholdDrinksContainers).Sum(p => p.PackagingTonnage);
+
+                commsCost.ReportedPublicBinTonnageValue = publicBinTonnage;
+                commsCost.HouseholdDrinksContainersValue = householdcontainers;
+
                 commsCost.ProducerReportedHouseholdPackagingWasteTonnageValue = producerReportedTon;
                 commsCost.ReportedPublicBinTonnageValue = publicBinTonnage;
                 commsCost.HouseholdDrinksContainersValue = householdcontainers;
