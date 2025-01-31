@@ -43,21 +43,21 @@ public static class CalcResultSummaryUtil
 
     public static decimal GetHouseholdPackagingWasteTonnage(ProducerDetail producer, MaterialDetail material)
     {
-        var householdPackagingMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == "HH");
+        var householdPackagingMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == PackagingTypes.Household);
 
         return householdPackagingMaterial != null ? householdPackagingMaterial.PackagingTonnage : 0;
     }
 
     public static decimal GetPublicBinTonnage(ProducerDetail producer, MaterialDetail material)
     {
-        var publicBinTonnageMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == "PB");
+        var publicBinTonnageMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == PackagingTypes.PublicBin);
 
         return publicBinTonnageMaterial?.PackagingTonnage ?? 0;
     }
 
     public static decimal GetHouseholdDrinksContainersTonnage(ProducerDetail producer, MaterialDetail material)
     {
-        var holdDrinksContainersMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == "HDC");
+        var holdDrinksContainersMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == PackagingTypes.HouseholdDrinksContainers);
 
         return holdDrinksContainersMaterial?.PackagingTonnage ?? 0;
     }
@@ -68,7 +68,9 @@ public static class CalcResultSummaryUtil
         var publicBinTonnageMaterial = GetPublicBinTonnage(producer, material);
         var householdDrinksContainers = GetHouseholdDrinksContainersTonnage(producer, material);
 
-        return material.Code != MaterialCodes.Glass ? householdPackagingWasteTonnage + publicBinTonnageMaterial : householdPackagingWasteTonnage + publicBinTonnageMaterial + householdDrinksContainers;
+        return material.Code != MaterialCodes.Glass ?
+            householdPackagingWasteTonnage + publicBinTonnageMaterial : 
+            householdPackagingWasteTonnage + publicBinTonnageMaterial + householdDrinksContainers;
     }
 
     public static decimal GetHouseholdPackagingWasteTonnageProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material)
@@ -537,7 +539,9 @@ public static class CalcResultSummaryUtil
                 Name = $"{material.Name} Breakdown",
                 ColumnIndex = commsCostColumnIndex
             });
-            commsCostColumnIndex = commsCostColumnIndex + (material.Code == MaterialCodes.Glass ? MaterialsBreakdownHeaderCommsIncrementalColumnIndex + 1 : MaterialsBreakdownHeaderCommsIncrementalColumnIndex);           
+            commsCostColumnIndex = commsCostColumnIndex + (material.Code == MaterialCodes.Glass ? 
+                MaterialsBreakdownHeaderCommsIncrementalColumnIndex + 1 : 
+                MaterialsBreakdownHeaderCommsIncrementalColumnIndex);           
         }
 
         materialsBreakdownHeaders.Add(new CalcResultSummaryHeader
@@ -929,7 +933,7 @@ public static class CalcResultSummaryUtil
 
     public static decimal GetHDCGlassTonnage(ProducerDetail producer, MaterialDetail material)
     {
-        var hdcPackagingMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == "HDC");
+        var hdcPackagingMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == PackagingTypes.HouseholdDrinksContainers);
 
         return hdcPackagingMaterial != null ? hdcPackagingMaterial.PackagingTonnage : 0;
     }
