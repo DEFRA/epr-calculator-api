@@ -49,8 +49,8 @@ namespace EPR.Calculator.API.Builder.Summary
 
             var hhTotalPackagingTonnage = GetHHTotalPackagingTonnagePerRun(runProducerMaterialDetails, runId);
 
-            // Household + Publicbin + HDC
-			var TotalPackagingTonnage = GetTotalPackagingTonnagePerRun(runProducerMaterialDetails, materials, runId);
+            // Household + PublicBin + HDC
+	    var TotalPackagingTonnage = GetTotalPackagingTonnagePerRun(runProducerMaterialDetails, materials, runId);
 
             var result = GetCalcResultSummary(
                 orderedProducerDetails,
