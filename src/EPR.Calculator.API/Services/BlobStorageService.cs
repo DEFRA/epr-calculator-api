@@ -60,10 +60,16 @@ namespace EPR.Calculator.API.Services
             {
                 return Results.NotFound(fileName);
             }
-
-            var downloadResult = await blobClient.DownloadContentAsync();
-            var content = downloadResult.Value.Content.ToString();
-            return Results.File(Encoding.Unicode.GetBytes(content), OctetStream, fileName);
+            try
+            {
+                var downloadResult = await blobClient.DownloadContentAsync();
+                var content = downloadResult.Value.Content.ToString();
+                return Results.File(Encoding.Unicode.GetBytes(content), OctetStream, fileName);
+            }
+            catch(Exception ex)
+            {
+                return Results.Problem($"An error occurred while downloading the file: {ex.Message}");
+            }
         }
     }
 }
