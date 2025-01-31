@@ -8,6 +8,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
@@ -107,7 +108,8 @@ namespace EPR.Calculator.API.UnitTests
                             Material = "Material1",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage = Fixture.Create<string>(),
+                            ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         },
                          new CalcResultLaDisposalCostDataDetail()
                         {
@@ -119,7 +121,8 @@ namespace EPR.Calculator.API.UnitTests
                             Scotland="ScotlandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage = Fixture.Create<string>(),
+                            ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         },
                           new CalcResultLaDisposalCostDataDetail()
                         {
@@ -131,7 +134,8 @@ namespace EPR.Calculator.API.UnitTests
                             Scotland="ScotlandTest",
                             Total = "TotalTest",
                             ProducerReportedHouseholdPackagingWasteTonnage = Fixture.Create<string>(),
-                            ProducerReportedHouseholdTonnagePlusLateReportingTonnage = Fixture.Create<string>(),
+                            ReportedPublicBinTonnage = Fixture.Create<string>(),
+                            ProducerReportedTotalTonnage = Fixture.Create<string>(),
                         }
                     }
                 },
@@ -522,7 +526,7 @@ namespace EPR.Calculator.API.UnitTests
             Assert.IsNotNull(result);
             Assert.AreEqual(CalcResultSummaryHeaders.CalculationResult, result.ResultSummaryHeader!.Name);
             Assert.AreEqual(25, result.ProducerDisposalFeesHeaders!.Count());
-            var isColumnHeaderExists = result.ProducerDisposalFeesHeaders!.Select(dict => dict.ColumnIndex == 196 || dict.ColumnIndex == 197 || dict.ColumnIndex == 198).ToList();
+            var isColumnHeaderExists = result.ProducerDisposalFeesHeaders!.Select(dict => dict.ColumnIndex == 213 || dict.ColumnIndex == 214 || dict.ColumnIndex == 215).ToList();
             Assert.IsTrue(isColumnHeaderExists.Contains(true));
             Assert.IsNotNull(result.ProducerDisposalFees);
             Assert.AreEqual(2, result.ProducerDisposalFees.Count());
@@ -580,7 +584,7 @@ namespace EPR.Calculator.API.UnitTests
             var result = CalcResultSummaryBuilder.GetCalcResultSummary(orderedProducerDetails, materials,
                 runProducerMaterialDetails, _calcResult, TotalPackagingTonnage);
             Assert.IsNotNull(result);
-            Assert.AreEqual(117, result.ColumnHeaders.Count());
+            Assert.AreEqual(125, result.ColumnHeaders.Count());
 
             var producerDisposalFees = result.ProducerDisposalFees;
             Assert.IsNotNull(producerDisposalFees);

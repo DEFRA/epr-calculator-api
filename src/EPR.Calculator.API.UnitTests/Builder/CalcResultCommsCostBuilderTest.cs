@@ -1,10 +1,12 @@
 ﻿using AutoFixture;
 using EPR.Calculator.API.Builder.CommsCost;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -114,8 +116,10 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("Total", materialHeader.Total);
             Assert.AreEqual("Producer Reported Household Packaging Waste Tonnage",
                 materialHeader.ProducerReportedHouseholdPackagingWasteTonnage);
+            Assert.AreEqual("Reported Public Bin Tonnage", materialHeader.ReportedPublicBinTonnage);
+            Assert.AreEqual("Household Drinks Containers", materialHeader.HouseholdDrinksContainers);
             Assert.AreEqual("Late Reporting Tonnage", materialHeader.LateReportingTonnage);
-            Assert.AreEqual("Producer Reported Household Tonnage + Late Reporting Tonnage",
+            Assert.AreEqual("Producer Reported Household Packaging Waste Tonnage + Late Reporting Tonnage + Report Public Bin Tonnage + Household Drinks Containers",
                 materialHeader.ProducerReportedHouseholdPlusLateReportingTonnage);
             Assert.AreEqual("Comms Cost - by Material Price Per Tonne",
                 materialHeader.CommsCostByMaterialPricePerTonne);
@@ -164,6 +168,60 @@ namespace EPR.Calculator.API.UnitTests.Builder
             Assert.AreEqual("36080.000",
                 totalMaterialCost.ProducerReportedHouseholdPlusLateReportingTonnage);
             Assert.IsTrue(string.IsNullOrEmpty(totalMaterialCost.CommsCostByMaterialPricePerTonne));
+        }
+
+        [TestMethod]
+        public async Task GetProducerReportedMaterials_ShouldReturnValidMaterials()
+        {
+            // Arrange
+            SeedDatabase(dbContext);
+            var runId = 1;
+
+            // Act
+            var result = await builder.GetProducerReportedMaterials(dbContext, runId);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(3, result.Count);
+            Assert.IsTrue(result.Any(r => r.PackagingType == PackagingTypes.Household));
+            Assert.IsTrue(result.Any(r => r.PackagingType == PackagingTypes.PublicBin));
+            Assert.IsTrue(result.Any(r => r.PackagingType == PackagingTypes.HouseholdDrinksContainers && r.MaterialId == 3));
+            Assert.IsTrue(result.Any(r => r.MaterialId == 1));
+            Assert.IsTrue(result.Any(r => r.MaterialId == 2));
+            Assert.IsTrue(result.Any(r => r.MaterialId == 3));
+            Assert.IsTrue(result.Any(r => r.PackagingTonnage == 100));
+            Assert.IsTrue(result.Any(r => r.PackagingTonnage == 200));
+            Assert.IsTrue(result.Any(r => r.PackagingTonnage == 300));
+            Assert.IsTrue(result.Any(r => r.PackagingType == PackagingTypes.Household));
+            Assert.IsTrue(result.Any(r => r.PackagingType == PackagingTypes.PublicBin));
+            Assert.IsTrue(result.Any(r => r.PackagingType == PackagingTypes.HouseholdDrinksContainers && r.MaterialId == 3));
+        }
+
+        private void SeedDatabase(ApplicationDBContext context)
+        {
+            var run = new CalculatorRun { Id = 1 , Financial_Year ="2024-25" , Name ="CalculatorRunTest1" };
+            context.CalculatorRuns.Add(run);
+
+            var producerDetail = new ProducerDetail { Id = 1, CalculatorRunId = 1 };
+            context.ProducerDetail.Add(producerDetail);
+
+            var materials = new List<Material>
+        {
+            new Material { Id = 1, Name ="Plastic", Code = MaterialCodes.Plastic },
+            new Material { Id = 2, Name ="Steel",Code = MaterialCodes.Steel },
+            new Material { Id = 3, Name ="Glass",Code = MaterialCodes.Glass }
+        };
+            context.Material.AddRange(materials);
+
+            var producerReportedMaterials = new List<ProducerReportedMaterial>
+        {
+            new ProducerReportedMaterial { Id = 1, ProducerDetailId = 1, MaterialId = 1, PackagingType = PackagingTypes.Household, PackagingTonnage = 100 },
+            new ProducerReportedMaterial { Id = 2, ProducerDetailId = 1, MaterialId = 2, PackagingType = PackagingTypes.PublicBin, PackagingTonnage = 200 },
+            new ProducerReportedMaterial { Id = 3, ProducerDetailId = 1, MaterialId = 3, PackagingType = PackagingTypes.HouseholdDrinksContainers, PackagingTonnage = 300 }
+        };
+            context.ProducerReportedMaterial.AddRange(producerReportedMaterials);
+
+            context.SaveChanges();
         }
 
         private void CreateProducerDetail()
