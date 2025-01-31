@@ -393,8 +393,8 @@ namespace EPR.Calculator.API.Builder.Summary
         {
             var allProducerDetails = allResults.Select(x => x.ProducerDetail);
             var allProducerReportedMaterials = allResults.Select(x => x.ProducerReportedMaterial);
-            
-             var result =
+
+            var result =
                 (from p in allProducerDetails
                     join m in allProducerReportedMaterials
                         on p.Id equals m.ProducerDetailId
