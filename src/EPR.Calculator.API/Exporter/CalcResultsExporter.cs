@@ -98,6 +98,10 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append(
                     $"{CsvSanitiser.SanitiseData(commCostByMaterial.ProducerReportedHouseholdPackagingWasteTonnage)},");
                 csvContent.Append(
+                    $"{CsvSanitiser.SanitiseData(commCostByMaterial.ReportedPublicBinTonnage)},");
+                csvContent.Append(
+                    $"{CsvSanitiser.SanitiseData(commCostByMaterial.HouseholdDrinksContainers)},");
+                csvContent.Append(
                     $"{CsvSanitiser.SanitiseData(commCostByMaterial.LateReportingTonnage)},");
                 csvContent.Append(
                     $"{CsvSanitiser.SanitiseData(commCostByMaterial.ProducerReportedHouseholdPlusLateReportingTonnage)},");
