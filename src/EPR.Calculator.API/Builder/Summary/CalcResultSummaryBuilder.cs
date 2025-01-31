@@ -47,8 +47,6 @@ namespace EPR.Calculator.API.Builder.Summary
             var orderedProducerDetails = GetOrderedListOfProducersAssociatedRunId(
                 runId, producerDetails);
 
-            var hhTotalPackagingTonnage = GetHHTotalPackagingTonnagePerRun(runProducerMaterialDetails, runId);
-
             // Household + PublicBin + HDC
 	    var TotalPackagingTonnage = GetTotalPackagingTonnagePerRun(runProducerMaterialDetails, materials, runId);
 
@@ -57,7 +55,6 @@ namespace EPR.Calculator.API.Builder.Summary
                 materials,
                 runProducerMaterialDetails,
                 calcResult,
-                hhTotalPackagingTonnage,
                 TotalPackagingTonnage);
 
             return result;
@@ -68,8 +65,7 @@ namespace EPR.Calculator.API.Builder.Summary
             IEnumerable<MaterialDetail> materials,
             IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails,
             CalcResult calcResult,
-            IEnumerable<TotalPackagingTonnagePerRun> hhTotalPackagingTonnage,
-	    IEnumerable<TotalPackagingTonnagePerRun> TotalPackagingTonnage)
+            IEnumerable<TotalPackagingTonnagePerRun> TotalPackagingTonnage)
         {
             var result = new CalcResultSummary();
             if (orderedProducerDetails.Any())
@@ -86,19 +82,19 @@ namespace EPR.Calculator.API.Builder.Summary
                         producerDisposalFees.Find(pdf => pdf.ProducerId == producer.ProducerId.ToString()) == null)
                     {
                         var totalRow = GetProducerTotalRow(producersAndSubsidiaries.ToList(), materials, calcResult,
-                            runProducerMaterialDetails, producerDisposalFees, false, hhTotalPackagingTonnage, TotalPackagingTonnage);
+                            runProducerMaterialDetails, producerDisposalFees, false, TotalPackagingTonnage);
                         producerDisposalFees.Add(totalRow);
                     }
 
                     // Calculate the values for the producer
                     producerDisposalFees.Add(GetProducerRow(producerDisposalFees, producer, materials, calcResult,
-                        runProducerMaterialDetails, hhTotalPackagingTonnage, TotalPackagingTonnage));
+                        runProducerMaterialDetails, TotalPackagingTonnage));
                 }
                
 
                 // Calculate the total for all the producers
                 var allTotalRow = GetProducerTotalRow(orderedProducerDetails.ToList(), materials, calcResult,
-                    runProducerMaterialDetails, producerDisposalFees, true, hhTotalPackagingTonnage, TotalPackagingTonnage);
+                    runProducerMaterialDetails, producerDisposalFees, true, TotalPackagingTonnage);
                 producerDisposalFees.Add(allTotalRow);
                 
                 result.ProducerDisposalFees = producerDisposalFees;
@@ -170,8 +166,7 @@ namespace EPR.Calculator.API.Builder.Summary
             IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails,
             IEnumerable<CalcResultSummaryProducerDisposalFees> producerDisposalFees,
             bool isOverAllTotalRow,
-            IEnumerable<TotalPackagingTonnagePerRun> hhTotalPackagingTonnage,
-	    IEnumerable<TotalPackagingTonnagePerRun> TotalPackagingTonnage)
+            IEnumerable<TotalPackagingTonnagePerRun> TotalPackagingTonnage)
         {
             var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
             var commsCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>();
@@ -259,13 +254,13 @@ namespace EPR.Calculator.API.Builder.Summary
                 NorthernIrelandTotalWithBadDebtProvision2A = CalcResultSummaryUtil.GetNorthernIrelandCommsTotal(commsCostSummary),
 
                 //Total Bill for 2b
-                TotalProducerFeeWithoutBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithoutBadDebtFor2bTotalsRow(calcResult, producersAndSubsidiaries, hhTotalPackagingTonnage),
-                BadDebtProvisionFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsBadDebtProvisionFor2bTotalsRow(calcResult, producersAndSubsidiaries, hhTotalPackagingTonnage),
-                TotalProducerFeeWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithBadDebtFor2bTotalsRow(calcResult, producersAndSubsidiaries, hhTotalPackagingTonnage),
-                EnglandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsEnglandWithBadDebtTotalsRow(calcResult, producersAndSubsidiaries, hhTotalPackagingTonnage),
-                WalesTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsWalesWithBadDebtTotalsRow(calcResult, producersAndSubsidiaries, hhTotalPackagingTonnage),
-                ScotlandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsScotlandWithBadDebtTotalsRow(calcResult, producersAndSubsidiaries, hhTotalPackagingTonnage),
-                NorthernIrelandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsNorthernIrelandWithBadDebtTotalsRow(calcResult, producersAndSubsidiaries, hhTotalPackagingTonnage),
+                TotalProducerFeeWithoutBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithoutBadDebtFor2bTotalsRow(calcResult, producersAndSubsidiaries, TotalPackagingTonnage),
+                BadDebtProvisionFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsBadDebtProvisionFor2bTotalsRow(calcResult, producersAndSubsidiaries, TotalPackagingTonnage),
+                TotalProducerFeeWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithBadDebtFor2bTotalsRow(calcResult, producersAndSubsidiaries, TotalPackagingTonnage),
+                EnglandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsEnglandWithBadDebtTotalsRow(calcResult, producersAndSubsidiaries, TotalPackagingTonnage),
+                WalesTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsWalesWithBadDebtTotalsRow(calcResult, producersAndSubsidiaries, TotalPackagingTonnage),
+                ScotlandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsScotlandWithBadDebtTotalsRow(calcResult, producersAndSubsidiaries, TotalPackagingTonnage),
+                NorthernIrelandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsNorthernIrelandWithBadDebtTotalsRow(calcResult, producersAndSubsidiaries, TotalPackagingTonnage),
 
                 //Section-3
                 // Percentage of Producer Reported Tonnage vs All Producers
@@ -275,7 +270,7 @@ namespace EPR.Calculator.API.Builder.Summary
             };
 
             TwoCCommsCostUtil.UpdateTwoCTotals(calcResult, producerDisposalFees, isOverAllTotalRow, totalRow,
-                producersAndSubsidiaries, hhTotalPackagingTonnage);
+                producersAndSubsidiaries, TotalPackagingTonnage);
 
             return totalRow;
         }
@@ -286,8 +281,7 @@ namespace EPR.Calculator.API.Builder.Summary
             IEnumerable<MaterialDetail> materials,
             CalcResult calcResult,
             IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails, 
-            IEnumerable<TotalPackagingTonnagePerRun> hhTotalPackagingTonnage,
-	    IEnumerable<TotalPackagingTonnagePerRun> TotalPackagingTonnage)
+            IEnumerable<TotalPackagingTonnagePerRun> TotalPackagingTonnage)
         {
             var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
             var commsCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>();
@@ -376,37 +370,15 @@ namespace EPR.Calculator.API.Builder.Summary
             result.PercentageofProducerReportedTonnagevsAllProducers = TonnageVsAllProducerUtil.GetPercentageofProducerReportedTonnagevsAllProducers(producer, TotalPackagingTonnage);
 
             ////Total Bill for 2b
-            result.TotalProducerFeeWithoutBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithoutBadDebtFor2b(calcResult, producer, hhTotalPackagingTonnage);
-            result.BadDebtProvisionFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsBadDebtProvisionFor2b(calcResult, producer, hhTotalPackagingTonnage);
-            result.TotalProducerFeeWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithBadDebtFor2b(calcResult, producer, hhTotalPackagingTonnage);
-            result.EnglandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsEnglandWithBadDebt(calcResult, producer, hhTotalPackagingTonnage);
-            result.WalesTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsWalesWithBadDebt(calcResult, producer, hhTotalPackagingTonnage);
-            result.ScotlandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsScotlandWithBadDebt(calcResult, producer, hhTotalPackagingTonnage);
-            result.NorthernIrelandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsNorthernIrelandWithBadDebt(calcResult, producer, hhTotalPackagingTonnage);
+            result.TotalProducerFeeWithoutBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithoutBadDebtFor2b(calcResult, producer, TotalPackagingTonnage);
+            result.BadDebtProvisionFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsBadDebtProvisionFor2b(calcResult, producer, TotalPackagingTonnage);
+            result.TotalProducerFeeWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsProducerFeeWithBadDebtFor2b(calcResult, producer, TotalPackagingTonnage);
+            result.EnglandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsEnglandWithBadDebt(calcResult, producer, TotalPackagingTonnage);
+            result.WalesTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsWalesWithBadDebt(calcResult, producer, TotalPackagingTonnage);
+            result.ScotlandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsScotlandWithBadDebt(calcResult, producer, TotalPackagingTonnage);
+            result.NorthernIrelandTotalWithBadDebtFor2bComms = CalcResultSummaryCommsCostTwoBTotalBill.GetCommsNorthernIrelandWithBadDebt(calcResult, producer, TotalPackagingTonnage);
 
-            TwoCCommsCostUtil.UpdateTwoCRows(calcResult, result, producer, hhTotalPackagingTonnage);
-
-            return result;
-        }
-
-        public static IEnumerable<TotalPackagingTonnagePerRun> GetHHTotalPackagingTonnagePerRun(IEnumerable<CalcResultsProducerAndReportMaterialDetail> allResults, int runId)
-        {
-            var allProducerDetails = allResults.Select(x => x.ProducerDetail);
-            var allProducerReportedMaterials = allResults.Select(x => x.ProducerReportedMaterial);
-
-            var result =
-                (from p in allProducerDetails
-                    join m in allProducerReportedMaterials
-                        on p.Id equals m.ProducerDetailId
-                    where p.CalculatorRunId == runId && m.PackagingType == "HH"
-                    group new { m, p } by new { p.ProducerId, p.SubsidiaryId }
-                    into g
-                    select new TotalPackagingTonnagePerRun
-                    {
-                        ProducerId = g.Key.ProducerId,
-                        SubsidiaryId = g.Key.SubsidiaryId,
-                        TotalPackagingTonnage = g.Sum(x => x.m.PackagingTonnage)
-                    }).ToList();
+            TwoCCommsCostUtil.UpdateTwoCRows(calcResult, result, producer, TotalPackagingTonnage);
 
             return result;
         }

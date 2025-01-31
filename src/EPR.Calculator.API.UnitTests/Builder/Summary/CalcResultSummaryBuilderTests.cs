@@ -573,14 +573,12 @@ namespace EPR.Calculator.API.UnitTests
             var runProducerMaterialDetails = CalcResultSummaryBuilder.GetProducerRunMaterialDetails(orderedProducerDetails,
                 _context.ProducerReportedMaterial.ToList(), 1);
 
-            var hhTotalPackagingTonnage = CalcResultSummaryBuilder.GetHHTotalPackagingTonnagePerRun(runProducerMaterialDetails, 1);
-
             var materials = Mappers.MaterialMapper.Map(_context.Material.ToList());
 	    
 	    var TotalPackagingTonnage = CalcResultSummaryBuilder.GetTotalPackagingTonnagePerRun(runProducerMaterialDetails, materials, 1);
 
             var result = CalcResultSummaryBuilder.GetCalcResultSummary(orderedProducerDetails, materials,
-                runProducerMaterialDetails, _calcResult, hhTotalPackagingTonnage, TotalPackagingTonnage);
+                runProducerMaterialDetails, _calcResult, TotalPackagingTonnage);
             Assert.IsNotNull(result);
             Assert.AreEqual(117, result.ColumnHeaders.Count());
 

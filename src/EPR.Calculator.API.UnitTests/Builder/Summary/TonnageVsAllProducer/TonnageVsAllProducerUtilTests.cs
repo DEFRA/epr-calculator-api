@@ -19,20 +19,23 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TonnageVsAllProducer
       // Arrange
       var producers = Fixture.Create<List<ProducerDetail>>();
 
-
       var testProducerId = Fixture.Create<int>();
       var testCalculatorRunId = Fixture.Create<int>();
       var testSubsidaryId = Fixture.Create<string>();
+      var testMaterialId = Fixture.Create<int>();
+      var materialDetails = Fixture.Create<List<MaterialDetail>>();
 
       var allResults = GenerateAllResults(testProducerId, testCalculatorRunId, testSubsidaryId);
 
       producers.First().ProducerId = testProducerId;
       producers.First().SubsidiaryId = testSubsidaryId;
       producers.First().CalculatorRunId = testCalculatorRunId;
+      allResults.First().ProducerReportedMaterial.MaterialId = testMaterialId;
+      materialDetails.First().Id = testMaterialId;
 
-      var hhTotalPackagingTonnage = CalcResultSummaryBuilder.GetHHTotalPackagingTonnagePerRun(allResults, producers.First().CalculatorRunId);
+      var TotalPackagingTonnage = CalcResultSummaryBuilder.GetTotalPackagingTonnagePerRun(allResults, materialDetails, producers.First().CalculatorRunId);
       // Act
-      var result = TonnageVsAllProducerUtil.GetPercentageofProducerReportedTonnagevsAllProducersTotal(producers, hhTotalPackagingTonnage);
+      var result = TonnageVsAllProducerUtil.GetPercentageofProducerReportedTonnagevsAllProducersTotal(producers, TotalPackagingTonnage);
 
       // Assert
       Assert.AreEqual(50, result);
@@ -49,6 +52,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TonnageVsAllProducer
       var fixture = new Fixture();
       var producers = fixture.Create<List<ProducerDetail>>();
       var allResults = fixture.Create<List<CalcResultsProducerAndReportMaterialDetail>>();
+      var materialDetails = Fixture.Create<List<MaterialDetail>>();
 
       var testProducerId = fixture.Create<int>();
       var testCalculatorRunId = fixture.Create<int>();
@@ -59,10 +63,10 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TonnageVsAllProducer
       allResults.First().ProducerDetail.CalculatorRunId = testCalculatorRunId;
       allResults.First().ProducerReportedMaterial.PackagingType = "HH";
 
-      var hhTotalPackagingTonnage = CalcResultSummaryBuilder.GetHHTotalPackagingTonnagePerRun(allResults, testCalculatorRunId);
+      var TotalPackagingTonnage = CalcResultSummaryBuilder.GetTotalPackagingTonnagePerRun(allResults, materialDetails, testCalculatorRunId);
 
       // Act
-      var result = TonnageVsAllProducerUtil.GetPercentageofProducerReportedTonnagevsAllProducersTotal(producers, hhTotalPackagingTonnage);
+      var result = TonnageVsAllProducerUtil.GetPercentageofProducerReportedTonnagevsAllProducersTotal(producers, TotalPackagingTonnage);
 
       // Assert
       Assert.AreEqual(0, result);
@@ -75,6 +79,8 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TonnageVsAllProducer
       var testProducerId = Fixture.Create<int>();
       var testCalculatorRunId = Fixture.Create<int>();
       var testSubsidaryId = Fixture.Create<string>();
+      var materialDetails = Fixture.Create<List<MaterialDetail>>();
+      var testMaterialId = Fixture.Create<int>();
 
       var producer = Fixture.Create<ProducerDetail>();
       var allResults = GenerateAllResults(testProducerId, testCalculatorRunId, testSubsidaryId);
@@ -82,13 +88,15 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TonnageVsAllProducer
       producer.ProducerId = testProducerId;
       producer.SubsidiaryId = testSubsidaryId;
       producer.CalculatorRunId = testCalculatorRunId;
+      allResults.First().ProducerReportedMaterial.MaterialId = testMaterialId;
+      materialDetails.First().Id = testMaterialId;
 
-      var hhTotalPackagingTonnage = CalcResultSummaryBuilder.GetHHTotalPackagingTonnagePerRun(allResults, testCalculatorRunId);
+      var TotalPackagingTonnage = CalcResultSummaryBuilder.GetTotalPackagingTonnagePerRun(allResults, materialDetails, testCalculatorRunId);
 
       // Act
       var result = TonnageVsAllProducerUtil.GetPercentageofProducerReportedTonnagevsAllProducers(
           producer,
-          hhTotalPackagingTonnage);
+          TotalPackagingTonnage);
 
       // Assert
       Assert.AreEqual(50, result);
@@ -110,7 +118,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TonnageVsAllProducer
       allResults.First().ProducerDetail.Id = testProducerId;
       allResults.First().ProducerDetail.ProducerId = testProducerId;
       allResults.First().ProducerDetail.CalculatorRunId = testCalculatorRunId;
-      allResults.First().ProducerReportedMaterial.PackagingType = "HH";
+      allResults.First().ProducerReportedMaterial.PackagingType = "PB";
 
       var totalPackagingTonnage = CalcResultSummaryBuilder.GetTotalPackagingTonnagePerRun(allResults, materialDetails, testCalculatorRunId);
 
@@ -135,6 +143,7 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TonnageVsAllProducer
       var allResults = GenerateAllResults(testProducerId, testCalculatorRunId, testSubsidaryId);
 
       allResults.First().ProducerReportedMaterial.MaterialId = testMaterialId;
+      allResults.First().ProducerReportedMaterial.PackagingType = "PB";
       materialDetails.First().Id = testMaterialId;
 
       producer.ProducerId = testProducerId;
@@ -151,7 +160,6 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.TonnageVsAllProducer
       // Assert
       Assert.AreEqual(50, result);
     }
-
 
     private List<CalcResultsProducerAndReportMaterialDetail> GenerateAllResults(
             int testProducerId,
