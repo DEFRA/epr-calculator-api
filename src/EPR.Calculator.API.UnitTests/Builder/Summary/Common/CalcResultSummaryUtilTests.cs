@@ -58,6 +58,48 @@
         }
 
         [TestMethod]
+        public void CanGetPublicBinTonnage()
+        {
+            // Arrange
+            var producer = TestDataHelper.GetProducers().First(p => p.Id == 1);
+            var material = TestDataHelper.GetMaterials().First(m => m.Code == "PL");
+
+            // Act
+            var result = CalcResultSummaryUtil.GetPublicBinTonnage(producer, material);
+
+            // Assert
+            Assert.AreEqual(20.00m, result);
+        }
+
+        [TestMethod]
+        public void CanGetHouseholdDrinksContainersTonnage()
+        {
+            // Arrange
+            var producer = TestDataHelper.GetProducers().First(p => p.Id == 1);
+            var material = TestDataHelper.GetMaterials().First(m => m.Code == "GL");
+
+            // Act
+            var result = CalcResultSummaryUtil.GetHouseholdDrinksContainersTonnage(producer, material);
+
+            // Assert
+            Assert.AreEqual(50.00m, result);
+        }
+
+        [TestMethod]
+        public void CanGetReportedTonnage()
+        {
+            // Arrange
+            var producer = TestDataHelper.GetProducers().First(p => p.Id == 1);
+            var material = TestDataHelper.GetMaterials().First(m => m.Code == "AL");
+
+            // Act
+            var result = CalcResultSummaryUtil.GetReportedTonnage(producer, material);
+
+            // Assert
+            Assert.AreEqual(1000.00m, result);
+        }
+
+        [TestMethod]
         public void CanGetHouseholdPackagingWasteTonnageProducerTotal()
         {
             // Arrange
@@ -69,6 +111,48 @@
 
             // Assert
             Assert.AreEqual(3000.00m, result);
+        }
+
+        [TestMethod]
+        public void CanGetPublicBinTonnageProducerTotal()
+        {
+            // Arrange
+            var producers = TestDataHelper.GetProducers();
+            var material = TestDataHelper.GetMaterials().First(m => m.Code == "PL");
+
+            // Act
+            var result = CalcResultSummaryUtil.GetPublicBinTonnageProducerTotal(producers, material);
+
+            // Assert
+            Assert.AreEqual(60.00m, result);
+        }
+
+        [TestMethod]
+        public void CanGetReportedTonnageProducerTotal()
+        {
+            // Arrange
+            var producers = TestDataHelper.GetProducers();
+            var material = TestDataHelper.GetMaterials().First(m => m.Code == "AL");
+
+            // Act
+            var result = CalcResultSummaryUtil.GetReportedTonnageProducerTotal(producers, material);
+
+            // Assert
+            Assert.AreEqual(3000.00m, result);
+        }
+
+        [TestMethod]
+        public void CanGetHouseholdDrinksContainersTonnageProducerTotal()
+        {
+            // Arrange
+            var producers = TestDataHelper.GetProducers();
+            var material = TestDataHelper.GetMaterials().First(m => m.Code == "GL");
+
+            // Act
+            var result = CalcResultSummaryUtil.GetHouseholdDrinksContainersTonnageProducerTotal(producers, material);
+
+            // Assert
+            Assert.AreEqual(150.00m, result);
         }
 
         [TestMethod]
