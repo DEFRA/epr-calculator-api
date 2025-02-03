@@ -17,5 +17,6 @@
         public const string LADisposalCostData = "LA Disposal Cost Data";
         public const string PolicyName = "AllowAllOrigins";
         public const string ServiceBusClientName = "calculator";
+        public const int SecondaryHeaderMaxColumnSize = 270;
     }
 }

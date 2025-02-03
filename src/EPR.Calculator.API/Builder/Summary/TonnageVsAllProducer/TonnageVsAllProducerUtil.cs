@@ -4,25 +4,22 @@ namespace EPR.Calculator.API.Builder.Summary.TonnageVsAllProducer;
 
 public static class TonnageVsAllProducerUtil
 {
-    public static decimal GetPercentageofProducerReportedTonnagevsAllProducersTotal(List<ProducerDetail> producers, IEnumerable<TotalPackagingTonnagePerRun> totalPackagingTonnage)
+    public static decimal GetPercentageofProducerReportedTonnagevsAllProducersTotal(IEnumerable<ProducerDetail> producers, IEnumerable<TotalPackagingTonnagePerRun> totalPackagingTonnage)
     {
-        decimal totalPercentageofProducerReportedHH = 0;
+        decimal totalPercentageofProducerReported = 0;
 
-        foreach (var producer in producers)
-        {
-            totalPercentageofProducerReportedHH += GetPercentageofProducerReportedTonnagevsAllProducers(producer, totalPackagingTonnage);
-        }
+        totalPercentageofProducerReported = producers.Sum(producer => GetPercentageofProducerReportedTonnagevsAllProducers(producer, totalPackagingTonnage));
 
-        return totalPercentageofProducerReportedHH;
+        return totalPercentageofProducerReported;
     }
 
     public static decimal GetPercentageofProducerReportedTonnagevsAllProducers(ProducerDetail producer, IEnumerable<TotalPackagingTonnagePerRun> totalPackagingTonnage)
     {
         var totalTonnage = totalPackagingTonnage.Sum(x => x.TotalPackagingTonnage);
         var producerData = totalPackagingTonnage.FirstOrDefault(r => r.ProducerId == producer.ProducerId && r.SubsidiaryId == producer.SubsidiaryId);
-        var PercentageofHHTonnage = producerData != null && totalTonnage > 0
+        var PercentageofTonnage = producerData != null && totalTonnage > 0
             ? producerData.TotalPackagingTonnage / totalTonnage * 100
             : 0;
-        return PercentageofHHTonnage;
+        return PercentageofTonnage;
     }
 }

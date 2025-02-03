@@ -598,6 +598,7 @@ namespace EPR.Calculator.API.UnitTests
             );
             var httpContext = new Mock<HttpContext>();
             httpContext.SetupSequence(c => c.RequestAborted)
+                .Returns(new CancellationToken(false))
                 .Returns(new CancellationToken(true));
             controller.ControllerContext.HttpContext = httpContext.Object;
 
