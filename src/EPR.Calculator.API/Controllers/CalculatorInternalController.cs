@@ -226,7 +226,6 @@ namespace EPR.Calculator.API.Controllers
                 if (!string.IsNullOrEmpty(blobUri))
                 {
                     await SaveCsvFileMetadataAsync(results.CalcResultDetail.RunId, fileName.ToString(), blobUri);
-
                     calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
                     this.context.CalculatorRuns.Update(calculatorRun);
                     await this.context.SaveChangesAsync(HttpContext.RequestAborted);
@@ -264,7 +263,6 @@ namespace EPR.Calculator.API.Controllers
                 CalculatorRunId = runId
             };
             await context.CalculatorRunCsvFileMetadata.AddAsync(csvFileMetadata);
-            await context.SaveChangesAsync();
         }
 
         private async Task UpdateCalculatorRunClassificationAsync(CalculatorRun calculatorRun, RunClassification classification)

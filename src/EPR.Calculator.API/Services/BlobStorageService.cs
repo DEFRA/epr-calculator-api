@@ -43,8 +43,9 @@ namespace EPR.Calculator.API.Services
                 await blobClient.UploadAsync(binaryData);
                 return blobClient.Uri.ToString();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error Blob write");
                 return string.Empty;
             }
         }
