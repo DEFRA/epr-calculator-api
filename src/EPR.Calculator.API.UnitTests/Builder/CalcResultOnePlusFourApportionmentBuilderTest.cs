@@ -1,18 +1,9 @@
-﻿using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Data;
+﻿using AutoFixture;
+using EPR.Calculator.API.Builder.OnePlusFourApportionment;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
-using EPR.Calculator.API.Tests.Controllers;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EPR.Calculator.API.Builder.OnePlusFourApportionment;
-using AutoFixture;
 
 namespace EPR.Calculator.API.UnitTests.Builder
 {

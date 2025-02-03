@@ -1,14 +1,12 @@
-﻿using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Builder.Summary.ThreeSa;
+using EPR.Calculator.API.Builder.Summary.ThreeSA;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using EPR.Calculator.API.Builder.Summary.SaSetupCosts;
-using EPR.Calculator.API.Builder.Summary.ThreeSa;
-using EPR.Calculator.API.Builder.Summary.ThreeSA;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Enums;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
 {
@@ -181,8 +179,9 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             Scotland = "ScotlandTest",
                             Material = "Material1",
                             NorthernIreland = "NorthernIrelandTest",
-                            Total = "null",
-                            ProducerReportedHouseholdPackagingWasteTonnage = "null"
+                            Total = string.Empty,
+                            ProducerReportedHouseholdPackagingWasteTonnage = string.Empty,
+                            ReportedPublicBinTonnage = string.Empty
                         },
                         new CalcResultLaDisposalCostDataDetail
                         {
@@ -192,9 +191,9 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             Name = "Material1",
                             Scotland = "ScotlandTest",
                             NorthernIreland = "NorthernIrelandTest",
-                            Total = "null",
-                            ProducerReportedHouseholdPackagingWasteTonnage = "null",
-
+                            Total = string.Empty,
+                            ProducerReportedHouseholdPackagingWasteTonnage = string.Empty,
+                            ReportedPublicBinTonnage = string.Empty
                         },
                         new CalcResultLaDisposalCostDataDetail
                         {
@@ -205,8 +204,8 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                             Scotland = "ScotlandTest",
                             NorthernIreland = "NorthernIrelandTest",
                             Total = "100",
-                            ProducerReportedHouseholdPackagingWasteTonnage = "null",
-
+                            ProducerReportedHouseholdPackagingWasteTonnage = string.Empty,
+                            ReportedPublicBinTonnage = string.Empty
                         }
                     },
                     Name = "some test"

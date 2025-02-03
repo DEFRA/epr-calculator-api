@@ -98,6 +98,10 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append(
                     $"{CsvSanitiser.SanitiseData(commCostByMaterial.ProducerReportedHouseholdPackagingWasteTonnage)},");
                 csvContent.Append(
+                    $"{CsvSanitiser.SanitiseData(commCostByMaterial.ReportedPublicBinTonnage)},");
+                csvContent.Append(
+                    $"{CsvSanitiser.SanitiseData(commCostByMaterial.HouseholdDrinksContainers)},");
+                csvContent.Append(
                     $"{CsvSanitiser.SanitiseData(commCostByMaterial.LateReportingTonnage)},");
                 csvContent.Append(
                     $"{CsvSanitiser.SanitiseData(commCostByMaterial.ProducerReportedHouseholdPlusLateReportingTonnage)},");
@@ -281,8 +285,10 @@ namespace EPR.Calculator.API.Exporter
                 csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.NorthernIreland)}\",");
                 csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.Total)}\",");
                 csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.ProducerReportedHouseholdPackagingWasteTonnage)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.ReportedPublicBinTonnage)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.HouseholdDrinkContainers)}\",");
                 csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.LateReportingTonnage)}\",");
-                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.ProducerReportedHouseholdTonnagePlusLateReportingTonnage)}\",");
+                csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.ProducerReportedTotalTonnage)}\",");
                 csvContent.Append($"\"{CsvSanitiser.SanitiseData(lapcapData.DisposalCostPricePerTonne)}\",");
                 csvContent.AppendLine();
             }
