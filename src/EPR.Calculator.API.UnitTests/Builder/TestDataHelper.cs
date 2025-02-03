@@ -665,7 +665,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     TwoCWalesTotalWithBadDebt = 300.7301007856519m,
                     TwoCScotlandTotalWithBadDebt = 360.87612094278234m,
                     TwoCNorthernIrelandTotalWithBadDebt = 150.36505039282596m,
-                    PercentageofProducerReportedHHTonnagevsAllProducers = 5.6741528450123m,
+                    PercentageofProducerReportedTonnagevsAllProducers = 5.6741528450123m,
                     ProducerTotalOnePlus2A2B2CWithBadDeptProvision = 10491.167766844124m,
                     ProducerOverallPercentageOfCostsForOnePlus2A2B2C = 4.7341913352015945m,
                     Total3SAOperatingCostwoBadDebtprovision = 3077.2243678810364m,

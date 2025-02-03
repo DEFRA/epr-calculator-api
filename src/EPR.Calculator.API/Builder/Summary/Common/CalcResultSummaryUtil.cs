@@ -12,6 +12,8 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
 using System.Globalization;
+using EPR.Calculator.API.Builder.Summary.ThreeSA;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace EPR.Calculator.API.Builder.Summary.Common;
 
@@ -706,9 +708,9 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalwithBadDebtprovision }
         ]);
 
-        // Percentage of Producer Reported Household Tonnage vs All Producers
+        // Percentage of Producer Reported Tonnage vs All Producers
         columnHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PercentageofProducerReportedHHTonnagevsAllProducers },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PercentageofProducerReportedTonnagevsAllProducers },
         ]);
 
         // 2b comms total.
