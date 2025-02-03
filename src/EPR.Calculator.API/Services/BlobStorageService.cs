@@ -1,6 +1,8 @@
 ﻿using Azure.Storage;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Exceptions;
+using System;
 using System.Configuration;
 using System.Text;
 namespace EPR.Calculator.API.Services
@@ -14,8 +16,9 @@ namespace EPR.Calculator.API.Services
         public const string OctetStream = "application/octet-stream";
         private readonly BlobContainerClient containerClient;
         private readonly StorageSharedKeyCredential sharedKeyCredential;
+        private readonly ILogger<BlobStorageService> _logger;
 
-        public BlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration)
+        public BlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration, ILogger<BlobStorageService> logger)
         {
             var settings = configuration.GetSection(BlobStorageSection).Get<BlobStorageSettings>() ??
                 throw new ConfigurationErrorsException(BlobSettingsMissingError);
@@ -27,6 +30,8 @@ namespace EPR.Calculator.API.Services
 
             this.containerClient = blobServiceClient.GetBlobContainerClient(settings.ContainerName ??
                 throw new ConfigurationErrorsException(ContainerNameMissingError));
+
+            _logger = logger;
         }
 
         public async Task<string> UploadResultFileContentAsync(string fileName, string content)
@@ -54,17 +59,20 @@ namespace EPR.Calculator.API.Services
                 {
                     blobClient = new BlobClient(new Uri(blobUri), sharedKeyCredential);
                 }
-                catch (UriFormatException) { /*Ignore this exception*/ }
+                catch (UriFormatException exception) {
+                    _logger.LogError(exception, "Blob Uri is not in correct format.");
+                    blobClient ??= this.containerClient.GetBlobClient(fileName);
+                }
+            }
+            else
+                blobClient ??= this.containerClient.GetBlobClient(fileName);
+
+            if (!await blobClient.ExistsAsync())
+            {
+                return Results.NotFound(fileName);
             }
             try 
             {
-                blobClient ??= this.containerClient.GetBlobClient(fileName);
-            
-                if (!await blobClient.ExistsAsync())
-                {
-                    return Results.NotFound(fileName);
-                }
-            
                 var downloadResult = await blobClient.DownloadContentAsync();
                 var content = downloadResult.Value.Content.ToString();
                 return Results.File(Encoding.Unicode.GetBytes(content), OctetStream, fileName);
