@@ -4,14 +4,26 @@ using EPR.Calculator.API.Models;
 
 namespace EPR.Calculator.API.UnitTests.Builder
 {
-  public static class TestDataHelper
-  {
-    public static CalcResultParameterOtherCost GetCalcResultParameterOtherCost()
+    public static class TestDataHelper
     {
-      return new CalcResultParameterOtherCost
-      {
-        Name = "Parameters - Other",
-        SaOperatingCost = new List<CalcResultParameterOtherCostDetail> {
+        public static CalcResult GetCalcResult()
+        {
+            return new CalcResult
+            {
+                CalcResultParameterOtherCost = GetCalcResultParameterOtherCost(),
+                CalcResultDetail = GetCalcResultDetail(),
+                CalcResultLapcapData = GetCalcResultLapcapData(),
+                CalcResultLateReportingTonnageData = GetCalcResultLateReportingTonnage(),
+
+            };
+        }
+
+        public static CalcResultParameterOtherCost GetCalcResultParameterOtherCost()
+        {
+            return new CalcResultParameterOtherCost
+            {
+                Name = "Parameters - Other",
+                SaOperatingCost = new List<CalcResultParameterOtherCostDetail> {
                     new CalcResultParameterOtherCostDetail
                     {
                         Name = null,
@@ -42,7 +54,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         OrderId = 2
                     }
                 },
-        Details = new List<CalcResultParameterOtherCostDetail> {
+                Details = new List<CalcResultParameterOtherCostDetail> {
                     new CalcResultParameterOtherCostDetail {
                         Name = "4 LA Data Prep Charge",
                         England = "£16,000.00",
@@ -72,7 +84,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         OrderId = 2
                     }
                 },
-        SchemeSetupCost = {
+                SchemeSetupCost = {
                     Name = "5 Scheme set up cost Yearly Cost",
                     England = "£17,500.00",
                     Wales = "£23,400.00",
@@ -86,8 +98,8 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     TotalValue = 62750,
                     OrderId = 1
                 },
-        BadDebtProvision = new KeyValuePair<string, string>("6 Bad Debt Provision", "6.00%"),
-        Materiality = new List<CalcResultMateriality> {
+                BadDebtProvision = new KeyValuePair<string, string>("6 Bad Debt Provision", "6.00%"),
+                Materiality = new List<CalcResultMateriality> {
                     new CalcResultMateriality {
                         SevenMateriality = "7 Materiality",
                         Amount = "Amount £s",
@@ -131,21 +143,21 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         PercentageValue = -0.5m
                     }
                 },
-        BadDebtValue = 6
-      };
-    }
+                BadDebtValue = 6
+            };
+        }
 
-    public static CalcResultDetail GetCalcResultDetail()
-    {
-      return new CalcResultDetail() { };
-    }
+        public static CalcResultDetail GetCalcResultDetail()
+        {
+            return new CalcResultDetail() { };
+        }
 
-    public static CalcResultLaDisposalCostData GetCalcResultLaDisposalCostData()
-    {
-      return new CalcResultLaDisposalCostData()
-      {
-        Name = "Disposal Cost Data",
-        CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>()
+        public static CalcResultLaDisposalCostData GetCalcResultLaDisposalCostData()
+        {
+            return new CalcResultLaDisposalCostData()
+            {
+                Name = "Disposal Cost Data",
+                CalcResultLaDisposalCostDetails = new List<CalcResultLaDisposalCostDataDetail>()
                 {
                     new CalcResultLaDisposalCostDataDetail() {
                         Name = "Material",
@@ -156,8 +168,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         NorthernIreland = "Northern Ireland",
                         Total = "Total",
                         ProducerReportedHouseholdPackagingWasteTonnage = "Producer Reported Household Packaging Waste Tonnage",
+                        ReportedPublicBinTonnage = "Reported Public Bin Tonnage",
                         LateReportingTonnage = "Late Reporting Tonnage",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "Producer Reported Household Tonnage + Late Reporting Tonnage",
+                        ProducerReportedTotalTonnage = "Producer Reported Household Tonnage + Late Reporting Tonnage",
                         DisposalCostPricePerTonne = "Disposal Cost Price Per Tonne",
                         OrderId = 1
                     },
@@ -170,8 +183,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         NorthernIreland = "£1,250.00",
                         Total = "£10,000.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "6980.000",
+                        ReportedPublicBinTonnage = "2000.000",
                         LateReportingTonnage = "8000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "14980.000",
+                        ProducerReportedTotalTonnage = "14980.000",
                         DisposalCostPricePerTonne = "£0.6676",
                         OrderId = 2
                     },
@@ -184,8 +198,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         NorthernIreland = "£1,750.00",
                         Total = "£14,750.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "11850.000",
+                        ReportedPublicBinTonnage = "2000.000",
                         LateReportingTonnage = "7000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "18850.000",
+                        ProducerReportedTotalTonnage = "18850.000",
                         DisposalCostPricePerTonne = "£0.7825",
                         OrderId = 3
                     },
@@ -198,8 +213,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         NorthernIreland = "£4,500.00",
                         Total = "£70,200.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "4900.000",
+                        ReportedPublicBinTonnage = "2000.000",
                         LateReportingTonnage = "6000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "10900.000",
+                        ProducerReportedTotalTonnage = "10900.000",
                         DisposalCostPricePerTonne = "£6.4404",
                         OrderId = 4
                     },
@@ -212,8 +228,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         NorthernIreland = "£3,400.00",
                         Total = "£22,700.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "4270.000",
+                        ReportedPublicBinTonnage = "2000.000",
                         LateReportingTonnage = "5000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "9270.000",
+                        ProducerReportedTotalTonnage = "9270.000",
                         DisposalCostPricePerTonne = "£2.4488",
                         OrderId = 5
                     },
@@ -226,8 +243,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         NorthernIreland = "£2,100.00",
                         Total = "£36,300.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "12805.000",
+                        ReportedPublicBinTonnage = "2000.000",
                         LateReportingTonnage = "4000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "16805.000",
+                        ProducerReportedTotalTonnage = "16805.000",
                         DisposalCostPricePerTonne = "£2.1601",
                         OrderId = 6
                     },
@@ -240,8 +258,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         NorthernIreland = "£0.00",
                         Total = "£21,200.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "7700.000",
+                        ReportedPublicBinTonnage = "2000.000",
                         LateReportingTonnage = "3000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "10700.000",
+                        ProducerReportedTotalTonnage = "10700.000",
                         DisposalCostPricePerTonne = "£1.9813",
                         OrderId = 7
                     },
@@ -254,8 +273,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         NorthernIreland = "£5,600.00",
                         Total = "£17,600.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "6800.000",
+                        ReportedPublicBinTonnage = "2000.000",
                         LateReportingTonnage = "2000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "8800.000",
+                        ProducerReportedTotalTonnage = "8800.000",
                         DisposalCostPricePerTonne = "£2.0000",
                         OrderId = 8
                     },
@@ -268,8 +288,9 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         NorthernIreland = "£700.00",
                         Total = "£10,400.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "7700.000",
+                        ReportedPublicBinTonnage = "2000.000",
                         LateReportingTonnage = "1000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "8700.000",
+                        ProducerReportedTotalTonnage = "8700.000",
                         DisposalCostPricePerTonne = "£1.1954",
                         OrderId = 9
                     },
@@ -282,21 +303,22 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         NorthernIreland = "£19,300.00",
                         Total = "£203,150.00",
                         ProducerReportedHouseholdPackagingWasteTonnage = "63005.000",
+                        ReportedPublicBinTonnage = "2000.000",
                         LateReportingTonnage = "36000.000",
-                        ProducerReportedHouseholdTonnagePlusLateReportingTonnage = "99005.000",
+                        ProducerReportedTotalTonnage = "99005.000",
                         DisposalCostPricePerTonne = null,
                         OrderId = 10
                     }
                 }
-      };
-    }
+            };
+        }
 
-    public static CalcResultLapcapData GetCalcResultLapcapData()
-    {
-      return new CalcResultLapcapData()
-      {
-        Name = "LAPCAP Data",
-        CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>()
+        public static CalcResultLapcapData GetCalcResultLapcapData()
+        {
+            return new CalcResultLapcapData()
+            {
+                Name = "LAPCAP Data",
+                CalcResultLapcapDataDetails = new List<CalcResultLapcapDataDetails>()
                 {
                     new CalcResultLapcapDataDetails {
                         Name = "Material",
@@ -453,15 +475,15 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         OrderId = 11
                     }
                 }
-      };
-    }
+            };
+        }
 
-    public static CalcResultOnePlusFourApportionment GetCalcResultOnePlusFourApportionment()
-    {
-      return new CalcResultOnePlusFourApportionment()
-      {
-        Name = "One Plus Four Apportionment",
-        CalcResultOnePlusFourApportionmentDetails = new List<CalcResultOnePlusFourApportionmentDetail> {
+        public static CalcResultOnePlusFourApportionment GetCalcResultOnePlusFourApportionment()
+        {
+            return new CalcResultOnePlusFourApportionment()
+            {
+                Name = "One Plus Four Apportionment",
+                CalcResultOnePlusFourApportionmentDetails = new List<CalcResultOnePlusFourApportionmentDetail> {
                     new CalcResultOnePlusFourApportionmentDetail()
                     {
                         EnglandDisposalTotal = "80",
@@ -528,29 +550,27 @@ namespace EPR.Calculator.API.UnitTests.Builder
                         Name = OnePlus4ApportionmentColumnHeaders.OnePluseFourApportionment,
                     }
                 }
-      };
-    }
+            };
+        }
 
-    public static CalcResultCommsCost GetCalcResultCommsCostReportDetail()
-    {
-      return new CalcResultCommsCost()
-      {
-        CalcResultCommsCostCommsCostByMaterial = [
-              new ()
+        public static CalcResultCommsCost GetCalcResultCommsCostReportDetail()
+        {
+            return new CalcResultCommsCost()
+            {
+                CalcResultCommsCostCommsCostByMaterial = [
+                    new ()
                     {
                         CommsCostByMaterialPricePerTonne="0.42",
                         Name ="Material1",
-
                     },
                     new ()
                     {
                         CommsCostByMaterialPricePerTonne="0.3",
                         Name ="Material2",
-
                     }
-          ],
-        CommsCostByCountry = [
-              new()
+                ],
+                CommsCostByCountry = [
+                    new()
                     {
                         Total= "Total"
                     },
@@ -558,24 +578,50 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     {
                         TotalValue= 2530
                     }
-          ]
-      };
-    }
+                ]
+            };
+        }
 
-    public static CalcResultSummary GetCalcResultSummary()
-    {
-      return new CalcResultSummary
-      {
-        BadDebtProvisionFor1 = 6021.3677166M,
-        BadDebtProvisionFor2A = 2098.887360M,
-        BadDebtProvisionTitleSection3 = 3900.000000M,
-        ProducerDisposalFees = GetProducerDisposalFees()
-      };
-    }
+        public static CalcResultLateReportingTonnage GetCalcResultLateReportingTonnage()
+        {
+            return new CalcResultLateReportingTonnage
+            {
+                Name = "Late Reporting Tonnage",
+                CalcResultLateReportingTonnageDetails = new[]
+                {
+                    new CalcResultLateReportingTonnageDetail()
+                    {
+                        Name = "Aluminium",
+                        TotalLateReportingTonnage = 8000.00m
+                    },
+                    new CalcResultLateReportingTonnageDetail()
+                    {
+                        Name = "Plastic",
+                        TotalLateReportingTonnage = 2000.00m
+                    },
+                    new CalcResultLateReportingTonnageDetail()
+                    {
+                        Name = "Total",
+                        TotalLateReportingTonnage = 10000.00m
+                    }
+                }
+            };
+        }
 
-    public static List<CalcResultSummaryProducerDisposalFees> GetProducerDisposalFees()
-    {
-      return new List<CalcResultSummaryProducerDisposalFees>()
+        public static CalcResultSummary GetCalcResultSummary()
+        {
+            return new CalcResultSummary
+            {
+                BadDebtProvisionFor1 = 6021.3677166M,
+                BadDebtProvisionFor2A = 2098.887360M,
+                BadDebtProvisionTitleSection3 = 3900.000000M,
+                ProducerDisposalFees = GetProducerDisposalFees()
+            };
+        }
+
+        public static List<CalcResultSummaryProducerDisposalFees> GetProducerDisposalFees()
+        {
+            return new List<CalcResultSummaryProducerDisposalFees>()
             {
                 new CalcResultSummaryProducerDisposalFees()
                 {
@@ -661,11 +707,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     ProducerCommsFeesByMaterial = GetProducerCommsFeesByMaterial()
                 }
             };
-    }
+        }
 
-    public static Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> GetProducerDisposalFeesByMaterial()
-    {
-      return new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>
+        public static Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> GetProducerDisposalFeesByMaterial()
+        {
+            return new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>
             {
                 {
                     new MaterialDetail
@@ -852,11 +898,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 }
             };
-    }
+        }
 
-    public static Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> GetProducerCommsFeesByMaterial()
-    {
-      return new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>
+        public static Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> GetProducerCommsFeesByMaterial()
+        {
+            return new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>
             {
                 {
                     new MaterialDetail
@@ -1027,11 +1073,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 }
             };
-    }
+        }
 
-    public static List<MaterialDetail> GetMaterials()
-    {
-      return new List<MaterialDetail>
+        public static List<MaterialDetail> GetMaterials()
+        {
+            return new List<MaterialDetail>
             {
                 new MaterialDetail
                 {
@@ -1090,11 +1136,11 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     Description = "Other materials"
                 }
             };
-    }
+        }
 
-    public static List<ProducerDetail> GetProducers()
-    {
-      var producers = new List<ProducerDetail>
+        public static List<ProducerDetail> GetProducers()
+        {
+            var producers = new List<ProducerDetail>
             {
                 new ProducerDetail
                 {
@@ -1119,21 +1165,21 @@ namespace EPR.Calculator.API.UnitTests.Builder
                 }
             };
 
-      var producerReportedMaterials = GetProducerReportedMaterials();
+            var producerReportedMaterials = GetProducerReportedMaterials();
 
-      producers.ForEach(producer => {
-        producerReportedMaterials.ForEach(producerReportedMaterial =>
+            producers.ForEach(producer => {
+                producerReportedMaterials.ForEach(producerReportedMaterial =>
+                {
+                    producer.ProducerReportedMaterials.Add(producerReportedMaterial);
+                });
+            });
+
+            return producers;
+        }
+
+        public static List<ProducerReportedMaterial> GetProducerReportedMaterials()
         {
-          producer.ProducerReportedMaterials.Add(producerReportedMaterial);
-        });
-      });
-
-      return producers;
-    }
-
-    public static List<ProducerReportedMaterial> GetProducerReportedMaterials()
-    {
-      return new List<ProducerReportedMaterial>()
+            return new List<ProducerReportedMaterial>()
             {
                 new ProducerReportedMaterial
                 {
@@ -1150,8 +1196,24 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     PackagingType = "CW",
                     MaterialId = 1,
                     ProducerDetail = null
+                },
+                new ProducerReportedMaterial
+                {
+                    Material = new Material { Id = 3, Code = "PL", Name = "Plastic", Description = "Plastic" },
+                    PackagingTonnage = 20.00m,
+                    PackagingType = "PB",
+                    MaterialId = 3,
+                    ProducerDetail = null
+                },
+                new ProducerReportedMaterial
+                {
+                    Material = new Material { Id = 4, Code = "GL", Name = "Glass", Description = "Glass" },
+                    PackagingTonnage = 50.00m,
+                    PackagingType = "HDC",
+                    MaterialId = 4,
+                    ProducerDetail = null
                 }
             };
+        }
     }
-  }
 }

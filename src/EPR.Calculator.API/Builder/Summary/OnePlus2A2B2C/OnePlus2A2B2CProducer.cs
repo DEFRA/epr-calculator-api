@@ -4,7 +4,7 @@ namespace EPR.Calculator.API.Builder.Summary.OnePlus2A2B2C
 {
     public static class OnePlus2A2B2CProducer
     {
-        public static readonly int ColumnIndex = 208;
+        public static readonly int ColumnIndex = 242;
 
         public static IEnumerable<CalcResultSummaryHeader> GetHeaders()
         {

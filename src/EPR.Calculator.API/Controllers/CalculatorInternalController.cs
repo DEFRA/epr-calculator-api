@@ -59,7 +59,7 @@ namespace EPR.Calculator.API.Controllers
         [RequestTimeout("RpdStatus")]
         public async Task<IActionResult> UpdateRpdStatus([FromBody] UpdateRpdStatus request)
         {
-            commandTimeoutService.SetCommandTimeout(context.Database, "RpdStatusCommand"); 
+            commandTimeoutService.SetCommandTimeout(context.Database, "RpdStatusCommand");
 
             try
             {
@@ -132,7 +132,7 @@ namespace EPR.Calculator.API.Controllers
         [RequestTimeout("Transpose")]
         public async Task<IActionResult> TransposeBeforeCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
-            var startTime = DateTime.Now; 
+            var startTime = DateTime.Now;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
