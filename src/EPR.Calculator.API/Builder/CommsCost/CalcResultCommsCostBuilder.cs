@@ -53,7 +53,7 @@ namespace EPR.Calculator.API.Builder.CommsCost
                                                ParameterValue = defaultDetail.ParameterValue,
                                                ParameterType = defaultTemplate.ParameterType,
                                                ParameterCategory = defaultTemplate.ParameterCategory
-                                           }).ToListAsync();
+                                           }).Distinct().ToListAsync();
             var materialDefaults = allDefaultResults.Where(x =>
                 x.ParameterType == CommunicationCostByMaterial && materialNames.Contains(x.ParameterCategory));
 
