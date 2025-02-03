@@ -1196,6 +1196,22 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     PackagingType = "CW",
                     MaterialId = 1,
                     ProducerDetail = null
+                },
+                new ProducerReportedMaterial
+                {
+                    Material = new Material { Id = 3, Code = "PL", Name = "Plastic", Description = "Plastic" },
+                    PackagingTonnage = 20.00m,
+                    PackagingType = "PB",
+                    MaterialId = 3,
+                    ProducerDetail = null
+                },
+                new ProducerReportedMaterial
+                {
+                    Material = new Material { Id = 4, Code = "GL", Name = "Glass", Description = "Glass" },
+                    PackagingTonnage = 50.00m,
+                    PackagingType = "HDC",
+                    MaterialId = 4,
+                    ProducerDetail = null
                 }
             };
         }
