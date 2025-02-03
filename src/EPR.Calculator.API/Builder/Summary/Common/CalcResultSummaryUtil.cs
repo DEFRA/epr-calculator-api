@@ -62,20 +62,6 @@ public static class CalcResultSummaryUtil
         return holdDrinksContainersMaterial?.PackagingTonnage ?? 0;
     }
 
-    public static decimal GetPublicBinTonnage(ProducerDetail producer, MaterialDetail material)
-    {
-        var publicBinTonnageMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == PackagingTypes.PublicBin);
-
-        return publicBinTonnageMaterial?.PackagingTonnage ?? 0;
-    }
-
-    public static decimal GetHouseholdDrinksContainersTonnage(ProducerDetail producer, MaterialDetail material)
-    {
-        var holdDrinksContainersMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == PackagingTypes.HouseholdDrinksContainers);
-
-        return holdDrinksContainersMaterial?.PackagingTonnage ?? 0;
-    }
-
     public static decimal GetReportedTonnage(ProducerDetail producer, MaterialDetail material)
     {
         var householdPackagingWasteTonnage = GetHouseholdPackagingWasteTonnage(producer, material);
@@ -653,9 +639,6 @@ public static class CalcResultSummaryUtil
             {
                 columnHeadersList.Insert(2, new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.HouseholdDrinksContainersTonnage });
             }
-
-            columnHeaders.AddRange(columnHeadersList);
-        }
 
             columnHeaders.AddRange(columnHeadersList);
         }
