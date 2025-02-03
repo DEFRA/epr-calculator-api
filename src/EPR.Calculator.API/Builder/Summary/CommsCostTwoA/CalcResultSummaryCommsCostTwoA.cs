@@ -127,11 +127,17 @@ public static class CalcResultSummaryCommsCostTwoA
 
     public static decimal GetProducerTotalCostWithoutBadDebtProvision(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)
     {
+        decimal hdcTonnage = 0;
         var hhPackagingWasteTonnage = CalcResultSummaryUtil.GetHouseholdPackagingWasteTonnage(producer, material);
         var reportedPublicBinTonnage = CalcResultSummaryUtil.GetReportedPublicBinTonnage(producer, material);
         var priceperTonne = CalcResultSummaryCommsCostTwoA.GetPriceperTonneForComms(material, calcResult);
+        if (material.Code == MaterialCodes.Glass) hdcTonnage = CalcResultSummaryUtil.GetHDCGlassTonnage(producer, material);
 
-        return (hhPackagingWasteTonnage + reportedPublicBinTonnage) * priceperTonne;
+        var totalTonnage = material.Code == MaterialCodes.Glass ?
+            hdcTonnage + reportedPublicBinTonnage + hhPackagingWasteTonnage :
+            hhPackagingWasteTonnage + reportedPublicBinTonnage;
+
+        return totalTonnage * priceperTonne;
     }   
 
     public static decimal GetBadDebtProvisionForCommsCost(ProducerDetail producer, MaterialDetail material, CalcResult calcResult)

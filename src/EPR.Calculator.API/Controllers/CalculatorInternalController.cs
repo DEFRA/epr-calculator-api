@@ -59,7 +59,7 @@ namespace EPR.Calculator.API.Controllers
         [RequestTimeout("RpdStatus")]
         public async Task<IActionResult> UpdateRpdStatus([FromBody] UpdateRpdStatus request)
         {
-            commandTimeoutService.SetCommandTimeout(context.Database, "RpdStatusCommand"); 
+            commandTimeoutService.SetCommandTimeout(context.Database, "RpdStatusCommand");
 
             try
             {
@@ -132,7 +132,7 @@ namespace EPR.Calculator.API.Controllers
         [RequestTimeout("Transpose")]
         public async Task<IActionResult> TransposeBeforeCalcResults([FromBody] CalcResultsRequestDto resultsRequestDto)
         {
-            var startTime = DateTime.Now; 
+            var startTime = DateTime.Now;
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
@@ -213,28 +213,23 @@ namespace EPR.Calculator.API.Controllers
                 {
                     return StatusCode(StatusCodes.Status422UnprocessableEntity, validationResult.ErrorMessages.ToArray());
                 }
-                var isTransposeSuccessful = await this.transposePomAndOrgDataService.Transpose(
-                    resultsRequestDto,
-                    HttpContext.RequestAborted);
-                if (isTransposeSuccessful)
+
+                var results = await this.builder.Build(resultsRequestDto);
+                var exportedResults = this.exporter.Export(results);
+
+                var fileName = new CalcResultsFileName(
+                    results.CalcResultDetail.RunId,
+                    results.CalcResultDetail.RunName,
+                    results.CalcResultDetail.RunDate);
+                var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
+
+                if (resultsFileWritten)
                 {
-                    var results = await this.builder.Build(resultsRequestDto);
-                    var exportedResults = this.exporter.Export(results);
-
-                    var fileName = new CalcResultsFileName(
-                        results.CalcResultDetail.RunId,
-                        results.CalcResultDetail.RunName,
-                        results.CalcResultDetail.RunDate);
-                    var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
-
-                    if (resultsFileWritten)
-                    {
-                        calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
-                        this.context.CalculatorRuns.Update(calculatorRun);
-                        await this.context.SaveChangesAsync(HttpContext.RequestAborted);
-                        var timeDiff = startTime - DateTime.Now;
-                        return new ObjectResult(timeDiff.Minutes) { StatusCode = StatusCodes.Status201Created };
-                    }
+                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
+                    this.context.CalculatorRuns.Update(calculatorRun);
+                    await this.context.SaveChangesAsync(HttpContext.RequestAborted);
+                    var timeDiff = startTime - DateTime.Now;
+                    return new ObjectResult(timeDiff.Minutes) { StatusCode = StatusCodes.Status201Created };
                 }
             }
             catch (OperationCanceledException exception)
