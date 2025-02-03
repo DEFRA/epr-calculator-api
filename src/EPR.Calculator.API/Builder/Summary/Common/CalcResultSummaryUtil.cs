@@ -12,8 +12,6 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
 using System.Globalization;
-using EPR.Calculator.API.Builder.Summary.ThreeSA;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace EPR.Calculator.API.Builder.Summary.Common;
 
