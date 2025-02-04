@@ -3273,3 +3273,45 @@ GO
 
 COMMIT;
 GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250123134310_AddCalculatorRunCsvFileMetadata'
+)
+BEGIN
+    CREATE TABLE [calculator_run_csvfile_metadata] (
+        [id] int NOT NULL IDENTITY,
+        [filename] nvarchar(400) NOT NULL,
+        [blob_uri] nvarchar(2000) NOT NULL,
+        [calculator_run_id] int NOT NULL,
+        CONSTRAINT [PK_calculator_run_csvfile_metadata] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_calculator_run_csvfile_metadata_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250123134310_AddCalculatorRunCsvFileMetadata'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_csvfile_metadata_calculator_run_id] ON [calculator_run_csvfile_metadata] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250123134310_AddCalculatorRunCsvFileMetadata'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250123134310_AddCalculatorRunCsvFileMetadata', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+

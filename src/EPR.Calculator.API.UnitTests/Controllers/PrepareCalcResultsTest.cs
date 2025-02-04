@@ -58,7 +58,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             transposePomAndOrgDataService.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
             mockStorageservice = new Mock<IStorageService>();
             mockStorageservice.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(true);
+                .ReturnsAsync("expected result");
 
             mockValidator = new Mock<CalculatorRunValidator>();
 
