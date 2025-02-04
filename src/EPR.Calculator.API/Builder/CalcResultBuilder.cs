@@ -6,6 +6,7 @@ using EPR.Calculator.API.Builder.LateReportingTonnages;
 using EPR.Calculator.API.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.Builder.ParametersOther;
 using EPR.Calculator.API.Builder.Summary;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
 
@@ -13,6 +14,7 @@ namespace EPR.Calculator.API.Builder
 {
     public class CalcResultBuilder : ICalcResultBuilder
     {
+        private readonly ApplicationDBContext context;
         private readonly ICalcResultParameterOtherCostBuilder calcResultParameterOtherCostBuilder;
         private readonly ICalcResultDetailBuilder calcResultDetailBuilder;
         private readonly ICalcResultLapcapDataBuilder lapcapBuilder;
@@ -23,6 +25,7 @@ namespace EPR.Calculator.API.Builder
         private readonly ICalcRunLaDisposalCostBuilder laDisposalCostBuilder;
 
         public CalcResultBuilder(
+            ApplicationDBContext context,
             ICalcResultDetailBuilder calcResultDetailBuilder,
             ICalcResultLapcapDataBuilder lapcapBuilder,
             ICalcResultParameterOtherCostBuilder calcResultParameterOtherCostBuilder,
@@ -32,6 +35,7 @@ namespace EPR.Calculator.API.Builder
             ICalcRunLaDisposalCostBuilder calcRunLaDisposalCostBuilder,
             ICalcResultSummaryBuilder summaryBuilder)
         {
+            this.context = context;
             this.calcResultDetailBuilder = calcResultDetailBuilder;
             this.lapcapBuilder = lapcapBuilder;
             this.commsCostReportBuilder = commsCostReportBuilder;
@@ -60,6 +64,22 @@ namespace EPR.Calculator.API.Builder
                         Name = string.Empty
                     }
             };
+
+            var scaledupProducers = await (
+                                            from run in context.CalculatorRuns
+                                            join pdm in context.CalculatorRunPomDataMaster
+                                                on run.CalculatorRunPomDataMasterId equals pdm.Id
+                                            join pdd in context.CalculatorRunPomDataDetails
+                                                on pdm.Id equals pdd.CalculatorRunPomDataMasterId
+                                            join spl in context.SubmissionPeriodLookup
+                                                on pdd.SubmissionPeriod equals spl.SubmissionPeriod
+                                            where run.Id == 28
+                                            select new
+                                            {
+                                                ProducerId = pdd.
+                                            }
+
+                ).ToListAsync();
 
             result.CalcResultDetail = await this.calcResultDetailBuilder.Construct(resultsRequestDto);
             result.CalcResultLapcapData = await this.lapcapBuilder.Construct(resultsRequestDto);
