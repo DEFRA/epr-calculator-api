@@ -665,7 +665,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     TwoCWalesTotalWithBadDebt = 300.7301007856519m,
                     TwoCScotlandTotalWithBadDebt = 360.87612094278234m,
                     TwoCNorthernIrelandTotalWithBadDebt = 150.36505039282596m,
-                    PercentageofProducerReportedHHTonnagevsAllProducers = 5.6741528450123m,
+                    PercentageofProducerReportedTonnagevsAllProducers = 5.6741528450123m,
                     ProducerTotalOnePlus2A2B2CWithBadDeptProvision = 10491.167766844124m,
                     ProducerOverallPercentageOfCostsForOnePlus2A2B2C = 4.7341913352015945m,
                     Total3SAOperatingCostwoBadDebtprovision = 3077.2243678810364m,
@@ -1195,6 +1195,22 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     PackagingTonnage = 20.00m,
                     PackagingType = "CW",
                     MaterialId = 1,
+                    ProducerDetail = null
+                },
+                new ProducerReportedMaterial
+                {
+                    Material = new Material { Id = 3, Code = "PL", Name = "Plastic", Description = "Plastic" },
+                    PackagingTonnage = 20.00m,
+                    PackagingType = "PB",
+                    MaterialId = 3,
+                    ProducerDetail = null
+                },
+                new ProducerReportedMaterial
+                {
+                    Material = new Material { Id = 4, Code = "GL", Name = "Glass", Description = "Glass" },
+                    PackagingTonnage = 50.00m,
+                    PackagingType = "HDC",
+                    MaterialId = 4,
                     ProducerDetail = null
                 }
             };
