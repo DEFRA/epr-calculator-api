@@ -12,6 +12,8 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
 using System.Globalization;
+using EPR.Calculator.API.Builder.Summary.ThreeSA;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace EPR.Calculator.API.Builder.Summary.Common;
 
@@ -25,11 +27,11 @@ public static class CalcResultSummaryUtil
 
     public const int DisposalFeeSummaryColumnIndex = 110;
     public const int MaterialsBreakdownHeaderCommsInitialColumnIndex = 117;
-    public const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 9;
+    public const int MaterialsBreakdownHeaderCommsIncrementalColumnIndex = 11;
     //Section-(1) & (2a)
-    public const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 196;
+    public const int DisposalFeeCommsCostsHeaderInitialColumnIndex = 213;
     //Section-(2b)
-    private const int CommsCost2bColumnIndex = 194;
+    private const int CommsCost2bColumnIndex = 228;
     public const int decimalRoundUp = 2;
 
     public static int GetLevelIndex(List<CalcResultSummaryProducerDisposalFees> producerDisposalFeesLookup, ProducerDetail producer)
@@ -535,7 +537,9 @@ public static class CalcResultSummaryUtil
                 Name = $"{material.Name} Breakdown",
                 ColumnIndex = commsCostColumnIndex
             });
-            commsCostColumnIndex = commsCostColumnIndex + MaterialsBreakdownHeaderCommsIncrementalColumnIndex;
+            commsCostColumnIndex = commsCostColumnIndex + (material.Code == MaterialCodes.Glass ? 
+                MaterialsBreakdownHeaderCommsIncrementalColumnIndex + 1 : 
+                MaterialsBreakdownHeaderCommsIncrementalColumnIndex);           
         }
 
         materialsBreakdownHeaders.Add(new CalcResultSummaryHeader
@@ -651,6 +655,8 @@ public static class CalcResultSummaryUtil
         {
             columnHeaders.AddRange([
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ReportedHouseholdPackagingWasteTonnage },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ReportedPublicBinTonnage },
+                new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.TotalReportedTonnage },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PricePerTonne },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ProducerTotalCostWithoutBadDebtProvision },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.BadDebtProvision },
@@ -660,6 +666,13 @@ public static class CalcResultSummaryUtil
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.ScotlandWithBadDebtProvision },
                 new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandWithBadDebtProvision }
             ]);
+
+            if(material.Code==MaterialCodes.Glass)
+            {
+              int? index =  columnHeaders.FindLastIndex(t => t.Name.Equals(CalcResultSummaryHeaders.ReportedPublicBinTonnage));
+               int t = (int)(index + 1);
+              columnHeaders.Insert(t, new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.HouseholdDrinksContainersTonnage });
+            }
         }
 
         columnHeaders.AddRange([
@@ -693,9 +706,9 @@ public static class CalcResultSummaryUtil
             new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.NorthernIrelandTotalwithBadDebtprovision }
         ]);
 
-        // Percentage of Producer Reported Household Tonnage vs All Producers
+        // Percentage of Producer Reported Tonnage vs All Producers
         columnHeaders.AddRange([
-            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PercentageofProducerReportedHHTonnagevsAllProducers },
+            new CalcResultSummaryHeader { Name = CalcResultSummaryHeaders.PercentageofProducerReportedTonnagevsAllProducers },
         ]);
 
         // 2b comms total.
@@ -895,5 +908,43 @@ public static class CalcResultSummaryUtil
             default:
                 return 0;
         }
+    }
+
+    public static decimal GetReportedPublicBinTonnage(ProducerDetail producer, MaterialDetail material)
+    {
+        var publicBinPackagingMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == "PB");
+
+        return publicBinPackagingMaterial != null ? publicBinPackagingMaterial.PackagingTonnage : 0;
+    }
+
+    public static decimal GetReportedPublicBinTonnageTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material)
+    {
+        decimal totalCost = 0;
+
+        foreach (var producer in producers)
+        {
+            totalCost += GetReportedPublicBinTonnage(producer, material);
+        }
+
+        return totalCost;
+    }
+
+    public static decimal GetHDCGlassTonnage(ProducerDetail producer, MaterialDetail material)
+    {
+        var hdcPackagingMaterial = producer.ProducerReportedMaterials.FirstOrDefault(p => p.Material?.Code == material.Code && p.PackagingType == PackagingTypes.HouseholdDrinksContainers);
+
+        return hdcPackagingMaterial != null ? hdcPackagingMaterial.PackagingTonnage : 0;
+    }
+
+    public static decimal GetHDCGlassTonnageTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material)
+    {
+        decimal totalCost = 0;
+
+        foreach (var producer in producers)
+        {
+            totalCost += GetHDCGlassTonnage(producer, material);
+        }
+
+        return totalCost;
     }
 }

@@ -760,6 +760,64 @@
             Assert.AreEqual(12.32876712328767m, result);
         }
 
+        [TestMethod]
+        public void CanGetReportedPublicBinTonnage()
+        {
+            // Arrange
+            var producer = TestDataHelper.GetProducers().First(p => p.Id == 2);
+            var material = TestDataHelper.GetMaterials().First(m => m.Code == "PL");
+
+            // Act
+            var result = CalcResultSummaryUtil.GetReportedPublicBinTonnage(producer, material);
+
+            // Assert
+            Assert.AreEqual(20.00m, result);
+        }
+
+        [TestMethod]
+        public void CanGetReportedPublicBinTonnageTotal()
+        {
+            // Arrange
+            var producer = TestDataHelper.GetProducers();
+            var material = TestDataHelper.GetMaterials().First(m => m.Code == "PL");
+
+            // Act
+            var result = CalcResultSummaryUtil.GetReportedPublicBinTonnageTotal(producer, material);
+
+            // Assert
+            Assert.AreEqual(60.00m, result);
+        }
+
+        [TestMethod]
+        public void CanGetReportedHDCTonnage()
+        {
+            // Arrange
+            var producer = TestDataHelper.GetProducers().First(p => p.Id == 1);
+            var material = TestDataHelper.GetMaterials().First(m => m.Code == "GL");
+
+            // Act
+            var result = CalcResultSummaryUtil.GetHDCGlassTonnage(producer, material);
+
+            // Assert
+            Assert.AreEqual(50.00m, result);
+        }
+
+        [TestMethod]
+        public void CanGetReportedHDCTonnageTotal()
+        {
+            // Arrange
+            var producer = TestDataHelper.GetProducers();
+            var material = TestDataHelper.GetMaterials().First(m => m.Code == "GL");
+
+            // Act
+            var result = CalcResultSummaryUtil.GetHDCGlassTonnageTotal(producer, material);
+
+            // Assert
+            Assert.AreEqual(150.00m, result);
+        }
+
+
+
         private CalcResultParameterCommunicationCost GetCalcResultParameterCommunicationCost()
         {
             return this.Fixture.Create<CalcResultParameterCommunicationCost>();
