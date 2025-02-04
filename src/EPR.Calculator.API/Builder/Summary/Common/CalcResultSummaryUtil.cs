@@ -68,9 +68,7 @@ public static class CalcResultSummaryUtil
         var publicBinTonnageMaterial = GetPublicBinTonnage(producer, material);
         var householdDrinksContainers = GetHouseholdDrinksContainersTonnage(producer, material);
 
-        return material.Code != MaterialCodes.Glass ?
-            householdPackagingWasteTonnage + publicBinTonnageMaterial : 
-            householdPackagingWasteTonnage + publicBinTonnageMaterial + householdDrinksContainers;
+        return material.Code != MaterialCodes.Glass ? householdPackagingWasteTonnage + publicBinTonnageMaterial : householdPackagingWasteTonnage + publicBinTonnageMaterial + householdDrinksContainers;
     }
 
     public static decimal GetHouseholdPackagingWasteTonnageProducerTotal(IEnumerable<ProducerDetail> producers, MaterialDetail material)
