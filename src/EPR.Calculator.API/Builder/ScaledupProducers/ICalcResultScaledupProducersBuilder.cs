@@ -5,6 +5,6 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
 {
     public interface ICalcResultScaledupProducersBuilder
     {
-        Task<CalcResultScaledupProducers> Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult);
+        Task<CalcResultScaledupProducers> Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult, IEnumerable<ScaledupProducer> scaledupProducers);
     }
 }

@@ -17,7 +17,9 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
             this.context = context;
         }
 
-        public async Task<CalcResultScaledupProducers> Construct(CalcResultsRequestDto resultsRequestDto, CalcResult calcResult)
+        public async Task<CalcResultScaledupProducers> Construct(CalcResultsRequestDto resultsRequestDto,
+            CalcResult calcResult,
+            IEnumerable<ScaledupProducer> scaledupProducers)
         {
             var runId = resultsRequestDto.RunId;
             var materialsFromDb = await context.Material.ToListAsync();

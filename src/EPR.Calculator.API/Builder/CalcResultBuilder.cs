@@ -5,10 +5,12 @@ using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
 using EPR.Calculator.API.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.Builder.ParametersOther;
+using EPR.Calculator.API.Builder.ScaledupProducers;
 using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Builder
 {
@@ -23,6 +25,7 @@ namespace EPR.Calculator.API.Builder
         private readonly ICalcResultCommsCostBuilder commsCostReportBuilder;
         private readonly ICalcResultLateReportingBuilder lateReportingBuilder;
         private readonly ICalcRunLaDisposalCostBuilder laDisposalCostBuilder;
+        private readonly ICalcResultScaledupProducersBuilder calcResultScaledupProducersBuilder;
 
         public CalcResultBuilder(
             ApplicationDBContext context,
@@ -33,6 +36,7 @@ namespace EPR.Calculator.API.Builder
             ICalcResultCommsCostBuilder commsCostReportBuilder,
             ICalcResultLateReportingBuilder lateReportingBuilder,
             ICalcRunLaDisposalCostBuilder calcRunLaDisposalCostBuilder,
+            ICalcResultScaledupProducersBuilder calcResultScaledupProducersBuilder,
             ICalcResultSummaryBuilder summaryBuilder)
         {
             this.context = context;
@@ -43,6 +47,7 @@ namespace EPR.Calculator.API.Builder
             this.calcResultParameterOtherCostBuilder = calcResultParameterOtherCostBuilder;
             this.laDisposalCostBuilder = calcRunLaDisposalCostBuilder;
             this.lapcapplusFourApportionmentBuilder = calcResultOnePlusFourApportionmentBuilder;
+            this.calcResultScaledupProducersBuilder = calcResultScaledupProducersBuilder;
             this.summaryBuilder = summaryBuilder;
         }
 
@@ -73,13 +78,13 @@ namespace EPR.Calculator.API.Builder
                                                 on pdm.Id equals pdd.CalculatorRunPomDataMasterId
                                             join spl in context.SubmissionPeriodLookup
                                                 on pdd.SubmissionPeriod equals spl.SubmissionPeriod
-                                            where run.Id == 28
-                                            select new
+                                            where run.Id == resultsRequestDto.RunId
+                                            select new ScaledupProducer
                                             {
-                                                ProducerId = pdd.
-                                            }
-
-                ).ToListAsync();
+                                                ProducerId = pdd.OrganisationId,
+                                                SubmissionPeriod = pdd.SubmissionPeriod,
+                                                ScaleupFactor = spl.ScaleupFactor
+                                            }).Distinct().ToListAsync();
 
             result.CalcResultDetail = await this.calcResultDetailBuilder.Construct(resultsRequestDto);
             result.CalcResultLapcapData = await this.lapcapBuilder.Construct(resultsRequestDto);
@@ -90,6 +95,7 @@ namespace EPR.Calculator.API.Builder
             result.CalcResultCommsCostReportDetail = await this.commsCostReportBuilder.Construct(
                 resultsRequestDto, result.CalcResultOnePlusFourApportionment);
             result.CalcResultLaDisposalCostData = await this.laDisposalCostBuilder.Construct(resultsRequestDto, result);
+            result.CalcResultScaledupProducers = await this.calcResultScaledupProducersBuilder.Construct(resultsRequestDto, result, scaledupProducers);
             result.CalcResultSummary = await this.summaryBuilder.Construct(resultsRequestDto, result);
 
             return result;

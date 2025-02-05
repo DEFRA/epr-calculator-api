@@ -51,6 +51,8 @@
                 CalcResultLaDisposalCostDetails = [],
             };
 
+        public CalcResultScaledupProducers CalcResultScaledupProducers { get; set; }
+
         public CalcResultSummary CalcResultSummary { get; set; } = new();
     }
 }
