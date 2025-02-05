@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250130170758_AddSubmissionPeriodLookup")]
-    partial class AddSubmissionPeriodLookup
+    [Migration("20250123134310_AddCalculatorRunCsvFileMetadata")]
+    partial class AddCalculatorRunCsvFileMetadata
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -156,6 +156,38 @@ namespace EPR.Calculator.API.Data.Migrations
                             CreatedBy = "Test User",
                             Status = "ERROR"
                         });
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunCsvFileMetadata", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BlobUri")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("blob_uri");
+
+                    b.Property<int>("CalculatorRunId")
+                        .HasColumnType("int")
+                        .HasColumnName("calculator_run_id");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("filename");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CalculatorRunId");
+
+                    b.ToTable("calculator_run_csvfile_metadata");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataDetail", b =>
@@ -1424,45 +1456,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.ToTable("producer_reported_material");
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.SubmissionPeriodLookup", b =>
-                {
-                    b.Property<string>("SubmissionPeriod")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("submission_period");
-
-                    b.Property<int>("DaysInSubmissionPeriod")
-                        .HasColumnType("int")
-                        .HasColumnName("days_in_submission_period");
-
-                    b.Property<int>("DaysInWholePeriod")
-                        .HasColumnType("int")
-                        .HasColumnName("days_in_whole_period");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("end_date");
-
-                    b.Property<decimal>("ScaleupFactor")
-                        .HasPrecision(16, 12)
-                        .HasColumnType("decimal(16,12)")
-                        .HasColumnName("scaleup_factor");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("start_date");
-
-                    b.Property<string>("SubmissionPeriodDesc")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("submission_period_desc");
-
-                    b.HasKey("SubmissionPeriod");
-
-                    b.ToTable("submission_period_lookup");
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", null)
@@ -1494,6 +1487,17 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("DefaultParameterSettingMaster");
 
                     b.Navigation("LapcapDataMaster");
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunCsvFileMetadata", b =>
+                {
+                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
+                        .WithMany("CsvFileMetadata")
+                        .HasForeignKey("CalculatorRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CalculatorRun");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataDetail", b =>
@@ -1616,6 +1620,8 @@ namespace EPR.Calculator.API.Data.Migrations
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
                 {
                     b.Navigation("CountryApportionments");
+
+                    b.Navigation("CsvFileMetadata");
 
                     b.Navigation("ProducerDetails");
                 });

@@ -217,17 +217,19 @@ namespace EPR.Calculator.API.Controllers
                 var results = await this.builder.Build(resultsRequestDto);
                 var exportedResults = this.exporter.Export(results);
 
-                var fileName = new CalcResultsFileName(
-                    results.CalcResultDetail.RunId,
-                    results.CalcResultDetail.RunName,
-                    results.CalcResultDetail.RunDate);
-                var resultsFileWritten = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
+                    var fileName = new CalcResultsFileName(
+                        results.CalcResultDetail.RunId,
+                        results.CalcResultDetail.RunName,
+                        results.CalcResultDetail.RunDate);
+                    var blobUri = await this.storageService.UploadResultFileContentAsync(fileName, exportedResults);
 
-                if (resultsFileWritten)
+                if (!string.IsNullOrEmpty(blobUri))
                 {
+                    await SaveCsvFileMetadataAsync(results.CalcResultDetail.RunId, fileName.ToString(), blobUri);
                     calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
                     this.context.CalculatorRuns.Update(calculatorRun);
                     await this.context.SaveChangesAsync(HttpContext.RequestAborted);
+
                     var timeDiff = startTime - DateTime.Now;
                     return new ObjectResult(timeDiff.Minutes) { StatusCode = StatusCodes.Status201Created };
                 }
@@ -236,9 +238,7 @@ namespace EPR.Calculator.API.Controllers
             {
                 if (calculatorRun != null)
                 {
-                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
-                    this.context.CalculatorRuns.Update(calculatorRun);
-                    await this.context.SaveChangesAsync();
+                    await UpdateCalculatorRunClassificationAsync(calculatorRun, RunClassification.ERROR);
                 }
                 return StatusCode(StatusCodes.Status408RequestTimeout, exception.ToString());
             }
@@ -246,16 +246,30 @@ namespace EPR.Calculator.API.Controllers
             {
                 if (calculatorRun != null)
                 {
-                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
-                    this.context.CalculatorRuns.Update(calculatorRun);
-                    await this.context.SaveChangesAsync();
+                    await UpdateCalculatorRunClassificationAsync(calculatorRun, RunClassification.ERROR);
                 }
                 return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
             }
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.ERROR;
-            this.context.CalculatorRuns.Update(calculatorRun);
-            await this.context.SaveChangesAsync();
+            await UpdateCalculatorRunClassificationAsync(calculatorRun, RunClassification.ERROR);
             return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
+        private async Task SaveCsvFileMetadataAsync(int runId, string fileName, string blobUri)
+        {
+            var csvFileMetadata = new CalculatorRunCsvFileMetadata
+            {
+                FileName = fileName,
+                BlobUri = blobUri,
+                CalculatorRunId = runId
+            };
+            await context.CalculatorRunCsvFileMetadata.AddAsync(csvFileMetadata);
+        }
+
+        private async Task UpdateCalculatorRunClassificationAsync(CalculatorRun calculatorRun, RunClassification classification)
+        {
+            calculatorRun.CalculatorRunClassificationId = (int)classification;
+            context.CalculatorRuns.Update(calculatorRun);
+            await context.SaveChangesAsync();
         }
     }
 }
