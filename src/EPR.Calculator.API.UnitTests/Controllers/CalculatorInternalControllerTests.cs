@@ -317,7 +317,8 @@ namespace EPR.Calculator.API.UnitTests
 
             mockTranspose.Setup(x => x.Transpose(It.IsAny<CalcResultsRequestDto>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
             mockStorageService.Setup(x => x.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(true);
+                .ReturnsAsync("expected result");
+
             mockCalcResultBuilder.Setup(b => b.Build(requestDto)).ReturnsAsync(calcResult);
             var task = controller.PrepareCalcResults(requestDto);
             task.Wait();
@@ -538,7 +539,7 @@ namespace EPR.Calculator.API.UnitTests
 
             var mockStorage = new Mock<IStorageService>();
             mockStorage.Setup(m => m.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.FromResult(true));
+                .ReturnsAsync("expected ");
 
             var controller = new CalculatorInternalController(
                 dbContext,
@@ -583,7 +584,7 @@ namespace EPR.Calculator.API.UnitTests
 
             var mockStorage = new Mock<IStorageService>();
             mockStorage.Setup(m => m.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.FromResult(true));
+                .ReturnsAsync("expected result");
 
             var controller = new CalculatorInternalController(
                 dbContext,
@@ -599,17 +600,15 @@ namespace EPR.Calculator.API.UnitTests
             var httpContext = new Mock<HttpContext>();
             httpContext.SetupSequence(c => c.RequestAborted)
                 .Returns(new CancellationToken(false))
-                .Returns(new CancellationToken(false))
                 .Returns(new CancellationToken(true));
             controller.ControllerContext.HttpContext = httpContext.Object;
-
 
             // Act
             var task = await controller.PrepareCalcResults(requestDto);
             var result = (ObjectResult)task;
 
             // Assert
-            Assert.AreEqual((int)HttpStatusCode.Created, result.StatusCode);
+            Assert.AreEqual((int)HttpStatusCode.RequestTimeout, result.StatusCode);
         }
 
         /// <summary>
@@ -665,7 +664,7 @@ namespace EPR.Calculator.API.UnitTests
 
             var mockStorage = new Mock<IStorageService>();
             mockStorage.Setup(m => m.UploadResultFileContentAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.FromResult(true));
+                .ReturnsAsync("expected result");
 
             var controller = new CalculatorInternalController(
                 dbContext,

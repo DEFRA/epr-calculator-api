@@ -3,7 +3,6 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Exporter;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
@@ -316,21 +315,16 @@ namespace EPR.Calculator.API.Controllers
                 var badRequest = Results.BadRequest(ModelState.Values.SelectMany(x => x.Errors));
                 return badRequest;
             }
-
-            var calcRun = await context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId);
-            if (calcRun == null)
+            
+            var csvFileMetadata = await context.CalculatorRunCsvFileMetadata.SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId);
+            if (csvFileMetadata == null)
             {
-                var notFound = Results.NotFound(ModelState.Values.SelectMany(x => x.Errors));
-                return notFound;
+                return Results.NotFound($"No CSV file found for Run Id {runId}");
             }
 
             try
             {
-                var fileName = new CalcResultsFileName(
-                    calcRun.Id,
-                    calcRun.Name ?? string.Empty,
-                    calcRun.CreatedAt);
-                return await storageService.DownloadFile(fileName);
+                return await storageService.DownloadFile(csvFileMetadata.FileName, csvFileMetadata.BlobUri);
             }
             catch (Exception e)
             {

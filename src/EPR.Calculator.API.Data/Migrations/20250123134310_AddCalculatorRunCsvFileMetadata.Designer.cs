@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250123134310_AddCalculatorRunCsvFileMetadata")]
+    partial class AddCalculatorRunCsvFileMetadata
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1451,45 +1454,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.HasIndex("ProducerDetailId");
 
                     b.ToTable("producer_reported_material");
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.SubmissionPeriodLookup", b =>
-                {
-                    b.Property<string>("SubmissionPeriod")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("submission_period");
-
-                    b.Property<int>("DaysInSubmissionPeriod")
-                        .HasColumnType("int")
-                        .HasColumnName("days_in_submission_period");
-
-                    b.Property<int>("DaysInWholePeriod")
-                        .HasColumnType("int")
-                        .HasColumnName("days_in_whole_period");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("end_date");
-
-                    b.Property<decimal>("ScaleupFactor")
-                        .HasPrecision(16, 12)
-                        .HasColumnType("decimal(16,12)")
-                        .HasColumnName("scaleup_factor");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("start_date");
-
-                    b.Property<string>("SubmissionPeriodDesc")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("submission_period_desc");
-
-                    b.HasKey("SubmissionPeriod");
-
-                    b.ToTable("submission_period_lookup");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
