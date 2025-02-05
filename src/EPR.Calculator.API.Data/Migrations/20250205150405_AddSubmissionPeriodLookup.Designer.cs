@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250130170758_AddSubmissionPeriodLookup")]
+    [Migration("20250205150405_AddSubmissionPeriodLookup")]
     partial class AddSubmissionPeriodLookup
     {
         /// <inheritdoc />
@@ -156,6 +156,38 @@ namespace EPR.Calculator.API.Data.Migrations
                             CreatedBy = "Test User",
                             Status = "ERROR"
                         });
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunCsvFileMetadata", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BlobUri")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)")
+                        .HasColumnName("blob_uri");
+
+                    b.Property<int>("CalculatorRunId")
+                        .HasColumnType("int")
+                        .HasColumnName("calculator_run_id");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("filename");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CalculatorRunId");
+
+                    b.ToTable("calculator_run_csvfile_metadata");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataDetail", b =>
@@ -1494,6 +1526,17 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("DefaultParameterSettingMaster");
 
                     b.Navigation("LapcapDataMaster");
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunCsvFileMetadata", b =>
+                {
+                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
+                        .WithMany()
+                        .HasForeignKey("CalculatorRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CalculatorRun");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataDetail", b =>

@@ -176,8 +176,8 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.Property<string>("FileName")
                         .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
                         .HasColumnName("filename");
 
                     b.HasKey("Id");
@@ -1528,7 +1528,7 @@ namespace EPR.Calculator.API.Data.Migrations
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunCsvFileMetadata", b =>
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
-                        .WithMany("CsvFileMetadata")
+                        .WithMany()
                         .HasForeignKey("CalculatorRunId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1656,8 +1656,6 @@ namespace EPR.Calculator.API.Data.Migrations
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
                 {
                     b.Navigation("CountryApportionments");
-
-                    b.Navigation("CsvFileMetadata");
 
                     b.Navigation("ProducerDetails");
                 });
