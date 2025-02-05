@@ -3315,3 +3315,54 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250205150405_AddSubmissionPeriodLookup'
+)
+BEGIN
+    CREATE TABLE [submission_period_lookup] (
+        [submission_period] nvarchar(400) NOT NULL,
+        [submission_period_desc] nvarchar(400) NOT NULL,
+        [start_date] datetime2 NOT NULL,
+        [end_date] datetime2 NOT NULL,
+        [days_in_submission_period] int NOT NULL,
+        [days_in_whole_period] int NOT NULL,
+        [scaleup_factor] decimal(16,12) NOT NULL,
+        CONSTRAINT [PK_submission_period_lookup] PRIMARY KEY ([submission_period])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250205150405_AddSubmissionPeriodLookup'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
+        SET IDENTITY_INSERT [submission_period_lookup] ON;
+    EXEC(N'INSERT INTO [submission_period_lookup] ([submission_period], [submission_period_desc], [start_date], [end_date], [days_in_submission_period], [days_in_whole_period], [scaleup_factor])
+    VALUES (N''2024-P1'', N''January to June 2024'', ''2024-01-01T00:00:00.0000000+00:00'', ''2024-06-30T23:59:59.0000000+01:00'', 182, 182, 1.0),
+    (N''2024-P2'', N''April to June 2024'', ''2024-04-01T00:00:00.0000000+01:00'', ''2024-06-30T23:59:59.0000000+01:00'', 91, 182, 2.0),
+    (N''2024-P3'', N''May to June 2024'', ''2024-05-01T00:00:00.0000000+01:00'', ''2024-06-30T23:59:59.0000000+01:00'', 61, 182, 2.983606557377),
+    (N''2024-P4'', N''July to December 2024'', ''2024-07-01T00:00:00.0000000+01:00'', ''2024-12-31T23:59:59.0000000+00:00'', 184, 184, 1.0)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
+        SET IDENTITY_INSERT [submission_period_lookup] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250205150405_AddSubmissionPeriodLookup'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250205150405_AddSubmissionPeriodLookup', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
