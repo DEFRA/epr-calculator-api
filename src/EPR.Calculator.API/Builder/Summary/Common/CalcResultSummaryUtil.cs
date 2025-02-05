@@ -336,7 +336,7 @@ public static class CalcResultSummaryUtil
         return calcResult.CalcResultLapcapData.CalcResultLapcapDataDetails?.FirstOrDefault(la => la.Name == CalcResultSummaryHeaders.OneCountryApportionment);
     }
 
-    public static decimal GetTotalProducerDisposalFee(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
+    public static decimal GetTotalProducerDisposalFee(Dictionary<string, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
     {
         decimal totalProducerDisposalFee = 0;
 
@@ -348,7 +348,7 @@ public static class CalcResultSummaryUtil
         return totalProducerDisposalFee;
     }
 
-    public static decimal GetTotalBadDebtProvision(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
+    public static decimal GetTotalBadDebtProvision(Dictionary<string, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
     {
         decimal totalBadDebtProvision = 0;
 
@@ -360,7 +360,7 @@ public static class CalcResultSummaryUtil
         return totalBadDebtProvision;
     }
 
-    public static decimal GetTotalProducerDisposalFeeWithBadDebtProvision(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
+    public static decimal GetTotalProducerDisposalFeeWithBadDebtProvision(Dictionary<string, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
     {
         decimal totalProducerDisposalFeeWithBadDebtProvision = 0;
 
@@ -372,7 +372,7 @@ public static class CalcResultSummaryUtil
         return totalProducerDisposalFeeWithBadDebtProvision;
     }
 
-    public static decimal GetEnglandTotal(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
+    public static decimal GetEnglandTotal(Dictionary<string, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
     {
         decimal totalEngland = 0;
 
@@ -384,7 +384,7 @@ public static class CalcResultSummaryUtil
         return totalEngland;
     }
 
-    public static decimal GetWalesTotal(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
+    public static decimal GetWalesTotal(Dictionary<string, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
     {
         decimal totalWales = 0;
 
@@ -396,7 +396,7 @@ public static class CalcResultSummaryUtil
         return totalWales;
     }
 
-    public static decimal GetScotlandTotal(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
+    public static decimal GetScotlandTotal(Dictionary<string, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
     {
         decimal totalScotland = 0;
 
@@ -408,7 +408,7 @@ public static class CalcResultSummaryUtil
         return totalScotland;
     }
 
-    public static decimal GetNorthernIrelandTotal(Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
+    public static decimal GetNorthernIrelandTotal(Dictionary<string, CalcResultSummaryProducerDisposalFeesByMaterial> materialCostSummary)
     {
         decimal totalNorthernIreland = 0;
 
@@ -761,7 +761,7 @@ public static class CalcResultSummaryUtil
         return columnHeaders;
     }
 
-    public static decimal GetTotalProducerCommsFee(Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> commsCostSummary)
+    public static decimal GetTotalProducerCommsFee(Dictionary<string, CalcResultSummaryProducerCommsFeesCostByMaterial> commsCostSummary)
     {
         decimal producerTotalCostWithoutBadDebtProvision = 0;
 
@@ -773,7 +773,7 @@ public static class CalcResultSummaryUtil
         return producerTotalCostWithoutBadDebtProvision;
     }
 
-    public static decimal GetCommsTotalBadDebtProvision(Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> materialCostSummary)
+    public static decimal GetCommsTotalBadDebtProvision(Dictionary<string, CalcResultSummaryProducerCommsFeesCostByMaterial> materialCostSummary)
     {
         decimal totalBadDebtProvision = 0;
 
@@ -785,7 +785,7 @@ public static class CalcResultSummaryUtil
         return totalBadDebtProvision;
     }
 
-    public static decimal GetTotalProducerCommsFeeWithBadDebtProvision(Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> commsCostSummary)
+    public static decimal GetTotalProducerCommsFeeWithBadDebtProvision(Dictionary<string, CalcResultSummaryProducerCommsFeesCostByMaterial> commsCostSummary)
     {
         decimal totalCommsCostsbyMaterialwithBadDebtprovision = 0;
 
@@ -797,7 +797,7 @@ public static class CalcResultSummaryUtil
         return totalCommsCostsbyMaterialwithBadDebtprovision;
     }
 
-    public static decimal GetNorthernIrelandCommsTotal(Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> commsCostSummary)
+    public static decimal GetNorthernIrelandCommsTotal(Dictionary<string, CalcResultSummaryProducerCommsFeesCostByMaterial> commsCostSummary)
     {
         decimal northernIrelandTotalwithBadDebtprovision = 0;
 
@@ -809,7 +809,7 @@ public static class CalcResultSummaryUtil
         return northernIrelandTotalwithBadDebtprovision;
     }
 
-    public static decimal GetScotlandCommsTotal(Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> commsCostSummary)
+    public static decimal GetScotlandCommsTotal(Dictionary<string, CalcResultSummaryProducerCommsFeesCostByMaterial> commsCostSummary)
     {
         decimal scotlandTotalwithBadDebtprovision = 0;
 
@@ -821,7 +821,7 @@ public static class CalcResultSummaryUtil
         return scotlandTotalwithBadDebtprovision;
     }
 
-    public static decimal GetWalesCommsTotal(Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> commsCostSummary)
+    public static decimal GetWalesCommsTotal(Dictionary<string, CalcResultSummaryProducerCommsFeesCostByMaterial> commsCostSummary)
     {
         decimal walesTotalwithBadDebtprovision = 0;
 
@@ -833,7 +833,7 @@ public static class CalcResultSummaryUtil
         return walesTotalwithBadDebtprovision;
     }
 
-    public static decimal GetEnglandCommsTotal(Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> commsCostSummary)
+    public static decimal GetEnglandCommsTotal(Dictionary<string, CalcResultSummaryProducerCommsFeesCostByMaterial> commsCostSummary)
     {
         decimal englandTotalwithBadDebtprovision = 0;
 

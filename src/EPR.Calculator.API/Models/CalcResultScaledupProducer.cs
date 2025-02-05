@@ -18,6 +18,6 @@
 
         public required decimal ScaleupFactor { get; set; }
 
-        public required Dictionary<MaterialDetail, CalcResultScaledupProducerTonnage> ScaledupProducerTonnageByMaterial { get; set; }
+        public required Dictionary<string, CalcResultScaledupProducerTonnage> ScaledupProducerTonnageByMaterial { get; set; }
     }
 }

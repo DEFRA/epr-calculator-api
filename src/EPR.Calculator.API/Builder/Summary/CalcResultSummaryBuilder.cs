@@ -168,12 +168,12 @@ namespace EPR.Calculator.API.Builder.Summary
             bool isOverAllTotalRow,
             IEnumerable<TotalPackagingTonnagePerRun> TotalPackagingTonnage)
         {
-            var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
-            var commsCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>();
+            var materialCostSummary = new Dictionary<string, CalcResultSummaryProducerDisposalFeesByMaterial>();
+            var commsCostSummary = new Dictionary<string, CalcResultSummaryProducerCommsFeesCostByMaterial>();
 
             foreach (var material in materials)
             {
-                materialCostSummary.Add(material, new CalcResultSummaryProducerDisposalFeesByMaterial
+                materialCostSummary.Add(material.Code, new CalcResultSummaryProducerDisposalFeesByMaterial
                 {
                     HouseholdPackagingWasteTonnage = CalcResultSummaryUtil.GetHouseholdPackagingWasteTonnageProducerTotal(producersAndSubsidiaries, material),
                     PublicBinTonnage = CalcResultSummaryUtil.GetPublicBinTonnageProducerTotal(producersAndSubsidiaries, material),
@@ -192,10 +192,14 @@ namespace EPR.Calculator.API.Builder.Summary
                         calcResult)
                 });
 
-                if (material.Code == MaterialCodes.Glass && materialCostSummary.TryGetValue(material, out var materialCost))
-                { materialCost.HouseholdDrinksContainersTonnage = CalcResultSummaryUtil.GetHouseholdDrinksContainersTonnageProducerTotal(producersAndSubsidiaries, material); }
+                if (material.Code == MaterialCodes.Glass
+                    && 
+                    materialCostSummary.TryGetValue(material.Code, out var materialCost))
+                { 
+                    materialCost.HouseholdDrinksContainersTonnage = CalcResultSummaryUtil.GetHouseholdDrinksContainersTonnageProducerTotal(producersAndSubsidiaries, material); 
+                }
 
-                commsCostSummary.Add(material, new CalcResultSummaryProducerCommsFeesCostByMaterial
+                commsCostSummary.Add(material.Code, new CalcResultSummaryProducerCommsFeesCostByMaterial
                 {
                     HouseholdPackagingWasteTonnage = CalcResultSummaryUtil.GetHouseholdPackagingWasteTonnageProducerTotal(producersAndSubsidiaries, material),
                     ReportedPublicBinTonnage = CalcResultSummaryUtil.GetReportedPublicBinTonnageTotal(producersAndSubsidiaries, material),
@@ -212,8 +216,12 @@ namespace EPR.Calculator.API.Builder.Summary
                             calcResult)
                 });
 
-                if (material.Code == MaterialCodes.Glass && commsCostSummary.TryGetValue(material, out var comm))
-                { comm.HouseholdDrinksContainers = CalcResultSummaryUtil.GetHDCGlassTonnageTotal(producersAndSubsidiaries, material); }
+                if (material.Code == MaterialCodes.Glass 
+                    && 
+                    commsCostSummary.TryGetValue(material.Code, out var comm))
+                { 
+                    comm.HouseholdDrinksContainers = CalcResultSummaryUtil.GetHDCGlassTonnageTotal(producersAndSubsidiaries, material); 
+                }
 
             }
 
@@ -293,8 +301,8 @@ namespace EPR.Calculator.API.Builder.Summary
             IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails, 
             IEnumerable<TotalPackagingTonnagePerRun> TotalPackagingTonnage)
         {
-            var materialCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>();
-            var commsCostSummary = new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>();
+            var materialCostSummary = new Dictionary<string, CalcResultSummaryProducerDisposalFeesByMaterial>();
+            var commsCostSummary = new Dictionary<string, CalcResultSummaryProducerCommsFeesCostByMaterial>();
             var result = new CalcResultSummaryProducerDisposalFees
             {
                 ProducerId = producer.ProducerId.ToString(),
@@ -322,9 +330,9 @@ namespace EPR.Calculator.API.Builder.Summary
                     NorthernIrelandWithBadDebtProvision = CalcResultSummaryUtil.GetNorthernIrelandWithBadDebtProvision(producer, material, calcResult),
                 };
 
-                materialCostSummary.Add(material, calcResultSummaryProducerDisposalFeesByMaterial);
+                materialCostSummary.Add(material.Code, calcResultSummaryProducerDisposalFeesByMaterial);
 
-                if (material.Code == MaterialCodes.Glass && materialCostSummary.TryGetValue(material, out var producerDisposalFees))
+                if (material.Code == MaterialCodes.Glass && materialCostSummary.TryGetValue(material.Code, out var producerDisposalFees))
                 {
                     producerDisposalFees.HouseholdDrinksContainersTonnage = CalcResultSummaryUtil.GetHouseholdDrinksContainersTonnage(producer, material);
                 }
@@ -352,9 +360,9 @@ namespace EPR.Calculator.API.Builder.Summary
                     NorthernIrelandWithBadDebtProvision = CalcResultSummaryCommsCostTwoA.GetNorthernIrelandWithBadDebtProvisionForComms(producer, material, calcResult)
                 };
 
-                commsCostSummary.Add(material, calcResultSummaryProducerCommsFeesCostByMaterial);
+                commsCostSummary.Add(material.Code, calcResultSummaryProducerCommsFeesCostByMaterial);
 
-                if (material.Code == MaterialCodes.Glass && commsCostSummary.TryGetValue(material, out var comm))
+                if (material.Code == MaterialCodes.Glass && commsCostSummary.TryGetValue(material.Code, out var comm))
                 {                    
                     comm.HouseholdDrinksContainers = CalcResultSummaryUtil.GetHDCGlassTonnage(producer, material); 
                 }
