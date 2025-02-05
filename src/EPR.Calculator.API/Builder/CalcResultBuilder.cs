@@ -94,7 +94,7 @@ namespace EPR.Calculator.API.Builder
             result.CalcResultOnePlusFourApportionment = this.lapcapplusFourApportionmentBuilder.Construct(resultsRequestDto, result);
             result.CalcResultCommsCostReportDetail = await this.commsCostReportBuilder.Construct(
                 resultsRequestDto, result.CalcResultOnePlusFourApportionment);
-            result.CalcResultLaDisposalCostData = await this.laDisposalCostBuilder.Construct(resultsRequestDto, result);
+            result.CalcResultLaDisposalCostData = await this.laDisposalCostBuilder.Construct(resultsRequestDto, result, scaledupProducers);
             result.CalcResultScaledupProducers = await this.calcResultScaledupProducersBuilder.Construct(resultsRequestDto, result, scaledupProducers);
             result.CalcResultSummary = await this.summaryBuilder.Construct(resultsRequestDto, result);
 

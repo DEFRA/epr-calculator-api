@@ -25,6 +25,8 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
             var materialsFromDb = await context.Material.ToListAsync();
             var materials = Mappers.MaterialMapper.Map(materialsFromDb);
 
+            var scaledupProducerIds = scaledupProducers.Select((p) => p.ProducerId) ?? [];
+
             var runProducerMaterialDetails = await (from pd in context.ProducerDetail
                                                     join prm in context.ProducerReportedMaterial on pd.Id equals prm.ProducerDetailId
                                                     where pd.CalculatorRunId == runId
