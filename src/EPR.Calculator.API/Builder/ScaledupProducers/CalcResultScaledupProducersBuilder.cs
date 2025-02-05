@@ -119,9 +119,9 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
             };
         }
 
-        private static Dictionary<MaterialDetail, CalcResultScaledupProducerTonnage> GetScaledupProducerTonnages(IEnumerable<MaterialDetail> materials)
+        private static Dictionary<string, CalcResultScaledupProducerTonnage> GetScaledupProducerTonnages(IEnumerable<MaterialDetail> materials)
         {
-            var scaledupProducerTonnages = new Dictionary<MaterialDetail, CalcResultScaledupProducerTonnage>();
+            var scaledupProducerTonnages = new Dictionary<string, CalcResultScaledupProducerTonnage>();
             foreach (var material in materials)
             {
                 var scaledupProducerTonnage = new CalcResultScaledupProducerTonnage
@@ -137,7 +137,7 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
                     ScaledupReportedSelfManagedConsumerWasteTonnage = GetScaledupReportedSelfManagedConsumerWasteTonnage(),
                     ScaledupNetReportedTonnage = GetScaledupNetReportedTonnage()
                 };
-                scaledupProducerTonnages.Add(material, scaledupProducerTonnage);
+                scaledupProducerTonnages.Add(material.Name, scaledupProducerTonnage);
             }
             return scaledupProducerTonnages;
         }
