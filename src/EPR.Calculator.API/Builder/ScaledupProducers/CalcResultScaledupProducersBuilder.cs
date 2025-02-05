@@ -126,77 +126,20 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
             {
                 var scaledupProducerTonnage = new CalcResultScaledupProducerTonnage
                 {
-                    ReportedHouseholdPackagingWasteTonnage = GetReportedHouseholdPackagingWasteTonnage(),
-                    ReportedPublicBinTonnage = GetReportedPublicBinTonnage(),
-                    TotalReportedTonnage = GetTotalReportedTonnage(),
-                    ReportedSelfManagedConsumerWasteTonnage = GetReportedSelfManagedConsumerWasteTonnage(),
-                    NetReportedTonnage = GetNetReportedTonnage(),
-                    ScaledupReportedHouseholdPackagingWasteTonnage = GetScaledupReportedHouseholdPackagingWasteTonnage(),
-                    ScaledupReportedPublicBinTonnage = GetScaledupReportedPublicBinTonnage(),
-                    ScaledupTotalReportedTonnage = GetScaledupTotalReportedTonnage(),
-                    ScaledupReportedSelfManagedConsumerWasteTonnage = GetScaledupReportedSelfManagedConsumerWasteTonnage(),
-                    ScaledupNetReportedTonnage = GetScaledupNetReportedTonnage()
+                    ReportedHouseholdPackagingWasteTonnage = ScaledupUtil.GetReportedHouseholdPackagingWasteTonnage(),
+                    ReportedPublicBinTonnage = ScaledupUtil.GetReportedPublicBinTonnage(),
+                    TotalReportedTonnage = ScaledupUtil.GetTotalReportedTonnage(),
+                    ReportedSelfManagedConsumerWasteTonnage = ScaledupUtil.GetReportedSelfManagedConsumerWasteTonnage(),
+                    NetReportedTonnage = ScaledupUtil.GetNetReportedTonnage(),
+                    ScaledupReportedHouseholdPackagingWasteTonnage = ScaledupUtil.GetScaledupReportedHouseholdPackagingWasteTonnage(),
+                    ScaledupReportedPublicBinTonnage = ScaledupUtil.GetScaledupReportedPublicBinTonnage(),
+                    ScaledupTotalReportedTonnage = ScaledupUtil.GetScaledupTotalReportedTonnage(),
+                    ScaledupReportedSelfManagedConsumerWasteTonnage = ScaledupUtil.GetScaledupReportedSelfManagedConsumerWasteTonnage(),
+                    ScaledupNetReportedTonnage = ScaledupUtil.GetScaledupNetReportedTonnage()
                 };
                 scaledupProducerTonnages.Add(material, scaledupProducerTonnage);
             }
             return scaledupProducerTonnages;
-        }
-
-        private static IEnumerable<ProducerDetail> GetOrderedListOfProducersAssociatedRunId(
-            int runId,
-            IEnumerable<ProducerDetail> producerDetails)
-        {
-            return producerDetails.Where(pd => pd.CalculatorRunId == runId).OrderBy(pd => pd.ProducerId).ToList();
-        }
-
-        private static decimal GetReportedHouseholdPackagingWasteTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetReportedPublicBinTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetTotalReportedTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetReportedSelfManagedConsumerWasteTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetNetReportedTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetScaledupReportedHouseholdPackagingWasteTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetScaledupReportedPublicBinTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetScaledupTotalReportedTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetScaledupReportedSelfManagedConsumerWasteTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetScaledupNetReportedTonnage()
-        {
-            return 0;
         }
     }
 }
