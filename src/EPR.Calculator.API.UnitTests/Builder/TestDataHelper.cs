@@ -709,18 +709,12 @@ namespace EPR.Calculator.API.UnitTests.Builder
             };
         }
 
-        public static Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial> GetProducerDisposalFeesByMaterial()
+        public static Dictionary<string, CalcResultSummaryProducerDisposalFeesByMaterial> GetProducerDisposalFeesByMaterial()
         {
-            return new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>
+            return new Dictionary<string, CalcResultSummaryProducerDisposalFeesByMaterial>
             {
                 {
-                    new MaterialDetail
-                    {
-                        Id = 1,
-                        Code = "AL",
-                        Name = "Aluminium",
-                        Description = "Aluminium"
-                    },
+                    MaterialCodes.Aluminium,
                     new CalcResultSummaryProducerDisposalFeesByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 1000,
@@ -737,13 +731,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 },
                 {
-                    new MaterialDetail
-                    {
-                        Id = 2,
-                        Code = "FC",
-                        Name = "Fibre composite",
-                        Description = "Fibre composite"
-                    },
+                    MaterialCodes.FibreComposite,
                     new CalcResultSummaryProducerDisposalFeesByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 2000,
@@ -760,13 +748,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 },
                 {
-                    new MaterialDetail
-                    {
-                        Id = 3,
-                        Code = "GL",
-                        Name = "Glass",
-                        Description = "Glass"
-                    },
+                    MaterialCodes.Glass,
                     new CalcResultSummaryProducerDisposalFeesByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 500,
@@ -783,13 +765,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 },
                 {
-                    new MaterialDetail
-                    {
-                        Id = 4,
-                        Code = "PC",
-                        Name = "Paper or card",
-                        Description = "Paper or card"
-                    },
+                    MaterialCodes.PaperOrCard,
                     new CalcResultSummaryProducerDisposalFeesByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 20,
@@ -806,13 +782,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 },
                 {
-                    new MaterialDetail
-                    {
-                        Id = 5,
-                        Code = "PL",
-                        Name = "Plastic",
-                        Description = "Plastic"
-                    },
+                    MaterialCodes.Plastic,
                     new CalcResultSummaryProducerDisposalFeesByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 5.000m,
@@ -829,13 +799,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 },
                 {
-                    new MaterialDetail
-                    {
-                        Id = 6,
-                        Code = "ST",
-                        Name = "Steel",
-                        Description = "Steel"
-                    },
+                    MaterialCodes.Steel,
                     new CalcResultSummaryProducerDisposalFeesByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 0.000m,
@@ -852,13 +816,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 },
                 {
-                    new MaterialDetail
-                    {
-                        Id = 7,
-                        Code = "WD",
-                        Name = "Wood",
-                        Description = "Wood"
-                    },
+                    MaterialCodes.Wood,
                     new CalcResultSummaryProducerDisposalFeesByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 500.000m,
@@ -875,13 +833,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 },
                 {
-                    new MaterialDetail
-                    {
-                        Id = 8,
-                        Code = "OT",
-                        Name = "Other materials",
-                        Description = "Other materials"
-                    },
+                    MaterialCodes.OtherMaterials,
                     new CalcResultSummaryProducerDisposalFeesByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 50.000m,
@@ -900,18 +852,12 @@ namespace EPR.Calculator.API.UnitTests.Builder
             };
         }
 
-        public static Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial> GetProducerCommsFeesByMaterial()
+        public static Dictionary<string, CalcResultSummaryProducerCommsFeesCostByMaterial> GetProducerCommsFeesByMaterial()
         {
-            return new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>
+            return new Dictionary<string, CalcResultSummaryProducerCommsFeesCostByMaterial>
             {
                 {
-                    new MaterialDetail
-                    {
-                        Id = 1,
-                        Code = "AL",
-                        Name = "Aluminium",
-                        Description = "Aluminium"
-                    },
+                    MaterialCodes.Aluminium,
                     new CalcResultSummaryProducerCommsFeesCostByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 1000,
@@ -926,13 +872,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 },
                 {
-                    new MaterialDetail
-                    {
-                        Id = 2,
-                        Code = "FC",
-                        Name = "Fibre composite",
-                        Description = "Fibre composite"
-                    },
+                    MaterialCodes.FibreComposite,
                     new CalcResultSummaryProducerCommsFeesCostByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 2000.000m,
@@ -947,13 +887,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 },
                 {
-                    new MaterialDetail
-                    {
-                        Id = 3,
-                        Code = "GL",
-                        Name = "Glass",
-                        Description = "Glass"
-                    },
+                    MaterialCodes.Glass,
                     new CalcResultSummaryProducerCommsFeesCostByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 500.000m,
@@ -968,13 +902,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 },
                 {
-                    new MaterialDetail
-                    {
-                        Id = 4,
-                        Code = "PC",
-                        Name = "Paper or card",
-                        Description = "Paper or card"
-                    },
+                    MaterialCodes.PaperOrCard,
                     new CalcResultSummaryProducerCommsFeesCostByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 20.000m,
@@ -989,13 +917,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 },
                 {
-                    new MaterialDetail
-                    {
-                        Id = 5,
-                        Code = "PL",
-                        Name = "Plastic",
-                        Description = "Plastic"
-                    },
+                    MaterialCodes.Plastic,
                     new CalcResultSummaryProducerCommsFeesCostByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 5.000m,
@@ -1010,13 +932,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 },
                 {
-                    new MaterialDetail
-                    {
-                        Id = 6,
-                        Code = "ST",
-                        Name = "Steel",
-                        Description = "Steel"
-                    },
+                    MaterialCodes.Steel,
                     new CalcResultSummaryProducerCommsFeesCostByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 0.000m,
@@ -1031,13 +947,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 },
                 {
-                    new MaterialDetail
-                    {
-                        Id = 7,
-                        Code = "WD",
-                        Name = "Wood",
-                        Description = "Wood"
-                    },
+                    MaterialCodes.Wood,
                     new CalcResultSummaryProducerCommsFeesCostByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 500.000m,
@@ -1052,13 +962,7 @@ namespace EPR.Calculator.API.UnitTests.Builder
                     }
                 },
                 {
-                    new MaterialDetail
-                    {
-                        Id = 8,
-                        Code = "OT",
-                        Name = "Other materials",
-                        Description = "Other materials"
-                    },
+                    MaterialCodes.OtherMaterials,
                     new CalcResultSummaryProducerCommsFeesCostByMaterial
                     {
                         HouseholdPackagingWasteTonnage = 50.000m,

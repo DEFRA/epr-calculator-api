@@ -300,11 +300,11 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.ThreeSa
                         new()
                         {
                             ProducerCommsFeesByMaterial =
-                                new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>()
+                                new Dictionary<string, CalcResultSummaryProducerCommsFeesCostByMaterial>()
                                 {
                                 },
                             ProducerDisposalFeesByMaterial =
-                                new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>()
+                                new Dictionary<string, CalcResultSummaryProducerDisposalFeesByMaterial>()
                                 {
                                 },
                             ProducerId = "1",

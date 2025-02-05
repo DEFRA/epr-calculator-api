@@ -7,6 +7,7 @@ using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
 using EPR.Calculator.API.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.Builder.ParametersOther;
+using EPR.Calculator.API.Builder.ScaledupProducers;
 using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
@@ -37,6 +38,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<ICalcRunLaDisposalCostBuilder> mockLaDisposalCostBuilder;
         private readonly Mock<ICalcResultCommsCostBuilder> mockCommsCostReportBuilder;
         private readonly Mock<ICalcResultParameterOtherCostBuilder> mockCalcResultParameterOtherCostBuilder;
+        private readonly Mock<ICalcResultOnePlusFourApportionmentBuilder> mockICalcResultOnePlusFourApportionmentBuilder;
+        private readonly Mock<ICalcResultScaledupProducersBuilder> mockCalcResultScaledupProducersBuilder;
+
         private readonly CalculatorInternalController controller;
         private CalcResultDetailBuilder detailBuilder;
         private readonly Mock<CalculatorRunValidator> mockValidator;
@@ -44,7 +48,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<ApplicationDBContext> mockContext;
         private readonly CalcResultBuilder calcResultBuilder;
         protected readonly new IOrgAndPomWrapper? wrapper;
-        private readonly Mock<ICalcResultOnePlusFourApportionmentBuilder> mockICalcResultOnePlusFourApportionmentBuilder;
 
         private Mock<IStorageService>? mockStorageservice;
 
@@ -83,7 +86,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             mockCommsCostReportBuilder = new Mock<ICalcResultCommsCostBuilder>();
             mockCalcResultParameterOtherCostBuilder = new Mock<ICalcResultParameterOtherCostBuilder>();
             mockICalcResultOnePlusFourApportionmentBuilder = new Mock<ICalcResultOnePlusFourApportionmentBuilder>();
+            mockCalcResultScaledupProducersBuilder = new Mock<ICalcResultScaledupProducersBuilder>();
             calcResultBuilder = new CalcResultBuilder(
+                dbContext,
                 mockDetailBuilder.Object,
                 mockLapcapBuilder.Object,
                 mockCalcResultParameterOtherCostBuilder.Object,
@@ -91,6 +96,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 mockCommsCostReportBuilder.Object,
                 mocklateReportingBuilder.Object,
                 mockLaDisposalCostBuilder.Object,
+                mockCalcResultScaledupProducersBuilder.Object,
                 mockSummaryBuilder.Object);
 
             mockContext = new Mock<ApplicationDBContext>();

@@ -70,21 +70,7 @@ namespace EPR.Calculator.API.Builder
                     }
             };
 
-            var scaledupProducers = await (
-                                            from run in context.CalculatorRuns
-                                            join pdm in context.CalculatorRunPomDataMaster
-                                                on run.CalculatorRunPomDataMasterId equals pdm.Id
-                                            join pdd in context.CalculatorRunPomDataDetails
-                                                on pdm.Id equals pdd.CalculatorRunPomDataMasterId
-                                            join spl in context.SubmissionPeriodLookup
-                                                on pdd.SubmissionPeriod equals spl.SubmissionPeriod
-                                            where run.Id == resultsRequestDto.RunId
-                                            select new ScaledupProducer
-                                            {
-                                                ProducerId = pdd.OrganisationId,
-                                                SubmissionPeriod = pdd.SubmissionPeriod,
-                                                ScaleupFactor = spl.ScaleupFactor
-                                            }).Distinct().ToListAsync();
+            var scaledupProducers = await GetScaledupProducers(resultsRequestDto);
 
             result.CalcResultDetail = await this.calcResultDetailBuilder.Construct(resultsRequestDto);
             result.CalcResultLapcapData = await this.lapcapBuilder.Construct(resultsRequestDto);
@@ -99,6 +85,27 @@ namespace EPR.Calculator.API.Builder
             result.CalcResultSummary = await this.summaryBuilder.Construct(resultsRequestDto, result);
 
             return result;
+        }
+
+        private async Task<IEnumerable<ScaledupProducer>> GetScaledupProducers(CalcResultsRequestDto resultsRequestDto)
+        {
+            return await(
+                        from run in context.CalculatorRuns
+                        join pdm in context.CalculatorRunPomDataMaster
+                            on run.CalculatorRunPomDataMasterId equals pdm.Id
+                        join pdd in context.CalculatorRunPomDataDetails
+                            on pdm.Id equals pdd.CalculatorRunPomDataMasterId
+                        join spl in context.SubmissionPeriodLookup
+                            on pdd.SubmissionPeriod equals spl.SubmissionPeriod
+                        where run.Id == resultsRequestDto.RunId
+                        select new ScaledupProducer
+                        {
+                            ProducerId = pdd.OrganisationId,
+                            SubmissionPeriod = pdd.SubmissionPeriod,
+                            ScaleupFactor = spl.ScaleupFactor,
+                            DaysInSubmissionPeriod = spl.DaysInSubmissionPeriod,
+                            DaysInWholePeriod = spl.DaysInWholePeriod
+                        }).Distinct().ToListAsync();
         }
     }
 }

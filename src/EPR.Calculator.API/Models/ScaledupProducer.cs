@@ -7,5 +7,9 @@
         public string? SubmissionPeriod { get; set; }
 
         public decimal ScaleupFactor { get; set; }
+
+        public int DaysInSubmissionPeriod { get; set; }
+
+        public int DaysInWholePeriod { get; set; }
     }
 }
