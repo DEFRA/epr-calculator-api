@@ -21,11 +21,6 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
             return 0;
         }
 
-        public static decimal GetTotalReportedTonnage()
-        {
-            return 0;
-        }
-
         public static decimal GetReportedSelfManagedConsumerWasteTonnage()
         {
             return 0;

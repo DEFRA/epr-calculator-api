@@ -96,7 +96,7 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
                 DaysInSubmissionPeriod = 0,
                 DaysInWholePeriod = 0,
                 ScaleupFactor = 0,
-                ScaledupProducerTonnageByMaterial = GetScaledupProducerTonnages(materials)
+                ScaledupProducerTonnageByMaterial = GetScaledupProducerTonnages(producer, materials)
             };
         }
 
@@ -115,28 +115,30 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
                 DaysInSubmissionPeriod = 0,
                 DaysInWholePeriod = 0,
                 ScaleupFactor = 0,
-                ScaledupProducerTonnageByMaterial = GetScaledupProducerTonnages(materials)
+                ScaledupProducerTonnageByMaterial = new Dictionary<string, CalcResultScaledupProducerTonnage>()
             };
         }
 
-        private static Dictionary<string, CalcResultScaledupProducerTonnage> GetScaledupProducerTonnages(IEnumerable<MaterialDetail> materials)
+        private static Dictionary<string, CalcResultScaledupProducerTonnage> GetScaledupProducerTonnages(
+            ProducerDetail producer,
+            IEnumerable<MaterialDetail> materials)
         {
             var scaledupProducerTonnages = new Dictionary<string, CalcResultScaledupProducerTonnage>();
             foreach (var material in materials)
             {
-                var scaledupProducerTonnage = new CalcResultScaledupProducerTonnage
-                {
-                    ReportedHouseholdPackagingWasteTonnage = ScaledupUtil.GetReportedHouseholdPackagingWasteTonnage(),
-                    ReportedPublicBinTonnage = ScaledupUtil.GetReportedPublicBinTonnage(),
-                    TotalReportedTonnage = ScaledupUtil.GetTotalReportedTonnage(),
-                    ReportedSelfManagedConsumerWasteTonnage = ScaledupUtil.GetReportedSelfManagedConsumerWasteTonnage(),
-                    NetReportedTonnage = ScaledupUtil.GetNetReportedTonnage(),
-                    ScaledupReportedHouseholdPackagingWasteTonnage = ScaledupUtil.GetScaledupReportedHouseholdPackagingWasteTonnage(),
-                    ScaledupReportedPublicBinTonnage = ScaledupUtil.GetScaledupReportedPublicBinTonnage(),
-                    ScaledupTotalReportedTonnage = ScaledupUtil.GetScaledupTotalReportedTonnage(),
-                    ScaledupReportedSelfManagedConsumerWasteTonnage = ScaledupUtil.GetScaledupReportedSelfManagedConsumerWasteTonnage(),
-                    ScaledupNetReportedTonnage = ScaledupUtil.GetScaledupNetReportedTonnage()
-                };
+                var scaledupProducerTonnage = new CalcResultScaledupProducerTonnage();
+                scaledupProducerTonnage.ReportedHouseholdPackagingWasteTonnage = CalcResultSummaryUtil.GetHouseholdPackagingWasteTonnage(producer, material);
+                scaledupProducerTonnage.ReportedPublicBinTonnage = CalcResultSummaryUtil.GetReportedPublicBinTonnage(producer, material);
+                scaledupProducerTonnage.TotalReportedTonnage = scaledupProducerTonnage.ReportedHouseholdPackagingWasteTonnage +
+                    scaledupProducerTonnage.ReportedPublicBinTonnage;
+
+                scaledupProducerTonnage.ReportedSelfManagedConsumerWasteTonnage = ScaledupUtil.GetReportedSelfManagedConsumerWasteTonnage();
+                scaledupProducerTonnage.NetReportedTonnage = ScaledupUtil.GetNetReportedTonnage();
+                scaledupProducerTonnage.ScaledupReportedHouseholdPackagingWasteTonnage = ScaledupUtil.GetScaledupReportedHouseholdPackagingWasteTonnage();
+                scaledupProducerTonnage.ScaledupReportedPublicBinTonnage = ScaledupUtil.GetScaledupReportedPublicBinTonnage();
+                scaledupProducerTonnage.ScaledupTotalReportedTonnage = ScaledupUtil.GetScaledupTotalReportedTonnage();
+                scaledupProducerTonnage.ScaledupReportedSelfManagedConsumerWasteTonnage = ScaledupUtil.GetScaledupReportedSelfManagedConsumerWasteTonnage();
+                scaledupProducerTonnage.ScaledupNetReportedTonnage = ScaledupUtil.GetScaledupNetReportedTonnage();
                 scaledupProducerTonnages.Add(material.Name, scaledupProducerTonnage);
             }
             return scaledupProducerTonnages;
