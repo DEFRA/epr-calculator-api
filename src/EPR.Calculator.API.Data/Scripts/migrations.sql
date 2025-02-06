@@ -3366,3 +3366,28 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250206120041_AddPomDataDetailSubmissionPeriodIndex'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_pom_data_detail_submission_period] ON [calculator_run_pom_data_detail] ([submission_period]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250206120041_AddPomDataDetailSubmissionPeriodIndex'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250206120041_AddPomDataDetailSubmissionPeriodIndex', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
