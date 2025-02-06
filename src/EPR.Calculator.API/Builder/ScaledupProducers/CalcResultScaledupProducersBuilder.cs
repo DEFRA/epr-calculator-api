@@ -32,30 +32,50 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
             var scaledupProducersSummary = new CalcResultScaledupProducers();
             if (scaledupProducers.Any())
             {
+                var scaleupProducerIds = await GetScaledUpProducerIds(resultsRequestDto.RunId);
+                var producerIds = scaleupProducerIds.Select(x => x.ProducerId);
                 var runProducerMaterialDetails = await (from pd in context.ProducerDetail
                                                         join prm in context.ProducerReportedMaterial on pd.Id equals prm.ProducerDetailId
-                                                        where pd.CalculatorRunId == runId
+                                                        where pd.CalculatorRunId == runId  && producerIds.Contains(pd.ProducerId)
                                                         select new CalcResultsProducerAndReportMaterialDetail
                                                         {
                                                             ProducerDetail = pd,
                                                             ProducerReportedMaterial = prm
                                                         }).ToListAsync();
-
                 var producerDetails = runProducerMaterialDetails
                     .Select(p => p.ProducerDetail)
                     .Distinct()
                     .OrderBy(p => p.ProducerId)
                     .ToList();
-                scaledupProducersSummary = GetCalcResultScaledupProducers(producerDetails, materials, runProducerMaterialDetails, calcResult);
+                scaledupProducersSummary = GetCalcResultScaledupProducers(producerDetails, materials, runProducerMaterialDetails, calcResult, scaleupProducerIds);
             }
             SetHeaders(scaledupProducersSummary, materials);
             return scaledupProducersSummary;
         }
 
+        private async Task<IEnumerable<CalcResultScaleupProducer>> GetScaledUpProducerIds(int runId)
+        {
+            var scaleupProducerIds = await (from run in context.CalculatorRuns
+                                            join pd in context.ProducerDetail on run.Id equals pd.CalculatorRunId
+                                            join prm in context.ProducerReportedMaterial on pd.Id equals prm.ProducerDetailId
+                                            join crpdm in context.CalculatorRunPomDataMaster on run.CalculatorRunPomDataMasterId equals crpdm.Id
+                                            join crpdd in context.CalculatorRunPomDataDetails on crpdm.Id equals crpdd.CalculatorRunPomDataMasterId
+                                            join spl in context.SubmissionPeriodLookup on crpdd.SubmissionPeriod equals spl.SubmissionPeriod
+                                            where run.Id == runId && spl.ScaleupFactor > 1 && crpdd.OrganisationId != null
+                                            select new CalcResultScaleupProducer
+                                            {
+                                                ProducerId = crpdd.OrganisationId.Value,
+                                                ScaleupFactor = spl.ScaleupFactor
+                                            }
+                               ).Distinct().ToListAsync();
+            return scaleupProducerIds;
+        }
+
         private static CalcResultScaledupProducers GetCalcResultScaledupProducers(IEnumerable<ProducerDetail> producers,
             IEnumerable<MaterialDetail> materials,
             IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails,
-            CalcResult calcResult)
+            CalcResult calcResult,
+            IEnumerable<CalcResultScaleupProducer> scaleupProducerIds)
         {
             var scaledupProducersSummary = new CalcResultScaledupProducers();
             var scaledupProducers = new List<CalcResultScaledupProducer>();
@@ -74,7 +94,7 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
                 }
 
                 // Calculate the values for the producer
-                var scaledupProducer = GetProducerRow(producer, materials);
+                var scaledupProducer = GetProducerRow(producer, materials, scaleupProducerIds);
                 scaledupProducers.Add(scaledupProducer);
             }
 
@@ -88,7 +108,8 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
         }
 
         private static CalcResultScaledupProducer GetProducerRow(ProducerDetail producer,
-            IEnumerable<MaterialDetail> materials)
+            IEnumerable<MaterialDetail> materials,
+            IEnumerable<CalcResultScaleupProducer> scaleupProducerIds)
         {
             return new CalcResultScaledupProducer
             {
@@ -100,7 +121,7 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
                 DaysInSubmissionPeriod = 0,
                 DaysInWholePeriod = 0,
                 ScaleupFactor = 0,
-                ScaledupProducerTonnageByMaterial = GetScaledupProducerTonnages(producer, materials)
+                ScaledupProducerTonnageByMaterial = GetScaledupProducerTonnages(producer, materials, scaleupProducerIds)
             };
         }
 
@@ -125,7 +146,8 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
 
         private static Dictionary<string, CalcResultScaledupProducerTonnage> GetScaledupProducerTonnages(
             ProducerDetail producer,
-            IEnumerable<MaterialDetail> materials)
+            IEnumerable<MaterialDetail> materials,
+            IEnumerable<CalcResultScaleupProducer> scaleupProducerIds)
         {
             var scaledupProducerTonnages = new Dictionary<string, CalcResultScaledupProducerTonnage>();
             foreach (var material in materials)
