@@ -293,8 +293,8 @@ namespace EPR.Calculator.API.UnitTests.Builder.Summary.SaSetupCosts
                     {
                         new()
                         {
-                            ProducerCommsFeesByMaterial =  new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>(){ },
-                            ProducerDisposalFeesByMaterial = new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>(){ },
+                            ProducerCommsFeesByMaterial =  new Dictionary<string, CalcResultSummaryProducerCommsFeesCostByMaterial>(){ },
+                            ProducerDisposalFeesByMaterial = new Dictionary<string, CalcResultSummaryProducerDisposalFeesByMaterial>(){ },
                             ProducerId ="1",
                             ProducerName ="Test",
                             TotalProducerDisposalFeeWithBadDebtProvision =100,
