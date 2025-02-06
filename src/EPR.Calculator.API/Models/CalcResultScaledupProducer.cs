@@ -10,6 +10,8 @@
 
         public required string Level { get; set; }
 
+        public bool isTotalRow { get; set; } = false;
+
         public required string SubmissonPeriodCode { get; set; }
 
         public required int DaysInSubmissionPeriod { get; set; }
