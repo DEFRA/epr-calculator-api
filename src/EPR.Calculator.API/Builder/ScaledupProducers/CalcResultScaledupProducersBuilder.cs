@@ -11,6 +11,7 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
 {
     public class CalcResultScaledupProducersBuilder : ICalcResultScaledupProducersBuilder
     {
+        private const decimal NormalScaleup = 1.0M;
         private const int MaterialsBreakdownHeaderInitialColumnIndex = 9;
         private const int MaterialsBreakdownHeaderIncrementalColumnIndex = 10;
 
@@ -32,30 +33,50 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
             var scaledupProducersSummary = new CalcResultScaledupProducers();
             if (scaledupProducers.Any())
             {
+                var scaleupProducerIds = await GetScaledUpProducerIds(resultsRequestDto.RunId);
+                var producerIds = scaleupProducerIds.Select(x => x.ProducerId);
                 var runProducerMaterialDetails = await (from pd in context.ProducerDetail
                                                         join prm in context.ProducerReportedMaterial on pd.Id equals prm.ProducerDetailId
-                                                        where pd.CalculatorRunId == runId
+                                                        where pd.CalculatorRunId == runId  && producerIds.Contains(pd.ProducerId)
                                                         select new CalcResultsProducerAndReportMaterialDetail
                                                         {
                                                             ProducerDetail = pd,
                                                             ProducerReportedMaterial = prm
                                                         }).ToListAsync();
-
                 var producerDetails = runProducerMaterialDetails
                     .Select(p => p.ProducerDetail)
                     .Distinct()
                     .OrderBy(p => p.ProducerId)
                     .ToList();
-                scaledupProducersSummary = GetCalcResultScaledupProducers(producerDetails, materials, runProducerMaterialDetails, calcResult);
+                scaledupProducersSummary = GetCalcResultScaledupProducers(producerDetails, materials, runProducerMaterialDetails, calcResult, scaleupProducerIds);
             }
             SetHeaders(scaledupProducersSummary, materials);
             return scaledupProducersSummary;
         }
 
+        private async Task<IEnumerable<CalcResultScaleupProducer>> GetScaledUpProducerIds(int runId)
+        {
+            var scaleupProducerIds = await (from run in context.CalculatorRuns
+                                            join pd in context.ProducerDetail on run.Id equals pd.CalculatorRunId
+                                            join prm in context.ProducerReportedMaterial on pd.Id equals prm.ProducerDetailId
+                                            join crpdm in context.CalculatorRunPomDataMaster on run.CalculatorRunPomDataMasterId equals crpdm.Id
+                                            join crpdd in context.CalculatorRunPomDataDetails on crpdm.Id equals crpdd.CalculatorRunPomDataMasterId
+                                            join spl in context.SubmissionPeriodLookup on crpdd.SubmissionPeriod equals spl.SubmissionPeriod
+                                            where run.Id == runId && spl.ScaleupFactor > NormalScaleup && crpdd.OrganisationId != null
+                                            select new CalcResultScaleupProducer
+                                            {
+                                                ProducerId = crpdd.OrganisationId.GetValueOrDefault(),
+                                                ScaleupFactor = spl.ScaleupFactor
+                                            }
+                               ).Distinct().ToListAsync();
+            return scaleupProducerIds;
+        }
+
         private static CalcResultScaledupProducers GetCalcResultScaledupProducers(IEnumerable<ProducerDetail> producers,
             IEnumerable<MaterialDetail> materials,
             IEnumerable<CalcResultsProducerAndReportMaterialDetail> runProducerMaterialDetails,
-            CalcResult calcResult)
+            CalcResult calcResult,
+            IEnumerable<CalcResultScaleupProducer> scaleupProducerIds)
         {
             var scaledupProducersSummary = new CalcResultScaledupProducers();
             var scaledupProducers = new List<CalcResultScaledupProducer>();
@@ -74,7 +95,8 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
                 }
 
                 // Calculate the values for the producer
-                var scaledupProducer = GetProducerRow(producer, materials);
+                var scaleupFactor = scaleupProducerIds.Single(x => x.ProducerId == producer.Id).ScaleupFactor;
+                var scaledupProducer = GetProducerRow(producer, materials, scaleupFactor);
                 scaledupProducers.Add(scaledupProducer);
             }
 
@@ -88,7 +110,8 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
         }
 
         private static CalcResultScaledupProducer GetProducerRow(ProducerDetail producer,
-            IEnumerable<MaterialDetail> materials)
+            IEnumerable<MaterialDetail> materials,
+            decimal scaleupFactor)
         {
             return new CalcResultScaledupProducer
             {
@@ -100,7 +123,7 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
                 DaysInSubmissionPeriod = 0,
                 DaysInWholePeriod = 0,
                 ScaleupFactor = 0,
-                ScaledupProducerTonnageByMaterial = GetScaledupProducerTonnages(materials)
+                ScaledupProducerTonnageByMaterial = GetScaledupProducerTonnages(producer, materials, scaleupFactor)
             };
         }
 
@@ -119,88 +142,34 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
                 DaysInSubmissionPeriod = 0,
                 DaysInWholePeriod = 0,
                 ScaleupFactor = 0,
-                ScaledupProducerTonnageByMaterial = GetScaledupProducerTonnages(materials)
+                ScaledupProducerTonnageByMaterial = new Dictionary<string, CalcResultScaledupProducerTonnage>()
             };
         }
 
-        private static Dictionary<string, CalcResultScaledupProducerTonnage> GetScaledupProducerTonnages(IEnumerable<MaterialDetail> materials)
+        private static Dictionary<string, CalcResultScaledupProducerTonnage> GetScaledupProducerTonnages(
+            ProducerDetail producer,
+            IEnumerable<MaterialDetail> materials,
+            decimal scaleUpFactor)
         {
             var scaledupProducerTonnages = new Dictionary<string, CalcResultScaledupProducerTonnage>();
             foreach (var material in materials)
             {
-                var scaledupProducerTonnage = new CalcResultScaledupProducerTonnage
-                {
-                    ReportedHouseholdPackagingWasteTonnage = GetReportedHouseholdPackagingWasteTonnage(),
-                    ReportedPublicBinTonnage = GetReportedPublicBinTonnage(),
-                    TotalReportedTonnage = GetTotalReportedTonnage(),
-                    ReportedSelfManagedConsumerWasteTonnage = GetReportedSelfManagedConsumerWasteTonnage(),
-                    NetReportedTonnage = GetNetReportedTonnage(),
-                    ScaledupReportedHouseholdPackagingWasteTonnage = GetScaledupReportedHouseholdPackagingWasteTonnage(),
-                    ScaledupReportedPublicBinTonnage = GetScaledupReportedPublicBinTonnage(),
-                    ScaledupTotalReportedTonnage = GetScaledupTotalReportedTonnage(),
-                    ScaledupReportedSelfManagedConsumerWasteTonnage = GetScaledupReportedSelfManagedConsumerWasteTonnage(),
-                    ScaledupNetReportedTonnage = GetScaledupNetReportedTonnage()
-                };
+                var scaledupProducerTonnage = new CalcResultScaledupProducerTonnage();
+                scaledupProducerTonnage.ReportedHouseholdPackagingWasteTonnage = CalcResultSummaryUtil.GetHouseholdPackagingWasteTonnage(producer, material);
+                scaledupProducerTonnage.ReportedPublicBinTonnage = CalcResultSummaryUtil.GetReportedPublicBinTonnage(producer, material);
+                scaledupProducerTonnage.TotalReportedTonnage = scaledupProducerTonnage.ReportedHouseholdPackagingWasteTonnage +
+                    scaledupProducerTonnage.ReportedPublicBinTonnage;
+
+                scaledupProducerTonnage.ReportedSelfManagedConsumerWasteTonnage = CalcResultSummaryUtil.GetManagedConsumerWasteTonnage(producer, material);
+                scaledupProducerTonnage.NetReportedTonnage = CalcResultSummaryUtil.GetNetReportedTonnage(producer, material);
+                scaledupProducerTonnage.ScaledupReportedHouseholdPackagingWasteTonnage = scaledupProducerTonnage.ReportedHouseholdPackagingWasteTonnage * scaleUpFactor;
+                scaledupProducerTonnage.ScaledupReportedPublicBinTonnage = scaledupProducerTonnage.ReportedPublicBinTonnage * scaleUpFactor;
+                scaledupProducerTonnage.ScaledupTotalReportedTonnage = scaledupProducerTonnage.TotalReportedTonnage * scaleUpFactor;
+                scaledupProducerTonnage.ScaledupReportedSelfManagedConsumerWasteTonnage = scaledupProducerTonnage.ReportedSelfManagedConsumerWasteTonnage * scaleUpFactor;
+                scaledupProducerTonnage.ScaledupNetReportedTonnage = scaledupProducerTonnage.NetReportedTonnage * scaleUpFactor;
                 scaledupProducerTonnages.Add(material.Name, scaledupProducerTonnage);
             }
             return scaledupProducerTonnages;
-        }
-
-        private static IEnumerable<ProducerDetail> GetOrderedListOfProducersAssociatedRunId(
-            int runId,
-            IEnumerable<ProducerDetail> producerDetails)
-        {
-            return producerDetails.Where(pd => pd.CalculatorRunId == runId).OrderBy(pd => pd.ProducerId).ToList();
-        }
-
-        private static decimal GetReportedHouseholdPackagingWasteTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetReportedPublicBinTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetTotalReportedTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetReportedSelfManagedConsumerWasteTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetNetReportedTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetScaledupReportedHouseholdPackagingWasteTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetScaledupReportedPublicBinTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetScaledupTotalReportedTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetScaledupReportedSelfManagedConsumerWasteTonnage()
-        {
-            return 0;
-        }
-
-        private static decimal GetScaledupNetReportedTonnage()
-        {
-            return 0;
         }
 
         private static void SetHeaders(CalcResultScaledupProducers producers, IEnumerable<MaterialDetail> materials)
