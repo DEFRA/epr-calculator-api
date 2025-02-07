@@ -4,9 +4,9 @@
     {
         public CalcResultScaledupProducerHeader TitleHeader { get; set; }
 
-        public IEnumerable<CalcResultSummaryHeader> MaterialBreakdownHeaders { get; set; }
+        public IEnumerable<CalcResultScaledupProducerHeader> MaterialBreakdownHeaders { get; set; }
 
-        public IEnumerable<CalcResultSummaryHeader> ColumnHeaders { get; set; }
+        public IEnumerable<CalcResultScaledupProducerHeader> ColumnHeaders { get; set; }
 
         public IEnumerable<CalcResultScaledupProducer> ScaledupProducers { get; set; }
     }

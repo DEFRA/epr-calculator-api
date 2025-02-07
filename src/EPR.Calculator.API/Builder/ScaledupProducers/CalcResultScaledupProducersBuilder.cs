@@ -194,12 +194,12 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
             producers.ColumnHeaders = GetColumnHeaders(materials);
         }
 
-        private static List<CalcResultSummaryHeader> GetMaterialsBreakdownHeader(IEnumerable<MaterialDetail> materials)
+        private static List<CalcResultScaledupProducerHeader> GetMaterialsBreakdownHeader(IEnumerable<MaterialDetail> materials)
         {
-            var materialsBreakdownHeaders = new List<CalcResultSummaryHeader>();
+            var materialsBreakdownHeaders = new List<CalcResultScaledupProducerHeader>();
             var columnIndex = MaterialsBreakdownHeaderInitialColumnIndex;
 
-            materialsBreakdownHeaders.Add(new CalcResultSummaryHeader
+            materialsBreakdownHeaders.Add(new CalcResultScaledupProducerHeader
             {
                 Name = CalcResultScaledupProducerHeaders.EachSubmissionForTheYear,
                 ColumnIndex = 1
@@ -207,7 +207,7 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
 
             foreach (var material in materials)
             {
-                materialsBreakdownHeaders.Add(new CalcResultSummaryHeader
+                materialsBreakdownHeaders.Add(new CalcResultScaledupProducerHeader
                 {
                     Name = $"{material.Name} Breakdown",
                     ColumnIndex = columnIndex
@@ -221,35 +221,35 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
             return materialsBreakdownHeaders;
         }
 
-        private static List<CalcResultSummaryHeader> GetColumnHeaders(IEnumerable<MaterialDetail> materials)
+        private static List<CalcResultScaledupProducerHeader> GetColumnHeaders(IEnumerable<MaterialDetail> materials)
         {
-            var columnHeaders = new List<CalcResultSummaryHeader>();
+            var columnHeaders = new List<CalcResultScaledupProducerHeader>();
 
             columnHeaders.AddRange([
-                new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.ProducerId },
-                new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.SubsidiaryId },
-                new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.ProducerOrSubsidiaryName },
-                new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.Level },
-                new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.SubmissionPeriodCode },
-                new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.DaysInSubmissionPeriod },
-                new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.DaysInWholePeriod },
-                new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.ScaleupFactor }
+                new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.ProducerId },
+                new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.SubsidiaryId },
+                new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.ProducerOrSubsidiaryName },
+                new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.Level },
+                new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.SubmissionPeriodCode },
+                new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.DaysInSubmissionPeriod },
+                new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.DaysInWholePeriod },
+                new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.ScaleupFactor }
             ]);
 
             foreach (var material in materials)
             {
-                var columnHeadersList = new List<CalcResultSummaryHeader>
+                var columnHeadersList = new List<CalcResultScaledupProducerHeader>
                 {
-                    new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.ReportedHouseholdPackagingWasteTonnage },
-                    new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.ReportedPublicBinTonnage },
-                    new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.TotalReportedTonnage },
-                    new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.ReportedSelfManagedConsumerWasteTonnage },
-                    new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.NetReportedTonnage },
-                    new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.ScaledupReportedHouseholdPackagingWasteTonnage },
-                    new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.ScaledupReportedPublicBinTonnage },
-                    new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.ScaledupTotalReportedTonnage },
-                    new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.ScaledupReportedSelfManagedConsumerWasteTonnage },
-                    new CalcResultSummaryHeader { Name = CalcResultScaledupProducerHeaders.ScaledupNetReportedTonnage },
+                    new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.ReportedHouseholdPackagingWasteTonnage },
+                    new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.ReportedPublicBinTonnage },
+                    new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.TotalReportedTonnage },
+                    new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.ReportedSelfManagedConsumerWasteTonnage },
+                    new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.NetReportedTonnage },
+                    new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.ScaledupReportedHouseholdPackagingWasteTonnage },
+                    new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.ScaledupReportedPublicBinTonnage },
+                    new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.ScaledupTotalReportedTonnage },
+                    new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.ScaledupReportedSelfManagedConsumerWasteTonnage },
+                    new CalcResultScaledupProducerHeader { Name = CalcResultScaledupProducerHeaders.ScaledupNetReportedTonnage },
                 };
 
                 columnHeaders.AddRange(columnHeadersList);
