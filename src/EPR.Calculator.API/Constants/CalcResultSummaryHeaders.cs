@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
-using static Azure.Core.HttpHeader;
-
-namespace EPR.Calculator.API.Constants
+﻿namespace EPR.Calculator.API.Constants
 {
     public static class CalcResultSummaryHeaders
     {

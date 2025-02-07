@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Azure;
@@ -41,9 +42,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void DownloadResultFile_Test()
+        public async Task DownloadResultFile_ShouldReturnFileResult_WhenFileExists()
         {
+            // Arrange
             var date = new DateTime(2024, 11, 11);
+            var runId = 1;
+            var fileName = "1-Calc RunName_Results File_20241111.csv";
+            var blobUri = $"https://example.com/{fileName}";
+
             context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",
@@ -54,23 +60,73 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 DefaultParameterSettingMasterId = 1,
                 Financial_Year = "2024-25"
             });
+
+            context.CalculatorRunCsvFileMetadata.Add(new CalculatorRunCsvFileMetadata
+            {
+                CalculatorRunId = runId,
+                FileName = fileName,
+                BlobUri = blobUri
+            });
+
             context.SaveChanges();
 
             var controller =
                 new CalculatorController(context, mockConfig.Object,
                     mockStorageService.Object, mockServiceBusService.Object);
             var mockResult = new Mock<IResult>();
-            mockStorageService.Setup(x => x.DownloadFile(It.IsAny<string>())).ReturnsAsync(mockResult.Object);
+            mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(mockResult.Object);
 
-            var downloadResultFile = controller.DownloadResultFile(1);
+            // Act
+            var downloadResultFile = await controller.DownloadResultFile(runId);
 
-            downloadResultFile.Wait();
+            // Assert
+            mockStorageService.Verify(x => x.DownloadFile(fileName, blobUri));
+            Assert.AreEqual(mockResult.Object, downloadResultFile);
+        }
 
-            var result1 = downloadResultFile.Result;
+        [TestMethod]
+        public async Task DownloadResultFile_ShouldReturnNotFound_WhenFileDoesNotExist()
+        {
+            // Arrange
+            var runId = 1;
+            var fileName = "1-Calc RunName_Results File_20241111.csv";
+            var blobUri = $"https://example.com/{fileName}";
 
-            mockStorageService.Verify(x => x.DownloadFile("1-Calc RunName_Results File_20241111.csv"));
+            context.CalculatorRuns.Add(new CalculatorRun
+            {
+                Id = runId,
+                Name = "Calc RunName",
+                CalculatorRunClassificationId = 2,
+                CreatedAt = new DateTime(2024, 11, 11),
+                CreatedBy = "User23",
+                LapcapDataMasterId = 1,
+                DefaultParameterSettingMasterId = 1,
+                Financial_Year = "2024-25"
+            });
 
-            Assert.AreEqual(mockResult.Object, result1);
+            context.CalculatorRunCsvFileMetadata.Add(new CalculatorRunCsvFileMetadata
+            {
+                CalculatorRunId = runId,
+                FileName = fileName,
+                BlobUri = blobUri
+            });
+
+            context.SaveChanges();
+
+            var controller =
+                new CalculatorController(context, mockConfig.Object,
+                    mockStorageService.Object, mockServiceBusService.Object);
+            var mockResult = new Mock<IResult>();
+            mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(Results.NotFound(fileName));
+
+            // Act
+            var downloadResultFile = await controller.DownloadResultFile(runId);
+
+            // Assert
+            mockStorageService.Verify(x => x.DownloadFile(fileName, blobUri));
+            Assert.IsInstanceOfType(downloadResultFile, typeof(NotFound<string>));
+            var notFoundObjectResult = (NotFound<string>)downloadResultFile;
+            Assert.AreEqual(fileName, notFoundObjectResult.Value);
         }
     }
 }

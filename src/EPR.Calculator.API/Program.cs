@@ -8,6 +8,7 @@ using EPR.Calculator.API.Builder.Lapcap;
 using EPR.Calculator.API.Builder.LateReportingTonnages;
 using EPR.Calculator.API.Builder.OnePlusFourApportionment;
 using EPR.Calculator.API.Builder.ParametersOther;
+using EPR.Calculator.API.Builder.ScaledupProducers;
 using EPR.Calculator.API.Builder.Summary;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
@@ -47,7 +48,7 @@ builder.Services.AddScoped<ICalcResultBuilder, CalcResultBuilder>();
 builder.Services.AddScoped<ICalcResultsExporter<CalcResult>, CalcResultsExporter>();
 builder.Services.AddScoped<ICalcResultLapcapDataBuilder, CalcResultLapcapDataBuilder>();
 builder.Services.AddScoped<ICalcResultSummaryBuilder, CalcResultSummaryBuilder>();
-builder.Services.AddScoped<IStorageService, BlobStorageService>();
+builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
 builder.Services.AddScoped<ITransposePomAndOrgDataService, TransposePomAndOrgDataService>();
 builder.Services.AddScoped<ICalcResultLateReportingBuilder, CalcResultLateReportingBuilder>();
 builder.Services.AddScoped<ICalcRunLaDisposalCostBuilder, CalcRunLaDisposalCostBuilder>();
@@ -56,6 +57,7 @@ builder.Services.AddScoped<ICalcResultParameterOtherCostBuilder, CalcResultParam
 builder.Services.AddScoped<ICalcResultCommsCostBuilder, CalcResultCommsCostBuilder>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
+builder.Services.AddScoped<ICalcResultScaledupProducersBuilder, CalcResultScaledupProducersBuilder>();
 
 
 // Add services to the container.
