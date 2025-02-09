@@ -439,9 +439,9 @@ namespace EPR.Calculator.API.UnitTests.Exporter
                         new CalcResultSummaryProducerDisposalFees
                         {
                             ProducerCommsFeesByMaterial =
-                                new Dictionary<MaterialDetail, CalcResultSummaryProducerCommsFeesCostByMaterial>(),
+                                new Dictionary<string, CalcResultSummaryProducerCommsFeesCostByMaterial>(),
                             ProducerDisposalFeesByMaterial =
-                                new Dictionary<MaterialDetail, CalcResultSummaryProducerDisposalFeesByMaterial>(),
+                                new Dictionary<string, CalcResultSummaryProducerDisposalFeesByMaterial>(),
                             ProducerId = "1",
                             ProducerName = "Test",
                             TotalProducerDisposalFeeWithBadDebtProvision = 100,

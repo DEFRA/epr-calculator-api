@@ -1,13 +1,22 @@
 ﻿using AutoFixture;
+using EPR.Calculator.API.Builder;
+using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Exporter;
+using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Validators;
+using FluentValidation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Net;
 using static EPR.Calculator.API.Services.TransposePomAndOrgDataService;
 
 namespace EPR.Calculator.API.UnitTests.Services
@@ -28,7 +37,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             _context = new ApplicationDBContext(_dbContextOptions);
 
-            SeedDatabase();            
+            SeedDatabase();
         }
 
         public Fixture Fixture { get; init; } = new Fixture();
@@ -59,7 +68,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
         [TestMethod]
         public void Transpose_Should_Return_Correct_Producer_Detail()
-        {
+        {   
             var expectedResult = new ProducerDetail
             {
                 Id = 1,

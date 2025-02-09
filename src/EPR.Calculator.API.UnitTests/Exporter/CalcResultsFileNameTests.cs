@@ -5,6 +5,7 @@ namespace EPR.Calculator.API.UnitTests.Exporter
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.Exporter;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
     using Moq.EntityFrameworkCore;
@@ -22,8 +23,12 @@ namespace EPR.Calculator.API.UnitTests.Exporter
         private DateTime TimeStamp { get; init; }
 
         public CalcResultsFileNameTests()
-        {
+        {   
             Fixture = new Fixture();
+            Fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+                .ForEach(b => Fixture.Behaviors.Remove(b));
+            Fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
             RunId = Fixture.Create<int>();
             TimeStamp = Fixture.Create<DateTime>();
         }
@@ -103,7 +108,7 @@ namespace EPR.Calculator.API.UnitTests.Exporter
         public void CanCallFromDatabase()
         {
             // Arrange
-            var mockRun = Fixture.Create<CalculatorRun>();
+            var mockRun = Fixture.Build<CalculatorRun>().Create();
             mockRun.Name = Fixture.Create<string>();
             var context = new Mock<ApplicationDBContext>();
             context.Setup(c => c.CalculatorRuns).ReturnsDbSet([mockRun]);
