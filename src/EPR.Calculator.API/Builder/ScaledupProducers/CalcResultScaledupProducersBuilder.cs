@@ -35,19 +35,6 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
             if (scaleupProducerIds.Any())
             {
                 var producerIds = scaleupProducerIds.Select(x => x.ProducerId);
-                //var runProducerMaterialDetails = await (from pd in context.ProducerDetail
-                //                                        join prm in context.ProducerReportedMaterial on pd.Id equals prm.ProducerDetailId
-                //                                        join run in context.CalculatorRuns on pd.CalculatorRunId equals run.Id
-                //                                        join crpdm in context.CalculatorRunPomDataMaster on run.CalculatorRunPomDataMasterId equals crpdm.Id
-                //                                        join crpdd in context.CalculatorRunPomDataDetails on crpdm.Id equals crpdd.CalculatorRunPomDataMasterId
-                //                                        join spl in context.SubmissionPeriodLookup on crpdd.SubmissionPeriod equals spl.SubmissionPeriod
-                //                                        where pd.CalculatorRunId == runId && producerIds.Contains(pd.ProducerId)
-                //                                        select new CalcResultProducerAndReportedMaterialSubmissionPeriodDetail
-                //                                        {
-                //                                            ProducerDetail = pd,
-                //                                            ProducerReportedMaterial = prm,
-                //                                            SubmissionPeriodLookup = spl.SubmissionPeriod
-                //                                        }).Distinct().ToListAsync();
 
                 var runProducerMaterialDetails = await (from pd in context.ProducerDetail
                                                         join prm in context.ProducerReportedMaterial on pd.Id equals prm.ProducerDetailId
@@ -64,8 +51,7 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
                     .OrderBy(p => p.ProducerId)
                     .ToList();
 
-                scaledupProducersSummary = GetCalcResultScaledupProducers(producerDetails, materials,
-                    calcResult, scaleupProducerIds);
+                scaledupProducersSummary = GetCalcResultScaledupProducers(producerDetails, materials, scaleupProducerIds);
             }
 
             SetHeaders(scaledupProducersSummary, materials);
@@ -95,7 +81,6 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
 
         private static CalcResultScaledupProducers GetCalcResultScaledupProducers(IEnumerable<ProducerDetail> producers,
             IEnumerable<MaterialDetail> materials,
-            CalcResult calcResult,
             IEnumerable<ScaleupProducer> scaleupProducers)
         {
             var scaledupProducersSummary = new CalcResultScaledupProducers();
@@ -107,14 +92,14 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
                 // This additional row will be the total of this producer and its subsidiaries
                 var producersAndSubsidiaries = producers.Where(pd => pd.ProducerId == producer.ProducerId);
 
+                var subsidiaries = producersAndSubsidiaries.Where(p => p.SubsidiaryId != null);
+
                 var submissionPeriods = scaleupProducers
                     .Where(p => p.ProducerId == producersAndSubsidiaries.First().ProducerId)
                     .Select(p => p.SubmissionPeriod);
 
-                var subsidiaries = producersAndSubsidiaries.Where(p => p.SubsidiaryId != null);
-
                 // Make sure the total row is written only once
-                if (subsidiaries.Count() > 0 &&
+                if (subsidiaries.Any() &&
                     scaledupProducers.FirstOrDefault(p => p.ProducerId == producer.ProducerId.ToString() && p.ScaleupFactor > NormalScaleup) == null)
                 {
                     foreach (var submissionPeriod in submissionPeriods)
@@ -192,7 +177,8 @@ namespace EPR.Calculator.API.Builder.ScaledupProducers
                 ProducerId = isOverAllTotalRow ? string.Empty : producers[0].ProducerId.ToString(),
                 ProducerName = isOverAllTotalRow ? string.Empty : producers[0].ProducerName ?? string.Empty,
                 SubsidiaryId = string.Empty,
-                Level = isOverAllTotalRow ? string.Empty : "1",
+                isTotalRow = true,
+                Level = isOverAllTotalRow ? CommonConstants.Totals : CommonConstants.LevelOne,
                 SubmissonPeriodCode = isOverAllTotalRow || scaleupProducer == null ? string.Empty : submissionPeriod,
                 DaysInSubmissionPeriod = isOverAllTotalRow || scaleupProducer == null ? -1 : scaleupProducer.DaysInSubmissionPeriod,
                 DaysInWholePeriod = isOverAllTotalRow || scaleupProducer == null ? -1 : scaleupProducer.DaysInWholePeriod,

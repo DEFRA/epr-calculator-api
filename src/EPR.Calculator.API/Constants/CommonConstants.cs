@@ -9,6 +9,8 @@
         public const string NorthernIreland = "Northern Ireland";
         public const string Total = "Total";
         public const string Totals = "Totals";
+        public const string LevelOne = "1";
+        public const string LevelTwo = "2";
         public const string ProducerReportedHouseholdPackagingWasteTonnage = "Producer Reported Household Packaging Waste Tonnage";
         public const string ReportedPublicBinTonnage = "Reported Public Bin Tonnage";
         public const string HouseholdDrinkContainers = "Household Drinks Containers";
