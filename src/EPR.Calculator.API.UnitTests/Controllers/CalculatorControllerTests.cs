@@ -5,6 +5,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Validators;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Azure;
@@ -269,7 +270,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
 #pragma warning disable CS8604 // Possible null reference argument.
             calculatorController =
-                new CalculatorController(dbContext, configs, mockStorageService.Object, mockServiceBusService.Object);
+                new CalculatorController(dbContext, configs, mockStorageService.Object, mockServiceBusService.Object, new TelemetryClient());
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var identity = new GenericIdentity("TestUser");
@@ -332,7 +333,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var mockStorageService = new Mock<IStorageService>();
 #pragma warning disable CS8604 // Possible null reference argument.
             calculatorController =
-                new CalculatorController(dbContext, configs, mockStorageService.Object, mockServiceBusService.Object);
+                new CalculatorController(dbContext, configs, mockStorageService.Object, mockServiceBusService.Object, new TelemetryClient());
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var identity = new GenericIdentity("TestUser");

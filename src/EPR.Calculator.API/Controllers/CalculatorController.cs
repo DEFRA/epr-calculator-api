@@ -6,6 +6,7 @@ using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,14 +21,17 @@ namespace EPR.Calculator.API.Controllers
         private readonly IConfiguration configuration;
         private readonly IStorageService storageService;
         private readonly IServiceBusService serviceBusService;
+        private readonly TelemetryClient telemetryClient;
 
         public CalculatorController(ApplicationDBContext context, IConfiguration configuration,
-            IStorageService storageService, IServiceBusService serviceBusService)
+            IStorageService storageService, IServiceBusService serviceBusService,
+            TelemetryClient telemetryClient)
         {
             this.context = context;
             this.configuration = configuration;
             this.storageService = storageService;
             this.serviceBusService = serviceBusService;
+            this.telemetryClient = telemetryClient;
         }
 
         [HttpPost]
@@ -310,24 +314,26 @@ namespace EPR.Calculator.API.Controllers
         [Authorize()]
         public async Task<IResult> DownloadResultFile(int runId)
         {
+            this.telemetryClient.TrackTrace("Result File Id is " + runId);
             if (!ModelState.IsValid)
             {
                 var badRequest = Results.BadRequest(ModelState.Values.SelectMany(x => x.Errors));
                 return badRequest;
             }
-            
-            var csvFileMetadata = await context.CalculatorRunCsvFileMetadata.SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId);
-            if (csvFileMetadata == null)
-            {
-                return Results.NotFound($"No CSV file found for Run Id {runId}");
-            }
-
+            this.telemetryClient.TrackTrace("Not a bad request");
             try
             {
+                this.telemetryClient.TrackTrace("Before SingleOrDefaultAsync");
+                var csvFileMetadata = await context.CalculatorRunCsvFileMetadata.SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId);
+                if (csvFileMetadata == null)
+                {
+                    return Results.NotFound($"No CSV file found for Run Id {runId}");
+                }
                 return await storageService.DownloadFile(csvFileMetadata.FileName, csvFileMetadata.BlobUri);
             }
             catch (Exception e)
             {
+                this.telemetryClient.TrackException(e);
                 return Results.Problem(e.Message);
             }
         }

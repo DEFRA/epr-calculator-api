@@ -5,6 +5,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -60,7 +61,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal
             };
             var controller =
-                new CalculatorController(context, mockConfig.Object, mockStorageService.Object, mockServiceBusService.Object);
+                new CalculatorController(context, mockConfig.Object, mockStorageService.Object, mockServiceBusService.Object, new TelemetryClient());
             controller.ControllerContext = new ControllerContext
             {
                 HttpContext = defaultContext
@@ -96,7 +97,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var controller =
                 new CalculatorController(context, mockConfig.Object,
-                    mockStorageService.Object, mockServiceBusService.Object);
+                    mockStorageService.Object, mockServiceBusService.Object,
+                    new TelemetryClient());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -141,7 +143,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var controller =
                 new CalculatorController(context, mockConfig.Object,
-                    mockStorageService.Object, mockServiceBusService.Object);
+                    mockStorageService.Object, mockServiceBusService.Object, new TelemetryClient());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -189,7 +191,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var controller =
                 new CalculatorController(context, mockConfig.Object,
-                    mockStorageService.Object, mockServiceBusService.Object);
+                    mockStorageService.Object, mockServiceBusService.Object, new TelemetryClient());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
