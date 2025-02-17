@@ -82,7 +82,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
             dbContext.SaveChanges();
             calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(),
-                mockStorageService.Object, mockServiceBusService.Object);
+                mockStorageService.Object, mockServiceBusService.Object, new TelemetryClient());
 
             dbContext.Material.RemoveRange(dbContext.Material.ToList());
             dbContext.SaveChanges();
