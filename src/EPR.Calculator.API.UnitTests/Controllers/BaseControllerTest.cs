@@ -1,25 +1,17 @@
-﻿using EPR.Calculator.API.Validators;
+﻿using Azure.Messaging.ServiceBus;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Services;
+using EPR.Calculator.API.UnitTests.Helpers;
+using EPR.Calculator.API.Validators;
+using EPR.Calculator.API.Wrapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using EPR.Calculator.API.UnitTests.Helpers;
-using Moq;
-using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Azure;
-using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Wrapper;
-using EPR.Calculator.API.Builder;
-using EPR.Calculator.API.Models;
-using EPR.Calculator.API.Exporter;
-using EPR.Calculator.API.Services;
-using Castle.Core.Configuration;
-using System.Configuration;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Http;
-using Microsoft.ApplicationInsights;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -30,7 +22,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         protected DefaultParameterSettingController defaultParameterSettingController;
         protected LapcapDataController lapcapDataController;
         protected CalculatorController calculatorController;
-        protected CalculatorInternalController calculatorInternalController;
         protected IOrgAndPomWrapper wrapper;
 
         public BaseControllerTest()
@@ -53,21 +44,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             defaultParameterSettingController = new DefaultParameterSettingController(dbContext, validator);
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(dbContext);
             lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator);
-
-
-            wrapper = new Mock<IOrgAndPomWrapper>().Object;
-            calculatorInternalController = new CalculatorInternalController(
-                dbContext,
-                new RpdStatusDataValidator(wrapper),
-                wrapper,
-                new Mock<ICalcResultBuilder>().Object,
-                new Mock<ICalcResultsExporter<CalcResult>>().Object,
-                new Mock<ITransposePomAndOrgDataService>().Object,
-                new Mock<IStorageService>().Object,
-                new Mock<CalculatorRunValidator>().Object,
-                new CommandTimeoutService(new ConfigurationBuilder().Build())
-            );
-            calculatorInternalController.ControllerContext.HttpContext = new Mock<HttpContext>().Object;
 
             var mockStorageService = new Mock<IStorageService>();
             var mockServiceBusService = new Mock<IServiceBusService>();

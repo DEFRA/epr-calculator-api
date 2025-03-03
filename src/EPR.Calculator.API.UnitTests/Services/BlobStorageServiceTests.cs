@@ -58,45 +58,6 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task UploadResultFileContentAsync_ReturnsTrue_WhenUploadSucceeds()
-        {
-            // Arrange
-            var fileName = "test.txt";
-            var content = "test content";
-            var expectedUri = new Uri("https://example.com/test.txt");
-
-            var responseMock = new Mock<Response<BlobContentInfo>>();
-            _mockBlobClient.Setup(x => x.UploadAsync(It.IsAny<BinaryData>()))
-                          .ReturnsAsync(responseMock.Object);
-            _mockBlobClient.Setup(x => x.Uri).Returns(expectedUri);
-
-            // Act
-            var result = await _blobStorageService.UploadResultFileContentAsync(fileName, content);
-
-            // Assert
-            Assert.AreEqual(result, expectedUri.ToString());
-            _mockBlobClient.Verify(x => x.UploadAsync(It.IsAny<BinaryData>()), Times.Once);
-        }
-
-        [TestMethod]
-        public async Task UploadResultFileContentAsync_ShouldReturnFalse_WhenUploadFails()
-        {
-            // Arrange
-            var fileName = "test.txt";
-            var content = "test content";
-
-            _mockBlobClient.Setup(x => x.UploadAsync(It.IsAny<BinaryData>()))
-                .ThrowsAsync(new Exception("Upload failed"));
-
-            // Act
-            var result = await _blobStorageService.UploadResultFileContentAsync(fileName, content);
-
-            // Assert
-            Assert.AreEqual(result, string.Empty);
-            _mockBlobClient.Verify(x => x.UploadAsync(It.IsAny<BinaryData>()), Times.Once);
-        }
-
-        [TestMethod]
         public async Task DownloadFile_ShouldReturnFileResult_WhenFileExists()
         {
             // Arrange

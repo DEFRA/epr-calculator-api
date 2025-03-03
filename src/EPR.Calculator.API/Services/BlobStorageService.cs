@@ -34,22 +34,6 @@ namespace EPR.Calculator.API.Services
             _logger = logger;
         }
 
-        public async Task<string> UploadResultFileContentAsync(string fileName, string content)
-        {
-            try
-            {
-                var blobClient = this.containerClient.GetBlobClient(fileName);
-                var binaryData = BinaryData.FromString(content);
-                await blobClient.UploadAsync(binaryData);
-                return blobClient.Uri.ToString();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error Blob write");
-                return string.Empty;
-            }
-        }
-
         public async Task<IResult> DownloadFile(string fileName, string blobUri)
         {
             BlobClient? blobClient = null;
