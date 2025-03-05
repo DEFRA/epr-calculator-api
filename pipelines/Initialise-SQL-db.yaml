@@ -28,6 +28,7 @@ parameters:
       - development
       - tst
       - preprod
+      - preprod2
       - prod
     default: development
 
@@ -52,6 +53,8 @@ variables:
     - ${{ if eq(parameters.teamName, 'Team-Laps') }}:
       - template: vars/${{ parameters.teamName }}-${{ parameters.envToDeploy }}.yaml
   - ${{ if eq(parameters.envToDeploy, 'preprod') }}:
+    - template: vars/${{ parameters.envToDeploy }}.yaml
+  - ${{ if eq(parameters.envToDeploy, 'preprod2') }}:
     - template: vars/${{ parameters.envToDeploy }}.yaml
   - ${{ if eq(parameters.envToDeploy, 'prod') }}:
     - template: vars/${{ parameters.envToDeploy }}.yaml
