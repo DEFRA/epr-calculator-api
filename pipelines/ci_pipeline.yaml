@@ -50,7 +50,7 @@ resources:
     - repository: CommonTemplates
       name: RWD-CPR-EPR4P-ADO/epr-webapps-code-deploy-templates
       type: git
-      ref: main
+      ref: feature/automation-tests-pr-hardfail
 
 extends:
   template: epr-build-pipeline.yaml@CommonTemplates
