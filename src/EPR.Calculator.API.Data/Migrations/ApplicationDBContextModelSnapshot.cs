@@ -94,7 +94,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasIndex("LapcapDataMasterId");
 
-                    b.ToTable("calculator_run");
+                    b.ToTable("calculator_run", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", b =>
@@ -120,7 +120,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("calculator_run_classification");
+                    b.ToTable("calculator_run_classification", (string)null);
 
                     b.HasData(
                         new
@@ -184,7 +184,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasIndex("CalculatorRunId");
 
-                    b.ToTable("calculator_run_csvfile_metadata");
+                    b.ToTable("calculator_run_csvfile_metadata", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataDetail", b =>
@@ -226,7 +226,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasIndex("CalculatorRunOrganisationDataMasterId");
 
-                    b.ToTable("calculator_run_organization_data_detail");
+                    b.ToTable("calculator_run_organization_data_detail", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataMaster", b =>
@@ -262,7 +262,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("calculator_run_organization_data_master");
+                    b.ToTable("calculator_run_organization_data_master", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunPomDataDetail", b =>
@@ -327,7 +327,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasIndex("CalculatorRunPomDataMasterId");
 
-                    b.ToTable("calculator_run_pom_data_detail");
+                    b.ToTable("calculator_run_pom_data_detail", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunPomDataMaster", b =>
@@ -363,7 +363,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("calculator_run_pom_data_master");
+                    b.ToTable("calculator_run_pom_data_master", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CostType", b =>
@@ -394,7 +394,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("cost_type");
+                    b.ToTable("cost_type", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.Country", b =>
@@ -425,7 +425,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("country");
+                    b.ToTable("country", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CountryApportionment", b =>
@@ -462,7 +462,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasIndex("CountryId");
 
-                    b.ToTable("country_apportionment");
+                    b.ToTable("country_apportionment", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingDetail", b =>
@@ -494,7 +494,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasIndex("ParameterUniqueReferenceId");
 
-                    b.ToTable("default_parameter_setting_detail");
+                    b.ToTable("default_parameter_setting_detail", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingMaster", b =>
@@ -537,7 +537,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("default_parameter_setting_master");
+                    b.ToTable("default_parameter_setting_master", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.DefaultParameterTemplateMaster", b =>
@@ -571,7 +571,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("ParameterUniqueReferenceId");
 
-                    b.ToTable("default_parameter_template_master");
+                    b.ToTable("default_parameter_template_master", (string)null);
 
                     b.HasData(
                         new
@@ -933,7 +933,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasIndex("UniqueReference");
 
-                    b.ToTable("lapcap_data_detail");
+                    b.ToTable("lapcap_data_detail", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.LapcapDataMaster", b =>
@@ -977,7 +977,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("lapcap_data_master");
+                    b.ToTable("lapcap_data_master", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.LapcapDataTemplateMaster", b =>
@@ -1011,7 +1011,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("UniqueReference");
 
-                    b.ToTable("lapcap_data_template_master");
+                    b.ToTable("lapcap_data_template_master", (string)null);
 
                     b.HasData(
                         new
@@ -1300,7 +1300,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("material");
+                    b.ToTable("material", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.OrganisationData", b =>
@@ -1329,7 +1329,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("subsidiary_id");
 
-                    b.ToTable("organisation_data");
+                    b.ToTable("organisation_data", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.PomData", b =>
@@ -1379,7 +1379,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("subsidiary_id");
 
-                    b.ToTable("pom_data");
+                    b.ToTable("pom_data", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDetail", b =>
@@ -1413,7 +1413,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasIndex("CalculatorRunId");
 
-                    b.ToTable("producer_detail");
+                    b.ToTable("producer_detail", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerReportedMaterial", b =>
@@ -1450,7 +1450,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasIndex("ProducerDetailId");
 
-                    b.ToTable("producer_reported_material");
+                    b.ToTable("producer_reported_material", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.SubmissionPeriodLookup", b =>
@@ -1489,7 +1489,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("SubmissionPeriod");
 
-                    b.ToTable("submission_period_lookup");
+                    b.ToTable("submission_period_lookup", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
