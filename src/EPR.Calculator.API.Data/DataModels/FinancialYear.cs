@@ -7,11 +7,11 @@ using System.Runtime.CompilerServices;
 namespace EPR.Calculator.API.Data.DataModels
 {
     [Table("calculator_run_financial_years")]
-    [PrimaryKey(nameof(Id), nameof(Name))]
+    [PrimaryKey(nameof(Id))]
     public record FinancialYear
     {
         [Column("id")]
-        public int Id { get; }
+        public int Id { get; set; }
 
         [Column("financial_Year")]
         [Required]
@@ -22,19 +22,14 @@ namespace EPR.Calculator.API.Data.DataModels
 
         public override string ToString() => Name;
 
-        //public override bool Equals(object? obj) => Equals(obj as FinancialYear);
+        //[ForeignKey("FinancialYear")]
+        public ICollection<CalculatorRun> CalculatorRuns { get; }
+            = new List<CalculatorRun>();
 
-        //public bool Equals(FinancialYear? other) =>
-        //    other is not null
-        //    && this.Name == other.Name;
+        public ICollection<DefaultParameterSettingMaster> DefaultParameterSettingMasters { get; }
+            = new List<DefaultParameterSettingMaster>();
 
-        //public override int GetHashCode()
-        //{
-        //    return this.Name.GetHashCode();
-        //}
-
-        //public static implicit operator string(FinancialYear financialYear) => financialYear.Name;
-
-        //public static implicit operator FinancialYear(string value) => new FinancialYear { Name  = value };
+        public ICollection<LapcapDataMaster> LapcapDataMasters { get; }
+            = new List<LapcapDataMaster>();
     }
 }

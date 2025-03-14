@@ -185,7 +185,28 @@ namespace EPR.Calculator.API.Data
             .HasMany(e => e.CountryApportionments)
             .WithOne(e => e.Country)
             .HasForeignKey(e => e.CountryId);
-            
+
+            modelBuilder.Entity<FinancialYear>()
+                .HasData(new FinancialYear { Id = 1, Name = "2024-25" });
+
+            modelBuilder.Entity<FinancialYear>()
+            .HasMany(e => e.CalculatorRuns)
+            .WithOne(e => e.Financial_Year)
+            .HasForeignKey(e => e.FinancialYearId)
+            .HasPrincipalKey(e => e.Name);
+
+            modelBuilder.Entity<FinancialYear>()
+            .HasMany(e => e.DefaultParameterSettingMasters)
+            .WithOne(e => e.ParameterYear)
+            .HasForeignKey(e => e.ParameterYearId)
+            .HasPrincipalKey(e => e.Name);
+
+            modelBuilder.Entity<FinancialYear>()
+            .HasMany(e => e.LapcapDataMasters)
+            .WithOne(e => e.ProjectionYear)
+            .HasForeignKey(e => e.ProjectionYearId)
+            .HasPrincipalKey(e => e.Name);
+
             modelBuilder.Entity<CalculatorRunCsvFileMetadata>().Property(e => e.CalculatorRunId).IsRequired(true);
             
             Seeder.Initialize(modelBuilder);

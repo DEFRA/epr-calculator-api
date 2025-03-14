@@ -21,8 +21,10 @@ namespace EPR.Calculator.API.Data.DataModels
         public required string Name { get; set; }
 
         [Column("financial_year")]
-        [StringLength(250)]
         [Required]
+        public string FinancialYearId { get; set; }
+
+        [Column("financial_year")]
         public required FinancialYear Financial_Year { get; set; }
 
         [Column("created_by")]
