@@ -1,24 +1,28 @@
-﻿using Azure.Messaging.ServiceBus;
-using EPR.Calculator.API.Controllers;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Services;
-using EPR.Calculator.API.UnitTests.Helpers;
-using EPR.Calculator.API.Validators;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Azure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using System.Security.Claims;
-using System.Security.Principal;
-
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
+    using System;
+    using System.Security.Claims;
+    using System.Security.Principal;
+    using System.Threading.Tasks;
+    using AutoFixture;
+    using Azure.Messaging.ServiceBus;
+    using EPR.Calculator.API.Controllers;
+    using EPR.Calculator.API.Data.DataModels;
+    using EPR.Calculator.API.Dtos;
+    using EPR.Calculator.API.Services;
+    using EPR.Calculator.API.UnitTests.Helpers;
+    using EPR.Calculator.API.Validators;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Azure;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Moq;
     [TestClass]
     public class CalculatorControllerTests : BaseControllerTest
     {
+        public CalculatorController TestClass { get; init; }
+
         private FinancialYear FinancialYear23_24 { get; } = new FinancialYear { Name = "2023-24" };
 
         [TestMethod]
@@ -500,6 +504,17 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var expectedJson = "{\"Message\":\"The calculator is currently running. You will be able to run another calculation once the current one has finished.\"}";
             var actualJson = System.Text.Json.JsonSerializer.Serialize(actionResult?.Value);
             Assert.AreEqual(expectedJson, actualJson);
+        }
+
+        [TestMethod]
+        public async Task CanCallFinancialYears()
+        {
+            // Act
+            var result = await this.calculatorController.FinancialYears() as ObjectResult;
+            var resultList = result?.Value as IList<FinancialYear>;
+
+            // Assert
+            Assert.IsTrue(resultList?.Single().Name == "2024-25");
         }
     }
 }
