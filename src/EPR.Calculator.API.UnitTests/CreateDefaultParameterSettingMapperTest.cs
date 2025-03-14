@@ -9,13 +9,15 @@ namespace EPR.Calculator.API.Tests.Controllers
     [TestClass]
     public class CreateDefaultParameterSettingMapperTest : BaseControllerTest
     {
+        private FinancialYear FinancialYear24_25 { get; } = new FinancialYear { Name = "2024-25" };
+
         [TestMethod]
         public void Check_TheResult_Parmeter_Are_Equal_IsNotNullOf_ResultSet_WithDefaultSchemeParametersDto_WithCorrectYear()
         {
             var defaultParameterSettingMaster = new DefaultParameterSettingMaster
             {
                 Id = 200,
-                ParameterYear = "2024-25",
+                ParameterYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
             };
@@ -61,7 +63,7 @@ namespace EPR.Calculator.API.Tests.Controllers
                 //// Assert
                 var mappedItem = result.First();
                 Assert.AreEqual(detail.Id, mappedItem.Id);
-                Assert.AreEqual(defaultParameterSettingMaster.ParameterYear, mappedItem.ParameterYear);
+                Assert.AreEqual(defaultParameterSettingMaster.ParameterYear.Name, mappedItem.ParameterYear);
                 Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);
                 Assert.AreEqual(defaultParameterSettingMaster.CreatedAt, mappedItem.CreatedAt);
                 Assert.AreEqual(detail.DefaultParameterSettingMasterId, mappedItem.DefaultParameterSettingMasterId);

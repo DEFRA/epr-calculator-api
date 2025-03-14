@@ -1,4 +1,5 @@
 using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.UnitTests.Controllers;
 using EPR.Calculator.API.Validators;
@@ -66,7 +67,8 @@ namespace EPR.Calculator.API.Tests.Controllers
             };
 
             //Act
-            var actionResult1 = await defaultParameterSettingController?.Get("2024-25") as ObjectResult;
+            var actionResult1 = await defaultParameterSettingController
+                .Get(this.FinancialYear24_25.Name) as ObjectResult;
 
             //Assert
             var okResult = actionResult1 as ObjectResult;
@@ -88,7 +90,7 @@ namespace EPR.Calculator.API.Tests.Controllers
 
             // Return 404 error if the year does not exist
             //Act
-            var result = await defaultParameterSettingController?.Get("2028-25") as ObjectResult;
+            var result = await defaultParameterSettingController.Get("2028-25") as ObjectResult;
 
             //Assert
             var okResult = result as ObjectResult;
@@ -137,7 +139,11 @@ namespace EPR.Calculator.API.Tests.Controllers
 
             CreateDefaultParameterSettingValidator _validator = new CreateDefaultParameterSettingValidator();
             CreateDefaultParameterSettingDto _parameter = new CreateDefaultParameterSettingDto()
-            { ParameterFileName = string.Empty, ParameterYear = "2024-25", SchemeParameterTemplateValues = schemeParameterTemplateValues };
+            {
+                ParameterFileName = string.Empty,
+                ParameterYear = "2024-25" ,
+                SchemeParameterTemplateValues = schemeParameterTemplateValues
+            };
             var result = _validator.Validate(_parameter);
 
             Assert.IsNotNull(result);
@@ -174,7 +180,11 @@ namespace EPR.Calculator.API.Tests.Controllers
 
             CreateDefaultParameterSettingValidator _validator = new CreateDefaultParameterSettingValidator();
             CreateDefaultParameterSettingDto _parameter = new CreateDefaultParameterSettingDto()
-            { ParameterFileName = new string('A', 257), ParameterYear = "2024-25", SchemeParameterTemplateValues = schemeParameterTemplateValues };
+            { 
+                ParameterFileName = new string('A', 257),
+                ParameterYear = "2024-25",
+                SchemeParameterTemplateValues = schemeParameterTemplateValues
+            };
             var result = _validator.Validate(_parameter);
 
             Assert.IsNotNull(result);

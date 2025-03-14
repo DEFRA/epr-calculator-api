@@ -11,7 +11,7 @@ namespace EPR.Calculator.API.Data.DataModels
         [Column("parameter_year")]
         [Required]
         [StringLength(250)]
-        public string ParameterYear { get; set; } = string.Empty;
+        public required FinancialYear ParameterYear { get; set; }
 
         [Column("effective_from")]
         [Required]

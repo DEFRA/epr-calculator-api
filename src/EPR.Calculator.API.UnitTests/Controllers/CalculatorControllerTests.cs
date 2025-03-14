@@ -7,6 +7,7 @@ using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -18,6 +19,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     [TestClass]
     public class CalculatorControllerTests : BaseControllerTest
     {
+        private FinancialYear FinancialYear23_24 { get; } = new FinancialYear { Name = "2023-24" };
+
         [TestMethod]
         public async Task Create_Calculator_Run()
         {
@@ -31,18 +34,17 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2024-25",
+                ParameterYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext.SaveChanges();
 
             dbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = "2024-25",
+                ProjectionYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -82,7 +84,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2023-24",
+                ParameterYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -93,7 +95,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = "2023-24",
+                ProjectionYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -135,18 +137,17 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2023-24",
+                ParameterYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext?.SaveChanges();
 
             dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = "2024-25",
+                ProjectionYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -179,6 +180,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task Create_Calculator_Run_Return_404_If_No_Lapcap_Data()
         {
+            var financialYear27_28 = new FinancialYear { Name = "2027-28" };
+
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
@@ -188,7 +191,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2027-28",
+                ParameterYear = financialYear27_28,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -199,7 +202,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = "2023-24",
+                ProjectionYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -242,7 +245,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2024-25",
+                ParameterYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -253,7 +256,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = "2024-25",
+                ProjectionYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -306,7 +309,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2024-25",
+                ParameterYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -317,7 +320,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = "2024-25",
+                ProjectionYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -446,7 +449,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2023-24",
+                ParameterYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -457,7 +460,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = "2023-24",
+                ProjectionYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -470,7 +473,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 CalculatorRunClassificationId = 2,
-                Financial_Year = "2023-24",
+                Financial_Year = FinancialYear23_24,
                 Name = "TestOneAtATime"
             });
             dbContext?.SaveChanges();

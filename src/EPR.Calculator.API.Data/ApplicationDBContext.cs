@@ -66,6 +66,8 @@ namespace EPR.Calculator.API.Data
 
         public virtual DbSet<SubmissionPeriodLookup> SubmissionPeriodLookup { get; set; }
 
+        public virtual DbSet<FinancialYear> FinancialYears { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
