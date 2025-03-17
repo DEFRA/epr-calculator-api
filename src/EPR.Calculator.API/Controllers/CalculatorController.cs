@@ -21,8 +21,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly IStorageService storageService;
         private readonly IServiceBusService serviceBusService;
 
-        public CalculatorController(ApplicationDBContext context, IConfiguration configuration,
-            IStorageService storageService, IServiceBusService serviceBusService)
+        public CalculatorController(ApplicationDBContext context, IConfiguration configuration, IStorageService storageService, IServiceBusService serviceBusService)
         {
             this.context = context;
             this.configuration = configuration;
