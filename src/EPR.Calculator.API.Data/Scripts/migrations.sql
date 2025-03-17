@@ -3366,37 +3366,3 @@ GO
 COMMIT;
 GO
 
-BEGIN TRANSACTION;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250219143156_GrantExecutePermissionsToStoredProcedures'
-)
-BEGIN
-    GRANT EXECUTE ON dbo.CreateRunOrganization TO dbo;
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250219143156_GrantExecutePermissionsToStoredProcedures'
-)
-BEGIN
-    GRANT EXECUTE ON dbo.CreateRunPom TO dbo;
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250219143156_GrantExecutePermissionsToStoredProcedures'
-)
-BEGIN
-    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250219143156_GrantExecutePermissionsToStoredProcedures', N'8.0.7');
-END;
-GO
-
-COMMIT;
-GO
-
