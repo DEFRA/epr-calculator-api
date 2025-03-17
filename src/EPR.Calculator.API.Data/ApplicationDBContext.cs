@@ -1,9 +1,9 @@
-﻿using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.DataSeeder;
-using Microsoft.EntityFrameworkCore;
-
-namespace EPR.Calculator.API.Data
+﻿namespace EPR.Calculator.API.Data
 {
+    using EPR.Calculator.API.Data.DataModels;
+    using EPR.Calculator.API.Data.DataSeeder;
+    using Microsoft.EntityFrameworkCore;
+
     public class ApplicationDBContext : DbContext
     {
         public ApplicationDBContext()
