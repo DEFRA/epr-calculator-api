@@ -12,7 +12,7 @@ namespace EPR.Calculator.API.Data.DataModels
         [Required]
         public string ParameterYearId { get; set; }
 
-        public required FinancialYear ParameterYear { get; set; }
+        public required CalculatorRunFinancialYear ParameterYear { get; set; }
 
         [Column("effective_from")]
         [Required]

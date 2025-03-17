@@ -23,7 +23,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         public CalculatorController TestClass { get; init; }
 
-        private FinancialYear FinancialYear23_24 { get; } = new FinancialYear { Name = "2023-24" };
+        private CalculatorRunFinancialYear FinancialYear23_24 { get; } = new CalculatorRunFinancialYear { Name = "2023-24" };
 
         [TestMethod]
         public async Task Create_Calculator_Run()
@@ -184,7 +184,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task Create_Calculator_Run_Return_404_If_No_Lapcap_Data()
         {
-            var financialYear27_28 = new FinancialYear { Name = "2027-28" };
+            var financialYear27_28 = new CalculatorRunFinancialYear { Name = "2027-28" };
 
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
@@ -511,7 +511,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Act
             var result = await this.calculatorController.FinancialYears() as ObjectResult;
-            var resultList = result?.Value as IList<FinancialYear>;
+            var resultList = result?.Value as IList<CalculatorRunFinancialYear>;
 
             // Assert
             Assert.IsTrue(resultList?.Single().Name == "2024-25");

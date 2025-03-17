@@ -36,7 +36,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetParameterYear()
         {
             // Arrange
-            var testValue = Fixture.Create<FinancialYear>();
+            var testValue = Fixture.Create<CalculatorRunFinancialYear>();
 
             // Act
             this.TestClass.ParameterYear = testValue;

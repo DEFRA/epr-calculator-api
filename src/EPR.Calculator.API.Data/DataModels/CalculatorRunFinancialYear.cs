@@ -8,7 +8,7 @@ namespace EPR.Calculator.API.Data.DataModels
 {
     [Table("calculator_run_financial_years")]
     [PrimaryKey(nameof(Id))]
-    public record FinancialYear
+    public record CalculatorRunFinancialYear
     {
         [Column("id")]
         public int Id { get; set; }

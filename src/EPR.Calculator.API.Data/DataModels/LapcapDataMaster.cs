@@ -14,7 +14,7 @@ namespace EPR.Calculator.API.Data.DataModels
         [Required]
         public string ProjectionYearId { get; set; }
 
-        public required FinancialYear ProjectionYear { get; set; }
+        public required CalculatorRunFinancialYear ProjectionYear { get; set; }
 
         [Column("effective_from")]
         [Required]

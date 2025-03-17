@@ -87,7 +87,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             }
         }
 
-        private static FinancialYear FinancialYear24_25 { get; } = new FinancialYear { Name = "2024-25" };
+        private static CalculatorRunFinancialYear FinancialYear24_25 { get; } = new CalculatorRunFinancialYear { Name = "2024-25" };
 
         [TestInitialize]
         public void Initialise()

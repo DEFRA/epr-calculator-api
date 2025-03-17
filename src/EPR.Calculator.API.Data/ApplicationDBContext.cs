@@ -66,7 +66,7 @@
 
         public virtual DbSet<SubmissionPeriodLookup> SubmissionPeriodLookup { get; set; }
 
-        public virtual DbSet<FinancialYear> FinancialYears { get; set; }
+        public virtual DbSet<CalculatorRunFinancialYear> FinancialYears { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -186,22 +186,22 @@
             .WithOne(e => e.Country)
             .HasForeignKey(e => e.CountryId);
 
-            modelBuilder.Entity<FinancialYear>()
-                .HasData(new FinancialYear { Id = 1, Name = "2024-25" });
+            modelBuilder.Entity<CalculatorRunFinancialYear>()
+                .HasData(new CalculatorRunFinancialYear { Id = 1, Name = "2024-25" });
 
-            modelBuilder.Entity<FinancialYear>()
+            modelBuilder.Entity<CalculatorRunFinancialYear>()
             .HasMany(e => e.CalculatorRuns)
             .WithOne(e => e.Financial_Year)
             .HasForeignKey(e => e.FinancialYearId)
             .HasPrincipalKey(e => e.Name);
 
-            modelBuilder.Entity<FinancialYear>()
+            modelBuilder.Entity<CalculatorRunFinancialYear>()
             .HasMany(e => e.DefaultParameterSettingMasters)
             .WithOne(e => e.ParameterYear)
             .HasForeignKey(e => e.ParameterYearId)
             .HasPrincipalKey(e => e.Name);
 
-            modelBuilder.Entity<FinancialYear>()
+            modelBuilder.Entity<CalculatorRunFinancialYear>()
             .HasMany(e => e.LapcapDataMasters)
             .WithOne(e => e.ProjectionYear)
             .HasForeignKey(e => e.ProjectionYearId)

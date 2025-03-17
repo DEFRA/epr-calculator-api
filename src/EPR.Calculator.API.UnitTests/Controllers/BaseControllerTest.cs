@@ -58,7 +58,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // The database is persistant between tests, so we need to only create the financial year once.
             if (!dbContext.FinancialYears.Any())
             {
-                FinancialYear24_25 = new FinancialYear { Name = "2024-25" };
+                FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
                 dbContext.FinancialYears.Add(FinancialYear24_25);
                 dbContext.SaveChanges();
             }
@@ -78,7 +78,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext.SaveChanges();
         }
 
-        protected FinancialYear FinancialYear24_25 { get; init; }
+        protected CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
 
         [TestMethod]
         public void CheckDbContext()

@@ -11,10 +11,10 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public FinancialYearTests()
         {
             this.Fixture = new Fixture();
-            this.TestClass = Fixture.Create<FinancialYear>();
+            this.TestClass = Fixture.Create<CalculatorRunFinancialYear>();
         }
 
-        private FinancialYear TestClass { get; init; }
+        private CalculatorRunFinancialYear TestClass { get; init; }
 
         private IFixture Fixture { get; init; }
 

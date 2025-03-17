@@ -35,7 +35,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context.Database.EnsureCreated();
         }
 
-        private FinancialYear FinancialYear24_25 { get; } = new FinancialYear { Name = "2024-25" };
+        private CalculatorRunFinancialYear FinancialYear24_25 { get; } = new CalculatorRunFinancialYear { Name = "2024-25" };
 
         [TestCleanup]
         public void CleanUp()
