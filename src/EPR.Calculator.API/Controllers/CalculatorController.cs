@@ -58,8 +58,15 @@ namespace EPR.Calculator.API.Controllers
                     };
                 }
 
-                var financialYear = await context.FinancialYears.SingleAsync(
+                var financialYear = await this.context.FinancialYears.SingleOrDefaultAsync(
                     year => year.Name == request.FinancialYear);
+                if (financialYear is null)
+                {
+                    return new ObjectResult(new { Message = ErrorMessages.InvalidFinancialYear })
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest,
+                    };
+                }
 
                 // Return failed dependency error if at least one of the dependent data not available for the financial year
                 var dataPreCheckMessage = DataPreChecksBeforeInitialisingCalculatorRun(financialYear);
@@ -180,7 +187,7 @@ namespace EPR.Calculator.API.Controllers
             }
             catch (Exception exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
         }
 

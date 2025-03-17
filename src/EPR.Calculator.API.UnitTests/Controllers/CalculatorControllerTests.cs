@@ -5,6 +5,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using System.Security.Principal;
     using System.Threading.Tasks;
     using AutoFixture;
+    using Azure.Core;
     using Azure.Messaging.ServiceBus;
     using EPR.Calculator.API.Controllers;
     using EPR.Calculator.API.Data.DataModels;
@@ -21,7 +22,22 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     [TestClass]
     public class CalculatorControllerTests : BaseControllerTest
     {
-        public CalculatorController TestClass { get; init; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CalculatorControllerTests"/> class.
+        /// </summary>
+        public CalculatorControllerTests()
+        {
+            this.Fixture = new Fixture();
+
+            // Set up authorisation.
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+            var context = new DefaultHttpContext { User = principal };
+            this.calculatorController.ControllerContext = new ControllerContext { HttpContext = context };
+        }
+
+        public Fixture Fixture { get; init; } 
 
         private CalculatorRunFinancialYear FinancialYear23_24 { get; } = new CalculatorRunFinancialYear { Name = "2023-24" };
 
@@ -55,20 +71,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveTo = null
             });
             dbContext.SaveChanges();
-
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal
-            };
-
-            calculatorController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context
-            };
 
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
@@ -107,20 +109,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             });
             dbContext?.SaveChanges();
 
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal
-            };
-
-            calculatorController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context
-            };
-
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
@@ -158,20 +146,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveTo = null
             });
             dbContext?.SaveChanges();
-
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal
-            };
-
-            calculatorController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context
-            };
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
@@ -213,21 +187,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveTo = null
             });
             dbContext?.SaveChanges();
-
-
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal
-            };
-
-            calculatorController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context
-            };
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
@@ -365,6 +324,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
+        public async Task Create_Calculator_Run_Return_400_If_FinancialYear_Invalid()
+        {
+            var createCalculatorRunDto = new CreateCalculatorRunDto
+            {
+                CalculatorRunName = "Test calculator run",
+                FinancialYear = this.Fixture.Create<string>(),
+            };
+            var actionResult = await this.calculatorController.Create(createCalculatorRunDto) as ObjectResult;
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(StatusCodes.Status400BadRequest, actionResult.StatusCode);
+        }
+
+        [TestMethod]
         public async Task Get_Calculator_Runs_Return_Results_Test()
         {
             var runParams = new CalculatorRunsParamsDto
@@ -481,20 +453,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Name = "TestOneAtATime"
             });
             dbContext?.SaveChanges();
-
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal
-            };
-
-            calculatorController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context
-            };
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
