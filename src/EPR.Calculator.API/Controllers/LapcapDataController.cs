@@ -1,14 +1,14 @@
-﻿using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Mappers;
-using EPR.Calculator.API.Validators;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
-namespace EPR.Calculator.API.Controllers
+﻿namespace EPR.Calculator.API.Controllers
 {
+    using EPR.Calculator.API.Data;
+    using EPR.Calculator.API.Data.DataModels;
+    using EPR.Calculator.API.Dtos;
+    using EPR.Calculator.API.Mappers;
+    using EPR.Calculator.API.Validators;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+
     [Route("v1")]
     public class LapcapDataController : ControllerBase
     {

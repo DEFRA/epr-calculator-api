@@ -1,18 +1,18 @@
-﻿using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Mappers;
-using EPR.Calculator.API.Models;
-using EPR.Calculator.API.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Configuration;
-
-namespace EPR.Calculator.API.Controllers
+﻿namespace EPR.Calculator.API.Controllers
 {
+    using System.Configuration;
+    using EPR.Calculator.API.Constants;
+    using EPR.Calculator.API.Data;
+    using EPR.Calculator.API.Data.DataModels;
+    using EPR.Calculator.API.Dtos;
+    using EPR.Calculator.API.Enums;
+    using EPR.Calculator.API.Mappers;
+    using EPR.Calculator.API.Models;
+    using EPR.Calculator.API.Services;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+
     [Route("v1")]
     public class CalculatorController : ControllerBase
     {
