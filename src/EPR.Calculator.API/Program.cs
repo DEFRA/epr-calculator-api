@@ -1,10 +1,10 @@
+using System.Configuration;
 using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services;
-using EPR.Calculator.API.Services.EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using FluentValidation;
@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.Identity.Web;
-using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,8 +30,6 @@ builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IStorageService, BlobStorageService>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
-
-
 // Add services to the container.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
@@ -42,10 +39,6 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-
-
-
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
 
 // Configure the database context.
@@ -66,6 +59,7 @@ builder.Services.AddSingleton<BlobServiceClient>(provider =>
     {
         throw new ConfigurationErrorsException("Blob Storage connection string is not configured.");
     }
+
     return new BlobServiceClient(connectionString);
 });
 
@@ -94,8 +88,7 @@ builder.Services.AddAzureClients(builder =>
         provider
             .GetService<IAzureClientFactory<ServiceBusClient>>()
             .CreateClient("calculator")
-            .CreateSender(serviceBusQueueName)
-    )
+            .CreateSender(serviceBusQueueName))
     .WithName($"calculator-{serviceBusQueueName}");
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 });
