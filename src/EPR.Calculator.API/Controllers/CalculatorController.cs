@@ -334,7 +334,7 @@ namespace EPR.Calculator.API.Controllers
             }
         }
 
-        private string DataPreChecksBeforeInitialisingCalculatorRun(FinancialYear financialYear)
+        private string DataPreChecksBeforeInitialisingCalculatorRun(CalculatorRunFinancialYear financialYear)
         {
             // Get active default parameter settings for the given financial year
             var activeDefaultParameterSettings = context.DefaultParameterSettings
