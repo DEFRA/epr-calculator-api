@@ -24,7 +24,6 @@ namespace EPR.Calculator.API.Data.DataModels
         [Required]
         public string FinancialYearId { get; set; }
 
-        [Column("financial_year")]
         public required CalculatorRunFinancialYear Financial_Year { get; set; }
 
         [Column("created_by")]
