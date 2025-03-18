@@ -57,9 +57,10 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("default_parameter_setting_master_id");
 
-                    b.Property<string>("FinancialYearId")
+                    b.Property<string>("Financial_Year")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)")
                         .HasColumnName("financial_year");
 
                     b.Property<int?>("LapcapDataMasterId")
@@ -90,8 +91,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.HasIndex("CalculatorRunPomDataMasterId");
 
                     b.HasIndex("DefaultParameterSettingMasterId");
-
-                    b.HasIndex("FinancialYearId");
 
                     b.HasIndex("LapcapDataMasterId");
 
@@ -530,14 +529,13 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(256)")
                         .HasColumnName("parameter_filename");
 
-                    b.Property<string>("ParameterYearId")
+                    b.Property<string>("ParameterYear")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)")
                         .HasColumnName("parameter_year");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ParameterYearId");
 
                     b.ToTable("default_parameter_setting_master", (string)null);
                 });
@@ -906,36 +904,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.FinancialYear", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("financial_Year");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("calculator_run_financial_years");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "2024-25"
-                        });
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.LapcapDataDetail", b =>
                 {
                     b.Property<int>("Id")
@@ -1001,14 +969,13 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(256)")
                         .HasColumnName("lapcap_filename");
 
-                    b.Property<string>("ProjectionYearId")
+                    b.Property<string>("ProjectionYear")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
                         .HasColumnName("projection_year");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ProjectionYearId");
 
                     b.ToTable("lapcap_data_master", (string)null);
                 });
@@ -1545,13 +1512,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .WithMany("RunDetails")
                         .HasForeignKey("DefaultParameterSettingMasterId");
 
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.FinancialYear", "FinancialYear")
-                        .WithMany("CalculatorRuns")
-                        .HasForeignKey("FinancialYearId")
-                        .HasPrincipalKey("Name")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("EPR.Calculator.API.Data.DataModels.LapcapDataMaster", "LapcapDataMaster")
                         .WithMany("RunDetails")
                         .HasForeignKey("LapcapDataMasterId");
@@ -1561,8 +1521,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("CalculatorRunPomDataMaster");
 
                     b.Navigation("DefaultParameterSettingMaster");
-
-                    b.Navigation("FinancialYear");
 
                     b.Navigation("LapcapDataMaster");
                 });
@@ -1646,18 +1604,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("ParameterUniqueReference");
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingMaster", b =>
-                {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.FinancialYear", "ParameterYear")
-                        .WithMany("DefaultParameterSettingMasters")
-                        .HasForeignKey("ParameterYearId")
-                        .HasPrincipalKey("Name")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ParameterYear");
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.LapcapDataDetail", b =>
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.LapcapDataMaster", "LapcapDataMaster")
@@ -1675,18 +1621,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("LapcapDataMaster");
 
                     b.Navigation("LapcapDataTemplateMaster");
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.LapcapDataMaster", b =>
-                {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.FinancialYear", "ProjectionYear")
-                        .WithMany("LapcapDataMasters")
-                        .HasForeignKey("ProjectionYearId")
-                        .HasPrincipalKey("Name")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProjectionYear");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDetail", b =>
@@ -1760,15 +1694,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("Details");
 
                     b.Navigation("RunDetails");
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.FinancialYear", b =>
-                {
-                    b.Navigation("CalculatorRuns");
-
-                    b.Navigation("DefaultParameterSettingMasters");
-
-                    b.Navigation("LapcapDataMasters");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.LapcapDataMaster", b =>
