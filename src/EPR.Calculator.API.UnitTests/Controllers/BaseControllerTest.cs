@@ -55,17 +55,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             mockFactory.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(mockClient.Object);
 
-            // The database is persistant between tests, so we need to only create the financial year once.
-            if (!dbContext.FinancialYears.Any())
-            {
-                FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
-                dbContext.FinancialYears.Add(FinancialYear24_25);
-                dbContext.SaveChanges();
-            }
-            else
-            {
-                FinancialYear24_25 = dbContext.FinancialYears.First()!;
-            }
+            this.FinancialYear24_25 = this.dbContext.FinancialYears.Single(year => year.Name == "2024-25");
 
             dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
             dbContext.SaveChanges();

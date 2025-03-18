@@ -39,11 +39,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context = new ApplicationDBContext(dbContextOptions);
             context.Database.EnsureCreated();
 
+            this.FinancialYear24_25 = this.context.FinancialYears.Single(year => year.Name == "2024-25");
+
             context.CalculatorRuns.AddRange(GetCalculatorRuns());
             context.SaveChanges();
         }
 
-        private CalculatorRunFinancialYear FinancialYear24_25 { get; } = new CalculatorRunFinancialYear { Name = "2024-25" };
+        private CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
 
         [TestCleanup]
         public void CleanUp()

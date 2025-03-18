@@ -1,6 +1,5 @@
 namespace EPR.Calculator.API.UnitTests.DataModels
 {
-    using System;
     using AutoFixture;
     using EPR.Calculator.API.Data.DataModels;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,7 +10,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public FinancialYearTests()
         {
             this.Fixture = new Fixture();
-            this.TestClass = Fixture.Create<CalculatorRunFinancialYear>();
+            this.TestClass = this.Fixture.Create<CalculatorRunFinancialYear>();
         }
 
         private CalculatorRunFinancialYear TestClass { get; init; }
@@ -32,7 +31,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetName()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.Name = testValue;
@@ -45,20 +44,13 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetDescription()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.Description = testValue;
 
             // Assert
             Assert.AreEqual(testValue, this.TestClass.Description);
-        }
-
-        [TestMethod]
-        public void CanGetId()
-        {
-            // Assert
-            Assert.IsInstanceOfType(this.TestClass.Id, typeof(int));
         }
     }
 }

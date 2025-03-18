@@ -341,6 +341,22 @@ namespace EPR.Calculator.API.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("FinancialYears")]
+        [Authorize]
+        public async Task<IActionResult> FinancialYears()
+        {
+            try
+            {
+                var financialYears = await this.context.FinancialYears.ToListAsync();
+                return new ObjectResult(financialYears.Select(FinancialYearMapper.Map));
+            }
+            catch (Exception exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+        }
+
         private string DataPreChecksBeforeInitialisingCalculatorRun(CalculatorRunFinancialYear financialYear)
         {
             // Get active default parameter settings for the given financial year
@@ -371,27 +387,6 @@ namespace EPR.Calculator.API.Controllers
 
             // All good, return empty string
             return string.Empty;
-        }
-
-        [HttpGet]
-        [Route("FinancialYears")]
-        [Authorize()]
-        public async Task<IActionResult> FinancialYears()
-        {
-            if (!ModelState.IsValid)
-            {
-                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
-            }
-
-            try
-            {
-                var financialYears = await context.FinancialYears.ToListAsync();
-                return new ObjectResult(financialYears);
-            }
-            catch (Exception exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception);
-            }
         }
 
         private string CalculatorRunNameExists(string runName)

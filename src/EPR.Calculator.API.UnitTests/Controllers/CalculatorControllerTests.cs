@@ -469,9 +469,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Act
             var result = await this.calculatorController.FinancialYears() as ObjectResult;
-            var resultList = result?.Value as IList<CalculatorRunFinancialYear>;
+            var resultList = result?.Value as IEnumerable<FinancialYearDto>;
 
             // Assert
+            Assert.IsInstanceOfType<IEnumerable<FinancialYearDto>>(resultList);
             Assert.IsTrue(resultList?.Single().Name == "2024-25");
         }
     }

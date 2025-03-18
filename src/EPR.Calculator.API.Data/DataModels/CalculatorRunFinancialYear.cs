@@ -7,12 +7,9 @@ using System.Runtime.CompilerServices;
 namespace EPR.Calculator.API.Data.DataModels
 {
     [Table("calculator_run_financial_years")]
-    [PrimaryKey(nameof(Id))]
+    [PrimaryKey(nameof(Name))]
     public record CalculatorRunFinancialYear
     {
-        [Column("id")]
-        public int Id { get; set; }
-
         [Column("financial_Year")]
         [Required]
         public required string Name { get; set; }
@@ -22,7 +19,6 @@ namespace EPR.Calculator.API.Data.DataModels
 
         public override string ToString() => Name;
 
-        //[ForeignKey("FinancialYear")]
         public ICollection<CalculatorRun> CalculatorRuns { get; }
             = new List<CalculatorRun>();
 
