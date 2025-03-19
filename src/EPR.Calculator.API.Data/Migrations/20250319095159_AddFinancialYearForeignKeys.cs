@@ -10,21 +10,6 @@ namespace EPR.Calculator.API.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateIndex(
-                 name: "IX_lapcap_data_master_projection_year",
-                 table: "lapcap_data_master",
-                 column: "projection_year");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_default_parameter_setting_master_parameter_year",
-                table: "default_parameter_setting_master",
-                column: "parameter_year");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_calculator_run_financial_year",
-                table: "calculator_run",
-                column: "financial_year");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_calculator_run_calculator_run_financial_years_financial_year",
                 table: "calculator_run",
@@ -64,18 +49,6 @@ namespace EPR.Calculator.API.Data.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_lapcap_data_master_calculator_run_financial_years_projection_year",
                 table: "lapcap_data_master");
-
-            migrationBuilder.DropIndex(
-                name: "IX_lapcap_data_master_projection_year",
-                table: "lapcap_data_master");
-
-            migrationBuilder.DropIndex(
-                name: "IX_default_parameter_setting_master_parameter_year",
-                table: "default_parameter_setting_master");
-
-            migrationBuilder.DropIndex(
-                name: "IX_calculator_run_financial_year",
-                table: "calculator_run");
         }
     }
 }
