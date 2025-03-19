@@ -18,12 +18,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     [TestClass]
     public class BaseControllerTest
     {
-        protected ApplicationDBContext dbContext;
-        protected DefaultParameterSettingController defaultParameterSettingController;
-        protected LapcapDataController lapcapDataController;
-        protected CalculatorController calculatorController;
-        protected IOrgAndPomWrapper wrapper;
-
         public BaseControllerTest()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
@@ -31,20 +25,21 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
 
+            this.DbContext = new ApplicationDBContext(dbContextOptions);
+            this.DbContext.Database.EnsureCreated();
+            this.DbContext.DefaultParameterTemplateMasterList.RemoveRange(
+                this.DbContext.DefaultParameterTemplateMasterList);
+            this.DbContext.SaveChanges();
 
-            dbContext = new ApplicationDBContext(dbContextOptions);
-            dbContext.Database.EnsureCreated();
-            dbContext.DefaultParameterTemplateMasterList.RemoveRange(dbContext.DefaultParameterTemplateMasterList);
-            dbContext.SaveChanges();
+            this.DbContext.DefaultParameterTemplateMasterList.AddRange(GetDefaultParameterTemplateMasterData().ToList());
+            this.DbContext.SaveChanges();
 
-            dbContext.DefaultParameterTemplateMasterList.AddRange(GetDefaultParameterTemplateMasterData().ToList());
-            dbContext.SaveChanges();
+            var validator = new CreateDefaultParameterDataValidator(this.DbContext);
+            this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator);
+            ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(this.DbContext);
+            this.LapcapDataController = new LapcapDataController(this.DbContext, lapcapDataValidator);
 
-            var validator = new CreateDefaultParameterDataValidator(dbContext);
-            defaultParameterSettingController = new DefaultParameterSettingController(dbContext, validator);
-            ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(dbContext);
-            lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator);
-
+            this.Wrapper = new Mock<IOrgAndPomWrapper>().Object;
             var mockStorageService = new Mock<IStorageService>();
             var mockServiceBusService = new Mock<IServiceBusService>();
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
@@ -55,31 +50,44 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             mockFactory.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(mockClient.Object);
 
-            dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
-            dbContext.SaveChanges();
-            calculatorController = new CalculatorController(dbContext, ConfigurationItems.GetConfigurationValues(),
-                mockStorageService.Object, mockServiceBusService.Object);
+            this.DbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
+            this.DbContext.SaveChanges();
+            this.CalculatorController = new CalculatorController(
+                this.DbContext,
+                ConfigurationItems.GetConfigurationValues(),
+                mockStorageService.Object,
+                mockServiceBusService.Object);
 
-            dbContext.Material.RemoveRange(dbContext.Material.ToList());
-            dbContext.SaveChanges();
-            dbContext.Material.AddRange(GetMaterials());
-            dbContext.SaveChanges();
+            this.DbContext.Material.RemoveRange(this.DbContext.Material.ToList());
+            this.DbContext.SaveChanges();
+            this.DbContext.Material.AddRange(GetMaterials());
+            this.DbContext.SaveChanges();
         }
+
+        protected ApplicationDBContext DbContext { get; set; }
+
+        protected DefaultParameterSettingController DefaultParameterSettingController { get; set; }
+
+        protected LapcapDataController LapcapDataController { get; set; }
+
+        protected CalculatorController CalculatorController { get; set; }
+
+        protected IOrgAndPomWrapper Wrapper { get; set; }
 
         [TestMethod]
         public void CheckDbContext()
         {
-            Assert.IsNotNull(dbContext);
-            Assert.IsTrue(dbContext.Database.IsInMemory());
+            Assert.IsNotNull(this.DbContext);
+            Assert.IsTrue(this.DbContext.Database.IsInMemory());
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            dbContext?.Database.EnsureDeleted();
+            this.DbContext.Database.EnsureDeleted();
         }
 
-        public static IEnumerable<DefaultParameterTemplateMaster> GetDefaultParameterTemplateMasterData()
+        public IEnumerable<DefaultParameterTemplateMaster> GetDefaultParameterTemplateMasterData()
         {
             var list = new List<DefaultParameterTemplateMaster>();
             list.Add(new DefaultParameterTemplateMaster
@@ -88,7 +96,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "England",
                 ParameterType = "Communication costs by country",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -96,7 +104,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Northern Ireland",
                 ParameterType = "Communication costs by country",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -104,7 +112,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Scotland",
                 ParameterType = "Communication costs by country",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -112,7 +120,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "United Kingdom",
                 ParameterType = "Communication costs by country",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -120,7 +128,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Wales",
                 ParameterType = "Communication costs by country",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -128,7 +136,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Aluminium",
                 ParameterType = "Communication costs by material",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -136,7 +144,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Fibre composite",
                 ParameterType = "Communication costs by material",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -144,7 +152,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Glass",
                 ParameterType = "Communication costs by material",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -152,7 +160,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Paper or card",
                 ParameterType = "Communication costs by material",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -160,7 +168,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Plastic",
                 ParameterType = "Communication costs by material",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -168,7 +176,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Steel",
                 ParameterType = "Communication costs by material",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -176,7 +184,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Wood",
                 ParameterType = "Communication costs by material",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -184,7 +192,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Fibre composite",
                 ParameterType = "Late reporting tonnage",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -192,7 +200,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Glass",
                 ParameterType = "Late reporting tonnage",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -200,7 +208,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Aluminium",
                 ParameterType = "Late reporting tonnage",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -208,7 +216,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Wood",
                 ParameterType = "Late reporting tonnage",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -216,7 +224,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Steel",
                 ParameterType = "Late reporting tonnage",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -224,7 +232,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Paper or card",
                 ParameterType = "Late reporting tonnage",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -232,7 +240,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "England",
                 ParameterType = "Local authority data preparation costs",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -240,7 +248,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Northern Ireland",
                 ParameterType = "Local authority data preparation costs",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -248,7 +256,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Scotland",
                 ParameterType = "Local authority data preparation costs",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -256,7 +264,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Wales",
                 ParameterType = "Local authority data preparation costs",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -264,7 +272,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Amount Decrease",
                 ParameterType = "Materiality threshold",
                 ValidRangeFrom = -999999999.990m,
-                ValidRangeTo = 0.00m
+                ValidRangeTo = 0.00m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -272,7 +280,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Amount Increase",
                 ParameterType = "Materiality threshold",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -280,7 +288,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Percent Decrease",
                 ParameterType = "Materiality threshold",
                 ValidRangeFrom = -999.990m,
-                ValidRangeTo = 0.00m
+                ValidRangeTo = 0.00m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -288,7 +296,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Percent Increase",
                 ParameterType = "Materiality threshold",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999.990m
+                ValidRangeTo = 999.990m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -296,7 +304,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Other",
                 ParameterType = "Other materials",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -304,7 +312,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Other materials",
                 ParameterType = "Late reporting tonnage",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -312,7 +320,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Bad debt provision",
                 ParameterType = "Percentage",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 1000.000m
+                ValidRangeTo = 1000.000m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -320,7 +328,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Plastic",
                 ParameterType = "Late reporting tonnage",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -328,7 +336,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "England",
                 ParameterType = "Scheme administrator operating costs",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -336,7 +344,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Northern Ireland",
                 ParameterType = "Scheme administrator operating costs",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -344,7 +352,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Scotland",
                 ParameterType = "Scheme administrator operating costs",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -352,7 +360,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Wales",
                 ParameterType = "Scheme administrator operating costs",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -360,7 +368,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "England",
                 ParameterType = "Scheme setup costs",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -368,7 +376,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Northern Ireland",
                 ParameterType = "Scheme setup costs",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -376,7 +384,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Scotland",
                 ParameterType = "Scheme setup costs",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -384,7 +392,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Wales",
                 ParameterType = "Scheme setup costs",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -392,7 +400,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Amount Decrease",
                 ParameterType = "Tonnage change threshold",
                 ValidRangeFrom = -999999999.990m,
-                ValidRangeTo = 0.00m
+                ValidRangeTo = 0.00m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -400,7 +408,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Amount Increase",
                 ParameterType = "Tonnage change threshold",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999999999.99m
+                ValidRangeTo = 999999999.99m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -408,7 +416,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Percent Decrease",
                 ParameterType = "Tonnage change threshold",
                 ValidRangeFrom = -999.990m,
-                ValidRangeTo = 0.00m
+                ValidRangeTo = 0.00m,
             });
             list.Add(new DefaultParameterTemplateMaster
             {
@@ -416,12 +424,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterCategory = "Percent Increase",
                 ParameterType = "Tonnage change threshold",
                 ValidRangeFrom = 0m,
-                ValidRangeTo = 999.990m
+                ValidRangeTo = 999.990m,
             });
             return list;
         }
 
-        public static IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
+        public IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
         {
             var list = new List<LapcapDataTemplateMaster>();
             list.Add(new LapcapDataTemplateMaster
@@ -692,7 +700,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Name = "Test Run",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
-                CreatedBy = "Test User"
+                CreatedBy = "Test User",
             });
             list.Add(new CalculatorRun
             {
@@ -700,7 +708,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Name = "Test Calculated Result",
                 Financial_Year = "2024-25",
                 CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
-                CreatedBy = "Test User"
+                CreatedBy = "Test User",
             });
             list.Add(new CalculatorRun
             {
@@ -745,56 +753,56 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 Code = "AL",
                 Name = "Aluminium",
-                Description = "Aluminium"
+                Description = "Aluminium",
             });
             list.Add(new Material
             {
                 Id = 2,
                 Code = "FC",
                 Name = "Fibre composite",
-                Description = "Fibre composite"
+                Description = "Fibre composite",
             });
             list.Add(new Material
             {
                 Id = 3,
                 Code = "GL",
                 Name = "Glass",
-                Description = "Glass"
+                Description = "Glass",
             });
             list.Add(new Material
             {
                 Id = 4,
                 Code = "PC",
                 Name = "Paper or card",
-                Description = "Paper or card"
+                Description = "Paper or card",
             });
             list.Add(new Material
             {
                 Id = 5,
                 Code = "PL",
                 Name = "Plastic",
-                Description = "Plastic"
+                Description = "Plastic",
             });
             list.Add(new Material
             {
                 Id = 6,
                 Code = "ST",
                 Name = "Steel",
-                Description = "Steel"
+                Description = "Steel",
             });
             list.Add(new Material
             {
                 Id = 7,
                 Code = "WD",
                 Name = "Wood",
-                Description = "Wood"
+                Description = "Wood",
             });
             list.Add(new Material
             {
                 Id = 8,
                 Code = "OT",
                 Name = "Other materials",
-                Description = "Other materials"
+                Description = "Other materials",
             });
             return list;
         }
@@ -808,7 +816,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CalendarYear = "2024-25",
                 EffectiveFrom = DateTime.Now,
                 CreatedBy = "Test user",
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
             });
             return list;
         }
@@ -830,7 +838,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 LoadTimeStamp = DateTime.Now,
                 CalculatorRunPomDataMasterId = 1,
                 SubmissionPeriodDesc = "July to December 2023",
-                CalculatorRunPomDataMaster = GetCalculatorRunPomDataMaster().ToList()[0]
+                CalculatorRunPomDataMaster = GetCalculatorRunPomDataMaster().ToList()[0],
             });
             return list;
         }
@@ -844,7 +852,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CalendarYear = "2024-25",
                 EffectiveFrom = DateTime.Now,
                 CreatedBy = "Test user",
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
             });
             return list;
         }
@@ -867,7 +875,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CalendarYear = "2024-25",
                 EffectiveFrom = DateTime.Now,
                 CreatedBy = "Test user",
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
             }
             },
                 new CalculatorRunOrganisationDataDetail
@@ -885,7 +893,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CalendarYear = "2024-25",
                 EffectiveFrom = DateTime.Now,
                 CreatedBy = "Test user",
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
             }
             } });
             return list;

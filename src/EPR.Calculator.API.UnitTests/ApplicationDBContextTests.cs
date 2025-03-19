@@ -12,16 +12,16 @@ namespace EPR.Calculator.API.UnitTests
     [TestClass]
     public class ApplicationDBContextTests
     {
+        public ApplicationDBContextTests()
+        {
+            this.Options = new Mock<DbContextOptions>().Object;
+            this.Options = new DbContextOptionsBuilder().Options;
+            this.TestClass = new TestApplicationDBContext(this.Options);
+        }
+
         private TestApplicationDBContext TestClass { get; init; }
 
         private DbContextOptions Options { get; init; }
-
-        public ApplicationDBContextTests()
-        {
-            Options = new Mock<DbContextOptions>().Object;
-            Options = new DbContextOptionsBuilder().Options;
-            TestClass = new TestApplicationDBContext(Options);
-        }
 
         [TestMethod]
         public void CanCallOnConfiguring()
@@ -31,7 +31,7 @@ namespace EPR.Calculator.API.UnitTests
             var optionsBuilder = fixture.Create<DbContextOptionsBuilder>();
 
             // Act
-            TestClass.PublicOnConfiguring(optionsBuilder);
+            this.TestClass.PublicOnConfiguring(optionsBuilder);
 
             // Assert
             Assert.AreEqual(true, optionsBuilder.IsConfigured);
@@ -44,7 +44,7 @@ namespace EPR.Calculator.API.UnitTests
         {
             public void PublicOnConfiguring(DbContextOptionsBuilder optionsBuilder)
             {
-                base.OnConfiguring(optionsBuilder);
+                this.OnConfiguring(optionsBuilder);
             }
         }
     }

@@ -52,10 +52,10 @@ namespace EPR.Calculator.API.Tests.Controllers
             };
 
             //Check if dbContext is not null
-            if (dbContext != null)
+            if (DbContext != null)
             {
                 // Act           
-                var result = CreateDefaultParameterSettingMapper.Map(defaultParameterSettingMaster, dbContext.DefaultParameterTemplateMasterList);
+                var result = CreateDefaultParameterSettingMapper.Map(defaultParameterSettingMaster, DbContext.DefaultParameterTemplateMasterList);
                 Assert.AreEqual(1, result.Count);
                 Assert.IsNotNull(result);
                 //// Assert

@@ -19,9 +19,9 @@ namespace EPR.Calculator.API.Tests.Controllers
             var actionResult = await DataPostCallAsync();
             Assert.AreEqual(201, actionResult?.StatusCode);
 
-            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterSettingDetail.Count());
-            Assert.AreEqual(1, dbContext?.DefaultParameterSettings.Count());
-            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterTemplateMasterList.Count());
+            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, DbContext?.DefaultParameterSettingDetail.Count());
+            Assert.AreEqual(1, DbContext?.DefaultParameterSettings.Count());
+            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, DbContext?.DefaultParameterTemplateMasterList.Count());
         }
 
         [TestMethod]
@@ -34,12 +34,12 @@ namespace EPR.Calculator.API.Tests.Controllers
             Assert.AreEqual(201, actionResult2?.StatusCode);
 
             var expectedLength = DefaultParameterUniqueReferences.UniqueReferences.Length * 2;
-            Assert.AreEqual(expectedLength, dbContext?.DefaultParameterSettingDetail.Count());
-            Assert.AreEqual(2, dbContext?.DefaultParameterSettings.Count());
-            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterTemplateMasterList.Count());
+            Assert.AreEqual(expectedLength, DbContext?.DefaultParameterSettingDetail.Count());
+            Assert.AreEqual(2, DbContext?.DefaultParameterSettings.Count());
+            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, DbContext?.DefaultParameterTemplateMasterList.Count());
 
-            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, dbContext?.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2));
-            Assert.AreEqual(1, dbContext?.DefaultParameterSettings.Count(a => a.EffectiveTo == null));
+            Assert.AreEqual(DefaultParameterUniqueReferences.UniqueReferences.Length, DbContext?.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2));
+            Assert.AreEqual(1, DbContext?.DefaultParameterSettings.Count(a => a.EffectiveTo == null));
         }
 
         //GET API
@@ -66,7 +66,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             };
 
             //Act
-            var actionResult1 = await defaultParameterSettingController?.Get("2024-25") as ObjectResult;
+            var actionResult1 = await DefaultParameterSettingController?.Get("2024-25") as ObjectResult;
 
             //Assert
             var okResult = actionResult1 as ObjectResult;
@@ -88,7 +88,7 @@ namespace EPR.Calculator.API.Tests.Controllers
 
             // Return 404 error if the year does not exist
             //Act
-            var result = await defaultParameterSettingController?.Get("2028-25") as ObjectResult;
+            var result = await DefaultParameterSettingController?.Get("2028-25") as ObjectResult;
 
             //Assert
             var okResult = result as ObjectResult;
@@ -195,7 +195,7 @@ namespace EPR.Calculator.API.Tests.Controllers
                 User = principal
             };
 
-            defaultParameterSettingController.ControllerContext = new ControllerContext
+            DefaultParameterSettingController.ControllerContext = new ControllerContext
             {
                 HttpContext = context
             };
@@ -228,7 +228,7 @@ namespace EPR.Calculator.API.Tests.Controllers
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
                 ParameterFileName = "TestFileName"
             };
-            var actionResult = await defaultParameterSettingController?.Create(createDefaultParameterDto);
+            var actionResult = await DefaultParameterSettingController?.Create(createDefaultParameterDto);
             return actionResult as ObjectResult;
         }
     }

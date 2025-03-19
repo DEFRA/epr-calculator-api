@@ -28,7 +28,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            dbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
                 ParameterYear = "2024-25",
@@ -37,9 +37,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext.SaveChanges();
+            DbContext.SaveChanges();
 
-            dbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
                 ProjectionYear = "2024-25",
@@ -48,7 +48,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext.SaveChanges();
+            DbContext.SaveChanges();
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -59,12 +59,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal
             };
 
-            calculatorController.ControllerContext = new ControllerContext
+            CalculatorController.ControllerContext = new ControllerContext
             {
                 HttpContext = context
             };
 
-            var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResult = await CalculatorController?.Create(createCalculatorRunDto) as ObjectResult;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(202, actionResult.StatusCode);
@@ -79,7 +79,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 FinancialYear = "2024-25"
             };
 
-            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            DbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
                 ParameterYear = "2023-24",
@@ -88,9 +88,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext?.SaveChanges();
+            DbContext?.SaveChanges();
 
-            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
+            DbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
                 ProjectionYear = "2023-24",
@@ -99,7 +99,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext?.SaveChanges();
+            DbContext?.SaveChanges();
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -110,13 +110,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal
             };
 
-            calculatorController.ControllerContext = new ControllerContext
+            CalculatorController.ControllerContext = new ControllerContext
             {
                 HttpContext = context
             };
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResult = await CalculatorController?.Create(createCalculatorRunDto) as ObjectResult;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(424, actionResult.StatusCode);
@@ -132,7 +132,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 FinancialYear = "2024-25"
             };
 
-            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            DbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
                 ParameterYear = "2023-24",
@@ -141,9 +141,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext?.SaveChanges();
+            DbContext?.SaveChanges();
 
-            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
+            DbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
                 ProjectionYear = "2024-25",
@@ -152,7 +152,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext?.SaveChanges();
+            DbContext?.SaveChanges();
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -163,13 +163,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal
             };
 
-            calculatorController.ControllerContext = new ControllerContext
+            CalculatorController.ControllerContext = new ControllerContext
             {
                 HttpContext = context
             };
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResult = await CalculatorController?.Create(createCalculatorRunDto) as ObjectResult;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(424, actionResult.StatusCode);
@@ -185,7 +185,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 FinancialYear = "2027-28"
             };
 
-            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            DbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
                 ParameterYear = "2027-28",
@@ -194,9 +194,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext?.SaveChanges();
+            DbContext?.SaveChanges();
 
-            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
+            DbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
                 ProjectionYear = "2023-24",
@@ -205,7 +205,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext?.SaveChanges();
+            DbContext?.SaveChanges();
 
 
             var identity = new GenericIdentity("TestUser");
@@ -217,13 +217,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal
             };
 
-            calculatorController.ControllerContext = new ControllerContext
+            CalculatorController.ControllerContext = new ControllerContext
             {
                 HttpContext = context
             };
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResult = await CalculatorController?.Create(createCalculatorRunDto) as ObjectResult;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(424, actionResult.StatusCode);
@@ -239,7 +239,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 FinancialYear = "2024-25"
             };
 
-            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            DbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
                 ParameterYear = "2024-25",
@@ -248,9 +248,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext?.SaveChanges();
+            DbContext?.SaveChanges();
 
-            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
+            DbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
                 ProjectionYear = "2024-25",
@@ -259,7 +259,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext?.SaveChanges();
+            DbContext?.SaveChanges();
 
             var configs = ConfigurationItems.GetConfigurationValues();
             configs.GetSection("ServiceBus").GetSection("ConnectionString").Value = string.Empty;
@@ -268,8 +268,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var mockStorageService = new Mock<IStorageService>();
 
 #pragma warning disable CS8604 // Possible null reference argument.
-            calculatorController =
-                new CalculatorController(dbContext, configs, mockStorageService.Object, mockServiceBusService.Object);
+            CalculatorController =
+                new CalculatorController(DbContext, configs, mockStorageService.Object, mockServiceBusService.Object);
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var identity = new GenericIdentity("TestUser");
@@ -281,12 +281,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal
             };
 
-            calculatorController.ControllerContext = new ControllerContext
+            CalculatorController.ControllerContext = new ControllerContext
             {
                 HttpContext = context
             };
 
-            var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
             var actionResultValue = actionResult?.Value as System.Configuration.ConfigurationErrorsException;
 
             Assert.IsNotNull(actionResult);
@@ -303,7 +303,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 FinancialYear = "2024-25"
             };
 
-            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            DbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
                 ParameterYear = "2024-25",
@@ -312,9 +312,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext?.SaveChanges();
+            DbContext?.SaveChanges();
 
-            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
+            DbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
                 ProjectionYear = "2024-25",
@@ -323,7 +323,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext?.SaveChanges();
+            DbContext?.SaveChanges();
 
             var configs = ConfigurationItems.GetConfigurationValues();
             configs.GetSection("ServiceBus").GetSection("QueueName").Value = string.Empty;
@@ -331,8 +331,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var mockServiceBusService = new Mock<IServiceBusService>();
             var mockStorageService = new Mock<IStorageService>();
 #pragma warning disable CS8604 // Possible null reference argument.
-            calculatorController =
-                new CalculatorController(dbContext, configs, mockStorageService.Object, mockServiceBusService.Object);
+            CalculatorController =
+                new CalculatorController(DbContext, configs, mockStorageService.Object, mockServiceBusService.Object);
 #pragma warning restore CS8604 // Possible null reference argument.
 
             var identity = new GenericIdentity("TestUser");
@@ -344,12 +344,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal
             };
 
-            calculatorController.ControllerContext = new ControllerContext
+            CalculatorController.ControllerContext = new ControllerContext
             {
                 HttpContext = context
             };
 
-            var actionResult = await calculatorController.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
             var actionResultValue = actionResult?.Value as System.Configuration.ConfigurationErrorsException;
 
             Assert.IsNotNull(actionResult);
@@ -364,7 +364,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 FinancialYear = "2024-25"
             };
-            var actionResult = await calculatorController?.GetCalculatorRuns(runParams) as ObjectResult;
+            var actionResult = await CalculatorController?.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.StatusCode);
         }
@@ -376,7 +376,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 FinancialYear = "2022-23"
             };
-            var actionResult = await calculatorController?.GetCalculatorRuns(runParams) as ObjectResult;
+            var actionResult = await CalculatorController?.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(404, actionResult.StatusCode);
         }
@@ -388,7 +388,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 FinancialYear = string.Empty
             };
-            var actionResult = await calculatorController?.GetCalculatorRuns(runParams) as ObjectResult;
+            var actionResult = await CalculatorController?.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(400, actionResult.StatusCode);
         }
@@ -409,7 +409,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             string calculatorRunName = "Test Run";
 
-            var actionResult = await calculatorController?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
+            var actionResult = await CalculatorController?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.Value);
         }
@@ -419,7 +419,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             string calculatorRunName = "test 45610";
 
-            var actionResult = await calculatorController?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
+            var actionResult = await CalculatorController?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(404, actionResult.StatusCode);
         }
@@ -429,7 +429,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             string calculatorRunName = "TEST run";
 
-            var actionResult = await calculatorController?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
+            var actionResult = await CalculatorController?.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.Value);
         }
@@ -443,7 +443,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 FinancialYear = "2024-25"
             };
 
-            dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            DbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
                 ParameterYear = "2023-24",
@@ -452,9 +452,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext?.SaveChanges();
+            DbContext?.SaveChanges();
 
-            dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
+            DbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
                 ProjectionYear = "2023-24",
@@ -463,9 +463,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext?.SaveChanges();
+            DbContext?.SaveChanges();
 
-            dbContext?.CalculatorRuns.Add(new CalculatorRun
+            DbContext?.CalculatorRuns.Add(new CalculatorRun
             {
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
@@ -473,7 +473,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Financial_Year = "2023-24",
                 Name = "TestOneAtATime"
             });
-            dbContext?.SaveChanges();
+            DbContext?.SaveChanges();
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -484,13 +484,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal
             };
 
-            calculatorController.ControllerContext = new ControllerContext
+            CalculatorController.ControllerContext = new ControllerContext
             {
                 HttpContext = context
             };
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResult = await CalculatorController?.Create(createCalculatorRunDto) as ObjectResult;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(422, actionResult.StatusCode);

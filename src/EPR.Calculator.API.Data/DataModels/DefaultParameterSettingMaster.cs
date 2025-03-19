@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
+
 namespace EPR.Calculator.API.Data.DataModels
 {
     [Table("default_parameter_setting_master")]

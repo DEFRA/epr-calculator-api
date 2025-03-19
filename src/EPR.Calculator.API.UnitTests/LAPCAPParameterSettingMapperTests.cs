@@ -49,10 +49,10 @@ namespace EPR.Calculator.API.UnitTests
             };
 
             //Check if dbContext is not null
-            if (dbContext != null)
+            if (DbContext != null)
             {
                 // Act
-                var result = LapcapDataParameterSettingMapper.Map(defaultParameterSettingMaster, dbContext.LapcapDataTemplateMaster);
+                var result = LapcapDataParameterSettingMapper.Map(defaultParameterSettingMaster, DbContext.LapcapDataTemplateMaster);
 
                 // Assert
                 var mappedItem = result.First();

@@ -1,8 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices.Marshalling;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Data.DataModels
 {

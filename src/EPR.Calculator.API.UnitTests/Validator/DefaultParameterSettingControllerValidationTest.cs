@@ -25,7 +25,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 User = principal
             };
 
-            defaultParameterSettingController.ControllerContext = new ControllerContext
+            DefaultParameterSettingController.ControllerContext = new ControllerContext
             {
                 HttpContext = context
             };
@@ -37,9 +37,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 ParameterFileName = "TestFileName"
             };
 
-            defaultParameterSettingController?.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
-            defaultParameterSettingController?.ModelState.AddModelError("SchemeParameterTemplateValues", ErrorMessages.SchemeParameterTemplateValuesMissing);
-            var actionResult = await defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
+            DefaultParameterSettingController?.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
+            DefaultParameterSettingController?.ModelState.AddModelError("SchemeParameterTemplateValues", ErrorMessages.SchemeParameterTemplateValuesMissing);
+            var actionResult = await DefaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
 
             var modelErrors = actionResult?.Value as IEnumerable<ModelError>;
@@ -60,7 +60,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 User = principal
             };
 
-            defaultParameterSettingController.ControllerContext = new ControllerContext
+            DefaultParameterSettingController.ControllerContext = new ControllerContext
             {
                 HttpContext = context
             };
@@ -73,7 +73,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 ParameterFileName = "TestFileName"
             };
 
-            var actionResult = await defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
+            var actionResult = await DefaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
 
             var errors = actionResult?.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
@@ -93,7 +93,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 User = principal
             };
 
-            defaultParameterSettingController.ControllerContext = new ControllerContext
+            DefaultParameterSettingController.ControllerContext = new ControllerContext
             {
                 HttpContext = context
             };
@@ -114,7 +114,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 ParameterFileName = "TestFileName"
             };
 
-            var actionResult = await defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
+            var actionResult = await DefaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
 
             var errors = actionResult?.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
