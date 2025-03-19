@@ -16,7 +16,7 @@ namespace EPR.Calculator.API.Mappers
                 var data = new DefaultSchemeParametersDto
                 {
                     Id = item.Id,
-                    ParameterYear = defaultParameterSettingMaster.ParameterYear,
+                    ParameterYear = defaultParameterSettingMaster.ParameterYear.Name,
                     EffectiveFrom = defaultParameterSettingMaster.EffectiveFrom,
                     EffectiveTo = defaultParameterSettingMaster.EffectiveTo,
                     CreatedBy = defaultParameterSettingMaster.CreatedBy,

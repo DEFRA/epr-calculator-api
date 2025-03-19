@@ -1,23 +1,46 @@
-﻿using Azure.Messaging.ServiceBus;
-using EPR.Calculator.API.Controllers;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Services;
-using EPR.Calculator.API.UnitTests.Helpers;
-using EPR.Calculator.API.Validators;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Azure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using System.Security.Claims;
-using System.Security.Principal;
-
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
+    using System;
+    using System.Security.Claims;
+    using System.Security.Principal;
+    using System.Threading.Tasks;
+    using AutoFixture;
+    using Azure.Core;
+    using Azure.Messaging.ServiceBus;
+    using EPR.Calculator.API.Controllers;
+    using EPR.Calculator.API.Data.DataModels;
+    using EPR.Calculator.API.Dtos;
+    using EPR.Calculator.API.Services;
+    using EPR.Calculator.API.UnitTests.Helpers;
+    using EPR.Calculator.API.Validators;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Azure;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Moq;
     [TestClass]
     public class CalculatorControllerTests : BaseControllerTest
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CalculatorControllerTests"/> class.
+        /// </summary>
+        public CalculatorControllerTests()
+        {
+            this.Fixture = new Fixture();
+
+            // Set up authorisation.
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+            var context = new DefaultHttpContext { User = principal };
+            this.calculatorController.ControllerContext = new ControllerContext { HttpContext = context };
+        }
+
+        public Fixture Fixture { get; init; } 
+
+        private CalculatorRunFinancialYear FinancialYear23_24 { get; } = new CalculatorRunFinancialYear { Name = "2023-24" };
+
         [TestMethod]
         public async Task Create_Calculator_Run()
         {
@@ -31,38 +54,23 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2024-25",
+                ParameterYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext.SaveChanges();
 
             dbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = "2024-25",
+                ProjectionYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
             dbContext.SaveChanges();
-
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal
-            };
-
-            calculatorController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context
-            };
 
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
@@ -82,7 +90,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2023-24",
+                ParameterYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -93,27 +101,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = "2023-24",
+                ProjectionYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
             dbContext?.SaveChanges();
-
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal
-            };
-
-            calculatorController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context
-            };
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
@@ -135,38 +129,23 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2023-24",
+                ParameterYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
-            dbContext?.SaveChanges();
 
             dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = "2024-25",
+                ProjectionYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
             dbContext?.SaveChanges();
-
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal
-            };
-
-            calculatorController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context
-            };
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
@@ -179,6 +158,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task Create_Calculator_Run_Return_404_If_No_Lapcap_Data()
         {
+            var financialYear27_28 = new CalculatorRunFinancialYear { Name = "2027-28" };
+
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
@@ -188,7 +169,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2027-28",
+                ParameterYear = financialYear27_28,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -199,28 +180,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = "2023-24",
+                ProjectionYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
                 EffectiveTo = null
             });
             dbContext?.SaveChanges();
-
-
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal
-            };
-
-            calculatorController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context
-            };
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
@@ -242,7 +208,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2024-25",
+                ParameterYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -253,7 +219,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = "2024-25",
+                ProjectionYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -306,7 +272,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2024-25",
+                ParameterYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -317,7 +283,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = "2024-25",
+                ProjectionYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -355,6 +321,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(500, actionResult.StatusCode);
             Assert.AreEqual("Configuration item not found: ServiceBus__QueueName", actionResultValue?.Message);
+        }
+
+        [TestMethod]
+        public async Task Create_Calculator_Run_Return_400_If_FinancialYear_Invalid()
+        {
+            var createCalculatorRunDto = new CreateCalculatorRunDto
+            {
+                CalculatorRunName = "Test calculator run",
+                FinancialYear = this.Fixture.Create<string>(),
+            };
+            var actionResult = await this.calculatorController.Create(createCalculatorRunDto) as ObjectResult;
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(StatusCodes.Status400BadRequest, actionResult.StatusCode);
         }
 
         [TestMethod]
@@ -446,7 +425,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = "2023-24",
+                ParameterYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -457,7 +436,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext?.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = "2023-24",
+                ProjectionYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -470,24 +449,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 CalculatorRunClassificationId = 2,
-                Financial_Year = "2023-24",
+                Financial_Year = FinancialYear23_24,
                 Name = "TestOneAtATime"
             });
             dbContext?.SaveChanges();
-
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal
-            };
-
-            calculatorController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context
-            };
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             var actionResult = await calculatorController?.Create(createCalculatorRunDto) as ObjectResult;
@@ -497,6 +462,18 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var expectedJson = "{\"Message\":\"The calculator is currently running. You will be able to run another calculation once the current one has finished.\"}";
             var actualJson = System.Text.Json.JsonSerializer.Serialize(actionResult?.Value);
             Assert.AreEqual(expectedJson, actualJson);
+        }
+
+        [TestMethod]
+        public async Task CanCallFinancialYears()
+        {
+            // Act
+            var result = await this.calculatorController.FinancialYears() as ObjectResult;
+            var resultList = result?.Value as IEnumerable<FinancialYearDto>;
+
+            // Assert
+            Assert.IsInstanceOfType<IEnumerable<FinancialYearDto>>(resultList);
+            Assert.IsTrue(resultList?.Single().Name == "2024-25");
         }
     }
 }
