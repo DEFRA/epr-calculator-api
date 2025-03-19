@@ -55,7 +55,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             mockFactory.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(mockClient.Object);
 
-            this.FinancialYear24_25 = this.dbContext.FinancialYears.Single(year => year.Name == "2024-25");
+            this.FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
+            this.dbContext.FinancialYears.Add(this.FinancialYear24_25);
 
             dbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
             dbContext.SaveChanges();

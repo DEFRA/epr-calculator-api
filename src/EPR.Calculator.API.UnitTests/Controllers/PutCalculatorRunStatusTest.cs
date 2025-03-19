@@ -39,7 +39,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context = new ApplicationDBContext(dbContextOptions);
             context.Database.EnsureCreated();
 
-            this.FinancialYear24_25 = this.context.FinancialYears.Single(year => year.Name == "2024-25");
+            this.FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
+            this.context.FinancialYears.Add(this.FinancialYear24_25);
+            this.context.SaveChanges();
 
             context.CalculatorRuns.AddRange(GetCalculatorRuns());
             context.SaveChanges();

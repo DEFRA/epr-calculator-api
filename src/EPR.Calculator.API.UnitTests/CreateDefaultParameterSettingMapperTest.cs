@@ -9,8 +9,6 @@ namespace EPR.Calculator.API.Tests.Controllers
     [TestClass]
     public class CreateDefaultParameterSettingMapperTest : BaseControllerTest
     {
-        private CalculatorRunFinancialYear FinancialYear24_25 { get; } = new CalculatorRunFinancialYear { Name = "2024-25" };
-
         [TestMethod]
         public void Check_TheResult_Parmeter_Are_Equal_IsNotNullOf_ResultSet_WithDefaultSchemeParametersDto_WithCorrectYear()
         {
