@@ -16,16 +16,16 @@ namespace EPR.Calculator.API.UnitTests.Utils
         {
             DefaultParameterTemplateMaster template = new DefaultParameterTemplateMaster
             {
-                ParameterType = parameterType,
-                ParameterUniqueReferenceId = parameterUniqueReferenceId,
-                ParameterCategory = parameterCategory
+                ParameterType = this.parameterType,
+                ParameterUniqueReferenceId = this.parameterUniqueReferenceId,
+                ParameterCategory = parameterCategory,
             };
             string errorMessage = "Some error message";
             var errorDto = Util.CreateErrorDto(template, errorMessage);
             Assert.IsNotNull(errorDto);
-            Assert.AreEqual(errorDto.ParameterType, parameterType);
-            Assert.AreEqual(errorDto.ParameterCategory, parameterCategory);
-            Assert.AreEqual(errorDto.ParameterUniqueRef, parameterUniqueReferenceId);
+            Assert.AreEqual(errorDto.ParameterType, this.parameterType);
+            Assert.AreEqual(errorDto.ParameterCategory, this.parameterCategory);
+            Assert.AreEqual(errorDto.ParameterUniqueRef, this.parameterUniqueReferenceId);
         }
 
         [TestMethod]
@@ -33,9 +33,9 @@ namespace EPR.Calculator.API.UnitTests.Utils
         {
             DefaultParameterTemplateMaster template = new DefaultParameterTemplateMaster
             {
-                ParameterType = parameterType,
-                ParameterUniqueReferenceId = parameterUniqueReferenceId,
-                ParameterCategory = parameterCategory
+                ParameterType = this.parameterType,
+                ParameterUniqueReferenceId = this.parameterUniqueReferenceId,
+                ParameterCategory = this.parameterCategory,
             };
             var parameterValue = Util.GetParameterValue(template, "£100");
             Assert.IsNotNull(parameterValue);
@@ -45,14 +45,14 @@ namespace EPR.Calculator.API.UnitTests.Utils
         [TestMethod]
         public void GetParameterValueTest_For_Percent()
         {
-            parameterType = "Paramter Type 1 percent";
-            parameterUniqueReferenceId = Guid.NewGuid().ToString();
-            parameterCategory = "Parameter Category 1";
+            this.parameterType = "Paramter Type 1 percent";
+            this.parameterUniqueReferenceId = Guid.NewGuid().ToString();
+            this.parameterCategory = "Parameter Category 1";
             DefaultParameterTemplateMaster template = new DefaultParameterTemplateMaster
             {
-                ParameterType = parameterType,
-                ParameterUniqueReferenceId = parameterUniqueReferenceId,
-                ParameterCategory = parameterCategory
+                ParameterType = this.parameterType,
+                ParameterUniqueReferenceId = this.parameterUniqueReferenceId,
+                ParameterCategory = this.parameterCategory,
             };
             var parameterValue = Util.GetParameterValue(template, "100%");
             Assert.IsNotNull(parameterValue);
@@ -68,7 +68,8 @@ namespace EPR.Calculator.API.UnitTests.Utils
         [DataRow("2024-25", "2024")]
         [DataRow("2023-24", "2023")]
         [DataRow("2022-23", "2022")]
-        public void GetFinancialYearAsYYYY_ValidString_ShouldReturnFirstYear(string financialYear,
+        public void GetFinancialYearAsYYYY_ValidString_ShouldReturnFirstYear(
+            string financialYear,
             string expectedFinancialYear)
         {
             var result = Util.GetFinancialYearAsYYYY(financialYear);

@@ -14,14 +14,6 @@ namespace EPR.Calculator.API.UnitTests.Services
     [TestClass]
     public class CommandTimeoutServiceTests
     {
-        private CommandTimeoutService TestClass { get; init; }
-
-        private IFixture Fixture { get; init; }
-
-        private Mock<IConfiguration> Configuration { get; init; }
-
-        private DatabaseFacade Database { get; init; }
-
         public CommandTimeoutServiceTests()
         {
             this.Fixture = new Fixture();
@@ -29,6 +21,14 @@ namespace EPR.Calculator.API.UnitTests.Services
             this.TestClass = new CommandTimeoutService(this.Configuration.Object);
             this.Database = new DatabaseFacade(new ApplicationDBContext());
         }
+
+        private CommandTimeoutService TestClass { get; init; }
+
+        private IFixture Fixture { get; init; }
+
+        private Mock<IConfiguration> Configuration { get; init; }
+
+        private DatabaseFacade Database { get; init; }
 
         [TestMethod]
         public void CanConstruct()
@@ -63,7 +63,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         public void CanCallSetCommandTimeout(double value, int? expectedValue)
         {
             // Arrange
-            var configValueKey = Fixture.Create<string>();
+            var configValueKey = this.Fixture.Create<string>();
 
             var mockValueSection = new Mock<IConfigurationSection>();
             mockValueSection.Setup(s => s.Value).Returns(value.ToString());
@@ -72,7 +72,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             mockTimeoutSection.Setup(x => x.GetSection(configValueKey))
                 .Returns(mockValueSection.Object);
 
-            Configuration.Setup(c => c.GetSection("Timeouts"))
+            this.Configuration.Setup(c => c.GetSection("Timeouts"))
                 .Returns(mockTimeoutSection.Object);
 
             // Act
@@ -87,6 +87,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         /// Checks that <see cref="CommandTimeoutService.SetCommandTimeout(DatabaseFacade, string)"/>
         /// throws an exception when an empty key is passed.
         /// </summary>
+        /// <param name="value">The key value to test.</param>
         [DataTestMethod]
         [DataRow(null)]
         [DataRow("")]
@@ -101,7 +102,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             {
                 this.TestClass.SetCommandTimeout(this.Database, value);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 result = ex;
             }

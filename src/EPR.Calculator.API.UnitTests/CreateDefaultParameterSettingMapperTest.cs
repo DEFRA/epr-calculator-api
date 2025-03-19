@@ -3,7 +3,6 @@ using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.UnitTests.Controllers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-
 namespace EPR.Calculator.API.Tests.Controllers
 {
     [TestClass]
@@ -29,9 +28,9 @@ namespace EPR.Calculator.API.Tests.Controllers
                     ParameterUniqueReferenceId = "BADEBT-P",
                     ParameterValue = 30.99m,
                     DefaultParameterSettingMaster = defaultParameterSettingMaster,
-                }
+                },
             };
-            
+
             var detail = new DefaultParameterSettingDetail
             {
                 Id = 150,
@@ -41,21 +40,22 @@ namespace EPR.Calculator.API.Tests.Controllers
                 DefaultParameterSettingMaster = defaultParameterSettingMaster,
             };
 
-
             details.ForEach(detail => defaultParameterSettingMaster.Details.Add(detail));
 
             var template = new DefaultParameterTemplateMaster
             {
                 ParameterUniqueReferenceId = "BADEBT-P",
                 ParameterType = "Percentage",
-                ParameterCategory = "Bad debt provision"
+                ParameterCategory = "Bad debt provision",
             };
 
-            //Check if dbContext is not null
-            if (DbContext != null)
+            // Check if dbContext is not null
+            if (this.DbContext != null)
             {
-                // Act           
-                var result = CreateDefaultParameterSettingMapper.Map(defaultParameterSettingMaster, DbContext.DefaultParameterTemplateMasterList);
+                // Act
+                var result = CreateDefaultParameterSettingMapper.Map(
+                    defaultParameterSettingMaster,
+                    this.DbContext.DefaultParameterTemplateMasterList);
                 Assert.AreEqual(1, result.Count);
                 Assert.IsNotNull(result);
                 //// Assert

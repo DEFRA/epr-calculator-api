@@ -10,65 +10,65 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     [TestClass]
     public class CalculatorRunOrganisationDataMasterTests
     {
+        public CalculatorRunOrganisationDataMasterTests()
+        {
+            this.TestClass = this.Fixture.Create<CalculatorRunOrganisationDataMaster>();
+        }
+
         private Fixture Fixture { get; } = new Fixture();
 
         private CalculatorRunOrganisationDataMaster TestClass { get; init; }
-
-        public CalculatorRunOrganisationDataMasterTests()
-        {
-            TestClass = Fixture.Create<CalculatorRunOrganisationDataMaster>();
-        }
 
         [TestMethod]
         public void CanSetAndGetId()
         {
             // Arrange
-            var testValue = Fixture.Create<int>();
+            var testValue = this.Fixture.Create<int>();
 
             // Act
-            TestClass.Id = testValue;
+            this.TestClass.Id = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.Id);
+            Assert.AreEqual(testValue, this.TestClass.Id);
         }
 
         [TestMethod]
         public void CanSetAndGetCalendarYear()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.CalendarYear = testValue;
+            this.TestClass.CalendarYear = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.CalendarYear);
+            Assert.AreEqual(testValue, this.TestClass.CalendarYear);
         }
 
         [TestMethod]
         public void CanSetAndGetEffectiveFrom()
         {
             // Arrange
-            var testValue = Fixture.Create<DateTime>();
+            var testValue = this.Fixture.Create<DateTime>();
 
             // Act
-            TestClass.EffectiveFrom = testValue;
+            this.TestClass.EffectiveFrom = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.EffectiveFrom);
+            Assert.AreEqual(testValue, this.TestClass.EffectiveFrom);
         }
 
         [TestMethod]
         public void CanSetAndGetEffectiveTo()
         {
             // Arrange
-            var testValue = Fixture.Create<DateTime?>();
+            var testValue = this.Fixture.Create<DateTime?>();
 
             // Act
-            TestClass.EffectiveTo = testValue;
+            this.TestClass.EffectiveTo = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.EffectiveTo);
+            Assert.AreEqual(testValue, this.TestClass.EffectiveTo);
         }
 
         [TestMethod]
@@ -78,37 +78,39 @@ namespace EPR.Calculator.API.UnitTests.DataModels
             var testValue = Fixture.Create<string>();
 
             // Act
-            TestClass.CreatedBy = testValue;
+            this.TestClass.CreatedBy = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.CreatedBy);
+            Assert.AreEqual(testValue, this.TestClass.CreatedBy);
         }
 
         [TestMethod]
         public void CanSetAndGetCreatedAt()
         {
             // Arrange
-            var testValue = Fixture.Create<DateTime>();
+            var testValue = this.Fixture.Create<DateTime>();
 
             // Act
-            TestClass.CreatedAt = testValue;
+            this.TestClass.CreatedAt = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.CreatedAt);
+            Assert.AreEqual(testValue, this.TestClass.CreatedAt);
         }
 
         [TestMethod]
         public void CanGetDetails()
         {
             // Assert
-            Assert.IsInstanceOfType(TestClass.Details, typeof(ICollection<CalculatorRunOrganisationDataDetail>));
+            Assert.IsInstanceOfType(
+                this.TestClass.Details,
+                typeof(ICollection<CalculatorRunOrganisationDataDetail>));
         }
 
         [TestMethod]
         public void CanGetRunDetails()
         {
             // Assert
-            Assert.IsNull(TestClass.RunDetails);
+            Assert.IsNull(this.TestClass.RunDetails);
         }
     }
 }
