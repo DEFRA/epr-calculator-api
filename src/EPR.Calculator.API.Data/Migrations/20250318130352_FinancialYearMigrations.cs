@@ -13,6 +13,14 @@ namespace EPR.Calculator.API.Data.Migrations
             migrationBuilder.InsertData(
                 table: "calculator_run_financial_years",
                 columns: new[] { "financial_Year", "description" },
+                values: new object[] { "2023-24", null });
+            migrationBuilder.InsertData(
+                table: "calculator_run_financial_years",
+                columns: new[] { "financial_Year", "description" },
+                values: new object[] { "2024-25", null });
+            migrationBuilder.InsertData(
+                table: "calculator_run_financial_years",
+                columns: new[] { "financial_Year", "description" },
                 values: new object[] { "2025-26", null });
 
             migrationBuilder.InsertData(
