@@ -42,88 +42,17 @@ namespace EPR.Calculator.API.Data.Migrations
                 columns: table => new
                 {
                     financial_Year = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_calculator_run_financial_years", x => x.financial_Year);
                 });
-
-            migrationBuilder.InsertData(
-                table: "calculator_run_financial_years",
-                columns: new[] { "financial_Year", "description" },
-                values: new object[] { "2024-25", null });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_lapcap_data_master_projection_year",
-                table: "lapcap_data_master",
-                column: "projection_year");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_default_parameter_setting_master_parameter_year",
-                table: "default_parameter_setting_master",
-                column: "parameter_year");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_calculator_run_financial_year",
-                table: "calculator_run",
-                column: "financial_year");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_calculator_run_calculator_run_financial_years_financial_year",
-                table: "calculator_run",
-                column: "financial_year",
-                principalTable: "calculator_run_financial_years",
-                principalColumn: "financial_Year",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_default_parameter_setting_master_calculator_run_financial_years_parameter_year",
-                table: "default_parameter_setting_master",
-                column: "parameter_year",
-                principalTable: "calculator_run_financial_years",
-                principalColumn: "financial_Year",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_lapcap_data_master_calculator_run_financial_years_projection_year",
-                table: "lapcap_data_master",
-                column: "projection_year",
-                principalTable: "calculator_run_financial_years",
-                principalColumn: "financial_Year",
-                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_calculator_run_calculator_run_financial_years_financial_year",
-                table: "calculator_run");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_default_parameter_setting_master_calculator_run_financial_years_parameter_year",
-                table: "default_parameter_setting_master");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_lapcap_data_master_calculator_run_financial_years_projection_year",
-                table: "lapcap_data_master");
-
-            migrationBuilder.DropTable(
-                name: "calculator_run_financial_years");
-
-            migrationBuilder.DropIndex(
-                name: "IX_lapcap_data_master_projection_year",
-                table: "lapcap_data_master");
-
-            migrationBuilder.DropIndex(
-                name: "IX_default_parameter_setting_master_parameter_year",
-                table: "default_parameter_setting_master");
-
-            migrationBuilder.DropIndex(
-                name: "IX_calculator_run_financial_year",
-                table: "calculator_run");
-
             migrationBuilder.AlterColumn<string>(
                 name: "projection_year",
                 table: "lapcap_data_master",
@@ -150,6 +79,9 @@ namespace EPR.Calculator.API.Data.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(450)");
+
+            migrationBuilder.DropTable(
+                name: "calculator_run_financial_years");
         }
     }
 }
