@@ -187,9 +187,6 @@
             .HasForeignKey(e => e.CountryId);
 
             modelBuilder.Entity<CalculatorRunFinancialYear>()
-                .HasData(new CalculatorRunFinancialYear { Name = "2024-25" });
-
-            modelBuilder.Entity<CalculatorRunFinancialYear>()
             .HasMany(e => e.CalculatorRuns)
             .WithOne(e => e.Financial_Year)
             .HasForeignKey(e => e.FinancialYearId)

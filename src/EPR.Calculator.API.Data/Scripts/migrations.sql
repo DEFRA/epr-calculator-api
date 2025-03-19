@@ -3432,20 +3432,6 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
 )
 BEGIN
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
-        SET IDENTITY_INSERT [calculator_run_financial_years] ON;
-    EXEC(N'INSERT INTO [calculator_run_financial_years] ([financial_Year], [description])
-    VALUES (N''2024-25'', NULL)');
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
-        SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
-)
-BEGIN
     CREATE INDEX [IX_lapcap_data_master_projection_year] ON [lapcap_data_master] ([projection_year]);
 END;
 GO
@@ -3473,13 +3459,29 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
 )
 BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250318112342_AddFinancialYearTable', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250319095159_AddFinancialYearForeignKeys'
+)
+BEGIN
     ALTER TABLE [calculator_run] ADD CONSTRAINT [FK_calculator_run_calculator_run_financial_years_financial_year] FOREIGN KEY ([financial_year]) REFERENCES [calculator_run_financial_years] ([financial_Year]) ON DELETE CASCADE;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
+    WHERE [MigrationId] = N'20250319095159_AddFinancialYearForeignKeys'
 )
 BEGIN
     ALTER TABLE [default_parameter_setting_master] ADD CONSTRAINT [FK_default_parameter_setting_master_calculator_run_financial_years_parameter_year] FOREIGN KEY ([parameter_year]) REFERENCES [calculator_run_financial_years] ([financial_Year]) ON DELETE CASCADE;
@@ -3488,7 +3490,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
+    WHERE [MigrationId] = N'20250319095159_AddFinancialYearForeignKeys'
 )
 BEGIN
     ALTER TABLE [lapcap_data_master] ADD CONSTRAINT [FK_lapcap_data_master_calculator_run_financial_years_projection_year] FOREIGN KEY ([projection_year]) REFERENCES [calculator_run_financial_years] ([financial_Year]) ON DELETE CASCADE;
@@ -3497,11 +3499,11 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
+    WHERE [MigrationId] = N'20250319095159_AddFinancialYearForeignKeys'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250318112342_AddFinancialYearTable', N'8.0.7');
+    VALUES (N'20250319095159_AddFinancialYearForeignKeys', N'8.0.7');
 END;
 GO
 
