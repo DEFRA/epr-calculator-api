@@ -2,7 +2,7 @@
 {
     public class CalculatorRunDto
     {
-        public int RunId {get; set; }
+        public int RunId { get; set; }
 
         public DateTime CreatedAt { get; set; }
 

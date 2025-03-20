@@ -1,5 +1,4 @@
-﻿
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 
 namespace EPR.Calculator.API.Mappers
@@ -31,6 +30,7 @@ namespace EPR.Calculator.API.Mappers
 
                 result.Add(data);
             }
+
             return result;
         }
     }

@@ -43,7 +43,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public async Task DownloadResultFile_ShouldReturnFileResult_WhenFileExists()
         {
             // Arrange
-            var date = new DateTime(2024, 11, 11);
+            var date = new DateTime(2024, 11, 11, 0, 0, 0, DateTimeKind.Unspecified);
             var runId = 1;
             var fileName = "1-Calc RunName_Results File_20241111.csv";
             var blobUri = $"https://example.com/{fileName}";
@@ -98,7 +98,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = runId,
                 Name = "Calc RunName",
                 CalculatorRunClassificationId = 2,
-                CreatedAt = new DateTime(2024, 11, 11),
+                CreatedAt = new DateTime(2024, 11, 11, 0, 0, 0, DateTimeKind.Unspecified),
                 CreatedBy = "User23",
                 LapcapDataMasterId = 1,
                 DefaultParameterSettingMasterId = 1,

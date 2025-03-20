@@ -1,7 +1,4 @@
-﻿using EPR.Calculator.API.Data.DataModels;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace EPR.Calculator.API.Dtos
 {

@@ -1,8 +1,4 @@
-﻿namespace EPR.Calculator.API.Services
-{
-    using System.IO;
-    using System.Text;
-    using System.Threading.Tasks;
+﻿    using System.Text;
 
     namespace EPR.Calculator.API.Services
     {
@@ -26,4 +22,3 @@
             }
         }
     }
-}

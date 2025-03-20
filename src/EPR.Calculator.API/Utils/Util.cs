@@ -104,11 +104,6 @@ namespace EPR.Calculator.API.Utils
                 sb.Append($"must be between {decimal.Truncate(defaulTemplate.ValidRangeFrom)} and {Math.Round(defaulTemplate.ValidRangeTo, 3, MidpointRounding.ToZero)} ");
                 sb.Append("tons");
             }
-            else if (IsTonnageAmountIncrease(defaulTemplate) || IsTonnageAmountDecrease(defaulTemplate))
-            {
-                sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
-                sb.Append($"must be between £{Math.Round(defaulTemplate.ValidRangeFrom, 2, MidpointRounding.ToZero)} and £{Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)}");
-            }
             else if (IsBadDebt(defaulTemplate))
             {
                 sb.Append($"The {defaulTemplate.ParameterType} ");

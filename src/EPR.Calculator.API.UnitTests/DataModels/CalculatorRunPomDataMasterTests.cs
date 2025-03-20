@@ -9,14 +9,14 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     [TestClass]
     public class CalculatorRunPomDataMasterTests
     {
-        private Fixture Fixture { get; } = new Fixture();
-
-        private CalculatorRunPomDataMaster TestClass { get; init; }
-
         public CalculatorRunPomDataMasterTests()
         {
             this.TestClass = this.Fixture.Create<CalculatorRunPomDataMaster>();
         }
+
+        private Fixture Fixture { get; } = new Fixture();
+
+        private CalculatorRunPomDataMaster TestClass { get; init; }
 
         [TestMethod]
         public void CanSetAndGetId()

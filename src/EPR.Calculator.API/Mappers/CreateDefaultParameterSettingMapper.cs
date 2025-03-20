@@ -31,6 +31,7 @@ namespace EPR.Calculator.API.Mappers
 
                 result.Add(data);
             }
+
             return result;
         }
     }
