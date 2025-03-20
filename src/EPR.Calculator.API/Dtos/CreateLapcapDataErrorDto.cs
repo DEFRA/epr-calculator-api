@@ -9,6 +9,6 @@ namespace EPR.Calculator.API.Dtos
 
         public required string Country { get; set; }
 
-        public required string Material {  get; set; }
+        public required string Material { get; set; }
     }
 }

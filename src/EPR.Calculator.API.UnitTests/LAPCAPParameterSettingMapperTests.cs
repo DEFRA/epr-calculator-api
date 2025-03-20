@@ -28,7 +28,7 @@ namespace EPR.Calculator.API.UnitTests
                     LapcapDataMaster = defaultParameterSettingMaster,
                     UniqueReference = "ENG-AL",
                     TotalCost = 30.99m, 
-                }
+                },
             };
             var detail = new LapcapDataDetail
             {
@@ -36,23 +36,25 @@ namespace EPR.Calculator.API.UnitTests
                 LapcapDataMasterId = 2,
                 LapcapDataMaster = defaultParameterSettingMaster,
                 UniqueReference = "ENG-AL",
-                TotalCost = 30.99m
+                TotalCost = 30.99m,
             };
 
-            details.ForEach(detail => defaultParameterSettingMaster.Details.Add(detail));
+            details.ForEach(defaultParameterSettingMaster.Details.Add);
 
             var template = new LapcapDataTemplateMaster
             {
                 UniqueReference = "ENG-AL",
                 Country = "England",
-                Material = "Aluminium"
+                Material = "Aluminium",
             };
 
-            //Check if dbContext is not null
-            if (DbContext != null)
+            // Check if dbContext is not null
+            if (this.DbContext != null)
             {
                 // Act
-                var result = LapcapDataParameterSettingMapper.Map(defaultParameterSettingMaster, DbContext.LapcapDataTemplateMaster);
+                var result = LapcapDataParameterSettingMapper.Map(
+                    defaultParameterSettingMaster,
+                    this.DbContext.LapcapDataTemplateMaster);
 
                 // Assert
                 var mappedItem = result.First();

@@ -5,13 +5,13 @@ namespace EPR.Calculator.API.Services
 {
     public class CommandTimeoutService : ICommandTimeoutService
     {
-        private IConfiguration Configuration { get; init; }
-
         public CommandTimeoutService()
             => this.Configuration = new ConfigurationBuilder().Build();
 
         public CommandTimeoutService(IConfiguration configuration)
             : this() => this.Configuration = configuration;
+
+        private IConfiguration Configuration { get; init; }
 
         public void SetCommandTimeout(DatabaseFacade database, string key)
         {

@@ -18,7 +18,7 @@ namespace EPR.Calculator.API.UnitTests.Utils
             {
                 ParameterType = this.parameterType,
                 ParameterUniqueReferenceId = this.parameterUniqueReferenceId,
-                ParameterCategory = parameterCategory,
+                ParameterCategory = this.parameterCategory,
             };
             string errorMessage = "Some error message";
             var errorDto = Util.CreateErrorDto(template, errorMessage);

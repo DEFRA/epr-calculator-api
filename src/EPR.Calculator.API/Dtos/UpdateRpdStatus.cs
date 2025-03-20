@@ -9,6 +9,6 @@ namespace EPR.Calculator.API.Dtos
 
         public required string UpdatedBy { get; set; }
 
-        public required bool isSuccessful { get; set; }
+        public required bool IsSuccessful { get; set; }
     }
 }

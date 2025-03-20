@@ -6,6 +6,7 @@ namespace EPR.Calculator.API.Dtos
     public class SchemeParameterTemplateValueDto
     {
         public required string ParameterUniqueReferenceId { get; set; }
+
         public required string ParameterValue { get; set; }
     }
 }

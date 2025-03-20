@@ -13,6 +13,7 @@ namespace EPR.Calculator.API.Dtos
         public required string ParameterType { get; set; }
 
         public required string ParameterCategory { get; set; }
+
         public required string ParameterUnit { get; set; }
 
         public required decimal ParameterValue { get; set; }

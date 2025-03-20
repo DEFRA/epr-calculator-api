@@ -51,7 +51,8 @@ namespace EPR.Calculator.API.Controllers
                         this.ModelState.Values.SelectMany(x => x.Errors));
                 }
 
-                bool isCalcAlreadyRunning = await context.CalculatorRuns.AnyAsync(run => run.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
+                bool isCalcAlreadyRunning = await this.context.CalculatorRuns.AnyAsync(
+                    run => run.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
                 if (isCalcAlreadyRunning)
                 {
                     return new ObjectResult(new { Message = ErrorMessages.CalculationAlreadyRunning })
@@ -60,21 +61,25 @@ namespace EPR.Calculator.API.Controllers
                     };
                 }
 
-                // Return failed dependency error if at least one of the dependent data not available for the financial year
-                var dataPreCheckMessage = DataPreChecksBeforeInitialisingCalculatorRun(request.FinancialYear);
+                // Return failed dependency error if at least one of the dependent data not available for
+                // the financial year
+                var dataPreCheckMessage = this.DataPreChecksBeforeInitialisingCalculatorRun(request.FinancialYear);
                 if (!string.IsNullOrWhiteSpace(dataPreCheckMessage))
                 {
                     return new ObjectResult(dataPreCheckMessage) { StatusCode = StatusCodes.Status424FailedDependency };
                 }
 
                 // Return bad gateway error if the calculator run name provided already exists
-                var calculatorRunNameExistsMessage = CalculatorRunNameExists(request.CalculatorRunName);
+                var calculatorRunNameExistsMessage = this.CalculatorRunNameExists(request.CalculatorRunName);
                 if (!string.IsNullOrWhiteSpace(calculatorRunNameExistsMessage))
                 {
-                    return new ObjectResult(calculatorRunNameExistsMessage) { StatusCode = StatusCodes.Status400BadRequest };
+                    return new ObjectResult(calculatorRunNameExistsMessage)
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest,
+                    };
                 }
 
-                // Read configuration items: service bus connection string and queue name 
+                // Read configuration items: service bus connection string and queue name
                 var serviceBusConnectionString = this.configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
                 var serviceBusQueueName = this.configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
 
@@ -105,7 +110,7 @@ namespace EPR.Calculator.API.Controllers
                     CreatedAt = DateTime.Now,
                     CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                     DefaultParameterSettingMasterId = activeDefaultParameterSettingsMaster.Id,
-                    LapcapDataMasterId = activeLapcapDataMaster.Id
+                    LapcapDataMasterId = activeLapcapDataMaster.Id,
                 };
 
                 using (var transaction = await this.context.Database.BeginTransactionAsync())
@@ -121,11 +126,11 @@ namespace EPR.Calculator.API.Controllers
                         {
                             CalculatorRunId = calculatorRun.Id,
                             FinancialYear = calculatorRun.Financial_Year,
-                            CreatedBy = User?.Identity?.Name ?? userName
+                            CreatedBy = this.User.Identity?.Name ?? userName,
                         };
 
                         // Send message
-                        await serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
+                        await this.serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
 
                         // All good, commit transaction
                         await transaction.CommitAsync();
@@ -134,8 +139,9 @@ namespace EPR.Calculator.API.Controllers
                     {
                         // Error, rollback transaction
                         await transaction.RollbackAsync();
+
                         // Return error status code: Internal Server Error
-                        return StatusCode(StatusCodes.Status500InternalServerError, exception);
+                        return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
                     }
                 }
 
@@ -144,7 +150,7 @@ namespace EPR.Calculator.API.Controllers
             }
             catch (Exception exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
         }
 
@@ -153,9 +159,9 @@ namespace EPR.Calculator.API.Controllers
         [Authorize()]
         public async Task<IActionResult> GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
         {
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
 
             if (string.IsNullOrWhiteSpace(request.FinancialYear))
@@ -165,7 +171,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRuns = await context.CalculatorRuns
+                var calculatorRuns = await this.context.CalculatorRuns
                     .Where(run => run.Financial_Year == request.FinancialYear)
                     .OrderByDescending(run => run.CreatedAt)
                     .ToListAsync();
@@ -179,7 +185,7 @@ namespace EPR.Calculator.API.Controllers
             }
             catch (Exception exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
         }
 
@@ -188,22 +194,22 @@ namespace EPR.Calculator.API.Controllers
         [Authorize()]
         public async Task<IActionResult> GetCalculatorRun(int runId)
         {
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
 
             try
             {
                 var calculatorRunDetail =
                     await (from run in this.context.CalculatorRuns
-                     join classification in context.CalculatorRunClassifications
+                     join classification in this.context.CalculatorRunClassifications
                          on run.CalculatorRunClassificationId equals classification.Id
                      where run.Id == runId
                      select new
                      {
                          Run = run,
-                         Classification = classification
+                         Classification = classification,
                      }).SingleOrDefaultAsync();
 
                 if (calculatorRunDetail == null)
@@ -218,7 +224,7 @@ namespace EPR.Calculator.API.Controllers
             }
             catch (Exception exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
         }
 
@@ -227,21 +233,21 @@ namespace EPR.Calculator.API.Controllers
         [Authorize()]
         public async Task<IActionResult> PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
-            var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
+            var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
                 return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
             }
 
             var userName = claim.Value;
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
 
             try
             {
-                var calculatorRun = await context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runStatusUpdateDto.RunId);
+                var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runStatusUpdateDto.RunId);
                 if (calculatorRun == null)
                 {
                     return new ObjectResult($"Unable to find Run Id {runStatusUpdateDto.RunId}")
@@ -272,11 +278,11 @@ namespace EPR.Calculator.API.Controllers
                 this.context.CalculatorRuns.Update(calculatorRun);
                 await this.context.SaveChangesAsync();
 
-                return StatusCode(201);
+                return this.StatusCode(201);
             }
             catch (Exception exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
         }
 
@@ -285,24 +291,25 @@ namespace EPR.Calculator.API.Controllers
         [Authorize()]
         public async Task<IActionResult> GetCalculatorRunByName([FromRoute] string name)
         {
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
 
             try
             {
-                var calculatorRun = await context.CalculatorRuns.CountAsync(run => EF.Functions.Like(run.Name, name));
+                var calculatorRun = await this.context.CalculatorRuns.CountAsync(run => EF.Functions.Like(run.Name, name));
 
                 if (calculatorRun <= 0)
                 {
                     return new ObjectResult("No data found for this calculator name") { StatusCode = StatusCodes.Status404NotFound };
                 }
+
                 return new ObjectResult(StatusCodes.Status200OK);
             }
             catch (Exception exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
         }
 
@@ -311,13 +318,13 @@ namespace EPR.Calculator.API.Controllers
         [Authorize()]
         public async Task<IResult> DownloadResultFile(int runId)
         {
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                var badRequest = Results.BadRequest(ModelState.Values.SelectMany(x => x.Errors));
+                var badRequest = Results.BadRequest(this.ModelState.Values.SelectMany(x => x.Errors));
                 return badRequest;
             }
-            
-            var csvFileMetadata = await context.CalculatorRunCsvFileMetadata.SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId);
+
+            var csvFileMetadata = await this.context.CalculatorRunCsvFileMetadata.SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId);
             if (csvFileMetadata == null)
             {
                 return Results.NotFound($"No CSV file found for Run Id {runId}");
@@ -325,7 +332,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                return await storageService.DownloadFile(csvFileMetadata.FileName, csvFileMetadata.BlobUri);
+                return await this.storageService.DownloadFile(csvFileMetadata.FileName, csvFileMetadata.BlobUri);
             }
             catch (Exception e)
             {
@@ -336,11 +343,11 @@ namespace EPR.Calculator.API.Controllers
         private string DataPreChecksBeforeInitialisingCalculatorRun(string financialYear)
         {
             // Get active default parameter settings for the given financial year
-            var activeDefaultParameterSettings = context.DefaultParameterSettings
+            var activeDefaultParameterSettings = this.context.DefaultParameterSettings
                         .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == financialYear);
 
             // Get active Lapcap data for the given financial year
-            var activeLapcapData = context.LapcapDataMaster
+            var activeLapcapData = this.context.LapcapDataMaster
                 .SingleOrDefault(data => data.ProjectionYear == financialYear && data.EffectiveTo == null);
 
             // Return no active default paramater settings and lapcap data message
@@ -367,7 +374,7 @@ namespace EPR.Calculator.API.Controllers
 
         private string CalculatorRunNameExists(string runName)
         {
-            var calculatorRun = context.CalculatorRuns.Count(run => EF.Functions.Like(run.Name, runName));
+            var calculatorRun = this.context.CalculatorRuns.Count(run => EF.Functions.Like(run.Name, runName));
 
             // Return calculator run name already exists
             if (calculatorRun > 0)
