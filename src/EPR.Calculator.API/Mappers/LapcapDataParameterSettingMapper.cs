@@ -6,8 +6,9 @@ namespace EPR.Calculator.API.Mappers
 {
     public static class LapcapDataParameterSettingMapper
     {
-        public static List<LapCapParameterDto> Map(LapcapDataMaster lapcapSettingMaster,
-                                                   IEnumerable<LapcapDataTemplateMaster> lapcapDataTemplate)
+        public static List<LapCapParameterDto> Map(
+            LapcapDataMaster lapcapSettingMaster,
+            IEnumerable<LapcapDataTemplateMaster> lapcapDataTemplate)
         {
             var result = new List<LapCapParameterDto>();
 
@@ -25,7 +26,7 @@ namespace EPR.Calculator.API.Mappers
                     Country = selectedTemplate.Country,
                     Material = selectedTemplate.Material,
                     TotalCost = item.TotalCost,
-                    EffectiveFrom = lapcapSettingMaster.EffectiveFrom
+                    EffectiveFrom = lapcapSettingMaster.EffectiveFrom,
                 };
 
                 result.Add(data);

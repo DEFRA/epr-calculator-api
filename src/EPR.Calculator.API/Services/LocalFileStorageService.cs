@@ -12,7 +12,7 @@
             {
                 throw new NotImplementedException();
             }
-            
+
             public Task<string> UploadResultFileContentAsync(string fileName, string content)
             {
                 var path = Path.Combine(Directory.GetCurrentDirectory(), fileName);

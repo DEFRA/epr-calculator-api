@@ -1,7 +1,7 @@
-﻿using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Dtos;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Dtos;
 
 namespace EPR.Calculator.API.Utils
 {
@@ -15,7 +15,7 @@ namespace EPR.Calculator.API.Utils
                 ParameterType = template.ParameterType,
                 ParameterCategory = template.ParameterCategory,
                 Message = errorMessage,
-                Description = ""
+                Description = string.Empty,
             };
         }
 
@@ -39,6 +39,7 @@ namespace EPR.Calculator.API.Utils
             {
                 sb.Append($"Enter the {defaultTemplate.ParameterType} percentage decrease");
             }
+
             return sb.ToString();
         }
 
@@ -116,7 +117,7 @@ namespace EPR.Calculator.API.Utils
             else if (IsPercentageIncrease(defaulTemplate))
             {
                 sb.Append($"The {defaulTemplate.ParameterType} percentage increase ");
-                sb.Append($"must be between { decimal.Truncate(defaulTemplate.ValidRangeFrom)}% and {Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)}%");
+                sb.Append($"must be between {decimal.Truncate(defaulTemplate.ValidRangeFrom)}% and {Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)}%");
             }
             else if (IsPercentageDecrease(defaulTemplate))
             {
@@ -181,11 +182,12 @@ namespace EPR.Calculator.API.Utils
                 && !defaultTemplate.ParameterType.Contains("percent", StringComparison.OrdinalIgnoreCase);
         }
 
-        public static CreateLapcapDataErrorDto CreateLapcapDataErrorDto(string country,
-                                                                        string material,
-                                                                        string message,
-                                                                        string description,
-                                                                        string uniqueReference)
+        public static CreateLapcapDataErrorDto CreateLapcapDataErrorDto(
+            string country,
+            string material,
+            string message,
+            string description,
+            string uniqueReference)
         {
             return new CreateLapcapDataErrorDto
             {
@@ -193,7 +195,7 @@ namespace EPR.Calculator.API.Utils
                 Material = material,
                 Message = message,
                 Description = description,
-                UniqueReference = uniqueReference
+                UniqueReference = uniqueReference,
             };
         }
 

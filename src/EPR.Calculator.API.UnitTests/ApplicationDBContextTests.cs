@@ -48,5 +48,4 @@ namespace EPR.Calculator.API.UnitTests
             }
         }
     }
-
 }

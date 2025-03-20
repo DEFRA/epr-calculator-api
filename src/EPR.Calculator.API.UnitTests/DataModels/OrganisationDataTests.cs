@@ -8,21 +8,21 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     [TestClass]
     public class OrganisationDataTests
     {
+        public OrganisationDataTests()
+        {
+            this.Fixture = new Fixture();
+            this.TestClass = this.Fixture.Create<OrganisationData>();
+        }
+
         private OrganisationData TestClass { get; }
 
         private IFixture Fixture { get; }
-
-        public OrganisationDataTests()
-        {
-            Fixture = new Fixture();
-            this.TestClass = Fixture.Create<OrganisationData>();
-        }
 
         [TestMethod]
         public void CanSetAndGetOrganisationId()
         {
             // Arrange
-            var testValue = Fixture.Create<int?>();
+            var testValue = this.Fixture.Create<int?>();
 
             // Act
             this.TestClass.OrganisationId = testValue;
@@ -35,7 +35,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetSubsidaryId()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.SubsidaryId = testValue;
@@ -48,7 +48,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetOrganisationName()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.OrganisationName = testValue;
@@ -61,7 +61,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetSubmissionPeriodDesc()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.SubmissionPeriodDesc = testValue;
@@ -74,7 +74,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetLoadTimestamp()
         {
             // Arrange
-            var testValue = Fixture.Create<DateTime>();
+            var testValue = this.Fixture.Create<DateTime>();
 
             // Act
             this.TestClass.LoadTimestamp = testValue;

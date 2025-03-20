@@ -6,15 +6,22 @@ namespace EPR.Calculator.API.Validators
 {
     public class CreateLapcapDataValidator : AbstractValidator<CreateLapcapDataDto>
     {
-        private readonly int MaxFileNameSupported = 256;
+        private const int MaxFileNameSupported = 256;
+
         public CreateLapcapDataValidator()
         {
-            RuleFor(x => x.ParameterYear).NotEmpty().WithMessage((ErrorMessages.YearRequired));
-            RuleFor(x => x.LapcapDataTemplateValues).NotNull().Must(x => x.Count() == LapcapDataUniqueReferences.UniqueReferences.Length)
-                .WithMessage((ErrorMessages.LapcapDataTemplateValuesMissing));
-            RuleFor(x => x.LapcapFileName).NotEmpty().WithMessage(ErrorMessages.FileNameRequired);
-            RuleFor(x => x.LapcapFileName).MaximumLength(MaxFileNameSupported).WithMessage(ErrorMessages.MaxFileNameLength);
-
+            this.RuleFor(x => x.ParameterYear)
+                .NotEmpty()
+                .WithMessage(ErrorMessages.YearRequired);
+            this.RuleFor(x => x.LapcapDataTemplateValues).NotNull()
+                .Must(x => x.Count() == LapcapDataUniqueReferences.UniqueReferences.Length)
+                .WithMessage(ErrorMessages.LapcapDataTemplateValuesMissing);
+            this.RuleFor(x => x.LapcapFileName)
+                .NotEmpty()
+                .WithMessage(ErrorMessages.FileNameRequired);
+            this.RuleFor(x => x.LapcapFileName)
+                .MaximumLength(MaxFileNameSupported)
+                .WithMessage(ErrorMessages.MaxFileNameLength);
         }
     }
 }

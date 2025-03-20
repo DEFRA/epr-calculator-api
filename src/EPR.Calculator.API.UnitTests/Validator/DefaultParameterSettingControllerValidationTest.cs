@@ -32,7 +32,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
-                ParameterYear = "",
+                ParameterYear = string.Empty,
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
                 ParameterFileName = "TestFileName",
             };
@@ -107,10 +107,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     ParameterUniqueReferenceId = uniqueRef,
                 });
             }
+
             schemeParameterTemplateValues.Single(x => x.ParameterUniqueReferenceId == "BADEBT-P").ParameterUniqueReferenceId = "Somehthing else";
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
-                ParameterYear = "",
+                ParameterYear = string.Empty,
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
                 ParameterFileName = "TestFileName",
             };

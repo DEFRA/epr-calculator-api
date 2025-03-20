@@ -9,236 +9,235 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     [TestClass]
     public class CalculatorRunTests
     {
+        public CalculatorRunTests()
+        {
+            this.TestClass = this.Fixture.Create<CalculatorRun>();
+        }
+
         private CalculatorRun TestClass { get; init; }
 
         private Fixture Fixture { get; } = new Fixture();
-
-        public CalculatorRunTests()
-        {
-            TestClass = this.Fixture.Create<CalculatorRun>();
-        }
 
         [TestMethod]
         public void CanSetAndGetCalculatorRunClassificationId()
         {
             // Arrange
-
-            var testValue = Fixture.Create<int>();
+            var testValue = this.Fixture.Create<int>();
 
             // Act
-            TestClass.CalculatorRunClassificationId = testValue;
+            this.TestClass.CalculatorRunClassificationId = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.CalculatorRunClassificationId);
+            Assert.AreEqual(testValue, this.TestClass.CalculatorRunClassificationId);
         }
 
         [TestMethod]
         public void CanSetAndGetId()
         {
             // Arrange
-            var testValue = Fixture.Create<int>();
+            var testValue = this.Fixture.Create<int>();
 
             // Act
-            TestClass.Id = testValue;
+            this.TestClass.Id = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.Id);
+            Assert.AreEqual(testValue, this.TestClass.Id);
         }
 
         [TestMethod]
         public void CanSetAndGetName()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.Name = testValue;
+            this.TestClass.Name = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.Name);
+            Assert.AreEqual(testValue, this.TestClass.Name);
         }
 
         [TestMethod]
         public void CanSetAndGetFinancial_Year()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.Financial_Year = testValue;
+            this.TestClass.Financial_Year = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.Financial_Year);
+            Assert.AreEqual(testValue, this.TestClass.Financial_Year);
         }
 
         [TestMethod]
         public void CanSetAndGetCreatedBy()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.CreatedBy = testValue;
+            this.TestClass.CreatedBy = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.CreatedBy);
+            Assert.AreEqual(testValue, this.TestClass.CreatedBy);
         }
 
         [TestMethod]
         public void CanSetAndGetCreatedAt()
         {
             // Arrange
-            var testValue = Fixture.Create<DateTime>();
+            var testValue = this.Fixture.Create<DateTime>();
 
             // Act
-            TestClass.CreatedAt = testValue;
+            this.TestClass.CreatedAt = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.CreatedAt);
+            Assert.AreEqual(testValue, this.TestClass.CreatedAt);
         }
 
         [TestMethod]
         public void CanSetAndGetUpdatedBy()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.UpdatedBy = testValue;
+            this.TestClass.UpdatedBy = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.UpdatedBy);
+            Assert.AreEqual(testValue, this.TestClass.UpdatedBy);
         }
 
         [TestMethod]
         public void CanSetAndGetUpdatedAt()
         {
             // Arrange
-            var testValue = Fixture.Create<DateTime?>();
+            var testValue = this.Fixture.Create<DateTime?>();
 
             // Act
-            TestClass.UpdatedAt = testValue;
+            this.TestClass.UpdatedAt = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.UpdatedAt);
+            Assert.AreEqual(testValue, this.TestClass.UpdatedAt);
         }
 
         [TestMethod]
         public void CanSetAndGetCalculatorRunPomDataMasterId()
         {
             // Arrange
-            var testValue = Fixture.Create<int?>();
+            var testValue = this.Fixture.Create<int?>();
 
             // Act
-            TestClass.CalculatorRunPomDataMasterId = testValue;
+            this.TestClass.CalculatorRunPomDataMasterId = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.CalculatorRunPomDataMasterId);
+            Assert.AreEqual(testValue, this.TestClass.CalculatorRunPomDataMasterId);
         }
 
         [TestMethod]
         public void CanSetAndGetCalculatorRunOrganisationDataMasterId()
         {
             // Arrange
-            var testValue = Fixture.Create<int?>();
+            var testValue = this.Fixture.Create<int?>();
 
             // Act
-            TestClass.CalculatorRunOrganisationDataMasterId = testValue;
+            this.TestClass.CalculatorRunOrganisationDataMasterId = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.CalculatorRunOrganisationDataMasterId);
+            Assert.AreEqual(testValue, this.TestClass.CalculatorRunOrganisationDataMasterId);
         }
 
         [TestMethod]
         public void CanSetAndGetLapcapDataMasterId()
         {
             // Arrange
-            var testValue = Fixture.Create<int?>();
+            var testValue = this.Fixture.Create<int?>();
 
             // Act
-            TestClass.LapcapDataMasterId = testValue;
+            this.TestClass.LapcapDataMasterId = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.LapcapDataMasterId);
+            Assert.AreEqual(testValue, this.TestClass.LapcapDataMasterId);
         }
 
         [TestMethod]
         public void CanSetAndGetDefaultParameterSettingMasterId()
         {
             // Arrange
-            var testValue = Fixture.Create<int?>();
+            var testValue = this.Fixture.Create<int?>();
 
             // Act
-            TestClass.DefaultParameterSettingMasterId = testValue;
+            this.TestClass.DefaultParameterSettingMasterId = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.DefaultParameterSettingMasterId);
+            Assert.AreEqual(testValue, this.TestClass.DefaultParameterSettingMasterId);
         }
 
         [TestMethod]
         public void CanSetAndGetCalculatorRunPomDataMaster()
         {
             // Arrange
-            var testValue = Fixture.Create<CalculatorRunPomDataMaster>();
+            var testValue = this.Fixture.Create<CalculatorRunPomDataMaster>();
 
             // Act
-            TestClass.CalculatorRunPomDataMaster = testValue;
+            this.TestClass.CalculatorRunPomDataMaster = testValue;
 
             // Assert
-            Assert.AreSame(testValue, TestClass.CalculatorRunPomDataMaster);
+            Assert.AreSame(testValue, this.TestClass.CalculatorRunPomDataMaster);
         }
 
         [TestMethod]
         public void CanSetAndGetCalculatorRunOrganisationDataMaster()
         {
             // Arrange
-            var testValue = Fixture.Create<CalculatorRunOrganisationDataMaster>();
+            var testValue = this.Fixture.Create<CalculatorRunOrganisationDataMaster>();
 
             // Act
-            TestClass.CalculatorRunOrganisationDataMaster = testValue;
+            this.TestClass.CalculatorRunOrganisationDataMaster = testValue;
 
             // Assert
-            Assert.AreSame(testValue, TestClass.CalculatorRunOrganisationDataMaster);
+            Assert.AreSame(testValue, this.TestClass.CalculatorRunOrganisationDataMaster);
         }
 
         [TestMethod]
         public void CanSetAndGetLapcapDataMaster()
         {
             // Arrange
-            var testValue = Fixture.Create<LapcapDataMaster>();
+            var testValue = this.Fixture.Create<LapcapDataMaster>();
 
             // Act
-            TestClass.LapcapDataMaster = testValue;
+            this.TestClass.LapcapDataMaster = testValue;
 
             // Assert
-            Assert.AreSame(testValue, TestClass.LapcapDataMaster);
+            Assert.AreSame(testValue, this.TestClass.LapcapDataMaster);
         }
 
         [TestMethod]
         public void CanSetAndGetDefaultParameterSettingMaster()
         {
             // Arrange
-            var testValue = Fixture.Create<DefaultParameterSettingMaster>();
+            var testValue = this.Fixture.Create<DefaultParameterSettingMaster>();
 
             // Act
-            TestClass.DefaultParameterSettingMaster = testValue;
+            this.TestClass.DefaultParameterSettingMaster = testValue;
 
             // Assert
-            Assert.AreSame(testValue, TestClass.DefaultParameterSettingMaster);
+            Assert.AreSame(testValue, this.TestClass.DefaultParameterSettingMaster);
         }
 
         [TestMethod]
         public void CanGetProducerDetails()
         {
             // Assert
-            Assert.IsInstanceOfType(TestClass.ProducerDetails, typeof(ICollection<ProducerDetail>));
+            Assert.IsInstanceOfType(this.TestClass.ProducerDetails, typeof(ICollection<ProducerDetail>));
         }
 
         [TestMethod]
         public void CanGetCountryApportionments()
         {
             // Assert
-            Assert.IsInstanceOfType(TestClass.CountryApportionments, typeof(ICollection<CountryApportionment>));
+            Assert.IsInstanceOfType(this.TestClass.CountryApportionments, typeof(ICollection<CountryApportionment>));
         }
     }
 }

@@ -116,7 +116,8 @@ namespace EPR.Calculator.API.UnitTests.Utils
         [DataRow("2024-25", "2023")]
         [DataRow("2023-24", "2022")]
         [DataRow("2022-23", "2021")]
-        public void GetCalendarYear_ValidString_ShouldReturnPreviousYearAsString(string financialYear,
+        public void GetCalendarYear_ValidString_ShouldReturnPreviousYearAsString(
+            string financialYear,
             string expectedCalendarYear)
         {
             var result = Util.GetCalendarYear(financialYear);

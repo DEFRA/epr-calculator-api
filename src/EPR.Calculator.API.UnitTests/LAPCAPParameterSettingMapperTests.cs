@@ -1,7 +1,7 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Mappers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EPR.Calculator.API.UnitTests.Controllers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests
 {
@@ -23,11 +23,11 @@ namespace EPR.Calculator.API.UnitTests
             {
                 new LapcapDataDetail
                 {
-                    Id=1,
+                    Id = 1,
                     LapcapDataMasterId = 1,
                     LapcapDataMaster = defaultParameterSettingMaster,
                     UniqueReference = "ENG-AL",
-                    TotalCost = 30.99m, 
+                    TotalCost = 30.99m,
                 },
             };
             var detail = new LapcapDataDetail

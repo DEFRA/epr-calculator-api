@@ -23,8 +23,8 @@ namespace EPR.Calculator.API.Tests.Controllers
             {
                 new DefaultParameterSettingDetail
                 {
-                    Id = 150, 
-                    DefaultParameterSettingMasterId = 200, 
+                    Id = 150,
+                    DefaultParameterSettingMasterId = 200,
                     ParameterUniqueReferenceId = "BADEBT-P",
                     ParameterValue = 30.99m,
                     DefaultParameterSettingMaster = defaultParameterSettingMaster,

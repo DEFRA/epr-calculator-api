@@ -4,7 +4,6 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     using System.Collections.Generic;
     using AutoFixture;
     using EPR.Calculator.API.Data.DataModels;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -75,7 +74,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetCreatedBy()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.CreatedBy = testValue;

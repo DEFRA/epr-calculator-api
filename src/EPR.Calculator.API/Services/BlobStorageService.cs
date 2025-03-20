@@ -1,10 +1,9 @@
-﻿using Azure.Storage;
+﻿using System.Configuration;
+using System.Text;
+using Azure.Storage;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Exceptions;
-using System;
-using System.Configuration;
-using System.Text;
+
 namespace EPR.Calculator.API.Services
 {
     public class BlobStorageService : IStorageService
@@ -16,22 +15,22 @@ namespace EPR.Calculator.API.Services
         public const string OctetStream = "application/octet-stream";
         private readonly BlobContainerClient containerClient;
         private readonly StorageSharedKeyCredential sharedKeyCredential;
-        private readonly ILogger<BlobStorageService> _logger;
+        private readonly ILogger<BlobStorageService> logger;
 
         public BlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration, ILogger<BlobStorageService> logger)
         {
             var settings = configuration.GetSection(BlobStorageSection).Get<BlobStorageSettings>() ??
                 throw new ConfigurationErrorsException(BlobSettingsMissingError);
-            
+
             settings.ExtractAccountDetails();
-           
+
             this.sharedKeyCredential = new StorageSharedKeyCredential(settings.AccountName, settings.AccountKey) ??
                 throw new ConfigurationErrorsException(AccountNameMissingError);
 
             this.containerClient = blobServiceClient.GetBlobContainerClient(settings.ContainerName ??
                 throw new ConfigurationErrorsException(ContainerNameMissingError));
 
-            _logger = logger;
+            this.logger = logger;
         }
 
         public async Task<IResult> DownloadFile(string fileName, string blobUri)
@@ -42,21 +41,24 @@ namespace EPR.Calculator.API.Services
             {
                 try
                 {
-                    blobClient = new BlobClient(new Uri(blobUri), sharedKeyCredential);
+                    blobClient = new BlobClient(new Uri(blobUri), this.sharedKeyCredential);
                 }
                 catch (UriFormatException exception) {
-                    _logger.LogError(exception, "Blob Uri is not in correct format.");
+                    this.logger.LogError(exception, "Blob Uri is not in correct format.");
                     blobClient ??= this.containerClient.GetBlobClient(fileName);
                 }
             }
             else
+            {
                 blobClient ??= this.containerClient.GetBlobClient(fileName);
+            }
 
             if (!await blobClient.ExistsAsync())
             {
                 return Results.NotFound(fileName);
             }
-            try 
+
+            try
             {
                 var downloadResult = await blobClient.DownloadContentAsync();
                 var content = downloadResult.Value.Content.ToString();

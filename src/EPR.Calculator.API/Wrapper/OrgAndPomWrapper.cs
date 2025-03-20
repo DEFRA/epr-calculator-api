@@ -7,7 +7,11 @@ namespace EPR.Calculator.API.Wrapper
     public class OrgAndPomWrapper : IOrgAndPomWrapper
     {
         private readonly ApplicationDBContext context;
-        public OrgAndPomWrapper(ApplicationDBContext context) { this.context = context; }
+
+        public OrgAndPomWrapper(ApplicationDBContext context)
+        {
+            this.context = context;
+        }
 
         public bool AnyOrganisationData()
         {
