@@ -207,7 +207,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
         {
             var lapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>();
-            var masterData = this.GetLapcapTemplateMasterData();
+            var masterData = GetLapcapTemplateMasterData();
             foreach (var templateMaster in masterData)
             {
                 if (uniqueRefsToAvoid == null || !uniqueRefsToAvoid.Contains(templateMaster.UniqueReference))
