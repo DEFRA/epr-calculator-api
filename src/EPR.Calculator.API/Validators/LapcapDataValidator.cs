@@ -32,15 +32,16 @@ namespace EPR.Calculator.API.Validators
                 var totalCostTo = lapcapTemplate.TotalCostTo;
                 var errorMessage = string.Empty;
 
-                switch (matchingCount)
+                if (matchingCount == 0)
                 {
-                    case 0:
                     errorMessage = $"Enter the total costs for {material} in {country}";
-                    break;
-                    case > 1:
+                }
+                else if (matchingCount > 1)
+                {
                     errorMessage = $"You have entered the total costs for {material} in {country} more than once";
-                    break;
-                    default:
+                }
+                else
+                {
                     decimal totalCostValue;
                     var data = matchingLapcapData.Single();
                     var totalCostStr = data.TotalCost;
@@ -60,7 +61,6 @@ namespace EPR.Calculator.API.Validators
                     {
                         errorMessage = $"Total costs for {material} can only include numbers, commas and decimal points";
                     }
-                        break;
                 }
 
                 if (!string.IsNullOrEmpty(errorMessage))

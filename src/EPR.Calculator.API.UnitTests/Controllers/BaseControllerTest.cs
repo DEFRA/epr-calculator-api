@@ -32,7 +32,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.DbContext.SaveChanges();
 
             this.DbContext.DefaultParameterTemplateMasterList.AddRange(
-                this.GetDefaultParameterTemplateMasterData().ToList());
+                GetDefaultParameterTemplateMasterData().ToList());
             this.DbContext.SaveChanges();
 
             var validator = new CreateDefaultParameterDataValidator(this.DbContext);
@@ -75,20 +75,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
         protected IOrgAndPomWrapper Wrapper { get; set; }
 
-        [TestMethod]
-        public void CheckDbContext()
-        {
-            Assert.IsNotNull(this.DbContext);
-            Assert.IsTrue(this.DbContext.Database.IsInMemory());
-        }
-
-        [TestCleanup]
-        public void TearDown()
-        {
-            this.DbContext.Database.EnsureDeleted();
-        }
-
-        public IEnumerable<DefaultParameterTemplateMaster> GetDefaultParameterTemplateMasterData()
+        public static IEnumerable<DefaultParameterTemplateMaster> GetDefaultParameterTemplateMasterData()
         {
             var list = new List<DefaultParameterTemplateMaster>
             {
@@ -432,7 +419,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             return list;
         }
 
-        public IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
+        public static IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
         {
             var list = new List<LapcapDataTemplateMaster>
             {
@@ -694,6 +681,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 },
             };
             return list;
+        }
+
+        [TestMethod]
+        public void CheckDbContext()
+        {
+            Assert.IsNotNull(this.DbContext);
+            Assert.IsTrue(this.DbContext.Database.IsInMemory());
+        }
+
+        [TestCleanup]
+        public void TearDown()
+        {
+            this.DbContext.Database.EnsureDeleted();
         }
 
         protected static IEnumerable<CalculatorRun> GetCalculatorRuns()
