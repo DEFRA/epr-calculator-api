@@ -39,9 +39,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context = new ApplicationDBContext(dbContextOptions);
             context.Database.EnsureCreated();
 
+            this.FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
+            this.context.FinancialYears.Add(this.FinancialYear24_25);
+            this.context.SaveChanges();
+
             context.CalculatorRuns.AddRange(GetCalculatorRuns());
             context.SaveChanges();
         }
+
+        private CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
 
         [TestCleanup]
         public void CleanUp()
@@ -90,7 +96,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CreatedBy = "User23",
                 LapcapDataMasterId = 1,
                 DefaultParameterSettingMasterId = 1,
-                Financial_Year = "2024-25"
+                Financial_Year = FinancialYear24_25,
             });
             context.SaveChanges();
 
@@ -135,7 +141,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CreatedBy = "User23",
                 LapcapDataMasterId = 1,
                 DefaultParameterSettingMasterId = 1,
-                Financial_Year = "2024-25"
+                Financial_Year = FinancialYear24_25,
             });
             this.context.SaveChanges();
 
@@ -183,7 +189,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CreatedBy = "User23",
                 LapcapDataMasterId = 1,
                 DefaultParameterSettingMasterId = 1,
-                Financial_Year = "2024-25"
+                Financial_Year = FinancialYear24_25,
             });
             context.SaveChanges();
 
@@ -214,7 +220,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual($"RunId {runId} cannot be changed to classification {classificationId}", result.Value);
         }
 
-        private static IEnumerable<CalculatorRun> GetCalculatorRuns()
+        private IEnumerable<CalculatorRun> GetCalculatorRuns()
         {
             return new List<CalculatorRun>() {
                 new CalculatorRun
@@ -222,7 +228,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     Id = 1,
                     CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                     Name = "Test Run",
-                    Financial_Year = "2024-25",
+                    Financial_Year = FinancialYear24_25,
                     CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
                     CreatedBy = "Test User"
                 },
@@ -231,7 +237,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     Id = 2,
                     CalculatorRunClassificationId = (int)RunClassification.ERROR,
                     Name = "Test Calculated Result",
-                    Financial_Year = "2024-25",
+                    Financial_Year = FinancialYear24_25,
                     CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
                     CreatedBy = "Test User"
                 },
@@ -240,7 +246,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     Id = 3,
                     CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
                     Name = "Test Run",
-                    Financial_Year = "2024-25",
+                    Financial_Year = FinancialYear24_25,
                     CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
                     CreatedBy = "Test User",
                     CalculatorRunOrganisationDataMasterId = 1,
@@ -251,7 +257,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     Id = 4,
                     CalculatorRunClassificationId = (int)RunClassification.DELETED,
                     Name = "Test Calculated Result",
-                    Financial_Year = "2024-25",
+                    Financial_Year = FinancialYear24_25,
                     CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
                     CreatedBy = "Test User",
                     CalculatorRunOrganisationDataMasterId = 2,
