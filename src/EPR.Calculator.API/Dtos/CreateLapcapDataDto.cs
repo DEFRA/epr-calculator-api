@@ -6,7 +6,9 @@ namespace EPR.Calculator.API.Dtos
     public class CreateLapcapDataDto
     {
         public required string ParameterYear { get; set; }
+
         public required IEnumerable<LapcapDataTemplateValueDto> LapcapDataTemplateValues { get; set; }
+
         public required string LapcapFileName { get; set; }
     }
 }

@@ -8,182 +8,182 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     [TestClass]
     public class CalculatorRunPomDataDetailTests
     {
+        public CalculatorRunPomDataDetailTests()
+        {
+            this.TestClass = this.Fixture.Create<CalculatorRunPomDataDetail>();
+        }
+
         private Fixture Fixture { get; } = new Fixture();
 
         private CalculatorRunPomDataDetail TestClass { get; init; }
-
-        public CalculatorRunPomDataDetailTests()
-        {
-            TestClass = Fixture.Create<CalculatorRunPomDataDetail>();
-        }
 
         [TestMethod]
         public void CanSetAndGetId()
         {
             // Arrange
-            var testValue = Fixture.Create<int>();
+            var testValue = this.Fixture.Create<int>();
 
             // Act
-            TestClass.Id = testValue;
+            this.TestClass.Id = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.Id);
+            Assert.AreEqual(testValue, this.TestClass.Id);
         }
 
         [TestMethod]
         public void CanSetAndGetOrganisationId()
         {
             // Arrange
-            var testValue = Fixture.Create<int?>();
+            var testValue = this.Fixture.Create<int?>();
 
             // Act
-            TestClass.OrganisationId = testValue;
+            this.TestClass.OrganisationId = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.OrganisationId);
+            Assert.AreEqual(testValue, this.TestClass.OrganisationId);
         }
 
         [TestMethod]
         public void CanSetAndGetSubsidaryId()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.SubsidaryId = testValue;
+            this.TestClass.SubsidaryId = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.SubsidaryId);
+            Assert.AreEqual(testValue, this.TestClass.SubsidaryId);
         }
 
         [TestMethod]
         public void CanSetAndGetSubmissionPeriod()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.SubmissionPeriod = testValue;
+            this.TestClass.SubmissionPeriod = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.SubmissionPeriod);
+            Assert.AreEqual(testValue, this.TestClass.SubmissionPeriod);
         }
 
         [TestMethod]
         public void CanSetAndGetPackagingActivity()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.PackagingActivity = testValue;
+            this.TestClass.PackagingActivity = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.PackagingActivity);
+            Assert.AreEqual(testValue, this.TestClass.PackagingActivity);
         }
 
         [TestMethod]
         public void CanSetAndGetPackagingType()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.PackagingType = testValue;
+            this.TestClass.PackagingType = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.PackagingType);
+            Assert.AreEqual(testValue, this.TestClass.PackagingType);
         }
 
         [TestMethod]
         public void CanSetAndGetPackagingClass()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.PackagingClass = testValue;
+            this.TestClass.PackagingClass = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.PackagingClass);
+            Assert.AreEqual(testValue, this.TestClass.PackagingClass);
         }
 
         [TestMethod]
         public void CanSetAndGetPackagingMaterial()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.PackagingMaterial = testValue;
+            this.TestClass.PackagingMaterial = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.PackagingMaterial);
+            Assert.AreEqual(testValue, this.TestClass.PackagingMaterial);
         }
 
         [TestMethod]
         public void CanSetAndGetPackagingMaterialWeight()
         {
             // Arrange
-            var testValue = Fixture.Create<double?>();
+            var testValue = this.Fixture.Create<double?>();
 
             // Act
-            TestClass.PackagingMaterialWeight = testValue;
+            this.TestClass.PackagingMaterialWeight = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.PackagingMaterialWeight);
+            Assert.AreEqual(testValue, this.TestClass.PackagingMaterialWeight);
         }
 
         [TestMethod]
         public void CanSetAndGetSubmissionPeriodDesc()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.SubmissionPeriodDesc = testValue;
+            this.TestClass.SubmissionPeriodDesc = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.SubmissionPeriodDesc);
+            Assert.AreEqual(testValue, this.TestClass.SubmissionPeriodDesc);
         }
 
         [TestMethod]
         public void CanSetAndGetLoadTimeStamp()
         {
             // Arrange
-            var testValue = Fixture.Create<DateTime>();
+            var testValue = this.Fixture.Create<DateTime>();
 
             // Act
-            TestClass.LoadTimeStamp = testValue;
+            this.TestClass.LoadTimeStamp = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.LoadTimeStamp);
+            Assert.AreEqual(testValue, this.TestClass.LoadTimeStamp);
         }
 
         [TestMethod]
         public void CanSetAndGetCalculatorRunPomDataMasterId()
         {
             // Arrange
-            var testValue = Fixture.Create<int>();
+            var testValue = this.Fixture.Create<int>();
 
             // Act
-            TestClass.CalculatorRunPomDataMasterId = testValue;
+            this.TestClass.CalculatorRunPomDataMasterId = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.CalculatorRunPomDataMasterId);
+            Assert.AreEqual(testValue, this.TestClass.CalculatorRunPomDataMasterId);
         }
 
         [TestMethod]
         public void CanSetAndGetCalculatorRunPomDataMaster()
         {
             // Arrange
-            var testValue = Fixture.Create<CalculatorRunPomDataMaster>();
+            var testValue = this.Fixture.Create<CalculatorRunPomDataMaster>();
 
             // Act
-            TestClass.CalculatorRunPomDataMaster = testValue;
+            this.TestClass.CalculatorRunPomDataMaster = testValue;
 
             // Assert
-            Assert.AreSame(testValue, TestClass.CalculatorRunPomDataMaster);
+            Assert.AreSame(testValue, this.TestClass.CalculatorRunPomDataMaster);
         }
     }
 }

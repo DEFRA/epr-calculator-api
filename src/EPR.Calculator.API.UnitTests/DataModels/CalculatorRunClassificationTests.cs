@@ -9,14 +9,14 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     [TestClass]
     public class CalculatorRunClassificationTests
     {
+        public CalculatorRunClassificationTests()
+        {
+            this.TestClass = this.Fixture.Create<CalculatorRunClassification>();
+        }
+
         private Fixture Fixture { get; } = new Fixture();
 
         private CalculatorRunClassification TestClass { get; init; }
-
-        public CalculatorRunClassificationTests()
-        {
-            TestClass = Fixture.Create<CalculatorRunClassification>();
-        }
 
         [TestMethod]
         public void CanSetAndGetId()
@@ -25,10 +25,10 @@ namespace EPR.Calculator.API.UnitTests.DataModels
             var testValue = this.Fixture.Create<int>();
 
             // Act
-            TestClass.Id = testValue;
+            this.TestClass.Id = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.Id);
+            Assert.AreEqual(testValue, this.TestClass.Id);
         }
 
         [TestMethod]
@@ -40,10 +40,10 @@ namespace EPR.Calculator.API.UnitTests.DataModels
             var testValue = fixture.Create<string>();
 
             // Act
-            TestClass.Status = testValue;
+            this.TestClass.Status = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.Status);
+            Assert.AreEqual(testValue, this.TestClass.Status);
         }
 
         [TestMethod]
@@ -55,17 +55,17 @@ namespace EPR.Calculator.API.UnitTests.DataModels
             var testValue = fixture.Create<string>();
 
             // Act
-            TestClass.CreatedBy = testValue;
+            this.TestClass.CreatedBy = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.CreatedBy);
+            Assert.AreEqual(testValue, this.TestClass.CreatedBy);
         }
 
         [TestMethod]
         public void CanGetCalculatorRunDetails()
         {
             // Assert
-            Assert.IsInstanceOfType(TestClass.CalculatorRunDetails, typeof(ICollection<CalculatorRun>));
+            Assert.IsInstanceOfType(this.TestClass.CalculatorRunDetails, typeof(ICollection<CalculatorRun>));
         }
     }
 }

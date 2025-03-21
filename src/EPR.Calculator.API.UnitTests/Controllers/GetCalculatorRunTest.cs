@@ -24,9 +24,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
         public GetCalculatorRunTest()
         {
-            mockStorageService = new Mock<IStorageService>();
-            mockConfig = new Mock<IConfiguration>();
-            mockServiceBusService = new Mock<IServiceBusService>();
+            this.mockStorageService = new Mock<IStorageService>();
+            this.mockConfig = new Mock<IConfiguration>();
+            this.mockServiceBusService = new Mock<IServiceBusService>();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
@@ -44,14 +44,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestCleanup]
         public void CleanUp()
         {
-            context.Database.EnsureDeleted();
+            this.context.Database.EnsureDeleted();
         }
 
         [TestMethod]
         public async Task GetCalculatorRunTest_Get_Valid_Run()
         {
             var date = DateTime.Now;
-            context.CalculatorRuns.Add(new CalculatorRun
+            this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",
                 CalculatorRunClassificationId = 2,
@@ -61,11 +61,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 DefaultParameterSettingMasterId = 1,
                 Financial_Year = this.FinancialYear24_25,
             });
-            context.SaveChanges();
+            this.context.SaveChanges();
 
             var controller =
-                new CalculatorController(context, mockConfig.Object,
-                    mockStorageService.Object, mockServiceBusService.Object);
+                new CalculatorController(
+                    this.context,
+                    this.mockConfig.Object,
+                    this.mockStorageService.Object,
+                    this.mockServiceBusService.Object);
 
             var response = await controller.GetCalculatorRun(1) as ObjectResult;
             Assert.IsNotNull(response);
@@ -85,8 +88,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public async Task GetCalculatorRunTest_Get_Invalid_Run()
         {
             var controller =
-                new CalculatorController(context, mockConfig.Object,
-                    mockStorageService.Object, mockServiceBusService.Object);
+                new CalculatorController(
+                    this.context,
+                    this.mockConfig.Object,
+                    this.mockStorageService.Object,
+                    this.mockServiceBusService.Object);
 
             var response = await controller.GetCalculatorRun(1) as ObjectResult;
             Assert.IsNotNull(response);

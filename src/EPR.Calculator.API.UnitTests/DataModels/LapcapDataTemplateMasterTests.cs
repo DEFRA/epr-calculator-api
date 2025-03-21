@@ -9,21 +9,21 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     [TestClass]
     public class LapcapDataTemplateMasterTests
     {
+        public LapcapDataTemplateMasterTests()
+        {
+            this.Fixture = new Fixture();
+            this.TestClass = this.Fixture.Create<LapcapDataTemplateMaster>();
+        }
+
         private LapcapDataTemplateMaster TestClass { get; }
 
         private IFixture Fixture { get; }
-
-        public LapcapDataTemplateMasterTests()
-        {
-            Fixture = new Fixture();
-            this.TestClass = Fixture.Create<LapcapDataTemplateMaster>();
-        }
 
         [TestMethod]
         public void CanSetAndGetUniqueReference()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.UniqueReference = testValue;
@@ -36,7 +36,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetCountry()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.Country = testValue;
@@ -49,7 +49,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetMaterial()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.Material = testValue;
@@ -62,7 +62,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetTotalCostFrom()
         {
             // Arrange
-            var testValue = Fixture.Create<decimal>();
+            var testValue = this.Fixture.Create<decimal>();
 
             // Act
             this.TestClass.TotalCostFrom = testValue;
@@ -75,7 +75,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetTotalCostTo()
         {
             // Arrange
-            var testValue = Fixture.Create<decimal>();
+            var testValue = this.Fixture.Create<decimal>();
 
             // Act
             this.TestClass.TotalCostTo = testValue;

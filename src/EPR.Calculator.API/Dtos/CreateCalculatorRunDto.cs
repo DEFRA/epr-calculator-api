@@ -8,6 +8,5 @@ namespace EPR.Calculator.API.Dtos
         public required string CalculatorRunName { get; set; }
 
         public required string FinancialYear { get; set; }
-
     }
 }

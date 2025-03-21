@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EPR.Calculator.API.Data.DataModels
 {
-
     [Table("lapcap_data_detail")]
     public class LapcapDataDetail
     {

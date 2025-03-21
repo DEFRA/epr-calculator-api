@@ -30,12 +30,14 @@ builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IStorageService, BlobStorageService>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
+
 // Add services to the container.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddAuthorization();
 
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -96,7 +98,8 @@ builder.Services.AddAzureClients(builder =>
 // Add CORS services
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(CommonConstants.PolicyName,
+    options.AddPolicy(
+        CommonConstants.PolicyName,
         policy => policy.AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod()
@@ -131,4 +134,4 @@ app.MapControllers();
 app.UseCors(CommonConstants.PolicyName);
 app.UseRequestTimeouts();
 
-app.Run();
+await app.RunAsync();

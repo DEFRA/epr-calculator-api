@@ -7,21 +7,21 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     [TestClass]
     public class DefaultParameterTemplateMasterTests
     {
+        public DefaultParameterTemplateMasterTests()
+        {
+            this.Fixture = new Fixture();
+            this.TestClass = this.Fixture.Create<DefaultParameterTemplateMaster>();
+        }
+
         private DefaultParameterTemplateMaster TestClass { get; }
 
         private IFixture Fixture { get; }
-
-        public DefaultParameterTemplateMasterTests()
-        {
-            Fixture = new Fixture();
-            this.TestClass = Fixture.Create<DefaultParameterTemplateMaster>();
-        }
 
         [TestMethod]
         public void CanSetAndGetParameterUniqueReferenceId()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.ParameterUniqueReferenceId = testValue;
@@ -34,7 +34,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetParameterType()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.ParameterType = testValue;
@@ -47,7 +47,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetParameterCategory()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.ParameterCategory = testValue;
@@ -60,7 +60,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetValidRangeFrom()
         {
             // Arrange
-            var testValue = Fixture.Create<decimal>();
+            var testValue = this.Fixture.Create<decimal>();
 
             // Act
             this.TestClass.ValidRangeFrom = testValue;
@@ -73,7 +73,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetValidRangeTo()
         {
             // Arrange
-            var testValue = Fixture.Create<decimal>();
+            var testValue = this.Fixture.Create<decimal>();
 
             // Act
             this.TestClass.ValidRangeTo = testValue;

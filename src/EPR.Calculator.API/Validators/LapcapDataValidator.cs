@@ -8,6 +8,7 @@ namespace EPR.Calculator.API.Validators
     public class LapcapDataValidator : ILapcapDataValidator
     {
         private readonly ApplicationDBContext context;
+
         public LapcapDataValidator(ApplicationDBContext context)
         {
             this.context = context;
@@ -52,7 +53,7 @@ namespace EPR.Calculator.API.Validators
                     {
                         if (totalCostValue < lapcapTemplate.TotalCostFrom ||
                             totalCostValue > lapcapTemplate.TotalCostTo)
-                        {                          
+                        {
                             errorMessage = $"Total costs for {material} in {country} must be between £{Convert.ToInt16(totalCostFrom)} and £{totalCostTo.ToString("#,##0.00")}";
                         }
                     }
@@ -61,12 +62,14 @@ namespace EPR.Calculator.API.Validators
                         errorMessage = $"Total costs for {material} can only include numbers, commas and decimal points";
                     }
                 }
+
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
                     var errorDto = Util.CreateLapcapDataErrorDto(country, material, errorMessage, string.Empty, uniqueRef);
                     validationResult.Errors.Add(errorDto);
                 }
             }
+
             validationResult.IsInvalid = validationResult.Errors.Count > 0;
             return validationResult;
         }

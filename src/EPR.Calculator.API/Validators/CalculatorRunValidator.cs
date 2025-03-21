@@ -8,8 +8,9 @@ namespace EPR.Calculator.API.Validators
     {
         public CalculatorRunValidator()
         {
-            RuleFor(x => x).NotEmpty().WithMessage("Calculator Run Name is Required");
+            this.RuleFor(x => x).NotEmpty().WithMessage("Calculator Run Name is Required");
         }
+
         public ValidationResult ValidateCalculatorRunIds(CalculatorRun calculatorRun)
         {
             var errorMessages = new List<string>();
@@ -19,7 +20,7 @@ namespace EPR.Calculator.API.Validators
                 { "CalculatorRunOrganisationDataMasterId", calculatorRun.CalculatorRunOrganisationDataMasterId },
                 { "DefaultParameterSettingMasterId", calculatorRun.DefaultParameterSettingMasterId },
                 { "CalculatorRunPomDataMasterId", calculatorRun.CalculatorRunPomDataMasterId },
-                { "LapcapDataMasterId", calculatorRun.LapcapDataMasterId }
+                { "LapcapDataMasterId", calculatorRun.LapcapDataMasterId },
             };
 
             errorMessages.AddRange(requiredMasterIds
@@ -29,7 +30,7 @@ namespace EPR.Calculator.API.Validators
             return new ValidationResult
             {
                 IsValid = errorMessages.Count == 0,
-                ErrorMessages = errorMessages
+                ErrorMessages = errorMessages,
             };
         }
     }

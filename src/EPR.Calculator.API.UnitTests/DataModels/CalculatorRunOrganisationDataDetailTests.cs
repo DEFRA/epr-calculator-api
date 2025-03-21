@@ -8,117 +8,117 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     [TestClass]
     public class CalculatorRunOrganisationDataDetailTests
     {
+        public CalculatorRunOrganisationDataDetailTests()
+        {
+            this.TestClass = this.Fixture.Create<CalculatorRunOrganisationDataDetail>();
+        }
+
         private Fixture Fixture { get; } = new Fixture();
 
         private CalculatorRunOrganisationDataDetail TestClass { get; init; }
-
-        public CalculatorRunOrganisationDataDetailTests()
-        {
-            TestClass = Fixture.Create<CalculatorRunOrganisationDataDetail>();
-        }
 
         [TestMethod]
         public void CanSetAndGetId()
         {
             // Arrange
-            var testValue = Fixture.Create<int>();
+            var testValue = this.Fixture.Create<int>();
 
             // Act
-            TestClass.Id = testValue;
+            this.TestClass.Id = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.Id);
+            Assert.AreEqual(testValue, this.TestClass.Id);
         }
 
         [TestMethod]
         public void CanSetAndGetOrganisationId()
         {
             // Arrange
-            var testValue = Fixture.Create<int?>();
+            var testValue = this.Fixture.Create<int?>();
 
             // Act
-            TestClass.OrganisationId = testValue;
+            this.TestClass.OrganisationId = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.OrganisationId);
+            Assert.AreEqual(testValue, this.TestClass.OrganisationId);
         }
 
         [TestMethod]
         public void CanSetAndGetSubsidaryId()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.SubsidaryId = testValue;
+            this.TestClass.SubsidaryId = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.SubsidaryId);
+            Assert.AreEqual(testValue, this.TestClass.SubsidaryId);
         }
 
         [TestMethod]
         public void CanSetAndGetOrganisationName()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.OrganisationName = testValue;
+            this.TestClass.OrganisationName = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.OrganisationName);
+            Assert.AreEqual(testValue, this.TestClass.OrganisationName);
         }
 
         [TestMethod]
         public void CanSetAndGetSubmissionPeriodDesc()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
-            TestClass.SubmissionPeriodDesc = testValue;
+            this.TestClass.SubmissionPeriodDesc = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.SubmissionPeriodDesc);
+            Assert.AreEqual(testValue, this.TestClass.SubmissionPeriodDesc);
         }
 
         [TestMethod]
         public void CanSetAndGetLoadTimeStamp()
         {
             // Arrange
-            var testValue = Fixture.Create<DateTime>();
+            var testValue = this.Fixture.Create<DateTime>();
 
             // Act
-            TestClass.LoadTimeStamp = testValue;
+            this.TestClass.LoadTimeStamp = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.LoadTimeStamp);
+            Assert.AreEqual(testValue, this.TestClass.LoadTimeStamp);
         }
 
         [TestMethod]
         public void CanSetAndGetCalculatorRunOrganisationDataMasterId()
         {
             // Arrange
-            var testValue = Fixture.Create<int>();
+            var testValue = this.Fixture.Create<int>();
 
             // Act
-            TestClass.CalculatorRunOrganisationDataMasterId = testValue;
+            this.TestClass.CalculatorRunOrganisationDataMasterId = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, TestClass.CalculatorRunOrganisationDataMasterId);
+            Assert.AreEqual(testValue, this.TestClass.CalculatorRunOrganisationDataMasterId);
         }
 
         [TestMethod]
         public void CanSetAndGetCalculatorRunOrganisationDataMaster()
         {
             // Arrange
-            var testValue = Fixture.Create<CalculatorRunOrganisationDataMaster>();
+            var testValue = this.Fixture.Create<CalculatorRunOrganisationDataMaster>();
 
             // Act
-            TestClass.CalculatorRunOrganisationDataMaster = testValue;
+            this.TestClass.CalculatorRunOrganisationDataMaster = testValue;
 
             // Assert
-            Assert.AreSame(testValue, TestClass.CalculatorRunOrganisationDataMaster);
+            Assert.AreSame(testValue, this.TestClass.CalculatorRunOrganisationDataMaster);
         }
     }
 }

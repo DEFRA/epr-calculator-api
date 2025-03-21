@@ -8,21 +8,21 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     [TestClass]
     public class CountryTests
     {
+        public CountryTests()
+        {
+            this.Fixture = new Fixture();
+            this.TestClass = this.Fixture.Create<Country>();
+        }
+
         private Country TestClass { get; init; }
 
         private IFixture Fixture { get; init; }
-
-        public CountryTests()
-        {
-            Fixture = new Fixture();
-            this.TestClass = Fixture.Create<Country>();
-        }
 
         [TestMethod]
         public void CanSetAndGetId()
         {
             // Arrange
-            var testValue = Fixture.Create<int>();
+            var testValue = this.Fixture.Create<int>();
 
             // Act
             this.TestClass.Id = testValue;
@@ -35,7 +35,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetCode()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.Code = testValue;
@@ -48,7 +48,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetName()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.Name = testValue;
@@ -61,7 +61,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetDescription()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.Description = testValue;

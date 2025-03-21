@@ -18,7 +18,7 @@ namespace EPR.Calculator.API.Mappers
                 UpdatedBy = run.UpdatedAt,
                 UpdatedAt = run.UpdatedAt,
                 RunClassificationId = run.CalculatorRunClassificationId,
-                RunClassificationStatus = classification.Status
+                RunClassificationStatus = classification.Status,
             };
         }
     }

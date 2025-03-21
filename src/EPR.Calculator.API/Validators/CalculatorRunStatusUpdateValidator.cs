@@ -7,7 +7,7 @@ public class CalculatorRunStatusUpdateValidator : AbstractValidator<CalculatorRu
 {
     public CalculatorRunStatusUpdateValidator()
     {
-        RuleFor(x => x.ClassificationId).GreaterThan(0).WithMessage("Invalid ClassificationId");
-        RuleFor(x => x.RunId).GreaterThan(0).WithMessage("Invalid RunId");
+        this.RuleFor(x => x.ClassificationId).GreaterThan(0).WithMessage("Invalid ClassificationId");
+        this.RuleFor(x => x.RunId).GreaterThan(0).WithMessage("Invalid RunId");
     }
 }

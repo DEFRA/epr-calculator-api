@@ -1,14 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 
 namespace EPR.Calculator.API.Data.DataModels
 {
     [Table("cost_type")]
     public class CostType
     {
-
         [Column("id")]
         [Required]
         public int Id { get; set; }

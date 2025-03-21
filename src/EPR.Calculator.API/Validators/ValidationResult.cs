@@ -2,11 +2,13 @@
 {
     public class ValidationResult
     {
-        public bool IsValid { get; set; }
-        public IEnumerable<string> ErrorMessages { get; set; }
         public ValidationResult()
         {
-            ErrorMessages = new List<string>();
+            this.ErrorMessages = new List<string>();
         }
+
+        public bool IsValid { get; set; }
+
+        public IEnumerable<string> ErrorMessages { get; set; }
     }
 }
