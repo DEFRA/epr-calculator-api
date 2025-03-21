@@ -66,6 +66,7 @@
                 optionsBuilder.UseSqlServer();
             }
         }
+        public virtual DbSet<CalculatorRunFinancialYear> FinancialYears { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -183,6 +184,24 @@
             .HasMany(e => e.CountryApportionments)
             .WithOne(e => e.Country)
             .HasForeignKey(e => e.CountryId);
+
+            modelBuilder.Entity<CalculatorRunFinancialYear>()
+            .HasMany(e => e.CalculatorRuns)
+            .WithOne(e => e.Financial_Year)
+            .HasForeignKey(e => e.FinancialYearId)
+            .HasPrincipalKey(e => e.Name);
+
+            modelBuilder.Entity<CalculatorRunFinancialYear>()
+            .HasMany(e => e.DefaultParameterSettingMasters)
+            .WithOne(e => e.ParameterYear)
+            .HasForeignKey(e => e.ParameterYearId)
+            .HasPrincipalKey(e => e.Name);
+
+            modelBuilder.Entity<CalculatorRunFinancialYear>()
+            .HasMany(e => e.LapcapDataMasters)
+            .WithOne(e => e.ProjectionYear)
+            .HasForeignKey(e => e.ProjectionYearId)
+            .HasPrincipalKey(e => e.Name);
 
             modelBuilder.Entity<CalculatorRunCsvFileMetadata>().Property(e => e.CalculatorRunId).IsRequired(true);
 

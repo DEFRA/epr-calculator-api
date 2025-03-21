@@ -61,9 +61,18 @@ namespace EPR.Calculator.API.Controllers
                     };
                 }
 
-                // Return failed dependency error if at least one of the dependent data not available for
-                // the financial year
-                var dataPreCheckMessage = this.DataPreChecksBeforeInitialisingCalculatorRun(request.FinancialYear);
+                var financialYear = await this.context.FinancialYears.SingleOrDefaultAsync(
+                    year => year.Name == request.FinancialYear);
+                if (financialYear is null)
+                {
+                    return new ObjectResult(new { Message = ErrorMessages.InvalidFinancialYear })
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest,
+                    };
+                }
+
+                // Return failed dependency error if at least one of the dependent data not available for the financial year
+                var dataPreCheckMessage = this.DataPreChecksBeforeInitialisingCalculatorRun(financialYear);
                 if (!string.IsNullOrWhiteSpace(dataPreCheckMessage))
                 {
                     return new ObjectResult(dataPreCheckMessage) { StatusCode = StatusCodes.Status424FailedDependency };
@@ -95,17 +104,17 @@ namespace EPR.Calculator.API.Controllers
 
                 // Get active default parameter settings master
                 var activeDefaultParameterSettingsMaster = await this.context.DefaultParameterSettings
-                    .SingleAsync(x => x.EffectiveTo == null && x.ParameterYear == request.FinancialYear);
+                    .SingleAsync(x => x.EffectiveTo == null && x.ParameterYear == financialYear);
 
                 // Get active lapcap data master
                 var activeLapcapDataMaster = await this.context.LapcapDataMaster
-                    .SingleAsync(data => data.ProjectionYear == request.FinancialYear && data.EffectiveTo == null);
+                    .SingleAsync(data => data.ProjectionYear == financialYear && data.EffectiveTo == null);
 
                 // Setup calculator run details
                 var calculatorRun = new CalculatorRun
                 {
                     Name = request.CalculatorRunName,
-                    Financial_Year = request.FinancialYear,
+                    Financial_Year = financialYear,
                     CreatedBy = userName,
                     CreatedAt = DateTime.Now,
                     CalculatorRunClassificationId = (int)RunClassification.RUNNING,
@@ -125,7 +134,7 @@ namespace EPR.Calculator.API.Controllers
                         var calculatorRunMessage = new CalculatorRunMessage
                         {
                             CalculatorRunId = calculatorRun.Id,
-                            FinancialYear = calculatorRun.Financial_Year,
+                            FinancialYear = calculatorRun.Financial_Year.Name,
                             CreatedBy = this.User.Identity?.Name ?? userName,
                         };
 
@@ -172,7 +181,7 @@ namespace EPR.Calculator.API.Controllers
             try
             {
                 var calculatorRuns = await this.context.CalculatorRuns
-                    .Where(run => run.Financial_Year == request.FinancialYear)
+                    .Where(run => run.Financial_Year.Name == request.FinancialYear)
                     .OrderByDescending(run => run.CreatedAt)
                     .ToListAsync();
 
@@ -340,7 +349,23 @@ namespace EPR.Calculator.API.Controllers
             }
         }
 
-        private string DataPreChecksBeforeInitialisingCalculatorRun(string financialYear)
+        [HttpGet]
+        [Route("FinancialYears")]
+        [Authorize]
+        public async Task<IActionResult> FinancialYears()
+        {
+            try
+            {
+                var financialYears = await this.context.FinancialYears.ToListAsync();
+                return new ObjectResult(financialYears.Select(FinancialYearMapper.Map));
+            }
+            catch (Exception exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+        }
+
+        private string DataPreChecksBeforeInitialisingCalculatorRun(CalculatorRunFinancialYear financialYear)
         {
             // Get active default parameter settings for the given financial year
             var activeDefaultParameterSettings = this.context.DefaultParameterSettings

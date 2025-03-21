@@ -14,7 +14,7 @@ namespace EPR.Calculator.API.UnitTests
             var defaultParameterSettingMaster = new LapcapDataMaster
             {
                 Id = 2,
-                ProjectionYear = "2024-25",
+                ProjectionYear = this.FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.Now,
                 EffectiveFrom = DateTime.Now,
@@ -59,7 +59,7 @@ namespace EPR.Calculator.API.UnitTests
                 // Assert
                 var mappedItem = result.First();
                 Assert.AreEqual(detail.Id, mappedItem.Id);
-                Assert.AreEqual(defaultParameterSettingMaster.ProjectionYear, mappedItem.ProjectionYear);
+                Assert.AreEqual(defaultParameterSettingMaster.ProjectionYear.Name, mappedItem.ProjectionYear);
                 Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);
                 Assert.AreEqual(defaultParameterSettingMaster.CreatedAt, mappedItem.CreatedAt);
                 Assert.AreEqual(detail.LapcapDataMasterId, mappedItem.LapcapDataMasterId);

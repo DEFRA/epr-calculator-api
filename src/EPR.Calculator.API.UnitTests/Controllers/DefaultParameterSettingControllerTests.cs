@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Security.Principal;
 using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.UnitTests.Controllers;
 using EPR.Calculator.API.Validators;
@@ -74,7 +75,8 @@ namespace EPR.Calculator.API.Tests.Controllers
             };
 
             // Act
-            var actionResult1 = await this.DefaultParameterSettingController.Get("2024-25") as ObjectResult;
+            var actionResult1 = await this.DefaultParameterSettingController
+                .Get(this.FinancialYear24_25.Name) as ObjectResult;
 
             // Assert
             var okResult = actionResult1 as ObjectResult;
@@ -142,7 +144,8 @@ namespace EPR.Calculator.API.Tests.Controllers
             CreateDefaultParameterSettingValidator validator = new CreateDefaultParameterSettingValidator();
             CreateDefaultParameterSettingDto parameter = new CreateDefaultParameterSettingDto()
             {
-                ParameterFileName = string.Empty, ParameterYear = "2024-25",
+                ParameterFileName = string.Empty,
+                ParameterYear = "2024-25",
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
             };
             var result = validator.Validate(parameter);
@@ -177,7 +180,11 @@ namespace EPR.Calculator.API.Tests.Controllers
 
             CreateDefaultParameterSettingValidator validator = new CreateDefaultParameterSettingValidator();
             CreateDefaultParameterSettingDto parameter = new CreateDefaultParameterSettingDto()
-            { ParameterFileName = new string('A', 257), ParameterYear = "2024-25", SchemeParameterTemplateValues = schemeParameterTemplateValues };
+            {
+                ParameterFileName = new string('A', 257),
+                ParameterYear = "2024-25",
+                SchemeParameterTemplateValues = schemeParameterTemplateValues,
+            };
             var result = validator.Validate(parameter);
 
             Assert.IsNotNull(result);

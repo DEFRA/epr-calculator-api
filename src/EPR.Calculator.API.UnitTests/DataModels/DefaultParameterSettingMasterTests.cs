@@ -11,8 +11,8 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     {
         public DefaultParameterSettingMasterTests()
         {
-           this.Fixture = new Fixture();
-           this.TestClass = new DefaultParameterSettingMaster();
+            Fixture = new Fixture();
+            this.TestClass = this.Fixture.Create<DefaultParameterSettingMaster>();
         }
 
         private DefaultParameterSettingMaster TestClass { get; }
@@ -36,7 +36,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetParameterYear()
         {
             // Arrange
-            var testValue = this.Fixture.Create<string>();
+            var testValue = Fixture.Create<CalculatorRunFinancialYear>();
 
             // Act
             this.TestClass.ParameterYear = testValue;

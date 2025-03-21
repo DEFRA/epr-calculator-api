@@ -2,6 +2,7 @@
 using System.Security.Principal;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Controllers;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -70,7 +71,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.LapcapDataController.ModelState.AddModelError("parameterYear", "Invalid year");
 
             // Act
-            var result = await this.LapcapDataController.Get("2024") as ObjectResult;
+            var result = await this.LapcapDataController.Get("2024-25") as ObjectResult;
 
             // Assert
             var okResult = result as ObjectResult;

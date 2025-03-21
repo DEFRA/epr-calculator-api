@@ -17,7 +17,7 @@ namespace EPR.Calculator.API.Mappers
                 var data = new LapCapParameterDto
                 {
                     Id = item.Id,
-                    ProjectionYear = lapcapSettingMaster.ProjectionYear,
+                    ProjectionYear = lapcapSettingMaster.ProjectionYear.Name,
                     CreatedBy = lapcapSettingMaster.CreatedBy,
                     CreatedAt = lapcapSettingMaster.CreatedAt,
                     LapcapDataMasterId = lapcapSettingMaster.Id,

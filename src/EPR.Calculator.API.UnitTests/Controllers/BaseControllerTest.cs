@@ -51,7 +51,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             mockFactory.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(mockClient.Object);
 
-            this.DbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
+            this.FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
+            this.DbContext.FinancialYears.Add(this.FinancialYear24_25);
+
+            this.DbContext.CalculatorRuns.AddRange(this.GetCalculatorRuns());
             this.DbContext.SaveChanges();
             this.CalculatorController = new CalculatorController(
                 this.DbContext,
@@ -66,6 +69,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         protected ApplicationDBContext DbContext { get; set; }
+
+        protected CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
 
         protected DefaultParameterSettingController DefaultParameterSettingController { get; set; }
 
@@ -696,62 +701,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.DbContext.Database.EnsureDeleted();
         }
 
-        protected static IEnumerable<CalculatorRun> GetCalculatorRuns()
-        {
-            var list = new List<CalculatorRun>
-            {
-                new CalculatorRun
-                {
-                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
-                    Name = "Test Run",
-                    Financial_Year = "2024-25",
-                    CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
-                    CreatedBy = "Test User",
-                },
-                new CalculatorRun
-                {
-                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
-                    Name = "Test Calculated Result",
-                    Financial_Year = "2024-25",
-                    CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
-                    CreatedBy = "Test User",
-                },
-                new CalculatorRun
-                {
-                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
-                    Name = "Test Run",
-                    Financial_Year = "2024-25",
-                    CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
-                    CreatedBy = "Test User",
-                    CalculatorRunOrganisationDataMasterId = 1,
-                    CalculatorRunPomDataMasterId = 1,
-                },
-                new CalculatorRun
-                {
-                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
-                    Name = "Test 422 error",
-                    Financial_Year = "2024-25",
-                    CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
-                    CreatedBy = "Test User",
-                    CalculatorRunOrganisationDataMasterId = 2,
-                    CalculatorRunPomDataMasterId = 2,
-                    LapcapDataMasterId = 2,
-                    DefaultParameterSettingMasterId = 2,
-                },
-                new CalculatorRun
-                {
-                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
-                    Name = "Test Calculated Result",
-                    Financial_Year = "2024-25",
-                    CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
-                    CreatedBy = "Test User",
-                    CalculatorRunOrganisationDataMasterId = 2,
-                    CalculatorRunPomDataMasterId = 2,
-                },
-            };
-            return list;
-        }
-
         protected static IEnumerable<Material> GetMaterials()
         {
             var list = new List<Material>
@@ -913,6 +862,62 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     },
                 },
             });
+            return list;
+        }
+
+        protected IEnumerable<CalculatorRun> GetCalculatorRuns()
+        {
+            var list = new List<CalculatorRun>
+            {
+                new CalculatorRun
+                {
+                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+                    Name = "Test Run",
+                    Financial_Year = this.FinancialYear24_25,
+                    CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
+                    CreatedBy = "Test User",
+                },
+                new CalculatorRun
+                {
+                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+                    Name = "Test Calculated Result",
+                    Financial_Year = this.FinancialYear24_25,
+                    CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
+                    CreatedBy = "Test User",
+                },
+                new CalculatorRun
+                {
+                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+                    Name = "Test Run",
+                    Financial_Year = this.FinancialYear24_25,
+                    CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
+                    CreatedBy = "Test User",
+                    CalculatorRunOrganisationDataMasterId = 1,
+                    CalculatorRunPomDataMasterId = 1,
+                },
+                new CalculatorRun
+                {
+                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+                    Name = "Test 422 error",
+                    Financial_Year = this.FinancialYear24_25,
+                    CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
+                    CreatedBy = "Test User",
+                    CalculatorRunOrganisationDataMasterId = 2,
+                    CalculatorRunPomDataMasterId = 2,
+                    LapcapDataMasterId = 2,
+                    DefaultParameterSettingMasterId = 2,
+                },
+                new CalculatorRun
+                {
+                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+                    Name = "Test Calculated Result",
+                    Financial_Year = this.FinancialYear24_25,
+                    CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
+                    CreatedBy = "Test User",
+                    CalculatorRunOrganisationDataMasterId = 2,
+                    CalculatorRunPomDataMasterId = 2,
+                },
+            };
             return list;
         }
     }

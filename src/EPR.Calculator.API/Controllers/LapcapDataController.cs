@@ -53,6 +53,9 @@ namespace EPR.Calculator.API.Controllers
                         .Where(x => x.EffectiveTo == null).ToListAsync();
                     oldLapcapData.ForEach(x => { x.EffectiveTo = DateTime.Now; });
 
+                    var financialYear = await this.context.FinancialYears.Where(
+                        x => x.Name == request.ParameterYear).SingleAsync();
+
                     var lapcapDataMaster = new LapcapDataMaster
                     {
                         CreatedAt = DateTime.Now,
@@ -60,7 +63,7 @@ namespace EPR.Calculator.API.Controllers
                         EffectiveFrom = DateTime.Now,
                         EffectiveTo = null,
                         LapcapFileName = request.LapcapFileName,
-                        ProjectionYear = request.ParameterYear,
+                        ProjectionYear = financialYear
                     };
                     await this.context.LapcapDataMaster.AddAsync(lapcapDataMaster);
 
@@ -114,9 +117,11 @@ namespace EPR.Calculator.API.Controllers
                 return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var lapcapDataMaster = await this.context.LapcapDataMaster
+            var financialYear = await context.FinancialYears.SingleOrDefaultAsync(x => x.Name == parameterYear);
+
+            var lapcapDataMaster = await context.LapcapDataMaster
               .Include(m => m.Details)
-              .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.ProjectionYear == parameterYear);
+              .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.ProjectionYear == financialYear);
 
             if (lapcapDataMaster == null)
             {

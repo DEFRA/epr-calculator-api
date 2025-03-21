@@ -29,9 +29,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
-            this.context = new ApplicationDBContext(dbContextOptions);
-            this.context.Database.EnsureCreated();
+            context = new ApplicationDBContext(dbContextOptions);
+            context.Database.EnsureCreated();
+
+            this.FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
+            this.context.FinancialYears.Add(this.FinancialYear24_25);
+            this.context.SaveChanges();
         }
+
+        private CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
 
         [TestCleanup]
         public void CleanUp()
@@ -56,7 +62,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CreatedBy = "User23",
                 LapcapDataMasterId = 1,
                 DefaultParameterSettingMasterId = 1,
-                Financial_Year = "2024-25",
+                Financial_Year = FinancialYear24_25
             });
 
             this.context.CalculatorRunCsvFileMetadata.Add(new CalculatorRunCsvFileMetadata
@@ -102,7 +108,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CreatedBy = "User23",
                 LapcapDataMasterId = 1,
                 DefaultParameterSettingMasterId = 1,
-                Financial_Year = "2024-25",
+                Financial_Year = FinancialYear24_25,
             });
 
             this.context.CalculatorRunCsvFileMetadata.Add(new CalculatorRunCsvFileMetadata
