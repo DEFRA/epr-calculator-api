@@ -90,7 +90,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         /// <summary>
-        /// Retrieves LAPCAP data for a specified year.
+        /// Retrieves LAPCAP data for the given specified year.
         /// </summary>
         /// <param name="parameterYear">The year for which to retrieve LAPCAP data.</param>
         /// <returns>
