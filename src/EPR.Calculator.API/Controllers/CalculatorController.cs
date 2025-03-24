@@ -42,6 +42,7 @@ namespace EPR.Calculator.API.Controllers
             }
 
             var userName = claim.Value;
+
             try
             {
                 // Return bad request if the model is invalid
@@ -196,14 +197,14 @@ namespace EPR.Calculator.API.Controllers
             {
                 var calculatorRunDetail =
                     await (from run in this.context.CalculatorRuns
-                     join classification in context.CalculatorRunClassifications
-                         on run.CalculatorRunClassificationId equals classification.Id
-                     where run.Id == runId
-                     select new
-                     {
-                         Run = run,
-                         Classification = classification
-                     }).SingleOrDefaultAsync();
+                           join classification in context.CalculatorRunClassifications
+                               on run.CalculatorRunClassificationId equals classification.Id
+                           where run.Id == runId
+                           select new
+                           {
+                               Run = run,
+                               Classification = classification
+                           }).SingleOrDefaultAsync();
 
                 if (calculatorRunDetail == null)
                 {
@@ -315,7 +316,7 @@ namespace EPR.Calculator.API.Controllers
                 var badRequest = Results.BadRequest(ModelState.Values.SelectMany(x => x.Errors));
                 return badRequest;
             }
-            
+
             var csvFileMetadata = await context.CalculatorRunCsvFileMetadata.SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId);
             if (csvFileMetadata == null)
             {
