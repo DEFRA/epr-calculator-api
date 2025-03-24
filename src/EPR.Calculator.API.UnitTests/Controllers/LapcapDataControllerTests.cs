@@ -1,5 +1,6 @@
 ﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Controllers;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -69,7 +70,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             lapcapDataController.ModelState.AddModelError("parameterYear", "Invalid year");
             //Act
-            var result = await lapcapDataController.Get("2024") as ObjectResult;
+            var result = await lapcapDataController.Get("2024-25") as ObjectResult;
             //Assert
             var okResult = result as ObjectResult;
             Assert.IsNotNull(okResult);
@@ -198,7 +199,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(1, errors.Count(x => x.Message == "You have entered the total costs for Wood in England more than once"));
         }
 
-        public static CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
+        public CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
         {
             var lapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>();
             var masterData = GetLapcapTemplateMasterData();
