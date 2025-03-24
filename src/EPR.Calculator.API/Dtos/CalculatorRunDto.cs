@@ -1,5 +1,8 @@
 ﻿namespace EPR.Calculator.API.Dtos
 {
+    /// <summary>
+    /// CalculatorRunDto
+    /// </summary>
     public class CalculatorRunDto
     {
         public int RunId {get; set; }
@@ -12,3 +15,4 @@
         public required string RunClassificationStatus { get; set; }
     }
 }
+ 
