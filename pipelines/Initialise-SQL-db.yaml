@@ -21,8 +21,9 @@ parameters:
       - DEV12
       - DEV13
       - DEV14
+      - DEV15
   - name: envToDeploy
-    displayName: 'Target env to deploy:    (select "development" for DEV1-11)'
+    displayName: 'Target env to deploy:    (select "development" for DEV1-15)'
     type: string
     values:
       - development
