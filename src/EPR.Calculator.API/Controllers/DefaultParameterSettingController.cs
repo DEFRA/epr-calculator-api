@@ -25,7 +25,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("defaultParameterSetting")]
-        [Authorize()]
+        [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> Create([FromBody] CreateDefaultParameterSettingDto request)
         {
             var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
@@ -92,7 +92,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("defaultParameterSetting/{parameterYear}")]
-        [Authorize()]
+        [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> Get([FromRoute] string parameterYear)
         {
             if (!ModelState.IsValid)
