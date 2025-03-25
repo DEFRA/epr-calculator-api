@@ -6,7 +6,9 @@ namespace EPR.Calculator.API.Dtos
     public class DefaultSchemeParametersDto
     {
         public int Id { get; set; }
+
         public required string ParameterYear { get; set; }
+
         public DateTime EffectiveFrom { get; set; }
 
         public DateTime? EffectiveTo { get; set; }
@@ -16,12 +18,13 @@ namespace EPR.Calculator.API.Dtos
         public DateTime CreatedAt { get; set; }
 
         public int DefaultParameterSettingMasterId { get; set; }
+
         public required string ParameterUniqueRef { get; set; }
+
         public required string ParameterType { get; set; }
 
         public required string ParameterCategory { get; set; }
 
         public decimal ParameterValue { get; set; }
-
     }
 }

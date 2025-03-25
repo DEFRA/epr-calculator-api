@@ -22,7 +22,7 @@ namespace EPR.Calculator.API.Data.DataModels
         [Column("description")]
         [StringLength(2000)]
         public string? Description { get; set; }
-        
+
         public ICollection<CountryApportionment> CountryApportionments { get; } = new List<CountryApportionment>();
     }
 }

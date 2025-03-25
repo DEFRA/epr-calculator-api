@@ -9,21 +9,21 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     [TestClass]
     public class DefaultParameterSettingMasterTests
     {
-        private DefaultParameterSettingMaster TestClass { get; }
-
-        private IFixture Fixture { get; }
-
         public DefaultParameterSettingMasterTests()
         {
             Fixture = new Fixture();
             this.TestClass = this.Fixture.Create<DefaultParameterSettingMaster>();
         }
 
+        private DefaultParameterSettingMaster TestClass { get; }
+
+        private IFixture Fixture { get; }
+
         [TestMethod]
         public void CanSetAndGetId()
         {
             // Arrange
-            var testValue = Fixture.Create<int>();
+            var testValue = this.Fixture.Create<int>();
 
             // Act
             this.TestClass.Id = testValue;
@@ -49,7 +49,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetEffectiveFrom()
         {
             // Arrange
-            var testValue = Fixture.Create<DateTime>();
+            var testValue = this.Fixture.Create<DateTime>();
 
             // Act
             this.TestClass.EffectiveFrom = testValue;
@@ -62,7 +62,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetEffectiveTo()
         {
             // Arrange
-            var testValue = Fixture.Create<DateTime?>();
+            var testValue = this.Fixture.Create<DateTime?>();
 
             // Act
             this.TestClass.EffectiveTo = testValue;
@@ -75,7 +75,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetCreatedBy()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.CreatedBy = testValue;
@@ -88,7 +88,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetCreatedAt()
         {
             // Arrange
-            var testValue = Fixture.Create<DateTime>();
+            var testValue = this.Fixture.Create<DateTime>();
 
             // Act
             this.TestClass.CreatedAt = testValue;
@@ -101,7 +101,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetParameterFileName()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.ParameterFileName = testValue;
@@ -121,7 +121,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanGetRunDetails()
         {
             // Assert
-            Assert.IsNull(TestClass.RunDetails);
+            Assert.IsNull(this.TestClass.RunDetails);
         }
     }
 }

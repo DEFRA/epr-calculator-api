@@ -1,12 +1,7 @@
 namespace EPR.Calculator.API.UnitTests.Services
 {
-    using System;
     using System.Threading.Tasks;
-    using AutoFixture;
-    using Azure;
     using Azure.Messaging.ServiceBus;
-    using Azure.Storage.Blobs.Models;
-    using Azure.Storage.Blobs.Specialized;
     using EPR.Calculator.API.Models;
     using EPR.Calculator.API.Services;
     using Microsoft.Extensions.Azure;
@@ -21,8 +16,8 @@ namespace EPR.Calculator.API.UnitTests.Services
 
         public ServiceBusServiceTests()
         {
-            mockServiceBusClientFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
-            serviceBusService = new ServiceBusService(mockServiceBusClientFactory.Object);
+            this.mockServiceBusClientFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
+            this.serviceBusService = new ServiceBusService(this.mockServiceBusClientFactory.Object);
         }
 
         [TestMethod]
@@ -33,7 +28,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var calculatorRunMessage = new CalculatorRunMessage() { CalculatorRunId = 1, CreatedBy = "Test user", FinancialYear = "2024-25" };
 
             var mockServiceBusClient = new Mock<ServiceBusClient>();
-            mockServiceBusClientFactory.Setup(clientFactory => clientFactory.CreateClient(It.IsAny<string>()))
+            this.mockServiceBusClientFactory.Setup(clientFactory => clientFactory.CreateClient(It.IsAny<string>()))
                 .Returns(mockServiceBusClient.Object);
 
             var mockServiceBusSender = new Mock<ServiceBusSender>();
@@ -44,10 +39,10 @@ namespace EPR.Calculator.API.UnitTests.Services
                 .Returns(Task.CompletedTask);
 
             // Act
-            await serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
+            await this.serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
 
             // Assert
-            mockServiceBusClientFactory.Verify(clientFactory => clientFactory.CreateClient(It.IsAny<string>()), Times.Once);
+            this.mockServiceBusClientFactory.Verify(clientFactory => clientFactory.CreateClient(It.IsAny<string>()), Times.Once);
             mockServiceBusClient.Verify(client => client.CreateSender(It.IsAny<string>()), Times.Once);
         }
     }

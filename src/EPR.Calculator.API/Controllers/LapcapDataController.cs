@@ -26,28 +26,31 @@ namespace EPR.Calculator.API.Controllers
         [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> Create([FromBody] CreateLapcapDataDto request)
         {
-            var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
+            var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
                 return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
             }
 
             var userName = claim.Value;
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
-            var validationResult = validator.Validate(request);
+
+            var validationResult = this.validator.Validate(request);
             if (validationResult.IsInvalid)
             {
-                return BadRequest(validationResult.Errors);
+                return this.BadRequest(validationResult.Errors);
             }
-            var templateMaster = context.LapcapDataTemplateMaster.ToList();
-            using (var transaction = await context.Database.BeginTransactionAsync())
+
+            var templateMaster = await this.context.LapcapDataTemplateMaster.ToListAsync();
+            using (var transaction = await this.context.Database.BeginTransactionAsync())
             {
                 try
                 {
-                    var oldLapcapData = this.context.LapcapDataMaster.Where(x => x.EffectiveTo == null).ToList();
+                    var oldLapcapData = await this.context.LapcapDataMaster
+                        .Where(x => x.EffectiveTo == null).ToListAsync();
                     oldLapcapData.ForEach(x => { x.EffectiveTo = DateTime.Now; });
 
                     var financialYear = await this.context.FinancialYears.Where(
@@ -73,16 +76,17 @@ namespace EPR.Calculator.API.Controllers
                         {
                             TotalCost = decimal.Parse(templateValue.TotalCost.Replace("£", string.Empty)),
                             UniqueReference = uniqueReference,
-                            LapcapDataMaster = lapcapDataMaster
+                            LapcapDataMaster = lapcapDataMaster,
                         });
                     }
+
                     await this.context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
                 catch (Exception exception)
                 {
                     await transaction.RollbackAsync();
-                    return StatusCode(StatusCodes.Status500InternalServerError, exception);
+                    return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
             }
 
@@ -108,9 +112,9 @@ namespace EPR.Calculator.API.Controllers
         [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> Get([FromRoute] string parameterYear)
         {
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
+                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
 
             var financialYear = await context.FinancialYears.SingleOrDefaultAsync(x => x.Name == parameterYear);
@@ -126,13 +130,13 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var _lapcaptemplateDetails = await this.context.LapcapDataTemplateMaster.ToListAsync();
-                var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(lapcapDataMaster, _lapcaptemplateDetails);
+                var lapcaptemplateDetails = await this.context.LapcapDataTemplateMaster.ToListAsync();
+                var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(lapcapDataMaster, lapcaptemplateDetails);
                 return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
             }
             catch (Exception exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception);
+                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
         }
     }

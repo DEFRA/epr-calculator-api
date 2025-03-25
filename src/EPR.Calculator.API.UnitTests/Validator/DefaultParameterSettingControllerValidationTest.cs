@@ -1,12 +1,12 @@
-﻿using EPR.Calculator.API.Constants;
+﻿using System.Security.Claims;
+using System.Security.Principal;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.UnitTests.Controllers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using EPR.Calculator.API.UnitTests.Controllers;
-using System.Security.Principal;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 
 namespace EPR.Calculator.API.UnitTests.Validator
 {
@@ -22,24 +22,24 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
             var context = new DefaultHttpContext()
             {
-                User = principal
+                User = principal,
             };
 
-            defaultParameterSettingController.ControllerContext = new ControllerContext
+            this.DefaultParameterSettingController.ControllerContext = new ControllerContext
             {
-                HttpContext = context
+                HttpContext = context,
             };
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
-                ParameterYear = "",
+                ParameterYear = string.Empty,
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
-                ParameterFileName = "TestFileName"
+                ParameterFileName = "TestFileName",
             };
 
-            defaultParameterSettingController?.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
-            defaultParameterSettingController?.ModelState.AddModelError("SchemeParameterTemplateValues", ErrorMessages.SchemeParameterTemplateValuesMissing);
-            var actionResult = await defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
+            this.DefaultParameterSettingController.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
+            this.DefaultParameterSettingController.ModelState.AddModelError("SchemeParameterTemplateValues", ErrorMessages.SchemeParameterTemplateValuesMissing);
+            var actionResult = await this.DefaultParameterSettingController.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
 
             var modelErrors = actionResult?.Value as IEnumerable<ModelError>;
@@ -57,23 +57,24 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
             var context = new DefaultHttpContext()
             {
-                User = principal
+                User = principal,
             };
 
-            defaultParameterSettingController.ControllerContext = new ControllerContext
+            this.DefaultParameterSettingController.ControllerContext = new ControllerContext
             {
-                HttpContext = context
+                HttpContext = context,
             };
 
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
-                ParameterYear = "",
+                ParameterYear = string.Empty,
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
-                ParameterFileName = "TestFileName"
+                ParameterFileName = "TestFileName",
             };
 
-            var actionResult = await defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
+            var actionResult = await this.DefaultParameterSettingController
+                .Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
 
             var errors = actionResult?.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
@@ -90,12 +91,12 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
             var context = new DefaultHttpContext()
             {
-                User = principal
+                User = principal,
             };
 
-            defaultParameterSettingController.ControllerContext = new ControllerContext
+            this.DefaultParameterSettingController.ControllerContext = new ControllerContext
             {
-                HttpContext = context
+                HttpContext = context,
             };
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             foreach (var uniqueRef in DefaultParameterUniqueReferences.UniqueReferences)
@@ -103,18 +104,20 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
                 {
                     ParameterValue = "0",
-                    ParameterUniqueReferenceId = uniqueRef
+                    ParameterUniqueReferenceId = uniqueRef,
                 });
             }
+
             schemeParameterTemplateValues.Single(x => x.ParameterUniqueReferenceId == "BADEBT-P").ParameterUniqueReferenceId = "Somehthing else";
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
-                ParameterYear = "",
+                ParameterYear = string.Empty,
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
-                ParameterFileName = "TestFileName"
+                ParameterFileName = "TestFileName",
             };
 
-            var actionResult = await defaultParameterSettingController?.Create(createDefaultParameterDto) as ObjectResult;
+            var actionResult = await this.DefaultParameterSettingController
+                .Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
 
             var errors = actionResult?.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;

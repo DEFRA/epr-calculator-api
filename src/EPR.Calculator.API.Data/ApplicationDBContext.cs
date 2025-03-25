@@ -10,16 +10,9 @@
         {
         }
 
-        public ApplicationDBContext(DbContextOptions options) : base(options)
+        public ApplicationDBContext(DbContextOptions options)
+            : base(options)
         {
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer();
-            }
         }
 
         public virtual DbSet<DefaultParameterSettingMaster> DefaultParameterSettings { get; set; }
@@ -66,6 +59,13 @@
 
         public virtual DbSet<SubmissionPeriodLookup> SubmissionPeriodLookup { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer();
+            }
+        }
         public virtual DbSet<CalculatorRunFinancialYear> FinancialYears { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -95,7 +95,6 @@
             modelBuilder.Entity<CalculatorRunCsvFileMetadata>();
             modelBuilder.Entity<SubmissionPeriodLookup>()
             .HasKey(e => e.SubmissionPeriod);
-            
 
             modelBuilder.Entity<LapcapDataTemplateMaster>()
             .HasMany(e => e.Details)
@@ -205,7 +204,7 @@
             .HasPrincipalKey(e => e.Name);
 
             modelBuilder.Entity<CalculatorRunCsvFileMetadata>().Property(e => e.CalculatorRunId).IsRequired(true);
-            
+
             Seeder.Initialize(modelBuilder);
         }
     }

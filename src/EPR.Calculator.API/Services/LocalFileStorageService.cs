@@ -1,8 +1,4 @@
-﻿namespace EPR.Calculator.API.Services
-{
-    using System.IO;
-    using System.Text;
-    using System.Threading.Tasks;
+﻿    using System.Text;
 
     namespace EPR.Calculator.API.Services
     {
@@ -12,7 +8,7 @@
             {
                 throw new NotImplementedException();
             }
-            
+
             public Task<string> UploadResultFileContentAsync(string fileName, string content)
             {
                 var path = Path.Combine(Directory.GetCurrentDirectory(), fileName);
@@ -26,4 +22,3 @@
             }
         }
     }
-}
