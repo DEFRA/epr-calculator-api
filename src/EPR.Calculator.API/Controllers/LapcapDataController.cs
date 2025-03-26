@@ -50,7 +50,7 @@ namespace EPR.Calculator.API.Controllers
                 try
                 {
                     var oldLapcapData = await this.context.LapcapDataMaster
-                        .Where(x => x.EffectiveTo == null).ToListAsync();
+                        .Where(x => x.EffectiveTo == null && x.ProjectionYearId == request.ParameterYear).ToListAsync();
                     oldLapcapData.ForEach(x => { x.EffectiveTo = DateTime.Now; });
 
                     var financialYear = await this.context.FinancialYears.Where(
