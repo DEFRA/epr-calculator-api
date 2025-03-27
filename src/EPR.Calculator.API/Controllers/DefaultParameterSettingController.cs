@@ -7,6 +7,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -51,7 +52,7 @@ namespace EPR.Calculator.API.Controllers
             {
                 try
                 {
-                    var oldDefaultSettings = await this.context.DefaultParameterSettings.Where(x => x.EffectiveTo == null).ToListAsync();
+                    var oldDefaultSettings = await this.context.DefaultParameterSettings.Where(x => x.EffectiveTo == null && x.ParameterYear.Name == request.ParameterYear).ToListAsync();
                     oldDefaultSettings.ForEach(x => { x.EffectiveTo = DateTime.Now; });
 
                     var financialYear = await this.context.FinancialYears.Where(
@@ -105,8 +106,13 @@ namespace EPR.Calculator.API.Controllers
             try
             {
                 var financialYear = await this.context.FinancialYears.Where(x => x.Name == parameterYear).FirstOrDefaultAsync();
+                if (financialYear == null)
+                {
+                    return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
+                }
+
                 var currentDefaultSetting = await this.context.DefaultParameterSettings
-                    .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.ParameterYear == financialYear);
+                    .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.ParameterYear.Name == financialYear.Name);
 
                 if (currentDefaultSetting == null)
                 {
