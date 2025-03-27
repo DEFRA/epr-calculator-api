@@ -52,20 +52,20 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var year24 = new CalculatorRunFinancialYear
             {
-                Name = "2024-25",
+                Name = "2029-30",
                 Description = ""
             };
             DbContext.Add(year24);
 
             var year25 = new CalculatorRunFinancialYear
             {
-                Name = "2025-26",
+                Name = "2030-31",
                 Description = ""
             };
             DbContext.Add(year25);
 
             var lapcapMaster25 = new LapcapDataMaster {
-                ProjectionYearId = "2024-25",
+                ProjectionYearId = "2029-30",
                 EffectiveFrom = new DateTime(2025, 1, 1),
                 EffectiveTo = null,
                 ProjectionYear = year24,
@@ -78,7 +78,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var lapcapMaster26 = new LapcapDataMaster
             {
-                ProjectionYearId = "2025-26",
+                ProjectionYearId = "2030-31",
                 EffectiveFrom = new DateTime(2025, 1, 1),
                 EffectiveTo = null,
                 ProjectionYear = year25,
@@ -107,7 +107,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var request = new CreateLapcapDataDto
             {
-                ParameterYear = "2024-25",
+                ParameterYear = "2029-30",
                 LapcapFileName = "Some Name",
                 LapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>(),
             };
@@ -118,8 +118,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var lapcapLatest = DbContext.LapcapDataMaster.Where(x => x.EffectiveTo == null).ToList();
             Assert.AreEqual(2, lapcapLatest.Count);
-            Assert.IsNotNull(DbContext.LapcapDataMaster.Single(x => x.ProjectionYearId == "2024-25" && x.EffectiveTo == null));
-            Assert.IsNotNull(DbContext.LapcapDataMaster.Single(x => x.ProjectionYearId == "2025-26" && x.EffectiveTo == null));
+            Assert.IsNotNull(DbContext.LapcapDataMaster.Single(x => x.ProjectionYearId == "2029-30" && x.EffectiveTo == null));
+            Assert.IsNotNull(DbContext.LapcapDataMaster.Single(x => x.ProjectionYearId == "2030-31" && x.EffectiveTo == null));
         }
     }
 }
