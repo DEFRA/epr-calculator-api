@@ -7,6 +7,7 @@ using EPR.Calculator.API.Services;
 using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Azure;
@@ -36,9 +37,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.DbContext.SaveChanges();
 
             var validator = new CreateDefaultParameterDataValidator(this.DbContext);
-            this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator);
+            this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator, new TelemetryClient());
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(this.DbContext);
-            this.LapcapDataController = new LapcapDataController(this.DbContext, lapcapDataValidator);
+            this.LapcapDataController = new LapcapDataController(this.DbContext, lapcapDataValidator, new TelemetryClient());
 
             this.Wrapper = new Mock<IOrgAndPomWrapper>().Object;
             var mockStorageService = new Mock<IStorageService>();
