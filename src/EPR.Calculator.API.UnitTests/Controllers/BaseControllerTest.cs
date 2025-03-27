@@ -32,6 +32,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         protected CalculatorController calculatorController;
         protected CalculatorInternalController calculatorInternalController;
         protected IOrgAndPomWrapper wrapper;
+        private readonly TelemetryClient _telemetryClient = new();
 
         public BaseControllerTest()
         {
@@ -50,9 +51,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             dbContext.SaveChanges();
 
             var validator = new CreateDefaultParameterDataValidator(dbContext);
-            defaultParameterSettingController = new DefaultParameterSettingController(dbContext, validator);
+            defaultParameterSettingController = new DefaultParameterSettingController(dbContext, validator, _telemetryClient);
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(dbContext);
-            lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator);
+            lapcapDataController = new LapcapDataController(dbContext, lapcapDataValidator, _telemetryClient);
 
 
             wrapper = new Mock<IOrgAndPomWrapper>().Object;

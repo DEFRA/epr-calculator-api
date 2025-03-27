@@ -7,6 +7,8 @@ using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.ApplicationInsights;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -15,12 +17,14 @@ namespace EPR.Calculator.API.Controllers
     {
         private readonly ApplicationDBContext _context;
         private readonly ICreateDefaultParameterDataValidator validator;
+        private readonly TelemetryClient _telemetryClient;
 
         public DefaultParameterSettingController(ApplicationDBContext context,
-                ICreateDefaultParameterDataValidator validator)
+                ICreateDefaultParameterDataValidator validator, TelemetryClient telemetryClient)
         {
             this._context = context;
             this.validator = validator;
+            this._telemetryClient = telemetryClient;
         }
 
         [HttpPost]
@@ -28,6 +32,8 @@ namespace EPR.Calculator.API.Controllers
         [Authorize()]
         public async Task<IActionResult> Create([FromBody] CreateDefaultParameterSettingDto request)
         {
+            this._telemetryClient.TrackTrace($"1.Parameter File Name in DefaultParameter API :{request.ParameterFileName}");
+
             var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
@@ -42,6 +48,8 @@ namespace EPR.Calculator.API.Controllers
             var validationResult = validator.Validate(request);
             if (validationResult != null && validationResult.IsInvalid)
             {
+                this._telemetryClient.TrackTrace($"2.Parameter File Name in API :{request.ParameterFileName}");
+                this._telemetryClient.TrackTrace($"3.Validation errors :{validationResult.Errors}");
                 return BadRequest(validationResult.Errors);
             }
 
@@ -80,6 +88,7 @@ namespace EPR.Calculator.API.Controllers
                 catch (Exception exception)
                 {
                     await transaction.RollbackAsync();
+                    this._telemetryClient.TrackTrace($"4.500InternalServerError Exception :{exception}");
                     return StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
             }

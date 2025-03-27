@@ -3,9 +3,11 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Validators;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -14,11 +16,13 @@ namespace EPR.Calculator.API.Controllers
     {
         private readonly ApplicationDBContext context;
         private readonly ILapcapDataValidator validator;
+        private readonly TelemetryClient _telemetryClient;
 
-        public LapcapDataController(ApplicationDBContext context, ILapcapDataValidator validator)
+        public LapcapDataController(ApplicationDBContext context, ILapcapDataValidator validator, TelemetryClient telemetryClient)
         {
             this.context = context;
             this.validator = validator;
+            this._telemetryClient = telemetryClient;
         }
 
         [HttpPost]
@@ -26,6 +30,8 @@ namespace EPR.Calculator.API.Controllers
         [Authorize()]
         public async Task<IActionResult> Create([FromBody] CreateLapcapDataDto request)
         {
+            this._telemetryClient.TrackTrace($"1.Lapcap File Name in lapcapData API :{request.LapcapFileName}");
+
             var claim = User?.Claims?.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
@@ -40,6 +46,8 @@ namespace EPR.Calculator.API.Controllers
             var validationResult = validator.Validate(request);
             if (validationResult.IsInvalid)
             {
+                this._telemetryClient.TrackTrace($"2.Lapcap File Name in lapcapData API :{request.LapcapFileName}");
+                this._telemetryClient.TrackTrace($"3.Validation errors :{validationResult.Errors}");
                 return BadRequest(validationResult.Errors);
             }
             var templateMaster = context.LapcapDataTemplateMaster.ToList();
@@ -79,6 +87,7 @@ namespace EPR.Calculator.API.Controllers
                 catch (Exception exception)
                 {
                     await transaction.RollbackAsync();
+                    this._telemetryClient.TrackTrace($"4.500InternalServerError Exception :{exception}");
                     return StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
             }
