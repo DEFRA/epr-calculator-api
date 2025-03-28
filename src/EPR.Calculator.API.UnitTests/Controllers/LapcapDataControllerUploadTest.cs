@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -98,7 +99,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var lapcapDataValidator = new Mock<ILapcapDataValidator>();
             lapcapDataValidator.Setup(x => x.Validate(It.IsAny<CreateLapcapDataDto>()))
                 .Returns(new LapcapValidationResultDto { IsInvalid = false });
-            this.LapcapDataController = new LapcapDataController(this.DbContext, lapcapDataValidator.Object)
+            this.LapcapDataController = new LapcapDataController(
+                this.DbContext,
+                lapcapDataValidator.Object,
+                new TelemetryClient())
             {
                 ControllerContext = new ControllerContext
                 {
@@ -186,7 +190,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var lapcapDataValidator = new Mock<ILapcapDataValidator>();
             lapcapDataValidator.Setup(x => x.Validate(It.IsAny<CreateLapcapDataDto>()))
                 .Returns(new LapcapValidationResultDto { IsInvalid = false });
-            this.LapcapDataController = new LapcapDataController(this.DbContext, lapcapDataValidator.Object)
+            this.LapcapDataController = new LapcapDataController(
+                this.DbContext,
+                lapcapDataValidator.Object,
+                new TelemetryClient())
             {
                 ControllerContext = new ControllerContext
                 {
