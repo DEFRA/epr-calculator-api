@@ -28,7 +28,16 @@ builder.Services.AddScoped<ICreateDefaultParameterDataValidator, CreateDefaultPa
 builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
 builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IStorageService, BlobStorageService>();
-builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
+}
+else
+{
+    builder.Services.AddScoped<IStorageService, BlobStorageService>();
+}
+
 builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
 
 // Add services to the container.
