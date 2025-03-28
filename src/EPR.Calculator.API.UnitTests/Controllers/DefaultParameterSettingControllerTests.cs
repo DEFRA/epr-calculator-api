@@ -133,18 +133,18 @@ namespace EPR.Calculator.API.Tests.Controllers
         }
 
         [TestMethod]
-        public async Task GetSchemeParameter_ReturnNotFound_WithDefaultSchemeParametersDoesNotExist()
+        public async Task GetSchemeParameter_ReturnBadRequest_WithDefaultSchemeParametersDoesNotExist()
         {
             await this.DataPostCallAsync();
 
-            // Return 404 error if the year does not exist
+            // Return 400 error if the year does not exist
             // Act
             var result = await this.DefaultParameterSettingController.Get("2028-25") as ObjectResult;
 
             // Assert
             var okResult = result as ObjectResult;
             Assert.IsNotNull(okResult);
-            Assert.AreEqual(404, okResult.StatusCode);
+            Assert.AreEqual(400, okResult.StatusCode);
         }
 
         [TestMethod]

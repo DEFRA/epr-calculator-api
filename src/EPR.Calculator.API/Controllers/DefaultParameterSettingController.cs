@@ -114,10 +114,10 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var financialYear = await this.context.FinancialYears.Where(x => x.Name == parameterYear).FirstOrDefaultAsync();
+                var financialYear = await this.context.FinancialYears.Where(x => x.Name == parameterYear).SingleOrDefaultAsync();
                 if (financialYear == null)
                 {
-                    return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
+                    return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status400BadRequest };
                 }
 
                 var currentDefaultSetting = await this.context.DefaultParameterSettings
