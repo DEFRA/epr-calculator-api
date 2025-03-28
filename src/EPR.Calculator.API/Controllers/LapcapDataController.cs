@@ -57,11 +57,19 @@ namespace EPR.Calculator.API.Controllers
                 try
                 {
                     var oldLapcapData = await this.context.LapcapDataMaster
-                        .Where(x => x.EffectiveTo == null).ToListAsync();
+                        .Where(x => x.EffectiveTo == null && x.ProjectionYearId == request.ParameterYear).ToListAsync();
                     oldLapcapData.ForEach(x => { x.EffectiveTo = DateTime.Now; });
 
                     var financialYear = await this.context.FinancialYears.Where(
-                        x => x.Name == request.ParameterYear).SingleAsync();
+                        x => x.Name == request.ParameterYear).SingleOrDefaultAsync();
+
+                    if (financialYear == null)
+                    {
+                        return new ObjectResult("No data available for the specified year. Please check the year and try again.")
+                        {
+                            StatusCode = StatusCodes.Status400BadRequest,
+                        };
+                    }
 
                     var lapcapDataMaster = new LapcapDataMaster
                     {
