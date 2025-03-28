@@ -36,8 +36,7 @@ namespace EPR.Calculator.API.Tests.Controllers
             this.DbContext.SaveChanges();
 
             var validator = new CreateDefaultParameterDataValidator(this.DbContext);
-            this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator);
-            ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(this.DbContext);
+            this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator, new Microsoft.ApplicationInsights.TelemetryClient());
 
             this.FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
             this.DbContext.FinancialYears.Add(this.FinancialYear24_25);

@@ -99,7 +99,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var DefaultParameterValidator = new Mock<ICreateDefaultParameterDataValidator>();
             DefaultParameterValidator.Setup(x => x.Validate(It.IsAny<CreateDefaultParameterSettingDto>()))
                 .Returns(new ValidationResultDto { IsInvalid = false });
-            this.DefaultParameterController = new DefaultParameterSettingController(this.DbContext, DefaultParameterValidator.Object)
+            this.DefaultParameterController = new DefaultParameterSettingController(this.DbContext, DefaultParameterValidator.Object, new Microsoft.ApplicationInsights.TelemetryClient())
             {
                 ControllerContext = new ControllerContext
                 {
