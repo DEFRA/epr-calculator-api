@@ -36,7 +36,7 @@ namespace EPR.Calculator.API.Exceptions
                 Title = "An error occurred while processing your request.",
                 exception.Message,
                 Instance = httpContext.Request.Path,
-                Detail = this.env.IsDevelopment() ? exception.StackTrace : null,
+                Detail = this.env.IsDevelopment() || this.env.EnvironmentName?.ToLower() == "local" ? exception.StackTrace : null,
             };
 
             var errorJson = JsonSerializer.Serialize(errorResponse, Options);

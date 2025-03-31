@@ -15,6 +15,7 @@ using Microsoft.Extensions.Azure;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+var environmentName = builder.Environment.EnvironmentName.ToLower();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -29,7 +30,7 @@ builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
 builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IStorageService, BlobStorageService>();
 
-if (builder.Environment.IsDevelopment())
+if (builder.Environment.IsDevelopment() || environmentName == "local")
 {
     builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
 }
@@ -131,7 +132,7 @@ foreach (string policy in TimeoutPolicies.AllPolicies)
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || environmentName == "local")
 {
     app.UseSwagger();
     app.UseSwaggerUI();
