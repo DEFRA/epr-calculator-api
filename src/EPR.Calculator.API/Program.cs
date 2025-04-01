@@ -28,7 +28,7 @@ builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddScoped<ICreateDefaultParameterDataValidator, CreateDefaultParameterDataValidator>();
 builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
 builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
-builder.Services.AddScoped<IStorageService, BlobStorageService>();
+builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 
 if (builder.Environment.IsDevelopment() || environmentName == "local")
 {

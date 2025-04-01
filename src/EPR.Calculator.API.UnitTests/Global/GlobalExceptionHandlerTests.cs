@@ -70,9 +70,11 @@ namespace EPR.Calculator.API.UnitTests.Global
         }
 
         [TestMethod]
-        public async Task TryHandleAsync_ReturnsExpectedJsonResponse_InDevelopment()
+        [DataRow("Development")]
+        [DataRow("local")]
+        public async Task TryHandleAsync_ReturnsExpectedJsonResponse_InDevelopment_Or_InLocal(string environmentName)
         {
-            this.mockEnv.Setup(env => env.EnvironmentName).Returns(Environments.Development);
+            this.mockEnv.Setup(env => env.EnvironmentName).Returns(environmentName);
             var exception = new Exception("Test exception");
 
             await this.exceptionHandler.TryHandleAsync(this.httpContext, exception, this.cancellationToken);
@@ -87,45 +89,11 @@ namespace EPR.Calculator.API.UnitTests.Global
         }
 
         [TestMethod]
-        public async Task TryHandleAsync_ReturnsExpectedJsonResponse_InLocal()
+        [DataRow("Development")]
+        [DataRow("local")]
+        public async Task TryHandleAsync_ReturnsExpectedJsonResponse_DummyStackTrace_InDevelopment_Or_InLocal(string environmentName)
         {
-            this.mockEnv.Setup(env => env.EnvironmentName).Returns("local");
-            var exception = new Exception("Test exception");
-
-            await this.exceptionHandler.TryHandleAsync(this.httpContext, exception, this.cancellationToken);
-
-            this.httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
-            var jsonResponse = await new StreamReader(this.httpContext.Response.Body).ReadToEndAsync();
-            var responseObject = JsonSerializer.Deserialize<JsonElement>(jsonResponse);
-
-            Assert.AreEqual(StatusCodes.Status500InternalServerError, responseObject.GetProperty("Status").GetInt32());
-            Assert.AreEqual("An error occurred while processing your request.", responseObject.GetProperty("Title").GetString());
-            Assert.AreEqual(exception.Message, responseObject.GetProperty("Message").GetString());
-        }
-
-        [TestMethod]
-        public async Task TryHandleAsync_ReturnsExpectedJsonResponse_DummyStackTrace_InDevelopment()
-        {
-            this.mockEnv.Setup(env => env.EnvironmentName).Returns(Environments.Development);
-            var dummyStackTrace = "at DummyNamespace.DummyClass.DummyMethod() in /DummyFile.cs:line 42";
-            var exception = CreateExceptionWithDummyStackTrace("Test exception with dummy stack trace", dummyStackTrace);
-
-            await this.exceptionHandler.TryHandleAsync(this.httpContext, exception, this.cancellationToken);
-
-            this.httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
-            var jsonResponse = await new StreamReader(this.httpContext.Response.Body).ReadToEndAsync();
-            var responseObject = JsonSerializer.Deserialize<JsonElement>(jsonResponse);
-
-            Assert.AreEqual(StatusCodes.Status500InternalServerError, responseObject.GetProperty("Status").GetInt32());
-            Assert.AreEqual("An error occurred while processing your request.", responseObject.GetProperty("Title").GetString());
-            Assert.AreEqual(exception.Message, responseObject.GetProperty("Message").GetString());
-            Assert.AreEqual(exception.StackTrace, responseObject.GetProperty("Detail").GetString());
-        }
-
-        [TestMethod]
-        public async Task TryHandleAsync_ReturnsExpectedJsonResponse_DummyStackTrace_InLocal()
-        {
-            this.mockEnv.Setup(env => env.EnvironmentName).Returns("local");
+            this.mockEnv.Setup(env => env.EnvironmentName).Returns(environmentName);
             var dummyStackTrace = "at DummyNamespace.DummyClass.DummyMethod() in /DummyFile.cs:line 42";
             var exception = CreateExceptionWithDummyStackTrace("Test exception with dummy stack trace", dummyStackTrace);
 
