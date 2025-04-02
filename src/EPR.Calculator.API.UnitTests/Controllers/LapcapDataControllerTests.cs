@@ -1,36 +1,37 @@
-﻿using EPR.Calculator.API.Constants;
+﻿using System.Security.Claims;
+using System.Security.Principal;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Controllers;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Security.Claims;
-using System.Security.Principal;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
     public class LapcapDataControllerTests : BaseControllerTest
     {
-        //GET API
+        // GET API
         [TestMethod]
         public async Task Get_RequestOkResult_WithLapCapParametersDto_WhenDataExist()
         {
-            var createDefaultParameterDto = CreateDto();
+            var createDefaultParameterDto = this.CreateDto();
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
             var principal = new ClaimsPrincipal(identity);
 
             var context = new DefaultHttpContext()
             {
-                User = principal
+                User = principal,
             };
 
-            lapcapDataController.ControllerContext = new ControllerContext
+            this.LapcapDataController.ControllerContext = new ControllerContext
             {
-                HttpContext = context
+                HttpContext = context,
             };
-            await lapcapDataController.Create(createDefaultParameterDto);
+            await this.LapcapDataController.Create(createDefaultParameterDto);
 
             var tempdateData = new LapCapParameterDto()
             {
@@ -48,10 +49,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.Now,
             };
 
-            //Act
-            var actionResult1 = await lapcapDataController.Get("2024-25") as ObjectResult;
+            // Act
+            var actionResult1 = await this.LapcapDataController.Get("2024-25") as ObjectResult;
 
-            //Assert
+            // Assert
             var okResult = actionResult1 as ObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult.StatusCode);
@@ -67,10 +68,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task Get_InvalidModelState_ReturnsBadRequest()
         {
-            lapcapDataController.ModelState.AddModelError("parameterYear", "Invalid year");
-            //Act
-            var result = await lapcapDataController.Get("2024") as ObjectResult;
-            //Assert
+            this.LapcapDataController.ModelState.AddModelError("parameterYear", "Invalid year");
+
+            // Act
+            var result = await this.LapcapDataController.Get("2024-25") as ObjectResult;
+
+            // Assert
             var okResult = result as ObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(StatusCodes.Status400BadRequest, okResult.StatusCode);
@@ -79,9 +82,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task Get_NoDataForYear_ReturnsNotFound()
         {
-            //Act
-            var result = await lapcapDataController.Get("2028-25") as ObjectResult;
-            //Assert
+            // Act
+            var result = await this.LapcapDataController.Get("2028-25") as ObjectResult;
+
+            // Assert
             var okResult = result as ObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(StatusCodes.Status404NotFound, okResult.StatusCode);
@@ -96,21 +100,23 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var context = new DefaultHttpContext()
             {
-                User = principal
+                User = principal,
             };
 
-            lapcapDataController.ControllerContext = new ControllerContext
+            this.LapcapDataController.ControllerContext = new ControllerContext
             {
-                HttpContext = context
+                HttpContext = context,
             };
-            var createDefaultParameterDto = CreateDto();
-            var task = lapcapDataController.Create(createDefaultParameterDto);
+            var createDefaultParameterDto = this.CreateDto();
+            var task = this.LapcapDataController.Create(createDefaultParameterDto);
             task.Wait();
             var actionResult = task.Result as ObjectResult;
             Assert.AreEqual(201, actionResult?.StatusCode);
 
-            Assert.AreEqual(LapcapDataUniqueReferences.UniqueReferences.Length, dbContext?.LapcapDataDetail.Count());
-            Assert.AreEqual(1, dbContext?.LapcapDataMaster.Count());
+            Assert.AreEqual(
+                LapcapDataUniqueReferences.UniqueReferences.Length,
+                this.DbContext.LapcapDataDetail.Count());
+            Assert.AreEqual(1, this.DbContext.LapcapDataMaster.Count());
         }
 
         [TestMethod]
@@ -122,17 +128,17 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var context = new DefaultHttpContext()
             {
-                User = principal
+                User = principal,
             };
 
-            lapcapDataController.ControllerContext = new ControllerContext
+            this.LapcapDataController.ControllerContext = new ControllerContext
             {
-                HttpContext = context
+                HttpContext = context,
             };
-            var createDefaultParameterDto = CreateDto();
+            var createDefaultParameterDto = this.CreateDto();
             createDefaultParameterDto.ParameterYear = string.Empty;
-            lapcapDataController.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
-            var task = lapcapDataController.Create(createDefaultParameterDto);
+            this.LapcapDataController.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
+            var task = this.LapcapDataController.Create(createDefaultParameterDto);
             task.Wait();
             var actionResult = task.Result as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
@@ -147,16 +153,16 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var context = new DefaultHttpContext()
             {
-                User = principal
+                User = principal,
             };
 
-            lapcapDataController.ControllerContext = new ControllerContext
+            this.LapcapDataController.ControllerContext = new ControllerContext
             {
-                HttpContext = context
+                HttpContext = context,
             };
             var uniqueRef = "ENG-WD";
-            var createDefaultParameterDto = CreateDto([uniqueRef]);
-            var task = lapcapDataController.Create(createDefaultParameterDto);
+            var createDefaultParameterDto = this.CreateDto([uniqueRef]);
+            var task = this.LapcapDataController.Create(createDefaultParameterDto);
             task.Wait();
             var actionResult = task.Result as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
@@ -175,21 +181,22 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var context = new DefaultHttpContext()
             {
-                User = principal
+                User = principal,
             };
 
-            lapcapDataController.ControllerContext = new ControllerContext
+            this.LapcapDataController.ControllerContext = new ControllerContext
             {
-                HttpContext = context
+                HttpContext = context,
             };
-            var createDefaultParameterDto = CreateDto();
+            var createDefaultParameterDto = this.CreateDto();
             var list = new List<LapcapDataTemplateValueDto>(createDefaultParameterDto.LapcapDataTemplateValues);
             if (list != null)
             {
                 list.Add(new LapcapDataTemplateValueDto { CountryName = "England", Material = "Wood", TotalCost = "9" });
                 createDefaultParameterDto.LapcapDataTemplateValues = list.AsEnumerable();
             }
-            var task = lapcapDataController.Create(createDefaultParameterDto);
+
+            var task = this.LapcapDataController.Create(createDefaultParameterDto);
             task.Wait();
             var actionResult = task.Result as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
@@ -198,7 +205,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(1, errors.Count(x => x.Message == "You have entered the total costs for Wood in England more than once"));
         }
 
-        public static CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
+        public CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
         {
             var lapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>();
             var masterData = GetLapcapTemplateMasterData();
@@ -214,13 +221,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     });
                 }
             }
+
             var createDefaultParameterDto = new CreateLapcapDataDto
             {
                 ParameterYear = "2024-25",
                 LapcapDataTemplateValues = lapcapDataTemplateValues,
-                LapcapFileName = "SomeTestFileName"
-
+                LapcapFileName = "SomeTestFileName",
             };
+
             return createDefaultParameterDto;
         }
     }

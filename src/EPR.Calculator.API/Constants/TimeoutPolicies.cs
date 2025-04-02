@@ -12,6 +12,5 @@
         public const string Transpose = "Transpose";
 
         public static string[] AllPolicies => [RpdStatus, PrepareCalcResults, Transpose];
-
     }
 }

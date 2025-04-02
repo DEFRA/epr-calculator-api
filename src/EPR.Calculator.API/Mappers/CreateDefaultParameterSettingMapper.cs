@@ -5,8 +5,9 @@ namespace EPR.Calculator.API.Mappers
 {
     public static class CreateDefaultParameterSettingMapper
     {
-        public static List<DefaultSchemeParametersDto> Map(DefaultParameterSettingMaster defaultParameterSettingMaster,
-                                                           IEnumerable<DefaultParameterTemplateMaster> defaultParameterTemplate)
+        public static List<DefaultSchemeParametersDto> Map(
+            DefaultParameterSettingMaster defaultParameterSettingMaster,
+            IEnumerable<DefaultParameterTemplateMaster> defaultParameterTemplate)
         {
             var result = new List<DefaultSchemeParametersDto>();
 
@@ -16,7 +17,7 @@ namespace EPR.Calculator.API.Mappers
                 var data = new DefaultSchemeParametersDto
                 {
                     Id = item.Id,
-                    ParameterYear = defaultParameterSettingMaster.ParameterYear,
+                    ParameterYear = defaultParameterSettingMaster.ParameterYear.Name,
                     EffectiveFrom = defaultParameterSettingMaster.EffectiveFrom,
                     EffectiveTo = defaultParameterSettingMaster.EffectiveTo,
                     CreatedBy = defaultParameterSettingMaster.CreatedBy,
@@ -25,11 +26,12 @@ namespace EPR.Calculator.API.Mappers
                     ParameterUniqueRef = item.ParameterUniqueReferenceId,
                     ParameterType = selectedTemplate.ParameterType,
                     ParameterCategory = selectedTemplate.ParameterCategory,
-                    ParameterValue = item.ParameterValue
+                    ParameterValue = item.ParameterValue,
                 };
 
                 result.Add(data);
             }
+
             return result;
         }
     }

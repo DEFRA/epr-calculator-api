@@ -8,21 +8,21 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     [TestClass]
     public class PomDataTests
     {
+        public PomDataTests()
+        {
+            this.Fixture = new Fixture();
+            this.TestClass = this.Fixture.Create<PomData>();
+        }
+
         private PomData TestClass { get; }
 
         private IFixture Fixture { get; }
-
-        public PomDataTests()
-        {
-            Fixture = new Fixture();
-            this.TestClass = Fixture.Create<PomData>();
-        }
 
         [TestMethod]
         public void CanSetAndGetOrganisationId()
         {
             // Arrange
-            var testValue = Fixture.Create<int?>();
+            var testValue = this.Fixture.Create<int?>();
 
             // Act
             this.TestClass.OrganisationId = testValue;
@@ -35,7 +35,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetSubsidaryId()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.SubsidaryId = testValue;
@@ -48,7 +48,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetSubmissionPeriod()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.SubmissionPeriod = testValue;
@@ -61,7 +61,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetPackagingActivity()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.PackagingActivity = testValue;
@@ -74,7 +74,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetPackagingType()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.PackagingType = testValue;
@@ -87,7 +87,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetPackagingClass()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.PackagingClass = testValue;
@@ -100,7 +100,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetPackagingMaterial()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.PackagingMaterial = testValue;
@@ -113,7 +113,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetPackagingMaterialWeight()
         {
             // Arrange
-            var testValue = Fixture.Create<double?>();
+            var testValue = this.Fixture.Create<double?>();
 
             // Act
             this.TestClass.PackagingMaterialWeight = testValue;
@@ -126,7 +126,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetSubmissionPeriodDesc()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.SubmissionPeriodDesc = testValue;
@@ -139,7 +139,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetLoadTimeStamp()
         {
             // Arrange
-            var testValue = Fixture.Create<DateTime>();
+            var testValue = this.Fixture.Create<DateTime>();
 
             // Act
             this.TestClass.LoadTimeStamp = testValue;

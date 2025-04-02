@@ -7,21 +7,21 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     [TestClass]
     public class LapcapDataDetailTests
     {
+        public LapcapDataDetailTests()
+        {
+            this.Fixture = new Fixture();
+            this.TestClass = this.Fixture.Create<LapcapDataDetail>();
+        }
+
         private LapcapDataDetail TestClass { get; }
 
         private IFixture Fixture { get; }
-
-        public LapcapDataDetailTests()
-        {
-            Fixture = new Fixture();
-            this.TestClass = Fixture.Create<LapcapDataDetail>();
-        }
 
         [TestMethod]
         public void CanSetAndGetId()
         {
             // Arrange
-            var testValue = Fixture.Create<int>();
+            var testValue = this.Fixture.Create<int>();
 
             // Act
             this.TestClass.Id = testValue;
@@ -34,7 +34,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetLapcapDataMasterId()
         {
             // Arrange
-            var testValue = Fixture.Create<int>();
+            var testValue = this.Fixture.Create<int>();
 
             // Act
             this.TestClass.LapcapDataMasterId = testValue;
@@ -47,7 +47,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetUniqueReference()
         {
             // Arrange
-            var testValue = Fixture.Create<string>();
+            var testValue = this.Fixture.Create<string>();
 
             // Act
             this.TestClass.UniqueReference = testValue;
@@ -60,7 +60,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetTotalCost()
         {
             // Arrange
-            var testValue = Fixture.Create<decimal>();
+            var testValue = this.Fixture.Create<decimal>();
 
             // Act
             this.TestClass.TotalCost = testValue;
@@ -73,7 +73,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetLapcapDataMaster()
         {
             // Arrange
-            var testValue = Fixture.Create<LapcapDataMaster>();
+            var testValue = this.Fixture.Create<LapcapDataMaster>();
 
             // Act
             this.TestClass.LapcapDataMaster = testValue;
@@ -86,7 +86,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetLapcapDataTemplateMaster()
         {
             // Arrange
-            var testValue = Fixture.Create<LapcapDataTemplateMaster>();
+            var testValue = this.Fixture.Create<LapcapDataTemplateMaster>();
 
             // Act
             this.TestClass.LapcapDataTemplateMaster = testValue;

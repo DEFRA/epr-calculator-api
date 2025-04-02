@@ -1,7 +1,4 @@
-﻿using EPR.Calculator.API.Data.DataModels;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace EPR.Calculator.API.Dtos
 {
@@ -13,6 +10,7 @@ namespace EPR.Calculator.API.Dtos
         public required string ParameterType { get; set; }
 
         public required string ParameterCategory { get; set; }
+
         public required string ParameterUnit { get; set; }
 
         public required decimal ParameterValue { get; set; }

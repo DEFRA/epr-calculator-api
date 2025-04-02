@@ -6,7 +6,7 @@ namespace EPR.Calculator.API.Validators
     {
         public ParameterYearValueValidationValidator()
         {
-            RuleFor(x => x).NotEmpty().WithMessage("Parameter Year is required");
+            this.RuleFor(x => x).NotEmpty().WithMessage("Parameter Year is required");
         }
     }
 }

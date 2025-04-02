@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
+
 namespace EPR.Calculator.API.Data.DataModels
 {
     [Table("default_parameter_setting_master")]
@@ -10,8 +10,9 @@ namespace EPR.Calculator.API.Data.DataModels
 
         [Column("parameter_year")]
         [Required]
-        [StringLength(250)]
-        public string ParameterYear { get; set; } = string.Empty;
+        public string ParameterYearId { get; set; }
+
+        public required CalculatorRunFinancialYear ParameterYear { get; set; }
 
         [Column("effective_from")]
         [Required]

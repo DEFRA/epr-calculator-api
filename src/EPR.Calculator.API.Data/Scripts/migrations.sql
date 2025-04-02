@@ -3371,29 +3371,267 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250219143156_GrantExecutePermissionsToStoredProcedures'
+    WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
 )
 BEGIN
-    GRANT EXECUTE ON dbo.CreateRunOrganization TO dbo;
+    DECLARE @var25 sysname;
+    SELECT @var25 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[lapcap_data_master]') AND [c].[name] = N'projection_year');
+    IF @var25 IS NOT NULL EXEC(N'ALTER TABLE [lapcap_data_master] DROP CONSTRAINT [' + @var25 + '];');
+    ALTER TABLE [lapcap_data_master] ALTER COLUMN [projection_year] nvarchar(450) NOT NULL;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250219143156_GrantExecutePermissionsToStoredProcedures'
+    WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
 )
 BEGIN
-    GRANT EXECUTE ON dbo.CreateRunPom TO dbo;
+    DECLARE @var26 sysname;
+    SELECT @var26 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[default_parameter_setting_master]') AND [c].[name] = N'parameter_year');
+    IF @var26 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_setting_master] DROP CONSTRAINT [' + @var26 + '];');
+    ALTER TABLE [default_parameter_setting_master] ALTER COLUMN [parameter_year] nvarchar(450) NOT NULL;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250219143156_GrantExecutePermissionsToStoredProcedures'
+    WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
+)
+BEGIN
+    DECLARE @var27 sysname;
+    SELECT @var27 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'financial_year');
+    IF @var27 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT [' + @var27 + '];');
+    ALTER TABLE [calculator_run] ALTER COLUMN [financial_year] nvarchar(450) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
+)
+BEGIN
+    CREATE TABLE [calculator_run_financial_years] (
+        [financial_Year] nvarchar(450) NOT NULL,
+        [description] nvarchar(max) NULL,
+        CONSTRAINT [PK_calculator_run_financial_years] PRIMARY KEY ([financial_Year])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
+)
+BEGIN
+    CREATE INDEX [IX_lapcap_data_master_projection_year] ON [lapcap_data_master] ([projection_year]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
+)
+BEGIN
+    CREATE INDEX [IX_default_parameter_setting_master_parameter_year] ON [default_parameter_setting_master] ([parameter_year]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_financial_year] ON [calculator_run] ([financial_year]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250219143156_GrantExecutePermissionsToStoredProcedures', N'8.0.7');
+    VALUES (N'20250318112342_AddFinancialYearTable', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250318130352_FinancialYearMigrations'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] ON;
+    EXEC(N'INSERT INTO [calculator_run_financial_years] ([financial_Year], [description])
+    VALUES (N''2023-24'', NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250318130352_FinancialYearMigrations'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] ON;
+    EXEC(N'INSERT INTO [calculator_run_financial_years] ([financial_Year], [description])
+    VALUES (N''2024-25'', NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250318130352_FinancialYearMigrations'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] ON;
+    EXEC(N'INSERT INTO [calculator_run_financial_years] ([financial_Year], [description])
+    VALUES (N''2025-26'', NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250318130352_FinancialYearMigrations'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] ON;
+    EXEC(N'INSERT INTO [calculator_run_financial_years] ([financial_Year], [description])
+    VALUES (N''2026-27'', NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250318130352_FinancialYearMigrations'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] ON;
+    EXEC(N'INSERT INTO [calculator_run_financial_years] ([financial_Year], [description])
+    VALUES (N''2027-28'', NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250318130352_FinancialYearMigrations'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] ON;
+    EXEC(N'INSERT INTO [calculator_run_financial_years] ([financial_Year], [description])
+    VALUES (N''2028-29'', NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250318130352_FinancialYearMigrations'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] ON;
+    EXEC(N'INSERT INTO [calculator_run_financial_years] ([financial_Year], [description])
+    VALUES (N''2029-30'', NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250318130352_FinancialYearMigrations'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] ON;
+    EXEC(N'INSERT INTO [calculator_run_financial_years] ([financial_Year], [description])
+    VALUES (N''2030-31'', NULL)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250318130352_FinancialYearMigrations'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250318130352_FinancialYearMigrations', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250319095159_AddFinancialYearForeignKeys'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD CONSTRAINT [FK_calculator_run_calculator_run_financial_years_financial_year] FOREIGN KEY ([financial_year]) REFERENCES [calculator_run_financial_years] ([financial_Year]) ON DELETE CASCADE;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250319095159_AddFinancialYearForeignKeys'
+)
+BEGIN
+    ALTER TABLE [default_parameter_setting_master] ADD CONSTRAINT [FK_default_parameter_setting_master_calculator_run_financial_years_parameter_year] FOREIGN KEY ([parameter_year]) REFERENCES [calculator_run_financial_years] ([financial_Year]) ON DELETE CASCADE;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250319095159_AddFinancialYearForeignKeys'
+)
+BEGIN
+    ALTER TABLE [lapcap_data_master] ADD CONSTRAINT [FK_lapcap_data_master_calculator_run_financial_years_projection_year] FOREIGN KEY ([projection_year]) REFERENCES [calculator_run_financial_years] ([financial_Year]) ON DELETE CASCADE;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250319095159_AddFinancialYearForeignKeys'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250319095159_AddFinancialYearForeignKeys', N'8.0.7');
 END;
 GO
 

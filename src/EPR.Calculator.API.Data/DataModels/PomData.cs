@@ -1,7 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 
 namespace EPR.Calculator.API.Data.DataModels
 {
@@ -38,7 +36,7 @@ namespace EPR.Calculator.API.Data.DataModels
         public double? PackagingMaterialWeight { get; set; }
 
         [Column("submission_period_desc")]
-        public required string? SubmissionPeriodDesc { get; set; }        
+        public required string? SubmissionPeriodDesc { get; set; }
 
         [Column("load_ts")]
         public required DateTime LoadTimeStamp { get; set; }

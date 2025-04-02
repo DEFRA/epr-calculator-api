@@ -7,13 +7,11 @@ namespace EPR.Calculator.API.Data.DataModels
     [Table("default_parameter_template_master")]
     public class DefaultParameterTemplateMaster
     {
-
         [Column("parameter_unique_ref")]
         [Key]
         [NotNull]
         [StringLength(450)]
         public required string ParameterUniqueReferenceId { get; set; }
-
 
         [Column("parameter_type")]
         [NotNull]

@@ -12,9 +12,9 @@ dotnet ef migrations add AddInitialMigration --startup-project EPR.Calculator.AP
 
 dotnet ef migrations add AddBlogCreatedTimestamp
 
-**** Command to remove a Migration *****
+**** Command to remove latest Migration *****
 
-dotnet ef migrations remove
+dotnet ef migrations remove --verbose --project "EPR.Calculator.API.Data" --startup-project "EPR.Calculator.API" 
 
 **** Listing Migrations *****
 

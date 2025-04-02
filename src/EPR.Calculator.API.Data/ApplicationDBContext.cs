@@ -1,25 +1,18 @@
-﻿using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.DataSeeder;
-using Microsoft.EntityFrameworkCore;
-
-namespace EPR.Calculator.API.Data
+﻿namespace EPR.Calculator.API.Data
 {
+    using EPR.Calculator.API.Data.DataModels;
+    using EPR.Calculator.API.Data.DataSeeder;
+    using Microsoft.EntityFrameworkCore;
+
     public class ApplicationDBContext : DbContext
     {
         public ApplicationDBContext()
         {
         }
 
-        public ApplicationDBContext(DbContextOptions options) : base(options)
+        public ApplicationDBContext(DbContextOptions options)
+            : base(options)
         {
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer();
-            }
         }
 
         public virtual DbSet<DefaultParameterSettingMaster> DefaultParameterSettings { get; set; }
@@ -66,6 +59,15 @@ namespace EPR.Calculator.API.Data
 
         public virtual DbSet<SubmissionPeriodLookup> SubmissionPeriodLookup { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer();
+            }
+        }
+        public virtual DbSet<CalculatorRunFinancialYear> FinancialYears { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -93,7 +95,6 @@ namespace EPR.Calculator.API.Data
             modelBuilder.Entity<CalculatorRunCsvFileMetadata>();
             modelBuilder.Entity<SubmissionPeriodLookup>()
             .HasKey(e => e.SubmissionPeriod);
-            
 
             modelBuilder.Entity<LapcapDataTemplateMaster>()
             .HasMany(e => e.Details)
@@ -183,9 +184,27 @@ namespace EPR.Calculator.API.Data
             .HasMany(e => e.CountryApportionments)
             .WithOne(e => e.Country)
             .HasForeignKey(e => e.CountryId);
-            
+
+            modelBuilder.Entity<CalculatorRunFinancialYear>()
+            .HasMany(e => e.CalculatorRuns)
+            .WithOne(e => e.Financial_Year)
+            .HasForeignKey(e => e.FinancialYearId)
+            .HasPrincipalKey(e => e.Name);
+
+            modelBuilder.Entity<CalculatorRunFinancialYear>()
+            .HasMany(e => e.DefaultParameterSettingMasters)
+            .WithOne(e => e.ParameterYear)
+            .HasForeignKey(e => e.ParameterYearId)
+            .HasPrincipalKey(e => e.Name);
+
+            modelBuilder.Entity<CalculatorRunFinancialYear>()
+            .HasMany(e => e.LapcapDataMasters)
+            .WithOne(e => e.ProjectionYear)
+            .HasForeignKey(e => e.ProjectionYearId)
+            .HasPrincipalKey(e => e.Name);
+
             modelBuilder.Entity<CalculatorRunCsvFileMetadata>().Property(e => e.CalculatorRunId).IsRequired(true);
-            
+
             Seeder.Initialize(modelBuilder);
         }
     }

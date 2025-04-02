@@ -6,7 +6,10 @@ namespace EPR.Calculator.API.Utils
     {
         public static string SanitiseData<T>(T value)
         {
-            if (value == null) return string.Empty;
+            if (value == null)
+            {
+                return string.Empty;
+            }
 
             // If the value is a string, use it directly; otherwise, serialize the object to JSON.
             var stringToSanitise = value is string

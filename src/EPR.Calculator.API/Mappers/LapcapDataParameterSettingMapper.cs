@@ -1,13 +1,13 @@
-﻿
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 
 namespace EPR.Calculator.API.Mappers
 {
     public static class LapcapDataParameterSettingMapper
     {
-        public static List<LapCapParameterDto> Map(LapcapDataMaster lapcapSettingMaster,
-                                                   IEnumerable<LapcapDataTemplateMaster> lapcapDataTemplate)
+        public static List<LapCapParameterDto> Map(
+            LapcapDataMaster lapcapSettingMaster,
+            IEnumerable<LapcapDataTemplateMaster> lapcapDataTemplate)
         {
             var result = new List<LapCapParameterDto>();
 
@@ -17,7 +17,7 @@ namespace EPR.Calculator.API.Mappers
                 var data = new LapCapParameterDto
                 {
                     Id = item.Id,
-                    ProjectionYear = lapcapSettingMaster.ProjectionYear,
+                    ProjectionYear = lapcapSettingMaster.ProjectionYear.Name,
                     CreatedBy = lapcapSettingMaster.CreatedBy,
                     CreatedAt = lapcapSettingMaster.CreatedAt,
                     LapcapDataMasterId = lapcapSettingMaster.Id,
@@ -25,11 +25,12 @@ namespace EPR.Calculator.API.Mappers
                     Country = selectedTemplate.Country,
                     Material = selectedTemplate.Material,
                     TotalCost = item.TotalCost,
-                    EffectiveFrom = lapcapSettingMaster.EffectiveFrom
+                    EffectiveFrom = lapcapSettingMaster.EffectiveFrom,
                 };
 
                 result.Add(data);
             }
+
             return result;
         }
     }

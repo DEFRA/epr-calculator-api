@@ -1,5 +1,4 @@
-﻿using Azure.Messaging.ServiceBus;
-using EPR.Calculator.API.Controllers;
+﻿using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Services;
@@ -7,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -24,33 +22,39 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
         public DownloadResultFileTest()
         {
-            mockStorageService = new Mock<IStorageService>();
-            mockServiceBusService = new Mock<IServiceBusService>();
-            mockConfig = new Mock<IConfiguration>();
+            this.mockStorageService = new Mock<IStorageService>();
+            this.mockServiceBusService = new Mock<IServiceBusService>();
+            this.mockConfig = new Mock<IConfiguration>();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
             context = new ApplicationDBContext(dbContextOptions);
             context.Database.EnsureCreated();
+
+            this.FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
+            this.context.FinancialYears.Add(this.FinancialYear24_25);
+            this.context.SaveChanges();
         }
+
+        private CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
 
         [TestCleanup]
         public void CleanUp()
         {
-            context.Database.EnsureDeleted();
+            this.context.Database.EnsureDeleted();
         }
 
         [TestMethod]
         public async Task DownloadResultFile_ShouldReturnFileResult_WhenFileExists()
         {
             // Arrange
-            var date = new DateTime(2024, 11, 11);
+            var date = new DateTime(2024, 11, 11, 0, 0, 0, DateTimeKind.Unspecified);
             var runId = 1;
             var fileName = "1-Calc RunName_Results File_20241111.csv";
             var blobUri = $"https://example.com/{fileName}";
 
-            context.CalculatorRuns.Add(new CalculatorRun
+            this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",
                 CalculatorRunClassificationId = 2,
@@ -58,29 +62,32 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CreatedBy = "User23",
                 LapcapDataMasterId = 1,
                 DefaultParameterSettingMasterId = 1,
-                Financial_Year = "2024-25"
+                Financial_Year = FinancialYear24_25
             });
 
-            context.CalculatorRunCsvFileMetadata.Add(new CalculatorRunCsvFileMetadata
+            this.context.CalculatorRunCsvFileMetadata.Add(new CalculatorRunCsvFileMetadata
             {
                 CalculatorRunId = runId,
                 FileName = fileName,
-                BlobUri = blobUri
+                BlobUri = blobUri,
             });
 
-            context.SaveChanges();
+            this.context.SaveChanges();
 
             var controller =
-                new CalculatorController(context, mockConfig.Object,
-                    mockStorageService.Object, mockServiceBusService.Object);
+                new CalculatorController(
+                    this.context,
+                    this.mockConfig.Object,
+                    this.mockStorageService.Object,
+                    this.mockServiceBusService.Object);
             var mockResult = new Mock<IResult>();
-            mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(mockResult.Object);
+            this.mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(mockResult.Object);
 
             // Act
             var downloadResultFile = await controller.DownloadResultFile(runId);
 
             // Assert
-            mockStorageService.Verify(x => x.DownloadFile(fileName, blobUri));
+            this.mockStorageService.Verify(x => x.DownloadFile(fileName, blobUri));
             Assert.AreEqual(mockResult.Object, downloadResultFile);
         }
 
@@ -92,38 +99,41 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var fileName = "1-Calc RunName_Results File_20241111.csv";
             var blobUri = $"https://example.com/{fileName}";
 
-            context.CalculatorRuns.Add(new CalculatorRun
+            this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Id = runId,
                 Name = "Calc RunName",
                 CalculatorRunClassificationId = 2,
-                CreatedAt = new DateTime(2024, 11, 11),
+                CreatedAt = new DateTime(2024, 11, 11, 0, 0, 0, DateTimeKind.Unspecified),
                 CreatedBy = "User23",
                 LapcapDataMasterId = 1,
                 DefaultParameterSettingMasterId = 1,
-                Financial_Year = "2024-25"
+                Financial_Year = FinancialYear24_25,
             });
 
-            context.CalculatorRunCsvFileMetadata.Add(new CalculatorRunCsvFileMetadata
+            this.context.CalculatorRunCsvFileMetadata.Add(new CalculatorRunCsvFileMetadata
             {
                 CalculatorRunId = runId,
                 FileName = fileName,
-                BlobUri = blobUri
+                BlobUri = blobUri,
             });
 
-            context.SaveChanges();
+            this.context.SaveChanges();
 
             var controller =
-                new CalculatorController(context, mockConfig.Object,
-                    mockStorageService.Object, mockServiceBusService.Object);
+                new CalculatorController(
+                    this.context,
+                    this.mockConfig.Object,
+                    this.mockStorageService.Object,
+                    this.mockServiceBusService.Object);
             var mockResult = new Mock<IResult>();
-            mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(Results.NotFound(fileName));
+            this.mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(Results.NotFound(fileName));
 
             // Act
             var downloadResultFile = await controller.DownloadResultFile(runId);
 
             // Assert
-            mockStorageService.Verify(x => x.DownloadFile(fileName, blobUri));
+            this.mockStorageService.Verify(x => x.DownloadFile(fileName, blobUri));
             Assert.IsInstanceOfType(downloadResultFile, typeof(NotFound<string>));
             var notFoundObjectResult = (NotFound<string>)downloadResultFile;
             Assert.AreEqual(fileName, notFoundObjectResult.Value);
