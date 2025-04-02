@@ -30,7 +30,7 @@ builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
 builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 
-if (builder.Environment.IsDevelopment() || environmentName == "local")
+if (environmentName == "local")
 {
     builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
 }
