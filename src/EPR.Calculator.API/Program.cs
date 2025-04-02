@@ -30,7 +30,7 @@ builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
 builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 
-if (environmentName == "local")
+if (environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
 {
     builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
 }
@@ -132,7 +132,7 @@ foreach (string policy in TimeoutPolicies.AllPolicies)
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || environmentName == "local")
+if (app.Environment.IsDevelopment() || environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
