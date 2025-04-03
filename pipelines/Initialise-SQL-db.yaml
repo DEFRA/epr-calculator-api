@@ -21,7 +21,6 @@ parameters:
       - DEV12
       - DEV13
       - DEV14
-      - DEV15
   - name: envToDeploy
     displayName: 'Target env to deploy:    (select "development" for DEV1-15)'
     type: string
@@ -31,6 +30,7 @@ parameters:
       - preprod
       - preprod2
       - prod
+      - DEV15      
     default: development
 
   - name: solutionFolder
@@ -59,7 +59,8 @@ variables:
     - template: vars/${{ parameters.envToDeploy }}.yaml
   - ${{ if eq(parameters.envToDeploy, 'prod') }}:
     - template: vars/${{ parameters.envToDeploy }}.yaml
-
+  - ${{ if eq(parameters.envToDeploy, 'dev15') }}:
+    - template: vars/${{ parameters.envToDeploy }}.yaml
 resources:
   repositories:
     - repository: CommonTemplates
