@@ -1,19 +1,24 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace EPR.Calculator.API.Exceptions
 {
     public class GlobalExceptionHandler : IExceptionHandler
     {
-        private readonly ILogger<GlobalExceptionHandler> _logger;
-        private readonly IHostEnvironment _env;
+        private static readonly JsonSerializerOptions Options = new()
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        };
+
+        private readonly ILogger<GlobalExceptionHandler> logger;
+        private readonly IHostEnvironment env;
 
         public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IHostEnvironment env)
         {
-            _logger = logger;
-            _env = env;
+            this.logger = logger;
+            this.env = env;
         }
 
         public async ValueTask<bool> TryHandleAsync(
@@ -21,7 +26,7 @@ namespace EPR.Calculator.API.Exceptions
             Exception exception,
             CancellationToken cancellationToken)
         {
-            _logger.LogError(exception, "An unhandled exception occurred.");
+            this.logger.LogError(exception, "An unhandled exception occurred.");
             httpContext.Response.ContentType = "application/json";
             httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
@@ -31,17 +36,12 @@ namespace EPR.Calculator.API.Exceptions
                 Title = "An error occurred while processing your request.",
                 exception.Message,
                 Instance = httpContext.Request.Path,
-                Detail = _env.IsDevelopment() ? exception.StackTrace : null
+                Detail = this.env.IsDevelopment() ? exception.StackTrace : null,
             };
 
-            var errorJson = JsonSerializer.Serialize(errorResponse, options);
+            var errorJson = JsonSerializer.Serialize(errorResponse, Options);
             await httpContext.Response.WriteAsync(errorJson, cancellationToken: cancellationToken);
             return true;
         }
-
-        private static readonly JsonSerializerOptions options = new()
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
     }
 }

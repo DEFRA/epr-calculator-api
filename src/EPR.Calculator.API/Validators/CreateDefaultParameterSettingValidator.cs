@@ -6,13 +6,21 @@ namespace EPR.Calculator.API.Validators
 {
     public partial class CreateDefaultParameterSettingValidator : AbstractValidator<CreateDefaultParameterSettingDto>
     {
-        public CreateDefaultParameterSettingValidator() 
+        public CreateDefaultParameterSettingValidator()
         {
-            RuleFor(x => x.ParameterYear).NotEmpty().WithMessage((ErrorMessages.YearRequired));
-            RuleFor(x => x.SchemeParameterTemplateValues).NotNull().Must(x => x.Count() == DefaultParameterUniqueReferences.UniqueReferences.Length)
-                .WithMessage((ErrorMessages.SchemeParameterTemplateValuesMissing));
-            RuleFor(x => x.ParameterFileName).NotEmpty().WithMessage(ErrorMessages.FileNameRequired);
-            RuleFor(x => x.ParameterFileName).MaximumLength(256).WithMessage(ErrorMessages.MaxFileNameLength);
+            this.RuleFor(x => x.ParameterYear)
+                .NotEmpty()
+                .WithMessage(ErrorMessages.YearRequired);
+            this.RuleFor(x => x.SchemeParameterTemplateValues)
+                .NotNull()
+                .Must(x => x.Count() == DefaultParameterUniqueReferences.UniqueReferences.Length)
+                .WithMessage(ErrorMessages.SchemeParameterTemplateValuesMissing);
+            this.RuleFor(x => x.ParameterFileName)
+                .NotEmpty()
+                .WithMessage(ErrorMessages.FileNameRequired);
+            this.RuleFor(x => x.ParameterFileName)
+                .MaximumLength(256)
+                .WithMessage(ErrorMessages.MaxFileNameLength);
         }
     }
 }

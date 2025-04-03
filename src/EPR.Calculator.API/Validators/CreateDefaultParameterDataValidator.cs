@@ -5,19 +5,20 @@ using EPR.Calculator.API.Utils;
 
 namespace EPR.Calculator.API.Validators
 {
-
     public class CreateDefaultParameterDataValidator : ICreateDefaultParameterDataValidator
     {
-        private readonly ApplicationDBContext _context;
+        private readonly ApplicationDBContext context;
+
         public CreateDefaultParameterDataValidator(ApplicationDBContext context)
         {
-            _context = context;
+            this.context = context;
         }
+
         public ValidationResultDto Validate(CreateDefaultParameterSettingDto createDefaultParameterSettingDto)
         {
             var validationResult = new ValidationResultDto();
 
-            var errors = ValidateByValues(createDefaultParameterSettingDto);
+            var errors = this.ValidateByValues(createDefaultParameterSettingDto);
             validationResult.Errors.AddRange(errors);
             validationResult.IsInvalid = validationResult.Errors.Count != 0;
             return validationResult;
@@ -25,7 +26,7 @@ namespace EPR.Calculator.API.Validators
 
         private List<CreateDefaultParameterSettingErrorDto> ValidateByValues(CreateDefaultParameterSettingDto createDefaultParameterSettingDto)
         {
-            IEnumerable<DefaultParameterTemplateMaster> defaultTemplateMasterList = this._context.DefaultParameterTemplateMasterList.ToList();
+            IEnumerable<DefaultParameterTemplateMaster> defaultTemplateMasterList = this.context.DefaultParameterTemplateMasterList.ToList();
 
             var errors = new List<CreateDefaultParameterSettingErrorDto>();
             var schemeParameterTemplateValues = createDefaultParameterSettingDto.SchemeParameterTemplateValues;
@@ -51,7 +52,7 @@ namespace EPR.Calculator.API.Validators
                     decimal parameterValue;
                     var matchingTemplate = matchingTemplates.Single();
                     var parameterValueStr = Util.GetParameterValue(defaultParameterTemplateMaster, matchingTemplate.ParameterValue);
-                    if(string.IsNullOrEmpty(parameterValueStr))
+                    if (string.IsNullOrEmpty(parameterValueStr))
                     {
                         var errorMessage = $"{Util.FormattedErrorForEmptyValue(defaultParameterTemplateMaster)}";
                         var error = Util.CreateErrorDto(defaultParameterTemplateMaster, errorMessage);
@@ -78,7 +79,5 @@ namespace EPR.Calculator.API.Validators
 
             return errors;
         }
-
-        
     }
 }

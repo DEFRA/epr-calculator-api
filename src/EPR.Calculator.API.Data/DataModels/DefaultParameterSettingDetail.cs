@@ -1,7 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Data.DataModels
 {
@@ -19,7 +18,7 @@ namespace EPR.Calculator.API.Data.DataModels
         [StringLength(450)]
         public required string ParameterUniqueReferenceId { get; set; }
 
-        public DefaultParameterTemplateMaster? ParameterUniqueReference {  get; set; }
+        public DefaultParameterTemplateMaster? ParameterUniqueReference { get; set; }
 
         [Column("parameter_value")]
         [Precision(18, 3)]
