@@ -15,7 +15,7 @@ using Microsoft.Extensions.Azure;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
-var environmentName = builder.Environment.EnvironmentName.ToLower();
+var environmentName = builder.Environment.EnvironmentName?.ToLower() ?? string.Empty;
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
