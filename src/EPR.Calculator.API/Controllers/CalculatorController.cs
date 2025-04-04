@@ -31,7 +31,6 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRun")]
-        [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
         {
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
@@ -165,7 +164,6 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("calculatorRuns")]
-        [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
         {
             if (!this.ModelState.IsValid)
@@ -200,7 +198,6 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("calculatorRuns/{runId}")]
-        [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> GetCalculatorRun(int runId)
         {
             if (!this.ModelState.IsValid)
@@ -239,7 +236,6 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPut]
         [Route("calculatorRuns")]
-        [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
@@ -297,7 +293,6 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("CheckCalcNameExists/{name}")]
-        [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> GetCalculatorRunByName([FromRoute] string name)
         {
             if (!this.ModelState.IsValid)
@@ -324,7 +319,6 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("DownloadResult/{runId}")]
-        [Authorize(Roles = "SASuperUser")]
         public async Task<IResult> DownloadResultFile(int runId)
         {
             if (!this.ModelState.IsValid)
@@ -351,7 +345,6 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("FinancialYears")]
-        [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> FinancialYears()
         {
             try
