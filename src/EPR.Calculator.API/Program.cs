@@ -40,7 +40,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorizationBuilder()
         .SetFallbackPolicy(new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
-        .RequireRole("SASuperUser")
+        .RequireRole(CommonConstants.SASuperUserRole)
         .Build());
 
 builder.Services.AddControllers();

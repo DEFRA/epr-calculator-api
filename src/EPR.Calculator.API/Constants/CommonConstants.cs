@@ -18,5 +18,6 @@
         public const string PolicyName = "AllowAllOrigins";
         public const string ServiceBusClientName = "calculator";
         public const int SecondaryHeaderMaxColumnSize = 270;
+        public const string SASuperUserRole = "SASuperUser";
     }
 }
