@@ -4,6 +4,7 @@ using Azure.Storage.Blobs;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Exceptions;
+using EPR.Calculator.API.HealthCheck;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
@@ -21,6 +22,7 @@ var environmentName = builder.Environment.EnvironmentName?.ToLower() ?? string.E
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddApplicationInsightsTelemetry();
+builder.Services.AddHealthChecks();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
@@ -143,5 +145,6 @@ app.UseHttpsRedirection();
 app.MapControllers();
 app.UseCors(CommonConstants.PolicyName);
 app.UseRequestTimeouts();
+app.MapHealthChecks("/admin/health", HealthCheckOptionsBuilder.Build()).AllowAnonymous();
 
 await app.RunAsync();
