@@ -32,7 +32,6 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("defaultParameterSetting")]
-        [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> Create([FromBody] CreateDefaultParameterSettingDto request)
         {
             this._telemetryClient.TrackTrace($"1.Parameter File Name in DefaultParameter API :{request.ParameterFileName}");
@@ -104,7 +103,6 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("defaultParameterSetting/{parameterYear}")]
-        [Authorize(Roles = "SASuperUser")]
         public async Task<IActionResult> Get([FromRoute] string parameterYear)
         {
             if (!this.ModelState.IsValid)

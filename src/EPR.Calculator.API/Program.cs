@@ -11,6 +11,7 @@ using EPR.Calculator.API.Wrapper;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.Identity.Web;
@@ -46,7 +47,13 @@ builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
 // Add services to the container.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-builder.Services.AddAuthorization();
+
+// Adding Authorization with Global Policy.
+builder.Services.AddAuthorizationBuilder()
+        .SetFallbackPolicy(new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .RequireRole(CommonConstants.SASuperUserRole)
+        .Build());
 
 builder.Services.AddControllers();
 
@@ -144,6 +151,8 @@ app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.MapControllers();
 app.UseCors(CommonConstants.PolicyName);
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseRequestTimeouts();
 app.MapHealthChecks("/admin/health", HealthCheckOptionsBuilder.Build()).AllowAnonymous();
 
