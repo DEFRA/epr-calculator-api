@@ -149,6 +149,8 @@ app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.MapControllers();
 app.UseCors(CommonConstants.PolicyName);
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseRequestTimeouts();
 
 await app.RunAsync();
