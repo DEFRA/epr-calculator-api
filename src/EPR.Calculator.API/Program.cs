@@ -16,6 +16,7 @@ using Microsoft.Extensions.Azure;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+var environmentName = builder.Environment.EnvironmentName?.ToLower() ?? string.Empty;
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -28,8 +29,17 @@ builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddScoped<ICreateDefaultParameterDataValidator, CreateDefaultParameterDataValidator>();
 builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
 builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
-builder.Services.AddScoped<IStorageService, BlobStorageService>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
+
+if (environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
+{
+    builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
+}
+else
+{
+    builder.Services.AddScoped<IStorageService, BlobStorageService>();
+}
+
 builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
 
 // Add services to the container.
@@ -129,7 +139,7 @@ foreach (string policy in TimeoutPolicies.AllPolicies)
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
