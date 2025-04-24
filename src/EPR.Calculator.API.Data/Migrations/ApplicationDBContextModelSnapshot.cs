@@ -62,7 +62,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("financial_year");
 
-                    b.Property<bool?>("HasBillingFileGenerated")
+                    b.Property<bool>("HasBillingFileGenerated")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);

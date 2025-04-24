@@ -14,7 +14,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 name: "HasBillingFileGenerated",
                 table: "calculator_run",
                 type: "bit",
-                nullable: true,
+                nullable: false,
                 defaultValue: false);
         }
 

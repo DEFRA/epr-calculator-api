@@ -28,7 +28,7 @@
 
         public int? DefaultParameterSettingMasterId { get; set; }
 
-        public bool? HasBillingFileGenerated { get; set; }
+        public bool HasBillingFileGenerated { get; set; }
 
         public CalculatorRunPomDataMaster? CalculatorRunPomDataMaster { get; set; }
 

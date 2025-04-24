@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250424141125_AddingHasBillingFileGeneratedColumn")]
+    [Migration("20250424155648_AddingHasBillingFileGeneratedColumn")]
     partial class AddingHasBillingFileGeneratedColumn
     {
         /// <inheritdoc />
@@ -65,7 +65,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("financial_year");
 
-                    b.Property<bool?>("HasBillingFileGenerated")
+                    b.Property<bool>("HasBillingFileGenerated")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
