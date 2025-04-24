@@ -1,4 +1,5 @@
 using System.Configuration;
+using System.IO.Compression;
 using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.Constants;
@@ -12,6 +13,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.Identity.Web;
@@ -127,7 +129,22 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
 
+builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Fastest;
+});
+
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.SmallestSize;
+});
 // Configure endpoint timeout policies.
 foreach (string policy in TimeoutPolicies.AllPolicies)
 {
@@ -139,6 +156,8 @@ foreach (string policy in TimeoutPolicies.AllPolicies)
 }
 
 var app = builder.Build();
+
+app.UseResponseCompression();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
