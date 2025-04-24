@@ -358,6 +358,49 @@ namespace EPR.Calculator.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Download the calculator run billing file.
+        /// </summary>
+        /// <param name="runId">calculator run id.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        [HttpGet]
+        [Route("DownloadBillingFile/{runId}")]
+        public async Task<IResult> DownloadBillingFile(int runId)
+        {
+            if (!this.ModelState.IsValid)
+            {
+                var badRequest = Results.BadRequest(this.ModelState.Values.SelectMany(x => x.Errors));
+                return badRequest;
+            }
+
+            var hasBillingFileGenerated = true;
+
+            if (!hasBillingFileGenerated)
+            {
+                return Results.NotFound($"Results File does not exist for Run Id {runId}");
+            }
+
+            var csvFileMetadata = await this.context.CalculatorRunCsvFileMetadata.SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId);
+
+            if (csvFileMetadata == null)
+            {
+                return Results.NotFound($"Results File does not exist for Run Id {runId}");
+            }
+
+            try
+            {
+                var runName = csvFileMetadata.CalculatorRun?.Name;
+                var datePart = DateTime.Now.ToString("yyyyMMdd");
+
+                string downloadFileName = $"{runId}-{runName}_Billing File_{datePart}.csv";
+                return await this.storageService.DownloadFile(csvFileMetadata.FileName, csvFileMetadata.BlobUri, downloadFileName);
+            }
+            catch (Exception e)
+            {
+                return Results.Problem(e.Message);
+            }
+        }
+
         private string DataPreChecksBeforeInitialisingCalculatorRun(CalculatorRunFinancialYear financialYear)
         {
             // Get active default parameter settings for the given financial year
