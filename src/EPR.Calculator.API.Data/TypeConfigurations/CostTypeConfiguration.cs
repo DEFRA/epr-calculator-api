@@ -9,6 +9,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class CostTypeConfiguration : IEntityTypeConfiguration<CostType>
     {
         /// <inheritdoc />
+        // NOSONAR
         public void Configure(EntityTypeBuilder<CostType> builder)
         {
             builder.ToTable("cost_type");

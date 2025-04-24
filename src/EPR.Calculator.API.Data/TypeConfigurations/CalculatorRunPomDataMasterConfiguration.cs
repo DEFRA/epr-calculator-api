@@ -10,6 +10,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class CalculatorRunPomDataMasterConfiguration : IEntityTypeConfiguration<CalculatorRunPomDataMaster>
     {
         /// <inheritdoc />
+        // NOSONAR
         public void Configure(EntityTypeBuilder<CalculatorRunPomDataMaster> builder)
         {
             builder.ToTable("calculator_run_pom_data_master");

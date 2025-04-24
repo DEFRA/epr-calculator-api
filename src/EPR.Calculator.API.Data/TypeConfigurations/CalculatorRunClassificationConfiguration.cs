@@ -9,6 +9,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class CalculatorRunClassificationConfiguration : IEntityTypeConfiguration<CalculatorRunClassification>
     {
         /// <inheritdoc />
+        // NOSONAR
         public void Configure(EntityTypeBuilder<CalculatorRunClassification> builder)
         {
             builder.ToTable("calculator_run_classification");

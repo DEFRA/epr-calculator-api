@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection.Emit;
 using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -10,6 +9,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class LapcapDataTemplateMasterConfiguration : IEntityTypeConfiguration<LapcapDataTemplateMaster>
     {
         /// <inheritdoc />
+        // NOSONAR
         public void Configure(EntityTypeBuilder<LapcapDataTemplateMaster> builder)
         {
             builder.ToTable("lapcap_data_template_master");

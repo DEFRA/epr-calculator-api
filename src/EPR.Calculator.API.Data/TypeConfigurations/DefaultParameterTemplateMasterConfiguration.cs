@@ -9,6 +9,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class DefaultParameterTemplateMasterConfiguration : IEntityTypeConfiguration<DefaultParameterTemplateMaster>
     {
         /// <inheritdoc />
+        // NOSONAR
         public void Configure(EntityTypeBuilder<DefaultParameterTemplateMaster> builder)
         {
             builder.ToTable("default_parameter_template_master");

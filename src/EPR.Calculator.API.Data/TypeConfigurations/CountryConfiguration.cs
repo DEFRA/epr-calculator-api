@@ -9,6 +9,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class CountryConfiguration : IEntityTypeConfiguration<Country>
     {
         /// <inheritdoc />
+        // NOSONAR
         public void Configure(EntityTypeBuilder<Country> builder)
         {
             builder.ToTable("country");

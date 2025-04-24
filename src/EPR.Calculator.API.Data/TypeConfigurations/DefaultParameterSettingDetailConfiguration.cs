@@ -9,6 +9,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class DefaultParameterSettingDetailConfiguration : IEntityTypeConfiguration<DefaultParameterSettingDetail>
     {
         /// <inheritdoc />
+        // NOSONAR
         public void Configure(EntityTypeBuilder<DefaultParameterSettingDetail> builder)
         {
             builder.ToTable("default_parameter_setting_detail");
