@@ -9,7 +9,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class PomDataConfiguration : IEntityTypeConfiguration<PomData>
     {
         /// <inheritdoc />
-        // NOSONAR
         public void Configure(EntityTypeBuilder<PomData> builder)
         {
             builder.ToTable("pom_data");

@@ -9,7 +9,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class OrganisationDataConfiguration : IEntityTypeConfiguration<OrganisationData>
     {
         /// <inheritdoc />
-        // NOSONAR
         public void Configure(EntityTypeBuilder<OrganisationData> builder)
         {
             builder.ToTable("organisation_data");

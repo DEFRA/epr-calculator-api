@@ -9,7 +9,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class LapcapDataDetailConfiguration : IEntityTypeConfiguration<LapcapDataDetail>
     {
         /// <inheritdoc />
-        // NOSONAR
         public void Configure(EntityTypeBuilder<LapcapDataDetail> builder)
         {
             builder.ToTable("lapcap_data_detail");

@@ -9,7 +9,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class LapcapDataMasterConfiguration : IEntityTypeConfiguration<LapcapDataMaster>
     {
         /// <inheritdoc />
-        // NOSONAR
         public void Configure(EntityTypeBuilder<LapcapDataMaster> builder)
         {
             builder.ToTable("lapcap_data_master");
@@ -51,7 +50,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.HasMany(e => e.RunDetails)
                    .WithOne(e => e.LapcapDataMaster)
                    .HasForeignKey(e => e.LapcapDataMasterId);
-
         }
     }
 }

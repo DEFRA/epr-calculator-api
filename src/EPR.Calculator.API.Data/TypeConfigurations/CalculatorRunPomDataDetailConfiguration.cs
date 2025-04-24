@@ -9,7 +9,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class CalculatorRunPomDataDetailConfiguration : IEntityTypeConfiguration<CalculatorRunPomDataDetail>
     {
         /// <inheritdoc />
-        // NOSONAR
         public void Configure(EntityTypeBuilder<CalculatorRunPomDataDetail> builder)
         {
             builder.ToTable("calculator_run_pom_data_detail");

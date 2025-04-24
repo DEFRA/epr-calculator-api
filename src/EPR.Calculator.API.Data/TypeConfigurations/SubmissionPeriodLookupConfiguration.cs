@@ -9,7 +9,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class SubmissionPeriodLookupConfiguration : IEntityTypeConfiguration<SubmissionPeriodLookup>
     {
         /// <inheritdoc />
-        // NOSONAR
         public void Configure(EntityTypeBuilder<SubmissionPeriodLookup> builder)
         {
             builder.ToTable("submission_period_lookup");

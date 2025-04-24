@@ -9,7 +9,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class ProducerDetailConfiguration : IEntityTypeConfiguration<ProducerDetail>
     {
         /// <inheritdoc />
-        // NOSONAR
         public void Configure(EntityTypeBuilder<ProducerDetail> builder)
         {
             builder.ToTable("producer_detail");

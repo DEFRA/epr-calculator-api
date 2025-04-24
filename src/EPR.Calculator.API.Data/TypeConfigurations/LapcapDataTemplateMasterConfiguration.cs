@@ -9,7 +9,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class LapcapDataTemplateMasterConfiguration : IEntityTypeConfiguration<LapcapDataTemplateMaster>
     {
         /// <inheritdoc />
-        // NOSONAR
         public void Configure(EntityTypeBuilder<LapcapDataTemplateMaster> builder)
         {
             builder.ToTable("lapcap_data_template_master");

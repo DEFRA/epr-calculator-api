@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection.Emit;
 using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -10,7 +9,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class CalculatorRunOrganisationDataMasterConfiguration : IEntityTypeConfiguration<CalculatorRunOrganisationDataMaster>
     {
         /// <inheritdoc />
-        // NOSONAR
         public void Configure(EntityTypeBuilder<CalculatorRunOrganisationDataMaster> builder)
         {
             builder.ToTable("calculator_run_organization_data_master");

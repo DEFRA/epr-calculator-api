@@ -9,7 +9,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     public class MaterialConfiguration : IEntityTypeConfiguration<Material>
     {
         /// <inheritdoc />
-        // NOSONAR
         public void Configure(EntityTypeBuilder<Material> builder)
         {
             builder.ToTable("material");
