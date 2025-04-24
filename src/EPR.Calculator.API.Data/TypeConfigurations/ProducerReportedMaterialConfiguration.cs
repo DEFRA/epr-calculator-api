@@ -11,7 +11,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
         /// <inheritdoc />
         public void Configure(EntityTypeBuilder<ProducerReportedMaterial> builder)
         {
-
             builder.ToTable("producer_reported_material");
 
             builder.Property(p => p.Id)

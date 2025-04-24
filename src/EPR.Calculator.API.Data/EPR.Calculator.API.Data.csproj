@@ -35,12 +35,12 @@
   </ItemGroup>
   <ItemGroup>
 	  <SonarQubeSetting Include="sonar.coverage.exclusions">
-		  <value>Scripts/*.*,Migrations/*.*,DataSeeder/*.*,DataModels/*.*</value>
+		  <value>Scripts/*.*,Migrations/*.*,DataSeeder/*.*,DataModels/*.*,TypeConfigurations/*.*</value>
 	  </SonarQubeSetting>
   </ItemGroup>
   <ItemGroup>
 	  <SonarQubeSetting Include="sonar.cpd.exclusions">
-		  <Value>Scripts/*.*,Migrations/*.*,DataSeeder/*.*,DataModels/*.*</Value>
+		  <Value>Scripts/*.*,Migrations/*.*,DataSeeder/*.*,DataModels/*.*,TypeConfigurations/*.*</Value>
 	  </SonarQubeSetting>
   </ItemGroup>
 	<ItemGroup>

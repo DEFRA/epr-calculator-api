@@ -6,7 +6,7 @@
 
         public string ParameterYearId { get; set; }
 
-        public virtual CalculatorRunFinancialYear ParameterYear { get; set; }
+        public required CalculatorRunFinancialYear ParameterYear { get; set; }
 
         public DateTime EffectiveFrom { get; set; }
 
