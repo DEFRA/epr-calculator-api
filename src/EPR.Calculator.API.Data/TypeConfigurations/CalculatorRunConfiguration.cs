@@ -70,6 +70,9 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.Property(e => e.DefaultParameterSettingMasterId)
                    .IsRequired(false);
 
+            builder.Property(p => p.HasBillingFileGenerated)
+                  .HasDefaultValue(false);
+
             builder.HasMany(e => e.CountryApportionments)
                    .WithOne(e => e.CalculatorRun)
                    .HasForeignKey(e => e.CalculatorRunId);
