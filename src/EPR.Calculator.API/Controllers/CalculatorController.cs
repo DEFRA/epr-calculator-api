@@ -7,7 +7,7 @@ using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
-using Microsoft.AspNetCore.Authorization;
+using EPR.Calculator.API.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -373,13 +373,6 @@ namespace EPR.Calculator.API.Controllers
                 return badRequest;
             }
 
-            var hasBillingFileGenerated = true;
-
-            if (!hasBillingFileGenerated)
-            {
-                return Results.NotFound($"Results File does not exist for Run Id {runId}");
-            }
-
             var csvFileMetadata = await this.context.CalculatorRunCsvFileMetadata.SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId);
 
             if (csvFileMetadata == null)
@@ -389,10 +382,8 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var runName = csvFileMetadata.CalculatorRun?.Name;
-                var datePart = DateTime.Now.ToString("yyyyMMdd");
-
-                string downloadFileName = $"{runId}-{runName}_Billing File_{datePart}.csv";
+                var runName = csvFileMetadata.CalculatorRun?.Name ?? string.Empty;
+                string downloadFileName = Util.GetBillingDownloadFileName(runId, runName, DateTime.Now);
                 return await this.storageService.DownloadFile(csvFileMetadata.FileName, csvFileMetadata.BlobUri, downloadFileName);
             }
             catch (Exception e)
