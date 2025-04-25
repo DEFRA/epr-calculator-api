@@ -3638,3 +3638,28 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250424155648_AddingHasBillingFileGeneratedColumn'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD [HasBillingFileGenerated] bit NOT NULL DEFAULT CAST(0 AS bit);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250424155648_AddingHasBillingFileGeneratedColumn'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250424155648_AddingHasBillingFileGeneratedColumn', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
