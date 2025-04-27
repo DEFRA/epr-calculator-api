@@ -25,9 +25,8 @@ dotnet ef migrations list
 dotnet ef migrations has-pending-model-changes
 
 **** Creating Migrations for Sql ******
-Should be run in the Data project
 
-dotnet ef migrations script -o  ./Scripts/migrations.sql -i
+dotnet ef migrations script -o  ./EPR.Calculator.API.Data/Scripts/migrations.sql -i --project "EPR.Calculator.API.Data" --startup-project "EPR.Calculator.API" 
 
 ***** Command to Update the migrations on the database *****
 
