@@ -41,31 +41,31 @@ namespace EPR.Calculator.API.Enums
         DELETED = 6,
 
         /// <summary>
-        /// Deleted.
+        /// INITIAL RUN COMPLETED.
         /// </summary>
         [Description("INITIAL RUN COMPLETED")]
         INITIAL_RUN_COMPLETED = 7,
 
         /// <summary>
-        /// Deleted.
+        /// INITIAL RUN.
         /// </summary>
         [Description("INITIAL RUN")]
         INITIAL_RUN = 8,
 
         /// <summary>
-        /// Deleted.
+        /// INTERIM RE-CALCULATION RUN.
         /// </summary>
         [Description("INTERIM RE-CALCULATION RUN")]
         INTERIM_RECALCULATION_RUN = 9,
 
         /// <summary>
-        /// Deleted.
+        /// FINAL RUN.
         /// </summary>
         [Description("FINAL RUN")]
         FINAL_RUN = 10,
 
         /// <summary>
-        /// Deleted.
+        /// FINAL RE-CALCULATION RUN.
         /// </summary>
         [Description("FINAL RE-CALCULATION RUN")]
         FINAL_RECALCULATION_RUN = 11,
