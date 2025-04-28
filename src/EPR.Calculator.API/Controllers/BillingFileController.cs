@@ -20,11 +20,13 @@ namespace EPR.Calculator.API.Controllers
         /// <response code="202">The request has been accepted for processing.</response>
         /// <response code="400">The request is invalid.</response>
         /// <response code="404">The specified resource was not found.</response>
+        /// <response code="422">The request could not be processed due to semantic errors.</response>
         /// <response code="500">An internal server error occurred.</response>
         [HttpPost("generateBillingFile")]
         [ProducesResponseType(StatusCodes.Status202Accepted)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GenerateBillingFile(
             [FromBody][Required] GenerateBillingFileRequestDto generateBillingFileRequestDto,
