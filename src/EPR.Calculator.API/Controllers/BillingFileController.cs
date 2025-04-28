@@ -36,17 +36,15 @@ namespace EPR.Calculator.API.Controllers
             {
                 return this.NotFound(CommonResources.ResourceNotFoundErrorMessage);
             }
-            else
-            {
-                ServiceProcessResponseDto serviceProcessResponseDto = await billingFileService.GenerateBillingFileAsync(
-                    generateBillingFileRequestDto,
-                    cancellationToken).ConfigureAwait(false);
 
-                return new ObjectResult(serviceProcessResponseDto.Message)
-                {
-                    StatusCode = (int)serviceProcessResponseDto.StatusCode,
-                };
-            }
+            ServiceProcessResponseDto serviceProcessResponseDto = await billingFileService.GenerateBillingFileAsync(
+                   generateBillingFileRequestDto,
+                   cancellationToken).ConfigureAwait(false);
+
+            return new ObjectResult(serviceProcessResponseDto.Message)
+            {
+                StatusCode = (int)serviceProcessResponseDto.StatusCode,
+            };
         }
     }
 }
