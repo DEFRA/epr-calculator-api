@@ -74,7 +74,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task GenerateBillingFileAsyncMethod_ShouldReturnAccepted_AndUpdateHasBillingFileGeneratedToTrue_WhenRequestIsValid()
         {
             // Arrange
-            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
+            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.Last();
             GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
             {
                 CalculatorRunId = calculatorRun.Id,
