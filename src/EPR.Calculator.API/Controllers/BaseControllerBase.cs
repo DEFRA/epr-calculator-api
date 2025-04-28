@@ -8,7 +8,7 @@ namespace EPR.Calculator.API.Controllers
     /// </summary>
     [ApiController]
     [Produces("application/json")]
-    [Route("api/v1")]
+    [Route("v1")]
     public abstract class BaseControllerBase : ControllerBase
     {
     }
