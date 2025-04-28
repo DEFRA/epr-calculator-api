@@ -1,17 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace EPR.Calculator.API.Dtos
+﻿namespace EPR.Calculator.API.Dtos
 {
-    public class GenerateBillingFileRequestDto : IValidatableObject
+    /// <summary>
+    /// Represents a request to generate a billing file.
+    /// </summary>
+    public class GenerateBillingFileRequestDto
     {
+        /// <summary>
+        /// Gets or sets the identifier for the calculator run.
+        /// </summary>
+        /// <value>
+        /// The unique identifier of the calculator run associated with the billing file generation.
+        /// </value>
         public int CalculatorRunId { get; set; }
-
-        [Required]
-        public required string BillingFileRequestedBy { get; set; }
-
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -38,8 +38,8 @@ namespace EPR.Calculator.API.Services
             {
                 return new ServiceProcessResponseDto
                 {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    Message = CommonResources.ResourceNotFoundErrorMessage,
+                    StatusCode = HttpStatusCode.UnprocessableContent,
+                    Message = string.Format(CommonResources.GenerateBillingFileAlreadyRequest, generateBillingFileRequestDto.CalculatorRunId),
                 };
             }
             else

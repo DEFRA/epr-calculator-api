@@ -22,7 +22,7 @@ namespace EPR.Calculator.API {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class CommonResources {
+    public class CommonResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace EPR.Calculator.API {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("EPR.Calculator.API.CommonResources", typeof(CommonResources).Assembly);
@@ -51,7 +51,7 @@ namespace EPR.Calculator.API {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -61,9 +61,18 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Generating billing file for this &apos;{0}&apos; run id already requested..
+        /// </summary>
+        public static string GenerateBillingFileAlreadyRequest {
+            get {
+                return ResourceManager.GetString("GenerateBillingFileAlreadyRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Request accepted for processing..
         /// </summary>
-        internal static string RequestAcceptedMessage {
+        public static string RequestAcceptedMessage {
             get {
                 return ResourceManager.GetString("RequestAcceptedMessage", resourceCulture);
             }
@@ -72,7 +81,7 @@ namespace EPR.Calculator.API {
         /// <summary>
         ///   Looks up a localized string similar to The requested resource could not be found..
         /// </summary>
-        internal static string ResourceNotFoundErrorMessage {
+        public static string ResourceNotFoundErrorMessage {
             get {
                 return ResourceManager.GetString("ResourceNotFoundErrorMessage", resourceCulture);
             }

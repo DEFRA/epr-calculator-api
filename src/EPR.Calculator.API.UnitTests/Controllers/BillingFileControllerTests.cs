@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Threading;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services;
@@ -35,7 +34,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
             {
                 CalculatorRunId = calculatorRunId,
-                BillingFileRequestedBy = "TestUser",
             };
             using CancellationTokenSource cancellationTokenSource = new();
 
@@ -75,7 +73,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
             {
                 CalculatorRunId = 101,
-                BillingFileRequestedBy = "TestUser",
             };
             using CancellationTokenSource cancellationTokenSource = new();
             ServiceProcessResponseDto serviceProcessResponseDto = new()
