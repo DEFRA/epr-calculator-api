@@ -25,8 +25,8 @@ namespace EPR.Calculator.API.Enums
         /// <summary>
         /// Play.
         /// </summary>
-        [Description("PLAY")]
-        PLAY = 4,
+        [Description("TEST RUN")]
+        TESTRUN = 4,
 
         /// <summary>
         /// Error.
@@ -39,5 +39,35 @@ namespace EPR.Calculator.API.Enums
         /// </summary>
         [Description("DELETED")]
         DELETED = 6,
+
+        /// <summary>
+        /// Deleted.
+        /// </summary>
+        [Description("INITIAL RUN COMPLETED")]
+        INITIALRUNCOMPLETED = 7,
+
+        /// <summary>
+        /// Deleted.
+        /// </summary>
+        [Description("INITIAL RUN")]
+        INITIALRUN = 8,
+
+        /// <summary>
+        /// Deleted.
+        /// </summary>
+        [Description("INTERIM RE-CALCULATION RUN")]
+        INTERIMRECALCULATIONRUN = 9,
+
+        /// <summary>
+        /// Deleted.
+        /// </summary>
+        [Description("FINAL RUN")]
+        FINALRUN = 10,
+
+        /// <summary>
+        /// Deleted.
+        /// </summary>
+        [Description("FINAL RE-CALCULATION RUN")]
+        FINALRECALCULATIONRUN = 11,
     }
 }
