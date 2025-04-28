@@ -4,7 +4,7 @@ namespace EPR.Calculator.API.Validators
 {
     public class CalculatorRunStatusDataValidator : ICalculatorRunStatusDataValidator
     {
-        public ValidationResultDto Validate(CalculatorRunStatusUpdateDto calculatorRunStatusUpdateDto)
+        public GenericValidationResultDto Validate(CalculatorRunStatusUpdateDto calculatorRunStatusUpdateDto)
         {
             throw new NotImplementedException();
         }
