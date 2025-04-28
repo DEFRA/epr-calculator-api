@@ -27,7 +27,6 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPut]
         [Route("calculatorRuns")]
-        [AllowAnonymous]
         public async Task<IActionResult> PutCalculatorRunStatus(CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
             try
@@ -65,7 +64,7 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
-                calculatorRun.UpdatedAt = DateTime.Now;
+                calculatorRun.UpdatedAt = DateTime.UtcNow;
                 calculatorRun.UpdatedBy = userName;
 
                 this.context.CalculatorRuns.Update(calculatorRun);

@@ -16,11 +16,59 @@ namespace EPR.Calculator.API.Validators
             CalculatorRunClassification classification,
             CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
-            throw new NotImplementedException();
-            //switch(runStatusUpdateDto.ClassificationId)
-            //{
-            //    case Calc
-            //}
+            switch (runStatusUpdateDto.ClassificationId)
+            {
+                case (int)RunClassification.INITIAL_RUN:
+                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.UNCLASSIFIED)
+                    {
+                        return new GenericValidationResultDto
+                        {
+                            IsInvalid = false,
+                        };
+                    }
+
+                    return new GenericValidationResultDto
+                    {
+                        IsInvalid = true,
+                        Errors = new List<string>
+                        {
+                            $"Invalid Classification for {RunClassification.INITIAL_RUN}",
+                        },
+                    };
+                case (int)RunClassification.INITIAL_RUN_COMPLETED:
+                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN
+                        &&
+                        calculatorRun.HasBillingFileGenerated)
+                    {
+                        return new GenericValidationResultDto
+                        {
+                            IsInvalid = false,
+                        };
+                    }
+
+                    return new GenericValidationResultDto
+                    {
+                        IsInvalid = true,
+                        Errors = new List<string>
+                        {
+                            $"Invalid Classification for {RunClassification.INITIAL_RUN_COMPLETED}",
+                        },
+                    };
+                case (int)RunClassification.DELETED:
+                    return new GenericValidationResultDto
+                    {
+                        IsInvalid = false,
+                    };
+                default:
+                    return new GenericValidationResultDto
+                    {
+                        IsInvalid = true,
+                        Errors = new List<string>
+                        {
+                            "Invalid Classification",
+                        },
+                    };
+            }
         }
     }
 }
