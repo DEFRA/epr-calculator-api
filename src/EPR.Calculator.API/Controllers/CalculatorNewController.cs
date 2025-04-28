@@ -57,7 +57,7 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                var validationResult = this.calculatorRunStatusDataValidator.Validate(runStatusUpdateDto);
+                var validationResult = this.calculatorRunStatusDataValidator.Validate(calculatorRun, classification, runStatusUpdateDto);
 
                 if (validationResult.IsInvalid)
                 {
