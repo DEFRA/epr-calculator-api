@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +15,8 @@ namespace EPR.Calculator.API.Services
     /// Initializes a new instance of the <see cref="BillingFileService"/> class.
     /// </remarks>
     /// <param name="applicationDBContext">The database context <seealso cref="ApplicationDBContext"/>.</param>
-    public class BillingFileService(ApplicationDBContext applicationDBContext) : IBillingFileService
+    /// <param name="storageService">The storage service <seealso cref="IStorageService"/>.</param>
+    public class BillingFileService(ApplicationDBContext applicationDBContext, IStorageService storageService) : IBillingFileService
     {
         /// <inheritdoc/>
         public async Task<ServiceProcessResponseDto> GenerateBillingFileAsync(
@@ -22,8 +24,7 @@ namespace EPR.Calculator.API.Services
             CancellationToken cancellationToken)
         {
             CalculatorRun? calculatorRun = await applicationDBContext.CalculatorRuns
-                                                                     .Where(x => x.Id == generateBillingFileRequestDto.CalculatorRunId)
-                                                                     .FirstOrDefaultAsync(cancellationToken)
+                                                                     .FirstOrDefaultAsync(x => x.Id == generateBillingFileRequestDto.CalculatorRunId, cancellationToken)
                                                                      .ConfigureAwait(false);
 
             if (calculatorRun is null)
@@ -32,6 +33,14 @@ namespace EPR.Calculator.API.Services
                 {
                     StatusCode = HttpStatusCode.NotFound,
                     Message = CommonResources.ResourceNotFoundErrorMessage,
+                };
+            }
+            else if (calculatorRun.CalculatorRunClassificationId != (int)RunClassification.INITIAL_RUN)
+            {
+                return new ServiceProcessResponseDto
+                {
+                    StatusCode = HttpStatusCode.UnprocessableContent,
+                    Message = string.Format(CommonResources.NotAValidClassificationStatus, generateBillingFileRequestDto.CalculatorRunId),
                 };
             }
             else if (calculatorRun.HasBillingFileGenerated)
@@ -44,14 +53,40 @@ namespace EPR.Calculator.API.Services
             }
             else
             {
-                calculatorRun.HasBillingFileGenerated = true;
-                await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                CalculatorRunCsvFileMetadata? calculatorRunCsvFileMetadata = await applicationDBContext.CalculatorRunCsvFileMetadata
+                                                                     .FirstOrDefaultAsync(x => x.CalculatorRunId == generateBillingFileRequestDto.CalculatorRunId, cancellationToken)
+                                                                     .ConfigureAwait(false);
 
-                return new ServiceProcessResponseDto
+                if (calculatorRunCsvFileMetadata is null)
                 {
-                    StatusCode = HttpStatusCode.Accepted,
-                    Message = CommonResources.RequestAcceptedMessage,
-                };
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.UnprocessableContent,
+                        Message = string.Format(CommonResources.CsvFileMetadataNotFoundErrorMessage, generateBillingFileRequestDto.CalculatorRunId),
+                    };
+                }
+                else if (!await storageService.IsBlobExistsAsync(
+                    calculatorRunCsvFileMetadata.FileName,
+                    calculatorRunCsvFileMetadata.BlobUri,
+                    cancellationToken).ConfigureAwait(false))
+                {
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.UnprocessableContent,
+                        Message = string.Format(CommonResources.BlobNotFoundErrorMessage, generateBillingFileRequestDto.CalculatorRunId),
+                    };
+                }
+                else
+                {
+                    calculatorRun.HasBillingFileGenerated = true;
+                    await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.Accepted,
+                        Message = CommonResources.RequestAcceptedMessage,
+                    };
+                }
             }
         }
     }

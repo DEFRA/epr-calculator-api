@@ -33,7 +33,37 @@ namespace EPR.Calculator.API.Services
             this.logger = logger;
         }
 
+        /// <inheritdoc/>
         public async Task<IResult> DownloadFile(string fileName, string blobUri)
+        {
+            BlobClient blobClient = this.GetBlobClient(fileName, blobUri);
+
+            if (!await blobClient.ExistsAsync())
+            {
+                return Results.NotFound(fileName);
+            }
+
+            try
+            {
+                var downloadResult = await blobClient.DownloadContentAsync();
+                var content = downloadResult.Value.Content.ToString();
+                return Results.File(Encoding.Unicode.GetBytes(content), OctetStream, fileName);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem($"An error occurred while downloading the file: {ex.Message}");
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> IsBlobExistsAsync(string fileName, string blobUri, CancellationToken cancellationToken)
+        {
+            BlobClient blobClient = this.GetBlobClient(fileName, blobUri);
+
+            return await blobClient.ExistsAsync(cancellationToken);
+        }
+
+        private BlobClient GetBlobClient(string fileName, string blobUri)
         {
             BlobClient? blobClient = null;
 
@@ -54,21 +84,7 @@ namespace EPR.Calculator.API.Services
                 blobClient ??= this.containerClient.GetBlobClient(fileName);
             }
 
-            if (!await blobClient.ExistsAsync())
-            {
-                return Results.NotFound(fileName);
-            }
-
-            try
-            {
-                var downloadResult = await blobClient.DownloadContentAsync();
-                var content = downloadResult.Value.Content.ToString();
-                return Results.File(Encoding.Unicode.GetBytes(content), OctetStream, fileName);
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem($"An error occurred while downloading the file: {ex.Message}");
-            }
+            return blobClient;
         }
     }
 }

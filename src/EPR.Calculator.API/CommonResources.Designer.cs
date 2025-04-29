@@ -61,11 +61,38 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Blob not found for this &apos;{0}&apos; run id to perform requested operation..
+        /// </summary>
+        public static string BlobNotFoundErrorMessage {
+            get {
+                return ResourceManager.GetString("BlobNotFoundErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Result csv file metadata not found for this &apos;{0}&apos; run id to perform requested operation..
+        /// </summary>
+        public static string CsvFileMetadataNotFoundErrorMessage {
+            get {
+                return ResourceManager.GetString("CsvFileMetadataNotFoundErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Generating billing file for this &apos;{0}&apos; run id already requested..
         /// </summary>
         public static string GenerateBillingFileAlreadyRequest {
             get {
                 return ResourceManager.GetString("GenerateBillingFileAlreadyRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Classification status is valid for this &apos;{0}&apos; run id to perform requested operation..
+        /// </summary>
+        public static string NotAValidClassificationStatus {
+            get {
+                return ResourceManager.GetString("NotAValidClassificationStatus", resourceCulture);
             }
         }
         

@@ -117,8 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BlobNotFoundErrorMessage" xml:space="preserve">
+    <value>Blob not found for this '{0}' run id to perform requested operation.</value>
+  </data>
+  <data name="CsvFileMetadataNotFoundErrorMessage" xml:space="preserve">
+    <value>Result csv file metadata not found for this '{0}' run id to perform requested operation.</value>
+  </data>
   <data name="GenerateBillingFileAlreadyRequest" xml:space="preserve">
     <value>Generating billing file for this '{0}' run id already requested.</value>
+  </data>
+  <data name="NotAValidClassificationStatus" xml:space="preserve">
+    <value>Classification status is valid for this '{0}' run id to perform requested operation.</value>
   </data>
   <data name="RequestAcceptedMessage" xml:space="preserve">
     <value>Request accepted for processing.</value>
