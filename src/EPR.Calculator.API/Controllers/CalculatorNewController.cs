@@ -19,7 +19,9 @@ namespace EPR.Calculator.API.Controllers
         /// </summary>
         /// <param name="context">Db Context</param>
         /// <param name="calculatorRunStatusDataValidator">Db Validator</param>
-        public CalculatorNewController(ApplicationDBContext context, ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator)
+        public CalculatorNewController(
+            ApplicationDBContext context,
+            ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator)
         {
             this.context = context;
             this.calculatorRunStatusDataValidator = calculatorRunStatusDataValidator;
@@ -56,11 +58,12 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                var validationResult = this.calculatorRunStatusDataValidator.Validate(calculatorRun, classification, runStatusUpdateDto);
+                var validationResult = this.calculatorRunStatusDataValidator.Validate(calculatorRun, runStatusUpdateDto);
 
                 if (validationResult.IsInvalid)
                 {
-                    return this.BadRequest(validationResult.Errors);
+                    return new ObjectResult(validationResult.Errors)
+                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
                 calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;

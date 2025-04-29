@@ -32,6 +32,7 @@ builder.Services.AddScoped<ICreateDefaultParameterDataValidator, CreateDefaultPa
 builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
 builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
+builder.Services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatusDataValidator>();
 
 if (environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
 {

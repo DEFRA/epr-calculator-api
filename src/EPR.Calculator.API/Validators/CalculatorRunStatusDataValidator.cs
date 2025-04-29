@@ -13,7 +13,6 @@ namespace EPR.Calculator.API.Validators
 
         public GenericValidationResultDto Validate(
             CalculatorRun calculatorRun,
-            CalculatorRunClassification classification,
             CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
             switch (runStatusUpdateDto.ClassificationId)
@@ -55,6 +54,18 @@ namespace EPR.Calculator.API.Validators
                         },
                     };
                 case (int)RunClassification.DELETED:
+                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.DELETED)
+                    {
+                        return new GenericValidationResultDto
+                        {
+                            IsInvalid = true,
+                            Errors = new List<string>
+                            {
+                                $"Invalid Classification for {RunClassification.INITIAL_RUN}",
+                            },
+                        };
+                    }
+
                     return new GenericValidationResultDto
                     {
                         IsInvalid = false,
