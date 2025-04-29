@@ -3638,3 +3638,102 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250424155648_AddingHasBillingFileGeneratedColumn'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD [HasBillingFileGenerated] bit NOT NULL DEFAULT CAST(0 AS bit);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250424155648_AddingHasBillingFileGeneratedColumn'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250424155648_AddingHasBillingFileGeneratedColumn', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250427142501_AddNewRunClassification'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'status', N'created_by') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
+        SET IDENTITY_INSERT [calculator_run_classification] ON;
+    EXEC(N'INSERT INTO [calculator_run_classification] ([status], [created_by])
+    VALUES (N''INITIAL RUN COMPLETED'', N''System User'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'status', N'created_by') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
+        SET IDENTITY_INSERT [calculator_run_classification] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250427142501_AddNewRunClassification'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250427142501_AddNewRunClassification', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250428101935_AddNewRunClassifications'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'status', N'created_by') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
+        SET IDENTITY_INSERT [calculator_run_classification] ON;
+    EXEC(N'INSERT INTO [calculator_run_classification] ([status], [created_by])
+    VALUES (N''INITIAL RUN'', N''Test user''),
+    (N''INTERIM RE-CALCULATION RUN'', N''Test user''),
+    (N''FINAL RUN'', N''Test user''),
+    (N''FINAL RE-CALCULATION RUN'', N''Test user'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'status', N'created_by') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
+        SET IDENTITY_INSERT [calculator_run_classification] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250428101935_AddNewRunClassifications'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [status] = N''TEST RUN''
+    WHERE [id] = 4;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250428101935_AddNewRunClassifications'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250428101935_AddNewRunClassifications', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
