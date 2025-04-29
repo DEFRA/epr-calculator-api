@@ -88,7 +88,7 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Classification status is valid for this &apos;{0}&apos; run id to perform requested operation..
+        ///   Looks up a localized string similar to Classification status is not valid for this &apos;{0}&apos; run id to perform requested operation..
         /// </summary>
         public static string NotAValidClassificationStatus {
             get {

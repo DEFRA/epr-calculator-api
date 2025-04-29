@@ -127,7 +127,7 @@
     <value>Generating billing file for this '{0}' run id already requested.</value>
   </data>
   <data name="NotAValidClassificationStatus" xml:space="preserve">
-    <value>Classification status is valid for this '{0}' run id to perform requested operation.</value>
+    <value>Classification status is not valid for this '{0}' run id to perform requested operation.</value>
   </data>
   <data name="RequestAcceptedMessage" xml:space="preserve">
     <value>Request accepted for processing.</value>
