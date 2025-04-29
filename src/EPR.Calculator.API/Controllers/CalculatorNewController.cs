@@ -1,7 +1,6 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
