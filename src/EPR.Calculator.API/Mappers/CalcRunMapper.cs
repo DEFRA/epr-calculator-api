@@ -15,10 +15,12 @@ namespace EPR.Calculator.API.Mappers
                 CreatedAt = run.CreatedAt,
                 FileExtension = FileExtension,
                 RunName = run.Name ?? string.Empty,
-                UpdatedBy = run.UpdatedAt,
+                UpdatedBy = run.UpdatedBy ?? string.Empty,
+                CreatedBy = run.CreatedBy,
                 UpdatedAt = run.UpdatedAt,
                 RunClassificationId = run.CalculatorRunClassificationId,
                 RunClassificationStatus = classification.Status,
+                FinancialYear = run.Financial_Year.Name,
             };
         }
     }
