@@ -358,6 +358,29 @@ namespace EPR.Calculator.API.Controllers
             }
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("ClassificationByFinancialYear")]
+        public async Task<IActionResult> ClassificationByFinancialYear([FromQuery, Required] string financialYear)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(financialYear) || !this.IsValidFinancialYear(financialYear))
+                {
+                    return this.BadRequest("Invalid financial year format. Expected format: YYYY-YY (e.g., 2024-25).");
+                }
+
+                // mocked options
+                var options = new[] { "Initial run", "Test run" };
+
+                return this.Ok(options);
+            }
+            catch (Exception exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+        }
+
         private string DataPreChecksBeforeInitialisingCalculatorRun(CalculatorRunFinancialYear financialYear)
         {
             // Get active default parameter settings for the given financial year
@@ -402,6 +425,11 @@ namespace EPR.Calculator.API.Controllers
 
             // All good, return empty string
             return string.Empty;
+        }
+
+        private bool IsValidFinancialYear(string financialYear)
+        {
+            return Regex.IsMatch(financialYear, @"^\d{4}-\d{2}$");
         }
     }
 }
