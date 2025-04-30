@@ -464,5 +464,52 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsInstanceOfType<IEnumerable<FinancialYearDto>>(resultList);
             Assert.IsTrue(resultList?.Single().Name == "2024-25");
         }
+
+        [TestMethod]
+        public async Task ClassificationByFinancialYear_Returns_Options_For_Valid_FinancialYear()
+        {
+            // Arrange
+            var financialYear = "2024-25";
+
+            // Act
+            var actionResult = await this.CalculatorController.ClassificationByFinancialYear(financialYear) as ObjectResult;
+
+            // Assert
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(StatusCodes.Status200OK, actionResult.StatusCode);
+            var result = actionResult.Value as string[];
+            Assert.IsNotNull(result);
+            CollectionAssert.AreEqual(new[] { "Initial run", "Test run" }, result);
+        }
+
+        [TestMethod]
+        public async Task ClassificationByFinancialYear_Returns_BadRequest_For_Invalid_FinancialYear()
+        {
+            // Arrange
+            var financialYear = "2025-2026"; // Invalid format
+
+            // Act
+            var actionResult = await this.CalculatorController.ClassificationByFinancialYear(financialYear) as ObjectResult;
+
+            // Assert
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(StatusCodes.Status400BadRequest, actionResult.StatusCode);
+            Assert.AreEqual("Invalid financial year format. Expected format: YYYY-YY (e.g., 2024-25).", actionResult.Value);
+        }
+
+        [TestMethod]
+        public async Task ClassificationByFinancialYear_Returns_BadRequest_For_Missing_FinancialYear()
+        {
+            // Arrange
+            string financialYear = null; // Missing input
+
+            // Act
+            var actionResult = await this.CalculatorController.ClassificationByFinancialYear(financialYear) as ObjectResult;
+
+            // Assert
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(StatusCodes.Status400BadRequest, actionResult.StatusCode);
+            Assert.AreEqual("Invalid financial year format. Expected format: YYYY-YY (e.g., 2024-25).", actionResult.Value);
+        }
     }
 }

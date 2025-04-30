@@ -359,7 +359,6 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         [Route("ClassificationByFinancialYear")]
         public async Task<IActionResult> ClassificationByFinancialYear([FromQuery, Required] string financialYear)
         {
