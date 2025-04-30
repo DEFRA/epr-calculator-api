@@ -128,7 +128,6 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
-builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
 // Configure endpoint timeout policies.
 foreach (string policy in TimeoutPolicies.AllPolicies)
