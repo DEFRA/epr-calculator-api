@@ -494,7 +494,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // Assert
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(StatusCodes.Status400BadRequest, actionResult.StatusCode);
-            Assert.AreEqual("Invalid financial year format. Expected format: YYYY-YY (e.g., 2024-25).", actionResult.Value);
+            Assert.AreEqual("Financial year not found. Expected format: YYYY-YY (e.g., 2024-25).", actionResult.Value);
         }
 
         [TestMethod]
@@ -509,7 +509,22 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // Assert
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(StatusCodes.Status400BadRequest, actionResult.StatusCode);
-            Assert.AreEqual("Invalid financial year format. Expected format: YYYY-YY (e.g., 2024-25).", actionResult.Value);
+            Assert.AreEqual("Financial year not found. Expected format: YYYY-YY (e.g., 2024-25).", actionResult.Value);
+        }
+
+        [TestMethod]
+        public async Task IsValidFinancialYear_Returns_False_For_Nonexistent_FinancialYear()
+        {
+            // Arrange
+            var financialYear = "2026-24"; // Valid format but not in the database
+
+            // Act
+            var actionResult = await this.CalculatorController.ClassificationByFinancialYear(financialYear) as ObjectResult;
+
+            // Assert
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(StatusCodes.Status400BadRequest, actionResult.StatusCode);
+            Assert.AreEqual("Financial year not found. Expected format: YYYY-YY (e.g., 2024-25).", actionResult.Value);
         }
     }
 }

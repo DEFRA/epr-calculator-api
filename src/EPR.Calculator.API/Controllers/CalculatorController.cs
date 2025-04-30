@@ -361,20 +361,28 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("ClassificationByFinancialYear")]
-        public async Task<IActionResult> ClassificationByFinancialYear([FromQuery, Required] string financialYear)
+        [AllowAnonymous]
+        [Route("ClassificationByFinancialYear/{runId}")]
+        public async Task<IActionResult> ClassificationByFinancialYear(int runId, [FromQuery, Required] string financialYear)
         {
             try
             {
                 if (string.IsNullOrEmpty(financialYear) || !this.IsValidFinancialYear(financialYear))
                 {
-                    return this.BadRequest("Invalid financial year format. Expected format: YYYY-YY (e.g., 2024-25).");
+                    return this.BadRequest("Financial year not found. Expected format: YYYY-YY (e.g., 2024-25).");
                 }
 
-                // mocked options
-                var options = new[] { "Initial run", "Test run" };
+                var classifications = await this.context.CalculatorRunClassifications
+                    .Where(c => c.Status == "Initial Run" || c.Status == "Test Run")
+                    .Select(c => c.Status)
+                    .ToListAsync();
 
-                return this.Ok(options);
+                if (!classifications.Any())
+                {
+                    return this.NotFound("No classifications found.");
+                }
+
+                return this.Ok(classifications);
             }
             catch (Exception exception)
             {
@@ -430,7 +438,10 @@ namespace EPR.Calculator.API.Controllers
 
         private bool IsValidFinancialYear(string financialYear)
         {
-            return Regex.IsMatch(financialYear, @"^\d{4}-\d{2}$");
+            var matchesRegex = Regex.IsMatch(financialYear, @"^\d{4}-\d{2}$");
+            var dbYear = this.context.FinancialYears.SingleOrDefault(y => y.Name == financialYear);
+
+            return matchesRegex && dbYear != null;
         }
     }
 }
