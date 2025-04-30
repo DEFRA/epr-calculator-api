@@ -60,6 +60,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.context.SaveChanges();
         }
 
+        [TestCleanup]
+        public void CleanUp()
+        {
+            this.context.Database.EnsureDeleted();
+        }
+
         [TestMethod]
         public void PutCalculatorRunStatus()
         {
