@@ -1,3 +1,4 @@
+﻿using System.ComponentModel.DataAnnotations;
 ﻿using System.Configuration;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
