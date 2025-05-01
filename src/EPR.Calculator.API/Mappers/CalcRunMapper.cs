@@ -20,7 +20,7 @@ namespace EPR.Calculator.API.Mappers
                 UpdatedAt = run.UpdatedAt,
                 RunClassificationId = run.CalculatorRunClassificationId,
                 RunClassificationStatus = classification.Status,
-                FinancialYear = run.Financial_Year.Name,
+                FinancialYear = run.FinancialYearId,
             };
         }
     }
