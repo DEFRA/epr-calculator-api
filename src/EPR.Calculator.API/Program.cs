@@ -1,4 +1,5 @@
 using System.Configuration;
+using System.Reflection;
 using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.Constants;
@@ -128,6 +129,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
 // Configure endpoint timeout policies.
 foreach (string policy in TimeoutPolicies.AllPolicies)
