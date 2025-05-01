@@ -1,4 +1,5 @@
 using System.Configuration;
+using System.Reflection;
 using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.Constants;
@@ -34,6 +35,7 @@ builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
 builder.Services.AddScoped<ICalcFinancialYearRequestDtoDataValidator, CalcFinancialYearRequestDtoDataValidator>();
 builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
+builder.Services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatusDataValidator>();
 
 if (environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
 {
@@ -129,6 +131,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
 // Configure endpoint timeout policies.
 foreach (string policy in TimeoutPolicies.AllPolicies)
