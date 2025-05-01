@@ -81,7 +81,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(date, run.CreatedAt);
             Assert.AreEqual(2, run.RunClassificationId);
             Assert.IsNull(run.UpdatedAt);
-            Assert.AreEqual(run.UpdatedBy, string.Empty);
+            Assert.IsNull(run.UpdatedBy);
         }
 
         [TestMethod]
