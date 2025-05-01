@@ -147,5 +147,17 @@ namespace EPR.Calculator.API.UnitTests.Utils
             var sqlString = Util.GetFormattedSqlString("procedureName", runId, calendarYear, createdBy);
             Assert.AreEqual($"exec procedureName @RunId ={runId}, @calendarYear = {calendarYear}, @createdBy = {createdBy}", sqlString.ToString());
         }
+
+        [TestMethod]
+        public void GetBillingDownloadFileNameTest()
+        {
+            var runId = 21;
+            var runName = "calcutor run test";
+            var dateTime = DateTime.Now;
+            var dateTimePart = dateTime.ToString("yyyyMMdd");
+
+            var resultString = Util.GetBillingDownloadFileName(runId, runName, dateTime);
+            Assert.AreEqual($"{runId}-{runName}_Billing File_{dateTimePart}.csv", resultString);
+        }
     }
 }

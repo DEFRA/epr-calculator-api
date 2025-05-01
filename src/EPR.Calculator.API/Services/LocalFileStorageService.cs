@@ -20,5 +20,10 @@
             {
                 throw new NotImplementedException();
             }
+
+            public Task<IResult> DownloadFile(string fileName, string blobUri, string downLoadFileName)
+            {
+                throw new NotImplementedException();
+            }
         }
     }

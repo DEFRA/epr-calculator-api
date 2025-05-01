@@ -109,5 +109,56 @@ namespace EPR.Calculator.API.UnitTests.Services
             Assert.IsNotNull(notFoundResult);
             Assert.AreEqual(fileName, notFoundResult.Value);
         }
+
+        [TestMethod]
+        public async Task DownloadFile_WithRequestedDownLoadFileName_ShouldReturnFileResult_WhenFileExists()
+        {
+            // Arrange
+            var fileName = "test.txt";
+            var downLoadFileName = "downloadfile.txt";
+            var blobUri = "https://example.com/test.txt";
+            var content = "test content";
+            var binaryData = BinaryData.FromString(content);
+            var downloadDetails = BlobsModelFactory.BlobDownloadDetails(
+                contentLength: content.Length,
+                contentType: "application/octet-stream");
+
+            var downloadResult = BlobsModelFactory.BlobDownloadResult(
+                content: binaryData,
+                details: downloadDetails);
+
+            this.mockBlobClient.Setup(x => x.ExistsAsync(default)).ReturnsAsync(Response.FromValue(true, null!));
+            this.mockBlobClient.Setup(x => x.DownloadContentAsync()).ReturnsAsync(Response.FromValue(downloadResult, null!));
+            this.mockBlobClient.Setup(x => x.Uri).Returns(new Uri(blobUri));
+            blobUri = string.Empty;
+
+            // Act
+            var result = await this.blobStorageService.DownloadFile(fileName, blobUri, downLoadFileName);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(FileContentHttpResult));
+            var fileContentResult = (FileContentHttpResult)result;
+            Assert.AreEqual("application/octet-stream", fileContentResult.ContentType);
+            Assert.AreEqual(downLoadFileName, fileContentResult.FileDownloadName);
+        }
+
+        [TestMethod]
+        public async Task DownloadFile_WithRequestedDownLoadFileName_ShouldReturnNotFound_WhenFileDoesNotExist()
+        {
+            // Arrange
+            var fileName = "test.txt";
+            var downLoadFileName = "downloadfile.txt";
+            var blobUri = string.Empty;
+            this.mockBlobClient.Setup(x => x.ExistsAsync(default)).ReturnsAsync(Response.FromValue(false, null!));
+
+            // Act
+            var result = await this.blobStorageService.DownloadFile(fileName, blobUri,downLoadFileName);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(NotFound<string>));
+            var notFoundResult = result as NotFound<string>;
+            Assert.IsNotNull(notFoundResult);
+            Assert.AreEqual(fileName, notFoundResult.Value);
+        }
     }
 }

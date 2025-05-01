@@ -35,6 +35,16 @@ namespace EPR.Calculator.API.Services
 
         public async Task<IResult> DownloadFile(string fileName, string blobUri)
         {
+            return await this.Download(fileName, blobUri, null);
+        }
+
+        public async Task<IResult> DownloadFile(string fileName, string blobUri, string downloadFileName)
+        {
+            return await this.Download(fileName, blobUri, downloadFileName);
+        }
+
+        private async Task<IResult> Download(string fileName, string blobUri, string? downloadFileName = default)
+        {
             BlobClient? blobClient = null;
 
             if (!string.IsNullOrEmpty(blobUri))
@@ -63,7 +73,8 @@ namespace EPR.Calculator.API.Services
             {
                 var downloadResult = await blobClient.DownloadContentAsync();
                 var content = downloadResult.Value.Content.ToString();
-                return Results.File(Encoding.Unicode.GetBytes(content), OctetStream, fileName);
+                var destinationFileName = downloadFileName ?? fileName;
+                return Results.File(Encoding.Unicode.GetBytes(content), OctetStream, destinationFileName);
             }
             catch (Exception ex)
             {

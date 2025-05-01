@@ -7,7 +7,7 @@ using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
-using Microsoft.AspNetCore.Authorization;
+using EPR.Calculator.API.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -355,6 +355,40 @@ namespace EPR.Calculator.API.Controllers
             catch (Exception exception)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+        }
+
+        /// <summary>
+        /// Download the calculator run billing file.
+        /// </summary>
+        /// <param name="runId">calculator run id.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        [HttpGet]
+        [Route("DownloadBillingFile/{runId}")]
+        public async Task<IResult> DownloadBillingFile(int runId)
+        {
+            if (!this.ModelState.IsValid)
+            {
+                var badRequest = Results.BadRequest(this.ModelState.Values.SelectMany(x => x.Errors));
+                return badRequest;
+            }
+
+            var csvFileMetadata = await this.context.CalculatorRunCsvFileMetadata.SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId);
+
+            if (csvFileMetadata == null)
+            {
+                return Results.NotFound($"Results File does not exist for Run Id {runId}");
+            }
+
+            try
+            {
+                var runName = csvFileMetadata.CalculatorRun?.Name ?? string.Empty;
+                string downloadFileName = Util.GetBillingDownloadFileName(runId, runName, DateTime.Now);
+                return await this.storageService.DownloadFile(csvFileMetadata.FileName, csvFileMetadata.BlobUri, downloadFileName);
+            }
+            catch (Exception e)
+            {
+                return Results.Problem(e.Message);
             }
         }
 
