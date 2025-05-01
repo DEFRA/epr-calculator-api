@@ -9,6 +9,7 @@ using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,13 +23,20 @@ namespace EPR.Calculator.API.Controllers
         private readonly IConfiguration configuration;
         private readonly IStorageService storageService;
         private readonly IServiceBusService serviceBusService;
+        private readonly ICalcFinancialYearRequestDtoDataValidator validator;
 
-        public CalculatorController(ApplicationDBContext context, IConfiguration configuration, IStorageService storageService, IServiceBusService serviceBusService)
+        public CalculatorController(
+            ApplicationDBContext context,
+            IConfiguration configuration,
+            IStorageService storageService,
+            IServiceBusService serviceBusService,
+            ICalcFinancialYearRequestDtoDataValidator validator)
         {
             this.context = context;
             this.configuration = configuration;
             this.storageService = storageService;
             this.serviceBusService = serviceBusService;
+            this.validator = validator;
         }
 
         [HttpPost]
@@ -361,14 +369,20 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("ClassificationByFinancialYear/{runId}")]
-        public async Task<IActionResult> ClassificationByFinancialYear(int runId, [FromQuery, Required] string financialYear)
+        [Route("ClassificationByFinancialYear")]
+        public async Task<IActionResult> ClassificationByFinancialYear([FromQuery] CalcFinancialYearRequestDto request)
         {
             try
             {
-                if (string.IsNullOrEmpty(financialYear) || !this.IsValidFinancialYear(financialYear))
+                if (!this.ModelState.IsValid)
                 {
-                    return this.BadRequest("Financial year not found. Expected format: YYYY-YY (e.g., 2024-25).");
+                    return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
+                }
+
+                var validationResult = this.validator.Validate(request);
+                if (validationResult.IsInvalid)
+                {
+                    return this.BadRequest(validationResult.Errors);
                 }
 
                 var classifications = await this.context.CalculatorRunClassifications
@@ -433,14 +447,6 @@ namespace EPR.Calculator.API.Controllers
 
             // All good, return empty string
             return string.Empty;
-        }
-
-        private bool IsValidFinancialYear(string financialYear)
-        {
-            var matchesRegex = Regex.IsMatch(financialYear, @"^\d{4}-\d{2}$");
-            var dbYear = this.context.FinancialYears.SingleOrDefault(y => y.Name == financialYear);
-
-            return matchesRegex && dbYear != null;
         }
     }
 }

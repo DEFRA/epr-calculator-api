@@ -4,6 +4,6 @@ namespace EPR.Calculator.API.Validators
 {
     public interface ICreateDefaultParameterDataValidator
     {
-        ValidationResultDto Validate(CreateDefaultParameterSettingDto createDefaultParameterSettingDto);
+        ValidationResultDto<CreateDefaultParameterSettingErrorDto> Validate(CreateDefaultParameterSettingDto createDefaultParameterSettingDto);
     }
 }

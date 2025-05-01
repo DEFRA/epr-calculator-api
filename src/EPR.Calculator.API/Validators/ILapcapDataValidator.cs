@@ -4,6 +4,6 @@ namespace EPR.Calculator.API.Validators
 {
     public interface ILapcapDataValidator
     {
-        LapcapValidationResultDto Validate(CreateLapcapDataDto createLapcapDataDto);
+        ValidationResultDto<CreateLapcapDataErrorDto> Validate(CreateLapcapDataDto createLapcapDataDto);
     }
 }

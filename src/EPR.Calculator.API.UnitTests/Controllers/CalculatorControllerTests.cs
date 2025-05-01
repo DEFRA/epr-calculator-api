@@ -6,6 +6,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using System.Threading.Tasks;
     using AutoFixture;
     using EPR.Calculator.API.Controllers;
+    using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.Dtos;
     using EPR.Calculator.API.Services;
@@ -223,13 +224,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var mockServiceBusService = new Mock<IServiceBusService>();
             var mockStorageService = new Mock<IStorageService>();
+            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
 
             this.CalculatorController =
                 new CalculatorController(
                     this.DbContext,
                     configs,
                     mockStorageService.Object,
-                    mockServiceBusService.Object);
+                    mockServiceBusService.Object,
+                    mockValidator.Object);
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -289,8 +292,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var mockServiceBusService = new Mock<IServiceBusService>();
             var mockStorageService = new Mock<IStorageService>();
+            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
             this.CalculatorController =
-                new CalculatorController(this.DbContext, configs, mockStorageService.Object, mockServiceBusService.Object);
+                new CalculatorController(
+                    this.DbContext,
+                    configs,
+                    mockStorageService.Object,
+                    mockServiceBusService.Object,
+                    mockValidator.Object);
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -470,16 +479,33 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Arrange
             var financialYear = "2024-25";
+            var request = new CalcFinancialYearRequestDto { FinancialYear = financialYear };
+
+            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
+            mockValidator
+                .Setup(v => v.Validate(request))
+                .Returns(new ValidationResultDto<ErrorDto> { IsInvalid = false });
+
+            var individualCalcController = new CalculatorController(
+                this.DbContext,
+                ConfigurationItems.GetConfigurationValues(),
+                Mock.Of<IStorageService>(),
+                Mock.Of<IServiceBusService>(),
+                mockValidator.Object);
+
+            this.DbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification { Status = "Initial Run" });
+            this.DbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification { Status = "Test Run" });
+            this.DbContext.SaveChanges();
 
             // Act
-            var actionResult = await this.CalculatorController.ClassificationByFinancialYear(financialYear) as ObjectResult;
+            var actionResult = await individualCalcController.ClassificationByFinancialYear(request) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(StatusCodes.Status200OK, actionResult.StatusCode);
-            var result = actionResult.Value as string[];
+            var result = actionResult.Value as List<string>;
             Assert.IsNotNull(result);
-            CollectionAssert.AreEqual(new[] { "Initial run", "Test run" }, result);
+            CollectionAssert.AreEquivalent(new[] { "Initial Run", "Test Run" }, result);
         }
 
         [TestMethod]
@@ -487,44 +513,89 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Arrange
             var financialYear = "2025-2026"; // Invalid format
+            var request = new CalcFinancialYearRequestDto { FinancialYear = financialYear };
+
+            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
+            mockValidator
+                .Setup(v => v.Validate(request))
+                .Returns(new ValidationResultDto<ErrorDto>
+                {
+                    IsInvalid = true,
+                    Errors = new List<ErrorDto> { new ErrorDto { Message = "Invalid financial year format." } }
+                });
+
+            var individualCalcController = new CalculatorController(
+                this.DbContext,
+                ConfigurationItems.GetConfigurationValues(),
+                Mock.Of<IStorageService>(),
+                Mock.Of<IServiceBusService>(),
+                mockValidator.Object);
 
             // Act
-            var actionResult = await this.CalculatorController.ClassificationByFinancialYear(financialYear) as ObjectResult;
+            var actionResult = await individualCalcController.ClassificationByFinancialYear(request) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(StatusCodes.Status400BadRequest, actionResult.StatusCode);
-            Assert.AreEqual("Financial year not found. Expected format: YYYY-YY (e.g., 2024-25).", actionResult.Value);
+            var errors = actionResult.Value as List<ErrorDto>;
+            Assert.IsNotNull(errors);
+            Assert.AreEqual("Invalid financial year format.", errors.First().Message);
         }
 
         [TestMethod]
-        public async Task ClassificationByFinancialYear_Returns_BadRequest_For_Missing_FinancialYear()
+        public async Task ClassificationByFinancialYear_Returns_NotFound_When_No_Classifications()
         {
             // Arrange
-            string financialYear = null; // Missing input
+            var financialYear = "2024-25";
+            var request = new CalcFinancialYearRequestDto { FinancialYear = financialYear };
+
+            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
+            mockValidator
+                .Setup(v => v.Validate(request))
+                .Returns(new ValidationResultDto<ErrorDto> { IsInvalid = false });
+
+            var individualCalcController = new CalculatorController(
+                this.DbContext,
+                ConfigurationItems.GetConfigurationValues(),
+                Mock.Of<IStorageService>(),
+                Mock.Of<IServiceBusService>(),
+                mockValidator.Object);
 
             // Act
-            var actionResult = await this.CalculatorController.ClassificationByFinancialYear(financialYear) as ObjectResult;
+            var actionResult = await individualCalcController.ClassificationByFinancialYear(request) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(actionResult);
-            Assert.AreEqual(StatusCodes.Status400BadRequest, actionResult.StatusCode);
-            Assert.AreEqual("Financial year not found. Expected format: YYYY-YY (e.g., 2024-25).", actionResult.Value);
+            Assert.AreEqual(StatusCodes.Status404NotFound, actionResult.StatusCode);
+            Assert.AreEqual("No classifications found.", actionResult.Value);
         }
 
         [TestMethod]
-        public async Task IsValidFinancialYear_Returns_False_For_Nonexistent_FinancialYear()
+        public async Task ClassificationByFinancialYear_Returns_InternalServerError_On_Exception()
         {
             // Arrange
-            var financialYear = "2026-24"; // Valid format but not in the database
+            var financialYear = "2024-25";
+            var request = new CalcFinancialYearRequestDto { FinancialYear = financialYear };
+
+            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
+            mockValidator
+                .Setup(v => v.Validate(request))
+                .Throws(new Exception());
+
+            var individualCalcController = new CalculatorController(
+                this.DbContext,
+                ConfigurationItems.GetConfigurationValues(),
+                Mock.Of<IStorageService>(),
+                Mock.Of<IServiceBusService>(),
+                mockValidator.Object);
 
             // Act
-            var actionResult = await this.CalculatorController.ClassificationByFinancialYear(financialYear) as ObjectResult;
+            var actionResult = await individualCalcController.ClassificationByFinancialYear(request) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(actionResult);
-            Assert.AreEqual(StatusCodes.Status400BadRequest, actionResult.StatusCode);
-            Assert.AreEqual("Financial year not found. Expected format: YYYY-YY (e.g., 2024-25).", actionResult.Value);
+            Assert.AreEqual(StatusCodes.Status500InternalServerError, actionResult.StatusCode);
+            Assert.IsInstanceOfType(actionResult.Value, typeof(Exception));
         }
     }
 }

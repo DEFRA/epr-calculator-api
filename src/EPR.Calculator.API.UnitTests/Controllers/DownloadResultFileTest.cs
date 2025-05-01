@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -19,11 +20,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<IConfiguration> mockConfig;
         private readonly Mock<IStorageService> mockStorageService;
         private readonly Mock<IServiceBusService> mockServiceBusService;
+        private readonly Mock<ICalcFinancialYearRequestDtoDataValidator> mockValidator;
 
         public DownloadResultFileTest()
         {
             this.mockStorageService = new Mock<IStorageService>();
             this.mockServiceBusService = new Mock<IServiceBusService>();
+            this.mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
             this.mockConfig = new Mock<IConfiguration>();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
@@ -79,7 +82,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.context,
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
-                    this.mockServiceBusService.Object);
+                    this.mockServiceBusService.Object,
+                    this.mockValidator.Object);
             var mockResult = new Mock<IResult>();
             this.mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(mockResult.Object);
 
@@ -125,7 +129,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.context,
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
-                    this.mockServiceBusService.Object);
+                    this.mockServiceBusService.Object,
+                    this.mockValidator.Object);
             var mockResult = new Mock<IResult>();
             this.mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(Results.NotFound(fileName));
 
