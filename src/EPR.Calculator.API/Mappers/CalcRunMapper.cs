@@ -14,11 +14,13 @@ namespace EPR.Calculator.API.Mappers
                 RunId = run.Id,
                 CreatedAt = run.CreatedAt,
                 FileExtension = FileExtension,
-                RunName = run.Name ?? string.Empty,
-                UpdatedBy = run.UpdatedAt,
+                RunName = run.Name,
+                UpdatedBy = run.UpdatedBy,
+                CreatedBy = run.CreatedBy,
                 UpdatedAt = run.UpdatedAt,
                 RunClassificationId = run.CalculatorRunClassificationId,
                 RunClassificationStatus = classification.Status,
+                FinancialYear = run.FinancialYearId,
             };
         }
     }
