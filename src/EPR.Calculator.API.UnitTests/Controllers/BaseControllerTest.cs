@@ -1,33 +1,22 @@
-﻿using Azure.Messaging.ServiceBus;
-using EPR.Calculator.API.Controllers;
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Services;
-using EPR.Calculator.API.UnitTests.Helpers;
-using EPR.Calculator.API.Validators;
-using EPR.Calculator.API.Wrapper;
-using Microsoft.ApplicationInsights;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Azure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-
-namespace EPR.Calculator.API.UnitTests.Controllers
+﻿namespace EPR.Calculator.API.UnitTests.Controllers
 {
-    [TestClass]
-    public class BaseControllerTest
+    using Azure.Messaging.ServiceBus;
+    using EPR.Calculator.API.Controllers;
+    using EPR.Calculator.API.Data.DataModels;
+    using EPR.Calculator.API.Services;
+    using EPR.Calculator.API.UnitTests.Helpers;
+    using EPR.Calculator.API.Validators;
+    using EPR.Calculator.API.Wrapper;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Azure;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Moq;
+
+    public class BaseControllerTest : InMemoryApplicationDbContext
     {
         public BaseControllerTest()
         {
-            var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-            .UseInMemoryDatabase(databaseName: "PayCal")
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-            .Options;
-
-            this.DbContext = new ApplicationDBContext(dbContextOptions);
-            this.DbContext.Database.EnsureCreated();
             this.DbContext.DefaultParameterTemplateMasterList.RemoveRange(
                 this.DbContext.DefaultParameterTemplateMasterList);
             this.DbContext.SaveChanges();
@@ -53,11 +42,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             mockFactory.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(mockClient.Object);
 
-            this.FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
-            this.DbContext.FinancialYears.Add(this.FinancialYear24_25);
-
-            this.DbContext.CalculatorRuns.AddRange(this.GetCalculatorRuns());
-            this.DbContext.SaveChanges();
             this.CalculatorController = new CalculatorController(
                 this.DbContext,
                 ConfigurationItems.GetConfigurationValues(),
@@ -70,10 +54,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.DbContext.Material.AddRange(GetMaterials());
             this.DbContext.SaveChanges();
         }
-
-        protected ApplicationDBContext DbContext { get; set; }
-
-        protected CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
 
         protected DefaultParameterSettingController DefaultParameterSettingController { get; set; }
 
@@ -521,62 +501,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     },
                 },
             });
-            return list;
-        }
-
-        protected IEnumerable<CalculatorRun> GetCalculatorRuns()
-        {
-            var list = new List<CalculatorRun>
-            {
-                new CalculatorRun
-                {
-                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
-                    Name = "Test Run",
-                    Financial_Year = this.FinancialYear24_25,
-                    CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
-                    CreatedBy = "Test User",
-                },
-                new CalculatorRun
-                {
-                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
-                    Name = "Test Calculated Result",
-                    Financial_Year = this.FinancialYear24_25,
-                    CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
-                    CreatedBy = "Test User",
-                },
-                new CalculatorRun
-                {
-                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
-                    Name = "Test Run",
-                    Financial_Year = this.FinancialYear24_25,
-                    CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
-                    CreatedBy = "Test User",
-                    CalculatorRunOrganisationDataMasterId = 1,
-                    CalculatorRunPomDataMasterId = 1,
-                },
-                new CalculatorRun
-                {
-                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
-                    Name = "Test 422 error",
-                    Financial_Year = this.FinancialYear24_25,
-                    CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
-                    CreatedBy = "Test User",
-                    CalculatorRunOrganisationDataMasterId = 2,
-                    CalculatorRunPomDataMasterId = 2,
-                    LapcapDataMasterId = 2,
-                    DefaultParameterSettingMasterId = 2,
-                },
-                new CalculatorRun
-                {
-                    CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
-                    Name = "Test Calculated Result",
-                    Financial_Year = this.FinancialYear24_25,
-                    CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
-                    CreatedBy = "Test User",
-                    CalculatorRunOrganisationDataMasterId = 2,
-                    CalculatorRunPomDataMasterId = 2,
-                },
-            };
             return list;
         }
     }
