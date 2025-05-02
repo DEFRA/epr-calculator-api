@@ -493,8 +493,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IServiceBusService>(),
                 mockValidator.Object);
 
-            this.DbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification { Status = "Initial Run" });
-            this.DbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification { Status = "Test Run" });
+            this.DbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification { Status = "INITIAL RUN" });
+            this.DbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification { Status = "TEST RUN" });
             this.DbContext.SaveChanges();
 
             // Act
@@ -505,7 +505,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(StatusCodes.Status200OK, actionResult.StatusCode);
             var result = actionResult.Value as List<string>;
             Assert.IsNotNull(result);
-            CollectionAssert.AreEquivalent(new[] { "Initial Run", "Test Run" }, result);
+            CollectionAssert.AreEquivalent(new[] { "INITIAL RUN", "TEST RUN" }, result);
         }
 
         [TestMethod]

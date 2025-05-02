@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using EnumsNET;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -8,6 +9,7 @@ using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -366,6 +368,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         [Route("ClassificationByFinancialYear")]
         public async Task<IActionResult> ClassificationByFinancialYear([FromQuery] CalcFinancialYearRequestDto request)
         {
@@ -382,8 +385,14 @@ namespace EPR.Calculator.API.Controllers
                     return this.BadRequest(validationResult.Errors);
                 }
 
+                var validStatuses = new[]
+                {
+                    RunClassification.INITIAL_RUN.AsString(EnumFormat.Description),
+                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)
+                };
+
                 var classifications = await this.context.CalculatorRunClassifications
-                    .Where(c => c.Status == "Initial Run" || c.Status == "Test Run")
+                    .Where(c => validStatuses.Contains(c.Status))
                     .Select(c => c.Status)
                     .ToListAsync();
 

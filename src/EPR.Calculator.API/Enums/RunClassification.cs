@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using EnumsNET;
 
 namespace EPR.Calculator.API.Enums
 {
