@@ -1,24 +1,31 @@
-﻿    using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
-    namespace EPR.Calculator.API.Services
+namespace EPR.Calculator.API.Services
+{
+    [ExcludeFromCodeCoverage]
+    public class LocalFileStorageService : IStorageService
     {
-        public class LocalFileStorageService : IStorageService
+        public Task<string?> GetResultFileContentAsync()
         {
-            public Task<string?> GetResultFileContentAsync()
-            {
-                throw new NotImplementedException();
-            }
+            throw new NotImplementedException();
+        }
 
-            public Task<string> UploadResultFileContentAsync(string fileName, string content)
-            {
-                var path = Path.Combine(Directory.GetCurrentDirectory(), fileName);
-                File.WriteAllText(path, content, Encoding.UTF8);
-                return Task.FromResult(path);
-            }
+        public Task<string> UploadResultFileContentAsync(string fileName, string content)
+        {
+            var path = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+            File.WriteAllText(path, content, Encoding.UTF8);
+            return Task.FromResult(path);
+        }
 
-            public Task<IResult> DownloadFile(string fileName, string blobUri)
-            {
-                throw new NotImplementedException();
-            }
+        public Task<IResult> DownloadFile(string fileName, string blobUri)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> IsBlobExistsAsync(string fileName, string blobUri, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
+}

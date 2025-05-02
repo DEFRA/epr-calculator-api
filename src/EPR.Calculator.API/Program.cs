@@ -7,6 +7,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.HealthCheck;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using FluentValidation;
@@ -34,6 +35,7 @@ builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
 builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 builder.Services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatusDataValidator>();
+builder.Services.AddScoped<IBillingFileService, BillingFileService>();
 
 if (environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
 {

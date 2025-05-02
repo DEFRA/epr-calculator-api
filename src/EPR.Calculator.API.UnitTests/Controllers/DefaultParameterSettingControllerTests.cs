@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace EPR.Calculator.API.Tests.Controllers
+namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
     public class DefaultParameterSettingControllerTests
