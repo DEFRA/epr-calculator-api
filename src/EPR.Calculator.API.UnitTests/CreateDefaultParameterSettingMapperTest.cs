@@ -3,7 +3,7 @@ using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.UnitTests.Controllers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace EPR.Calculator.API.Tests.Controllers
+namespace EPR.Calculator.API.UnitTests
 {
     [TestClass]
     public class CreateDefaultParameterSettingMapperTest : BaseControllerTest
