@@ -5,15 +5,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using System.Security.Principal;
     using System.Threading.Tasks;
     using AutoFixture;
+    using EnumsNET;
     using EPR.Calculator.API.Controllers;
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.Dtos;
+    using EPR.Calculator.API.Enums;
     using EPR.Calculator.API.Services;
     using EPR.Calculator.API.UnitTests.Helpers;
     using EPR.Calculator.API.Validators;
+    using FluentAssertions;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
 
@@ -486,16 +490,20 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Setup(v => v.Validate(request))
                 .Returns(new ValidationResultDto<ErrorDto> { IsInvalid = false });
 
+            var mockDbContext = MockDbContextForCalculatorRunClassifications();
+
             var individualCalcController = new CalculatorController(
-                this.DbContext,
+                mockDbContext.Object,
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
                 mockValidator.Object);
 
-            this.DbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification { Status = "INITIAL RUN" });
-            this.DbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification { Status = "TEST RUN" });
-            this.DbContext.SaveChanges();
+            var expectedClassifications = new List<CalculatorRunClassificationDto>
+            {
+                new CalculatorRunClassificationDto{Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)},
+                new CalculatorRunClassificationDto{Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)},
+            };
 
             // Act
             var actionResult = await individualCalcController.ClassificationByFinancialYear(request) as ObjectResult;
@@ -503,9 +511,41 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // Assert
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(StatusCodes.Status200OK, actionResult.StatusCode);
-            var result = actionResult.Value as List<string>;
+            var result = actionResult.Value as FinancialYearClassificationResponseDto;
             Assert.IsNotNull(result);
-            CollectionAssert.AreEquivalent(new[] { "INITIAL RUN", "TEST RUN" }, result);
+            var typeToAssert = typeof(CalculatorRunClassificationDto);
+            Assert.IsInstanceOfType(expectedClassifications[0], typeToAssert);
+            Assert.IsInstanceOfType(result.Classifications[1], typeToAssert);
+            result.Classifications.Should().BeEquivalentTo(expectedClassifications);
+            Assert.IsTrue(financialYear == result.FinancialYear);
+        }
+
+        private static Mock<ApplicationDBContext> MockDbContextForCalculatorRunClassifications()
+        {
+            var mockClassifications = new List<CalculatorRunClassification>
+            {
+                new CalculatorRunClassification { Id = 1, Status = "IN THE QUEUE", CreatedBy = "Test user" },
+                new CalculatorRunClassification { Id = 2, Status = "RUNNING", CreatedBy = "Test user" },
+                new CalculatorRunClassification { Id = 3, Status = "UNCLASSIFIED", CreatedBy = "Test user" },
+                new CalculatorRunClassification { Id = 4, Status = "TEST RUN", CreatedBy = "Test user" },
+                new CalculatorRunClassification { Id = 5, Status = "ERROR", CreatedBy = "Test user" },
+                new CalculatorRunClassification { Id = 6, Status = "DELETED", CreatedBy = "Test user" },
+                new CalculatorRunClassification { Id = 7, Status = "INITIAL RUN COMPLETED", CreatedBy = "Test user" },
+                new CalculatorRunClassification { Id = 8, Status = "INITIAL RUN", CreatedBy = "Test user" },
+                new CalculatorRunClassification { Id = 9, Status = "INTERIM RE-CALCULATION RUN", CreatedBy = "Test user" },
+                new CalculatorRunClassification { Id = 10, Status = "FINAL RUN", CreatedBy = "Test user" },
+                new CalculatorRunClassification { Id = 11, Status = "FINAL RE-CALCULATION RUN", CreatedBy = "Test user" },
+            }.AsQueryable();
+            var mockDbContext = new Mock<ApplicationDBContext>();
+            var mockClassificationsDbSet = new Mock<DbSet<CalculatorRunClassification>>();
+            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.Provider).Returns(new TestAsyncQueryProvider<CalculatorRunClassification>(mockClassifications.Provider));
+            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.Expression).Returns(mockClassifications.Expression);
+            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.ElementType).Returns(mockClassifications.ElementType);
+            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.GetEnumerator()).Returns(mockClassifications.GetEnumerator());
+            mockClassificationsDbSet.As<IAsyncEnumerable<CalculatorRunClassification>>().Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>())).Returns(new TestAsyncEnumerator<CalculatorRunClassification>(mockClassifications.GetEnumerator()));
+
+            mockDbContext.Setup(c => c.CalculatorRunClassifications).Returns(mockClassificationsDbSet.Object);
+            return mockDbContext;
         }
 
         [TestMethod]

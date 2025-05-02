@@ -1,0 +1,10 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=80822f8e_002D29da_002D4e91_002D92eb_002D385f8a21d866/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="ClassificationByFinancialYear_Returns_BadRequest_For_Invalid_FinancialYear" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;MSTest::51705AC9-C603-427A-A71E-340524E9A997::net8.0::EPR.Calculator.API.UnitTests.Controllers.CalculatorControllerTests.ClassificationByFinancialYear_Returns_BadRequest_For_Invalid_FinancialYear&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;MSTest::51705AC9-C603-427A-A71E-340524E9A997::net8.0::EPR.Calculator.API.UnitTests.Controllers.CalculatorControllerTests.ClassificationByFinancialYear_Returns_Options_For_Valid_FinancialYear&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;MSTest::51705AC9-C603-427A-A71E-340524E9A997::net8.0::EPR.Calculator.API.UnitTests.Controllers.CalculatorControllerTests.ClassificationByFinancialYear_Returns_NotFound_When_No_Classifications&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;MSTest::51705AC9-C603-427A-A71E-340524E9A997::net8.0::EPR.Calculator.API.UnitTests.Controllers.CalculatorControllerTests.ClassificationByFinancialYear_Returns_InternalServerError_On_Exception&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;MSTest::51705AC9-C603-427A-A71E-340524E9A997::net8.0::EPR.Calculator.API.UnitTests.Validator.CreateDefaultParameterDataValidatorTest.ValidateTest_For_Invalid_Format&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

@@ -388,12 +388,11 @@ namespace EPR.Calculator.API.Controllers
                 var validStatuses = new[]
                 {
                     RunClassification.INITIAL_RUN.AsString(EnumFormat.Description),
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)
+                    RunClassification.TEST_RUN.AsString(EnumFormat.Description),
                 };
 
                 var classifications = await this.context.CalculatorRunClassifications
                     .Where(c => validStatuses.Contains(c.Status))
-                    .Select(c => c.Status)
                     .ToListAsync();
 
                 if (!classifications.Any())
@@ -401,7 +400,8 @@ namespace EPR.Calculator.API.Controllers
                     return this.NotFound("No classifications found.");
                 }
 
-                return this.Ok(classifications);
+                var runDto = FinancialYearClassificationsMapper.Map(request.FinancialYear, classifications);
+                return new ObjectResult(runDto) { StatusCode = StatusCodes.Status200OK };
             }
             catch (Exception exception)
             {
