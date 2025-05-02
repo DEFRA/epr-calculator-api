@@ -17,6 +17,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using FluentAssertions;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Azure.Amqp.Transaction;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
@@ -564,7 +565,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     Errors = new List<ErrorDto> { new ErrorDto { Message = "Invalid financial year format." } }
                 });
 
-            var individualCalcController = new CalculatorController(
+            var controller = new CalculatorController(
                 this.DbContext,
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
@@ -572,7 +573,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 mockValidator.Object);
 
             // Act
-            var actionResult = await individualCalcController.ClassificationByFinancialYear(request) as ObjectResult;
+            var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(actionResult);
@@ -594,7 +595,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Setup(v => v.Validate(request))
                 .Returns(new ValidationResultDto<ErrorDto> { IsInvalid = false });
 
-            var individualCalcController = new CalculatorController(
+            var controller = new CalculatorController(
                 this.DbContext,
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
@@ -602,7 +603,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 mockValidator.Object);
 
             // Act
-            var actionResult = await individualCalcController.ClassificationByFinancialYear(request) as ObjectResult;
+            var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(actionResult);
@@ -622,7 +623,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Setup(v => v.Validate(request))
                 .Throws(new Exception());
 
-            var individualCalcController = new CalculatorController(
+            var controller = new CalculatorController(
                 this.DbContext,
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
@@ -630,7 +631,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 mockValidator.Object);
 
             // Act
-            var actionResult = await individualCalcController.ClassificationByFinancialYear(request) as ObjectResult;
+            var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(actionResult);
