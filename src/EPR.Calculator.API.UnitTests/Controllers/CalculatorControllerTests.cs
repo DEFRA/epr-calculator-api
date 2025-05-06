@@ -636,7 +636,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // Assert
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(StatusCodes.Status500InternalServerError, actionResult.StatusCode);
-            Assert.IsInstanceOfType(actionResult.Value, typeof(Exception));
+            Assert.AreEqual(actionResult.Value, "An unexpected error occurred.");
         }
     }
 }

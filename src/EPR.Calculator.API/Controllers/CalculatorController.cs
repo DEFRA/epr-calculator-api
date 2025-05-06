@@ -368,6 +368,7 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         [Route("ClassificationByFinancialYear")]
         public async Task<IActionResult> ClassificationByFinancialYear([FromQuery] CalcFinancialYearRequestDto request)
         {
@@ -400,7 +401,7 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 var runDto = FinancialYearClassificationsMapper.Map(request.FinancialYear, classifications);
-                return new ObjectResult(runDto) { StatusCode = StatusCodes.Status200OK };
+                return this.Ok(runDto);
             }
             catch (Exception exception)
             {
