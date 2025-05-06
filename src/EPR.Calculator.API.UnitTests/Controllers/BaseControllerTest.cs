@@ -36,6 +36,7 @@
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var mockClient = new Mock<ServiceBusClient>();
             var mockServiceBusSender = new Mock<ServiceBusSender>();
+            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
             mockServiceBusSender.Setup(msbs => msbs.SendMessageAsync(It.IsAny<ServiceBusMessage>(), default)).Returns(Task.CompletedTask);
             mockClient.Setup(mc => mc.CreateSender(It.IsAny<string>())).Returns(mockServiceBusSender.Object);
 
@@ -45,7 +46,8 @@
                 this.DbContext,
                 ConfigurationItems.GetConfigurationValues(),
                 mockStorageService.Object,
-                mockServiceBusService.Object);
+                mockServiceBusService.Object,
+                mockValidator.Object);
 
             this.DbContext.Material.RemoveRange(this.DbContext.Material.ToList());
             this.DbContext.SaveChanges();

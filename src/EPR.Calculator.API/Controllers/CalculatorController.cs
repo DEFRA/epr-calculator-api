@@ -1,4 +1,6 @@
-﻿using EPR.Calculator.API.Constants;
+﻿using System.Configuration;
+using EnumsNET;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -6,9 +8,10 @@ using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Validators;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Configuration;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -19,13 +22,20 @@ namespace EPR.Calculator.API.Controllers
         private readonly IConfiguration configuration;
         private readonly IStorageService storageService;
         private readonly IServiceBusService serviceBusService;
+        private readonly ICalcFinancialYearRequestDtoDataValidator validator;
 
-        public CalculatorController(ApplicationDBContext context, IConfiguration configuration, IStorageService storageService, IServiceBusService serviceBusService)
+        public CalculatorController(
+            ApplicationDBContext context,
+            IConfiguration configuration,
+            IStorageService storageService,
+            IServiceBusService serviceBusService,
+            ICalcFinancialYearRequestDtoDataValidator validator)
         {
             this.context = context;
             this.configuration = configuration;
             this.storageService = storageService;
             this.serviceBusService = serviceBusService;
+            this.validator = validator;
         }
 
         [HttpPost]
@@ -354,6 +364,48 @@ namespace EPR.Calculator.API.Controllers
             catch (Exception exception)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("ClassificationByFinancialYear")]
+        public async Task<IActionResult> ClassificationByFinancialYear([FromQuery] CalcFinancialYearRequestDto request)
+        {
+            try
+            {
+                if (!this.ModelState.IsValid)
+                {
+                    return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
+                }
+
+                var validationResult = this.validator.Validate(request);
+                if (validationResult.IsInvalid)
+                {
+                    return this.BadRequest(validationResult.Errors);
+                }
+
+                var validStatuses = new[]
+                {
+                    RunClassification.INITIAL_RUN.AsString(EnumFormat.Description),
+                    RunClassification.TEST_RUN.AsString(EnumFormat.Description),
+                };
+
+                var classifications = await this.context.CalculatorRunClassifications
+                    .Where(c => validStatuses.Contains(c.Status))
+                    .ToListAsync();
+
+                if (!classifications.Any())
+                {
+                    return this.NotFound("No classifications found.");
+                }
+
+                var runDto = FinancialYearClassificationsMapper.Map(request.FinancialYear, classifications);
+                return this.Ok(runDto);
+            }
+            catch (Exception exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
             }
         }
 

@@ -22,7 +22,7 @@
 
         public DbSet<DefaultParameterTemplateMaster> DefaultParameterTemplateMasterList { get; set; }
 
-        public DbSet<CalculatorRunClassification> CalculatorRunClassifications { get; set; }
+        public virtual DbSet<CalculatorRunClassification> CalculatorRunClassifications { get; set; }
 
         public virtual DbSet<CalculatorRun> CalculatorRuns { get; set; }
 

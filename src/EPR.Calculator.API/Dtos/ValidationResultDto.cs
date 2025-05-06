@@ -3,14 +3,15 @@
 namespace EPR.Calculator.API.Dtos
 {
     [ExcludeFromCodeCoverage]
-    public class ValidationResultDto
+    public class ValidationResultDto<TErrorDto>
+        where TErrorDto : ErrorDto
     {
         public ValidationResultDto()
         {
-            this.Errors = new List<CreateDefaultParameterSettingErrorDto>();
+            this.Errors = new List<TErrorDto>();
         }
 
-        public List<CreateDefaultParameterSettingErrorDto> Errors { get; set; }
+        public List<TErrorDto> Errors { get; set; }
 
         public bool IsInvalid { get; set; }
     }

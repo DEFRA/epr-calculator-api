@@ -1,7 +1,6 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Utils;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EPR.Calculator.API.Validators
 {
@@ -14,10 +13,10 @@ namespace EPR.Calculator.API.Validators
             this.context = context;
         }
 
-        public LapcapValidationResultDto Validate(CreateLapcapDataDto createLapcapDataDto)
+        public ValidationResultDto<CreateLapcapDataErrorDto> Validate(CreateLapcapDataDto createLapcapDataDto)
         {
             var lapcapTemplateList = this.context.LapcapDataTemplateMaster.ToList();
-            var validationResult = new LapcapValidationResultDto();
+            var validationResult = new ValidationResultDto<CreateLapcapDataErrorDto>();
             var lapcapDataTemplateValues = createLapcapDataDto.LapcapDataTemplateValues;
 
             foreach (var lapcapTemplate in lapcapTemplateList)

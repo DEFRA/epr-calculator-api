@@ -14,9 +14,9 @@ namespace EPR.Calculator.API.Validators
             this.context = context;
         }
 
-        public ValidationResultDto Validate(CreateDefaultParameterSettingDto createDefaultParameterSettingDto)
+        public ValidationResultDto<CreateDefaultParameterSettingErrorDto> Validate(CreateDefaultParameterSettingDto createDefaultParameterSettingDto)
         {
-            var validationResult = new ValidationResultDto();
+            var validationResult = new ValidationResultDto<CreateDefaultParameterSettingErrorDto>();
 
             var errors = this.ValidateByValues(createDefaultParameterSettingDto);
             validationResult.Errors.AddRange(errors);

@@ -88,7 +88,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var lapcapDataValidator = new Mock<ILapcapDataValidator>();
             lapcapDataValidator.Setup(x => x.Validate(It.IsAny<CreateLapcapDataDto>()))
-                .Returns(new LapcapValidationResultDto { IsInvalid = false });
+                .Returns(new ValidationResultDto<CreateLapcapDataErrorDto> { IsInvalid = false });
             this.LapcapDataController = new LapcapDataController(
                 dbContext,
                 lapcapDataValidator.Object,
@@ -202,7 +202,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var lapcapDataValidator = new Mock<ILapcapDataValidator>();
             lapcapDataValidator.Setup(x => x.Validate(It.IsAny<CreateLapcapDataDto>()))
-                .Returns(new LapcapValidationResultDto { IsInvalid = false });
+                .Returns(new ValidationResultDto<CreateLapcapDataErrorDto> { IsInvalid = false });
             this.LapcapDataController = new LapcapDataController(
                 dbContext,
                 lapcapDataValidator.Object,

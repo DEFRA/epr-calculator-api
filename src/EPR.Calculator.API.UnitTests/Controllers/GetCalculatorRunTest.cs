@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -21,12 +22,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<IConfiguration> mockConfig;
         private readonly Mock<IStorageService> mockStorageService;
         private readonly Mock<IServiceBusService> mockServiceBusService;
+        private readonly Mock<ICalcFinancialYearRequestDtoDataValidator> mockValidator;
 
         public GetCalculatorRunTest()
         {
             this.mockStorageService = new Mock<IStorageService>();
             this.mockConfig = new Mock<IConfiguration>();
             this.mockServiceBusService = new Mock<IServiceBusService>();
+            this.mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
@@ -68,7 +71,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.context,
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
-                    this.mockServiceBusService.Object);
+                    this.mockServiceBusService.Object,
+                    this.mockValidator.Object);
 
             var response = await controller.GetCalculatorRun(1) as ObjectResult;
             Assert.IsNotNull(response);
@@ -92,7 +96,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.context,
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
-                    this.mockServiceBusService.Object);
+                    this.mockServiceBusService.Object,
+                    this.mockValidator.Object);
 
             var response = await controller.GetCalculatorRun(1) as ObjectResult;
             Assert.IsNotNull(response);
