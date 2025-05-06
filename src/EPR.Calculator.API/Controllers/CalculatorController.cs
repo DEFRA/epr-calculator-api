@@ -404,7 +404,7 @@ namespace EPR.Calculator.API.Controllers
             }
             catch (Exception exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
             }
         }
 
