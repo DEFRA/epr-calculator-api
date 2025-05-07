@@ -103,53 +103,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.ToTable("calculator_run", (string)null);
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunBillingFileMetadata", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BillingCsvFileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("billing_csv_filename");
-
-                    b.Property<string>("BillingFileAuthorisedBy")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("billing_file_authorised_by");
-
-                    b.Property<DateTime?>("BillingFileAuthorisedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("billing_file_authorised_date");
-
-                    b.Property<string>("BillingFileCreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("billing_file_created_by");
-
-                    b.Property<DateTime>("BillingFileCreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("billing_file_created_date");
-
-                    b.Property<string>("BillingJsonFileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("billing_json_filename");
-
-                    b.Property<int>("CalculatorRunId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CalculatorRunId");
-
-                    b.ToTable("calculator_run_billing_file_metadata", (string)null);
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", b =>
                 {
                     b.Property<int>("Id")
@@ -1603,17 +1556,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("LapcapDataMaster");
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunBillingFileMetadata", b =>
-                {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
-                        .WithMany("CalculatorRunBillingFileMetadata")
-                        .HasForeignKey("CalculatorRunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CalculatorRun");
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunCsvFileMetadata", b =>
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
@@ -1766,8 +1708,6 @@ namespace EPR.Calculator.API.Data.Migrations
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
                 {
-                    b.Navigation("CalculatorRunBillingFileMetadata");
-
                     b.Navigation("CountryApportionments");
 
                     b.Navigation("ProducerDetails");
