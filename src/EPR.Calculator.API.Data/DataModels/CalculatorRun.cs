@@ -41,5 +41,7 @@
         public ICollection<ProducerDetail> ProducerDetails { get; } = new List<ProducerDetail>();
 
         public ICollection<CountryApportionment> CountryApportionments { get; } = new List<CountryApportionment>();
+
+        public ICollection<CalculatorRunBillingFileMetadata> CalculatorRunBillingFileMetadata { get; } = new List<CalculatorRunBillingFileMetadata>();
     }
 }
