@@ -61,7 +61,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
             this.TestClass.BillingJsonFileName = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, this.TestClass.BillingCsvFileName);
+            Assert.AreEqual(testValue, this.TestClass.BillingJsonFileName);
         }
 
         [TestMethod]

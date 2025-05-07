@@ -3737,3 +3737,48 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250507140359_AddCalculatorRunBillingFileMetadataTable'
+)
+BEGIN
+    CREATE TABLE [calculator_run_billing_file_metadata] (
+        [id] int NOT NULL IDENTITY,
+        [billing_csv_filename] nvarchar(max) NOT NULL,
+        [billing_json_filename] nvarchar(max) NOT NULL,
+        [billing_file_created_date] datetime2 NOT NULL,
+        [billing_file_created_by] nvarchar(max) NOT NULL,
+        [billing_file_authorised_date] datetime2 NULL,
+        [billing_file_authorised_by] nvarchar(max) NULL,
+        [calculator_run_id] int NOT NULL,
+        CONSTRAINT [PK_calculator_run_billing_file_metadata] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_calculator_run_billing_file_metadata_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250507140359_AddCalculatorRunBillingFileMetadataTable'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_billing_file_metadata_calculator_run_id] ON [calculator_run_billing_file_metadata] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250507140359_AddCalculatorRunBillingFileMetadataTable'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250507140359_AddCalculatorRunBillingFileMetadataTable', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
