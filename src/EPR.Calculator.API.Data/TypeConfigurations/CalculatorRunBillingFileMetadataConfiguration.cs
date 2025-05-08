@@ -18,11 +18,11 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
 
             builder.Property(p => p.BillingCsvFileName)
                 .HasColumnName("billing_csv_filename")
-                .IsRequired();
+                .HasMaxLength(400);
 
             builder.Property(p => p.BillingJsonFileName)
                 .HasColumnName("billing_json_filename")
-                .IsRequired();
+                .HasMaxLength(400);
 
             builder.Property(p => p.BillingFileCreatedDate)
                 .HasColumnName("billing_file_created_date")
@@ -30,16 +30,19 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
 
             builder.Property(p => p.BillingFileCreatedBy)
                 .HasColumnName("billing_file_created_by")
+                .HasMaxLength(400)
                 .IsRequired();
 
             builder.Property(p => p.BillingFileAuthorisedDate)
                 .HasColumnName("billing_file_authorised_date");
 
             builder.Property(p => p.BillingFileAuthorisedBy)
-                .HasColumnName("billing_file_authorised_by");
+                .HasColumnName("billing_file_authorised_by")
+                .HasMaxLength(400);
 
             builder.Property(p => p.CalculatorRunId)
-                .HasColumnName("calculator_run_id");
+                .HasColumnName("calculator_run_id")
+                .IsRequired();
         }
     }
 }
