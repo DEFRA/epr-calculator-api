@@ -70,6 +70,8 @@
 
         public virtual DbSet<CalculatorRunFinancialYear> FinancialYears { get; set; }
 
+        public virtual DbSet<CalculatorRunBillingFileMetadata> CalculatorRunBillingFileMetadata { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
