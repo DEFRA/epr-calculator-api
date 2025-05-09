@@ -1,5 +1,7 @@
 ﻿using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +13,7 @@ namespace EPR.Calculator.API.Controllers
     public class CalculatorNewController : ControllerBase
     {
         private readonly ApplicationDBContext context;
+        private readonly IConfiguration configuration;
         private readonly ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator;
 
         /// <summary>
@@ -20,9 +23,11 @@ namespace EPR.Calculator.API.Controllers
         /// <param name="calculatorRunStatusDataValidator">Db Validator</param>
         public CalculatorNewController(
             ApplicationDBContext context,
+            IConfiguration configuration,
             ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator)
         {
             this.context = context;
+            this.configuration = configuration;
             this.calculatorRunStatusDataValidator = calculatorRunStatusDataValidator;
         }
 
@@ -73,6 +78,81 @@ namespace EPR.Calculator.API.Controllers
                 await this.context.SaveChangesAsync();
 
                 return this.StatusCode(201);
+            }
+            catch (Exception exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+        }
+
+        [HttpPost]
+        [Route("prepareBillingFileSendToFSS/{runId}")]
+        public async Task<ActionResult> PrepareBillingFileSendToFSS(int runId)
+        {
+            var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
+            if (claim == null)
+            {
+                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+            }
+
+            var userName = claim.Value;
+            try
+            {
+                // Return bad request if the model is invalid
+                if (!this.ModelState.IsValid)
+                {
+                    return this.StatusCode(
+                        StatusCodes.Status400BadRequest,
+                        this.ModelState.Values.SelectMany(x => x.Errors));
+                }
+
+                var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId);
+                if (calculatorRun == null)
+                {
+                    return new ObjectResult($"Unable to find Run Id {runId}")
+                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
+
+                var billingJsonFileName = this.configuration.GetSection("BillingJsonFileName").Value;
+
+                using (var transaction = await this.context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        // Add entry to calculator run billing file metadata
+                        var calculatorRunBillingFileMetadata = new CalculatorRunBillingFileMetadata
+                        {
+                            BillingCsvFileName = null,
+                            BillingJsonFileName = billingJsonFileName,
+                            BillingFileCreatedDate = DateTime.UtcNow,
+                            BillingFileCreatedBy = userName,
+                            BillingFileAuthorisedDate = DateTime.UtcNow,
+                            BillingFileAuthorisedBy = userName,
+                            CalculatorRunId = runId,
+                        };
+                        this.context.CalculatorRunBillingFileMetadata.Add(calculatorRunBillingFileMetadata);
+
+                        // Update calculation run classification status: Initial run completed
+                        calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
+                        this.context.CalculatorRuns.Update(calculatorRun);
+
+                        await this.context.SaveChangesAsync();
+
+                        // All good, commit transaction
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception exception)
+                    {
+                        // Error, rollback transaction
+                        await transaction.RollbackAsync();
+
+                        // Return error status code: Internal Server Error
+                        return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                    }
+                }
+
+                // Return accepted status code: Accepted
+                return this.StatusCode(StatusCodes.Status202Accepted);
             }
             catch (Exception exception)
             {
