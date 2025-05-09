@@ -3782,3 +3782,37 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250509113737_AddTradingName'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [trading_name] nvarchar(400) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250509113737_AddTradingName'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [trading_name] nvarchar(400) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250509113737_AddTradingName'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250509113737_AddTradingName', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
