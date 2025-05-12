@@ -1,22 +1,23 @@
-﻿using EPR.Calculator.API.Controllers;
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.UnitTests.Helpers;
-using EPR.Calculator.API.Validators;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using System.Security.Claims;
-using System.Security.Principal;
-
-namespace EPR.Calculator.API.UnitTests.Controllers
+﻿namespace EPR.Calculator.API.UnitTests.Controllers
 {
+    using System.Security.Claims;
+    using System.Security.Principal;
+    using EPR.Calculator.API.Controllers;
+    using EPR.Calculator.API.Data;
+    using EPR.Calculator.API.Data.DataModels;
+    using EPR.Calculator.API.Dtos;
+    using EPR.Calculator.API.Enums;
+    using EPR.Calculator.API.UnitTests.Helpers;
+    using EPR.Calculator.API.Validators;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Diagnostics;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Moq;
+
     [TestClass]
-    public class PutCalculatorRunStatusNewTest
+    public class CalculatorNewControllerTests
     {
         private Mock<ICalculatorRunStatusDataValidator> mockValidator;
         private ApplicationDBContext context;
@@ -34,30 +35,40 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             var configs = ConfigurationItems.GetConfigurationValues();
+            configs.GetSection("BillingJsonFileName").Value = "Example_sample_message_Producer_billing_file_1.0.json";
             this.controller = new CalculatorNewController(this.context, configs, this.mockValidator.Object);
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "DELETED",
                 Id = 6,
-                CreatedBy = "SomeUser"
+                CreatedBy = "SomeUser",
             });
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "INITIAL RUN COMPLETED",
                 Id = 7,
-                CreatedBy = "SomeUser"
+                CreatedBy = "SomeUser",
             });
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "INITIAL RUN",
                 Id = 8,
-                CreatedBy = "SomeUser"
+                CreatedBy = "SomeUser",
             });
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
+                CalculatorRunClassificationId = 8,
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
+                HasBillingFileGenerated = true,
                 Name = "Name",
-                Id = 1
+                Id = 1,
+            });
+            this.context.CalculatorRuns.Add(new CalculatorRun
+            {
+                CalculatorRunClassificationId = 3,
+                Financial_Year = new CalculatorRunFinancialYear { Name = "2025-26" },
+                Name = "Second run",
+                Id = 2,
             });
             this.context.SaveChanges();
         }
@@ -69,18 +80,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void PutCalculatorRunStatus()
+        public void PrepareBillingFileSendToFSS()
         {
-            this.mockValidator.Setup(x => x.Validate(
-                It.IsAny<CalculatorRun>(),
-                It.IsAny<CalculatorRunStatusUpdateDto>())).Returns(new GenericValidationResultDto { IsInvalid = false });
-
-            var runStatusUpdateDto = new API.Dtos.CalculatorRunStatusUpdateDto
-            {
-                ClassificationId = 6,
-                RunId = 1,
-            };
-
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
             var principal = new ClaimsPrincipal(identity);
@@ -95,35 +96,18 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 HttpContext = userContext,
             };
 
-            var task = this.controller.PutCalculatorRunStatus(runStatusUpdateDto);
+            var task = this.controller.PrepareBillingFileSendToFSS(1);
             task.Wait();
+
             var result = task.Result as StatusCodeResult;
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(201, result.StatusCode);
+            Assert.AreEqual(202, result.StatusCode);
         }
 
         [TestMethod]
-        public void PutCalculatorRunStatus_Invalid()
+        public void PrepareBillingFileSendToFSS_Invalid()
         {
-            this.mockValidator.Setup(x => x.Validate(
-                It.IsAny<CalculatorRun>(),
-                It.IsAny<CalculatorRunStatusUpdateDto>()))
-                .Returns(new GenericValidationResultDto
-                {
-                    IsInvalid = true,
-                    Errors = new List<string>
-                    {
-                        "Some error",
-                    },
-                });
-
-            var runStatusUpdateDto = new API.Dtos.CalculatorRunStatusUpdateDto
-            {
-                ClassificationId = 6,
-                RunId = 1,
-            };
-
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
             var principal = new ClaimsPrincipal(identity);
@@ -138,16 +122,43 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 HttpContext = userContext,
             };
 
-            var task = this.controller.PutCalculatorRunStatus(runStatusUpdateDto);
+            var task = this.controller.PrepareBillingFileSendToFSS(-1);
             task.Wait();
+
             var result = task.Result as ObjectResult;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(422, result.StatusCode);
             Assert.IsNotNull(result.Value);
-            var errors = result.Value as IEnumerable<string>;
-            Assert.IsNotNull(errors);
-            Assert.AreEqual("Some error", errors.First());
+            Assert.AreEqual("Unable to find Run Id -1", result.Value);
+        }
+
+        [TestMethod]
+        public void PrepareBillingFileSendToFSS_NotInitialRun()
+        {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var userContext = new DefaultHttpContext()
+            {
+                User = principal,
+            };
+
+            this.controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = userContext,
+            };
+
+            var task = this.controller.PrepareBillingFileSendToFSS(2);
+            task.Wait();
+
+            var result = task.Result as ObjectResult;
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(422, result.StatusCode);
+            Assert.IsNotNull(result.Value);
+            Assert.AreEqual("Run Id 2 classification status is not an 'INITIAL RUN' or 'HasBillingFileGenerated' column is not set to true", result.Value);
         }
     }
 }
