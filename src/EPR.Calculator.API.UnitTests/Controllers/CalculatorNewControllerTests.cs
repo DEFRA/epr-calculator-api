@@ -6,6 +6,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.Dtos;
+    using EPR.Calculator.API.Enums;
     using EPR.Calculator.API.UnitTests.Helpers;
     using EPR.Calculator.API.Validators;
     using Microsoft.AspNetCore.Http;
@@ -56,7 +57,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             });
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
+                CalculatorRunClassificationId = 8,
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
+                HasBillingFileGenerated = true,
                 Name = "Name",
                 Id = 1,
             });
