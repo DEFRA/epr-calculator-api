@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Data;
+﻿using System.Configuration;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -113,7 +114,17 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
+                if (calculatorRun.CalculatorRunClassificationId != (int)RunClassification.INITIAL_RUN || !calculatorRun.HasBillingFileGenerated)
+                {
+                    return new ObjectResult($"Run Id {runId} classification status is not an 'INITIAL RUN' or 'HasBillingFileGenerated' column is not set to true")
+                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
+
                 var billingJsonFileName = this.configuration.GetSection("BillingJsonFileName").Value;
+                if (string.IsNullOrWhiteSpace(billingJsonFileName))
+                {
+                    throw new ConfigurationErrorsException("Configuration item not found: billingJsonFileName");
+                }
 
                 using (var transaction = await this.context.Database.BeginTransactionAsync())
                 {
@@ -130,7 +141,7 @@ namespace EPR.Calculator.API.Controllers
                             BillingFileAuthorisedBy = userName,
                             CalculatorRunId = runId,
                         };
-                        this.context.CalculatorRunBillingFileMetadata.Add(calculatorRunBillingFileMetadata);
+                        await this.context.CalculatorRunBillingFileMetadata.AddAsync(calculatorRunBillingFileMetadata);
 
                         // Update calculation run classification status: Initial run completed
                         calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
@@ -151,7 +162,7 @@ namespace EPR.Calculator.API.Controllers
                     }
                 }
 
-                // Return accepted status code: Accepted
+                // Return accepted status code
                 return this.StatusCode(StatusCodes.Status202Accepted);
             }
             catch (Exception exception)
