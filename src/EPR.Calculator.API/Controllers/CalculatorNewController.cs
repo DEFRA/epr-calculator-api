@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -116,14 +117,14 @@ namespace EPR.Calculator.API.Controllers
 
                 if (calculatorRun.CalculatorRunClassificationId != (int)RunClassification.INITIAL_RUN || !calculatorRun.HasBillingFileGenerated)
                 {
-                    return new ObjectResult($"Run Id {runId} classification status is not an 'INITIAL RUN' or 'HasBillingFileGenerated' column is not set to true")
+                    return new ObjectResult($"Run Id {runId} classification status is not an {RunClassification.INITIAL_RUN} or {nameof(calculatorRun.HasBillingFileGenerated)} column is not set to true")
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                var billingJsonFileName = this.configuration.GetSection("BillingJsonFileName").Value;
+                var billingJsonFileName = this.configuration.GetSection(CommonConstants.BillingJsonFileName).Value;
                 if (string.IsNullOrWhiteSpace(billingJsonFileName))
                 {
-                    throw new ConfigurationErrorsException("Configuration item not found: billingJsonFileName");
+                    throw new ConfigurationErrorsException($"Configuration item not found: {CommonConstants.BillingJsonFileName}");
                 }
 
                 using (var transaction = await this.context.Database.BeginTransactionAsync())

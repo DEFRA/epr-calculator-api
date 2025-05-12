@@ -158,7 +158,7 @@
             Assert.IsNotNull(result);
             Assert.AreEqual(422, result.StatusCode);
             Assert.IsNotNull(result.Value);
-            Assert.AreEqual("Run Id 2 classification status is not an 'INITIAL RUN' or 'HasBillingFileGenerated' column is not set to true", result.Value);
+            Assert.AreEqual("Run Id 2 classification status is not an INITIAL_RUN or HasBillingFileGenerated column is not set to true", result.Value);
         }
     }
 }
