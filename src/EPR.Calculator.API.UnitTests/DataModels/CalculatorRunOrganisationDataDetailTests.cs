@@ -70,6 +70,19 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         }
 
         [TestMethod]
+        public void CanSetAndGetTradingName()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<string>();
+
+            // Act
+            this.TestClass.TradingName = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.TradingName);
+        }
+
+        [TestMethod]
         public void CanSetAndGetSubmissionPeriodDesc()
         {
             // Arrange

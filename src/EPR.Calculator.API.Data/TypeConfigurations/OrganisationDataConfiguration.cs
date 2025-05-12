@@ -26,6 +26,10 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
                    .HasColumnName("organisation_name")
                    .HasMaxLength(400);
 
+            builder.Property(p => p.TradingName)
+                   .HasColumnName("trading_name")
+                   .HasMaxLength(400);
+
             builder.Property(p => p.SubmissionPeriodDesc)
                    .HasColumnName("submission_period_desc");
 

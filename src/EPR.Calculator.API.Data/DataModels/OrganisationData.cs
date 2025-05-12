@@ -8,6 +8,8 @@
 
         public required string OrganisationName { get; set; }
 
+        public string? TradingName { get; set; }
+
         public required string SubmissionPeriodDesc { get; set; }
 
         public required DateTime LoadTimestamp { get; set; }
