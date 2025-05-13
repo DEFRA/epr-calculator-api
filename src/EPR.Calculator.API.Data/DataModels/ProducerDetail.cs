@@ -6,6 +6,8 @@
 
         public int ProducerId { get; set; }
 
+        public string? TradingName { get; set; }
+
         public string? SubsidiaryId { get; set; }
 
         public string? ProducerName { get; set; }

@@ -3889,3 +3889,28 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250513190717_AddTradingNameToProducerDetail'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [TradingName] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250513190717_AddTradingNameToProducerDetail'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250513190717_AddTradingNameToProducerDetail', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
