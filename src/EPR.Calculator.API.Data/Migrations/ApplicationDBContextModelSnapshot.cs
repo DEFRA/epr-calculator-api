@@ -1492,7 +1492,9 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("subsidiary_id");
 
                     b.Property<string>("TradingName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)")
+                        .HasColumnName("trading_name");
 
                     b.HasKey("Id");
 
