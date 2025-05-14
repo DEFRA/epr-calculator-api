@@ -29,6 +29,10 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
                    .HasColumnName("producer_name")
                    .HasMaxLength(400);
 
+            builder.Property(p => p.TradingName)
+                   .HasColumnName("trading_name")
+                   .HasMaxLength(4000);
+
             builder.Property(p => p.CalculatorRunId)
                    .HasColumnName("calculator_run_id");
 

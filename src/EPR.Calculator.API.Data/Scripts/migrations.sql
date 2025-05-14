@@ -3816,3 +3816,101 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250513130643_AlterCreateRunOrganisationSproc'
+)
+BEGIN
+
+                    ALTER PROCEDURE [dbo].[CreateRunOrganization]
+                    (
+                        @RunId int,
+                        @calendarYear varchar(400),
+                        @createdBy varchar(400)
+                    )
+                    AS
+                    BEGIN
+                        SET NOCOUNT ON
+
+                        declare @DateNow datetime, @orgDataMasterid int
+                        SET @DateNow = GETDATE()
+
+                        declare @oldCalcRunOrgMasterId int
+                        SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)
+
+                        Update calculator_run_organization_data_master SET effective_to = @DateNow WHERE id = @oldCalcRunOrgMasterId
+
+                        INSERT into dbo.calculator_run_organization_data_master
+                        (calendar_year, created_at, created_by, effective_from, effective_to)
+                        values
+                        (@calendarYear, @DateNow, @createdBy, @DateNow, NULL)
+
+                        SET @orgDataMasterid  = CAST(scope_identity() AS int);
+
+                        INSERT 
+                        into 
+                            dbo.calculator_run_organization_data_detail
+                            (calculator_run_organization_data_master_id, 
+                                load_ts,
+                                organisation_id,
+                                organisation_name,
+                                trading_name,
+                                submission_period_desc,
+                                subsidiary_id)
+                        SELECT  @orgDataMasterid, 
+                                load_ts,
+                                organisation_id,
+                                organisation_name,
+                                trading_name,
+                                submission_period_desc,
+                                subsidiary_id  
+                                from 
+                                dbo.organisation_data
+
+                        Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
+
+                    END
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250513130643_AlterCreateRunOrganisationSproc'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250513130643_AlterCreateRunOrganisationSproc', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250513190717_AddTradingNameToProducerDetail'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [trading_name] nvarchar(4000) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250513190717_AddTradingNameToProducerDetail'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250513190717_AddTradingNameToProducerDetail', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
