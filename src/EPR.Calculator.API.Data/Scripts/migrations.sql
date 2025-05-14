@@ -3897,7 +3897,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250513190717_AddTradingNameToProducerDetail'
 )
 BEGIN
-    ALTER TABLE [producer_detail] ADD [TradingName] nvarchar(max) NULL;
+    ALTER TABLE [producer_detail] ADD [trading_name] nvarchar(4000) NULL;
 END;
 GO
 

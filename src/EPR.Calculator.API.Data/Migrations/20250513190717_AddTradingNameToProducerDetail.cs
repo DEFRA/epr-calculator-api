@@ -11,9 +11,9 @@ namespace EPR.Calculator.API.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "TradingName",
+                name: "trading_name",
                 table: "producer_detail",
-                type: "nvarchar(max)",
+                type: "nvarchar(4000)",
                 nullable: true);
         }
 
@@ -21,7 +21,7 @@ namespace EPR.Calculator.API.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "TradingName",
+                name: "trading_name",
                 table: "producer_detail");
         }
     }
