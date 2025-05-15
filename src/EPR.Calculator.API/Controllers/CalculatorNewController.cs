@@ -92,9 +92,9 @@ namespace EPR.Calculator.API.Controllers
         [Route("calculatorRuns/{runId}")]
         public async Task<IActionResult> GetCalculatorRun(int runId)
         {
-            if (!this.ModelState.IsValid)
+            if (runId <= 0)
             {
-                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
+                return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid Run Id.");
             }
 
             try
@@ -144,12 +144,9 @@ namespace EPR.Calculator.API.Controllers
             var userName = claim.Value;
             try
             {
-                // Return bad request if the model is invalid
-                if (!this.ModelState.IsValid)
+                if (runId <= 0)
                 {
-                    return this.StatusCode(
-                        StatusCodes.Status400BadRequest,
-                        this.ModelState.Values.SelectMany(x => x.Errors));
+                    return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid Run Id.");
                 }
 
                 var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId);
