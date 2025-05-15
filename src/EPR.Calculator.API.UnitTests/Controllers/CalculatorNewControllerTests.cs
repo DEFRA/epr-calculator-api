@@ -6,13 +6,13 @@
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.Dtos;
-    using EPR.Calculator.API.Enums;
     using EPR.Calculator.API.UnitTests.Helpers;
     using EPR.Calculator.API.Validators;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
 
@@ -69,6 +69,25 @@
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2025-26" },
                 Name = "Second run",
                 Id = 2,
+            });
+            this.context.CalculatorRuns.Add(new CalculatorRun
+            {
+                CalculatorRunClassificationId = 7,
+                Financial_Year = new CalculatorRunFinancialYear { Name = "2023-24" },
+                HasBillingFileGenerated = true,
+                Name = "Calc Billing Run Test",
+                Id = 3,
+            });
+            this.context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            {
+                Id = 1,
+                BillingCsvFileName = "test.csv",
+                BillingJsonFileName = "test.json",
+                BillingFileCreatedBy = "testUser",
+                BillingFileAuthorisedDate = DateTime.Now,
+                BillingFileAuthorisedBy = "testUser",
+                BillingFileCreatedDate = DateTime.Now,
+                CalculatorRunId = 3,
             });
             this.context.SaveChanges();
         }
@@ -159,6 +178,32 @@
             Assert.AreEqual(422, result.StatusCode);
             Assert.IsNotNull(result.Value);
             Assert.AreEqual("Run Id 2 classification status is not an INITIAL_RUN or HasBillingFileGenerated column is not set to true", result.Value);
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRunWithBillingDetails_Get_Valid_Run()
+        {
+            var response = await this.controller.GetCalculatorRun(3) as ObjectResult;
+
+            Assert.IsNotNull(response);
+            var run = response.Value as CalculatorRunBillingDto;
+            Assert.IsNotNull(run);
+            Assert.AreEqual(3, run.RunId);
+            Assert.AreEqual("INITIAL RUN COMPLETED", run.RunClassificationStatus);
+            Assert.AreEqual(7, run.RunClassificationId);
+            Assert.IsNull(run.UpdatedAt);
+            Assert.IsNull(run.UpdatedBy);
+            Assert.AreEqual("test.json", run.BillingJsonFileName);
+            Assert.AreEqual("test.csv", run.BillingCsvFileName);
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRunWithBillingDetails_Get_InValid_Run()
+        {
+            var response = await this.controller.GetCalculatorRun(5) as ObjectResult;
+            Assert.IsNotNull(response);
+            Assert.AreEqual(404, response.StatusCode);
+            Assert.AreEqual("Unable to find Run Id 5", response.Value);
         }
     }
 }
