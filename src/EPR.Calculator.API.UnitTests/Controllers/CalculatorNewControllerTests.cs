@@ -100,20 +100,7 @@
         [TestMethod]
         public void PrepareBillingFileSendToFSS()
         {
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var userContext = new DefaultHttpContext()
-            {
-                User = principal,
-            };
-
-            this.controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = userContext,
-            };
-
+            this.ControllerContext();
             var task = this.controller.PrepareBillingFileSendToFSS(1);
             task.Wait();
 
@@ -126,48 +113,22 @@
         [TestMethod]
         public void PrepareBillingFileSendToFSS_Invalid()
         {
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var userContext = new DefaultHttpContext()
-            {
-                User = principal,
-            };
-
-            this.controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = userContext,
-            };
-
+            this.ControllerContext();
             var task = this.controller.PrepareBillingFileSendToFSS(-1);
             task.Wait();
 
             var result = task.Result as ObjectResult;
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(422, result.StatusCode);
+            Assert.AreEqual(400, result.StatusCode);
             Assert.IsNotNull(result.Value);
-            Assert.AreEqual("Unable to find Run Id -1", result.Value);
+            Assert.AreEqual("Invalid Run Id -1", result.Value);
         }
 
         [TestMethod]
         public void PrepareBillingFileSendToFSS_NotInitialRun()
         {
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var userContext = new DefaultHttpContext()
-            {
-                User = principal,
-            };
-
-            this.controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = userContext,
-            };
-
+            this.ControllerContext();
             var task = this.controller.PrepareBillingFileSendToFSS(2);
             task.Wait();
 
@@ -182,6 +143,7 @@
         [TestMethod]
         public async Task GetCalculatorRunWithBillingDetails_Get_Valid_Run()
         {
+            this.ControllerContext();
             var response = await this.controller.GetCalculatorRun(3) as ObjectResult;
 
             Assert.IsNotNull(response);
@@ -197,12 +159,40 @@
         }
 
         [TestMethod]
-        public async Task GetCalculatorRunWithBillingDetails_Get_InValid_Run()
+        public async Task GetCalculatorRunWithBillingDetails_Get_NotFound_Run()
         {
+            this.ControllerContext();
             var response = await this.controller.GetCalculatorRun(5) as ObjectResult;
             Assert.IsNotNull(response);
             Assert.AreEqual(404, response.StatusCode);
             Assert.AreEqual("Unable to find Run Id 5", response.Value);
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRunWithBillingDetails_Get_InValid_Run()
+        {
+            this.ControllerContext();
+            var response = await this.controller.GetCalculatorRun(-1) as ObjectResult;
+            Assert.IsNotNull(response);
+            Assert.AreEqual(400, response.StatusCode);
+            Assert.AreEqual("Invalid Run Id -1", response.Value);
+        }
+
+        private void ControllerContext()
+        {
+            var identity = new GenericIdentity("TestUser");
+            identity.AddClaim(new Claim("name", "TestUser"));
+            var principal = new ClaimsPrincipal(identity);
+
+            var userContext = new DefaultHttpContext()
+            {
+                User = principal,
+            };
+
+            this.controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = userContext,
+            };
         }
     }
 }

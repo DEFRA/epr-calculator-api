@@ -94,7 +94,7 @@ namespace EPR.Calculator.API.Controllers
         {
             if (runId <= 0)
             {
-                return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid Run Id.");
+                return this.StatusCode(StatusCodes.Status400BadRequest, $"Invalid Run Id {runId}");
             }
 
             try
@@ -146,7 +146,7 @@ namespace EPR.Calculator.API.Controllers
             {
                 if (runId <= 0)
                 {
-                    return this.StatusCode(StatusCodes.Status400BadRequest, "Invalid Run Id.");
+                    return this.StatusCode(StatusCodes.Status400BadRequest, $"Invalid Run Id {runId}");
                 }
 
                 var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId);
