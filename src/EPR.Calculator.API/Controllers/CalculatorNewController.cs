@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -87,6 +88,49 @@ namespace EPR.Calculator.API.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("calculatorRuns/{runId}")]
+        public async Task<IActionResult> GetCalculatorRun(int runId)
+        {
+            if (runId <= 0)
+            {
+                return this.StatusCode(StatusCodes.Status400BadRequest, $"Invalid Run Id {runId}");
+            }
+
+            try
+            {
+                var calculatorRunDetail =
+                    await (from run in this.context.CalculatorRuns
+                           join classification in this.context.CalculatorRunClassifications
+                               on run.CalculatorRunClassificationId equals classification.Id
+                           join billingfilemetadata in this.context.CalculatorRunBillingFileMetadata
+                               on run.Id equals billingfilemetadata.CalculatorRunId into calculatorrunbillingFile
+                           from billingfilemetadata in calculatorrunbillingFile.DefaultIfEmpty()
+                           where run.Id == runId
+                           select new
+                           {
+                               Run = run,
+                               Classification = classification,
+                               BillingFileMetadata = billingfilemetadata,
+                           }).SingleOrDefaultAsync();
+
+                if (calculatorRunDetail == null)
+                {
+                    return new NotFoundObjectResult($"Unable to find Run Id {runId}");
+                }
+
+                var calcRun = calculatorRunDetail.Run;
+                var runClassification = calculatorRunDetail.Classification;
+                var calculatorRunbillingFile = calculatorRunDetail.BillingFileMetadata;
+                var runDto = CalcRunBillingFileMapper.Map(calcRun, runClassification, calculatorRunbillingFile);
+                return new ObjectResult(runDto);
+            }
+            catch (Exception exception)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+            }
+        }
+
         [HttpPost]
         [Route("prepareBillingFileSendToFSS/{runId}")]
         public async Task<ActionResult> PrepareBillingFileSendToFSS(int runId)
@@ -100,12 +144,9 @@ namespace EPR.Calculator.API.Controllers
             var userName = claim.Value;
             try
             {
-                // Return bad request if the model is invalid
-                if (!this.ModelState.IsValid)
+                if (runId <= 0)
                 {
-                    return this.StatusCode(
-                        StatusCodes.Status400BadRequest,
-                        this.ModelState.Values.SelectMany(x => x.Errors));
+                    return this.StatusCode(StatusCodes.Status400BadRequest, $"Invalid Run Id {runId}");
                 }
 
                 var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId);
