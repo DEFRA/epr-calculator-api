@@ -14,6 +14,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 name: "trading_name",
                 table: "producer_detail",
                 type: "nvarchar(4000)",
+                maxLength: 4000,
                 nullable: true);
         }
 
