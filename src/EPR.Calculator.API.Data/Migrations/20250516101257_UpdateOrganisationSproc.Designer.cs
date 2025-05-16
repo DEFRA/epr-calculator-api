@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250513130643_AlterCreateRunOrganisationSproc")]
-    partial class AlterCreateRunOrganisationSproc
+    [Migration("20250516101257_UpdateOrganisationSproc")]
+    partial class UpdateOrganisationSproc
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1493,6 +1493,11 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("subsidiary_id");
+
+                    b.Property<string>("TradingName")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)")
+                        .HasColumnName("trading_name");
 
                     b.HasKey("Id");
 

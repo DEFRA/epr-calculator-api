@@ -5,13 +5,22 @@
 namespace EPR.Calculator.API.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AlterCreateRunOrganisationSproc : Migration
+    public partial class UpdateOrganisationSproc : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            var alterOrgSql = @"
-                ALTER PROCEDURE [dbo].[CreateRunOrganization]
+            // Drop the existing procedure if it exists
+            var dropOrgProcSql = @"
+                IF OBJECT_ID(N'[dbo].[CreateRunOrganization]', N'P') IS NOT NULL
+                    DROP PROCEDURE [dbo].[CreateRunOrganization]";
+            migrationBuilder.Sql(dropOrgProcSql);
+
+            // Recreate the procedure using EXEC(@Sql) pattern
+            var createOrgProcSql = @"
+                DECLARE @Sql NVARCHAR(MAX)
+                SET @Sql = N'
+                CREATE PROCEDURE [dbo].[CreateRunOrganization]
                 (
                     @RunId int,
                     @calendarYear varchar(400),
@@ -58,15 +67,26 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
 
-                END";
-            migrationBuilder.Sql(alterOrgSql);
+                END'
+                EXEC(@Sql)";
+            migrationBuilder.Sql(createOrgProcSql);
         }
+
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            var revertOrgSql = @"
-                ALTER PROCEDURE [dbo].[CreateRunOrganization]
+            // Drop the existing procedure if it exists
+            var dropOrgProcSql = @"
+                IF OBJECT_ID(N'[dbo].[CreateRunOrganization]', N'P') IS NOT NULL
+                    DROP PROCEDURE [dbo].[CreateRunOrganization]";
+            migrationBuilder.Sql(dropOrgProcSql);
+
+            // Recreate the original procedure using EXEC(@Sql)
+            var revertOrgProcSql = @"
+                DECLARE @Sql NVARCHAR(MAX)
+                SET @Sql = N'
+                CREATE PROCEDURE [dbo].[CreateRunOrganization]
                 (
                     @RunId int,
                     @calendarYear varchar(400),
@@ -111,8 +131,10 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
 
-                END";
-            migrationBuilder.Sql(revertOrgSql);
+                END'
+                EXEC(@Sql)";
+            migrationBuilder.Sql(revertOrgProcSql);
         }
+
     }
 }
