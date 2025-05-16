@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250513190717_AddTradingNameToProducerDetail")]
+    [Migration("20250516101138_AddTradingNameToProducerDetail")]
     partial class AddTradingNameToProducerDetail
     {
         /// <inheritdoc />
@@ -1495,7 +1495,9 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("subsidiary_id");
 
                     b.Property<string>("TradingName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)")
+                        .HasColumnName("trading_name");
 
                     b.HasKey("Id");
 

@@ -3821,11 +3821,49 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250513130643_AlterCreateRunOrganisationSproc'
+    WHERE [MigrationId] = N'20250516101138_AddTradingNameToProducerDetail'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [trading_name] nvarchar(4000) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250516101138_AddTradingNameToProducerDetail'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250516101138_AddTradingNameToProducerDetail', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250516101257_UpdateOrganisationSproc'
 )
 BEGIN
 
-                    ALTER PROCEDURE [dbo].[CreateRunOrganization]
+                    IF OBJECT_ID(N'[dbo].[CreateRunOrganization]', N'P') IS NOT NULL
+                        DROP PROCEDURE [dbo].[CreateRunOrganization]
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250516101257_UpdateOrganisationSproc'
+)
+BEGIN
+
+                    DECLARE @Sql NVARCHAR(MAX)
+                    SET @Sql = N'
+                    CREATE PROCEDURE [dbo].[CreateRunOrganization]
                     (
                         @RunId int,
                         @calendarYear varchar(400),
@@ -3872,42 +3910,18 @@ BEGIN
 
                         Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
 
-                    END
+                    END'
+                    EXEC(@Sql)
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250513130643_AlterCreateRunOrganisationSproc'
+    WHERE [MigrationId] = N'20250516101257_UpdateOrganisationSproc'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250513130643_AlterCreateRunOrganisationSproc', N'8.0.7');
-END;
-GO
-
-COMMIT;
-GO
-
-BEGIN TRANSACTION;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250513190717_AddTradingNameToProducerDetail'
-)
-BEGIN
-    ALTER TABLE [producer_detail] ADD [trading_name] nvarchar(4000) NULL;
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250513190717_AddTradingNameToProducerDetail'
-)
-BEGIN
-    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250513190717_AddTradingNameToProducerDetail', N'8.0.7');
+    VALUES (N'20250516101257_UpdateOrganisationSproc', N'8.0.7');
 END;
 GO
 
