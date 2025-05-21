@@ -14,8 +14,8 @@ namespace EPR.Calculator.API.UnitTests
     {
         public ApplicationDBContextTests()
         {
-            this.Options = new Mock<DbContextOptions>().Object;
-            this.Options = new DbContextOptionsBuilder().Options;
+            this.Options = new Mock<DbContextOptions<ApplicationDBContext>>().Object;
+            this.Options = new DbContextOptionsBuilder<ApplicationDBContext>().Options;
             this.TestClass = new TestApplicationDBContext(this.Options);
         }
 
@@ -40,7 +40,7 @@ namespace EPR.Calculator.API.UnitTests
         /// <summary>
         /// Test class to expose the protected "OnConfiguring" method for testing.
         /// </summary>
-        private class TestApplicationDBContext(DbContextOptions options) : ApplicationDBContext(options)
+        private class TestApplicationDBContext(DbContextOptions options) : ApplicationDBContext((DbContextOptions<ApplicationDBContext>)options)
         {
             public void PublicOnConfiguring(DbContextOptionsBuilder optionsBuilder)
             {
