@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250521145003_AddProducerInvoicedMaterialNetTonnage")]
+    partial class AddProducerInvoicedMaterialNetTonnage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1464,57 +1467,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.ToTable("pom_data", (string)null);
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDesignatedRunInvoiceInstruction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BillingInstructionId")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)")
-                        .HasColumnName("billing_instruction_id");
-
-                    b.Property<int>("CalculatorRunId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_id");
-
-                    b.Property<decimal?>("CurrentYearInvoicedTotalAfterThisRun")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("current_year_invoiced_total_after_this_run");
-
-                    b.Property<string>("InstructionConfirmedBy")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)")
-                        .HasColumnName("instruction_confirmed_by");
-
-                    b.Property<DateTime?>("InstructionConfirmedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("instruction_confirmed_date");
-
-                    b.Property<decimal?>("InvoiceAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("invoice_amount");
-
-                    b.Property<decimal?>("OutstandingBalance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("outstanding_balance");
-
-                    b.Property<int>("ProducerId")
-                        .HasColumnType("int")
-                        .HasColumnName("producer_id");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("producer_designated_run_invoice_instruction", (string)null);
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDetail", b =>
                 {
                     b.Property<int>("Id")
@@ -1620,103 +1572,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.HasIndex("ProducerDetailId");
 
                     b.ToTable("producer_reported_material", (string)null);
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerResultFileSuggestedBillingInstruction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal?>("AmountLiabilityDifferenceCalcVsPrev")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("amount_liability_difference_calc_vs_prev");
-
-                    b.Property<string>("BillingInstructionAcceptReject")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)")
-                        .HasColumnName("billing_instruction_accept_reject");
-
-                    b.Property<int>("CalculatorRunId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_id");
-
-                    b.Property<decimal?>("CurrentYearInvoiceTotalToDate")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("current_year_invoice_total_to_date");
-
-                    b.Property<DateTime?>("LastModifiedAcceptReject")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("last_modified_accept_reject");
-
-                    b.Property<string>("LastModifiedAcceptRejectBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("last_modified_accept_reject_by");
-
-                    b.Property<string>("MaterialPercentageThresholdBreached")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)")
-                        .HasColumnName("material_percentage_threshold_breached");
-
-                    b.Property<string>("MaterialPoundThresholdBreached")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)")
-                        .HasColumnName("material_pound_threshold_breached");
-
-                    b.Property<decimal?>("PercentageLiabilityDifferenceCalcVsPrev")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("percentage_liability_difference_calc_vs_prev");
-
-                    b.Property<int>("ProducerId")
-                        .HasColumnType("int")
-                        .HasColumnName("producer_id");
-
-                    b.Property<string>("ReasonForRejection")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)")
-                        .HasColumnName("reason_for_rejection");
-
-                    b.Property<string>("SuggestedBillingInstruction")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)")
-                        .HasColumnName("suggested_billing_instruction");
-
-                    b.Property<decimal>("SuggestedInvoiceAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("suggested_invoice_amount");
-
-                    b.Property<string>("TonnageChangeSinceLastInvoice")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)")
-                        .HasColumnName("tonnage_change_since_last_invoice");
-
-                    b.Property<string>("TonnagePercentageThresholdBreached")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)")
-                        .HasColumnName("tonnage_percentage_threshold_breached");
-
-                    b.Property<string>("TonnagePoundThresholdBreached")
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)")
-                        .HasColumnName("tonnage_pound_threshold_breached");
-
-                    b.Property<decimal>("TotalProducerBillWithBadDebt")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("total_producer_bill_with_bad_debt");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("producer_resultfile_suggested_billing_instruction", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.SubmissionPeriodLookup", b =>
