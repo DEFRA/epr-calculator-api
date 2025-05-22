@@ -11,5 +11,7 @@
         public string? Description { get; set; }
 
         public virtual ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = new List<ProducerReportedMaterial>();
+
+        public ICollection<ProducerInvoicedMaterialNetTonnage> ProducerInvoicedMaterialNetTonnage { get; } = [];
     }
 }

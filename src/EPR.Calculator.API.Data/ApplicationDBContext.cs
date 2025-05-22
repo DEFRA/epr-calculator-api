@@ -60,6 +60,12 @@
 
         public virtual DbSet<SubmissionPeriodLookup> SubmissionPeriodLookup { get; set; }
 
+        public DbSet<ProducerInvoicedMaterialNetTonnage> ProducerInvoicedMaterialNetTonnage { get; set; }
+
+        public DbSet<ProducerDesignatedRunInvoiceInstruction> ProducerDesignatedRunInvoiceInstruction { get; set; }
+
+        public DbSet<ProducerResultFileSuggestedBillingInstruction> ProducerResultFileSuggestedBillingInstruction { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)

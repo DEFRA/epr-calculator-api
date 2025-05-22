@@ -43,5 +43,11 @@
         public ICollection<CountryApportionment> CountryApportionments { get; } = new List<CountryApportionment>();
 
         public ICollection<CalculatorRunBillingFileMetadata> CalculatorRunBillingFileMetadata { get; } = new List<CalculatorRunBillingFileMetadata>();
+
+        public ICollection<ProducerInvoicedMaterialNetTonnage> ProducerInvoicedMaterialNetTonnage { get; } = [];
+
+        public ICollection<ProducerDesignatedRunInvoiceInstruction> ProducerDesignatedRunInvoiceInstruction { get; } = [];
+
+        public ICollection<ProducerResultFileSuggestedBillingInstruction> ProducerResultFileSuggestedBillingInstruction { get; } = [];
     }
 }

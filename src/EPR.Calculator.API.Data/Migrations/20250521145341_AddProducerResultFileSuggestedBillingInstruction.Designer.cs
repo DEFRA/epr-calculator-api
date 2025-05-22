@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250521145341_AddProducerResultFileSuggestedBillingInstruction")]
+    partial class AddProducerResultFileSuggestedBillingInstruction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1512,8 +1515,6 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CalculatorRunId");
-
                     b.ToTable("producer_designated_run_invoice_instruction", (string)null);
                 });
 
@@ -1574,7 +1575,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("invoiced_net_tonnage");
 
-                    b.Property<int>("MaterialId")
+                    b.Property<int>("MeterialId")
                         .HasColumnType("int")
                         .HasColumnName("material_id");
 
@@ -1583,10 +1584,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("producer_id");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CalculatorRunId");
-
-                    b.HasIndex("MaterialId");
 
                     b.ToTable("producer_invoiced_material_net_tonnage", (string)null);
                 });
@@ -1661,8 +1658,8 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("last_modified_accept_reject");
 
                     b.Property<string>("LastModifiedAcceptRejectBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)")
                         .HasColumnName("last_modified_accept_reject_by");
 
                     b.Property<string>("MaterialPercentageThresholdBreached")
@@ -1721,8 +1718,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("total_producer_bill_with_bad_debt");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CalculatorRunId");
 
                     b.ToTable("producer_resultfile_suggested_billing_instruction", (string)null);
                 });
@@ -1938,15 +1933,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("ProjectionYear");
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDesignatedRunInvoiceInstruction", b =>
-                {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", null)
-                        .WithMany("ProducerDesignatedRunInvoiceInstruction")
-                        .HasForeignKey("CalculatorRunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDetail", b =>
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
@@ -1956,21 +1942,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("CalculatorRun");
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerInvoicedMaterialNetTonnage", b =>
-                {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", null)
-                        .WithMany("ProducerInvoicedMaterialNetTonnage")
-                        .HasForeignKey("CalculatorRunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.Material", null)
-                        .WithMany("ProducerInvoicedMaterialNetTonnage")
-                        .HasForeignKey("MaterialId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerReportedMaterial", b =>
@@ -1992,28 +1963,13 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("ProducerDetail");
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerResultFileSuggestedBillingInstruction", b =>
-                {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", null)
-                        .WithMany("ProducerResultFileSuggestedBillingInstruction")
-                        .HasForeignKey("CalculatorRunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
                 {
                     b.Navigation("CalculatorRunBillingFileMetadata");
 
                     b.Navigation("CountryApportionments");
 
-                    b.Navigation("ProducerDesignatedRunInvoiceInstruction");
-
                     b.Navigation("ProducerDetails");
-
-                    b.Navigation("ProducerInvoicedMaterialNetTonnage");
-
-                    b.Navigation("ProducerResultFileSuggestedBillingInstruction");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", b =>
@@ -2075,8 +2031,6 @@ namespace EPR.Calculator.API.Data.Migrations
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.Material", b =>
                 {
-                    b.Navigation("ProducerInvoicedMaterialNetTonnage");
-
                     b.Navigation("ProducerReportedMaterials");
                 });
 
