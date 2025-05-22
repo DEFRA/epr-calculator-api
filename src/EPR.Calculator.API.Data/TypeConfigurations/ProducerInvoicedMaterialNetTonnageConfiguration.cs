@@ -20,7 +20,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
                    .HasColumnName("calculator_run_id")
                    .IsRequired();
 
-            builder.Property(p => p.MeterialId)
+            builder.Property(p => p.MaterialId)
                    .HasColumnName("material_id")
                    .IsRequired();
 

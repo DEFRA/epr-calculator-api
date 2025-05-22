@@ -6,7 +6,7 @@
 
         public int CalculatorRunId { get; set; }
 
-        public int MeterialId { get; set; }
+        public int MaterialId { get; set; }
 
         public int ProducerId { get; set; }
 

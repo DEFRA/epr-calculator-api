@@ -4041,3 +4041,91 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250522093001_AddProducerDesignatedRunHistoryRelationships'
+)
+BEGIN
+    CREATE INDEX [IX_producer_resultfile_suggested_billing_instruction_calculator_run_id] ON [producer_resultfile_suggested_billing_instruction] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250522093001_AddProducerDesignatedRunHistoryRelationships'
+)
+BEGIN
+    CREATE INDEX [IX_producer_invoiced_material_net_tonnage_calculator_run_id] ON [producer_invoiced_material_net_tonnage] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250522093001_AddProducerDesignatedRunHistoryRelationships'
+)
+BEGIN
+    CREATE INDEX [IX_producer_invoiced_material_net_tonnage_material_id] ON [producer_invoiced_material_net_tonnage] ([material_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250522093001_AddProducerDesignatedRunHistoryRelationships'
+)
+BEGIN
+    CREATE INDEX [IX_producer_designated_run_invoice_instruction_calculator_run_id] ON [producer_designated_run_invoice_instruction] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250522093001_AddProducerDesignatedRunHistoryRelationships'
+)
+BEGIN
+    ALTER TABLE [producer_designated_run_invoice_instruction] ADD CONSTRAINT [FK_producer_designated_run_invoice_instruction_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250522093001_AddProducerDesignatedRunHistoryRelationships'
+)
+BEGIN
+    ALTER TABLE [producer_invoiced_material_net_tonnage] ADD CONSTRAINT [FK_producer_invoiced_material_net_tonnage_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250522093001_AddProducerDesignatedRunHistoryRelationships'
+)
+BEGIN
+    ALTER TABLE [producer_invoiced_material_net_tonnage] ADD CONSTRAINT [FK_producer_invoiced_material_net_tonnage_material_material_id] FOREIGN KEY ([material_id]) REFERENCES [material] ([id]) ON DELETE CASCADE;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250522093001_AddProducerDesignatedRunHistoryRelationships'
+)
+BEGIN
+    ALTER TABLE [producer_resultfile_suggested_billing_instruction] ADD CONSTRAINT [FK_producer_resultfile_suggested_billing_instruction_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250522093001_AddProducerDesignatedRunHistoryRelationships'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250522093001_AddProducerDesignatedRunHistoryRelationships', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
