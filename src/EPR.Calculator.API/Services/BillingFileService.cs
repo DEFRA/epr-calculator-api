@@ -3,6 +3,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
@@ -88,6 +89,87 @@ namespace EPR.Calculator.API.Services
                     };
                 }
             }
+        }
+
+        public async Task<ProducersInstructionResponse?> GetProducersInstructionResponseAsync(int runId, CancellationToken cancellationToken)
+        {
+            var validRunClassifications = new[]
+                {
+                    (int)RunClassification.INITIAL_RUN,
+                    (int)RunClassification.INTERIM_RECALCULATION_RUN,
+                    (int)RunClassification.FINAL_RUN,
+                    (int)RunClassification.FINAL_RECALCULATION_RUN,
+                };
+
+            var runStatus = await applicationDBContext.CalculatorRuns
+                .Where(run => run.Id == runId && validRunClassifications.Contains(run.CalculatorRunClassificationId))
+                .Select(run => run.CalculatorRunClassificationId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (runStatus == 0)
+            {
+                throw new UnprocessableEntityException("Run ID not found");
+            }
+
+
+
+            var instructions = await (
+         from billing in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+         join producer in applicationDBContext.ProducerDetail
+             on new { billing.ProducerId, billing.CalculatorRunId }
+             equals new { producer.ProducerId, producer.CalculatorRunId }
+         join run in applicationDBContext.CalculatorRuns
+             on billing.CalculatorRunId equals run.Id
+         where billing.CalculatorRunId == runId &&
+        validRunClassifications.Contains(run.CalculatorRunClassificationId)
+         select new
+         {
+             OrganisationId = producer.ProducerId,
+             OrganisationName = producer.ProducerName ?? producer.TradingName ?? "Unknown",
+             BillingInstruction = billing.SuggestedBillingInstruction,
+             InvoiceAmount = billing.SuggestedInvoiceAmount,
+             Status = billing.BillingInstructionAcceptReject,
+             CalculatorRunName = run.Name,
+             CalculatorRunCreatedAt = run.CreatedAt,
+         }).ToListAsync(cancellationToken);
+
+            if (instructions == null || !instructions.Any())
+            {
+                return null;
+            }
+
+            var details = instructions.Select(i => new ProducersInstructionDetail
+            {
+                organisationId = i.OrganisationId,
+                organisationName = i.OrganisationName,
+                billingInstruction = i.BillingInstruction,
+                invoiceAmount = i.InvoiceAmount.ToString("F2"),
+                status = MapToBillingStatus(i.Status),
+            }).ToList();
+
+            var summary = new ProducersInstructionSummary
+            {
+                Statuses = details
+                    .GroupBy(d => d.status)
+                    .ToDictionary(g => g.Key, g => g.Count()),
+            };
+
+            return new ProducersInstructionResponse
+            {
+                ProducersInstructionDetails = details,
+                ProducersInstructionSummary = summary,
+            };
+        }
+
+        private BillingStatus MapToBillingStatus(string? status)
+        {
+            return status?.ToLowerInvariant() switch
+            {
+                "accepted" => BillingStatus.Accepted,
+                "rejected" => BillingStatus.Rejected,
+                "pending" => BillingStatus.Pending,
+                _ => BillingStatus.Noaction,
+            };
         }
     }
 }

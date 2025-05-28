@@ -38,7 +38,7 @@
 
         public virtual DefaultParameterSettingMaster? DefaultParameterSettingMaster { get; set; }
 
-        public ICollection<ProducerDetail> ProducerDetails { get; } = new List<ProducerDetail>();
+        public virtual ICollection<ProducerDetail> ProducerDetails { get; } = new List<ProducerDetail>();
 
         public ICollection<CountryApportionment> CountryApportionments { get; } = new List<CountryApportionment>();
 
@@ -48,6 +48,6 @@
 
         public ICollection<ProducerDesignatedRunInvoiceInstruction> ProducerDesignatedRunInvoiceInstruction { get; } = [];
 
-        public ICollection<ProducerResultFileSuggestedBillingInstruction> ProducerResultFileSuggestedBillingInstruction { get; } = [];
+        public virtual ICollection<ProducerResultFileSuggestedBillingInstruction> ProducerResultFileSuggestedBillingInstruction { get; } = [];
     }
 }

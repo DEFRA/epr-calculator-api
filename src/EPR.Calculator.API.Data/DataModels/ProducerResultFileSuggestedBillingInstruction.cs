@@ -6,7 +6,11 @@
 
         public int CalculatorRunId { get; set; }
 
+        public virtual CalculatorRun? CalculatorRun { get; set; }
+
         public int ProducerId { get; set; }
+
+        public virtual ProducerDetail? ProducerDetail { get; set; }
 
         public decimal TotalProducerBillWithBadDebt { get; set; }
 

@@ -51,15 +51,15 @@ else
 builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
 
 // Add services to the container.
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
-// Adding Authorization with Global Policy.
-builder.Services.AddAuthorizationBuilder()
-        .SetFallbackPolicy(new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .RequireRole(CommonConstants.SASuperUserRole)
-        .Build());
+//// Adding Authorization with Global Policy.
+//builder.Services.AddAuthorizationBuilder()
+//        .SetFallbackPolicy(new AuthorizationPolicyBuilder()
+//        .RequireAuthenticatedUser()
+//        .RequireRole(CommonConstants.SASuperUserRole)
+//        .Build());
 
 builder.Services.AddControllers();
 
