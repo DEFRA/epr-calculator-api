@@ -6,6 +6,7 @@ using EPR.Calculator.API.Services.Abstractions;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Amqp.Transaction;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -104,6 +105,60 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 objectResult.Value.Should().NotBeNull();
                 objectResult.Value.Should().Be(message);
             }
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructions_ReturnsBadRequest_WhenRunIdIsInvalid()
+        {
+            // Arrange
+            int invalidRunId = 0;
+
+            // Act
+            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(invalidRunId);
+
+            // Assert
+            Assert.IsInstanceOfType(result.Result, typeof(BadRequestObjectResult));
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructions_ReturnsNotFound_WhenResponseIsNull()
+        {
+            // Arrange
+            int validRunId = 10;
+            billingFileServiceMock
+                .Setup(s => s.GetProducersInstructionResponseAsync(validRunId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync((ProducersInstructionResponse?)null);
+
+            // Act
+            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(validRunId);
+
+            // Assert
+            Assert.IsInstanceOfType(result.Result, typeof(NotFoundObjectResult));
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructions_ReturnsOk_WithValidResponse()
+        {
+            // Arrange
+            int validRunId = 20;
+            var expectedResponse = new ProducersInstructionResponse
+            {
+                ProducersInstructionDetails = new List<ProducersInstructionDetail>(),
+                ProducersInstructionSummary = new ProducersInstructionSummary()
+            };
+
+            billingFileServiceMock
+                .Setup(s => s.GetProducersInstructionResponseAsync(validRunId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expectedResponse);
+
+            // Act
+            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(validRunId);
+
+            // Assert
+            var okResult = result.Result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult.StatusCode);
+            Assert.AreEqual(expectedResponse, okResult.Value);
         }
     }
 }

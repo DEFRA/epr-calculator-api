@@ -5,6 +5,8 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services.Abstractions;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services
@@ -102,36 +104,33 @@ namespace EPR.Calculator.API.Services
                 };
 
             var runStatus = await applicationDBContext.CalculatorRuns
-                .Where(run => run.Id == runId && validRunClassifications.Contains(run.CalculatorRunClassificationId))
-                .Select(run => run.CalculatorRunClassificationId)
+                .Where(run => run.Id == runId)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (runStatus == 0)
+            if (runStatus == null)
             {
-                throw new UnprocessableEntityException("Run ID not found");
+                throw new KeyNotFoundException($"Run ID {runId} was not found.");
             }
 
-
+            if (!validRunClassifications.Contains(runStatus.CalculatorRunClassificationId))
+            {
+                throw new UnprocessableEntityException(string.Format(CommonResources.NotAValidClassificationStatus, runId));
+            }
 
             var instructions = await (
-         from billing in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-         join producer in applicationDBContext.ProducerDetail
-             on new { billing.ProducerId, billing.CalculatorRunId }
-             equals new { producer.ProducerId, producer.CalculatorRunId }
-         join run in applicationDBContext.CalculatorRuns
-             on billing.CalculatorRunId equals run.Id
-         where billing.CalculatorRunId == runId &&
-        validRunClassifications.Contains(run.CalculatorRunClassificationId)
-         select new
-         {
-             OrganisationId = producer.ProducerId,
-             OrganisationName = producer.ProducerName ?? producer.TradingName ?? "Unknown",
-             BillingInstruction = billing.SuggestedBillingInstruction,
-             InvoiceAmount = billing.SuggestedInvoiceAmount,
-             Status = billing.BillingInstructionAcceptReject,
-             CalculatorRunName = run.Name,
-             CalculatorRunCreatedAt = run.CreatedAt,
-         }).ToListAsync(cancellationToken);
+             from billing in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+             join producer in applicationDBContext.ProducerDetail
+                 on new { billing.ProducerId, billing.CalculatorRunId }
+                 equals new { producer.ProducerId, producer.CalculatorRunId }
+             where billing.CalculatorRunId == runId
+             select new
+             {
+                 OrganisationId = producer.ProducerId,
+                 OrganisationName = producer.ProducerName ?? producer.TradingName ?? string.Empty,
+                 BillingInstruction = billing.SuggestedBillingInstruction,
+                 InvoiceAmount = billing.SuggestedInvoiceAmount,
+                 Status = billing.BillingInstructionAcceptReject,
+             }).ToListAsync(cancellationToken);
 
             if (instructions == null || !instructions.Any())
             {

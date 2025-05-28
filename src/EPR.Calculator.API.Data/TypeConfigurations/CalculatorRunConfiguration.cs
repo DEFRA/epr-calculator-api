@@ -84,10 +84,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.HasMany(e => e.CalculatorRunBillingFileMetadata)
                     .WithOne(e => e.CalculatorRun)
                     .HasForeignKey(e => e.CalculatorRunId);
-
-            builder.HasMany(e => e.ProducerResultFileSuggestedBillingInstruction)
-                   .WithOne(e => e.CalculatorRun)
-                   .HasForeignKey(e => e.CalculatorRunId);
         }
     }
 }

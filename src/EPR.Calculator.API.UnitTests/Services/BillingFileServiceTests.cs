@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -284,6 +285,102 @@ namespace EPR.Calculator.API.UnitTests.Services
                         cancellationTokenSource.Token),
                     Times.Once());
             }
+        }
+
+
+        [TestMethod]
+        public async Task GetProducersInstructionResponseAsync_ReturnsResponse_WhenValid()
+        {
+            // Arrange
+            var runId = 11;
+            DbContext.CalculatorRuns.Add(new CalculatorRun
+            {
+                Id = runId,
+                CalculatorRunClassificationId = (int)RunClassification.FINAL_RUN,
+                Name = "Test Run",
+                CreatedAt = DateTime.UtcNow,
+                Financial_Year = new CalculatorRunFinancialYear { Name = "2021-22" },
+            });
+
+            DbContext.ProducerDetail.Add(new ProducerDetail
+            {
+                ProducerId = 101,
+                CalculatorRunId = runId,
+                ProducerName = "Acme Co",
+                TradingName = "Acme Trading",
+            });
+
+            DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
+            {
+                ProducerId = 101,
+                CalculatorRunId = runId,
+                SuggestedBillingInstruction = "Invoice",
+                SuggestedInvoiceAmount = 123.45m,
+                BillingInstructionAcceptReject = "Accepted",
+            });
+
+            await DbContext.SaveChangesAsync();
+
+            // Act
+            var result = await billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.ProducersInstructionDetails.Count);
+            Assert.AreEqual("Accepted", result.ProducersInstructionDetails.First().status.ToString());
+        }
+
+        [TestMethod]
+        public async Task GetProducersInstructionResponseAsync_ThrowsKeyNotFound_WhenRunNotFound()
+        {
+            // Arrange
+            var runId = 999;
+
+            // Act + Assert
+            await Assert.ThrowsExceptionAsync<KeyNotFoundException>(() =>
+                billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None));
+        }
+
+        [TestMethod]
+        public async Task GetProducersInstructionResponseAsync_ThrowsUnprocessableEntity_WhenInvalidClassification()
+        {
+            // Arrange
+            var runId = 20;
+            DbContext.CalculatorRuns.Add(new CalculatorRun
+            {
+                Id = runId,
+                Name = "Invalid Run",
+                CalculatorRunClassificationId = 999, // Invalid
+                Financial_Year = new CalculatorRunFinancialYear { Name = "2025-26" },
+            });
+
+            await DbContext.SaveChangesAsync();
+
+            // Act + Assert
+            await Assert.ThrowsExceptionAsync<UnprocessableEntityException>(() =>
+                billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None));
+        }
+
+        [TestMethod]
+        public async Task GetProducersInstructionResponseAsync_ReturnsNull_WhenNoInstructions()
+        {
+            // Arrange
+            var runId = 30;
+            DbContext.CalculatorRuns.Add(new CalculatorRun
+            {
+                Id = runId,
+                Name = "Run1",
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                Financial_Year = new CalculatorRunFinancialYear { Name = "2023-24" },
+            });
+
+            await DbContext.SaveChangesAsync();
+
+            // Act
+            var result = await billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None);
+
+            // Assert
+            Assert.IsNull(result);
         }
     }
 }
