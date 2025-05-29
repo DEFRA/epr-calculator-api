@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -87,6 +88,80 @@ namespace EPR.Calculator.API.Services
                         Message = CommonResources.RequestAcceptedMessage,
                     };
                 }
+            }
+        }
+
+        public async Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAsync(
+            int runId,
+            string userName,
+            ProduceBillingInstuctionRequestDto produceBillingInstuctionRequestDto,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                CalculatorRun? calculatorRun = await applicationDBContext.CalculatorRuns
+                                                    .FirstOrDefaultAsync(x => x.Id == runId, cancellationToken)
+                                                    .ConfigureAwait(false);
+
+                if (calculatorRun is null)
+                {
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.UnprocessableContent,
+                        Message = ErrorMessages.InvalidRunId,
+                    };
+                }
+
+                if (produceBillingInstuctionRequestDto.Status == BillingStatus.Rejected.ToString() && produceBillingInstuctionRequestDto.ReasonForRejection is null)
+                {
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.BadRequest,
+                        Message = ErrorMessages.RejectionReason,
+                    };
+                }
+
+                if (!Enum.TryParse(produceBillingInstuctionRequestDto.Status, true, out BillingStatus status))
+                {
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.BadRequest,
+                        Message = ErrorMessages.InvalidStatus,
+                    };
+                }
+
+                List<ProducerResultFileSuggestedBillingInstruction> rows = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                .Where(x => produceBillingInstuctionRequestDto.OrganisationIds.Contains(x.ProducerId) && x.CalculatorRunId == runId)
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+                foreach (var row in rows)
+                {
+                    row.BillingInstructionAcceptReject = produceBillingInstuctionRequestDto.Status;
+
+                    if (produceBillingInstuctionRequestDto.Status == BillingStatus.Rejected.ToString())
+                    {
+                        row.ReasonForRejection = produceBillingInstuctionRequestDto.ReasonForRejection;
+                    }
+
+                    row.LastModifiedAcceptReject = DateTime.UtcNow;
+                    row.LastModifiedAcceptRejectBy = userName;
+                }
+
+                await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                return new ServiceProcessResponseDto
+                {
+                    StatusCode = HttpStatusCode.OK,
+                };
+            }
+            catch (Exception exception)
+            {
+                return new ServiceProcessResponseDto
+                {
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    Message = exception.Message,
+                };
             }
         }
     }

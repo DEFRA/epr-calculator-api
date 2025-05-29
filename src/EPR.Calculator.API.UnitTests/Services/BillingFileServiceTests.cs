@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -284,6 +285,78 @@ namespace EPR.Calculator.API.UnitTests.Services
                         cancellationTokenSource.Token),
                     Times.Once());
             }
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAsync_ShouldReturnUnprocessableContent_WhenCalculatorRunNotFound()
+        {
+            // Arrange
+            var requestDto = new ProduceBillingInstuctionRequestDto
+            {
+                Status = BillingStatus.Accepted.ToString(),
+                OrganisationIds = new List<int> { 1, 2, 3 },
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(100, "TestUser", requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
+            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAsync_ShouldReturnBadRequest_WhenRejectedWithoutReason()
+        {
+            // Arrange
+            var requestDto = new ProduceBillingInstuctionRequestDto
+            {
+                Status = BillingStatus.Rejected.ToString(),
+                ReasonForRejection = null,
+                OrganisationIds = new List<int> { 1, 2, 3 },
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
+            Assert.AreEqual(ErrorMessages.RejectionReason, result.Message);
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAsync_ShouldReturnBadRequest_WhenStatusIsInvalid()
+        {
+            // Arrange
+            var requestDto = new ProduceBillingInstuctionRequestDto
+            {
+                Status = "Test",
+                OrganisationIds = new List<int> { 1, 2, 3 },
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
+            Assert.AreEqual(ErrorMessages.InvalidStatus, result.Message);
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAsync_ShouldReturnOk_WhenUpdateSuccessful()
+        {
+            // Arrange
+            var requestDto = new ProduceBillingInstuctionRequestDto
+            {
+                Status = BillingStatus.Accepted.ToString(),
+                OrganisationIds = new List<int> { 1, 2 },
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
         }
     }
 }
