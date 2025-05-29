@@ -5,6 +5,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services.Abstractions;
+using EPR.Calculator.API.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services
@@ -100,7 +101,7 @@ namespace EPR.Calculator.API.Services
             try
             {
                 CalculatorRun? calculatorRun = await applicationDBContext.CalculatorRuns
-                                                    .FirstOrDefaultAsync(x => x.Id == runId, cancellationToken)
+                                                    .FirstOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatus().Contains(x.CalculatorRunClassificationId), cancellationToken)
                                                     .ConfigureAwait(false);
 
                 if (calculatorRun is null)

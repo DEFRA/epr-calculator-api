@@ -306,6 +306,24 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
+        public async Task ProducerBillingInstructionsAsync_ShouldReturnUnprocessableContent_WhenRunStatusIsInvalid()
+        {
+            // Arrange
+            var requestDto = new ProduceBillingInstuctionRequestDto
+            {
+                Status = BillingStatus.Accepted.ToString(),
+                OrganisationIds = new List<int> { 1, 2, 3 },
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(2, "TestUser", requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
+            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+        }
+
+        [TestMethod]
         public async Task ProducerBillingInstructionsAsync_ShouldReturnBadRequest_WhenRejectedWithoutReason()
         {
             // Arrange
