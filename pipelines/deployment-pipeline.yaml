@@ -1,6 +1,7 @@
 trigger: none
 pr: none
-pool: DEFRA-COMMON-ubuntu2004-SSV3
+pool: 
+  vmImage: 'windows-latest
 
 parameters:
 - name: teamName
