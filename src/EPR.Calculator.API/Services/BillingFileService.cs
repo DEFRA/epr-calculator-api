@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -104,8 +105,7 @@ namespace EPR.Calculator.API.Services
                 };
 
             var runStatus = await applicationDBContext.CalculatorRuns
-                .Where(run => run.Id == runId)
-                .FirstOrDefaultAsync(cancellationToken);
+                .FirstOrDefaultAsync(run => run.Id == runId, cancellationToken);
 
             if (runStatus == null)
             {
@@ -117,39 +117,30 @@ namespace EPR.Calculator.API.Services
                 throw new UnprocessableEntityException(string.Format(CommonResources.NotAValidClassificationStatus, runId));
             }
 
-            var instructions = await (
-             from billing in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-             join producer in applicationDBContext.ProducerDetail
-                 on new { billing.ProducerId, billing.CalculatorRunId }
-                 equals new { producer.ProducerId, producer.CalculatorRunId }
-             where billing.CalculatorRunId == runId
-             select new
-             {
-                 OrganisationId = producer.ProducerId,
-                 OrganisationName = producer.ProducerName ?? producer.TradingName ?? string.Empty,
-                 BillingInstruction = billing.SuggestedBillingInstruction,
-                 InvoiceAmount = billing.SuggestedInvoiceAmount,
-                 Status = billing.BillingInstructionAcceptReject,
-             }).ToListAsync(cancellationToken);
+            var details = await (
+                from billing in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                join producer in applicationDBContext.ProducerDetail
+                    on new { billing.ProducerId, billing.CalculatorRunId }
+                    equals new { producer.ProducerId, producer.CalculatorRunId }
+                where billing.CalculatorRunId == runId
+                select new ProducersInstructionDetail
+                {
+                    OrganisationId = producer.ProducerId,
+                    OrganisationName = producer.ProducerName,
+                    BillingInstruction = billing.SuggestedBillingInstruction,
+                    InvoiceAmount = billing.SuggestedInvoiceAmount,
+                    Status = billing.BillingInstructionAcceptReject,
+                }).ToListAsync(cancellationToken);
 
-            if (instructions == null || !instructions.Any())
+            if (details == null || !details.Any())
             {
                 return null;
             }
 
-            var details = instructions.Select(i => new ProducersInstructionDetail
-            {
-                organisationId = i.OrganisationId,
-                organisationName = i.OrganisationName,
-                billingInstruction = i.BillingInstruction,
-                invoiceAmount = i.InvoiceAmount.ToString("F2"),
-                status = MapToBillingStatus(i.Status),
-            }).ToList();
-
             var summary = new ProducersInstructionSummary
             {
                 Statuses = details
-                    .GroupBy(d => d.status)
+                    .GroupBy(d => string.IsNullOrWhiteSpace(d.Status) ? string.Empty : d.Status.Trim())
                     .ToDictionary(g => g.Key, g => g.Count()),
             };
 
@@ -157,17 +148,6 @@ namespace EPR.Calculator.API.Services
             {
                 ProducersInstructionDetails = details,
                 ProducersInstructionSummary = summary,
-            };
-        }
-
-        private BillingStatus MapToBillingStatus(string? status)
-        {
-            return status?.ToLowerInvariant() switch
-            {
-                "accepted" => BillingStatus.Accepted,
-                "rejected" => BillingStatus.Rejected,
-                "pending" => BillingStatus.Pending,
-                _ => BillingStatus.Noaction,
             };
         }
     }

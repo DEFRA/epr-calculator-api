@@ -144,7 +144,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var expectedResponse = new ProducersInstructionResponse
             {
                 ProducersInstructionDetails = new List<ProducersInstructionDetail>(),
-                ProducersInstructionSummary = new ProducersInstructionSummary()
+                ProducersInstructionSummary = new ProducersInstructionSummary(),
             };
 
             billingFileServiceMock

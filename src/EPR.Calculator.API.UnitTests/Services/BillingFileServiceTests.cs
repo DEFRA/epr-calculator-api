@@ -327,7 +327,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.ProducersInstructionDetails.Count);
-            Assert.AreEqual("Accepted", result.ProducersInstructionDetails.First().status.ToString());
+            Assert.AreEqual("Accepted", result.ProducersInstructionDetails.First().Status.ToString());
         }
 
         [TestMethod]
