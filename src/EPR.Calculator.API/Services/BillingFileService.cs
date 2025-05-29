@@ -105,7 +105,7 @@ namespace EPR.Calculator.API.Services
                 };
 
             var runStatus = await applicationDBContext.CalculatorRuns
-                .FirstOrDefaultAsync(run => run.Id == runId, cancellationToken);
+                .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken);
 
             if (runStatus == null)
             {
@@ -129,8 +129,8 @@ namespace EPR.Calculator.API.Services
                     OrganisationName = producer.ProducerName,
                     BillingInstruction = billing.SuggestedBillingInstruction,
                     InvoiceAmount = billing.SuggestedInvoiceAmount,
-                    Status = billing.BillingInstructionAcceptReject,
-                }).ToListAsync(cancellationToken);
+                    Status = string.IsNullOrWhiteSpace(billing.BillingInstructionAcceptReject) ? string.Empty : billing.BillingInstructionAcceptReject,
+                }).Distinct().ToListAsync(cancellationToken);
 
             if (details == null || !details.Any())
             {
