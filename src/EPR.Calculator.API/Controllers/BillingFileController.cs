@@ -46,5 +46,30 @@ namespace EPR.Calculator.API.Controllers
                 StatusCode = (int)serviceProcessResponseDto.StatusCode,
             };
         }
+
+        [HttpGet("ProducerBillingInstructions/{runId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProducersInstructionResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ProducersInstructionResponse>> ProducerBillingInstructions(
+            int runId, CancellationToken cancellationToken = default)
+        {
+            if (runId <= 0)
+            {
+                return BadRequest(CommonResources.ResourceNotFoundErrorMessage);
+            }
+
+            var responseDto = await billingFileService.GetProducersInstructionResponseAsync(
+                runId, cancellationToken).ConfigureAwait(false);
+
+            if (responseDto == null)
+            {
+                return NotFound("No billing instructions found for the given runId.");
+            }
+
+            return Ok(responseDto);
+        }
     }
 }

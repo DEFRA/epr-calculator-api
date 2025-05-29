@@ -1,9 +1,13 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services.Abstractions;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services
@@ -88,6 +92,63 @@ namespace EPR.Calculator.API.Services
                     };
                 }
             }
+        }
+
+        public async Task<ProducersInstructionResponse?> GetProducersInstructionResponseAsync(int runId, CancellationToken cancellationToken)
+        {
+            var validRunClassifications = new[]
+                {
+                    (int)RunClassification.INITIAL_RUN,
+                    (int)RunClassification.INTERIM_RECALCULATION_RUN,
+                    (int)RunClassification.FINAL_RUN,
+                    (int)RunClassification.FINAL_RECALCULATION_RUN,
+                };
+
+            var runStatus = await applicationDBContext.CalculatorRuns
+                .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken);
+
+            if (runStatus == null)
+            {
+                throw new KeyNotFoundException($"Run ID {runId} was not found.");
+            }
+
+            if (!validRunClassifications.Contains(runStatus.CalculatorRunClassificationId))
+            {
+                throw new UnprocessableEntityException(string.Format(CommonResources.NotAValidClassificationStatus, runId));
+            }
+
+            var details = await (
+                from billing in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                join producer in applicationDBContext.ProducerDetail
+                    on new { billing.ProducerId, billing.CalculatorRunId }
+                    equals new { producer.ProducerId, producer.CalculatorRunId }
+                where billing.CalculatorRunId == runId
+                select new ProducersInstructionDetail
+                {
+                    OrganisationId = producer.ProducerId,
+                    OrganisationName = producer.ProducerName,
+                    BillingInstruction = billing.SuggestedBillingInstruction,
+                    InvoiceAmount = billing.SuggestedInvoiceAmount,
+                    Status = string.IsNullOrWhiteSpace(billing.BillingInstructionAcceptReject) ? string.Empty : billing.BillingInstructionAcceptReject,
+                }).Distinct().ToListAsync(cancellationToken);
+
+            if (details == null || !details.Any())
+            {
+                return null;
+            }
+
+            var summary = new ProducersInstructionSummary
+            {
+                Statuses = details
+                    .GroupBy(d => string.IsNullOrWhiteSpace(d.Status) ? string.Empty : d.Status.Trim())
+                    .ToDictionary(g => g.Key, g => g.Count()),
+            };
+
+            return new ProducersInstructionResponse
+            {
+                ProducersInstructionDetails = details,
+                ProducersInstructionSummary = summary,
+            };
         }
     }
 }
