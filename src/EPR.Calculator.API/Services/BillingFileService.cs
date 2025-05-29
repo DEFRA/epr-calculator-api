@@ -112,7 +112,7 @@ namespace EPR.Calculator.API.Services
                     };
                 }
 
-                if (produceBillingInstuctionRequestDto.Status == BillingStatus.Rejected.ToString() && produceBillingInstuctionRequestDto.ReasonForRejection is null)
+                if (produceBillingInstuctionRequestDto.Status.ToLower() == BillingStatus.Rejected.ToString().ToLower() && produceBillingInstuctionRequestDto.ReasonForRejection is null)
                 {
                     return new ServiceProcessResponseDto
                     {
@@ -139,7 +139,7 @@ namespace EPR.Calculator.API.Services
                 {
                     row.BillingInstructionAcceptReject = produceBillingInstuctionRequestDto.Status;
 
-                    if (produceBillingInstuctionRequestDto.Status == BillingStatus.Rejected.ToString())
+                    if (produceBillingInstuctionRequestDto.Status.ToLower() == BillingStatus.Rejected.ToString().ToLower())
                     {
                         row.ReasonForRejection = produceBillingInstuctionRequestDto.ReasonForRejection;
                     }

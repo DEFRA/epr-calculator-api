@@ -38,7 +38,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        [DataRow(StatusCodes.Status202Accepted, "Success")]
+        [DataRow(StatusCodes.Status200OK, "OK")]
         [DataRow(StatusCodes.Status400BadRequest, "Bad Request.")]
         [DataRow(StatusCodes.Status422UnprocessableEntity, "Unprocessable Entity")]
         public async Task ProducerBillingInstructions_ShouldReturn202Accepted_WhenUpdateSuccessful(
