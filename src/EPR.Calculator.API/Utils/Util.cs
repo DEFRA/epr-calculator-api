@@ -241,7 +241,7 @@ namespace EPR.Calculator.API.Utils
             return $"exec {procedureName} @RunId ={runId}, @calendarYear = {calendarYear}, @createdBy = {createdBy}";
         }
 
-        public static List<int> AcceptableRunStatus()
+        public static IEnumerable<int> AcceptableRunStatus()
         {
             var validRunClassifications = new List<int>
                 {

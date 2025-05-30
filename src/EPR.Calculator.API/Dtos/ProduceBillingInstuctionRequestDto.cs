@@ -7,7 +7,7 @@ namespace EPR.Calculator.API.Dtos
     /// </summary>
     public class ProduceBillingInstuctionRequestDto
     {
-        public required List<int> OrganisationIds { get; set; }
+        public required IEnumerable<int> OrganisationIds { get; set; }
 
         public required string Status { get; set; }
 

@@ -324,43 +324,6 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task ProducerBillingInstructionsAsync_ShouldReturnBadRequest_WhenRejectedWithoutReason()
-        {
-            // Arrange
-            var requestDto = new ProduceBillingInstuctionRequestDto
-            {
-                Status = BillingStatus.Rejected.ToString(),
-                ReasonForRejection = null,
-                OrganisationIds = new List<int> { 1, 2, 3 },
-            };
-
-            // Act
-            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
-
-            // Assert
-            Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
-            Assert.AreEqual(ErrorMessages.RejectionReason, result.Message);
-        }
-
-        [TestMethod]
-        public async Task ProducerBillingInstructionsAsync_ShouldReturnBadRequest_WhenStatusIsInvalid()
-        {
-            // Arrange
-            var requestDto = new ProduceBillingInstuctionRequestDto
-            {
-                Status = "Test",
-                OrganisationIds = new List<int> { 1, 2, 3 },
-            };
-
-            // Act
-            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
-
-            // Assert
-            Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
-            Assert.AreEqual(ErrorMessages.InvalidStatus, result.Message);
-        }
-
-        [TestMethod]
         public async Task ProducerBillingInstructionsAsync_ShouldReturnOk_WhenUpdateSuccessful()
         {
             // Arrange
@@ -374,7 +337,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
 
             // Assert
-            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+            Assert.AreEqual(HttpStatusCode.NoContent, result.StatusCode);
         }
     }
 }

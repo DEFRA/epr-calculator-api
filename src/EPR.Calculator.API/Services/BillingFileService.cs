@@ -101,7 +101,7 @@ namespace EPR.Calculator.API.Services
             try
             {
                 CalculatorRun? calculatorRun = await applicationDBContext.CalculatorRuns
-                                                    .FirstOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatus().Contains(x.CalculatorRunClassificationId), cancellationToken)
+                                                    .SingleOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatus().Contains(x.CalculatorRunClassificationId), cancellationToken)
                                                     .ConfigureAwait(false);
 
                 if (calculatorRun is null)
@@ -113,24 +113,6 @@ namespace EPR.Calculator.API.Services
                     };
                 }
 
-                if (produceBillingInstuctionRequestDto.Status.ToLower() == BillingStatus.Rejected.ToString().ToLower() && produceBillingInstuctionRequestDto.ReasonForRejection is null)
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.BadRequest,
-                        Message = ErrorMessages.RejectionReason,
-                    };
-                }
-
-                if (!Enum.TryParse(produceBillingInstuctionRequestDto.Status, true, out BillingStatus status))
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.BadRequest,
-                        Message = ErrorMessages.InvalidStatus,
-                    };
-                }
-
                 List<ProducerResultFileSuggestedBillingInstruction> rows = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
                 .Where(x => produceBillingInstuctionRequestDto.OrganisationIds.Contains(x.ProducerId) && x.CalculatorRunId == runId)
                 .ToListAsync()
@@ -138,22 +120,14 @@ namespace EPR.Calculator.API.Services
 
                 foreach (var row in rows)
                 {
-                    row.BillingInstructionAcceptReject = produceBillingInstuctionRequestDto.Status;
-
-                    if (produceBillingInstuctionRequestDto.Status.ToLower() == BillingStatus.Rejected.ToString().ToLower())
-                    {
-                        row.ReasonForRejection = produceBillingInstuctionRequestDto.ReasonForRejection;
-                    }
-
-                    row.LastModifiedAcceptReject = DateTime.UtcNow;
-                    row.LastModifiedAcceptRejectBy = userName;
+                    UpdateRow(userName, produceBillingInstuctionRequestDto, row);
                 }
 
                 await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 return new ServiceProcessResponseDto
                 {
-                    StatusCode = HttpStatusCode.OK,
+                    StatusCode = HttpStatusCode.NoContent,
                 };
             }
             catch (Exception exception)
@@ -164,6 +138,22 @@ namespace EPR.Calculator.API.Services
                     Message = exception.Message,
                 };
             }
+        }
+
+        private static void UpdateRow(
+            string userName,
+            ProduceBillingInstuctionRequestDto produceBillingInstuctionRequestDto,
+            ProducerResultFileSuggestedBillingInstruction row)
+        {
+            row.BillingInstructionAcceptReject = produceBillingInstuctionRequestDto.Status;
+
+            if (produceBillingInstuctionRequestDto.Status.ToLower() == BillingStatus.Rejected.ToString().ToLower())
+            {
+                row.ReasonForRejection = produceBillingInstuctionRequestDto.ReasonForRejection;
+            }
+
+            row.LastModifiedAcceptReject = DateTime.UtcNow;
+            row.LastModifiedAcceptRejectBy = userName;
         }
     }
 }
