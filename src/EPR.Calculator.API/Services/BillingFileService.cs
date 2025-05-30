@@ -118,12 +118,12 @@ namespace EPR.Calculator.API.Services
                             .ToListAsync(cancellationToken)
                             .ConfigureAwait(false);
 
-                if (rows is null)
+                if (rows.Count == 0)
                 {
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunId,
+                        Message = ErrorMessages.InvalidOrganisationId,
                     };
                 }
 

@@ -44,6 +44,12 @@ namespace EPR.Calculator.API.UnitTests
                 this.DbContext.CalculatorRuns.AddRange(this.GetCalculatorRuns());
                 this.DbContext.SaveChanges();
             }
+
+            if (!this.DbContext.ProducerResultFileSuggestedBillingInstruction.Any())
+            {
+                this.DbContext.ProducerResultFileSuggestedBillingInstruction.AddRange(this.GetProducerResultFileSuggestedBillingInstruction());
+                this.DbContext.SaveChanges();
+            }
         }
 
         /// <summary>
@@ -115,6 +121,20 @@ namespace EPR.Calculator.API.UnitTests
                 };
 
             return calculatorRuns;
+        }
+
+        private List<ProducerResultFileSuggestedBillingInstruction> GetProducerResultFileSuggestedBillingInstruction()
+        {
+            var rows = new List<ProducerResultFileSuggestedBillingInstruction>
+            {
+                new()
+                {
+                    CalculatorRunId = 1,
+                    ProducerId = 1,
+                    SuggestedBillingInstruction = "Test",
+                },
+            };
+            return rows;
         }
     }
 }
