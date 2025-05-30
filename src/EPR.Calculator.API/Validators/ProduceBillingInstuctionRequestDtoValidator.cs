@@ -21,7 +21,7 @@ namespace EPR.Calculator.API.Validators
 
             this.RuleFor(x => x.ReasonForRejection)
                 .NotEmpty()
-                .When(x => x.Status.ToLower() == BillingStatus.Rejected.ToString().ToLower())
+                .When(x => string.Equals(x.Status, BillingStatus.Rejected.ToString()))
                 .WithMessage("Reason for rejection is required.");
         }
     }

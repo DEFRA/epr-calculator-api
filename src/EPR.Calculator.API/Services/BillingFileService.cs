@@ -100,8 +100,8 @@ namespace EPR.Calculator.API.Services
         {
             try
             {
-                CalculatorRun? calculatorRun = await applicationDBContext.CalculatorRuns
-                            .SingleOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatus().Contains(x.CalculatorRunClassificationId), cancellationToken)
+                var calculatorRun = await applicationDBContext.CalculatorRuns
+                            .SingleOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatusForBillingInstructions().Contains(x.CalculatorRunClassificationId), cancellationToken)
                             .ConfigureAwait(false);
 
                 if (calculatorRun is null)
@@ -115,12 +115,21 @@ namespace EPR.Calculator.API.Services
 
                 var rows = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
                             .Where(x => produceBillingInstuctionRequestDto.OrganisationIds.Contains(x.ProducerId) && x.CalculatorRunId == runId)
-                            .ToListAsync()
+                            .ToListAsync(cancellationToken)
                             .ConfigureAwait(false);
+
+                if (rows is null)
+                {
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.UnprocessableContent,
+                        Message = ErrorMessages.InvalidRunId,
+                    };
+                }
 
                 foreach (var row in rows)
                 {
-                    UpdateRow(userName, produceBillingInstuctionRequestDto, row);
+                    UpdateBillingInstruction(userName, produceBillingInstuctionRequestDto, row);
                 }
 
                 await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -140,14 +149,14 @@ namespace EPR.Calculator.API.Services
             }
         }
 
-        private static void UpdateRow(
+        private static void UpdateBillingInstruction(
             string userName,
             ProduceBillingInstuctionRequestDto produceBillingInstuctionRequestDto,
             ProducerResultFileSuggestedBillingInstruction row)
         {
             row.BillingInstructionAcceptReject = produceBillingInstuctionRequestDto.Status;
 
-            if (produceBillingInstuctionRequestDto.Status.ToLower() == BillingStatus.Rejected.ToString().ToLower())
+            if (string.Equals(produceBillingInstuctionRequestDto.Status, BillingStatus.Rejected.ToString()))
             {
                 row.ReasonForRejection = produceBillingInstuctionRequestDto.ReasonForRejection;
             }

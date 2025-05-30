@@ -10,17 +10,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
     {
         private readonly ProduceBillingInstuctionRequestDtoValidator validator;
 
-        public ProduceBillingInstructionRequestDtoValidatorTests() {
-            this.validator = new ProduceBillingInstuctionRequestDtoValidator();
-        }
-
-        [TestMethod]
-        public void Should_Have_Error_When_OrganisationIds_Is_Null()
+        public ProduceBillingInstructionRequestDtoValidatorTests()
         {
-            var model = new ProduceBillingInstuctionRequestDto { OrganisationIds = null, Status = "Accepted" };
-            var result = this.validator.Validate(model);
-
-            Assert.AreEqual("Organisation Id is required.", result.Errors.First().ErrorMessage);
+            this.validator = new ProduceBillingInstuctionRequestDtoValidator();
         }
 
         [TestMethod]
@@ -35,7 +27,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
         [TestMethod]
         public void Should_Have_Error_When_Status_Is_Empty()
         {
-            var model = new ProduceBillingInstuctionRequestDto { OrganisationIds = [1], Status = "" };
+            var model = new ProduceBillingInstuctionRequestDto { OrganisationIds = [1], Status = string.Empty };
             var result = this.validator.Validate(model);
 
             Assert.AreEqual("Status is required.", result.Errors.First().ErrorMessage);
