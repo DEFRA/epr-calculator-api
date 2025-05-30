@@ -13,17 +13,16 @@ namespace EPR.Calculator.API.Controllers
     public class BillingFileNewController(IBillingFileService billingFileService) : BaseControllerBase
     {
         /// <summary>
-        /// Accept or Reject billing instruction based on the provided request.
+        /// Accept or Reject billing for the matching list of organisation id and run id.
         /// </summary>
-        /// <param name="runId">The request containing.</param>
-        /// <param name="produceBillingInstuctionRequestDto">The request containing the details for billing instruction.</param>
+        /// <param name="runId">Run Id passed in the URL.</param>
+        /// <param name="produceBillingInstuctionRequestDto">Organisation id and status passed as request body.</param>
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>Http response on success or failure.</returns>
         [HttpPut]
         [Route("producerBillingInstructions/{runId}")]
         [ProducesResponseType(StatusCodes.Status202Accepted)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ProducerBillingInstructions(

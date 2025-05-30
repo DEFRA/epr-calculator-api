@@ -101,8 +101,8 @@ namespace EPR.Calculator.API.Services
             try
             {
                 CalculatorRun? calculatorRun = await applicationDBContext.CalculatorRuns
-                                                    .SingleOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatus().Contains(x.CalculatorRunClassificationId), cancellationToken)
-                                                    .ConfigureAwait(false);
+                            .SingleOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatus().Contains(x.CalculatorRunClassificationId), cancellationToken)
+                            .ConfigureAwait(false);
 
                 if (calculatorRun is null)
                 {
@@ -113,10 +113,10 @@ namespace EPR.Calculator.API.Services
                     };
                 }
 
-                List<ProducerResultFileSuggestedBillingInstruction> rows = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                .Where(x => produceBillingInstuctionRequestDto.OrganisationIds.Contains(x.ProducerId) && x.CalculatorRunId == runId)
-                .ToListAsync()
-                .ConfigureAwait(false);
+                var rows = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                            .Where(x => produceBillingInstuctionRequestDto.OrganisationIds.Contains(x.ProducerId) && x.CalculatorRunId == runId)
+                            .ToListAsync()
+                            .ConfigureAwait(false);
 
                 foreach (var row in rows)
                 {
