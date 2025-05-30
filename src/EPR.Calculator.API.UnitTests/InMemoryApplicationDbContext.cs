@@ -62,6 +62,20 @@ namespace EPR.Calculator.API.UnitTests
         /// </summary>
         protected CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
 
+        private static List<ProducerResultFileSuggestedBillingInstruction> GetProducerResultFileSuggestedBillingInstruction()
+        {
+            var rows = new List<ProducerResultFileSuggestedBillingInstruction>
+            {
+                new()
+                {
+                    CalculatorRunId = 1,
+                    ProducerId = 1,
+                    SuggestedBillingInstruction = "Test",
+                },
+            };
+            return rows;
+        }
+
         /// <summary>
         /// Creates a list of predefined <see cref="CalculatorRun"/> objects for testing purposes.
         /// </summary>
@@ -121,20 +135,6 @@ namespace EPR.Calculator.API.UnitTests
                 };
 
             return calculatorRuns;
-        }
-
-        private static List<ProducerResultFileSuggestedBillingInstruction> GetProducerResultFileSuggestedBillingInstruction()
-        {
-            var rows = new List<ProducerResultFileSuggestedBillingInstruction>
-            {
-                new()
-                {
-                    CalculatorRunId = 1,
-                    ProducerId = 1,
-                    SuggestedBillingInstruction = "Test",
-                },
-            };
-            return rows;
         }
     }
 }
