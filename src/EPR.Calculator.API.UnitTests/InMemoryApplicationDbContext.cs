@@ -47,7 +47,7 @@ namespace EPR.Calculator.API.UnitTests
 
             if (!this.DbContext.ProducerResultFileSuggestedBillingInstruction.Any())
             {
-                this.DbContext.ProducerResultFileSuggestedBillingInstruction.AddRange(this.GetProducerResultFileSuggestedBillingInstruction());
+                this.DbContext.ProducerResultFileSuggestedBillingInstruction.AddRange(GetProducerResultFileSuggestedBillingInstruction());
                 this.DbContext.SaveChanges();
             }
         }
@@ -123,7 +123,7 @@ namespace EPR.Calculator.API.UnitTests
             return calculatorRuns;
         }
 
-        private List<ProducerResultFileSuggestedBillingInstruction> GetProducerResultFileSuggestedBillingInstruction()
+        private static List<ProducerResultFileSuggestedBillingInstruction> GetProducerResultFileSuggestedBillingInstruction()
         {
             var rows = new List<ProducerResultFileSuggestedBillingInstruction>
             {

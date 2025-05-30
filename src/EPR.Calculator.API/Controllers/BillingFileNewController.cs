@@ -30,7 +30,7 @@ namespace EPR.Calculator.API.Controllers
             [FromBody][Required] ProduceBillingInstuctionRequestDto produceBillingInstuctionRequestDto,
             CancellationToken cancellationToken = default)
         {
-            var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
+            var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name")!;
             var userName = claim.Value;
             var serviceProcessResponseDto = await billingFileService.UpdateProducerBillingInstructionsAsync(
                 runId,
