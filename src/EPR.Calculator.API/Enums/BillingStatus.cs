@@ -2,9 +2,7 @@
 {
     public enum BillingStatus
     {
-        NoAction,
         Accepted,
         Rejected,
-        Pending,
     }
 }
