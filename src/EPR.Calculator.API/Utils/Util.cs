@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Enums;
 
 namespace EPR.Calculator.API.Utils
 {
@@ -238,6 +239,19 @@ namespace EPR.Calculator.API.Utils
         public static FormattableString GetFormattedSqlString(string procedureName, int runId, string calendarYear, string createdBy)
         {
             return $"exec {procedureName} @RunId ={runId}, @calendarYear = {calendarYear}, @createdBy = {createdBy}";
+        }
+
+        public static IEnumerable<int> AcceptableRunStatusForBillingInstructions()
+        {
+            var validRunClassifications = new List<int>
+                {
+                    (int)RunClassification.INITIAL_RUN,
+                    (int)RunClassification.INTERIM_RECALCULATION_RUN,
+                    (int)RunClassification.FINAL_RUN,
+                    (int)RunClassification.FINAL_RECALCULATION_RUN,
+                };
+
+            return validRunClassifications;
         }
     }
 }
