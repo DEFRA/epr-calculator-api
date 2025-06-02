@@ -330,7 +330,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var requestDto = new ProduceBillingInstuctionRequestDto
             {
                 Status = BillingStatus.Accepted.ToString(),
-                OrganisationIds = new List<int> { 2, 3 },
+                OrganisationIds = new List<int> { 1, 2 },
             };
 
             // Act
@@ -348,7 +348,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var requestDto = new ProduceBillingInstuctionRequestDto
             {
                 Status = BillingStatus.Accepted.ToString(),
-                OrganisationIds = new List<int> { 1, 2 },
+                OrganisationIds = new List<int> { 1 },
             };
 
             // Act
@@ -369,7 +369,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var requestDto = new ProduceBillingInstuctionRequestDto
             {
                 Status = BillingStatus.Rejected.ToString(),
-                OrganisationIds = new List<int> { 1, 2 },
+                OrganisationIds = new List<int> { 1 },
                 ReasonForRejection = "Test",
             };
 

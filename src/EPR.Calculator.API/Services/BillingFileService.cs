@@ -118,7 +118,7 @@ namespace EPR.Calculator.API.Services
                             .ToListAsync(cancellationToken)
                             .ConfigureAwait(false);
 
-                if (rows.Count == 0)
+                if (rows.Count < produceBillingInstuctionRequestDto.OrganisationIds.Count())
                 {
                     return new ServiceProcessResponseDto
                     {
