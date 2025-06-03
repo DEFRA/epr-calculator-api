@@ -479,6 +479,6 @@ namespace EPR.Calculator.API.UnitTests.Services
             Assert.IsNotNull(updatedRecord?.LastModifiedAcceptReject);
             Assert.IsNotNull(updatedRecord?.LastModifiedAcceptRejectBy);
             Assert.AreEqual(HttpStatusCode.NoContent, result.StatusCode);
-        }       
+        }
     }
 }
