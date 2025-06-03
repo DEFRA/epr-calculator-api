@@ -5,6 +5,7 @@ using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Amqp.Transaction;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -114,10 +115,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             int invalidRunId = 0;
 
             // Act
-            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(invalidRunId);
+            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(invalidRunId) as ObjectResult;
 
             // Assert
-            Assert.IsInstanceOfType(result.Result, typeof(BadRequestObjectResult));
+            Assert.IsNotNull(result);
+            Assert.AreEqual(StatusCodes.Status400BadRequest, result.StatusCode);
         }
 
         [TestMethod]
@@ -130,10 +132,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .ReturnsAsync((ProducersInstructionResponse?)null);
 
             // Act
-            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(validRunId);
+            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(validRunId) as ObjectResult;
 
             // Assert
-            Assert.IsInstanceOfType(result.Result, typeof(NotFoundObjectResult));
+            Assert.IsNotNull(result);
+            Assert.AreEqual(StatusCodes.Status404NotFound, result.StatusCode);            
         }
 
         [TestMethod]
@@ -155,7 +158,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var result = await billingFileControllerUnderTest.ProducerBillingInstructions(validRunId);
 
             // Assert
-            var okResult = result.Result as OkObjectResult;
+            var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult.StatusCode);
             Assert.AreEqual(expectedResponse, okResult.Value);

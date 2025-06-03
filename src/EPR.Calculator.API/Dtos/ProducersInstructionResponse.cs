@@ -4,14 +4,14 @@ namespace EPR.Calculator.API.Dtos
 {
     public record ProducersInstructionResponse
     {
-        public ProducersInstructionSummary ProducersInstructionSummary { get; set; }
+        public ProducersInstructionSummary? ProducersInstructionSummary { get; set; }
 
-        public List<ProducersInstructionDetail> ProducersInstructionDetails { get; set; }
+        public List<ProducersInstructionDetail>? ProducersInstructionDetails { get; set; }
     }
 
     public class ProducersInstructionSummary
     {
-        public Dictionary<string, int> Statuses { get; set; }
+        public Dictionary<string, int>? Statuses { get; set; }
     }
 
     public class ProducersInstructionDetail
@@ -22,7 +22,7 @@ namespace EPR.Calculator.API.Dtos
 
         public string? BillingInstruction { get; set; }
 
-        public decimal InvoiceAmount { get; set; }
+        public string? InvoiceAmount { get; set; }
 
         public string? Status { get; set; }
     }
