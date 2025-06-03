@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -285,6 +286,104 @@ namespace EPR.Calculator.API.UnitTests.Services
                         cancellationTokenSource.Token),
                     Times.Once());
             }
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAsync_ShouldReturnUnprocessableContent_WhenCalculatorRunNotFound()
+        {
+            // Arrange
+            var requestDto = new ProduceBillingInstuctionRequestDto
+            {
+                Status = BillingStatus.Accepted.ToString(),
+                OrganisationIds = new List<int> { 1, 2, 3 },
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(100, "TestUser", requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
+            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAsync_ShouldReturnUnprocessableContent_WhenRunStatusIsInvalid()
+        {
+            // Arrange
+            var requestDto = new ProduceBillingInstuctionRequestDto
+            {
+                Status = BillingStatus.Accepted.ToString(),
+                OrganisationIds = new List<int> { 1, 2, 3 },
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(2, "TestUser", requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
+            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAsync_ShouldReturnUnprocessableContent_WhenOrganisationIdIsInvalid()
+        {
+            // Arrange
+            var requestDto = new ProduceBillingInstuctionRequestDto
+            {
+                Status = BillingStatus.Accepted.ToString(),
+                OrganisationIds = new List<int> { 1, 2 },
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
+            Assert.AreEqual(ErrorMessages.InvalidOrganisationId, result.Message);
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAsync_ShouldReturnOk_WhenAcceptedUpdateSuccessful()
+        {
+            // Arrange
+            var requestDto = new ProduceBillingInstuctionRequestDto
+            {
+                Status = BillingStatus.Accepted.ToString(),
+                OrganisationIds = new List<int> { 1 },
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
+
+            // Assert
+            var updatedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.FirstOrDefault();
+            Assert.AreEqual(updatedRecord?.BillingInstructionAcceptReject, BillingStatus.Accepted.ToString());
+            Assert.IsNotNull(updatedRecord?.LastModifiedAcceptReject);
+            Assert.IsNotNull(updatedRecord?.LastModifiedAcceptRejectBy);
+            Assert.AreEqual(HttpStatusCode.NoContent, result.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAsync_ShouldReturnOk_WhenRejectionUpdateSuccessful()
+        {
+            // Arrange
+            var requestDto = new ProduceBillingInstuctionRequestDto
+            {
+                Status = BillingStatus.Rejected.ToString(),
+                OrganisationIds = new List<int> { 1 },
+                ReasonForRejection = "Test",
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
+
+            // Assert
+            var updatedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.FirstOrDefault();
+            Assert.AreEqual(updatedRecord?.BillingInstructionAcceptReject, BillingStatus.Rejected.ToString());
+            Assert.AreEqual(updatedRecord?.ReasonForRejection, requestDto.ReasonForRejection);
+            Assert.IsNotNull(updatedRecord?.LastModifiedAcceptReject);
+            Assert.IsNotNull(updatedRecord?.LastModifiedAcceptRejectBy);
+            Assert.AreEqual(HttpStatusCode.NoContent, result.StatusCode);
         }
 
 
