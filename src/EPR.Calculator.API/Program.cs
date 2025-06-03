@@ -38,7 +38,9 @@ builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 builder.Services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatusDataValidator>();
 builder.Services.AddScoped<IBillingFileService, BillingFileService>();
-// todo remove create branch
+builder.Services.AddScoped<IPrepareBillingFileService, PrepareBillingFileService>();
+
+
 if (environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
 {
     builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
