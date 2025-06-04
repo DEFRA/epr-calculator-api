@@ -366,9 +366,12 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Status = BillingStatus.Accepted.ToString(),
                 OrganisationIds = new List<int> { 1, 2, 3 },
             };
+            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
+            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            await this.DbContext.SaveChangesAsync();
 
             // Act
-            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(100, "TestUser", requestDto, CancellationToken.None);
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
@@ -384,6 +387,9 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Status = BillingStatus.Accepted.ToString(),
                 OrganisationIds = new List<int> { 1, 2, 3 },
             };
+            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
+            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
+            await this.DbContext.SaveChangesAsync();
 
             // Act
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(2, "TestUser", requestDto, CancellationToken.None);
@@ -402,6 +408,9 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Status = BillingStatus.Accepted.ToString(),
                 OrganisationIds = new List<int> { 1, 2 },
             };
+            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
+            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            await this.DbContext.SaveChangesAsync();
 
             // Act
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
@@ -420,6 +429,9 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Status = BillingStatus.Accepted.ToString(),
                 OrganisationIds = new List<int> { 1 },
             };
+            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
+            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            await this.DbContext.SaveChangesAsync();
 
             // Act
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
@@ -442,6 +454,9 @@ namespace EPR.Calculator.API.UnitTests.Services
                 OrganisationIds = new List<int> { 1 },
                 ReasonForRejection = "Test",
             };
+            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
+            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            await this.DbContext.SaveChangesAsync();
 
             // Act
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
