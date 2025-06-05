@@ -152,7 +152,6 @@ namespace EPR.Calculator.API.Services
         public async Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAcceptAllAsync(
             int runId,
             string userName,
-            string status,
             CancellationToken cancellationToken)
         {
             try
@@ -186,7 +185,7 @@ namespace EPR.Calculator.API.Services
 
                 rows.ForEach(x =>
                 {
-                    x.BillingInstructionAcceptReject = status;
+                    x.BillingInstructionAcceptReject = BillingStatus.Accepted.ToString();
                     x.LastModifiedAcceptReject = DateTime.UtcNow;
                     x.LastModifiedAcceptRejectBy = userName;
                 });
@@ -195,7 +194,7 @@ namespace EPR.Calculator.API.Services
 
                 return new ServiceProcessResponseDto
                 {
-                    StatusCode = HttpStatusCode.NoContent,
+                    StatusCode = HttpStatusCode.OK,
                 };
             }
             catch (Exception exception)

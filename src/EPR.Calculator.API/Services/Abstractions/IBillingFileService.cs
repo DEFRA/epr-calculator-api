@@ -26,7 +26,6 @@ namespace EPR.Calculator.API.Services.Abstractions
         Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAcceptAllAsync(
             int runId,
             string userName,
-            string status,
             CancellationToken cancellationToken);
     }
 }

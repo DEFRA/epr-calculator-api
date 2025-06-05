@@ -28,7 +28,6 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ProducerBillingInstructions(
             int runId,
-            string status,
             CancellationToken cancellationToken = default)
         {
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name")!;
@@ -36,10 +35,9 @@ namespace EPR.Calculator.API.Controllers
             var serviceProcessResponseDto = await billingFileService.UpdateProducerBillingInstructionsAcceptAllAsync(
                 runId,
                 userName,
-                status,
                 cancellationToken).ConfigureAwait(false);
 
-            if (serviceProcessResponseDto.StatusCode == HttpStatusCode.NoContent || serviceProcessResponseDto.StatusCode == HttpStatusCode.OK)
+            if (serviceProcessResponseDto.StatusCode == HttpStatusCode.OK)
             {
                 var serviceBusQueueName = configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
                 serviceBusService.SendMessage(serviceBusQueueName, new BillingFileGenerationMessage() { ApprovedBy = userName, RunId = runId, MessageType = CommonConstants.BillingMessageType });

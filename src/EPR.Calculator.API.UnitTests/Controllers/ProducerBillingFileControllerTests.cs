@@ -51,21 +51,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             string message)
         {
             // Arrange
-            this.billingFileServiceMock.Setup(s => s.UpdateProducerBillingInstructionsAcceptAllAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            this.billingFileServiceMock.Setup(s => s.UpdateProducerBillingInstructionsAcceptAllAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ServiceProcessResponseDto { StatusCode = (HttpStatusCode)httpStatusCode });
 
             this.serviceBusServiceMock.Setup(s => s.SendMessage(It.IsAny<string>(), It.IsAny<BillingFileGenerationMessage>()));
             this.configMock.Setup(s => s.GetSection(It.IsAny<string>()).GetSection(It.IsAny<string>()).Value).Returns("test");
 
-            var requestDto = new ProduceBillingInstuctionRequestDto
-            {
-                Status = BillingStatus.Rejected.ToString(),
-                ReasonForRejection = null,
-                OrganisationIds = new List<int> { 1, 2, 3 },
-            };
-
             // Act
-            var result = await this.producerFileControllerTest.ProducerBillingInstructions(1, "Accept", CancellationToken.None) as ObjectResult;
+            var result = await this.producerFileControllerTest.ProducerBillingInstructions(1 ,CancellationToken.None) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(result);
