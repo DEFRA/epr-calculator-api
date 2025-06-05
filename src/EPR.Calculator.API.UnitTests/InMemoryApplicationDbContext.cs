@@ -102,7 +102,7 @@ namespace EPR.Calculator.API.UnitTests
                     },
                     new()
                     {
-                        CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+                        CalculatorRunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN,
                         Name = "Test Run",
                         Financial_Year = this.FinancialYear24_25,
                         CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
@@ -112,7 +112,7 @@ namespace EPR.Calculator.API.UnitTests
                     },
                     new()
                     {
-                        CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+                        CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
                         Name = "Test 422 error",
                         Financial_Year = this.FinancialYear24_25,
                         CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),

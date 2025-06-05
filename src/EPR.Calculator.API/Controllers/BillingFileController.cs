@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
@@ -45,6 +46,43 @@ namespace EPR.Calculator.API.Controllers
             {
                 StatusCode = (int)serviceProcessResponseDto.StatusCode,
             };
+        }
+
+        [HttpGet("ProducerBillingInstructions/{runId}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProducersInstructionResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> ProducerBillingInstructions(
+            int runId, CancellationToken cancellationToken = default)
+        {
+            if (runId <= 0)
+            {
+                return this.StatusCode(StatusCodes.Status400BadRequest, $"Invalid Run Id {runId}");
+            }
+
+            try
+            {
+                var responseDto = await billingFileService.GetProducersInstructionResponseAsync(
+                    runId, cancellationToken).ConfigureAwait(false);
+
+                if (responseDto == null)
+                {
+                    return this.StatusCode(StatusCodes.Status404NotFound, $"No billing instructions found for Run Id {runId}");
+                }
+
+                return Ok(responseDto);
+            }
+            catch (Exception ex)
+            {
+                return ex switch
+                {
+                    UnprocessableEntityException unEx => this.StatusCode(StatusCodes.Status422UnprocessableEntity, unEx.Message),
+                    KeyNotFoundException keyEx => this.StatusCode(StatusCodes.Status404NotFound, keyEx.Message),
+                    _ => throw ex,
+                };
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -288,6 +289,75 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
+        public async Task GetProducersInstructionResponseAsync_ThrowsKeyNotFound_WhenRunNotFound()
+        {
+            // Arrange
+            var runId = 999;
+
+            // Act + Assert
+            await Assert.ThrowsExceptionAsync<KeyNotFoundException>(() =>
+                billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None));
+        }
+
+        [TestMethod]
+        public async Task GetProducersInstructionResponseAsync_ThrowsUnprocessableEntity_WhenInvalidClassification()
+        {
+            // Arrange
+            var runId = 2;
+
+            // Act + Assert
+            await Assert.ThrowsExceptionAsync<UnprocessableEntityException>(() =>
+                billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None));
+        }
+
+        [TestMethod]
+        public async Task GetProducersInstructionResponseAsync_ReturnsNull_WhenNoInstructions()
+        {
+            // Arrange
+            var runId = 3;
+
+            // Act
+            var result = await billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None);
+
+            // Assert
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public async Task GetProducersInstructionResponseAsync_ReturnsResponse_WhenValid()
+        {
+            // Arrange
+            var runId = 4;
+
+            DbContext.ProducerDetail.Add(new ProducerDetail
+            {
+                ProducerId = 101,
+                CalculatorRunId = runId,
+                ProducerName = "Acme Co",
+                TradingName = "Acme Trading",
+            });
+
+            DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
+            {
+                ProducerId = 101,
+                CalculatorRunId = runId,
+                SuggestedBillingInstruction = "Invoice",
+                SuggestedInvoiceAmount = 123.45m,
+                BillingInstructionAcceptReject = "Accepted",
+            });
+
+            await DbContext.SaveChangesAsync();
+
+            // Act
+            var result = await billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.ProducersInstructionDetails.Count);
+            Assert.AreEqual("Accepted", result.ProducersInstructionDetails.First().Status.ToString());
+        }
+
+        [TestMethod]
         public async Task ProducerBillingInstructionsAsync_ShouldReturnUnprocessableContent_WhenCalculatorRunNotFound()
         {
             // Arrange
@@ -296,6 +366,9 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Status = BillingStatus.Accepted.ToString(),
                 OrganisationIds = new List<int> { 1, 2, 3 },
             };
+            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
+            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            await this.DbContext.SaveChangesAsync();
 
             // Act
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(100, "TestUser", requestDto, CancellationToken.None);
@@ -314,6 +387,9 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Status = BillingStatus.Accepted.ToString(),
                 OrganisationIds = new List<int> { 1, 2, 3 },
             };
+            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
+            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
+            await this.DbContext.SaveChangesAsync();
 
             // Act
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(2, "TestUser", requestDto, CancellationToken.None);
@@ -332,6 +408,9 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Status = BillingStatus.Accepted.ToString(),
                 OrganisationIds = new List<int> { 1, 2 },
             };
+            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
+            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            await this.DbContext.SaveChangesAsync();
 
             // Act
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
@@ -350,6 +429,9 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Status = BillingStatus.Accepted.ToString(),
                 OrganisationIds = new List<int> { 1 },
             };
+            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
+            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            await this.DbContext.SaveChangesAsync();
 
             // Act
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
@@ -372,6 +454,9 @@ namespace EPR.Calculator.API.UnitTests.Services
                 OrganisationIds = new List<int> { 1 },
                 ReasonForRejection = "Test",
             };
+            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
+            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            await this.DbContext.SaveChangesAsync();
 
             // Act
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
