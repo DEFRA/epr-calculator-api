@@ -9,6 +9,7 @@ using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,19 +24,22 @@ namespace EPR.Calculator.API.Controllers
         private readonly IStorageService storageService;
         private readonly IServiceBusService serviceBusService;
         private readonly ICalcFinancialYearRequestDtoDataValidator validator;
+        private readonly TelemetryClient telemetryClient;
 
         public CalculatorController(
             ApplicationDBContext context,
             IConfiguration configuration,
             IStorageService storageService,
             IServiceBusService serviceBusService,
-            ICalcFinancialYearRequestDtoDataValidator validator)
+            ICalcFinancialYearRequestDtoDataValidator validator,
+            TelemetryClient telemetryClient)
         {
             this.context = context;
             this.configuration = configuration;
             this.storageService = storageService;
             this.serviceBusService = serviceBusService;
             this.validator = validator;
+            this.telemetryClient = telemetryClient;
         }
 
         [HttpPost]
@@ -201,6 +205,11 @@ namespace EPR.Calculator.API.Controllers
             }
             catch (Exception exception)
             {
+                this.telemetryClient.TrackException(exception, new Dictionary<string, string>
+                {
+                    { "FinancialYear", request.FinancialYear }
+                });
+                this.telemetryClient.TrackTrace("Error retrieving calculator runs"); 
                 return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
         }
