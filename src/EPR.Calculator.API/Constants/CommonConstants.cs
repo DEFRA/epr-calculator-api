@@ -20,5 +20,7 @@
         public const int SecondaryHeaderMaxColumnSize = 270;
         public const string SASuperUserRole = "SASuperUser";
         public const string BillingJsonFileName = "BillingJsonFileName";
+        public const string BillingMessageType = "Billing";
+        public const string ResultMessageType = "Result";
     }
 }

@@ -118,7 +118,7 @@ namespace EPR.Calculator.API.Services
                             .ToListAsync(cancellationToken)
                             .ConfigureAwait(false);
 
-                if (rows.Count < produceBillingInstuctionRequestDto.OrganisationIds.Count())
+                if (rows.Count() < produceBillingInstuctionRequestDto.OrganisationIds.Count())
                 {
                     return new ServiceProcessResponseDto
                     {
@@ -131,6 +131,65 @@ namespace EPR.Calculator.API.Services
                 {
                     UpdateBillingInstruction(userName, produceBillingInstuctionRequestDto, row);
                 }
+
+                await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                return new ServiceProcessResponseDto
+                {
+                    StatusCode = HttpStatusCode.NoContent,
+                };
+            }
+            catch (Exception exception)
+            {
+                return new ServiceProcessResponseDto
+                {
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    Message = exception.Message,
+                };
+            }
+        }
+
+        public async Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAcceptAllAsync(
+            int runId,
+            string userName,
+            string status,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var calculatorRun = await applicationDBContext.CalculatorRuns
+                            .SingleOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatusForBillingInstructions().Contains(x.CalculatorRunClassificationId), cancellationToken)
+                            .ConfigureAwait(false);
+
+                if (calculatorRun is null)
+                {
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.UnprocessableContent,
+                        Message = ErrorMessages.InvalidRunId,
+                    };
+                }
+
+                var rows = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                            .Where(x => x.CalculatorRunId == runId)
+                            .ToListAsync(cancellationToken)
+                            .ConfigureAwait(false);
+
+                if (rows.Count() <= 0)
+                {
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.UnprocessableContent,
+                        Message = ErrorMessages.InvalidOrganisationId,
+                    };
+                }
+
+                rows.ForEach(x =>
+                {
+                    x.BillingInstructionAcceptReject = status;
+                    x.LastModifiedAcceptReject = DateTime.UtcNow;
+                    x.LastModifiedAcceptRejectBy = userName;
+                });
 
                 await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

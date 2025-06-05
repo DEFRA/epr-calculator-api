@@ -19,6 +19,8 @@ namespace EPR.Calculator.API.UnitTests.Services
 
         private readonly Mock<IStorageService> mockIStorageService;
 
+        private const string status = "Accepted";
+
         public BillingFileServiceTests()
         {
             this.mockIStorageService = new Mock<IStorageService>();
@@ -380,6 +382,42 @@ namespace EPR.Calculator.API.UnitTests.Services
             var updatedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.FirstOrDefault();
             Assert.AreEqual(updatedRecord?.BillingInstructionAcceptReject, BillingStatus.Rejected.ToString());
             Assert.AreEqual(updatedRecord?.ReasonForRejection, requestDto.ReasonForRejection);
+            Assert.IsNotNull(updatedRecord?.LastModifiedAcceptReject);
+            Assert.IsNotNull(updatedRecord?.LastModifiedAcceptRejectBy);
+            Assert.AreEqual(HttpStatusCode.NoContent, result.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnUnprocessableContent_WhenCalculatorRunNotFound()
+        {
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAcceptAllAsync(100, "TestUser", status, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
+            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnUnprocessableContent_WhenRunStatusIsInvalid()
+        {
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAcceptAllAsync(2, "TestUser", status, CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
+            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnOk_WhenAcceptedUpdateSuccessful()
+        {
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAcceptAllAsync(1, "TestUser", status, CancellationToken.None);
+
+            // Assert
+            var updatedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.FirstOrDefault();
+            Assert.AreEqual(updatedRecord?.BillingInstructionAcceptReject, BillingStatus.Accepted.ToString());
             Assert.IsNotNull(updatedRecord?.LastModifiedAcceptReject);
             Assert.IsNotNull(updatedRecord?.LastModifiedAcceptRejectBy);
             Assert.AreEqual(HttpStatusCode.NoContent, result.StatusCode);
