@@ -22,5 +22,16 @@ namespace EPR.Calculator.API.Services.Abstractions
             string userName,
             ProduceBillingInstuctionRequestDto produceBillingInstuctionRequestDto,
             CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get list of Producer Billing Instructions.
+        /// </summary>
+        /// <param name="runId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ProducersInstructionResponse> GetProducersInstructionResponseAsync(
+            int runId,
+            CancellationToken cancellationToken);
+
     }
 }
