@@ -3,6 +3,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -83,7 +84,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
-                    this.mockValidator.Object);
+                    this.mockValidator.Object,
+                    new TelemetryClient());
             var mockResult = new Mock<IResult>();
             this.mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(mockResult.Object);
 
@@ -130,7 +132,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
-                    this.mockValidator.Object);
+                    this.mockValidator.Object,
+                    new TelemetryClient());
             var mockResult = new Mock<IResult>();
             this.mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(Results.NotFound(fileName));
 

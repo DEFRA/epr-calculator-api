@@ -7,6 +7,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -71,7 +72,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
-                    this.mockValidator.Object);
+                    this.mockValidator.Object,
+                    new TelemetryClient());
             controller.ControllerContext = new ControllerContext
             {
                 HttpContext = defaultContext,
@@ -111,7 +113,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
-                    this.mockValidator.Object);
+                    this.mockValidator.Object,
+                    new TelemetryClient());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -160,7 +163,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
-                    this.mockValidator.Object);
+                    this.mockValidator.Object,
+                    new TelemetryClient());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -212,7 +216,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
-                    this.mockValidator.Object);
+                    this.mockValidator.Object,
+                    new TelemetryClient());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));

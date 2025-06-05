@@ -47,7 +47,8 @@
                 ConfigurationItems.GetConfigurationValues(),
                 mockStorageService.Object,
                 mockServiceBusService.Object,
-                mockValidator.Object);
+                mockValidator.Object,
+                new TelemetryClient());
 
             this.DbContext.Material.RemoveRange(this.DbContext.Material.ToList());
             this.DbContext.SaveChanges();
