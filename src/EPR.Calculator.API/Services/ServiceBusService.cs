@@ -17,10 +17,21 @@ namespace EPR.Calculator.API.Services
 
         public async Task SendMessage(string serviceBusQueueName, CalculatorRunMessage calculatorRunMessage)
         {
-            var client = this.serviceBusClientFactory.CreateClient(CommonConstants.ServiceBusClientName);
-            var serviceBusSender = client.CreateSender(serviceBusQueueName);
             var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
-            ServiceBusMessage serviceBusMessage = new ServiceBusMessage(messageString);
+            await SendMessageAsync(serviceBusQueueName, messageString);
+        }
+
+        public async Task SendMessage(string serviceBusQueueName, BillingFileGenerationMessage billingFileGenerationMessage)
+        {
+            var messageString = JsonConvert.SerializeObject(billingFileGenerationMessage);
+            await SendMessageAsync(serviceBusQueueName, messageString);
+        }
+
+        private async Task SendMessageAsync(string queueName, string message)
+        {
+            var client = this.serviceBusClientFactory.CreateClient(CommonConstants.ServiceBusClientName);
+            var serviceBusSender = client.CreateSender(queueName);
+            ServiceBusMessage serviceBusMessage = new ServiceBusMessage(message);
             await serviceBusSender.SendMessageAsync(serviceBusMessage);
         }
     }
