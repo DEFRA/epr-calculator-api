@@ -469,5 +469,41 @@ namespace EPR.Calculator.API.UnitTests.Services
             Assert.IsNotNull(updatedRecord?.LastModifiedAcceptRejectBy);
             Assert.AreEqual(HttpStatusCode.NoContent, result.StatusCode);
         }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnUnprocessableContent_WhenCalculatorRunNotFound()
+        {
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAcceptAllAsync(100, "TestUser", CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
+            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnUnprocessableContent_WhenRunStatusIsInvalid()
+        {
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAcceptAllAsync(2, "TestUser", CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
+            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+        }
+
+        [TestMethod]
+        public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnOk_WhenAcceptedUpdateSuccessful()
+        {
+            // Act
+            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAcceptAllAsync(1, "TestUser", CancellationToken.None);
+
+            // Assert
+            var updatedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.FirstOrDefault();
+            Assert.AreEqual(updatedRecord?.BillingInstructionAcceptReject, BillingStatus.Accepted.ToString());
+            Assert.IsNotNull(updatedRecord?.LastModifiedAcceptReject);
+            Assert.IsNotNull(updatedRecord?.LastModifiedAcceptRejectBy);
+            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+        }
     }
 }
