@@ -7,5 +7,7 @@
         public required string FinancialYear { get; set; }
 
         public required string CreatedBy { get; set; }
+
+        public string? MessageType { get; set; }
     }
 }

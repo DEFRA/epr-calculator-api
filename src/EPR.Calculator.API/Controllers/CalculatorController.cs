@@ -144,6 +144,7 @@ namespace EPR.Calculator.API.Controllers
                             CalculatorRunId = calculatorRun.Id,
                             FinancialYear = calculatorRun.Financial_Year.Name,
                             CreatedBy = this.User.Identity?.Name ?? userName,
+                            MessageType = CommonConstants.ResultMessageType,
                         };
 
                         // Send message

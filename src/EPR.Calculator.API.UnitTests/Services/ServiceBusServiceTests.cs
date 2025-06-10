@@ -26,7 +26,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         {
             // Arrange
             var serviceBusQueueName = "Some queue";
-            var calculatorRunMessage = new CalculatorRunMessage() { CalculatorRunId = 1, CreatedBy = "Test user", FinancialYear = "2024-25" };
+            var calculatorRunMessage = new CalculatorRunMessage() { CalculatorRunId = 1, CreatedBy = "Test user", FinancialYear = "2024-25", MessageType = CommonConstants.ResultMessageType };
 
             var mockServiceBusClient = new Mock<ServiceBusClient>();
             this.mockServiceBusClientFactory.Setup(clientFactory => clientFactory.CreateClient(It.IsAny<string>()))
