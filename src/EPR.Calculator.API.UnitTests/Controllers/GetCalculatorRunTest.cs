@@ -1,14 +1,13 @@
-﻿using Azure.Messaging.ServiceBus;
-using EPR.Calculator.API.Controllers;
+﻿using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -72,7 +71,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
-                    this.mockValidator.Object);
+                    this.mockValidator.Object, new TelemetryClient());
 
             var response = await controller.GetCalculatorRun(1) as ObjectResult;
             Assert.IsNotNull(response);
@@ -97,7 +96,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
-                    this.mockValidator.Object);
+                    this.mockValidator.Object,new TelemetryClient());
 
             var response = await controller.GetCalculatorRun(1) as ObjectResult;
             Assert.IsNotNull(response);

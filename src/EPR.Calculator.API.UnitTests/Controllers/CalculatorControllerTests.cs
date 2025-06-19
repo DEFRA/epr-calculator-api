@@ -15,6 +15,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using EPR.Calculator.API.UnitTests.Helpers;
     using EPR.Calculator.API.Validators;
     using FluentAssertions;
+    using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.Amqp.Transaction;
@@ -237,7 +238,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     configs,
                     mockStorageService.Object,
                     mockServiceBusService.Object,
-                    mockValidator.Object);
+                    mockValidator.Object,
+                    new TelemetryClient());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -304,7 +306,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     configs,
                     mockStorageService.Object,
                     mockServiceBusService.Object,
-                    mockValidator.Object);
+                    mockValidator.Object, new TelemetryClient());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -498,7 +500,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
-                mockValidator.Object);
+                mockValidator.Object, new TelemetryClient());
 
             var expectedClassifications = new List<CalculatorRunClassificationDto>
             {
@@ -570,7 +572,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
-                mockValidator.Object);
+                mockValidator.Object, new TelemetryClient());
 
             // Act
             var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
@@ -600,7 +602,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
-                mockValidator.Object);
+                mockValidator.Object, new TelemetryClient());
 
             // Act
             var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
@@ -628,7 +630,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
-                mockValidator.Object);
+                mockValidator.Object, new TelemetryClient());
 
             // Act
             var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;

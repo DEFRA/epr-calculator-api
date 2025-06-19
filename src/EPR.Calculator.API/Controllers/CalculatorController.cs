@@ -9,6 +9,7 @@ using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,19 +24,22 @@ namespace EPR.Calculator.API.Controllers
         private readonly IStorageService storageService;
         private readonly IServiceBusService serviceBusService;
         private readonly ICalcFinancialYearRequestDtoDataValidator validator;
+        private readonly TelemetryClient _telemetryClient;
 
         public CalculatorController(
             ApplicationDBContext context,
             IConfiguration configuration,
             IStorageService storageService,
             IServiceBusService serviceBusService,
-            ICalcFinancialYearRequestDtoDataValidator validator)
+            ICalcFinancialYearRequestDtoDataValidator validator,
+            TelemetryClient telemetryClient)
         {
             this.context = context;
             this.configuration = configuration;
             this.storageService = storageService;
             this.serviceBusService = serviceBusService;
             this.validator = validator;
+            this._telemetryClient = telemetryClient;
         }
 
         [HttpPost]
@@ -176,6 +180,7 @@ namespace EPR.Calculator.API.Controllers
         [Route("calculatorRuns")]
         public async Task<IActionResult> GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
         {
+            this._telemetryClient.TrackTrace($"1.Entered into GetCalculatorRuns :{request}");
             if (!this.ModelState.IsValid)
             {
                 return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
@@ -188,6 +193,7 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
+                this._telemetryClient.TrackTrace($"2.Before Calling DB :{request}");
                 var calculatorRuns = await this.context.CalculatorRuns
                     .Where(run => run.Financial_Year.Name == request.FinancialYear)
                     .OrderByDescending(run => run.CreatedAt)
@@ -195,13 +201,16 @@ namespace EPR.Calculator.API.Controllers
 
                 if (calculatorRuns.Count == 0)
                 {
+                    this._telemetryClient.TrackTrace($"3.No data for run id  :{request}");
                     return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
                 }
 
+                this._telemetryClient.TrackTrace($"4.All good  :{request}");
                 return new ObjectResult(calculatorRuns) { StatusCode = StatusCodes.Status200OK };
             }
             catch (Exception exception)
             {
+                this._telemetryClient.TrackTrace($"5.Some exception from DB call :{exception}");
                 return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
             }
         }
