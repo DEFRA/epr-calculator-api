@@ -357,15 +357,8 @@ namespace EPR.Calculator.API.Controllers
         [Route("FinancialYears")]
         public async Task<IActionResult> FinancialYears()
         {
-            try
-            {
-                var financialYears = await this.context.FinancialYears.ToListAsync();
-                return new ObjectResult(financialYears.Select(FinancialYearMapper.Map));
-            }
-            catch (Exception exception)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
-            }
+            var financialYears = await this.context.FinancialYears.ToListAsync();
+            return new ObjectResult(financialYears.Select(FinancialYearMapper.Map));
         }
 
         [HttpGet]
