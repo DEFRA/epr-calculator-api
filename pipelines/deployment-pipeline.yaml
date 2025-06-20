@@ -91,7 +91,7 @@ extends:
   template: epr-deployment-pipeline.yaml@CommonTemplates
   parameters:
     ${{ if contains(parameters.imageTag, 'RELEASE') }}:
-      imageTag: $(DEVRWDWEBWAx410)
+      imageTag: $(DEVRWDWEBWAx422)
     ${{ else }}:
       imageTag: ${{ parameters.imageTag }}
     azureSubscription: $(azureSubscription)
