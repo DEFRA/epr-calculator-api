@@ -21,6 +21,7 @@ namespace EPR.Calculator.API.Mappers
                 RunClassificationId = run.CalculatorRunClassificationId,
                 RunClassificationStatus = classification.Status,
                 FinancialYear = run.FinancialYearId,
+                IsBillingFileGenerating = run.IsBillingFileGenerating,
             };
         }
     }
