@@ -34,7 +34,6 @@
 
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             var configs = ConfigurationItems.GetConfigurationValues();
-            configs.GetSection("BillingJsonFileName").Value = "Example_sample_message_Producer_billing_file_1.0.json";
             this.controller = new CalculatorNewController(this.context, configs, this.mockValidator.Object);
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {

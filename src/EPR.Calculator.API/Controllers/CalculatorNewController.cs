@@ -162,29 +162,10 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                var billingJsonFileName = this.configuration.GetSection(CommonConstants.BillingJsonFileName).Value;
-                if (string.IsNullOrWhiteSpace(billingJsonFileName))
-                {
-                    throw new ConfigurationErrorsException($"Configuration item not found: {CommonConstants.BillingJsonFileName}");
-                }
-
                 using (var transaction = await this.context.Database.BeginTransactionAsync())
                 {
                     try
                     {
-                        // Add entry to calculator run billing file metadata
-                        var calculatorRunBillingFileMetadata = new CalculatorRunBillingFileMetadata
-                        {
-                            BillingCsvFileName = null,
-                            BillingJsonFileName = billingJsonFileName,
-                            BillingFileCreatedDate = DateTime.UtcNow,
-                            BillingFileCreatedBy = userName,
-                            BillingFileAuthorisedDate = DateTime.UtcNow,
-                            BillingFileAuthorisedBy = userName,
-                            CalculatorRunId = runId,
-                        };
-                        await this.context.CalculatorRunBillingFileMetadata.AddAsync(calculatorRunBillingFileMetadata);
-
                         // Update calculation run classification status: Initial run completed
                         calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
                         this.context.CalculatorRuns.Update(calculatorRun);
