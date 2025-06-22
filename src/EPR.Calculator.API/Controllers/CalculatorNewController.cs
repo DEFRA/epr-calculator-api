@@ -162,27 +162,20 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                using (var transaction = await this.context.Database.BeginTransactionAsync())
+                try
                 {
-                    try
-                    {
-                        // Update calculation run classification status: Initial run completed
-                        calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
-                        this.context.CalculatorRuns.Update(calculatorRun);
+                    // Update calculation run classification status: Initial run completed
+                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
+                    this.context.CalculatorRuns.Update(calculatorRun);
 
-                        await this.context.SaveChangesAsync();
+                    await this.context.SaveChangesAsync();
 
-                        // All good, commit transaction
-                        await transaction.CommitAsync();
-                    }
-                    catch (Exception exception)
-                    {
-                        // Error, rollback transaction
-                        await transaction.RollbackAsync();
-
-                        // Return error status code: Internal Server Error
-                        return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
-                    }
+                    // All good, commit transaction
+                }
+                catch (Exception exception)
+                {
+                    // Return error status code: Internal Server Error
+                    return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
 
                 // Return accepted status code
