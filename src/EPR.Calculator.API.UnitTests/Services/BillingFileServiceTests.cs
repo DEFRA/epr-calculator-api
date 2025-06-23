@@ -489,7 +489,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+            Assert.AreEqual(ErrorMessages.InvalidRunStatusForAcceptAll, result.Message);
         }
 
         [TestMethod]

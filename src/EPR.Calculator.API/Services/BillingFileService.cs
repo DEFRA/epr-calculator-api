@@ -21,6 +21,18 @@ namespace EPR.Calculator.API.Services
     /// <param name="storageService">The storage service <seealso cref="IStorageService"/>.</param>
     public class BillingFileService(ApplicationDBContext applicationDBContext, IStorageService storageService) : IBillingFileService
     {
+        /// <summary>
+        /// Validates the run ID for accepting all billing instructions.
+        /// </summary>
+        /// <param name="run">calculation Run</param>
+        /// <returns>bool</returns>
+        public static bool ValidateRunForAcceptAllBillingInstructions(CalculatorRun run)
+        {
+            return Util.AcceptableRunStatusForBillingInstructions().Contains(run.CalculatorRunClassificationId)
+                   &&
+                   !run.IsBillingFileGenerating.GetValueOrDefault();
+        }
+
         /// <inheritdoc/>
         public async Task<ServiceProcessResponseDto> GenerateBillingFileAsync(
             GenerateBillingFileRequestDto generateBillingFileRequestDto,
@@ -242,7 +254,7 @@ namespace EPR.Calculator.API.Services
             try
             {
                 var calculatorRun = await applicationDBContext.CalculatorRuns
-                            .SingleOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatusForBillingInstructions().Contains(x.CalculatorRunClassificationId), cancellationToken)
+                            .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken)
                             .ConfigureAwait(false);
 
                 if (calculatorRun is null)
@@ -251,6 +263,15 @@ namespace EPR.Calculator.API.Services
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
                         Message = ErrorMessages.InvalidRunId,
+                    };
+                }
+
+                if (!ValidateRunForAcceptAllBillingInstructions(calculatorRun))
+                {
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.UnprocessableContent,
+                        Message = ErrorMessages.InvalidRunStatusForAcceptAll,
                     };
                 }
 
@@ -274,6 +295,8 @@ namespace EPR.Calculator.API.Services
                     x.LastModifiedAcceptReject = DateTime.UtcNow;
                     x.LastModifiedAcceptRejectBy = userName;
                 });
+
+                calculatorRun.IsBillingFileGenerating = true;
 
                 await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
