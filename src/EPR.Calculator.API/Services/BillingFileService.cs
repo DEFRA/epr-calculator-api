@@ -1,5 +1,4 @@
-﻿using System.Net;
-using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -8,6 +7,8 @@ using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Utils;
 using Microsoft.EntityFrameworkCore;
+using System.Configuration;
+using System.Net;
 
 namespace EPR.Calculator.API.Services
 {
@@ -19,7 +20,7 @@ namespace EPR.Calculator.API.Services
     /// </remarks>
     /// <param name="applicationDBContext">The database context <seealso cref="ApplicationDBContext"/>.</param>
     /// <param name="storageService">The storage service <seealso cref="IStorageService"/>.</param>
-    public class BillingFileService(ApplicationDBContext applicationDBContext, IStorageService storageService) : IBillingFileService
+    public class BillingFileService(ApplicationDBContext applicationDBContext, IStorageService storageService, IBlobStorageService2 blobStorageService2, IConfiguration configuration) : IBillingFileService
     {
         /// <summary>
         /// Validates the run ID for accepting all billing instructions.
@@ -180,6 +181,29 @@ namespace EPR.Calculator.API.Services
                 ProducersInstructionDetails = details,
                 ProducersInstructionSummary = summary,
             };
+        }
+
+        public async Task<bool> MoveBillingJsonFile(int runId, CancellationToken cancellationToken)
+        {
+            var billingFileMetaData =
+                await applicationDBContext.CalculatorRunBillingFileMetadata
+                    .SingleOrDefaultAsync(m => m.CalculatorRunId == runId, cancellationToken)
+                    .ConfigureAwait(false);
+
+            if (billingFileMetaData == null || string.IsNullOrEmpty(billingFileMetaData.BillingJsonFileName))
+            {
+                return false;
+            }
+
+            var blobStorageSettings = new BlobStorageSettings();
+            configuration.GetSection("BlobStorage").Bind(blobStorageSettings);
+
+            var sourceContainer = blobStorageSettings.BillingFileJsonContainerName;
+            var targetContainer = blobStorageSettings.BillingFileJsonForFssContainerName;
+            
+            var result = await blobStorageService2.MoveBlobAsync(sourceContainer, targetContainer, billingFileMetaData.BillingJsonFileName);
+
+            return true;
         }
 
         private async Task<CalculatorRun?> GetRunStatusAsync(int runId, CancellationToken cancellationToken)

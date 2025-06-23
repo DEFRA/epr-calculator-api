@@ -47,6 +47,8 @@ else
 {
     builder.Services.AddScoped<IStorageService, BlobStorageService>();
 }
+// TODO - need to add a Local version of this too and move to the above if statement blocks
+builder.Services.AddScoped<IBlobStorageService2, BlobStorageService2>();
 
 builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
 

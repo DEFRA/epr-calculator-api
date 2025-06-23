@@ -1,13 +1,15 @@
-﻿using System.Configuration;
-using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -18,6 +20,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly ApplicationDBContext context;
         private readonly IConfiguration configuration;
         private readonly ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator;
+        private readonly IBillingFileService billingFileService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CalculatorNewController"/> class.
@@ -27,11 +30,13 @@ namespace EPR.Calculator.API.Controllers
         public CalculatorNewController(
             ApplicationDBContext context,
             IConfiguration configuration,
-            ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator)
+            ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
+            IBillingFileService billingFileService)
         {
             this.context = context;
             this.configuration = configuration;
             this.calculatorRunStatusDataValidator = calculatorRunStatusDataValidator;
+            this.billingFileService = billingFileService;
         }
 
         [HttpPut]
@@ -133,7 +138,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("prepareBillingFileSendToFSS/{runId}")]
-        public async Task<ActionResult> PrepareBillingFileSendToFSS(int runId)
+        public async Task<ActionResult> PrepareBillingFileSendToFSS(int runId, CancellationToken cancellationToken = default)
         {
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
@@ -168,9 +173,15 @@ namespace EPR.Calculator.API.Controllers
                     calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
                     this.context.CalculatorRuns.Update(calculatorRun);
 
-                    await this.context.SaveChangesAsync();
+                    var result = await this.billingFileService.MoveBillingJsonFile(runId, cancellationToken);
+
+                    if (!result)
+                    {
+                        return this.StatusCode(StatusCodes.Status422UnprocessableEntity, $"Unable to move billing json file for Run Id {runId}");
+                    }
 
                     // All good, commit transaction
+                    await this.context.SaveChangesAsync();
                 }
                 catch (Exception exception)
                 {
