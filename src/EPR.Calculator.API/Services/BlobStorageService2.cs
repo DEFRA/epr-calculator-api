@@ -6,15 +6,14 @@ namespace EPR.Calculator.API.Services
 {
     public class BlobStorageService2 : IBlobStorageService2
     {
-        private readonly BlobStorageSettings settings;
         private readonly BlobServiceClient blobServiceClient;
         private readonly TelemetryClient telemetryClient;
 
         public BlobStorageService2(IConfiguration configuration, TelemetryClient telemetryClient)
         {
-            this.settings = new BlobStorageSettings();
-            configuration.GetSection("BlobStorage").Bind(this.settings);
-            this.blobServiceClient = new BlobServiceClient(this.settings.ConnectionString);
+            var settings = new BlobStorageSettings();
+            configuration.GetSection("BlobStorage").Bind(settings);
+            this.blobServiceClient = new BlobServiceClient(settings.ConnectionString);
             this.telemetryClient = telemetryClient;
         }
 

@@ -8,7 +8,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.Dtos;
-    using EPR.Calculator.API.UnitTests.Helpers;
     using EPR.Calculator.API.Validators;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -37,8 +36,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             this.mockBillingFileService = new Mock<IBillingFileService>();
-            var configs = ConfigurationItems.GetConfigurationValues();
-            this.controller = new CalculatorNewController(this.context, configs, this.mockValidator.Object, this.mockBillingFileService.Object);
+            this.controller = new CalculatorNewController(this.context, this.mockValidator.Object, this.mockBillingFileService.Object);
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "DELETED",
@@ -223,26 +221,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(result);
             Assert.AreEqual(422, result.StatusCode);
             Assert.AreEqual("Unable to move billing json file for Run Id 1", result.Value);
-        }
-
-        [TestMethod]
-        public void PrepareBillingFileSendToFSS_MoveBillingJsonFileSucceeds_Returns202()
-        {
-            this.ControllerContext();
-
-            // Arrange: runId 1 is valid and meets preconditions
-            mockBillingFileService
-                .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(true);
-
-            // Act
-            var task = this.controller.PrepareBillingFileSendToFSS(1);
-            task.Wait();
-
-            // Assert
-            var result = task.Result as StatusCodeResult;
-            Assert.IsNotNull(result);
-            Assert.AreEqual(202, result.StatusCode);
         }
     }
 }

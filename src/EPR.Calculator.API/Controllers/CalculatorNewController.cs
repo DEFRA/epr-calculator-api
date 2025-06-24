@@ -1,15 +1,11 @@
-﻿using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
-using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Configuration;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -18,23 +14,21 @@ namespace EPR.Calculator.API.Controllers
     public class CalculatorNewController : ControllerBase
     {
         private readonly ApplicationDBContext context;
-        private readonly IConfiguration configuration;
         private readonly ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator;
         private readonly IBillingFileService billingFileService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CalculatorNewController"/> class.
         /// </summary>
-        /// <param name="context">Db Context</param>
-        /// <param name="calculatorRunStatusDataValidator">Db Validator</param>
+        /// <param name="context">Db Context.</param>
+        /// <param name="calculatorRunStatusDataValidator">Db Validator.</param>
+        /// <param name="billingFileService">Billing file service.</param>
         public CalculatorNewController(
             ApplicationDBContext context,
-            IConfiguration configuration,
             ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
             IBillingFileService billingFileService)
         {
             this.context = context;
-            this.configuration = configuration;
             this.calculatorRunStatusDataValidator = calculatorRunStatusDataValidator;
             this.billingFileService = billingFileService;
         }

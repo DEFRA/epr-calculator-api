@@ -36,8 +36,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             this.mockBillingFileService = new Mock<IBillingFileService>();
-            var configs = ConfigurationItems.GetConfigurationValues();
-            this.controller = new CalculatorNewController(this.context, configs, this.mockValidator.Object, this.mockBillingFileService.Object);
+            this.controller = new CalculatorNewController(this.context, this.mockValidator.Object, this.mockBillingFileService.Object);
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "DELETED",

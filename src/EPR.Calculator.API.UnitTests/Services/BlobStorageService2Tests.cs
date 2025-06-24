@@ -29,11 +29,11 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var inMemorySettings = new Dictionary<string, string>
             {
-                {"BlobStorage:ContainerName", "ContainerName"},
-                {"BlobStorage:ConnectionString", "UseDevelopmentStorage=true"},
-                {"BlobStorage:BillingFileCSVContainerName", "BillingFileCSVContainerName"},
-                {"BlobStorage:BillingFileJsonContainerName", "BillingFileJsonContainerName"},
-                {"BlobStorage:BillingFileJsonForFssContainerName", "BillingFileJsonForFssContainerName"}
+                { "BlobStorage:ContainerName", "ContainerName" },
+                { "BlobStorage:ConnectionString", "UseDevelopmentStorage=true" },
+                { "BlobStorage:BillingFileCSVContainerName", "BillingFileCSVContainerName" },
+                { "BlobStorage:BillingFileJsonContainerName", "BillingFileJsonContainerName" },
+                { "BlobStorage:BillingFileJsonForFssContainerName", "BillingFileJsonForFssContainerName" },
             };
 
             var configs = new ConfigurationBuilder()
@@ -43,9 +43,13 @@ namespace EPR.Calculator.API.UnitTests.Services
             this.blobStorageService2 = new BlobStorageService2(configs, new TelemetryClient());
 
             // Patch the private blobServiceClient field to use the mock
-            typeof(BlobStorageService2)
-                .GetField("blobServiceClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                .SetValue(this.blobStorageService2, this.mockBlobServiceClient.Object);
+            var field = typeof(BlobStorageService2).GetField("blobServiceClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (field is null)
+            {
+                throw new InvalidOperationException("Could not find the 'blobServiceClient' field on BlobStorageService2. Check the field name and its accessibility.");
+            }
+
+            field.SetValue(this.blobStorageService2, this.mockBlobServiceClient.Object);
         }
 
         [TestMethod]
@@ -56,13 +60,13 @@ namespace EPR.Calculator.API.UnitTests.Services
             var destContainer = "dest";
             var blobName = "file.txt";
 
-            // Setup the container and blob mocks
-            mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(sourceContainer)).Returns(mockSourceContainerClient.Object);
-            mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(destContainer)).Returns(mockDestContainerClient.Object);
+            // Set up the container and blob mocks
+            this.mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(sourceContainer)).Returns(this.mockSourceContainerClient.Object);
+            this.mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(destContainer)).Returns(this.mockDestContainerClient.Object);
 
-            mockSourceContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(mockSourceBlobClient.Object);
-            mockDestContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(mockDestBlobClient.Object);
-            mockDestContainerClient.Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(), null, null, It.IsAny<CancellationToken>()))
+            this.mockSourceContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(this.mockSourceBlobClient.Object);
+            this.mockDestContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(this.mockDestBlobClient.Object);
+            this.mockDestContainerClient.Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(), null, null, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Azure.Response<BlobContainerInfo>)null);
 
             // Setup the copy operation mock
@@ -71,14 +75,9 @@ namespace EPR.Calculator.API.UnitTests.Services
                 .Returns(new ValueTask<Response<long>>(Response.FromValue(0L, (Response)null)));
             mockCopyOperation.Setup(x => x.HasCompleted).Returns(true);
 
-            mockDestBlobClient
+            this.mockDestBlobClient
                 .Setup(x => x.StartCopyFromUriAsync(It.IsAny<Uri>(), null, null, null, null, null, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(mockCopyOperation.Object);
-
-            // Patch the private blobServiceClient field to use the mock
-            typeof(BlobStorageService2)
-                .GetField("blobServiceClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                .SetValue(this.blobStorageService2, this.mockBlobServiceClient.Object);
 
             // Act
             var result = await this.blobStorageService2.CopyBlobAsync(sourceContainer, destContainer, blobName);
@@ -95,15 +94,15 @@ namespace EPR.Calculator.API.UnitTests.Services
             var destContainer = "dest";
             var blobName = "file.txt";
 
-            mockSourceContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(mockSourceBlobClient.Object);
-            mockDestContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(mockDestBlobClient.Object);
-            mockDestContainerClient.Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(), null, null, It.IsAny<CancellationToken>()))
+            this.mockSourceContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(this.mockSourceBlobClient.Object);
+            this.mockDestContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(this.mockDestBlobClient.Object);
+            this.mockDestContainerClient.Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(), null, null, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((Azure.Response<BlobContainerInfo>)null);
 
-            mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(sourceContainer)).Returns(mockSourceContainerClient.Object);
-            mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(destContainer)).Returns(mockDestContainerClient.Object);
+            this.mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(sourceContainer)).Returns(this.mockSourceContainerClient.Object);
+            this.mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(destContainer)).Returns(this.mockDestContainerClient.Object);
 
-            mockDestBlobClient.Setup(x => x.StartCopyFromUriAsync(It.IsAny<Uri>(), null, null, null, null, null, It.IsAny<CancellationToken>()))
+            this.mockDestBlobClient.Setup(x => x.StartCopyFromUriAsync(It.IsAny<Uri>(), null, null, null, null, null, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Copy failed"));
 
             // Act
@@ -121,9 +120,9 @@ namespace EPR.Calculator.API.UnitTests.Services
             var blobName = "file.txt";
 
             // Setup the container and blob mocks
-            mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(container)).Returns(mockSourceContainerClient.Object);
-            mockSourceContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(mockSourceBlobClient.Object);
-            mockSourceBlobClient.Setup(x => x.DeleteIfExistsAsync(
+            this.mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(container)).Returns(this.mockSourceContainerClient.Object);
+            this.mockSourceContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(this.mockSourceBlobClient.Object);
+            this.mockSourceBlobClient.Setup(x => x.DeleteIfExistsAsync(
                     It.IsAny<DeleteSnapshotsOption>(), null, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Response.FromValue(true, (Response)null));
 
@@ -141,11 +140,11 @@ namespace EPR.Calculator.API.UnitTests.Services
             var container = "source";
             var blobName = "file.txt";
 
-            mockSourceBlobClient.Setup(x => x.DeleteIfExistsAsync(It.IsAny<DeleteSnapshotsOption>(), null, It.IsAny<CancellationToken>()))
+            this.mockSourceBlobClient.Setup(x => x.DeleteIfExistsAsync(It.IsAny<DeleteSnapshotsOption>(), null, It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("Delete failed"));
 
-            mockSourceContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(mockSourceBlobClient.Object);
-            mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(container)).Returns(mockSourceContainerClient.Object);
+            this.mockSourceContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(this.mockSourceBlobClient.Object);
+            this.mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(container)).Returns(this.mockSourceContainerClient.Object);
 
             // Act
             var result = await this.blobStorageService2.DeleteBlobAsync(container, blobName);
