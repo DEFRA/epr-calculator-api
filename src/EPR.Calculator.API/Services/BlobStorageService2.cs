@@ -52,7 +52,7 @@ namespace EPR.Calculator.API.Services
                 var copyOperation = await destBlob.StartCopyFromUriAsync(sourceBlob.Uri);
                 await copyOperation.WaitForCompletionAsync();
 
-                return true;
+                return copyOperation.HasCompleted;
             }
             catch (Exception e)
             {
