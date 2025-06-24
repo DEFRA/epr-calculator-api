@@ -175,7 +175,7 @@ namespace EPR.Calculator.API.Controllers
                     }
 
                     // All good, commit transaction
-                    await this.context.SaveChangesAsync();
+                    await this.context.SaveChangesAsync(cancellationToken);
                 }
                 catch (Exception exception)
                 {

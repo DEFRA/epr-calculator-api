@@ -103,8 +103,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             this.ControllerContext();
 
-            // Setup the mock to return a value
-            mockBillingFileService
+            // Set up the mock to return a value
+            this.mockBillingFileService
                 .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
@@ -185,6 +185,27 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual("Invalid Run Id -1", response.Value);
         }
 
+        [TestMethod]
+        public void PrepareBillingFileSendToFSS_MoveBillingJsonFileFails_Returns422()
+        {
+            this.ControllerContext();
+
+            // Arrange: runId 1 is valid and meets preconditions
+            this.mockBillingFileService
+                .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(false);
+
+            // Act
+            var task = this.controller.PrepareBillingFileSendToFSS(1);
+            task.Wait();
+
+            // Assert
+            var result = task.Result as ObjectResult;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(422, result.StatusCode);
+            Assert.AreEqual("Unable to move billing json file for Run Id 1", result.Value);
+        }
+
         private void ControllerContext()
         {
             var identity = new GenericIdentity("TestUser");
@@ -200,27 +221,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 HttpContext = userContext,
             };
-        }
-
-        [TestMethod]
-        public void PrepareBillingFileSendToFSS_MoveBillingJsonFileFails_Returns422()
-        {
-            this.ControllerContext();
-
-            // Arrange: runId 1 is valid and meets preconditions
-            mockBillingFileService
-                .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(false);
-
-            // Act
-            var task = this.controller.PrepareBillingFileSendToFSS(1);
-            task.Wait();
-
-            // Assert
-            var result = task.Result as ObjectResult;
-            Assert.IsNotNull(result);
-            Assert.AreEqual(422, result.StatusCode);
-            Assert.AreEqual("Unable to move billing json file for Run Id 1", result.Value);
         }
     }
 }

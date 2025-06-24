@@ -548,7 +548,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 CalculatorRunId = runId,
                 BillingJsonFileName = billingJsonFileName,
                 BillingFileCreatedDate = DateTime.UtcNow,
-                BillingFileCreatedBy = "test"
+                BillingFileCreatedBy = "test",
             });
             await this.DbContext.SaveChangesAsync();
 
@@ -556,11 +556,13 @@ namespace EPR.Calculator.API.UnitTests.Services
             var blobStorageSettings = new Dictionary<string, string>
             {
                 { "BlobStorage:BillingFileJsonContainerName", sourceContainer },
-                { "BlobStorage:BillingFileJsonForFssContainerName", targetContainer }
+                { "BlobStorage:BillingFileJsonForFssContainerName", targetContainer },
             };
+
             var config = new ConfigurationBuilder()
-                .AddInMemoryCollection(blobStorageSettings)
+                .AddInMemoryCollection(blobStorageSettings.Select(kv => new KeyValuePair<string, string?>(kv.Key, kv.Value)))
                 .Build();
+
             this.mockConfiguration.Setup(x => x.GetSection("BlobStorage")).Returns(config.GetSection("BlobStorage"));
 
             // Mock blob move
