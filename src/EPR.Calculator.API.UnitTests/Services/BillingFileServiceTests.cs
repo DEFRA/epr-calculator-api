@@ -8,6 +8,7 @@ using EPR.Calculator.API.Services;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -20,13 +21,21 @@ namespace EPR.Calculator.API.UnitTests.Services
 
         private readonly Mock<IStorageService> mockIStorageService;
 
+        private readonly Mock<IBlobStorageService2> mockBlobStorageService2;
+
+        private readonly Mock<IConfiguration> mockConfiguration;
+
         public BillingFileServiceTests()
         {
             this.mockIStorageService = new Mock<IStorageService>();
+            this.mockBlobStorageService2 = new Mock<IBlobStorageService2>();
+            this.mockConfiguration = new Mock<IConfiguration>();
 
             this.billingFileServiceUnderTest = new BillingFileService(
                 this.DbContext,
-                this.mockIStorageService.Object);
+                this.mockIStorageService.Object,
+                this.mockBlobStorageService2.Object,
+                this.mockConfiguration.Object);
         }
 
         [TestMethod]
@@ -504,6 +513,69 @@ namespace EPR.Calculator.API.UnitTests.Services
             Assert.IsNotNull(updatedRecord?.LastModifiedAcceptReject);
             Assert.IsNotNull(updatedRecord?.LastModifiedAcceptRejectBy);
             Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task MoveBillingJsonFile_ShouldReturnFalse_WhenMetadataNotFound()
+        {
+            // Arrange
+            int runId = 999; // Use a runId that does not exist in the metadata table
+            using var cancellationTokenSource = new CancellationTokenSource();
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.MoveBillingJsonFile(runId, cancellationTokenSource.Token);
+
+            // Assert
+            result.Should().BeFalse();
+            this.mockBlobStorageService2.Verify(
+                x => x.MoveBlobAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never());
+        }
+
+        [TestMethod]
+        public async Task MoveBillingJsonFile_ShouldReturnTrue_WhenMoveSucceeds()
+        {
+            // Arrange
+            int runId = 1;
+            var billingJsonFileName = "test-billing.json";
+            var sourceContainer = "source-container";
+            var targetContainer = "target-container";
+            using var cancellationTokenSource = new CancellationTokenSource();
+
+            // Add metadata to the in-memory DB
+            this.DbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            {
+                CalculatorRunId = runId,
+                BillingJsonFileName = billingJsonFileName,
+                BillingFileCreatedDate = DateTime.UtcNow,
+                BillingFileCreatedBy = "test"
+            });
+            await this.DbContext.SaveChangesAsync();
+
+            // Mock configuration for container names
+            var blobStorageSettings = new Dictionary<string, string>
+            {
+                { "BlobStorage:BillingFileJsonContainerName", sourceContainer },
+                { "BlobStorage:BillingFileJsonForFssContainerName", targetContainer }
+            };
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(blobStorageSettings)
+                .Build();
+            this.mockConfiguration.Setup(x => x.GetSection("BlobStorage")).Returns(config.GetSection("BlobStorage"));
+
+            // Mock blob move
+            this.mockBlobStorageService2
+                .Setup(x => x.MoveBlobAsync(sourceContainer, targetContainer, billingJsonFileName))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.MoveBillingJsonFile(runId, cancellationTokenSource.Token);
+
+            // Assert
+            result.Should().BeTrue();
+            this.mockBlobStorageService2.Verify(
+                x => x.MoveBlobAsync(sourceContainer, targetContainer, billingJsonFileName),
+                Times.Once());
         }
     }
 }

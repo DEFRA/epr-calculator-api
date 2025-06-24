@@ -1,4 +1,6 @@
-﻿namespace EPR.Calculator.API.UnitTests.Controllers
+﻿using EPR.Calculator.API.Services.Abstractions;
+
+namespace EPR.Calculator.API.UnitTests.Controllers
 {
     using System.Security.Claims;
     using System.Security.Principal;
@@ -18,6 +20,7 @@
     [TestClass]
     public class CalculatorNewControllerTests
     {
+        private Mock<IBillingFileService> mockBillingFileService;
         private Mock<ICalculatorRunStatusDataValidator> mockValidator;
         private ApplicationDBContext context;
         private CalculatorNewController controller;
@@ -33,8 +36,9 @@
             this.context.Database.EnsureCreated();
 
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
+            this.mockBillingFileService = new Mock<IBillingFileService>();
             var configs = ConfigurationItems.GetConfigurationValues();
-            this.controller = new CalculatorNewController(this.context, configs, this.mockValidator.Object);
+            this.controller = new CalculatorNewController(this.context, configs, this.mockValidator.Object, this.mockBillingFileService.Object);
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "DELETED",
@@ -100,6 +104,12 @@
         public void PrepareBillingFileSendToFSS()
         {
             this.ControllerContext();
+
+            // Setup the mock to return a value
+            mockBillingFileService
+                .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+
             var task = this.controller.PrepareBillingFileSendToFSS(1);
             task.Wait();
 
@@ -192,6 +202,47 @@
             {
                 HttpContext = userContext,
             };
+        }
+
+        [TestMethod]
+        public void PrepareBillingFileSendToFSS_MoveBillingJsonFileFails_Returns422()
+        {
+            this.ControllerContext();
+
+            // Arrange: runId 1 is valid and meets preconditions
+            mockBillingFileService
+                .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(false);
+
+            // Act
+            var task = this.controller.PrepareBillingFileSendToFSS(1);
+            task.Wait();
+
+            // Assert
+            var result = task.Result as ObjectResult;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(422, result.StatusCode);
+            Assert.AreEqual("Unable to move billing json file for Run Id 1", result.Value);
+        }
+
+        [TestMethod]
+        public void PrepareBillingFileSendToFSS_MoveBillingJsonFileSucceeds_Returns202()
+        {
+            this.ControllerContext();
+
+            // Arrange: runId 1 is valid and meets preconditions
+            mockBillingFileService
+                .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+
+            // Act
+            var task = this.controller.PrepareBillingFileSendToFSS(1);
+            task.Wait();
+
+            // Assert
+            var result = task.Result as StatusCodeResult;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(202, result.StatusCode);
         }
     }
 }

@@ -1,7 +1,10 @@
-﻿using EPR.Calculator.API.Controllers;
+﻿using System.Security.Claims;
+using System.Security.Principal;
+using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
@@ -10,8 +13,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.Security.Claims;
-using System.Security.Principal;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -21,6 +22,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private Mock<ICalculatorRunStatusDataValidator> mockValidator;
         private ApplicationDBContext context;
         private CalculatorNewController controller;
+        private Mock<IBillingFileService> mockBillingFileService;
 
         [TestInitialize]
         public void SetUp()
@@ -33,8 +35,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.context.Database.EnsureCreated();
 
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
+            this.mockBillingFileService = new Mock<IBillingFileService>();
             var configs = ConfigurationItems.GetConfigurationValues();
-            this.controller = new CalculatorNewController(this.context, configs, this.mockValidator.Object);
+            this.controller = new CalculatorNewController(this.context, configs, this.mockValidator.Object, this.mockBillingFileService.Object);
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "DELETED",

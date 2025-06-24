@@ -200,10 +200,10 @@ namespace EPR.Calculator.API.Services
 
             var sourceContainer = blobStorageSettings.BillingFileJsonContainerName;
             var targetContainer = blobStorageSettings.BillingFileJsonForFssContainerName;
-            
+
             var result = await blobStorageService2.MoveBlobAsync(sourceContainer, targetContainer, billingFileMetaData.BillingJsonFileName);
 
-            return true;
+            return result;
         }
 
         private async Task<CalculatorRun?> GetRunStatusAsync(int runId, CancellationToken cancellationToken)
