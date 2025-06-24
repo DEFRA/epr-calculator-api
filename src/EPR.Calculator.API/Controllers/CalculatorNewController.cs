@@ -166,6 +166,16 @@ namespace EPR.Calculator.API.Controllers
                 {
                     // Update calculation run classification status: Initial run completed
                     calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
+                    var metadata = await this.context.CalculatorRunBillingFileMetadata.SingleOrDefaultAsync(x => x.CalculatorRunId == runId);
+                    if (metadata == null)
+                    {
+                        return new ObjectResult($"Unable to find Billing File Metadata for Run Id {runId}")
+                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                    }
+
+                    metadata.BillingFileAuthorisedBy = userName;
+                    metadata.BillingFileAuthorisedDate = DateTime.UtcNow;
+
                     this.context.CalculatorRuns.Update(calculatorRun);
 
                     await this.context.SaveChangesAsync();
