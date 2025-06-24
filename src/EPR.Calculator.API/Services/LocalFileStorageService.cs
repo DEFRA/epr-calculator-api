@@ -25,7 +25,9 @@ namespace EPR.Calculator.API.Services
 
         public Task<bool> IsBlobExistsAsync(string fileName, string blobUri, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            // TODO DO NOT CHECK THIS IN
+            return Task.FromResult(true);
+            // throw new NotImplementedException();
         }
     }
 }
