@@ -21,5 +21,7 @@
         public required string RunClassificationStatus { get; set; }
 
         public string FinancialYear { get; set; }
+
+        public bool? IsBillingFileGenerating { get; set; }
     }
 }

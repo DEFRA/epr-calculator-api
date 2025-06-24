@@ -63,6 +63,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 LapcapDataMasterId = 1,
                 DefaultParameterSettingMasterId = 1,
                 Financial_Year = this.FinancialYear24_25,
+                IsBillingFileGenerating = true,
             });
             this.context.SaveChanges();
 
@@ -86,6 +87,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(2, run.RunClassificationId);
             Assert.IsNull(run.UpdatedAt);
             Assert.IsNull(run.UpdatedBy);
+            Assert.IsTrue(run.IsBillingFileGenerating);
         }
 
         [TestMethod]
