@@ -49,8 +49,10 @@ namespace EPR.Calculator.API.Services
 
             try
             {
-                await destBlob.StartCopyFromUriAsync(sourceBlob.Uri);
-                return await this.PollForCopyCompletionAsync(destBlob, blobName);
+                var copyOperation = await destBlob.StartCopyFromUriAsync(sourceBlob.Uri);
+                await copyOperation.WaitForCompletionAsync();
+
+                return true;
             }
             catch (Exception e)
             {
@@ -72,29 +74,6 @@ namespace EPR.Calculator.API.Services
             {
                 this.telemetryClient.TrackTrace($"Exception deleting blob for: {blobName} with exception :{e.Message}");
                 return false;
-            }
-        }
-
-        private async Task<bool> PollForCopyCompletionAsync(BlobClient destBlob, string blobName)
-        {
-            while (true)
-            {
-                var properties = await destBlob.GetPropertiesAsync();
-                var status = properties.Value.CopyStatus;
-
-                if (status == Azure.Storage.Blobs.Models.CopyStatus.Success)
-                {
-                    return true;
-                }
-
-                if (status == Azure.Storage.Blobs.Models.CopyStatus.Failed ||
-                    status == Azure.Storage.Blobs.Models.CopyStatus.Aborted)
-                {
-                    this.telemetryClient.TrackTrace($"Copy failed or aborted for: {blobName}");
-                    return false;
-                }
-
-                await Task.Delay(500);
             }
         }
     }
