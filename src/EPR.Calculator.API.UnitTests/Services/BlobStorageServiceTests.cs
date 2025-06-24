@@ -49,8 +49,8 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             var configurationMock = new Mock<IConfiguration>();
             var configurationSectionMock = new Mock<IConfigurationSection>();
-            var blobStorageSettings = new BlobStorageSettings { ContainerName = "test-container" };
-            configurationSectionMock.Setup(x => x.Value).Returns(blobStorageSettings.ContainerName);
+            var blobStorageSettings = new BlobStorageSettings { ResultFileCSVContainerName = "test-container" };
+            configurationSectionMock.Setup(x => x.Value).Returns(blobStorageSettings.ResultFileCSVContainerName);
             configurationMock.Setup(x => x.GetSection("BlobStorage")).Returns(configurationSectionMock.Object);
 
             // Act & Assert is handled by ExpectedException

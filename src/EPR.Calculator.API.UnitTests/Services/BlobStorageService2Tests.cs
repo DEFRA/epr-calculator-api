@@ -29,7 +29,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var inMemorySettings = new Dictionary<string, string>
             {
-                { "BlobStorage:ContainerName", "ContainerName" },
+                { "BlobStorage:ResultFileCSVContainerName", "ContainerName" },
                 { "BlobStorage:ConnectionString", "UseDevelopmentStorage=true" },
                 { "BlobStorage:BillingFileCSVContainerName", "BillingFileCSVContainerName" },
                 { "BlobStorage:BillingFileJsonContainerName", "BillingFileJsonContainerName" },
