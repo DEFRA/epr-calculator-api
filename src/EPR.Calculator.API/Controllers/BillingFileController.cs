@@ -1,16 +1,18 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Controllers
 {
     /// <summary>
     /// Controller responsible for handling billing file-related operations.
     /// </summary>
-    public class BillingFileController(IBillingFileService billingFileService) : BaseControllerBase
+    public class BillingFileController(IBillingFileService billingFileService, IStorageService storageService, ApplicationDBContext context) : BaseControllerBase
     {
         /// <summary>
         /// Generates a billing file based on the provided request.
@@ -82,6 +84,41 @@ namespace EPR.Calculator.API.Controllers
                     KeyNotFoundException keyEx => this.StatusCode(StatusCodes.Status404NotFound, keyEx.Message),
                     _ => throw ex,
                 };
+            }
+        }
+
+        [HttpGet]
+        [Route("downloadBillingFile/{runId}")]
+        public async Task<IResult> DownloadBillingFile(int runId)
+        {
+            if (!this.ModelState.IsValid)
+            {
+                var badRequest = Results.BadRequest(this.ModelState.Values.SelectMany(x => x.Errors));
+                return badRequest;
+            }
+
+            var runFileMetaData = await context.CalculatorRunBillingFileMetadata
+                .Where(b => b.CalculatorRunId == runId)
+                .Join(
+                    context.CalculatorRunCsvFileMetadata,
+                    billing => billing.BillingJsonFileName,
+                    csv => csv.FileName,
+                    (billing, csv) => new { csv.BlobUri, csv.FileName }
+                )
+                .SingleOrDefaultAsync();
+
+            if (runFileMetaData == null)
+            {
+                return Results.NotFound($"No billing file uri found for Run Id {runId}");
+            }
+
+            try
+            {
+                return await storageService.DownloadFile(runFileMetaData.FileName, runFileMetaData.BlobUri);
+            }
+            catch (Exception e)
+            {
+                return Results.Problem(e.Message);
             }
         }
     }
