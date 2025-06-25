@@ -66,13 +66,16 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             this.mockSourceContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(this.mockSourceBlobClient.Object);
             this.mockDestContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(this.mockDestBlobClient.Object);
-            this.mockDestContainerClient.Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(), null, null, It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Azure.Response<BlobContainerInfo>)null);
+            this.mockDestContainerClient
+                .Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(), null, null, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Mock.Of<Response<BlobContainerInfo>>());
 
             // Setup the copy operation mock
             var mockCopyOperation = new Mock<CopyFromUriOperation>();
-            mockCopyOperation.Setup(x => x.WaitForCompletionAsync(It.IsAny<CancellationToken>()))
-                .Returns(new ValueTask<Response<long>>(Response.FromValue(0L, (Response)null)));
+            var mockResponse = Mock.Of<Response>();
+            mockCopyOperation
+                .Setup(x => x.WaitForCompletionAsync(It.IsAny<CancellationToken>()))
+                .Returns(new ValueTask<Response<long>>(Response.FromValue(0L, mockResponse)));
             mockCopyOperation.Setup(x => x.HasCompleted).Returns(true);
 
             this.mockDestBlobClient
@@ -96,8 +99,10 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             this.mockSourceContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(this.mockSourceBlobClient.Object);
             this.mockDestContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(this.mockDestBlobClient.Object);
-            this.mockDestContainerClient.Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(), null, null, It.IsAny<CancellationToken>()))
-                .ReturnsAsync((Azure.Response<BlobContainerInfo>)null);
+            this.mockDestContainerClient
+                .Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(), null, null, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Mock.Of<Response<BlobContainerInfo>>());
+
 
             this.mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(sourceContainer)).Returns(this.mockSourceContainerClient.Object);
             this.mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(destContainer)).Returns(this.mockDestContainerClient.Object);
