@@ -2,7 +2,7 @@
 {
     public class BillingFileGenerationMessage
     {
-        public int RunId { get; set; }
+        public int CalculatorRunId { get; set; }
 
         public string ApprovedBy { get; set; }
 

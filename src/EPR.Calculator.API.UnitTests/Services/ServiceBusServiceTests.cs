@@ -52,7 +52,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         {
             // Arrange
             var serviceBusQueueName = "Some queue";
-            var billingFileGenerationMessage = new BillingFileGenerationMessage() { ApprovedBy = "Test user", MessageType = CommonConstants.BillingMessageType, RunId = 1 };
+            var billingFileGenerationMessage = new BillingFileGenerationMessage() { ApprovedBy = "Test user", MessageType = CommonConstants.BillingMessageType, CalculatorRunId = 1 };
 
             var mockServiceBusClient = new Mock<ServiceBusClient>();
             this.mockServiceBusClientFactory.Setup(clientFactory => clientFactory.CreateClient(It.IsAny<string>()))
