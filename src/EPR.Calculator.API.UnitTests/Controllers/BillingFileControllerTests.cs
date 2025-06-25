@@ -133,7 +133,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             int invalidRunId = 0;
 
             // Act
-            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(invalidRunId) as ObjectResult;
+            var result = await this.billingFileControllerUnderTest.ProducerBillingInstructions(invalidRunId) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(result);

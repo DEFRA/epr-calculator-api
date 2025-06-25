@@ -103,8 +103,7 @@ namespace EPR.Calculator.API.Controllers
                     context.CalculatorRunCsvFileMetadata,
                     billing => billing.BillingJsonFileName,
                     csv => csv.FileName,
-                    (billing, csv) => new { csv.BlobUri, csv.FileName }
-                )
+                    (billing, csv) => new { csv.BlobUri, csv.FileName })
                 .SingleOrDefaultAsync();
 
             if (runFileMetaData == null)
