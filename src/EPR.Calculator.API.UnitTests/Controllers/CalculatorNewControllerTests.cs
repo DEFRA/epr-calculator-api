@@ -19,18 +19,17 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     [TestClass]
     public class CalculatorNewControllerTests
     {
-        private Mock<IBillingFileService> mockBillingFileService;
-        private Mock<ICalculatorRunStatusDataValidator> mockValidator;
+        private readonly Mock<IBillingFileService> mockBillingFileService;
+        private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
         private ApplicationDBContext context;
         private CalculatorNewController controller;
 
-        [TestInitialize]
-        public void SetUp()
+        public CalculatorNewControllerTests()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-            .UseInMemoryDatabase(databaseName: "PayCal")
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-            .Options;
+                .UseInMemoryDatabase(databaseName: "PayCal")
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+                .Options;
             this.context = new ApplicationDBContext(dbContextOptions);
             this.context.Database.EnsureCreated();
 

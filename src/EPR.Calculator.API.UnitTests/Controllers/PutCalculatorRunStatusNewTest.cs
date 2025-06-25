@@ -19,18 +19,17 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     [TestClass]
     public class PutCalculatorRunStatusNewTest
     {
-        private Mock<ICalculatorRunStatusDataValidator> mockValidator;
+        private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
         private ApplicationDBContext context;
         private CalculatorNewController controller;
-        private Mock<IBillingFileService> mockBillingFileService;
+        private readonly Mock<IBillingFileService> mockBillingFileService;
 
-        [TestInitialize]
-        public void SetUp()
+        public PutCalculatorRunStatusNewTest()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-            .UseInMemoryDatabase(databaseName: "PayCal")
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-            .Options;
+                .UseInMemoryDatabase(databaseName: "PayCal")
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+                .Options;
             this.context = new ApplicationDBContext(dbContextOptions);
             this.context.Database.EnsureCreated();
 
@@ -41,25 +40,25 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 Status = "DELETED",
                 Id = 6,
-                CreatedBy = "SomeUser"
+                CreatedBy = "SomeUser",
             });
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "INITIAL RUN COMPLETED",
                 Id = 7,
-                CreatedBy = "SomeUser"
+                CreatedBy = "SomeUser",
             });
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "INITIAL RUN",
                 Id = 8,
-                CreatedBy = "SomeUser"
+                CreatedBy = "SomeUser",
             });
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
                 Name = "Name",
-                Id = 1
+                Id = 1,
             });
             this.context.SaveChanges();
         }
