@@ -20,9 +20,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     public class PutCalculatorRunStatusNewTest
     {
         private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
+        private readonly Mock<IBillingFileService> mockBillingFileService;
         private ApplicationDBContext context;
         private CalculatorNewController controller;
-        private readonly Mock<IBillingFileService> mockBillingFileService;
 
         public PutCalculatorRunStatusNewTest()
         {
