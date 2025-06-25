@@ -26,10 +26,10 @@ namespace EPR.Calculator.API.UnitTests.Models
             var testValue = fixture.Create<int>();
 
             // Act
-            _testClass.RunId = testValue;
+            _testClass.CalculatorRunId = testValue;
 
             // Assert
-            _testClass.RunId.Should().Be(testValue);
+            _testClass.CalculatorRunId.Should().Be(testValue);
         }
 
         [TestMethod]
