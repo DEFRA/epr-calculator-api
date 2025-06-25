@@ -174,6 +174,17 @@ namespace EPR.Calculator.API.Controllers
                         return this.StatusCode(StatusCodes.Status422UnprocessableEntity, $"Unable to move billing json file for Run Id {runId}");
                     }
 
+                    var metadata = await this.context.CalculatorRunBillingFileMetadata
+                        .SingleOrDefaultAsync(x => x.CalculatorRunId == runId, cancellationToken);
+                    if (metadata == null)
+                    {
+                        return new ObjectResult($"Unable to find Billing File Metadata for Run Id {runId}")
+                            { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                    }
+
+                    metadata.BillingFileAuthorisedBy = userName;
+                    metadata.BillingFileAuthorisedDate = DateTime.UtcNow;
+
                     // All good, commit transaction
                     await this.context.SaveChangesAsync(cancellationToken);
                 }

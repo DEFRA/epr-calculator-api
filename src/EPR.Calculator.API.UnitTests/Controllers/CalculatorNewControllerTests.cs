@@ -99,7 +99,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void PrepareBillingFileSendToFSS()
+        public void PrepareBillingFileSendToFSS_SendFile_Successfully()
         {
             this.ControllerContext();
 
@@ -108,6 +108,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
+            this.context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            {
+                BillingCsvFileName = "test2.csv",
+                BillingJsonFileName = "test2.json",
+                BillingFileCreatedBy = "testUser",
+                BillingFileCreatedDate = DateTime.Now,
+                CalculatorRunId = 1,
+            });
+            this.context.SaveChanges();
             var task = this.controller.PrepareBillingFileSendToFSS(1);
             task.Wait();
 
