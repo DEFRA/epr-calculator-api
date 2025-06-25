@@ -103,7 +103,6 @@ namespace EPR.Calculator.API.UnitTests.Services
                 .Setup(x => x.CreateIfNotExistsAsync(It.IsAny<PublicAccessType>(), null, null, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Mock.Of<Response<BlobContainerInfo>>());
 
-
             this.mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(sourceContainer)).Returns(this.mockSourceContainerClient.Object);
             this.mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(destContainer)).Returns(this.mockDestContainerClient.Object);
 
