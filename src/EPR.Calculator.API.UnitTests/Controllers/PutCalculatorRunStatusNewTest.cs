@@ -1,7 +1,10 @@
-﻿using EPR.Calculator.API.Controllers;
+﻿using System.Security.Claims;
+using System.Security.Principal;
+using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
@@ -10,54 +13,52 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.Security.Claims;
-using System.Security.Principal;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
     public class PutCalculatorRunStatusNewTest
     {
-        private Mock<ICalculatorRunStatusDataValidator> mockValidator;
+        private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
+        private readonly Mock<IBillingFileService> mockBillingFileService;
         private ApplicationDBContext context;
         private CalculatorNewController controller;
 
-        [TestInitialize]
-        public void SetUp()
+        public PutCalculatorRunStatusNewTest()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-            .UseInMemoryDatabase(databaseName: "PayCal")
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-            .Options;
+                .UseInMemoryDatabase(databaseName: "PayCal")
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+                .Options;
             this.context = new ApplicationDBContext(dbContextOptions);
             this.context.Database.EnsureCreated();
 
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
-            var configs = ConfigurationItems.GetConfigurationValues();
-            this.controller = new CalculatorNewController(this.context, configs, this.mockValidator.Object);
+            this.mockBillingFileService = new Mock<IBillingFileService>();
+            this.controller = new CalculatorNewController(this.context, this.mockValidator.Object, this.mockBillingFileService.Object);
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "DELETED",
                 Id = 6,
-                CreatedBy = "SomeUser"
+                CreatedBy = "SomeUser",
             });
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "INITIAL RUN COMPLETED",
                 Id = 7,
-                CreatedBy = "SomeUser"
+                CreatedBy = "SomeUser",
             });
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "INITIAL RUN",
                 Id = 8,
-                CreatedBy = "SomeUser"
+                CreatedBy = "SomeUser",
             });
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
                 Name = "Name",
-                Id = 1
+                Id = 1,
             });
             this.context.SaveChanges();
         }
