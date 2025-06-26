@@ -251,14 +251,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var billingMeta = new CalculatorRunBillingFileMetadata
             {
                 CalculatorRunId = runId,
+                BillingCsvFileName = "csvfile.json",
                 BillingJsonFileName = "file2.json",
                 BillingFileCreatedBy = "user",
                 BillingFileCreatedDate = DateTime.Now,
             };
             var csvMeta = new CalculatorRunCsvFileMetadata
             {
-                FileName = "file2.json",
-                BlobUri = "C:\\dev\\file2.json",
+                FileName = "csvfile.json",
+                BlobUri = "C:\\dev\\csvfile.json",
                 CalculatorRunId = runId,
             };
             this.context.CalculatorRunBillingFileMetadata.Add(billingMeta);
@@ -267,7 +268,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var expectedResult = Mock.Of<IResult>();
             this.storageServiceMock
-                .Setup(x => x.DownloadFile("file2.json", "C:\\dev\\file2.json"))
+                .Setup(x => x.DownloadFile("csvfile.json", "C:\\dev\\csvfile.json"))
                 .ReturnsAsync(expectedResult);
 
             // Act
