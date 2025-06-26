@@ -4,7 +4,6 @@ using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.HealthCheck;
 using EPR.Calculator.API.Services;
@@ -42,10 +41,12 @@ builder.Services.AddScoped<IBillingFileService, BillingFileService>();
 if (environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
 {
     builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
+    builder.Services.AddScoped<IBlobStorageService2, LocalFileStorageService2>();
 }
 else
 {
     builder.Services.AddScoped<IStorageService, BlobStorageService>();
+    builder.Services.AddScoped<IBlobStorageService2, BlobStorageService2>();
 }
 
 builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();

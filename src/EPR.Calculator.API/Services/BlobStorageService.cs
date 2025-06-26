@@ -27,7 +27,7 @@ namespace EPR.Calculator.API.Services
             this.sharedKeyCredential = new StorageSharedKeyCredential(settings.AccountName, settings.AccountKey) ??
                 throw new ConfigurationErrorsException(AccountNameMissingError);
 
-            this.containerClient = blobServiceClient.GetBlobContainerClient(settings.ContainerName ??
+            this.containerClient = blobServiceClient.GetBlobContainerClient(settings.ResultFileCSVContainerName ??
                 throw new ConfigurationErrorsException(ContainerNameMissingError));
 
             this.logger = logger;

@@ -37,5 +37,14 @@ namespace EPR.Calculator.API.Services.Abstractions
         Task<ProducersInstructionResponse> GetProducersInstructionResponseAsync(
             int runId,
             CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Gets the billing file name from the calculator_run_billing_file_metadata based on the run ID.
+        /// and then calls the blob storage service 2 to move the json file to the FSS container.
+        /// </summary>
+        /// <param name="runId">The calculator run id.</param>
+        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+        /// <returns>A <see cref="string"/> containing the name of the json billing file.</returns>
+        Task<bool> MoveBillingJsonFile(int runId, CancellationToken cancellationToken);
     }
 }

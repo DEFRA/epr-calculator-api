@@ -19,7 +19,7 @@ namespace EPR.Calculator.API.Services
     /// </remarks>
     /// <param name="applicationDBContext">The database context <seealso cref="ApplicationDBContext"/>.</param>
     /// <param name="storageService">The storage service <seealso cref="IStorageService"/>.</param>
-    public class BillingFileService(ApplicationDBContext applicationDBContext, IStorageService storageService) : IBillingFileService
+    public class BillingFileService(ApplicationDBContext applicationDBContext, IStorageService storageService, IBlobStorageService2 blobStorageService2, IConfiguration configuration) : IBillingFileService
     {
         /// <summary>
         /// Validates the run ID for accepting all billing instructions.
@@ -182,74 +182,33 @@ namespace EPR.Calculator.API.Services
             };
         }
 
-        private async Task<CalculatorRun?> GetRunStatusAsync(int runId, CancellationToken cancellationToken)
+        public async Task<bool> MoveBillingJsonFile(int runId, CancellationToken cancellationToken)
         {
-            return await applicationDBContext.CalculatorRuns
-                .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken);
-        }
+            var billingFileMetaData =
+                await applicationDBContext.CalculatorRunBillingFileMetadata
+                    .SingleOrDefaultAsync(m => m.CalculatorRunId == runId, cancellationToken)
+                    .ConfigureAwait(false);
 
-        private void ValidateRunClassification(CalculatorRun? runStatus, int runId)
-        {
-            if (runStatus == null)
+            if (billingFileMetaData == null || string.IsNullOrEmpty(billingFileMetaData.BillingJsonFileName))
             {
-                throw new KeyNotFoundException($"Run ID {runId} was not found.");
+                return false;
             }
 
-            var validRunClassifications = new HashSet<int>
-                    {
-                        (int)RunClassification.INITIAL_RUN,
-                        (int)RunClassification.INTERIM_RECALCULATION_RUN,
-                        (int)RunClassification.FINAL_RUN,
-                        (int)RunClassification.FINAL_RECALCULATION_RUN,
-                    };
+            var blobStorageSettings = new BlobStorageSettings();
+            configuration.GetSection("BlobStorage").Bind(blobStorageSettings);
 
-            if (!validRunClassifications.Contains(runStatus.CalculatorRunClassificationId))
-            {
-                throw new UnprocessableEntityException(string.Format(CommonResources.NotAValidClassificationStatus, runId));
-            }
-        }
+            var sourceContainer = blobStorageSettings.BillingFileJsonContainerName;
+            var targetContainer = blobStorageSettings.BillingFileJsonForFssContainerName;
 
-        private async Task<List<ProducersInstructionDetail>> GetInstructionDetailsAsync(int runId, CancellationToken cancellationToken)
-        {
-            return await (
-                from billing in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                join producer in applicationDBContext.ProducerDetail
-                    on new { billing.ProducerId, billing.CalculatorRunId }
-                    equals new { producer.ProducerId, producer.CalculatorRunId }
-                where billing.CalculatorRunId == runId && producer.SubsidiaryId == null
-                select new ProducersInstructionDetail
-                {
-                    OrganisationId = producer.ProducerId,
-                    OrganisationName = producer.ProducerName,
-                    BillingInstruction = billing.SuggestedBillingInstruction,
-                    InvoiceAmount = $"£{billing.SuggestedInvoiceAmount:N2}",
-                    Status = string.IsNullOrWhiteSpace(billing.BillingInstructionAcceptReject) ? string.Empty : billing.BillingInstructionAcceptReject,
-                }).Distinct().ToListAsync(cancellationToken);
-        }
+            var result = await blobStorageService2.MoveBlobAsync(sourceContainer, targetContainer, billingFileMetaData.BillingJsonFileName);
 
-        private ProducersInstructionSummary GenerateInstructionSummary(List<ProducersInstructionDetail> details)
-        {
-            var statusGroups = details
-                .GroupBy(d => string.IsNullOrWhiteSpace(d.Status) ? string.Empty : d.Status)
-                .ToDictionary(g => g.Key, g => g.Count());
-
-            var orderedStatuses = new Dictionary<string, int> { { "All", details.Count }, };
-
-            foreach (var kvp in statusGroups)
-            {
-                orderedStatuses[kvp.Key] = kvp.Value;
-            }
-
-            return new ProducersInstructionSummary
-            {
-                Statuses = orderedStatuses,
-            };
+            return result;
         }
 
         public async Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAcceptAllAsync(
-            int runId,
-            string userName,
-            CancellationToken cancellationToken)
+    int runId,
+    string userName,
+    CancellationToken cancellationToken)
         {
             try
             {
@@ -313,6 +272,70 @@ namespace EPR.Calculator.API.Services
                     Message = exception.Message,
                 };
             }
+        }
+
+        private async Task<CalculatorRun?> GetRunStatusAsync(int runId, CancellationToken cancellationToken)
+        {
+            return await applicationDBContext.CalculatorRuns
+                .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken);
+        }
+
+        private void ValidateRunClassification(CalculatorRun? runStatus, int runId)
+        {
+            if (runStatus == null)
+            {
+                throw new KeyNotFoundException($"Run ID {runId} was not found.");
+            }
+
+            var validRunClassifications = new HashSet<int>
+                    {
+                        (int)RunClassification.INITIAL_RUN,
+                        (int)RunClassification.INTERIM_RECALCULATION_RUN,
+                        (int)RunClassification.FINAL_RUN,
+                        (int)RunClassification.FINAL_RECALCULATION_RUN,
+                    };
+
+            if (!validRunClassifications.Contains(runStatus.CalculatorRunClassificationId))
+            {
+                throw new UnprocessableEntityException(string.Format(CommonResources.NotAValidClassificationStatus, runId));
+            }
+        }
+
+        private async Task<List<ProducersInstructionDetail>> GetInstructionDetailsAsync(int runId, CancellationToken cancellationToken)
+        {
+            return await (
+                from billing in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                join producer in applicationDBContext.ProducerDetail
+                    on new { billing.ProducerId, billing.CalculatorRunId }
+                    equals new { producer.ProducerId, producer.CalculatorRunId }
+                where billing.CalculatorRunId == runId && producer.SubsidiaryId == null
+                select new ProducersInstructionDetail
+                {
+                    OrganisationId = producer.ProducerId,
+                    OrganisationName = producer.ProducerName,
+                    BillingInstruction = billing.SuggestedBillingInstruction,
+                    InvoiceAmount = $"£{billing.SuggestedInvoiceAmount:N2}",
+                    Status = string.IsNullOrWhiteSpace(billing.BillingInstructionAcceptReject) ? string.Empty : billing.BillingInstructionAcceptReject,
+                }).Distinct().ToListAsync(cancellationToken);
+        }
+
+        private ProducersInstructionSummary GenerateInstructionSummary(List<ProducersInstructionDetail> details)
+        {
+            var statusGroups = details
+                .GroupBy(d => string.IsNullOrWhiteSpace(d.Status) ? string.Empty : d.Status)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            var orderedStatuses = new Dictionary<string, int> { { "All", details.Count }, };
+
+            foreach (var kvp in statusGroups)
+            {
+                orderedStatuses[kvp.Key] = kvp.Value;
+            }
+
+            return new ProducersInstructionSummary
+            {
+                Statuses = orderedStatuses,
+            };
         }
 
         private static void UpdateBillingInstruction(
