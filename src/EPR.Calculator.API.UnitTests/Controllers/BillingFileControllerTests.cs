@@ -189,7 +189,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.billingFileControllerUnderTest.ModelState.AddModelError("key", "error");
 
             // Act
-            var result = await this.billingFileControllerUnderTest.DownloadBillingFile(1);
+            var result = await this.billingFileControllerUnderTest.DownloadCsvBillingFile(1);
 
             // Assert
             result.Should().BeOfType<BadRequest<IEnumerable<ModelError>>>();
@@ -202,7 +202,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             int runId = 9999; // Use a runId that does not exist in the in-memory DB
 
             // Act
-            var result = await this.billingFileControllerUnderTest.DownloadBillingFile(runId);
+            var result = await this.billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
 
             // Assert
             result.Should().BeOfType<NotFound<string>>();
@@ -236,7 +236,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .ThrowsAsync(new Exception("fail"));
 
             // Act
-            var result = await this.billingFileControllerUnderTest.DownloadBillingFile(runId);
+            var result = await this.billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
 
             // Assert
             result.Should().BeOfType<ProblemHttpResult>();
@@ -270,7 +270,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .ReturnsAsync(expectedResult);
 
             // Act
-            var result = await this.billingFileControllerUnderTest.DownloadBillingFile(runId);
+            var result = await this.billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
 
             // Assert
             result.Should().BeSameAs(expectedResult);

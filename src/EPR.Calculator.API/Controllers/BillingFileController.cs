@@ -87,9 +87,20 @@ namespace EPR.Calculator.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Downloads the CSV billing file for the specified calculator run.
+        /// </summary>
+        /// <param name="runId">The unique identifier of the calculator run.</param>
+        /// <returns>The CSV billing file as a downloadable response, or an error result if not found or invalid.</returns>
+        /// <response code="200">Returns the CSV billing file for the specified run.</response>
+        /// <response code="400">Returned when the request is invalid.</response>
+        /// <response code="404">Returned when the billing file is not found for the specified run id.</response>
         [HttpGet]
         [Route("downloadBillingFile/{runId}")]
-        public async Task<IResult> DownloadBillingFile(int runId)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IResult> DownloadCsvBillingFile(int runId)
         {
             if (!this.ModelState.IsValid)
             {
