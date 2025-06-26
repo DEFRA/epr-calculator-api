@@ -1,4 +1,6 @@
-﻿using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
@@ -20,9 +22,8 @@ namespace EPR.Calculator.API.Controllers
         /// <summary>
         /// Initializes a new instance of the <see cref="CalculatorNewController"/> class.
         /// </summary>
-        /// <param name="context">Db Context.</param>
-        /// <param name="calculatorRunStatusDataValidator">Db Validator.</param>
-        /// <param name="billingFileService">Billing file service.</param>
+        /// <param name="context">Db Context</param>
+        /// <param name="calculatorRunStatusDataValidator">Db Validator</param>
         public CalculatorNewController(
             ApplicationDBContext context,
             ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
@@ -165,8 +166,19 @@ namespace EPR.Calculator.API.Controllers
                 {
                     // Update calculation run classification status: Initial run completed
                     calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
+                    var metadata = await this.context.CalculatorRunBillingFileMetadata.SingleOrDefaultAsync(x => x.CalculatorRunId == runId);
+                    if (metadata == null)
+                    {
+                        return new ObjectResult($"Unable to find Billing File Metadata for Run Id {runId}")
+                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                    }
+
+                    metadata.BillingFileAuthorisedBy = userName;
+                    metadata.BillingFileAuthorisedDate = DateTime.UtcNow;
 
                     this.context.CalculatorRuns.Update(calculatorRun);
+
+                    await this.context.SaveChangesAsync();
 
                     var result = await this.billingFileService.MoveBillingJsonFile(runId, cancellationToken);
 
@@ -175,19 +187,7 @@ namespace EPR.Calculator.API.Controllers
                         return this.StatusCode(StatusCodes.Status422UnprocessableEntity, $"Unable to move billing json file for Run Id {runId}");
                     }
 
-                    var metadata = await this.context.CalculatorRunBillingFileMetadata
-                        .SingleOrDefaultAsync(x => x.CalculatorRunId == runId, cancellationToken);
-                    if (metadata == null)
-                    {
-                        return new ObjectResult($"Unable to find Billing File Metadata for Run Id {runId}")
-                            { StatusCode = StatusCodes.Status422UnprocessableEntity };
-                    }
-
-                    metadata.BillingFileAuthorisedBy = userName;
-                    metadata.BillingFileAuthorisedDate = DateTime.UtcNow;
-
                     // All good, commit transaction
-                    await this.context.SaveChangesAsync(cancellationToken);
                 }
                 catch (Exception exception)
                 {
