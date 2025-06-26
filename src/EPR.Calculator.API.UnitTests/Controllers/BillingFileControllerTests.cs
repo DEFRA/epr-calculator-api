@@ -241,6 +241,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Assert
             result.Should().BeOfType<ProblemHttpResult>();
+
+            // Tidy Up
+            this.context.CalculatorRunBillingFileMetadata.Remove(billingMeta);
+            this.context.CalculatorRunCsvFileMetadata.Remove(csvMeta);
+            this.context.SaveChanges();
         }
 
         [TestMethod]
@@ -276,6 +281,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Assert
             result.Should().BeSameAs(expectedResult);
+
+            // Tidy Up
+            this.context.CalculatorRunBillingFileMetadata.Remove(billingMeta);
+            this.context.CalculatorRunCsvFileMetadata.Remove(csvMeta);
+            this.context.SaveChanges();
         }
     }
 }
