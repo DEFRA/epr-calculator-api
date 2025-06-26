@@ -126,9 +126,10 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Setup the container and blob mocks
             this.mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(container)).Returns(this.mockSourceContainerClient.Object);
             this.mockSourceContainerClient.Setup(x => x.GetBlobClient(blobName)).Returns(this.mockSourceBlobClient.Object);
-            this.mockSourceBlobClient.Setup(x => x.DeleteIfExistsAsync(
+            this.mockSourceBlobClient
+                .Setup(x => x.DeleteIfExistsAsync(
                     It.IsAny<DeleteSnapshotsOption>(), null, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Response.FromValue(true, (Response)null));
+                .ReturnsAsync(Response.FromValue(true, Mock.Of<Response>()));
 
             // Act
             var result = await this.blobStorageService2.DeleteBlobAsync(container, blobName);
