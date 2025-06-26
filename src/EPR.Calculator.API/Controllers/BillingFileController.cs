@@ -112,7 +112,7 @@ namespace EPR.Calculator.API.Controllers
                 .Where(b => b.CalculatorRunId == runId)
                 .Join(
                     context.CalculatorRunCsvFileMetadata,
-                    billing => billing.BillingJsonFileName,
+                    billing => billing.BillingCsvFileName,
                     csv => csv.FileName,
                     (billing, csv) => new { csv.BlobUri, csv.FileName })
                 .SingleOrDefaultAsync();
