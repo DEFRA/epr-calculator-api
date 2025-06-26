@@ -3,6 +3,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using EPR.Calculator.API.Services;
 using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -40,7 +41,9 @@ namespace EPR.Calculator.API.UnitTests.Services
                 .AddInMemoryCollection(inMemorySettings!)
                 .Build();
 
-            this.blobStorageService2 = new BlobStorageService2(configs, new TelemetryClient());
+            var telemetryConfig = TelemetryConfiguration.CreateDefault();
+            var telemetryClient = new TelemetryClient(telemetryConfig);
+            this.blobStorageService2 = new BlobStorageService2(configs, telemetryClient);
 
             // Patch the private blobServiceClient field to use the mock
             var field = typeof(BlobStorageService2).GetField("blobServiceClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
