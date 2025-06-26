@@ -9,12 +9,11 @@ namespace EPR.Calculator.API.UnitTests.Models
     [TestClass]
     public class BillingFileGenerationMessageTests
     {
-        private BillingFileGenerationMessage _testClass;
+        private readonly BillingFileGenerationMessage testClass;
 
-        [TestInitialize]
-        public void SetUp()
+        public BillingFileGenerationMessageTests()
         {
-            _testClass = new BillingFileGenerationMessage();
+            this.testClass = new BillingFileGenerationMessage();
         }
 
         [TestMethod]
@@ -26,10 +25,10 @@ namespace EPR.Calculator.API.UnitTests.Models
             var testValue = fixture.Create<int>();
 
             // Act
-            _testClass.RunId = testValue;
+            this.testClass.CalculatorRunId = testValue;
 
             // Assert
-            _testClass.RunId.Should().Be(testValue);
+            this.testClass.CalculatorRunId.Should().Be(testValue);
         }
 
         [TestMethod]
@@ -41,10 +40,10 @@ namespace EPR.Calculator.API.UnitTests.Models
             var testValue = fixture.Create<string>();
 
             // Act
-            _testClass.ApprovedBy = testValue;
+            this.testClass.ApprovedBy = testValue;
 
             // Assert
-            _testClass.ApprovedBy.Should().Be(testValue);
+            this.testClass.ApprovedBy.Should().Be(testValue);
         }
 
         [TestMethod]
@@ -56,10 +55,10 @@ namespace EPR.Calculator.API.UnitTests.Models
             var testValue = fixture.Create<string>();
 
             // Act
-            _testClass.MessageType = testValue;
+            this.testClass.MessageType = testValue;
 
             // Assert
-            _testClass.MessageType.Should().Be(testValue);
+            this.testClass.MessageType.Should().Be(testValue);
         }
     }
 }
