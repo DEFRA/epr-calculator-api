@@ -165,6 +165,7 @@ namespace EPR.Calculator.API.Controllers
                 {
                     // Update calculation run classification status: Initial run completed
                     calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
+
                     this.context.CalculatorRuns.Update(calculatorRun);
 
                     var result = await this.billingFileService.MoveBillingJsonFile(runId, cancellationToken);
