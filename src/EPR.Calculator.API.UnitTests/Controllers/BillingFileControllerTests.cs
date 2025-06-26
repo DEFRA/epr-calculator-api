@@ -147,7 +147,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             int validRunId = 10;
             this.billingFileServiceMock
                 .Setup(s => s.GetProducersInstructionResponseAsync(validRunId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync((ProducersInstructionResponse?)null);
+                .ReturnsAsync(new ProducersInstructionResponse());
 
             // Act
             var result = await this.billingFileControllerUnderTest.ProducerBillingInstructions(validRunId) as ObjectResult;

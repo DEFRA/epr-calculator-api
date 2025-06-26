@@ -69,7 +69,7 @@ namespace EPR.Calculator.API.Controllers
                 var responseDto = await billingFileService.GetProducersInstructionResponseAsync(
                     runId, cancellationToken).ConfigureAwait(false);
 
-                if (responseDto == null)
+                if (responseDto == null || (responseDto.ProducersInstructionDetails == null && responseDto.ProducersInstructionSummary == null))
                 {
                     return this.StatusCode(StatusCodes.Status404NotFound, $"No billing instructions found for Run Id {runId}");
                 }
