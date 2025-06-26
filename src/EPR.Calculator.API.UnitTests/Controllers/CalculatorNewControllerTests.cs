@@ -100,6 +100,15 @@
         public void PrepareBillingFileSendToFSS()
         {
             this.ControllerContext();
+            this.context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            {
+                BillingCsvFileName = "test2.csv",
+                BillingJsonFileName = "test2.json",
+                BillingFileCreatedBy = "testUser",
+                BillingFileCreatedDate = DateTime.Now,
+                CalculatorRunId = 1,
+            });
+            this.context.SaveChanges();
             var task = this.controller.PrepareBillingFileSendToFSS(1);
             task.Wait();
 
