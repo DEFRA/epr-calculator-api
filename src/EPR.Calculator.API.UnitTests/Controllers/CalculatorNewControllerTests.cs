@@ -223,6 +223,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(result);
             Assert.AreEqual(422, result.StatusCode);
             Assert.AreEqual("Unable to move billing json file for Run Id 1", result.Value);
+
+            this.context.CalculatorRunBillingFileMetadata.RemoveRange(this.context.CalculatorRunBillingFileMetadata);
+            this.context.SaveChanges();
         }
 
         private void ControllerContext()
