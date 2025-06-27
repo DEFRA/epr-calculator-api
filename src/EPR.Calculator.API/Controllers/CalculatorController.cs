@@ -337,7 +337,8 @@ namespace EPR.Calculator.API.Controllers
                 return badRequest;
             }
 
-            var csvFileMetadata = await this.context.CalculatorRunCsvFileMetadata.SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId);
+            var csvFileMetadata = await this.context.CalculatorRunCsvFileMetadata.
+                SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId && metadata.FileName != null && metadata.FileName.Contains("_Results"));
             if (csvFileMetadata == null)
             {
                 return Results.NotFound($"No CSV file found for Run Id {runId}");
