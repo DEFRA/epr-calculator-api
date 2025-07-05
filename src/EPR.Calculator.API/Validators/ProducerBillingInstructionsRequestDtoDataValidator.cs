@@ -83,7 +83,7 @@ namespace EPR.Calculator.API.Validators
 
                     // Only allowed values
                     var invalidStatuses = statusList.Where(s => !AllowedStatuses.Contains(s)).Distinct().ToList();
-                    if (invalidStatuses.Any())
+                    if (invalidStatuses.Count > 0)
                     {
                         validationResult.IsInvalid = true;
                         validationResult.Errors.Add(new ErrorDto

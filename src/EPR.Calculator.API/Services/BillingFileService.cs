@@ -218,11 +218,11 @@ namespace EPR.Calculator.API.Services
                 var searchQuery = requestDto.SearchQuery;
 
                 var query =
-                    (from ins in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                    from ins in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
                         join t1 in
-                            (from pd in applicationDBContext.ProducerDetail
+                            from pd in applicationDBContext.ProducerDetail
                                 where pd.CalculatorRunId == runId && pd.SubsidiaryId == null
-                                select new { pd.ProducerId, pd.ProducerName })
+                                select new { pd.ProducerId, pd.ProducerName }
                             on ins.ProducerId equals t1.ProducerId
                         where ins.CalculatorRunId == runId
                         select new ProducerBillingInstructionsDto
@@ -233,7 +233,7 @@ namespace EPR.Calculator.API.Services
                             SuggestedInvoiceAmount = ins.SuggestedInvoiceAmount,
                             BillingInstructionAcceptReject = ins.BillingInstructionAcceptReject,
                             CalculatorRunId = ins.CalculatorRunId,
-                        });
+                        };
 
                 // Apply OrganisationId filter if provided
                 if (searchQuery?.OrganisationId.HasValue == true)

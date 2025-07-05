@@ -14,8 +14,6 @@ namespace EPR.Calculator.API.Controllers
     [Route("v1")]
     public class ProducerBillingInstructionsController(
         IBillingFileService billingFileService,
-        IServiceBusService serviceBusService,
-        IConfiguration configuration,
         IProducerBillingInstructionsRequestDtoDataValidator validator) : BaseControllerBase
     {
         /// <summary>

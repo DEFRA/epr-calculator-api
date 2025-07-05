@@ -8,7 +8,7 @@ namespace EPR.Calculator.API.UnitTests.Dtos
     public class ProducerBillingInstructionsDtoTests
     {
         [TestMethod]
-        public void CanSetAndGetProperties()
+        public void CanSetAndGetProperties_ProducerBillingInstructionsDto()
         {
             var dto = new ProducerBillingInstructionsDto
             {
@@ -27,13 +27,9 @@ namespace EPR.Calculator.API.UnitTests.Dtos
             Assert.AreEqual("Accepted", dto.BillingInstructionAcceptReject);
             Assert.AreEqual(1, dto.CalculatorRunId);
         }
-    }
 
-    [TestClass]
-    public class ProducerBillingInstructionsRequestDtoTests
-    {
         [TestMethod]
-        public void CanSetAndGetProperties()
+        public void CanSetAndGetProperties_ProducerBillingInstructionsRequestDto()
         {
             var searchQuery = new ProducerBillingInstructionsSearchQueryDto
             {
@@ -54,13 +50,9 @@ namespace EPR.Calculator.API.UnitTests.Dtos
             Assert.AreEqual(2, dto.PageNumber);
             Assert.AreEqual(50, dto.PageSize);
         }
-    }
 
-    [TestClass]
-    public class ProducerBillingInstructionsResponseDtoTests
-    {
         [TestMethod]
-        public void CanSetAndGetProperties()
+        public void CanSetAndGetProperties_ProducerBillingInstructionsResponseDto()
         {
             var record = new ProducerBillingInstructionsDto { ProducerId = 1, ProducerName = "A", SuggestedBillingInstruction = "Invoice", SuggestedInvoiceAmount = 1.0m, BillingInstructionAcceptReject = "Accepted", CalculatorRunId = 1 };
             var dto = new ProducerBillingInstructionsResponseDto
