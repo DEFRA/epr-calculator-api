@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
 
 namespace EPR.Calculator.API.Dtos
 {
@@ -14,5 +15,7 @@ namespace EPR.Calculator.API.Dtos
         public List<TErrorDto> Errors { get; set; }
 
         public bool IsInvalid { get; set; }
+
+        public HttpStatusCode? StatusCode { get; set; }
     }
 }
