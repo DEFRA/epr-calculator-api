@@ -164,9 +164,9 @@ namespace EPR.Calculator.API.Services
 
         public async Task<ProducersInstructionResponse?> GetProducersInstructionResponseAsync(int runId, CancellationToken cancellationToken)
         {
-            ValidateRunClassification(await GetRunStatusAsync(runId, cancellationToken), runId);
+            this.ValidateRunClassification(await this.GetRunStatusAsync(runId, cancellationToken), runId);
 
-            var details = await GetInstructionDetailsAsync(runId, cancellationToken);
+            var details = await this.GetInstructionDetailsAsync(runId, cancellationToken);
 
             if (!details.Any())
             {
@@ -205,10 +205,81 @@ namespace EPR.Calculator.API.Services
             return result;
         }
 
+        public async Task<ProducerBillingInstructionsResponseDto> GetProducerBillingInstructionsAsync(
+            ProducerBillingInstructionsRequestDto requestDto,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var runId = requestDto.RunId;
+                int pageNumber = Math.Max(requestDto.PageNumber ?? 1, 1);
+                int pageSize = Math.Max(requestDto.PageSize ?? CommonConstants.ProducerBillingInstructionsDefaultPageSize, 1);
+
+                var searchQuery = requestDto.SearchQuery;
+
+                var query =
+                    (from ins in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                        join t1 in
+                            (from pd in applicationDBContext.ProducerDetail
+                                where pd.CalculatorRunId == runId && pd.SubsidiaryId == null
+                                select new { pd.ProducerId, pd.ProducerName })
+                            on ins.ProducerId equals t1.ProducerId
+                        where ins.CalculatorRunId == runId
+                        select new ProducerBillingInstructionsDto
+                        {
+                            ProducerName = t1.ProducerName,
+                            ProducerId = ins.ProducerId,
+                            SuggestedBillingInstruction = ins.SuggestedBillingInstruction,
+                            SuggestedInvoiceAmount = ins.SuggestedInvoiceAmount,
+                            BillingInstructionAcceptReject = ins.BillingInstructionAcceptReject,
+                            CalculatorRunId = ins.CalculatorRunId,
+                        });
+
+                // Apply OrganisationId filter if provided
+                if (searchQuery?.OrganisationId.HasValue == true)
+                {
+                    var orgId = searchQuery.OrganisationId.Value;
+                    query = query.Where(x => x.ProducerId == orgId);
+                }
+
+                // Apply Status filter if provided and not empty
+                if (searchQuery?.Status != null && searchQuery.Status.Any())
+                {
+                    var statusList = searchQuery.Status.ToList();
+                    query = query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject));
+                }
+
+                query = query.Distinct().OrderBy(x => x.ProducerId);
+
+                var pagedResult = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync(cancellationToken);
+
+                var countOfTotalRecords = await query.CountAsync(cancellationToken);
+
+                return new ProducerBillingInstructionsResponseDto
+                {
+                    Records = pagedResult,
+                    StatusCode = HttpStatusCode.OK,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalRecords = countOfTotalRecords,
+                };
+            }
+            catch (Exception)
+            {
+                return new ProducerBillingInstructionsResponseDto
+                {
+                    StatusCode = HttpStatusCode.InternalServerError,
+                };
+            }
+        }
+
         public async Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAcceptAllAsync(
-    int runId,
-    string userName,
-    CancellationToken cancellationToken)
+            int runId,
+            string userName,
+            CancellationToken cancellationToken)
         {
             try
             {

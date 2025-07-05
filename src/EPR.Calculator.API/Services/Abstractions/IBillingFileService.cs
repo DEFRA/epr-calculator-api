@@ -46,5 +46,13 @@ namespace EPR.Calculator.API.Services.Abstractions
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="string"/> containing the name of the json billing file.</returns>
         Task<bool> MoveBillingJsonFile(int runId, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Gets producer billing instructions for a given calculator run.
+        /// </summary>
+        /// <param name="requestDto">The calculator run id.</param>
+        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+        /// <returns>A <see cref="ProducerBillingInstructionsResponseDto"/> response containing records and pagination data.</returns>
+        Task<ProducerBillingInstructionsResponseDto> GetProducerBillingInstructionsAsync(ProducerBillingInstructionsRequestDto requestDto, CancellationToken cancellationToken);
     }
 }

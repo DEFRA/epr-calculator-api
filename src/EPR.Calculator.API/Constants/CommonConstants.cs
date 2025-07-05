@@ -21,5 +21,6 @@
         public const string SASuperUserRole = "SASuperUser";
         public const string BillingMessageType = "Billing";
         public const string ResultMessageType = "Result";
+        public const int ProducerBillingInstructionsDefaultPageSize = 50;
     }
 }

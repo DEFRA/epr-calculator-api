@@ -338,7 +338,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             var runId = 4;
 
-            DbContext.ProducerDetail.Add(new ProducerDetail
+            this.DbContext.ProducerDetail.Add(new ProducerDetail
             {
                 ProducerId = 101,
                 CalculatorRunId = runId,
@@ -346,7 +346,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 TradingName = "Acme Trading",
             });
 
-            DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
             {
                 ProducerId = 101,
                 CalculatorRunId = runId,
@@ -355,15 +355,18 @@ namespace EPR.Calculator.API.UnitTests.Services
                 BillingInstructionAcceptReject = "Accepted",
             });
 
-            await DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync();
 
             // Act
-            var result = await billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None);
+            var result = await this.billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None);
 
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.ProducersInstructionDetails.Count);
             Assert.AreEqual("Accepted", result.ProducersInstructionDetails.First().Status.ToString());
+
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.RemoveRange(this.DbContext.ProducerResultFileSuggestedBillingInstruction);
+            await this.DbContext.SaveChangesAsync();
         }
 
         [TestMethod]
@@ -578,6 +581,91 @@ namespace EPR.Calculator.API.UnitTests.Services
             this.mockBlobStorageService2.Verify(
                 x => x.MoveBlobAsync(sourceContainer, targetContainer, billingJsonFileName),
                 Times.Once());
+        }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructionsAsync_ReturnsRecords_WhenValid()
+        {
+            // Arrange
+            var runId = 9290;
+            this.DbContext.ProducerDetail.Add(new ProducerDetail
+            {
+                ProducerId = 1,
+                CalculatorRunId = runId,
+                ProducerName = "Producer1",
+            });
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
+            {
+                ProducerId = 1,
+                CalculatorRunId = runId,
+                SuggestedBillingInstruction = "Invoice",
+                SuggestedInvoiceAmount = 100,
+                BillingInstructionAcceptReject = "Accepted",
+            });
+            await this.DbContext.SaveChangesAsync();
+
+            var requestDto = new ProducerBillingInstructionsRequestDto
+            {
+                RunId = runId,
+                PageNumber = 1,
+                PageSize = 10,
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(System.Net.HttpStatusCode.OK, result.StatusCode);
+            Assert.AreEqual(1, result.Records.Count);
+            Assert.AreEqual(1, result.TotalRecords);
+            Assert.AreEqual(1, result.PageNumber);
+            Assert.AreEqual(10, result.PageSize);
+
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.RemoveRange(this.DbContext.ProducerResultFileSuggestedBillingInstruction);
+            await this.DbContext.SaveChangesAsync();
+        }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructionsAsync_ReturnsEmpty_WhenNoRecords()
+        {
+            // Arrange
+            var runId = 2323;
+            var requestDto = new ProducerBillingInstructionsRequestDto
+            {
+                RunId = runId,
+                PageNumber = 1,
+                PageSize = 10,
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(System.Net.HttpStatusCode.OK, result.StatusCode);
+            Assert.AreEqual(0, result.Records.Count);
+            Assert.AreEqual(0, result.TotalRecords);
+        }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructionsAsync_ReturnsInternalServerError_OnException()
+        {
+            // Arrange
+            var requestDto = new ProducerBillingInstructionsRequestDto
+            {
+                RunId = -1, // This will cause an exception if DB is not set up for this runId
+            };
+
+            // Simulate exception by disposing DbContext
+            this.DbContext.Dispose();
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(System.Net.HttpStatusCode.InternalServerError, result.StatusCode);
         }
     }
 }
