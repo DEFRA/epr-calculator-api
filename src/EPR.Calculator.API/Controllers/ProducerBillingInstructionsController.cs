@@ -34,10 +34,6 @@ namespace EPR.Calculator.API.Controllers
             [FromBody] ProducerBillingInstructionsRequestDto requestDto,
             CancellationToken cancellationToken = default)
         {
-            // TODO Unit test 
-            // If there are no producer records associated to the calculator run
-            // We are still sending a 200 but with an empty records field
-
             var validationResult = validator.Validate(requestDto);
             if (validationResult.IsInvalid)
             {

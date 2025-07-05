@@ -212,8 +212,8 @@ namespace EPR.Calculator.API.Services
             try
             {
                 var runId = requestDto.RunId;
-                int pageNumber = Math.Max(requestDto.PageNumber ?? 1, 1);
-                int pageSize = Math.Max(requestDto.PageSize ?? CommonConstants.ProducerBillingInstructionsDefaultPageSize, 1);
+                var pageNumber = Math.Max(requestDto.PageNumber ?? 1, 1);
+                var pageSize = Math.Max(requestDto.PageSize ?? CommonConstants.ProducerBillingInstructionsDefaultPageSize, 1);
 
                 var searchQuery = requestDto.SearchQuery;
 
@@ -254,6 +254,7 @@ namespace EPR.Calculator.API.Services
                 var pagedResult = await query
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
+                    .AsNoTracking()
                     .ToListAsync(cancellationToken);
 
                 var countOfTotalRecords = await query.CountAsync(cancellationToken);
