@@ -1,10 +1,9 @@
 using System.Net;
-using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 
 namespace EPR.Calculator.API.Validators
 {
-    public class ProducerBillingInstructionsRequestDtoDataValidator(ApplicationDBContext context) : IProducerBillingInstructionsRequestDtoDataValidator
+    public class ProducerBillingInstructionsRequestDtoDataValidator() : IProducerBillingInstructionsRequestDtoDataValidator
     {
         private static readonly HashSet<string> AllowedStatuses = new() { "Accepted", "Rejected" };
 

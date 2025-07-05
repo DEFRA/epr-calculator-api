@@ -44,7 +44,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
         public void Validate_ReturnsInvalid_WhenPageNumberNegative()
         {
             var dto = new ProducerBillingInstructionsRequestDto { PageNumber = -1 };
-            var validator = new ProducerBillingInstructionsRequestDtoDataValidator(this.dbContext);
+            var validator = new ProducerBillingInstructionsRequestDtoDataValidator();
             var result = validator.Validate(dto);
             Assert.IsTrue(result.IsInvalid);
             Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
@@ -54,7 +54,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
         public void Validate_ReturnsInvalid_WhenPageSizeLessThanOne()
         {
             var dto = new ProducerBillingInstructionsRequestDto { PageSize = 0 };
-            var validator = new ProducerBillingInstructionsRequestDtoDataValidator(this.dbContext);
+            var validator = new ProducerBillingInstructionsRequestDtoDataValidator();
             var result = validator.Validate(dto);
             Assert.IsTrue(result.IsInvalid);
             Assert.AreEqual("PageSize must be at least 1 if provided.", result.Errors.First().Message);
@@ -67,7 +67,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             {
                 SearchQuery = new ProducerBillingInstructionsSearchQueryDto { OrganisationId = 0 },
             };
-            var validator = new ProducerBillingInstructionsRequestDtoDataValidator(this.dbContext);
+            var validator = new ProducerBillingInstructionsRequestDtoDataValidator();
             var result = validator.Validate(dto);
             Assert.IsTrue(result.IsInvalid);
             Assert.AreEqual("OrganisationId must be greater than 0 if provided.", result.Errors.First().Message);
@@ -80,7 +80,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             {
                 SearchQuery = new ProducerBillingInstructionsSearchQueryDto { Status = new[] { "InvalidStatus" } },
             };
-            var validator = new ProducerBillingInstructionsRequestDtoDataValidator(this.dbContext);
+            var validator = new ProducerBillingInstructionsRequestDtoDataValidator();
             var result = validator.Validate(dto);
             Assert.IsTrue(result.IsInvalid);
             Assert.IsTrue(result.Errors.Any(e => e.Message.Contains("Status can only contain")));
@@ -93,7 +93,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             {
                 SearchQuery = new ProducerBillingInstructionsSearchQueryDto { Status = new[] { "Accepted", "Accepted" } },
             };
-            var validator = new ProducerBillingInstructionsRequestDtoDataValidator(this.dbContext);
+            var validator = new ProducerBillingInstructionsRequestDtoDataValidator();
             var result = validator.Validate(dto);
             Assert.IsTrue(result.IsInvalid);
             Assert.IsTrue(result.Errors.Any(e => e.Message.Contains("Status cannot contain duplicate values.")));
@@ -108,7 +108,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
                 PageSize = 10,
                 SearchQuery = new ProducerBillingInstructionsSearchQueryDto { OrganisationId = 1, Status = new[] { "Accepted" } },
             };
-            var validator = new ProducerBillingInstructionsRequestDtoDataValidator(this.dbContext);
+            var validator = new ProducerBillingInstructionsRequestDtoDataValidator();
             var result = validator.Validate(dto);
             Assert.IsFalse(result.IsInvalid);
         }

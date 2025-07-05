@@ -23,6 +23,11 @@ public class ProducerBillingInstructionsResponseDto
     public int TotalRecords { get; set; }
 
     /// <summary>
+    /// Returns the calculator run name.
+    /// </summary>
+    public string? RunName { get; set; }
+
+    /// <summary>
     /// Returns the page number for pagination.
     /// </summary>
     public int? PageNumber { get; set; }
@@ -31,9 +36,4 @@ public class ProducerBillingInstructionsResponseDto
     /// Returns the page size for pagination.
     /// </summary>
     public int? PageSize { get; set; }
-
-    /// <summary>
-    /// Returns the calculator run name.
-    /// </summary>
-    public string RunName { get; set; }
 }
