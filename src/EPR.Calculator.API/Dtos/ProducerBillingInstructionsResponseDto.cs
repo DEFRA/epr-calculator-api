@@ -31,4 +31,9 @@ public class ProducerBillingInstructionsResponseDto
     /// Returns the page size for pagination.
     /// </summary>
     public int? PageSize { get; set; }
+
+    /// <summary>
+    /// Returns the calculator run name.
+    /// </summary>
+    public string RunName { get; set; }
 }

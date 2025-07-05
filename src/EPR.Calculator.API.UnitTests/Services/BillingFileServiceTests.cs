@@ -587,7 +587,19 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task GetProducerBillingInstructionsAsync_ReturnsRecords_WhenValid()
         {
             // Arrange
-            var runId = 9290;
+            var runId = 9200;
+            var runName = $"{runId} - potato";
+            var financialYear = this.DbContext.FinancialYears.SingleOrDefault(y => y.Name == "2024-25");
+            financialYear = financialYear ?? new CalculatorRunFinancialYear { Name = "2024-25" };
+
+            this.DbContext.CalculatorRuns.Add(new CalculatorRun
+            {
+                Id = runId,
+                Name = runName,
+                Financial_Year = financialYear,
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                HasBillingFileGenerated = true,
+            });
             this.DbContext.ProducerDetail.Add(new ProducerDetail
             {
                 ProducerId = 1,
@@ -606,13 +618,12 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var requestDto = new ProducerBillingInstructionsRequestDto
             {
-                RunId = runId,
                 PageNumber = 1,
                 PageSize = 10,
             };
 
             // Act
-            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(requestDto, CancellationToken.None);
+            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
 
             // Assert
             Assert.IsNotNull(result);
@@ -621,6 +632,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             Assert.AreEqual(1, result.TotalRecords);
             Assert.AreEqual(1, result.PageNumber);
             Assert.AreEqual(10, result.PageSize);
+            Assert.AreEqual(runName, result.RunName);
 
             this.DbContext.ProducerResultFileSuggestedBillingInstruction.RemoveRange(this.DbContext.ProducerResultFileSuggestedBillingInstruction);
             await this.DbContext.SaveChangesAsync();
@@ -630,16 +642,15 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task GetProducerBillingInstructionsAsync_ReturnsEmpty_WhenNoRecords()
         {
             // Arrange
-            var runId = 2323;
+            var runId = 1;
             var requestDto = new ProducerBillingInstructionsRequestDto
             {
-                RunId = runId,
                 PageNumber = 1,
                 PageSize = 10,
             };
 
             // Act
-            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(requestDto, CancellationToken.None);
+            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
 
             // Assert
             Assert.IsNotNull(result);
@@ -652,20 +663,39 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task GetProducerBillingInstructionsAsync_ReturnsInternalServerError_OnException()
         {
             // Arrange
-            var requestDto = new ProducerBillingInstructionsRequestDto
-            {
-                RunId = -1, // This will cause an exception if DB is not set up for this runId
-            };
+            var requestDto = new ProducerBillingInstructionsRequestDto();
+            var runId = -1;
 
             // Simulate exception by disposing DbContext
             this.DbContext.Dispose();
 
             // Act
-            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(requestDto, CancellationToken.None);
+            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
 
             // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(System.Net.HttpStatusCode.InternalServerError, result.StatusCode);
+        }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructionsAsync_ReturnsNotFound_WhenRunDoesNotExist()
+        {
+            // Arrange
+            var nonExistingRunId = 999999; // Use a runId that does not exist in the DB
+            var requestDto = new ProducerBillingInstructionsRequestDto
+            {
+                PageNumber = 1,
+                PageSize = 10,
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(nonExistingRunId, requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(HttpStatusCode.NotFound, result.StatusCode);
+            Assert.IsNull(result.RunName); // Optionally check that RunName is null or empty
+            Assert.AreEqual(0, result.Records.Count);
         }
     }
 }

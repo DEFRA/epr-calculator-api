@@ -12,31 +12,6 @@ namespace EPR.Calculator.API.Validators
         {
             var validationResult = new ValidationResultDto<ErrorDto>();
 
-            // RunId is required (already enforced by [Required], but double-check)
-            if (request.RunId <= 0)
-            {
-                validationResult.IsInvalid = true;
-                validationResult.Errors.Add(new ErrorDto
-                {
-                    Message = "RunId is required and must be greater than 0.",
-                });
-
-                return validationResult;
-            }
-
-            var calculatorRun = context.CalculatorRuns.Find(request.RunId);
-            if (calculatorRun == null)
-            {
-                validationResult.IsInvalid = true;
-                validationResult.StatusCode = HttpStatusCode.NotFound;
-                validationResult.Errors.Add(new ErrorDto
-                {
-                    Message = $"Calculator run with ID {request.RunId} does not exist.",
-                });
-
-                return validationResult;
-            }
-
             // PageNumber: can't be negative if provided
             if (request.PageNumber.HasValue && request.PageNumber < 0)
             {

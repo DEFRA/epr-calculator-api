@@ -39,13 +39,11 @@ namespace EPR.Calculator.API.UnitTests.Dtos
 
             var dto = new ProducerBillingInstructionsRequestDto
             {
-                RunId = 10,
                 SearchQuery = searchQuery,
                 PageNumber = 2,
                 PageSize = 50,
             };
 
-            Assert.AreEqual(10, dto.RunId);
             Assert.AreEqual(searchQuery, dto.SearchQuery);
             Assert.AreEqual(2, dto.PageNumber);
             Assert.AreEqual(50, dto.PageSize);

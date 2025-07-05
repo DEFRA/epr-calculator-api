@@ -23,12 +23,13 @@ namespace EPR.Calculator.API.Controllers
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Http response on success or failure.</returns>
         [HttpPost]
-        [Route("producerBillingInstructions")]
+        [Route("producerBillingInstructions/{runId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ProducerBillingInstructions(
+            [FromRoute] int runId,
             [FromBody] ProducerBillingInstructionsRequestDto requestDto,
             CancellationToken cancellationToken = default)
         {
@@ -42,6 +43,7 @@ namespace EPR.Calculator.API.Controllers
             }
 
             var serviceProcessResponseDto = await billingFileService.GetProducerBillingInstructionsAsync(
+                runId,
                 requestDto,
                 cancellationToken).ConfigureAwait(false);
 

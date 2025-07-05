@@ -41,29 +41,9 @@ namespace EPR.Calculator.API.UnitTests.Validators
         }
 
         [TestMethod]
-        public void Validate_ReturnsInvalid_WhenRunIdIsZero()
-        {
-            var dto = new ProducerBillingInstructionsRequestDto { RunId = 0 };
-            var validator = new ProducerBillingInstructionsRequestDtoDataValidator(this.dbContext);
-            var result = validator.Validate(dto);
-            Assert.IsTrue(result.IsInvalid);
-            Assert.AreEqual("RunId is required and must be greater than 0.", result.Errors.First().Message);
-        }
-
-        [TestMethod]
-        public void Validate_ReturnsNotFound_WhenRunIdNotFound()
-        {
-            var dto = new ProducerBillingInstructionsRequestDto { RunId = 999 };
-            var validator = new ProducerBillingInstructionsRequestDtoDataValidator(this.dbContext);
-            var result = validator.Validate(dto);
-            Assert.IsTrue(result.IsInvalid);
-            Assert.AreEqual(HttpStatusCode.NotFound, result.StatusCode);
-        }
-
-        [TestMethod]
         public void Validate_ReturnsInvalid_WhenPageNumberNegative()
         {
-            var dto = new ProducerBillingInstructionsRequestDto { RunId = this.calcRunId, PageNumber = -1 };
+            var dto = new ProducerBillingInstructionsRequestDto { PageNumber = -1 };
             var validator = new ProducerBillingInstructionsRequestDtoDataValidator(this.dbContext);
             var result = validator.Validate(dto);
             Assert.IsTrue(result.IsInvalid);
@@ -73,7 +53,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
         [TestMethod]
         public void Validate_ReturnsInvalid_WhenPageSizeLessThanOne()
         {
-            var dto = new ProducerBillingInstructionsRequestDto { RunId = this.calcRunId, PageSize = 0 };
+            var dto = new ProducerBillingInstructionsRequestDto { PageSize = 0 };
             var validator = new ProducerBillingInstructionsRequestDtoDataValidator(this.dbContext);
             var result = validator.Validate(dto);
             Assert.IsTrue(result.IsInvalid);
@@ -85,7 +65,6 @@ namespace EPR.Calculator.API.UnitTests.Validators
         {
             var dto = new ProducerBillingInstructionsRequestDto
             {
-                RunId = this.calcRunId,
                 SearchQuery = new ProducerBillingInstructionsSearchQueryDto { OrganisationId = 0 },
             };
             var validator = new ProducerBillingInstructionsRequestDtoDataValidator(this.dbContext);
@@ -99,7 +78,6 @@ namespace EPR.Calculator.API.UnitTests.Validators
         {
             var dto = new ProducerBillingInstructionsRequestDto
             {
-                RunId = this.calcRunId,
                 SearchQuery = new ProducerBillingInstructionsSearchQueryDto { Status = new[] { "InvalidStatus" } },
             };
             var validator = new ProducerBillingInstructionsRequestDtoDataValidator(this.dbContext);
@@ -113,7 +91,6 @@ namespace EPR.Calculator.API.UnitTests.Validators
         {
             var dto = new ProducerBillingInstructionsRequestDto
             {
-                RunId = this.calcRunId,
                 SearchQuery = new ProducerBillingInstructionsSearchQueryDto { Status = new[] { "Accepted", "Accepted" } },
             };
             var validator = new ProducerBillingInstructionsRequestDtoDataValidator(this.dbContext);
@@ -127,7 +104,6 @@ namespace EPR.Calculator.API.UnitTests.Validators
         {
             var dto = new ProducerBillingInstructionsRequestDto
             {
-                RunId = this.calcRunId,
                 PageNumber = 1,
                 PageSize = 10,
                 SearchQuery = new ProducerBillingInstructionsSearchQueryDto { OrganisationId = 1, Status = new[] { "Accepted" } },

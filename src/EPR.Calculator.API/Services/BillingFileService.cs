@@ -206,12 +206,23 @@ namespace EPR.Calculator.API.Services
         }
 
         public async Task<ProducerBillingInstructionsResponseDto> GetProducerBillingInstructionsAsync(
+            int runId,
             ProducerBillingInstructionsRequestDto requestDto,
             CancellationToken cancellationToken)
         {
             try
             {
-                var runId = requestDto.RunId;
+                var run = await applicationDBContext.CalculatorRuns
+                    .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
+
+                if (run == null)
+                {
+                    return new ProducerBillingInstructionsResponseDto
+                    {
+                        StatusCode = HttpStatusCode.NotFound,
+                    };
+                }
+
                 var pageNumber = Math.Max(requestDto.PageNumber ?? 1, 1);
                 var pageSize = Math.Max(requestDto.PageSize ?? CommonConstants.ProducerBillingInstructionsDefaultPageSize, 1);
 
@@ -266,6 +277,7 @@ namespace EPR.Calculator.API.Services
                     PageNumber = pageNumber,
                     PageSize = pageSize,
                     TotalRecords = countOfTotalRecords,
+                    RunName = run.Name,
                 };
             }
             catch (Exception)
