@@ -55,14 +55,14 @@ namespace EPR.Calculator.API.UnitTests.Dtos
             var record = new ProducerBillingInstructionsDto { ProducerId = 1, ProducerName = "A", SuggestedBillingInstruction = "Invoice", SuggestedInvoiceAmount = 1.0m, BillingInstructionAcceptReject = "Accepted", CalculatorRunId = 1 };
             var dto = new ProducerBillingInstructionsResponseDto
             {
-                StatusCode = HttpStatusCode.OK,
                 Records = new List<ProducerBillingInstructionsDto> { record },
                 TotalRecords = 1,
                 PageNumber = 1,
                 PageSize = 10,
+                RunName = "Test Run",
             };
 
-            Assert.AreEqual(HttpStatusCode.OK, dto.StatusCode);
+            Assert.AreEqual("Test Run", dto.RunName);
             Assert.AreEqual(1, dto.Records.Count);
             Assert.AreEqual(1, dto.TotalRecords);
             Assert.AreEqual(1, dto.PageNumber);

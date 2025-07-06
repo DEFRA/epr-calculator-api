@@ -37,7 +37,6 @@ builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 builder.Services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatusDataValidator>();
 builder.Services.AddScoped<IBillingFileService, BillingFileService>();
-builder.Services.AddScoped<IProducerBillingInstructionsRequestDtoDataValidator, ProducerBillingInstructionsRequestDtoDataValidator>();
 
 if (environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
 {

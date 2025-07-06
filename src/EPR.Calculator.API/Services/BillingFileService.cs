@@ -205,88 +205,71 @@ namespace EPR.Calculator.API.Services
             return result;
         }
 
-        public async Task<ProducerBillingInstructionsResponseDto> GetProducerBillingInstructionsAsync(
+        public async Task<ProducerBillingInstructionsResponseDto?> GetProducerBillingInstructionsAsync(
             int runId,
             ProducerBillingInstructionsRequestDto requestDto,
             CancellationToken cancellationToken)
         {
-            try
-            {
-                var run = await applicationDBContext.CalculatorRuns
-                    .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
+            var run = await applicationDBContext.CalculatorRuns
+                .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
-                if (run == null)
-                {
-                    return new ProducerBillingInstructionsResponseDto
+            if (run == null)
+            {
+                return null;
+            }
+
+            var searchQuery = requestDto.SearchQuery;
+
+            var query =
+                from ins in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                    join t1 in
+                        from pd in applicationDBContext.ProducerDetail
+                            where pd.CalculatorRunId == runId && pd.SubsidiaryId == null
+                            select new { pd.ProducerId, pd.ProducerName }
+                        on ins.ProducerId equals t1.ProducerId
+                    where ins.CalculatorRunId == runId
+                    select new ProducerBillingInstructionsDto
                     {
-                        StatusCode = HttpStatusCode.NotFound,
+                        ProducerName = t1.ProducerName,
+                        ProducerId = ins.ProducerId,
+                        SuggestedBillingInstruction = ins.SuggestedBillingInstruction,
+                        SuggestedInvoiceAmount = ins.SuggestedInvoiceAmount,
+                        BillingInstructionAcceptReject = ins.BillingInstructionAcceptReject,
+                        CalculatorRunId = ins.CalculatorRunId,
                     };
-                }
 
-                var pageNumber = Math.Max(requestDto.PageNumber ?? 1, 1);
-                var pageSize = Math.Max(requestDto.PageSize ?? CommonConstants.ProducerBillingInstructionsDefaultPageSize, 1);
-
-                var searchQuery = requestDto.SearchQuery;
-
-                var query =
-                    from ins in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                        join t1 in
-                            from pd in applicationDBContext.ProducerDetail
-                                where pd.CalculatorRunId == runId && pd.SubsidiaryId == null
-                                select new { pd.ProducerId, pd.ProducerName }
-                            on ins.ProducerId equals t1.ProducerId
-                        where ins.CalculatorRunId == runId
-                        select new ProducerBillingInstructionsDto
-                        {
-                            ProducerName = t1.ProducerName,
-                            ProducerId = ins.ProducerId,
-                            SuggestedBillingInstruction = ins.SuggestedBillingInstruction,
-                            SuggestedInvoiceAmount = ins.SuggestedInvoiceAmount,
-                            BillingInstructionAcceptReject = ins.BillingInstructionAcceptReject,
-                            CalculatorRunId = ins.CalculatorRunId,
-                        };
-
-                // Apply OrganisationId filter if provided
-                if (searchQuery?.OrganisationId.HasValue == true)
-                {
-                    var orgId = searchQuery.OrganisationId.Value;
-                    query = query.Where(x => x.ProducerId == orgId);
-                }
-
-                // Apply Status filter if provided and not empty
-                if (searchQuery?.Status != null && searchQuery.Status.Any())
-                {
-                    var statusList = searchQuery.Status.ToList();
-                    query = query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject));
-                }
-
-                query = query.Distinct().OrderBy(x => x.ProducerId);
-
-                var pagedResult = await query
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken);
-
-                var countOfTotalRecords = await query.CountAsync(cancellationToken);
-
-                return new ProducerBillingInstructionsResponseDto
-                {
-                    Records = pagedResult,
-                    StatusCode = HttpStatusCode.OK,
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                    TotalRecords = countOfTotalRecords,
-                    RunName = run.Name,
-                };
-            }
-            catch (Exception)
+            // Apply OrganisationId filter if provided
+            if (searchQuery?.OrganisationId.HasValue == true)
             {
-                return new ProducerBillingInstructionsResponseDto
-                {
-                    StatusCode = HttpStatusCode.InternalServerError,
-                };
+                var orgId = searchQuery.OrganisationId.Value;
+                query = query.Where(x => x.ProducerId == orgId);
             }
+
+            // Apply Status filter if provided and not empty
+            if (searchQuery?.Status != null && searchQuery.Status.Any())
+            {
+                var statusList = searchQuery.Status.ToList();
+                query = query.Where(x => statusList.Contains(x.BillingInstructionAcceptReject));
+            }
+
+            query = query.Distinct().OrderBy(x => x.ProducerId);
+
+            var pagedResult = await query
+                .Skip((requestDto.PageNumber - 1) * requestDto.PageSize)
+                .Take(requestDto.PageSize)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+
+            var countOfTotalRecords = await query.CountAsync(cancellationToken);
+
+            return new ProducerBillingInstructionsResponseDto
+            {
+                Records = pagedResult,
+                PageNumber = requestDto.PageNumber,
+                PageSize = requestDto.PageSize,
+                TotalRecords = countOfTotalRecords,
+                RunName = run.Name,
+            };
         }
 
         public async Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAcceptAllAsync(

@@ -1,7 +1,6 @@
-﻿using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Services;
+﻿using EPR.Calculator.API.Constants;
+using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services.Abstractions;
-using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,11 +9,9 @@ namespace EPR.Calculator.API.Controllers
     /// <summary>
     /// Controller responsible for handling producer billing instruction operations.
     /// </summary>
-    [AllowAnonymous]
     [Route("v1")]
     public class ProducerBillingInstructionsController(
-        IBillingFileService billingFileService,
-        IProducerBillingInstructionsRequestDtoDataValidator validator) : BaseControllerBase
+        IBillingFileService billingFileService) : BaseControllerBase
     {
         /// <summary>
         /// Retrieve producer billing instructions for a specific calculator run.
@@ -33,24 +30,33 @@ namespace EPR.Calculator.API.Controllers
             [FromBody] ProducerBillingInstructionsRequestDto requestDto,
             CancellationToken cancellationToken = default)
         {
-            var validationResult = validator.Validate(requestDto);
-            if (validationResult.IsInvalid)
+            if (!this.ModelState.IsValid)
             {
-                return new ObjectResult(validationResult)
-                {
-                    StatusCode = validationResult.StatusCode != null ? (int)validationResult.StatusCode : StatusCodes.Status400BadRequest,
-                };
+                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var serviceProcessResponseDto = await billingFileService.GetProducerBillingInstructionsAsync(
-                runId,
-                requestDto,
-                cancellationToken).ConfigureAwait(false);
-
-            return new ObjectResult(serviceProcessResponseDto)
+            try
             {
-                StatusCode = (int)serviceProcessResponseDto.StatusCode,
-            };
+                var serviceProcessResponseDto = await billingFileService.GetProducerBillingInstructionsAsync(
+                    runId,
+                    requestDto,
+                    cancellationToken).ConfigureAwait(false);
+
+                if (serviceProcessResponseDto == null)
+                {
+                    return this.NotFound(new ErrorDto
+                    {
+                        Message = ErrorMessages.RunNotFound,
+                        Description = ErrorMessages.RunNotFound,
+                    });
+                }
+
+                return this.Ok(serviceProcessResponseDto);
+            }
+            catch (Exception e)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
     }
 }

@@ -54,6 +54,6 @@ namespace EPR.Calculator.API.Services.Abstractions
         /// <param name="requestDto">The request payload.</param>
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="ProducerBillingInstructionsResponseDto"/> response containing records and pagination data.</returns>
-        Task<ProducerBillingInstructionsResponseDto> GetProducerBillingInstructionsAsync(int runId, ProducerBillingInstructionsRequestDto requestDto, CancellationToken cancellationToken);
+        Task<ProducerBillingInstructionsResponseDto?> GetProducerBillingInstructionsAsync(int runId, ProducerBillingInstructionsRequestDto requestDto, CancellationToken cancellationToken);
     }
 }

@@ -1,8 +1,8 @@
-using System.Net;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
+using FluentValidation.TestHelper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -13,6 +13,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
     {
         private ApplicationDBContext dbContext = null!;
         private int calcRunId;
+        private ProducerBillingInstructionsRequestDtoValidator validator = null!;
 
         [TestInitialize]
         public void Setup()
@@ -38,69 +39,65 @@ namespace EPR.Calculator.API.UnitTests.Validators
 
             this.dbContext.CalculatorRuns.Add(calcRun);
             this.dbContext.SaveChanges();
+            this.validator = new ProducerBillingInstructionsRequestDtoValidator();
         }
 
         [TestMethod]
         public void Validate_ReturnsInvalid_WhenPageNumberNegative()
         {
             var dto = new ProducerBillingInstructionsRequestDto { PageNumber = -1 };
-            var validator = new ProducerBillingInstructionsRequestDtoDataValidator();
-            var result = validator.Validate(dto);
-            Assert.IsTrue(result.IsInvalid);
-            Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
+            var result = this.validator.TestValidate(dto);
+            result.ShouldHaveValidationErrorFor(x => x.PageNumber)
+                .WithErrorMessage("PageNumber must be 1 or greater.");
         }
 
         [TestMethod]
-        public void Validate_ReturnsInvalid_WhenPageSizeLessThanOne()
+        public void Should_HaveValidationError_When_PageSize_IsLessThan1()
         {
             var dto = new ProducerBillingInstructionsRequestDto { PageSize = 0 };
-            var validator = new ProducerBillingInstructionsRequestDtoDataValidator();
-            var result = validator.Validate(dto);
-            Assert.IsTrue(result.IsInvalid);
-            Assert.AreEqual("PageSize must be at least 1 if provided.", result.Errors.First().Message);
+            var result = this.validator.TestValidate(dto);
+            result.ShouldHaveValidationErrorFor(x => x.PageSize)
+                .WithErrorMessage("PageSize must be at least 1 if provided.");
         }
 
         [TestMethod]
-        public void Validate_ReturnsInvalid_WhenOrganisationIdIsZero()
+        public void Should_HaveValidationError_When_OrganisationId_IsZero()
         {
             var dto = new ProducerBillingInstructionsRequestDto
             {
                 SearchQuery = new ProducerBillingInstructionsSearchQueryDto { OrganisationId = 0 },
             };
-            var validator = new ProducerBillingInstructionsRequestDtoDataValidator();
-            var result = validator.Validate(dto);
-            Assert.IsTrue(result.IsInvalid);
-            Assert.AreEqual("OrganisationId must be greater than 0 if provided.", result.Errors.First().Message);
+            var result = this.validator.TestValidate(dto);
+            result.ShouldHaveValidationErrorFor("SearchQuery.OrganisationId")
+                .WithErrorMessage("OrganisationId must be greater than 0 if provided.");
         }
 
         [TestMethod]
-        public void Validate_ReturnsInvalid_WhenStatusHasInvalidValue()
+        public void Should_HaveValidationError_When_Status_HasInvalidValue()
         {
             var dto = new ProducerBillingInstructionsRequestDto
             {
                 SearchQuery = new ProducerBillingInstructionsSearchQueryDto { Status = new[] { "InvalidStatus" } },
             };
-            var validator = new ProducerBillingInstructionsRequestDtoDataValidator();
-            var result = validator.Validate(dto);
-            Assert.IsTrue(result.IsInvalid);
-            Assert.IsTrue(result.Errors.Any(e => e.Message.Contains("Status can only contain")));
+            var result = this.validator.TestValidate(dto);
+            result.ShouldHaveValidationErrorFor("SearchQuery.Status")
+                .WithErrorMessage("Status can only contain: Accepted, Rejected.");
         }
 
         [TestMethod]
-        public void Validate_ReturnsInvalid_WhenStatusHasDuplicates()
+        public void Should_HaveValidationError_When_Status_HasDuplicates()
         {
             var dto = new ProducerBillingInstructionsRequestDto
             {
                 SearchQuery = new ProducerBillingInstructionsSearchQueryDto { Status = new[] { "Accepted", "Accepted" } },
             };
-            var validator = new ProducerBillingInstructionsRequestDtoDataValidator();
-            var result = validator.Validate(dto);
-            Assert.IsTrue(result.IsInvalid);
-            Assert.IsTrue(result.Errors.Any(e => e.Message.Contains("Status cannot contain duplicate values.")));
+            var result = this.validator.TestValidate(dto);
+            result.ShouldHaveValidationErrorFor("SearchQuery.Status")
+                .WithErrorMessage("Status cannot contain duplicate values.");
         }
 
         [TestMethod]
-        public void Validate_ReturnsValid_WhenAllFieldsAreCorrect()
+        public void Should_NotHaveValidationError_When_AllFieldsAreValid()
         {
             var dto = new ProducerBillingInstructionsRequestDto
             {
@@ -108,9 +105,8 @@ namespace EPR.Calculator.API.UnitTests.Validators
                 PageSize = 10,
                 SearchQuery = new ProducerBillingInstructionsSearchQueryDto { OrganisationId = 1, Status = new[] { "Accepted" } },
             };
-            var validator = new ProducerBillingInstructionsRequestDtoDataValidator();
-            var result = validator.Validate(dto);
-            Assert.IsFalse(result.IsInvalid);
+            var result = this.validator.TestValidate(dto);
+            result.ShouldNotHaveAnyValidationErrors();
         }
     }
 }

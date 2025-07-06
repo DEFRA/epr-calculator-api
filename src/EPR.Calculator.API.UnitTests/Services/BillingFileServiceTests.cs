@@ -627,7 +627,6 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(System.Net.HttpStatusCode.OK, result.StatusCode);
             Assert.AreEqual(1, result.Records.Count);
             Assert.AreEqual(1, result.TotalRecords);
             Assert.AreEqual(1, result.PageNumber);
@@ -654,31 +653,12 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(System.Net.HttpStatusCode.OK, result.StatusCode);
             Assert.AreEqual(0, result.Records.Count);
             Assert.AreEqual(0, result.TotalRecords);
         }
 
         [TestMethod]
-        public async Task GetProducerBillingInstructionsAsync_ReturnsInternalServerError_OnException()
-        {
-            // Arrange
-            var requestDto = new ProducerBillingInstructionsRequestDto();
-            var runId = -1;
-
-            // Simulate exception by disposing DbContext
-            this.DbContext.Dispose();
-
-            // Act
-            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(System.Net.HttpStatusCode.InternalServerError, result.StatusCode);
-        }
-
-        [TestMethod]
-        public async Task GetProducerBillingInstructionsAsync_ReturnsNotFound_WhenRunDoesNotExist()
+        public async Task GetProducerBillingInstructionsAsync_ReturnsNull_WhenRunDoesNotExist()
         {
             // Arrange
             var nonExistingRunId = 999999; // Use a runId that does not exist in the DB
@@ -692,10 +672,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(nonExistingRunId, requestDto, CancellationToken.None);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(HttpStatusCode.NotFound, result.StatusCode);
-            Assert.IsNull(result.RunName); // Optionally check that RunName is null or empty
-            Assert.AreEqual(0, result.Records.Count);
+            Assert.IsNull(result);
         }
     }
 }

@@ -22,5 +22,6 @@
         public const string BillingMessageType = "Billing";
         public const string ResultMessageType = "Result";
         public const int ProducerBillingInstructionsDefaultPageSize = 10;
+        public const int ProducerBillingInstructionsDefaultPageNumber = 1;
     }
 }
