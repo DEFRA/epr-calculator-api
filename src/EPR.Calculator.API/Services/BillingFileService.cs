@@ -253,9 +253,12 @@ namespace EPR.Calculator.API.Services
 
             query = query.Distinct().OrderBy(x => x.ProducerId);
 
+            requestDto.PageNumber ??= CommonConstants.ProducerBillingInstructionsDefaultPageNumber;
+            requestDto.PageSize ??= CommonConstants.ProducerBillingInstructionsDefaultPageSize;
+
             var pagedResult = await query
-                .Skip((requestDto.PageNumber - 1) * requestDto.PageSize)
-                .Take(requestDto.PageSize)
+                .Skip((requestDto.PageNumber.Value - 1) * requestDto.PageSize.Value)
+                .Take(requestDto.PageSize.Value)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 

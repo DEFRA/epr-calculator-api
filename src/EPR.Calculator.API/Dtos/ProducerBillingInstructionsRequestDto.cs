@@ -15,11 +15,11 @@ namespace EPR.Calculator.API.Dtos
         /// <summary>
         /// Gets or sets the page number for pagination.
         /// </summary>
-        public int PageNumber { get; set; } = CommonConstants.ProducerBillingInstructionsDefaultPageNumber;
+        public int? PageNumber { get; set; } = CommonConstants.ProducerBillingInstructionsDefaultPageNumber;
 
         /// <summary>
         /// Gets or sets the page size for pagination.
         /// </summary>
-        public int PageSize { get; set; } = CommonConstants.ProducerBillingInstructionsDefaultPageSize;
+        public int? PageSize { get; set; } = CommonConstants.ProducerBillingInstructionsDefaultPageSize;
     }
 }
