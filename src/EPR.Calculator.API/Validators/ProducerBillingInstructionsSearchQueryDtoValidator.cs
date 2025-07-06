@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace EPR.Calculator.API.Validators;
 
-public class ProducerBillingInstructionsSearchQueryDtoValidator : AbstractValidator<ProducerBillingInstructionsSearchQueryDto?>
+public class ProducerBillingInstructionsSearchQueryDtoValidator : AbstractValidator<ProducerBillingInstructionsSearchQueryDto>
 {
     private static readonly HashSet<string> AllowedStatuses = new() { "Accepted", "Rejected" };
 

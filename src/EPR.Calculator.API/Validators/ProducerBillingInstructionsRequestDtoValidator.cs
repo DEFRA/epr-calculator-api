@@ -16,7 +16,7 @@ namespace EPR.Calculator.API.Validators
                 .WithMessage("PageSize must be at least 1 if provided.");
 
             this.RuleFor(x => x.SearchQuery)
-                .SetValidator(new ProducerBillingInstructionsSearchQueryDtoValidator())
+                .SetValidator(new ProducerBillingInstructionsSearchQueryDtoValidator()!)
                 .When(x => x.SearchQuery != null);
         }
     }
