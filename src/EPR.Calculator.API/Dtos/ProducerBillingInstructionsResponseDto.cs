@@ -13,17 +13,22 @@ public class ProducerBillingInstructionsResponseDto
     public int TotalRecords { get; set; }
 
     /// <summary>
-    /// Returns the calculator run name.
+    /// Gets or sets the calculator run Id.
+    /// </summary>
+    public int CalculatorRunId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the calculator run name.
     /// </summary>
     public string? RunName { get; set; }
 
     /// <summary>
-    /// Returns the page number for pagination.
+    /// Gets or sets the page number for pagination.
     /// </summary>
     public int? PageNumber { get; set; }
 
     /// <summary>
-    /// Returns the page size for pagination.
+    /// Gets or sets the page size for pagination.
     /// </summary>
     public int? PageSize { get; set; }
 }

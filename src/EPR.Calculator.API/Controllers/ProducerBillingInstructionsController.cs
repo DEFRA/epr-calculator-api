@@ -53,7 +53,7 @@ namespace EPR.Calculator.API.Controllers
 
                 return this.Ok(serviceProcessResponseDto);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError);
             }

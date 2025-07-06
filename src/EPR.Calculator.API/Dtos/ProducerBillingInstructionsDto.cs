@@ -13,7 +13,5 @@ public class ProducerBillingInstructionsDto
 
     public decimal SuggestedInvoiceAmount { get; set; }
 
-    public string BillingInstructionAcceptReject { get; set; } = string.Empty;
-
-    public int CalculatorRunId { get; set; }
+    public string? BillingInstructionAcceptReject { get; set; }
 }

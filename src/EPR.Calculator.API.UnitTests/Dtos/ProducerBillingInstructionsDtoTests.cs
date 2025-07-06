@@ -17,7 +17,6 @@ namespace EPR.Calculator.API.UnitTests.Dtos
                 SuggestedBillingInstruction = "Invoice",
                 SuggestedInvoiceAmount = 100.50m,
                 BillingInstructionAcceptReject = "Accepted",
-                CalculatorRunId = 1,
             };
 
             Assert.AreEqual("Test Producer", dto.ProducerName);
@@ -25,7 +24,6 @@ namespace EPR.Calculator.API.UnitTests.Dtos
             Assert.AreEqual("Invoice", dto.SuggestedBillingInstruction);
             Assert.AreEqual(100.50m, dto.SuggestedInvoiceAmount);
             Assert.AreEqual("Accepted", dto.BillingInstructionAcceptReject);
-            Assert.AreEqual(1, dto.CalculatorRunId);
         }
 
         [TestMethod]
@@ -52,7 +50,7 @@ namespace EPR.Calculator.API.UnitTests.Dtos
         [TestMethod]
         public void CanSetAndGetProperties_ProducerBillingInstructionsResponseDto()
         {
-            var record = new ProducerBillingInstructionsDto { ProducerId = 1, ProducerName = "A", SuggestedBillingInstruction = "Invoice", SuggestedInvoiceAmount = 1.0m, BillingInstructionAcceptReject = "Accepted", CalculatorRunId = 1 };
+            var record = new ProducerBillingInstructionsDto { ProducerId = 1, ProducerName = "A", SuggestedBillingInstruction = "Invoice", SuggestedInvoiceAmount = 1.0m, BillingInstructionAcceptReject = "Accepted" };
             var dto = new ProducerBillingInstructionsResponseDto
             {
                 Records = new List<ProducerBillingInstructionsDto> { record },
@@ -60,9 +58,11 @@ namespace EPR.Calculator.API.UnitTests.Dtos
                 PageNumber = 1,
                 PageSize = 10,
                 RunName = "Test Run",
+                CalculatorRunId = 1,
             };
 
             Assert.AreEqual("Test Run", dto.RunName);
+            Assert.AreEqual(1, dto.CalculatorRunId);
             Assert.AreEqual(1, dto.Records.Count);
             Assert.AreEqual(1, dto.TotalRecords);
             Assert.AreEqual(1, dto.PageNumber);

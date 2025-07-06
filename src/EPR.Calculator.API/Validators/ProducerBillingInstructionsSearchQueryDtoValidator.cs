@@ -12,7 +12,7 @@ public class ProducerBillingInstructionsSearchQueryDtoValidator : AbstractValida
         this.RuleFor(x => x.OrganisationId)
             .Must(id => !id.HasValue || id > 0)
             .WithMessage("OrganisationId must be greater than 0 if provided.")
-            .When(x => x.OrganisationId.HasValue);
+            .When(x => x != null && x.OrganisationId.HasValue);
 
         this.RuleFor(x => x.Status)
             .Custom((statusList, context) =>
@@ -35,6 +35,6 @@ public class ProducerBillingInstructionsSearchQueryDtoValidator : AbstractValida
                     }
                 }
             })
-            .When(x => x.Status != null && x.Status.Count() > 0);
+            .When(x => x != null && x.Status != null && x.Status.Any());
     }
 }

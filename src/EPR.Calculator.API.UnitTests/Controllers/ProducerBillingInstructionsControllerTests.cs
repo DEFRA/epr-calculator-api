@@ -36,7 +36,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var objectResult = result as ObjectResult;
             Assert.IsNotNull(objectResult);
             Assert.AreEqual(StatusCodes.Status400BadRequest, objectResult.StatusCode);
-            Assert.IsTrue(((IEnumerable<ModelError>)objectResult.Value).Any());
+            Assert.IsTrue(objectResult.Value is IEnumerable<ModelError> errors && errors.Any());
         }
 
         [TestMethod]
@@ -72,6 +72,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 RunName = "Test Run",
                 PageNumber = 1,
                 PageSize = 10,
+                CalculatorRunId = runId,
             };
             this.mockBillingFileService
                 .Setup(x => x.GetProducerBillingInstructionsAsync(runId, requestDto, It.IsAny<CancellationToken>()))
@@ -103,6 +104,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 RunName = "Test Run",
                 PageNumber = 1,
                 PageSize = 10,
+                CalculatorRunId = runId,
             };
 
             this.mockBillingFileService

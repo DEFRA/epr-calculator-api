@@ -235,7 +235,6 @@ namespace EPR.Calculator.API.Services
                         SuggestedBillingInstruction = ins.SuggestedBillingInstruction,
                         SuggestedInvoiceAmount = ins.SuggestedInvoiceAmount,
                         BillingInstructionAcceptReject = ins.BillingInstructionAcceptReject,
-                        CalculatorRunId = ins.CalculatorRunId,
                     };
 
             // Apply OrganisationId filter if provided
@@ -249,7 +248,7 @@ namespace EPR.Calculator.API.Services
             if (searchQuery?.Status != null && searchQuery.Status.Any())
             {
                 var statusList = searchQuery.Status.ToList();
-                query = query.Where(x => statusList.Contains(x.BillingInstructionAcceptReject));
+                query = query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject));
             }
 
             query = query.Distinct().OrderBy(x => x.ProducerId);
@@ -269,6 +268,7 @@ namespace EPR.Calculator.API.Services
                 PageSize = requestDto.PageSize,
                 TotalRecords = countOfTotalRecords,
                 RunName = run.Name,
+                CalculatorRunId = run.Id,
             };
         }
 
