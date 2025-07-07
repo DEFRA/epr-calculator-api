@@ -108,23 +108,33 @@ namespace EPR.Calculator.API.Controllers
                 return badRequest;
             }
 
-            var runFileMetaData = await context.CalculatorRunBillingFileMetadata
-                .Where(b => b.CalculatorRunId == runId)
-                .Join(
-                    context.CalculatorRunCsvFileMetadata,
-                    billing => billing.BillingCsvFileName,
-                    csv => csv.FileName,
-                    (billing, csv) => new { csv.BlobUri, csv.FileName })
-                .SingleOrDefaultAsync();
+            var latestBillingFileMetaData = await context.CalculatorRunBillingFileMetadata.Where(
+                x => x.CalculatorRunId == runId).OrderByDescending(x => x.BillingFileCreatedDate).
+                FirstOrDefaultAsync();
 
-            if (runFileMetaData == null)
+            if (latestBillingFileMetaData == null)
+            {
+                return Results.NotFound($"No billing file metadata for Run Id {runId}");
+            }
+            else if (string.IsNullOrEmpty(latestBillingFileMetaData.BillingCsvFileName))
+            {
+                return Results.NotFound($"No billing file name found for Run Id {runId}");
+            }
+
+            var csvFileMetaData = await context.CalculatorRunCsvFileMetadata.
+                SingleOrDefaultAsync(x =>
+                    x.CalculatorRunId == runId
+                    &&
+                    x.FileName == latestBillingFileMetaData.BillingCsvFileName);
+
+            if (csvFileMetaData == null)
             {
                 return Results.NotFound($"No billing file uri found for Run Id {runId}");
             }
 
             try
             {
-                return await storageService.DownloadFile(runFileMetaData.FileName, runFileMetaData.BlobUri);
+                return await storageService.DownloadFile(csvFileMetaData.FileName, csvFileMetaData.BlobUri);
             }
             catch (Exception e)
             {
