@@ -21,5 +21,6 @@ namespace EPR.Calculator.API.Constants
         public static readonly string InvalidRunStatusForAcceptAll = "Run is not having the right status or Is Billing File Generating is already set to true";
         public static readonly string InvalidOrganisationId = "OrganisationId is invalid.";
         public static readonly string InvalidStatus = "Status is invalid.";
+        public static readonly string RunNotFound = "A calculator run with the specified RunId was not found.";
     }
 }

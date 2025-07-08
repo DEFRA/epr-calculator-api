@@ -164,9 +164,9 @@ namespace EPR.Calculator.API.Services
 
         public async Task<ProducersInstructionResponse?> GetProducersInstructionResponseAsync(int runId, CancellationToken cancellationToken)
         {
-            ValidateRunClassification(await GetRunStatusAsync(runId, cancellationToken), runId);
+            this.ValidateRunClassification(await this.GetRunStatusAsync(runId, cancellationToken), runId);
 
-            var details = await GetInstructionDetailsAsync(runId, cancellationToken);
+            var details = await this.GetInstructionDetailsAsync(runId, cancellationToken);
 
             if (!details.Any())
             {
@@ -205,10 +205,80 @@ namespace EPR.Calculator.API.Services
             return result;
         }
 
+        public async Task<ProducerBillingInstructionsResponseDto?> GetProducerBillingInstructionsAsync(
+            int runId,
+            ProducerBillingInstructionsRequestDto requestDto,
+            CancellationToken cancellationToken)
+        {
+            var run = await applicationDBContext.CalculatorRuns
+                .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
+
+            if (run == null)
+            {
+                return null;
+            }
+
+            var searchQuery = requestDto.SearchQuery;
+
+            var query =
+                from ins in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                    join t1 in
+                        from pd in applicationDBContext.ProducerDetail
+                            where pd.CalculatorRunId == runId && pd.SubsidiaryId == null
+                            select new { pd.ProducerId, pd.ProducerName }
+                        on ins.ProducerId equals t1.ProducerId
+                    where ins.CalculatorRunId == runId
+                    select new ProducerBillingInstructionsDto
+                    {
+                        ProducerName = t1.ProducerName,
+                        ProducerId = ins.ProducerId,
+                        SuggestedBillingInstruction = ins.SuggestedBillingInstruction,
+                        SuggestedInvoiceAmount = ins.SuggestedInvoiceAmount,
+                        BillingInstructionAcceptReject = ins.BillingInstructionAcceptReject,
+                    };
+
+            // Apply OrganisationId filter if provided
+            if (searchQuery?.OrganisationId.HasValue == true)
+            {
+                var orgId = searchQuery.OrganisationId.Value;
+                query = query.Where(x => x.ProducerId == orgId);
+            }
+
+            // Apply Status filter if provided and not empty
+            if (searchQuery?.Status != null && searchQuery.Status.Any())
+            {
+                var statusList = searchQuery.Status.ToList();
+                query = query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject));
+            }
+
+            query = query.Distinct().OrderBy(x => x.ProducerId);
+
+            requestDto.PageNumber ??= CommonConstants.ProducerBillingInstructionsDefaultPageNumber;
+            requestDto.PageSize ??= CommonConstants.ProducerBillingInstructionsDefaultPageSize;
+
+            var pagedResult = await query
+                .Skip((requestDto.PageNumber.Value - 1) * requestDto.PageSize.Value)
+                .Take(requestDto.PageSize.Value)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+
+            var countOfTotalRecords = await query.CountAsync(cancellationToken);
+
+            return new ProducerBillingInstructionsResponseDto
+            {
+                Records = pagedResult,
+                PageNumber = requestDto.PageNumber,
+                PageSize = requestDto.PageSize,
+                TotalRecords = countOfTotalRecords,
+                RunName = run.Name,
+                CalculatorRunId = run.Id,
+            };
+        }
+
         public async Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAcceptAllAsync(
-    int runId,
-    string userName,
-    CancellationToken cancellationToken)
+            int runId,
+            string userName,
+            CancellationToken cancellationToken)
         {
             try
             {
