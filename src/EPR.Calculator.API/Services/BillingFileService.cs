@@ -264,6 +264,8 @@ namespace EPR.Calculator.API.Services
 
             var countOfTotalRecords = await query.CountAsync(cancellationToken);
 
+            var allProducerIds = await query.Select(x => x.ProducerId).Distinct().ToListAsync(cancellationToken);
+
             return new ProducerBillingInstructionsResponseDto
             {
                 Records = pagedResult,
@@ -272,6 +274,7 @@ namespace EPR.Calculator.API.Services
                 TotalRecords = countOfTotalRecords,
                 RunName = run.Name,
                 CalculatorRunId = run.Id,
+                AllProducerIds = allProducerIds,
             };
         }
 
