@@ -30,7 +30,6 @@ namespace EPR.Calculator.API.UnitTests.Validators
             {
                 CalculatorRunClassificationId = 8,
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
-                HasBillingFileGenerated = true,
                 Name = "Test",
                 Id = this.calcRunId,
                 CreatedBy = "Test",

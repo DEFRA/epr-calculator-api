@@ -14,6 +14,8 @@ namespace EPR.Calculator.API.Controllers
     /// </summary>
     public class BillingFileController(IBillingFileService billingFileService, IStorageService storageService, ApplicationDBContext context) : BaseControllerBase
     {
+        private const string ObsoleteError = "This endpoint is no longer needed for Accept/Reject";
+
         /// <summary>
         /// Generates a billing file based on the provided request.
         /// </summary>
@@ -31,6 +33,7 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Obsolete(ObsoleteError)]
         public async Task<IActionResult> GenerateBillingFile(
             [FromBody][Required] GenerateBillingFileRequestDto generateBillingFileRequestDto,
             CancellationToken cancellationToken = default)
