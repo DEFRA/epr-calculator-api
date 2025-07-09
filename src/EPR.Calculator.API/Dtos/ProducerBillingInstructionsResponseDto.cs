@@ -31,4 +31,6 @@ public class ProducerBillingInstructionsResponseDto
     /// Gets or sets the page size for pagination.
     /// </summary>
     public int? PageSize { get; set; }
+
+    public IEnumerable<int> AllProducerIds { get; set; } = new List<int>();
 }
