@@ -58,14 +58,6 @@ namespace EPR.Calculator.API.Services
                     Message = string.Format(CommonResources.NotAValidClassificationStatus, generateBillingFileRequestDto.CalculatorRunId),
                 };
             }
-            else if (calculatorRun.HasBillingFileGenerated)
-            {
-                return new ServiceProcessResponseDto
-                {
-                    StatusCode = HttpStatusCode.UnprocessableContent,
-                    Message = string.Format(CommonResources.GenerateBillingFileAlreadyRequest, generateBillingFileRequestDto.CalculatorRunId),
-                };
-            }
             else
             {
                 CalculatorRunCsvFileMetadata? calculatorRunCsvFileMetadata = await applicationDBContext.CalculatorRunCsvFileMetadata
@@ -93,8 +85,6 @@ namespace EPR.Calculator.API.Services
                 }
                 else
                 {
-                    calculatorRun.HasBillingFileGenerated = true;
-                    await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                     return new ServiceProcessResponseDto
                     {

@@ -58,7 +58,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 CalculatorRunClassificationId = 8,
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
-                HasBillingFileGenerated = true,
                 Name = "Name",
                 Id = 1,
             });
@@ -73,7 +72,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 CalculatorRunClassificationId = 7,
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2023-24" },
-                HasBillingFileGenerated = true,
                 Name = "Calc Billing Run Test",
                 Id = 3,
             });

@@ -60,7 +60,6 @@ namespace EPR.Calculator.API.UnitTests.Validator
         {
             var calculatorRun = new CalculatorRun
             {
-                HasBillingFileGenerated = true,
                 Financial_Year = new CalculatorRunFinancialYear
                 {
                     Name = "Name",
@@ -83,7 +82,6 @@ namespace EPR.Calculator.API.UnitTests.Validator
         {
             var calculatorRun = new CalculatorRun
             {
-                HasBillingFileGenerated = false,
                 Financial_Year = new CalculatorRunFinancialYear
                 {
                     Name = "Name",
@@ -106,7 +104,6 @@ namespace EPR.Calculator.API.UnitTests.Validator
         {
             var calculatorRun = new CalculatorRun
             {
-                HasBillingFileGenerated = false,
                 Financial_Year = new CalculatorRunFinancialYear
                 {
                     Name = "Name",
@@ -129,7 +126,6 @@ namespace EPR.Calculator.API.UnitTests.Validator
         {
             var calculatorRun = new CalculatorRun
             {
-                HasBillingFileGenerated = false,
                 Financial_Year = new CalculatorRunFinancialYear
                 {
                     Name = "Name",
@@ -152,7 +148,6 @@ namespace EPR.Calculator.API.UnitTests.Validator
         {
             var calculatorRun = new CalculatorRun
             {
-                HasBillingFileGenerated = false,
                 Financial_Year = new CalculatorRunFinancialYear
                 {
                     Name = "Name",
