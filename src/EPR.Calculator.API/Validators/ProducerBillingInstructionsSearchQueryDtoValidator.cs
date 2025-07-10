@@ -5,7 +5,7 @@ namespace EPR.Calculator.API.Validators;
 
 public class ProducerBillingInstructionsSearchQueryDtoValidator : AbstractValidator<ProducerBillingInstructionsSearchQueryDto>
 {
-    private static readonly HashSet<string> AllowedStatuses = new() { "Accepted", "Rejected" };
+    private static readonly HashSet<string> AllowedStatuses = new() { "Accepted", "Rejected", "Pending" };
 
     public ProducerBillingInstructionsSearchQueryDtoValidator()
     {

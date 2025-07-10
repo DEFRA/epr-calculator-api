@@ -233,7 +233,7 @@ namespace EPR.Calculator.API.Services
                     ProducerId = ins.ProducerId,
                     SuggestedBillingInstruction = ins.SuggestedBillingInstruction,
                     SuggestedInvoiceAmount = ins.SuggestedInvoiceAmount,
-                    BillingInstructionAcceptReject = ins.BillingInstructionAcceptReject,
+                    BillingInstructionAcceptReject = string.IsNullOrWhiteSpace(ins.BillingInstructionAcceptReject) ? BillingStatus.Pending.ToString() : ins.BillingInstructionAcceptReject.Trim(),
                 };
 
             // Group by on BillingInstructionAcceptReject
