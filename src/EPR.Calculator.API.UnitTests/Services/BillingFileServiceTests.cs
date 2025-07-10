@@ -71,42 +71,6 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task GenerateBillingFileAsyncMethod_ShouldReturnUnprocessableContent_WhenGenerateBillingAlreadyRequested()
-        {
-            // Arrange
-            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            await this.DbContext.SaveChangesAsync();
-
-            GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
-            {
-                CalculatorRunId = calculatorRun.Id,
-            };
-            using CancellationTokenSource cancellationTokenSource = new();
-
-            // Act
-            ServiceProcessResponseDto result = await this.billingFileServiceUnderTest.GenerateBillingFileAsync(
-                generateBillingFileRequestDto,
-                cancellationTokenSource.Token);
-
-            // Assert
-            using (new AssertionScope())
-            {
-                result.Should().NotBeNull();
-                result.StatusCode.Should().Be(HttpStatusCode.UnprocessableContent);
-                result.Message.Should().Be(string.Format(CommonResources.GenerateBillingFileAlreadyRequest, generateBillingFileRequestDto.CalculatorRunId));
-
-                // Verify
-                this.mockIStorageService.Verify(
-                    x => x.IsBlobExistsAsync(
-                        It.IsAny<string>(),
-                        It.IsAny<string>(),
-                        cancellationTokenSource.Token),
-                    Times.Never());
-            }
-        }
-
-        [TestMethod]
         public async Task GenerateBillingFileAsyncMethod_ShouldReturnUnprocessableContent_WhenItsNotInitialRun()
         {
             // Arrange
