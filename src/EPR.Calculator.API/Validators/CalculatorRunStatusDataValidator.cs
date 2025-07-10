@@ -36,7 +36,6 @@ namespace EPR.Calculator.API.Validators
                     };
                 case (int)RunClassification.INITIAL_RUN_COMPLETED:
                     if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN)
-                    // We need to add another condition for INITIAL_RUN_COMPLETED
                     {
                         return new GenericValidationResultDto
                         {
