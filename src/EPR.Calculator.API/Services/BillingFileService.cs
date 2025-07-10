@@ -175,8 +175,9 @@ namespace EPR.Calculator.API.Services
         public async Task<bool> MoveBillingJsonFile(int runId, CancellationToken cancellationToken)
         {
             var billingFileMetaData =
-                await applicationDBContext.CalculatorRunBillingFileMetadata
-                    .SingleOrDefaultAsync(m => m.CalculatorRunId == runId, cancellationToken)
+                await applicationDBContext.CalculatorRunBillingFileMetadata.Where(m => m.CalculatorRunId == runId)
+                .OrderByDescending(m => m.BillingFileCreatedDate)
+                    .FirstOrDefaultAsync(m => m.CalculatorRunId == runId, cancellationToken)
                     .ConfigureAwait(false);
 
             if (billingFileMetaData == null || string.IsNullOrEmpty(billingFileMetaData.BillingJsonFileName))
