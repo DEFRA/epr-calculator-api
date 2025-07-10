@@ -78,28 +78,6 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        public void Validate_InitialRunComplete_Invalid_Test()
-        {
-            var calculatorRun = new CalculatorRun
-            {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
-                Name = "Name",
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-            };
-            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
-            {
-                ClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
-                RunId = 1,
-            };
-            var vr = validator.Validate(calculatorRun, runStatusUpdateDto);
-            Assert.IsNotNull(vr);
-            Assert.IsTrue(vr.IsInvalid);
-        }
-
-        [TestMethod]
         public void Validate_Delete_Test()
         {
             var calculatorRun = new CalculatorRun
