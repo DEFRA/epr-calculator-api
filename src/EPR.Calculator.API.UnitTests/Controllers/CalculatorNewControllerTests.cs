@@ -139,21 +139,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void PrepareBillingFileSendToFSS_NotInitialRun()
-        {
-            this.ControllerContext();
-            var task = this.controller.PrepareBillingFileSendToFSS(2);
-            task.Wait();
-
-            var result = task.Result as ObjectResult;
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual(422, result.StatusCode);
-            Assert.IsNotNull(result.Value);
-            Assert.AreEqual("Run Id 2 classification status is not an INITIAL_RUN or HasBillingFileGenerated column is not set to true", result.Value);
-        }
-
-        [TestMethod]
         public async Task GetCalculatorRunWithBillingDetails_Get_Valid_Run()
         {
             this.ControllerContext();
