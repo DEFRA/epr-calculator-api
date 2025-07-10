@@ -274,13 +274,19 @@ namespace EPR.Calculator.API.Services
 
             var groupedStatusResult = await groupedStatus.ToListAsync(cancellationToken);
 
+            var totalAcceptedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Accepted.ToString())?.TotalRecords ?? 0;
+            var totalRejectedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Rejected.ToString())?.TotalRecords ?? 0;
+            var totalPendingRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Pending.ToString())?.TotalRecords ?? 0;
+
             return new ProducerBillingInstructionsResponseDto
             {
                 Records = pagedResult,
                 PageNumber = requestDto.PageNumber,
                 PageSize = requestDto.PageSize,
                 TotalRecords = groupedStatusResult.Sum(s => s.TotalRecords),
-                TotalRecordsByStatus = groupedStatusResult,
+                TotalAcceptedRecords = totalAcceptedRecords,
+                TotalRejectedRecords = totalRejectedRecords,
+                TotalPendingRecords = totalPendingRecords,
                 RunName = run.Name,
                 CalculatorRunId = run.Id,
                 AllProducerIds = allProducerIds,
