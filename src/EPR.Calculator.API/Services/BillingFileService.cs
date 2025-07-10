@@ -222,20 +222,28 @@ namespace EPR.Calculator.API.Services
 
             var query =
                 from ins in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                    join t1 in
-                        from pd in applicationDBContext.ProducerDetail
-                            where pd.CalculatorRunId == runId && pd.SubsidiaryId == null
-                            select new { pd.ProducerId, pd.ProducerName }
-                        on ins.ProducerId equals t1.ProducerId
-                    where ins.CalculatorRunId == runId
-                    select new ProducerBillingInstructionsDto
-                    {
-                        ProducerName = t1.ProducerName,
-                        ProducerId = ins.ProducerId,
-                        SuggestedBillingInstruction = ins.SuggestedBillingInstruction,
-                        SuggestedInvoiceAmount = ins.SuggestedInvoiceAmount,
-                        BillingInstructionAcceptReject = ins.BillingInstructionAcceptReject,
-                    };
+                join pd in applicationDBContext.ProducerDetail
+                    on ins.ProducerId equals pd.ProducerId
+                where ins.CalculatorRunId == runId
+                    && pd.CalculatorRunId == runId
+                    && pd.SubsidiaryId == null
+                select new ProducerBillingInstructionsDto
+                {
+                    ProducerName = pd.ProducerName,
+                    ProducerId = ins.ProducerId,
+                    SuggestedBillingInstruction = ins.SuggestedBillingInstruction,
+                    SuggestedInvoiceAmount = ins.SuggestedInvoiceAmount,
+                    BillingInstructionAcceptReject = ins.BillingInstructionAcceptReject,
+                };
+
+            // Group by on BillingInstructionAcceptReject
+            var groupedStatus = query
+                        .GroupBy(x => string.IsNullOrWhiteSpace(x.BillingInstructionAcceptReject) ? BillingStatus.Pending.ToString() : x.BillingInstructionAcceptReject.Trim())
+                        .Select(g => new ProducerBillingInstructionsStatus
+                        {
+                            Status = g.Key,
+                            TotalRecords = g.Count(),
+                        });
 
             // Apply OrganisationId filter if provided
             if (searchQuery?.OrganisationId.HasValue == true)
@@ -262,16 +270,17 @@ namespace EPR.Calculator.API.Services
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            var countOfTotalRecords = await query.CountAsync(cancellationToken);
-
             var allProducerIds = await query.Select(x => x.ProducerId).Distinct().ToListAsync(cancellationToken);
+
+            var groupedStatusResult = await groupedStatus.ToListAsync(cancellationToken);
 
             return new ProducerBillingInstructionsResponseDto
             {
                 Records = pagedResult,
                 PageNumber = requestDto.PageNumber,
                 PageSize = requestDto.PageSize,
-                TotalRecords = countOfTotalRecords,
+                TotalRecords = groupedStatusResult.Sum(s => s.TotalRecords),
+                TotalRecordsByStatus = groupedStatusResult,
                 RunName = run.Name,
                 CalculatorRunId = run.Id,
                 AllProducerIds = allProducerIds,

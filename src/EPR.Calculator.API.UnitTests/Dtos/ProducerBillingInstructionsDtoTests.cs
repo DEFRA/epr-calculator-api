@@ -55,6 +55,11 @@ namespace EPR.Calculator.API.UnitTests.Dtos
             {
                 Records = new List<ProducerBillingInstructionsDto> { record },
                 TotalRecords = 1,
+                TotalRecordsByStatus = new List<ProducerBillingInstructionsStatus>
+                {
+                    new ProducerBillingInstructionsStatus { Status = "Accepted", TotalRecords = 1 },
+                    new ProducerBillingInstructionsStatus { Status = "Rejected", TotalRecords = 0 },
+                },
                 PageNumber = 1,
                 PageSize = 10,
                 RunName = "Test Run",

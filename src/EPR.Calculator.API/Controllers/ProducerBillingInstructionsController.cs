@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EPR.Calculator.API.Controllers
@@ -24,6 +25,7 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [AllowAnonymous]
         public async Task<IActionResult> ProducerBillingInstructions(
             [FromRoute] int runId,
             [FromBody] ProducerBillingInstructionsRequestDto requestDto,

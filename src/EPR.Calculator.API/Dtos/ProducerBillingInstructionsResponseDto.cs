@@ -13,6 +13,11 @@ public class ProducerBillingInstructionsResponseDto
     public int TotalRecords { get; set; }
 
     /// <summary>
+    /// Gets or sets the total of statues.
+    /// </summary>
+    public List<ProducerBillingInstructionsStatus> TotalRecordsByStatus { get; set; } = new List<ProducerBillingInstructionsStatus>();
+
+    /// <summary>
     /// Gets or sets the calculator run Id.
     /// </summary>
     public int CalculatorRunId { get; set; }
