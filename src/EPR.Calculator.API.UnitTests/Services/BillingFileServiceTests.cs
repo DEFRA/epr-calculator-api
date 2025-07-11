@@ -71,49 +71,11 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task GenerateBillingFileAsyncMethod_ShouldReturnUnprocessableContent_WhenGenerateBillingAlreadyRequested()
-        {
-            // Arrange
-            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            calculatorRun.HasBillingFileGenerated = true;
-            await this.DbContext.SaveChangesAsync();
-
-            GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
-            {
-                CalculatorRunId = calculatorRun.Id,
-            };
-            using CancellationTokenSource cancellationTokenSource = new();
-
-            // Act
-            ServiceProcessResponseDto result = await this.billingFileServiceUnderTest.GenerateBillingFileAsync(
-                generateBillingFileRequestDto,
-                cancellationTokenSource.Token);
-
-            // Assert
-            using (new AssertionScope())
-            {
-                result.Should().NotBeNull();
-                result.StatusCode.Should().Be(HttpStatusCode.UnprocessableContent);
-                result.Message.Should().Be(string.Format(CommonResources.GenerateBillingFileAlreadyRequest, generateBillingFileRequestDto.CalculatorRunId));
-
-                // Verify
-                this.mockIStorageService.Verify(
-                    x => x.IsBlobExistsAsync(
-                        It.IsAny<string>(),
-                        It.IsAny<string>(),
-                        cancellationTokenSource.Token),
-                    Times.Never());
-            }
-        }
-
-        [TestMethod]
         public async Task GenerateBillingFileAsyncMethod_ShouldReturnUnprocessableContent_WhenItsNotInitialRun()
         {
             // Arrange
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
-            calculatorRun.HasBillingFileGenerated = false;
             await this.DbContext.SaveChangesAsync();
 
             GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
@@ -150,7 +112,6 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.Last();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            calculatorRun.HasBillingFileGenerated = false;
             await this.DbContext.SaveChangesAsync();
 
             GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
@@ -187,7 +148,6 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            calculatorRun.HasBillingFileGenerated = false;
             var fileName = "1-Calc RunName_Results File_20241111.csv";
             var blobUri = $"https://example.com/{fileName}";
 
@@ -244,7 +204,6 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            calculatorRun.HasBillingFileGenerated = false;
 
             var fileName = "1-Calc RunName_Results File_20241111.csv";
             var blobUri = $"https://example.com/{fileName}";
@@ -285,7 +244,6 @@ namespace EPR.Calculator.API.UnitTests.Services
                 result.StatusCode.Should().Be(HttpStatusCode.Accepted);
                 result.Message.Should().Be(CommonResources.RequestAcceptedMessage);
                 calculatorRun = await this.DbContext.CalculatorRuns.SingleAsync(x => x.Id == generateBillingFileRequestDto.CalculatorRunId, cancellationTokenSource.Token);
-                calculatorRun.HasBillingFileGenerated.Should().BeTrue();
 
                 // Verify
                 this.mockIStorageService.Verify(
@@ -598,7 +556,6 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Name = runName,
                 Financial_Year = financialYear,
                 CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-                HasBillingFileGenerated = true,
             });
             this.DbContext.ProducerDetail.Add(new ProducerDetail
             {

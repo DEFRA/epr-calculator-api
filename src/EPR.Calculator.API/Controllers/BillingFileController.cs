@@ -14,6 +14,8 @@ namespace EPR.Calculator.API.Controllers
     /// </summary>
     public class BillingFileController(IBillingFileService billingFileService, IStorageService storageService, ApplicationDBContext context) : BaseControllerBase
     {
+        private const string ObsoleteError = "This endpoint is no longer needed for Accept/Reject";
+
         /// <summary>
         /// Generates a billing file based on the provided request.
         /// </summary>
@@ -31,6 +33,7 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [Obsolete(ObsoleteError)]
         public async Task<IActionResult> GenerateBillingFile(
             [FromBody][Required] GenerateBillingFileRequestDto generateBillingFileRequestDto,
             CancellationToken cancellationToken = default)
@@ -108,23 +111,33 @@ namespace EPR.Calculator.API.Controllers
                 return badRequest;
             }
 
-            var runFileMetaData = await context.CalculatorRunBillingFileMetadata
-                .Where(b => b.CalculatorRunId == runId)
-                .Join(
-                    context.CalculatorRunCsvFileMetadata,
-                    billing => billing.BillingCsvFileName,
-                    csv => csv.FileName,
-                    (billing, csv) => new { csv.BlobUri, csv.FileName })
-                .SingleOrDefaultAsync();
+            var latestBillingFileMetaData = await context.CalculatorRunBillingFileMetadata.Where(
+                x => x.CalculatorRunId == runId).OrderByDescending(x => x.BillingFileCreatedDate).
+                FirstOrDefaultAsync();
 
-            if (runFileMetaData == null)
+            if (latestBillingFileMetaData == null)
+            {
+                return Results.NotFound($"No billing file metadata for Run Id {runId}");
+            }
+            else if (string.IsNullOrEmpty(latestBillingFileMetaData.BillingCsvFileName))
+            {
+                return Results.NotFound($"No billing file name found for Run Id {runId}");
+            }
+
+            var csvFileMetaData = await context.CalculatorRunCsvFileMetadata.
+                SingleOrDefaultAsync(x =>
+                    x.CalculatorRunId == runId
+                    &&
+                    x.FileName == latestBillingFileMetaData.BillingCsvFileName);
+
+            if (csvFileMetaData == null)
             {
                 return Results.NotFound($"No billing file uri found for Run Id {runId}");
             }
 
             try
             {
-                return await storageService.DownloadFile(runFileMetaData.FileName, runFileMetaData.BlobUri);
+                return await storageService.DownloadFile(csvFileMetaData.FileName, csvFileMetaData.BlobUri);
             }
             catch (Exception e)
             {

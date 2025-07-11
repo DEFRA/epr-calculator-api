@@ -30,8 +30,6 @@
 
         public bool? IsBillingFileGenerating { get; set; } = null;
 
-        public bool HasBillingFileGenerated { get; set; }
-
         public CalculatorRunPomDataMaster? CalculatorRunPomDataMaster { get; set; }
 
         public CalculatorRunOrganisationDataMaster? CalculatorRunOrganisationDataMaster { get; set; }
