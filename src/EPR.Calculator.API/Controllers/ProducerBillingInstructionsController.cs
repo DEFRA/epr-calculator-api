@@ -25,7 +25,6 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [AllowAnonymous]
         public async Task<IActionResult> ProducerBillingInstructions(
             [FromRoute] int runId,
             [FromBody] ProducerBillingInstructionsRequestDto requestDto,
