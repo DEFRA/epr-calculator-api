@@ -20,7 +20,7 @@ namespace EPR.Calculator.API.Controllers
         /// <returns>Http response on success or failure.</returns>
         [HttpPost]
         [Route("producerBillingInstructions/{runId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProducerBillingInstructionsResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
