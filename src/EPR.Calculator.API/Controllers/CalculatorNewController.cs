@@ -160,7 +160,10 @@ namespace EPR.Calculator.API.Controllers
                 {
                     // Update calculation run classification status: Initial run completed
                     calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
-                    var metadata = await this.context.CalculatorRunBillingFileMetadata.SingleOrDefaultAsync(x => x.CalculatorRunId == runId);
+                    var metadata = await this.context.CalculatorRunBillingFileMetadata.
+                        Where(x => x.CalculatorRunId == runId).OrderByDescending(x => x.BillingFileCreatedBy).
+                        FirstOrDefaultAsync();
+
                     if (metadata == null)
                     {
                         return new ObjectResult($"Unable to find Billing File Metadata for Run Id {runId}")

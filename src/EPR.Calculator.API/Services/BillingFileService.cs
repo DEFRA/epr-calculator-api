@@ -177,7 +177,7 @@ namespace EPR.Calculator.API.Services
             var billingFileMetaData =
                 await applicationDBContext.CalculatorRunBillingFileMetadata.Where(m => m.CalculatorRunId == runId)
                 .OrderByDescending(m => m.BillingFileCreatedDate)
-                    .FirstOrDefaultAsync(m => m.CalculatorRunId == runId, cancellationToken)
+                    .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
 
             if (billingFileMetaData == null || string.IsNullOrEmpty(billingFileMetaData.BillingJsonFileName))
