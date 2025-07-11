@@ -27,6 +27,10 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("lapcapData")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateLapcapDataDto request)
         {
             this._telemetryClient.TrackTrace($"1.Lapcap File Name in lapcapData API :{request.LapcapFileName}");
@@ -124,6 +128,10 @@ namespace EPR.Calculator.API.Controllers
         /// <response code="500">If an internal server error occurs.</response>
         [HttpGet]
         [Route("lapcapData/{parameterYear}")]
+        [ProducesResponseType(typeof(List<LapCapParameterDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] string parameterYear)
         {
             if (!this.ModelState.IsValid)

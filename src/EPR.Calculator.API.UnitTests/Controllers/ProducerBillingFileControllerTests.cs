@@ -31,7 +31,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.billingFileServiceMock = new Mock<IBillingFileService>();
             this.serviceBusServiceMock = new Mock<IServiceBusService>();
             this.configMock = new Mock<IConfiguration>();
-            this.producerFileControllerTest = new ProducerBillingFileController(this.billingFileServiceMock.Object ,this.serviceBusServiceMock.Object , this.configMock.Object);
+            this.producerFileControllerTest = new ProducerBillingFileController(this.billingFileServiceMock.Object, this.serviceBusServiceMock.Object, this.configMock.Object);
 
             // Mock User Claims
             // Set up authorisation.
@@ -58,7 +58,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.configMock.Setup(s => s.GetSection(It.IsAny<string>()).GetSection(It.IsAny<string>()).Value).Returns("test");
 
             // Act
-            var result = await this.producerFileControllerTest.ProducerBillingInstructions(1 ,CancellationToken.None) as ObjectResult;
+            var result = await this.producerFileControllerTest.ProducerBillingInstructions(1, CancellationToken.None) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(result);
