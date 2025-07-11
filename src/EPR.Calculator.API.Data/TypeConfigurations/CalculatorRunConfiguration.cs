@@ -58,6 +58,9 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.Property(p => p.DefaultParameterSettingMasterId)
                    .HasColumnName("default_parameter_setting_master_id");
 
+            builder.Property(p => p.IsBillingFileGenerating)
+                .HasColumnName("is_billing_file_generating");
+
             builder.Property(e => e.CalculatorRunPomDataMasterId)
                    .IsRequired(false);
 

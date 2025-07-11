@@ -1,4 +1,6 @@
-﻿namespace EPR.Calculator.API.UnitTests.Controllers
+﻿using EPR.Calculator.API.Services.Abstractions;
+
+namespace EPR.Calculator.API.UnitTests.Controllers
 {
     using System.Security.Claims;
     using System.Security.Principal;
@@ -6,7 +8,6 @@
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.Dtos;
-    using EPR.Calculator.API.UnitTests.Helpers;
     using EPR.Calculator.API.Validators;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -18,24 +19,23 @@
     [TestClass]
     public class CalculatorNewControllerTests
     {
-        private Mock<ICalculatorRunStatusDataValidator> mockValidator;
+        private readonly Mock<IBillingFileService> mockBillingFileService;
+        private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
         private ApplicationDBContext context;
         private CalculatorNewController controller;
 
-        [TestInitialize]
-        public void SetUp()
+        public CalculatorNewControllerTests()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-            .UseInMemoryDatabase(databaseName: "PayCal")
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-            .Options;
+                .UseInMemoryDatabase(databaseName: "PayCal")
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+                .Options;
             this.context = new ApplicationDBContext(dbContextOptions);
             this.context.Database.EnsureCreated();
 
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
-            var configs = ConfigurationItems.GetConfigurationValues();
-            configs.GetSection("BillingJsonFileName").Value = "Example_sample_message_Producer_billing_file_1.0.json";
-            this.controller = new CalculatorNewController(this.context, configs, this.mockValidator.Object);
+            this.mockBillingFileService = new Mock<IBillingFileService>();
+            this.controller = new CalculatorNewController(this.context, this.mockValidator.Object, this.mockBillingFileService.Object);
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "DELETED",
@@ -98,9 +98,24 @@
         }
 
         [TestMethod]
-        public void PrepareBillingFileSendToFSS()
+        public void PrepareBillingFileSendToFSS_SendFile_Successfully()
         {
             this.ControllerContext();
+
+            // Set up the mock to return a value
+            this.mockBillingFileService
+                .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+
+            this.context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            {
+                BillingCsvFileName = "test2.csv",
+                BillingJsonFileName = "test2.json",
+                BillingFileCreatedBy = "testUser",
+                BillingFileCreatedDate = DateTime.Now,
+                CalculatorRunId = 1,
+            });
+            this.context.SaveChanges();
             var task = this.controller.PrepareBillingFileSendToFSS(1);
             task.Wait();
 
@@ -176,6 +191,41 @@
             Assert.IsNotNull(response);
             Assert.AreEqual(400, response.StatusCode);
             Assert.AreEqual("Invalid Run Id -1", response.Value);
+        }
+
+        [TestMethod]
+        public void PrepareBillingFileSendToFSS_MoveBillingJsonFileFails_Returns422()
+        {
+            this.ControllerContext();
+
+            // Arrange: runId 1 is valid and meets preconditions
+            this.mockBillingFileService
+                .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(false);
+
+            this.context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            {
+                BillingCsvFileName = "test2.csv",
+                BillingJsonFileName = "test2.json",
+                BillingFileCreatedBy = "testUser",
+                BillingFileCreatedDate = DateTime.Now,
+                CalculatorRunId = 1,
+            });
+
+            this.context.SaveChanges();
+
+            // Act
+            var task = this.controller.PrepareBillingFileSendToFSS(1);
+            task.Wait();
+
+            // Assert
+            var result = task.Result as ObjectResult;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(422, result.StatusCode);
+            Assert.AreEqual("Unable to move billing json file for Run Id 1", result.Value);
+
+            this.context.CalculatorRunBillingFileMetadata.RemoveRange(this.context.CalculatorRunBillingFileMetadata);
+            this.context.SaveChanges();
         }
 
         private void ControllerContext()

@@ -21,6 +21,7 @@ parameters:
       - DEV12
       - DEV13
       - DEV14
+      - DEV16
   - name: envToDeploy
     displayName: 'Target env to deploy:    (select "development" for DEV1-15)'
     type: string
@@ -92,6 +93,6 @@ jobs:
           azureContainerRegistryName: $(acr.azureContainerRegistryName)
           repositoryName: $(acr.repositoryName)
           ${{ if contains(parameters.branchName, 'RELEASE') }}:
-            branchName: $(DEVRWDWEBWAx407)
+            branchName: $(DEVRWDWEBWAx422)
           ${{ else }}:
             branchName: ${{ parameters.branchName }}

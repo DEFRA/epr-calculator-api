@@ -1,6 +1,8 @@
 trigger: none
 pr: none
 pool: DEFRA-COMMON-ubuntu2004-SSV3
+appendCommitMessageToRunName: false
+name: 'Deploy code to $(serviceName)'
 
 parameters:
 - name: teamName
@@ -21,6 +23,7 @@ parameters:
     - DEV12
     - DEV13
     - DEV14
+    - DEV16
 - name: envToDeploy
   displayName: 'Target Environment to deploy:'
   default: development
@@ -90,7 +93,7 @@ extends:
   template: epr-deployment-pipeline.yaml@CommonTemplates
   parameters:
     ${{ if contains(parameters.imageTag, 'RELEASE') }}:
-      imageTag: $(DEVRWDWEBWAx410)
+      imageTag: $(DEVRWDWEBWAx422)
     ${{ else }}:
       imageTag: ${{ parameters.imageTag }}
     azureSubscription: $(azureSubscription)

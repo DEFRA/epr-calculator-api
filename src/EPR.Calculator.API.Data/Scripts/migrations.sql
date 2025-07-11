@@ -4129,3 +4129,28 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250620144219_AddNewColumnIsBillingFileGenerating'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD [is_billing_file_generating] bit NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250620144219_AddNewColumnIsBillingFileGenerating'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250620144219_AddNewColumnIsBillingFileGenerating', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+

@@ -4,7 +4,13 @@
     {
         public string ConnectionString { get; set; } = string.Empty;
 
-        public string ContainerName { get; set; } = string.Empty;
+        public string ResultFileCSVContainerName { get; set; } = string.Empty;
+
+        public string BillingFileCSVContainerName { get; set; } = string.Empty;
+
+        public string BillingFileJsonContainerName { get; set; } = string.Empty;
+
+        public string BillingFileJsonForFssContainerName { get; set; } = string.Empty;
 
         public string CsvFileName { get; set; } = string.Empty;
 

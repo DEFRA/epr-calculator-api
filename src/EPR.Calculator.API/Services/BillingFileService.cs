@@ -19,8 +19,20 @@ namespace EPR.Calculator.API.Services
     /// </remarks>
     /// <param name="applicationDBContext">The database context <seealso cref="ApplicationDBContext"/>.</param>
     /// <param name="storageService">The storage service <seealso cref="IStorageService"/>.</param>
-    public class BillingFileService(ApplicationDBContext applicationDBContext, IStorageService storageService) : IBillingFileService
+    public class BillingFileService(ApplicationDBContext applicationDBContext, IStorageService storageService, IBlobStorageService2 blobStorageService2, IConfiguration configuration) : IBillingFileService
     {
+        /// <summary>
+        /// Validates the run ID for accepting all billing instructions.
+        /// </summary>
+        /// <param name="run">calculation Run</param>
+        /// <returns>bool</returns>
+        public static bool ValidateRunForAcceptAllBillingInstructions(CalculatorRun run)
+        {
+            return Util.AcceptableRunStatusForBillingInstructions().Contains(run.CalculatorRunClassificationId)
+                   &&
+                   !run.IsBillingFileGenerating.GetValueOrDefault();
+        }
+
         /// <inheritdoc/>
         public async Task<ServiceProcessResponseDto> GenerateBillingFileAsync(
             GenerateBillingFileRequestDto generateBillingFileRequestDto,
@@ -119,7 +131,7 @@ namespace EPR.Calculator.API.Services
                             .ToListAsync(cancellationToken)
                             .ConfigureAwait(false);
 
-                if (rows.Count < produceBillingInstuctionRequestDto.OrganisationIds.Count())
+                if (rows.Count() < produceBillingInstuctionRequestDto.OrganisationIds.Count())
                 {
                     return new ServiceProcessResponseDto
                     {
@@ -152,9 +164,9 @@ namespace EPR.Calculator.API.Services
 
         public async Task<ProducersInstructionResponse?> GetProducersInstructionResponseAsync(int runId, CancellationToken cancellationToken)
         {
-            ValidateRunClassification(await GetRunStatusAsync(runId, cancellationToken), runId);
+            this.ValidateRunClassification(await this.GetRunStatusAsync(runId, cancellationToken), runId);
 
-            var details = await GetInstructionDetailsAsync(runId, cancellationToken);
+            var details = await this.GetInstructionDetailsAsync(runId, cancellationToken);
 
             if (!details.Any())
             {
@@ -168,6 +180,168 @@ namespace EPR.Calculator.API.Services
                 ProducersInstructionDetails = details,
                 ProducersInstructionSummary = summary,
             };
+        }
+
+        public async Task<bool> MoveBillingJsonFile(int runId, CancellationToken cancellationToken)
+        {
+            var billingFileMetaData =
+                await applicationDBContext.CalculatorRunBillingFileMetadata
+                    .SingleOrDefaultAsync(m => m.CalculatorRunId == runId, cancellationToken)
+                    .ConfigureAwait(false);
+
+            if (billingFileMetaData == null || string.IsNullOrEmpty(billingFileMetaData.BillingJsonFileName))
+            {
+                return false;
+            }
+
+            var blobStorageSettings = new BlobStorageSettings();
+            configuration.GetSection("BlobStorage").Bind(blobStorageSettings);
+
+            var sourceContainer = blobStorageSettings.BillingFileJsonContainerName;
+            var targetContainer = blobStorageSettings.BillingFileJsonForFssContainerName;
+
+            var result = await blobStorageService2.MoveBlobAsync(sourceContainer, targetContainer, billingFileMetaData.BillingJsonFileName);
+
+            return result;
+        }
+
+        public async Task<ProducerBillingInstructionsResponseDto?> GetProducerBillingInstructionsAsync(
+            int runId,
+            ProducerBillingInstructionsRequestDto requestDto,
+            CancellationToken cancellationToken)
+        {
+            var run = await applicationDBContext.CalculatorRuns
+                .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
+
+            if (run == null)
+            {
+                return null;
+            }
+
+            var searchQuery = requestDto.SearchQuery;
+
+            var query =
+                from ins in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                    join t1 in
+                        from pd in applicationDBContext.ProducerDetail
+                            where pd.CalculatorRunId == runId && pd.SubsidiaryId == null
+                            select new { pd.ProducerId, pd.ProducerName }
+                        on ins.ProducerId equals t1.ProducerId
+                    where ins.CalculatorRunId == runId
+                    select new ProducerBillingInstructionsDto
+                    {
+                        ProducerName = t1.ProducerName,
+                        ProducerId = ins.ProducerId,
+                        SuggestedBillingInstruction = ins.SuggestedBillingInstruction,
+                        SuggestedInvoiceAmount = ins.SuggestedInvoiceAmount,
+                        BillingInstructionAcceptReject = ins.BillingInstructionAcceptReject,
+                    };
+
+            // Apply OrganisationId filter if provided
+            if (searchQuery?.OrganisationId.HasValue == true)
+            {
+                var orgId = searchQuery.OrganisationId.Value;
+                query = query.Where(x => x.ProducerId == orgId);
+            }
+
+            // Apply Status filter if provided and not empty
+            if (searchQuery?.Status != null && searchQuery.Status.Any())
+            {
+                var statusList = searchQuery.Status.ToList();
+                query = query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject));
+            }
+
+            query = query.Distinct().OrderBy(x => x.ProducerId);
+
+            requestDto.PageNumber ??= CommonConstants.ProducerBillingInstructionsDefaultPageNumber;
+            requestDto.PageSize ??= CommonConstants.ProducerBillingInstructionsDefaultPageSize;
+
+            var pagedResult = await query
+                .Skip((requestDto.PageNumber.Value - 1) * requestDto.PageSize.Value)
+                .Take(requestDto.PageSize.Value)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+
+            var countOfTotalRecords = await query.CountAsync(cancellationToken);
+
+            return new ProducerBillingInstructionsResponseDto
+            {
+                Records = pagedResult,
+                PageNumber = requestDto.PageNumber,
+                PageSize = requestDto.PageSize,
+                TotalRecords = countOfTotalRecords,
+                RunName = run.Name,
+                CalculatorRunId = run.Id,
+            };
+        }
+
+        public async Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAcceptAllAsync(
+            int runId,
+            string userName,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var calculatorRun = await applicationDBContext.CalculatorRuns
+                            .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken)
+                            .ConfigureAwait(false);
+
+                if (calculatorRun is null)
+                {
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.UnprocessableContent,
+                        Message = ErrorMessages.InvalidRunId,
+                    };
+                }
+
+                if (!ValidateRunForAcceptAllBillingInstructions(calculatorRun))
+                {
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.UnprocessableContent,
+                        Message = ErrorMessages.InvalidRunStatusForAcceptAll,
+                    };
+                }
+
+                var rows = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                            .Where(x => x.CalculatorRunId == runId)
+                            .ToListAsync(cancellationToken)
+                            .ConfigureAwait(false);
+
+                if (rows.Count() <= 0)
+                {
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.UnprocessableContent,
+                        Message = ErrorMessages.InvalidOrganisationId,
+                    };
+                }
+
+                rows.ForEach(x =>
+                {
+                    x.BillingInstructionAcceptReject = BillingStatus.Accepted.ToString();
+                    x.LastModifiedAcceptReject = DateTime.UtcNow;
+                    x.LastModifiedAcceptRejectBy = userName;
+                });
+
+                calculatorRun.IsBillingFileGenerating = true;
+
+                await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                return new ServiceProcessResponseDto
+                {
+                    StatusCode = HttpStatusCode.OK,
+                };
+            }
+            catch (Exception exception)
+            {
+                return new ServiceProcessResponseDto
+                {
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    Message = exception.Message,
+                };
+            }
         }
 
         private async Task<CalculatorRun?> GetRunStatusAsync(int runId, CancellationToken cancellationToken)

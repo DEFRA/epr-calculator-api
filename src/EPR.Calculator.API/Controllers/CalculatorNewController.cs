@@ -1,10 +1,10 @@
-﻿using System.Configuration;
-using EPR.Calculator.API.Constants;
+﻿using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,8 +16,8 @@ namespace EPR.Calculator.API.Controllers
     public class CalculatorNewController : ControllerBase
     {
         private readonly ApplicationDBContext context;
-        private readonly IConfiguration configuration;
         private readonly ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator;
+        private readonly IBillingFileService billingFileService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CalculatorNewController"/> class.
@@ -26,12 +26,12 @@ namespace EPR.Calculator.API.Controllers
         /// <param name="calculatorRunStatusDataValidator">Db Validator</param>
         public CalculatorNewController(
             ApplicationDBContext context,
-            IConfiguration configuration,
-            ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator)
+            ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
+            IBillingFileService billingFileService)
         {
             this.context = context;
-            this.configuration = configuration;
             this.calculatorRunStatusDataValidator = calculatorRunStatusDataValidator;
+            this.billingFileService = billingFileService;
         }
 
         [HttpPut]
@@ -147,7 +147,7 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> PrepareBillingFileSendToFSS(int runId)
+        public async Task<ActionResult> PrepareBillingFileSendToFSS(int runId, CancellationToken cancellationToken = default)
         {
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
@@ -176,46 +176,37 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                var billingJsonFileName = this.configuration.GetSection(CommonConstants.BillingJsonFileName).Value;
-                if (string.IsNullOrWhiteSpace(billingJsonFileName))
+                try
                 {
-                    throw new ConfigurationErrorsException($"Configuration item not found: {CommonConstants.BillingJsonFileName}");
+                    // Update calculation run classification status: Initial run completed
+                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
+                    var metadata = await this.context.CalculatorRunBillingFileMetadata.SingleOrDefaultAsync(x => x.CalculatorRunId == runId);
+                    if (metadata == null)
+                    {
+                        return new ObjectResult($"Unable to find Billing File Metadata for Run Id {runId}")
+                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                    }
+
+                    metadata.BillingFileAuthorisedBy = userName;
+                    metadata.BillingFileAuthorisedDate = DateTime.UtcNow;
+
+                    this.context.CalculatorRuns.Update(calculatorRun);
+
+                    await this.context.SaveChangesAsync();
+
+                    var result = await this.billingFileService.MoveBillingJsonFile(runId, cancellationToken);
+
+                    if (!result)
+                    {
+                        return this.StatusCode(StatusCodes.Status422UnprocessableEntity, $"Unable to move billing json file for Run Id {runId}");
+                    }
+
+                    // All good, commit transaction
                 }
-
-                using (var transaction = await this.context.Database.BeginTransactionAsync())
+                catch (Exception exception)
                 {
-                    try
-                    {
-                        // Add entry to calculator run billing file metadata
-                        var calculatorRunBillingFileMetadata = new CalculatorRunBillingFileMetadata
-                        {
-                            BillingCsvFileName = null,
-                            BillingJsonFileName = billingJsonFileName,
-                            BillingFileCreatedDate = DateTime.UtcNow,
-                            BillingFileCreatedBy = userName,
-                            BillingFileAuthorisedDate = DateTime.UtcNow,
-                            BillingFileAuthorisedBy = userName,
-                            CalculatorRunId = runId,
-                        };
-                        await this.context.CalculatorRunBillingFileMetadata.AddAsync(calculatorRunBillingFileMetadata);
-
-                        // Update calculation run classification status: Initial run completed
-                        calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
-                        this.context.CalculatorRuns.Update(calculatorRun);
-
-                        await this.context.SaveChangesAsync();
-
-                        // All good, commit transaction
-                        await transaction.CommitAsync();
-                    }
-                    catch (Exception exception)
-                    {
-                        // Error, rollback transaction
-                        await transaction.RollbackAsync();
-
-                        // Return error status code: Internal Server Error
-                        return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
-                    }
+                    // Return error status code: Internal Server Error
+                    return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
 
                 // Return accepted status code
