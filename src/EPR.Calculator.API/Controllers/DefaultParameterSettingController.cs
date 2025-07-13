@@ -32,6 +32,11 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpPost]
         [Route("defaultParameterSetting")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateDefaultParameterSettingDto request)
         {
             this._telemetryClient.TrackTrace($"1.Parameter File Name in DefaultParameter API :{request.ParameterFileName}");
@@ -103,6 +108,9 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("defaultParameterSetting/{parameterYear}")]
+        [ProducesResponseType(typeof(List<DefaultSchemeParametersDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] string parameterYear)
         {
             if (!this.ModelState.IsValid)
