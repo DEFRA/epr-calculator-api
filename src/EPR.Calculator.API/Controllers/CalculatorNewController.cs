@@ -112,7 +112,8 @@ namespace EPR.Calculator.API.Controllers
                                Run = run,
                                Classification = classification,
                                BillingFileMetadata = billingfilemetadata,
-                           }).SingleOrDefaultAsync();
+                           }).OrderByDescending(x => x.BillingFileMetadata.BillingFileCreatedDate)
+                           .FirstOrDefaultAsync();
 
                 if (calculatorRunDetail == null)
                 {
