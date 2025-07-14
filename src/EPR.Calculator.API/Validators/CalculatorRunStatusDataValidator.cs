@@ -35,9 +35,7 @@ namespace EPR.Calculator.API.Validators
                         },
                     };
                 case (int)RunClassification.INITIAL_RUN_COMPLETED:
-                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN
-                        &&
-                        calculatorRun.HasBillingFileGenerated)
+                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN)
                     {
                         return new GenericValidationResultDto
                         {
