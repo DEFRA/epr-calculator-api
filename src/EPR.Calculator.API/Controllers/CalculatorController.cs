@@ -1,4 +1,5 @@
-﻿using EnumsNET;
+﻿using System.Configuration;
+using EnumsNET;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -11,8 +12,6 @@ using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Configuration;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace EPR.Calculator.API.Controllers
 {
