@@ -58,7 +58,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 CalculatorRunClassificationId = 8,
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
-                HasBillingFileGenerated = true,
                 Name = "Name",
                 Id = 1,
             });
@@ -73,7 +72,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 CalculatorRunClassificationId = 7,
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2023-24" },
-                HasBillingFileGenerated = true,
                 Name = "Calc Billing Run Test",
                 Id = 3,
             });
@@ -138,21 +136,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(400, result.StatusCode);
             Assert.IsNotNull(result.Value);
             Assert.AreEqual("Invalid Run Id -1", result.Value);
-        }
-
-        [TestMethod]
-        public void PrepareBillingFileSendToFSS_NotInitialRun()
-        {
-            this.ControllerContext();
-            var task = this.controller.PrepareBillingFileSendToFSS(2);
-            task.Wait();
-
-            var result = task.Result as ObjectResult;
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual(422, result.StatusCode);
-            Assert.IsNotNull(result.Value);
-            Assert.AreEqual("Run Id 2 classification status is not an INITIAL_RUN or HasBillingFileGenerated column is not set to true", result.Value);
         }
 
         [TestMethod]

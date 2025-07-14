@@ -197,10 +197,22 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRuns = await this.context.CalculatorRuns
-                    .Where(run => run.Financial_Year.Name == request.FinancialYear)
-                    .OrderByDescending(run => run.CreatedAt)
-                    .ToListAsync();
+                var calculatorRuns = await (from run in this.context.CalculatorRuns
+                       join bill in this.context.CalculatorRunBillingFileMetadata on run.Id equals bill.CalculatorRunId
+                       into billFile
+                       where run.Financial_Year.Name == request.FinancialYear
+                                    select new
+                                    {
+                                        run.Id,
+                                        run.Name,
+                                        Financial_Year = run.FinancialYearId,
+                                        run.CreatedAt,
+                                        run.CreatedBy,
+                                        run.CalculatorRunClassificationId,
+                                        HasBillingFileGenerated = billFile.Any(),
+                                    })
+                       .OrderByDescending(run => run.CreatedAt)
+                       .ToListAsync();
 
                 if (calculatorRuns.Count == 0)
                 {
