@@ -1,5 +1,4 @@
-﻿using System.Configuration;
-using EnumsNET;
+﻿using EnumsNET;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -12,6 +11,8 @@ using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Configuration;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -197,10 +198,22 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRuns = await this.context.CalculatorRuns
-                    .Where(run => run.Financial_Year.Name == request.FinancialYear)
-                    .OrderByDescending(run => run.CreatedAt)
-                    .ToListAsync();
+                var calculatorRuns = await (from run in this.context.CalculatorRuns
+                       join bill in this.context.CalculatorRunBillingFileMetadata on run.Id equals bill.CalculatorRunId
+                       into billFile
+                       where run.Financial_Year.Name == request.FinancialYear
+                                    select new
+                                    {
+                                        run.Id,
+                                        run.Name,
+                                        Financial_Year = run.FinancialYearId,
+                                        run.CreatedAt,
+                                        run.CreatedBy,
+                                        run.CalculatorRunClassificationId,
+                                        HasBillingFileGenerated = billFile.Any(),
+                                    })
+                       .OrderByDescending(run => run.CreatedAt)
+                       .ToListAsync();
 
                 if (calculatorRuns.Count == 0)
                 {
