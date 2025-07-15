@@ -120,7 +120,8 @@ namespace EPR.Calculator.API.Controllers
                                Run = run,
                                Classification = classification,
                                BillingFileMetadata = billingfilemetadata,
-                           }).SingleOrDefaultAsync();
+                           }).OrderByDescending(x => x.BillingFileMetadata.BillingFileCreatedDate)
+                           .FirstOrDefaultAsync();
 
                 if (calculatorRunDetail == null)
                 {
@@ -170,17 +171,14 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                if (calculatorRun.CalculatorRunClassificationId != (int)RunClassification.INITIAL_RUN || !calculatorRun.HasBillingFileGenerated)
-                {
-                    return new ObjectResult($"Run Id {runId} classification status is not an {RunClassification.INITIAL_RUN} or {nameof(calculatorRun.HasBillingFileGenerated)} column is not set to true")
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
-                }
-
                 try
                 {
                     // Update calculation run classification status: Initial run completed
                     calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
-                    var metadata = await this.context.CalculatorRunBillingFileMetadata.SingleOrDefaultAsync(x => x.CalculatorRunId == runId);
+                    var metadata = await this.context.CalculatorRunBillingFileMetadata.
+                        Where(x => x.CalculatorRunId == runId).OrderByDescending(x => x.BillingFileCreatedDate).
+                        FirstOrDefaultAsync();
+
                     if (metadata == null)
                     {
                         return new ObjectResult($"Unable to find Billing File Metadata for Run Id {runId}")

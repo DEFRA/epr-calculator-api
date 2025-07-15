@@ -58,14 +58,6 @@ namespace EPR.Calculator.API.Services
                     Message = string.Format(CommonResources.NotAValidClassificationStatus, generateBillingFileRequestDto.CalculatorRunId),
                 };
             }
-            else if (calculatorRun.HasBillingFileGenerated)
-            {
-                return new ServiceProcessResponseDto
-                {
-                    StatusCode = HttpStatusCode.UnprocessableContent,
-                    Message = string.Format(CommonResources.GenerateBillingFileAlreadyRequest, generateBillingFileRequestDto.CalculatorRunId),
-                };
-            }
             else
             {
                 CalculatorRunCsvFileMetadata? calculatorRunCsvFileMetadata = await applicationDBContext.CalculatorRunCsvFileMetadata
@@ -93,8 +85,6 @@ namespace EPR.Calculator.API.Services
                 }
                 else
                 {
-                    calculatorRun.HasBillingFileGenerated = true;
-                    await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                     return new ServiceProcessResponseDto
                     {
@@ -185,8 +175,9 @@ namespace EPR.Calculator.API.Services
         public async Task<bool> MoveBillingJsonFile(int runId, CancellationToken cancellationToken)
         {
             var billingFileMetaData =
-                await applicationDBContext.CalculatorRunBillingFileMetadata
-                    .SingleOrDefaultAsync(m => m.CalculatorRunId == runId, cancellationToken)
+                await applicationDBContext.CalculatorRunBillingFileMetadata.Where(m => m.CalculatorRunId == runId)
+                .OrderByDescending(m => m.BillingFileCreatedDate)
+                    .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
 
             if (billingFileMetaData == null || string.IsNullOrEmpty(billingFileMetaData.BillingJsonFileName))
@@ -277,6 +268,8 @@ namespace EPR.Calculator.API.Services
             var totalAcceptedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Accepted.ToString())?.TotalRecords ?? 0;
             var totalRejectedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Rejected.ToString())?.TotalRecords ?? 0;
             var totalPendingRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Pending.ToString())?.TotalRecords ?? 0;
+
+            var allProducerIds = await query.Select(x => x.ProducerId).Distinct().ToListAsync(cancellationToken);
 
             return new ProducerBillingInstructionsResponseDto
             {
