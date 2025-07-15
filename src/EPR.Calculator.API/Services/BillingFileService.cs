@@ -269,8 +269,6 @@ namespace EPR.Calculator.API.Services
             var totalRejectedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Rejected.ToString())?.TotalRecords ?? 0;
             var totalPendingRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Pending.ToString())?.TotalRecords ?? 0;
 
-            var allProducerIds = await query.Select(x => x.ProducerId).Distinct().ToListAsync(cancellationToken);
-
             return new ProducerBillingInstructionsResponseDto
             {
                 Records = pagedResult,
