@@ -2,7 +2,7 @@
 
 namespace EPR.Calculator.API.Data.DataModels
 {
-    [Index(nameof(OrganisationId))]
+    [Index(nameof(OrganisationId), nameof(CalculatorRunPomDataMasterId))]
     public class CalculatorRunPomDataDetail
     {
         public int Id { get; set; }

@@ -4210,3 +4210,37 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250715123102_AddCalculatorRunPomDataMasterIdIndex'
+)
+BEGIN
+    DROP INDEX [IX_calculator_run_pom_data_detail_organisation_id] ON [calculator_run_pom_data_detail];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250715123102_AddCalculatorRunPomDataMasterIdIndex'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_pom_data_detail_organisation_id_calculator_run_pom_data_master_id] ON [calculator_run_pom_data_detail] ([organisation_id], [calculator_run_pom_data_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250715123102_AddCalculatorRunPomDataMasterIdIndex'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250715123102_AddCalculatorRunPomDataMasterIdIndex', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
