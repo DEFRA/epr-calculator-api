@@ -55,6 +55,9 @@ namespace EPR.Calculator.API.UnitTests.Dtos
             {
                 Records = new List<ProducerBillingInstructionsDto> { record },
                 TotalRecords = 1,
+                TotalAcceptedRecords = 1,
+                TotalRejectedRecords = 0,
+                TotalPendingRecords = 0,
                 PageNumber = 1,
                 PageSize = 10,
                 RunName = "Test Run",
@@ -65,6 +68,9 @@ namespace EPR.Calculator.API.UnitTests.Dtos
             Assert.AreEqual(1, dto.CalculatorRunId);
             Assert.AreEqual(1, dto.Records.Count);
             Assert.AreEqual(1, dto.TotalRecords);
+            Assert.AreEqual(1, dto.TotalAcceptedRecords);
+            Assert.AreEqual(0, dto.TotalRejectedRecords);
+            Assert.AreEqual(0, dto.TotalPendingRecords);
             Assert.AreEqual(1, dto.PageNumber);
             Assert.AreEqual(10, dto.PageSize);
         }

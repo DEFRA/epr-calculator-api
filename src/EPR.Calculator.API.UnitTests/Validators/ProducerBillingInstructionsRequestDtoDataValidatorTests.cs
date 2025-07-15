@@ -80,7 +80,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             };
             var result = this.validator.TestValidate(dto);
             result.ShouldHaveValidationErrorFor("SearchQuery.Status")
-                .WithErrorMessage("Status can only contain: Accepted, Rejected.");
+                .WithErrorMessage("Status can only contain: Accepted, Rejected, Pending.");
         }
 
         [TestMethod]

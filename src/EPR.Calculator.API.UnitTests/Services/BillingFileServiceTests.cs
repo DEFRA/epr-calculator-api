@@ -586,6 +586,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Records.Count);
             Assert.AreEqual(1, result.TotalRecords);
+            Assert.AreEqual(1, result.TotalAcceptedRecords);
             Assert.AreEqual(1, result.PageNumber);
             Assert.AreEqual(10, result.PageSize);
             Assert.AreEqual(runName, result.RunName);

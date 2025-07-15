@@ -13,6 +13,21 @@ public class ProducerBillingInstructionsResponseDto
     public int TotalRecords { get; set; }
 
     /// <summary>
+    /// Gets or sets the total number of records by status.
+    /// </summary>
+    public int TotalAcceptedRecords { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total number of records by status.
+    /// </summary>
+    public int TotalRejectedRecords { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total number of records by status.
+    /// </summary>
+    public int TotalPendingRecords { get; set; }
+
+    /// <summary>
     /// Gets or sets the calculator run Id.
     /// </summary>
     public int CalculatorRunId { get; set; }

@@ -1,11 +1,12 @@
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Enums;
 using FluentValidation;
 
 namespace EPR.Calculator.API.Validators;
 
 public class ProducerBillingInstructionsSearchQueryDtoValidator : AbstractValidator<ProducerBillingInstructionsSearchQueryDto>
 {
-    private static readonly HashSet<string> AllowedStatuses = new() { "Accepted", "Rejected" };
+    private static readonly HashSet<string> AllowedStatuses = Enum.GetNames<BillingStatus>().ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     public ProducerBillingInstructionsSearchQueryDtoValidator()
     {
