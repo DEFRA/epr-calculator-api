@@ -1,5 +1,8 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace EPR.Calculator.API.Data.DataModels
 {
+    [Index(nameof(OrganisationId))]
     public class CalculatorRunPomDataDetail
     {
         public int Id { get; set; }

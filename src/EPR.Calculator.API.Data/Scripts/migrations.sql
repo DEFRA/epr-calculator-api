@@ -4185,3 +4185,28 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250715102843_AddOrganisationIdIndex'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_pom_data_detail_organisation_id] ON [calculator_run_pom_data_detail] ([organisation_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250715102843_AddOrganisationIdIndex'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250715102843_AddOrganisationIdIndex', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
