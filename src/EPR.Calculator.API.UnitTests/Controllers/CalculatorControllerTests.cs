@@ -237,7 +237,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     configs,
                     mockStorageService.Object,
                     mockServiceBusService.Object,
-                    mockValidator.Object);
+                    mockValidator.Object,
+                    Mock.Of<IAvailableClassificationsService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -304,7 +305,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     configs,
                     mockStorageService.Object,
                     mockServiceBusService.Object,
-                    mockValidator.Object);
+                    mockValidator.Object,
+                    Mock.Of<IAvailableClassificationsService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -491,6 +493,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Setup(v => v.Validate(request))
                 .Returns(new ValidationResultDto<ErrorDto> { IsInvalid = false });
 
+            var mockAvailableClassificationsService = new Mock<IAvailableClassificationsService>();
+            mockAvailableClassificationsService
+                .Setup(s => s.GetAvailableClassificationsForFinancialYearAsync(financialYear, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new List<CalculatorRunClassification>
+                {
+                    new CalculatorRunClassification { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description) },
+                    new CalculatorRunClassification { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description) },
+                });
+
             var mockDbContext = MockDbContextForCalculatorRunClassifications();
 
             var individualCalcController = new CalculatorController(
@@ -498,7 +509,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
-                mockValidator.Object);
+                mockValidator.Object,
+                mockAvailableClassificationsService.Object);
 
             var expectedClassifications = new List<CalculatorRunClassificationDto>
             {
@@ -570,7 +582,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
-                mockValidator.Object);
+                mockValidator.Object, 
+                Mock.Of<IAvailableClassificationsService>());
 
             // Act
             var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
@@ -595,12 +608,18 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Setup(v => v.Validate(request))
                 .Returns(new ValidationResultDto<ErrorDto> { IsInvalid = false });
 
+            var mockAvailableClassificationsService = new Mock<IAvailableClassificationsService>();
+            mockAvailableClassificationsService
+                .Setup(s => s.GetAvailableClassificationsForFinancialYearAsync(financialYear, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new List<CalculatorRunClassification>());
+
             var controller = new CalculatorController(
                 this.DbContext,
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
-                mockValidator.Object);
+                mockValidator.Object,
+                mockAvailableClassificationsService.Object);
 
             // Act
             var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
@@ -628,7 +647,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
-                mockValidator.Object);
+                mockValidator.Object,
+                Mock.Of<IAvailableClassificationsService>());
 
             // Act
             var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;

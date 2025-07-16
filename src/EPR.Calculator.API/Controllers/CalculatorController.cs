@@ -1,5 +1,4 @@
 ﻿using System.Configuration;
-using EnumsNET;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -23,19 +22,22 @@ namespace EPR.Calculator.API.Controllers
         private readonly IStorageService storageService;
         private readonly IServiceBusService serviceBusService;
         private readonly ICalcFinancialYearRequestDtoDataValidator validator;
+        private readonly IAvailableClassificationsService availableClassificationsService;
 
         public CalculatorController(
             ApplicationDBContext context,
             IConfiguration configuration,
             IStorageService storageService,
             IServiceBusService serviceBusService,
-            ICalcFinancialYearRequestDtoDataValidator validator)
+            ICalcFinancialYearRequestDtoDataValidator validator,
+            IAvailableClassificationsService availableClassificationsService)
         {
             this.context = context;
             this.configuration = configuration;
             this.storageService = storageService;
             this.serviceBusService = serviceBusService;
             this.validator = validator;
+            this.availableClassificationsService = availableClassificationsService;
         }
 
         [HttpPost]
@@ -430,22 +432,14 @@ namespace EPR.Calculator.API.Controllers
                     return this.BadRequest(validationResult.Errors);
                 }
 
-                var validStatuses = new[]
-                {
-                    RunClassification.INITIAL_RUN.AsString(EnumFormat.Description),
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description),
-                };
-
-                var classifications = await this.context.CalculatorRunClassifications
-                    .Where(c => validStatuses.Contains(c.Status))
-                    .ToListAsync();
-
+                var classifications = await this.availableClassificationsService.GetAvailableClassificationsForFinancialYearAsync(request.FinancialYear);
                 if (!classifications.Any())
                 {
                     return this.NotFound("No classifications found.");
                 }
 
                 var runDto = FinancialYearClassificationsMapper.Map(request.FinancialYear, classifications);
+
                 return this.Ok(runDto);
             }
             catch (Exception exception)

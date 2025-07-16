@@ -73,7 +73,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
-                    this.mockValidator.Object);
+                    this.mockValidator.Object,
+                    Mock.Of<IAvailableClassificationsService>());
 
             var response = await controller.GetCalculatorRun(1) as ObjectResult;
             Assert.IsNotNull(response);
@@ -99,7 +100,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
-                    this.mockValidator.Object);
+                    this.mockValidator.Object,
+                    Mock.Of<IAvailableClassificationsService>());
 
             var response = await controller.GetCalculatorRun(1) as ObjectResult;
             Assert.IsNotNull(response);
