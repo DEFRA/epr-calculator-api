@@ -353,6 +353,54 @@ namespace EPR.Calculator.API.Services
             }
         }
 
+        public async Task<ServiceProcessResponseDto> StartGeneratingBillingFileAsync(
+            int runId,
+            string userName,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var calculatorRun = await applicationDBContext.CalculatorRuns
+                            .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken)
+                            .ConfigureAwait(false);
+
+                if (calculatorRun is null)
+                {
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.UnprocessableContent,
+                        Message = ErrorMessages.InvalidRunId,
+                    };
+                }
+
+                if (!ValidateRunForAcceptAllBillingInstructions(calculatorRun))
+                {
+                    return new ServiceProcessResponseDto
+                    {
+                        StatusCode = HttpStatusCode.UnprocessableContent,
+                        Message = ErrorMessages.InvalidRunStatusForAcceptAll,
+                    };
+                }
+
+                calculatorRun.IsBillingFileGenerating = true;
+
+                await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                return new ServiceProcessResponseDto
+                {
+                    StatusCode = HttpStatusCode.OK,
+                };
+            }
+            catch (Exception exception)
+            {
+                return new ServiceProcessResponseDto
+                {
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    Message = exception.Message,
+                };
+            }
+        }
+
         private async Task<CalculatorRun?> GetRunStatusAsync(int runId, CancellationToken cancellationToken)
         {
             return await applicationDBContext.CalculatorRuns
