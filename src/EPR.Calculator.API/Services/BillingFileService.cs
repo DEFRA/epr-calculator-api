@@ -353,7 +353,6 @@ namespace EPR.Calculator.API.Services
             }
         }
 
-
         public async Task<ServiceProcessResponseDto> StartGeneratingBillingFileAsync(
             int runId,
             string userName,
