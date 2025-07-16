@@ -465,14 +465,16 @@ namespace EPR.Calculator.API.UnitTests.Services
         [TestMethod]
         public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnOk_WhenAcceptedUpdateSuccessful()
         {
+            // Arrange
+            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
+            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            calculatorRun.IsBillingFileGenerating = false;
+            await this.DbContext.SaveChangesAsync();
+
             // Act
-            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAcceptAllAsync(1, "TestUser", CancellationToken.None);
+            var result = await this.billingFileServiceUnderTest.StartGeneratingBillingFileAsync(1, "TestUser", CancellationToken.None);
 
             // Assert
-            var updatedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.FirstOrDefault();
-            Assert.AreEqual(updatedRecord?.BillingInstructionAcceptReject, BillingStatus.Accepted.ToString());
-            Assert.IsNotNull(updatedRecord?.LastModifiedAcceptReject);
-            Assert.IsNotNull(updatedRecord?.LastModifiedAcceptRejectBy);
             Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
         }
 

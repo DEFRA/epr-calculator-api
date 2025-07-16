@@ -51,7 +51,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             string message)
         {
             // Arrange
-            this.billingFileServiceMock.Setup(s => s.UpdateProducerBillingInstructionsAcceptAllAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            this.billingFileServiceMock.Setup(s => s.StartGeneratingBillingFileAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ServiceProcessResponseDto { StatusCode = (HttpStatusCode)httpStatusCode });
 
             this.serviceBusServiceMock.Setup(s => s.SendMessage(It.IsAny<string>(), It.IsAny<BillingFileGenerationMessage>()));
