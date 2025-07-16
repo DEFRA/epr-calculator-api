@@ -17,6 +17,10 @@ namespace EPR.Calculator.API.Services.Abstractions
             GenerateBillingFileRequestDto generateBillingFileRequestDto,
             CancellationToken cancellationToken);
 
+        Task<ServiceProcessResponseDto> StartGeneratingBillingFileAsync(int runId,
+            string userName,
+            CancellationToken cancellationToken);
+
         Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAsync(
             int runId,
             string userName,

@@ -32,7 +32,7 @@ namespace EPR.Calculator.API.Controllers
         {
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name")!;
             var userName = claim.Value;
-            var serviceProcessResponseDto = await billingFileService.UpdateProducerBillingInstructionsAcceptAllAsync(
+            var serviceProcessResponseDto = await billingFileService.StartGeneratingBillingFileAsync(
                 runId,
                 userName,
                 cancellationToken).ConfigureAwait(false);
