@@ -31,7 +31,10 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
         }
 
         // Check if financialYear exists in the database
-        var dbYear = context.FinancialYears.SingleOrDefault(y => y.Name == request.FinancialYear);
+        var dbYear = this.context.FinancialYears
+            .AsNoTracking()
+            .SingleOrDefault(y => y.Name == request.FinancialYear);
+
         if (dbYear == null)
         {
             validationResult.IsInvalid = true;
@@ -42,10 +45,9 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
             return validationResult;
         }
 
-        var currentRun = context.CalculatorRuns
-            .Where(run => run.Id == request.RunId)
+        var currentRun = this.context.CalculatorRuns
             .AsNoTracking()
-            .SingleOrDefault();
+            .SingleOrDefault(run => run.Id == request.RunId);
 
         // Check that the run esists
         if (currentRun == null)
