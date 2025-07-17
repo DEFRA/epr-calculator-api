@@ -1,6 +1,8 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Validators;
+using Microsoft.EntityFrameworkCore;
 
 public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearRequestDtoDataValidator
 {
@@ -35,6 +37,21 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
             validationResult.Errors.Add(new ErrorDto
             {
                 Message = "Financial year not found in the database.",
+            });
+        }
+
+        // Check that the current run is unclassified
+        var currentRun = this.context.CalculatorRuns
+            .Where(run => run.Id == request.RunId)
+            .AsNoTracking()
+            .SingleOrDefault();
+
+        if (currentRun?.CalculatorRunClassificationId != (int)RunClassification.UNCLASSIFIED)
+        {
+            validationResult.IsInvalid = true;
+            validationResult.Errors.Add(new ErrorDto
+            {
+                Message = "Run is already classified.",
             });
         }
 
