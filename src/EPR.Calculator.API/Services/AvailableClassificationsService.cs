@@ -18,13 +18,13 @@ public class AvailableClassificationsService(ApplicationDBContext context) : IAv
     private readonly List<string> finalRecalculationRunStatuses = new List<string>
         {
             RunClassification.FINAL_RECALCULATION_RUN.AsString(EnumFormat.Description)!,
-            // RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.AsString(EnumFormat.Description)!,
+            RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.AsString(EnumFormat.Description)!,
         };
 
     private readonly List<string> finalRunStatuses = new List<string>
         {
             RunClassification.FINAL_RUN.AsString(EnumFormat.Description)!,
-            // RunClassification.FINAL_RUN_COMPLETED.AsString(EnumFormat.Description)!,
+            RunClassification.FINAL_RUN_COMPLETED.AsString(EnumFormat.Description)!,
         };
 
     public async Task<List<CalculatorRunClassification>> GetAvailableClassificationsForFinancialYearAsync(string financialYear, CancellationToken cancellationToken = default)
