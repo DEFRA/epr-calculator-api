@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services;
 
-public class AvailableClassificationsService(ApplicationDBContext context) : IAvailableClassificationsService
+public class AvailableClassificationsService(ApplicationDBContext context, ILogger<AvailableClassificationsService> logger) : IAvailableClassificationsService
 {
 
     private readonly List<string> initialRunStatuses = new List<string>
@@ -31,21 +31,27 @@ public class AvailableClassificationsService(ApplicationDBContext context) : IAv
     {
         try
         {
-            var validStatuses = await this.DetermineAvailableClassificationsAsync(financialYear, cancellationToken);
+            List<string> validStatuses = await this.DetermineAvailableClassificationsAsync(financialYear, cancellationToken);
+            if (validStatuses.Count == 0)
+            {
+                return new();
+            }
 
             return await context.CalculatorRunClassifications
                 .Where(c => validStatuses.Contains(c.Status))
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
-        catch
+        catch (Exception exception)
         {
-            return new();
+            logger.LogError(exception, "An error occurred whilst attempting to determine available classifications.");
+            throw;
         }
     }
 
     private async Task<List<string>> DetermineAvailableClassificationsAsync(string financialYear, CancellationToken cancellationToken)
     {
-        var currentClassifications = await this.GetCurrentClassifications(financialYear, cancellationToken);
+        List<CalculatorRunClassification> currentClassifications = await this.GetCurrentClassifications(financialYear, cancellationToken);
 
         if (this.IsPreInitialRun(currentClassifications))
         {
@@ -98,6 +104,7 @@ public class AvailableClassificationsService(ApplicationDBContext context) : IAv
                 run => run.CalculatorRunClassificationId,
                 classification => classification.Id,
                 (run, classification) => classification)
+            .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
 
@@ -108,7 +115,7 @@ public class AvailableClassificationsService(ApplicationDBContext context) : IAv
 
     private bool HasNeitherFinalRunNorFinalRecalculationRun(List<CalculatorRunClassification> currentClassifications)
     {
-        var finalAndFinalRecalculationRunStatuses = this.finalRunStatuses.Concat(this.finalRecalculationRunStatuses).ToList();
+        List<string> finalAndFinalRecalculationRunStatuses = this.finalRunStatuses.Concat(this.finalRecalculationRunStatuses).ToList();
 
         return currentClassifications.All(c => !finalAndFinalRecalculationRunStatuses.Contains(c.Status));
     }
