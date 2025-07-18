@@ -441,6 +441,52 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
+        public async Task UpdateProducerBillingInstructionsAsync_ShouldClearReasonForRejection_WhenStatusChangesFromRejectedToAccepted()
+        {
+            // Arrange
+            var runId = 1;
+            var producerId = 1;
+            var initialReason = "Initial rejection reason";
+
+            // Ensure a CalculatorRun exists and is in the correct state
+            var calculatorRun = this.DbContext.CalculatorRuns.First();
+            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            await this.DbContext.SaveChangesAsync();
+
+            // First, reject the record with a reason
+            var rejectRequest = new ProduceBillingInstuctionRequestDto
+            {
+                Status = BillingStatus.Rejected.ToString(),
+                OrganisationIds = new List<int> { producerId },
+                ReasonForRejection = initialReason,
+            };
+
+            await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(
+                runId, "TestUser", rejectRequest, CancellationToken.None);
+
+            // Assert rejection applied
+            var rejectedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.FirstOrDefault();
+            Assert.AreEqual(BillingStatus.Rejected.ToString(), rejectedRecord?.BillingInstructionAcceptReject);
+            Assert.AreEqual(initialReason, rejectedRecord?.ReasonForRejection);
+
+            // Now, accept the record (should clear the reason)
+            var acceptRequest = new ProduceBillingInstuctionRequestDto
+            {
+                Status = BillingStatus.Accepted.ToString(),
+                OrganisationIds = new List<int> { producerId },
+                // ReasonForRejection intentionally omitted
+            };
+
+            await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(
+                runId, "TestUser", acceptRequest, CancellationToken.None);
+
+            // Assert acceptance and reason cleared
+            var acceptedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.FirstOrDefault();
+            Assert.AreEqual(BillingStatus.Accepted.ToString(), acceptedRecord?.BillingInstructionAcceptReject);
+            Assert.IsNull(acceptedRecord?.ReasonForRejection);
+        }
+
+        [TestMethod]
         public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnUnprocessableContent_WhenCalculatorRunNotFound()
         {
             // Act
