@@ -432,7 +432,7 @@ namespace EPR.Calculator.API.Controllers
                     return this.BadRequest(validationResult.Errors);
                 }
 
-                var classifications = await this.availableClassificationsService.GetAvailableClassificationsForFinancialYearAsync(request.FinancialYear);
+                var classifications = await this.availableClassificationsService.GetAvailableClassificationsForFinancialYearAsync(request);
                 if (!classifications.Any())
                 {
                     return this.NotFound("No classifications found.");

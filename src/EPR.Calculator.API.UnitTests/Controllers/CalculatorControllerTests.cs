@@ -495,7 +495,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var mockAvailableClassificationsService = new Mock<IAvailableClassificationsService>();
             mockAvailableClassificationsService
-                .Setup(s => s.GetAvailableClassificationsForFinancialYearAsync(financialYear, It.IsAny<CancellationToken>()))
+                .Setup(s => s.GetAvailableClassificationsForFinancialYearAsync(request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<CalculatorRunClassification>
                 {
                     new CalculatorRunClassification { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description) },
@@ -610,7 +610,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var mockAvailableClassificationsService = new Mock<IAvailableClassificationsService>();
             mockAvailableClassificationsService
-                .Setup(s => s.GetAvailableClassificationsForFinancialYearAsync(financialYear, It.IsAny<CancellationToken>()))
+                .Setup(s => s.GetAvailableClassificationsForFinancialYearAsync(request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<CalculatorRunClassification>());
 
             var controller = new CalculatorController(
