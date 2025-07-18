@@ -45,10 +45,10 @@ namespace EPR.Calculator.API.Data.Migrations
                 values: new object[,]
                 {
                     { "2026-27", null },
-                    { "2026-27", null },
-                    { "2026-27", null },
-                    { "2026-27", null },
-                    { "2026-27", null },
+                    { "2027-28", null },
+                    { "2028-29", null },
+                    { "2029-30", null },
+                    { "2030-31", null },
                 });
         }
     }
