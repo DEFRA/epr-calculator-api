@@ -474,6 +474,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             {
                 Status = BillingStatus.Accepted.ToString(),
                 OrganisationIds = new List<int> { producerId },
+
                 // ReasonForRejection intentionally omitted
             };
 
