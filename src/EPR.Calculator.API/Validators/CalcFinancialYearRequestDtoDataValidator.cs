@@ -1,6 +1,9 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Validators;
+using EPR.Calculator.API.Enums;
+using Microsoft.EntityFrameworkCore;
+
+namespace EPR.Calculator.API.Validators;
 
 public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearRequestDtoDataValidator
 {
@@ -28,13 +31,42 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
         }
 
         // Check if financialYear exists in the database
-        var dbYear = this.context.FinancialYears.SingleOrDefault(y => y.Name == request.FinancialYear);
+        var dbYear = this.context.FinancialYears
+            .AsNoTracking()
+            .SingleOrDefault(y => y.Name == request.FinancialYear);
+
         if (dbYear == null)
         {
             validationResult.IsInvalid = true;
             validationResult.Errors.Add(new ErrorDto
             {
                 Message = "Financial year not found in the database.",
+            });
+            return validationResult;
+        }
+
+        var currentRun = this.context.CalculatorRuns
+            .AsNoTracking()
+            .SingleOrDefault(run => run.Id == request.RunId);
+
+        // Check that the run esists
+        if (currentRun == null)
+        {
+            validationResult.IsInvalid = true;
+            validationResult.Errors.Add(new ErrorDto
+            {
+                Message = "Run not found in the database.",
+            });
+            return validationResult;
+        }
+
+        // Check that the run is unclassified
+        if (currentRun.CalculatorRunClassificationId != (int)RunClassification.UNCLASSIFIED)
+        {
+            validationResult.IsInvalid = true;
+            validationResult.Errors.Add(new ErrorDto
+            {
+                Message = "Run is already classified.",
             });
         }
 
