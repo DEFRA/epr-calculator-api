@@ -476,6 +476,10 @@ namespace EPR.Calculator.API.Services
             {
                 row.ReasonForRejection = produceBillingInstuctionRequestDto.ReasonForRejection;
             }
+            else
+            {
+                row.ReasonForRejection = null;
+            }
 
             row.LastModifiedAcceptReject = DateTime.UtcNow;
             row.LastModifiedAcceptRejectBy = userName;
