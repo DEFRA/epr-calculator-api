@@ -489,7 +489,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
             mockValidator
                 .Setup(v => v.Validate(request))
-                .Returns(new ValidationResultDto<ErrorDto> { IsInvalid = false });
+                .ReturnsAsync(new ValidationResultDto<ErrorDto> { IsInvalid = false });
 
             var mockDbContext = MockDbContextForCalculatorRunClassifications();
 
@@ -559,7 +559,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
             mockValidator
                 .Setup(v => v.Validate(request))
-                .Returns(new ValidationResultDto<ErrorDto>
+                .ReturnsAsync(new ValidationResultDto<ErrorDto>
                 {
                     IsInvalid = true,
                     Errors = new List<ErrorDto> { new ErrorDto { Message = "Invalid financial year format." } }
@@ -593,7 +593,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
             mockValidator
                 .Setup(v => v.Validate(request))
-                .Returns(new ValidationResultDto<ErrorDto> { IsInvalid = false });
+                .ReturnsAsync(new ValidationResultDto<ErrorDto> { IsInvalid = false });
 
             var controller = new CalculatorController(
                 this.DbContext,
