@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using EnumsNET;
+using EPR.Calculator.API.Constants;
 
 namespace EPR.Calculator.API.Enums
 {
@@ -74,19 +75,19 @@ namespace EPR.Calculator.API.Enums
         /// <summary>
         /// INTERIM RE-CALCULATION RUN COMPLETED.
         /// </summary>
-        [Description("INTERIM RE-CALCULATION RUN COMPLETED")]
+        [Description(RunClassificationDescription.IntermDesc)]
         INTERIM_RECALCULATION_RUN_COMPLETED = 12,
 
         /// <summary>
         /// FINAL RE-CALCULATION RUN COMPLETED.
         /// </summary>
-        [Description("FINAL RE-CALCULATION RUN COMPLETED")]
+        [Description(RunClassificationDescription.FinalRecalDesc)]
         FINAL_RECALCULATION_RUN_COMPLETED = 13,
 
         /// <summary>
         /// FINAL RUN COMPLETED.
         /// </summary>
-        [Description("FINAL RUN COMPLETED")]
+        [Description(RunClassificationDescription.FinalDesc)]
         FINAL_RUN_COMPLETED = 14,
     }
 }
