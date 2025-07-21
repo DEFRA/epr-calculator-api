@@ -498,8 +498,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Setup(s => s.GetAvailableClassificationsForFinancialYearAsync(request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<CalculatorRunClassification>
                 {
-                    new CalculatorRunClassification { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description) },
-                    new CalculatorRunClassification { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description) },
+                    new CalculatorRunClassification { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description) }!,
+                    new CalculatorRunClassification { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description) }!,
                 });
 
             var mockDbContext = MockDbContextForCalculatorRunClassifications();
@@ -582,7 +582,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
-                mockValidator.Object, 
+                mockValidator.Object,
                 Mock.Of<IAvailableClassificationsService>());
 
             // Act
