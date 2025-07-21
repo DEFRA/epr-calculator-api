@@ -424,6 +424,14 @@ namespace EPR.Calculator.API.Controllers
                     return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
                 }
 
+                var initialRun = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description);
+                var testRun = RunClassification.TEST_RUN.AsString(EnumFormat.Description);
+
+                if (initialRun == null || testRun == null)
+                {
+                    return this.BadRequest("Invalid run classifications.");
+                }
+
                 var validationResult = await this.validator.Validate(request);
                 if (validationResult.IsInvalid)
                 {
@@ -441,15 +449,12 @@ namespace EPR.Calculator.API.Controllers
 
                 if (anyInitialRunExists)
                 {
-#pragma warning disable CS8604 // Possible null reference argument.
-                    validStatuses.Add(RunClassification.TEST_RUN.AsString(EnumFormat.Description));
-#pragma warning restore CS8604 // Possible null reference argument.
+                    validStatuses.Add(testRun);
                 }
                 else
                 {
                     validStatuses.AddRange(
-                        [RunClassification.INITIAL_RUN.AsString(EnumFormat.Description),
-                        RunClassification.TEST_RUN.AsString(EnumFormat.Description)]);
+                        [initialRun, testRun]);
                 }
 
                 var classifications = await this.context.CalculatorRunClassifications
@@ -464,7 +469,7 @@ namespace EPR.Calculator.API.Controllers
                 var runDto = FinancialYearClassificationsMapper.Map(request.FinancialYear, classifications);
                 return this.Ok(runDto);
             }
-            catch (Exception exception)
+            catch (Exception)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
             }

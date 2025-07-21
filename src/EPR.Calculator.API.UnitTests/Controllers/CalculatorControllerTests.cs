@@ -482,6 +482,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task ClassificationByFinancialYear_Returns_Options_For_Valid_FinancialYear()
         {
+            var initialRun = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description);
+            var testRun = RunClassification.TEST_RUN.AsString(EnumFormat.Description);
+
+            if (initialRun == null || testRun == null)
+            {
+                Assert.Fail("Run classifications Enums not loaded");
+            }
+
             // Arrange
             var financialYear = "2024-25";
             var request = new CalcFinancialYearRequestDto { FinancialYear = financialYear };
@@ -496,8 +504,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.DbContext.SaveChanges();
 
             this.DbContext.CalculatorRunClassifications.AddRange(
-                new CalculatorRunClassification { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description), CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description), CreatedBy = "Test user" });
+                new CalculatorRunClassification { Id = (int)RunClassification.INITIAL_RUN, Status = initialRun, CreatedBy = "Test user" },
+                new CalculatorRunClassification { Id = (int)RunClassification.TEST_RUN, Status = testRun, CreatedBy = "Test user" });
             this.DbContext.SaveChanges();
 
             var controller = new CalculatorController(
@@ -507,18 +515,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IServiceBusService>(),
                 mockValidator.Object);
 
-            //var expectedClassifications = new List<CalculatorRunClassificationDto>
-            //{
-            //    new CalculatorRunClassificationDto{ Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description) },
-            //    new CalculatorRunClassificationDto{ Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description) },
-            //};
-
             var expectedClassifications = new List<CalculatorRunClassificationDto>
             {
                 new CalculatorRunClassificationDto
                 {
                     Id = (int)RunClassification.TEST_RUN,
-                    Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    Status = testRun,
                 },
             };
 
