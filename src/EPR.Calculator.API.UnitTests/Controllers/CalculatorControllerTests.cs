@@ -517,8 +517,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 new CalculatorRunClassificationDto
                 {
-                    Id = (int)RunClassification.INITIAL_RUN,
-                    Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)!,
+                    Id = (int)RunClassification.TEST_RUN,
+                    Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
                 },
             };
 
