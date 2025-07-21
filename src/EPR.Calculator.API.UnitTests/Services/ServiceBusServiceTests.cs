@@ -26,7 +26,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         {
             // Arrange
             var serviceBusQueueName = "Some queue";
-            var calculatorRunMessage = new CalculatorRunMessage() { CalculatorRunId = 1, CreatedBy = "Test user", FinancialYear = "2024-25", MessageType = CommonConstants.ResultMessageType };
+            var calculatorRunMessage = new CalculatorRunMessage() { CalculatorRunId = 1, CreatedBy = "Test user", FinancialYear = "2024-25", MessageType = CommonResources.ResultMessageType };
 
             var mockServiceBusClient = new Mock<ServiceBusClient>();
             this.mockServiceBusClientFactory.Setup(clientFactory => clientFactory.CreateClient(It.IsAny<string>()))
@@ -52,7 +52,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         {
             // Arrange
             var serviceBusQueueName = "Some queue";
-            var billingFileGenerationMessage = new BillingFileGenerationMessage() { ApprovedBy = "Test user", MessageType = CommonConstants.BillingMessageType, CalculatorRunId = 1 };
+            var billingFileGenerationMessage = new BillingFileGenerationMessage() { ApprovedBy = "Test user", MessageType = CommonResources.BillingMessageType, CalculatorRunId = 1 };
 
             var mockServiceBusClient = new Mock<ServiceBusClient>();
             this.mockServiceBusClientFactory.Setup(clientFactory => clientFactory.CreateClient(It.IsAny<string>()))

@@ -61,6 +61,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Billing.
+        /// </summary>
+        public static string BillingMessageType {
+            get {
+                return ResourceManager.GetString("BillingMessageType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Blob not found for this &apos;{0}&apos; run id to perform requested operation..
         /// </summary>
         public static string BlobNotFoundErrorMessage {
@@ -97,6 +106,33 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AllowAllOrigins.
+        /// </summary>
+        public static string PolicyName {
+            get {
+                return ResourceManager.GetString("PolicyName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 1.
+        /// </summary>
+        public static string ProducerBillingInstructionsDefaultPageNumber {
+            get {
+                return ResourceManager.GetString("ProducerBillingInstructionsDefaultPageNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 10.
+        /// </summary>
+        public static string ProducerBillingInstructionsDefaultPageSize {
+            get {
+                return ResourceManager.GetString("ProducerBillingInstructionsDefaultPageSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Request accepted for processing..
         /// </summary>
         public static string RequestAcceptedMessage {
@@ -111,6 +147,33 @@ namespace EPR.Calculator.API {
         public static string ResourceNotFoundErrorMessage {
             get {
                 return ResourceManager.GetString("ResourceNotFoundErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Result.
+        /// </summary>
+        public static string ResultMessageType {
+            get {
+                return ResourceManager.GetString("ResultMessageType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SASuperUser.
+        /// </summary>
+        public static string SASuperUserRole {
+            get {
+                return ResourceManager.GetString("SASuperUserRole", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to calculator.
+        /// </summary>
+        public static string ServiceBusClientName {
+            get {
+                return ResourceManager.GetString("ServiceBusClientName", resourceCulture);
             }
         }
     }

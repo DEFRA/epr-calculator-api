@@ -2,6 +2,7 @@ using System.Configuration;
 using System.Reflection;
 using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
+using EPR.Calculator.API;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Exceptions;
@@ -59,7 +60,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorizationBuilder()
         .SetFallbackPolicy(new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
-        .RequireRole(CommonConstants.SASuperUserRole)
+        .RequireRole(CommonResources.SASuperUserRole)
         .Build());
 
 builder.Services.AddControllers();
@@ -125,7 +126,7 @@ builder.Services.AddAzureClients(builder =>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
-        CommonConstants.PolicyName,
+        CommonResources.PolicyName,
         policy => policy.AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod()
@@ -158,7 +159,7 @@ if (app.Environment.IsDevelopment() || environmentName == EPR.Calculator.API.Con
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.MapControllers();
-app.UseCors(CommonConstants.PolicyName);
+app.UseCors(CommonResources.PolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRequestTimeouts();
