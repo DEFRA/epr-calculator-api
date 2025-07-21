@@ -7,6 +7,8 @@ namespace EPR.Calculator.API.Data.DataSeeder
     [ExcludeFromCodeCoverage]
     public static class Seeder
     {
+        public const string createdBy = "System User";
+
         public static void Initialize(ModelBuilder modelBuilder)
         {
             InitializeDefaultParameterTemplateMaster(modelBuilder);
@@ -379,6 +381,60 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     Id = 5,
                     Status = "ERROR",
                     CreatedBy = "Test User",
+                },
+                new CalculatorRunClassification
+                {
+                    Id = 6,
+                    Status = "DELETED",
+                    CreatedBy = "System User",
+                },
+                new CalculatorRunClassification
+                {
+                    Id = 7,
+                    Status = "INITIAL RUN COMPLETED",
+                    CreatedBy = "System User",
+                },
+                new CalculatorRunClassification
+                {
+                    Id = 8,
+                    Status = "INITIAL RUN",
+                    CreatedBy = "Test User",
+                },
+                new CalculatorRunClassification
+                {
+                    Id = 9,
+                    Status = "INTERIM RE-CALCULATION RUN",
+                    CreatedBy = "Test User",
+                },
+                new CalculatorRunClassification
+                {
+                    Id = 10,
+                    Status = "FINAL RUN",
+                    CreatedBy = "Test User",
+                },
+                new CalculatorRunClassification
+                {
+                     Id = 11,
+                     Status = "FINAL RE-CALCULATION RUN",
+                     CreatedBy = "Test User",
+                },
+                new CalculatorRunClassification
+                {
+                    Id = 12,
+                    Status = "INTERIM RE-CALCULATION RUN COMPLETED",
+                    CreatedBy = createdBy,
+                },
+                new CalculatorRunClassification
+                {
+                    Id = 13,
+                    Status = "FINAL RE-CALCULATION RUN COMPLETED",
+                    CreatedBy = createdBy,
+                },
+                new CalculatorRunClassification
+                {
+                    Id = 14,
+                    Status = "FINAL RUN COMPLETED",
+                    CreatedBy = createdBy,
                 });
         }
 
