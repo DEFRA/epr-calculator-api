@@ -442,7 +442,7 @@ namespace EPR.Calculator.API.Controllers
                 if (anyInitialRunExists)
                 {
 #pragma warning disable CS8604 // Possible null reference argument.
-                    validStatuses.Add(RunClassification.INITIAL_RUN.AsString(EnumFormat.Description));
+                    validStatuses.Add(RunClassification.TEST_RUN.AsString(EnumFormat.Description));
 #pragma warning restore CS8604 // Possible null reference argument.
                 }
                 else
