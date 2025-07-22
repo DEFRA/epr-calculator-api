@@ -97,6 +97,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Uploaded Lapcap parameter template should have a count of {0}.
+        /// </summary>
+        public static string LapcapDataTemplateValuesMissing {
+            get {
+                return ResourceManager.GetString("LapcapDataTemplateValuesMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Classification status is not valid for this &apos;{0}&apos; run id to perform requested operation..
         /// </summary>
         public static string NotAValidClassificationStatus {
@@ -169,11 +178,29 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Uploaded Scheme parameter template should have a count of {0}.
+        /// </summary>
+        public static string SchemeParameterTemplateValuesMissing {
+            get {
+                return ResourceManager.GetString("SchemeParameterTemplateValuesMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to calculator.
         /// </summary>
         public static string ServiceBusClientName {
             get {
                 return ResourceManager.GetString("ServiceBusClientName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BADEBT-P,COMC-AL,COMC-FC,COMC-GL,COMC-PC,COMC-PL,COMC-ST,COMC-WD,COMC-OT,COMC-UK,COMC-ENG,COMC-WLS,COMC-SCT,COMC-NIR,LAPC-ENG,LAPC-NIR,LAPC-SCT,LAPC-WLS,LRET-AL,LRET-FC,LRET-GL,LRET-OT,LRET-PC,LRET-PL,LRET-ST,LRET-WD,MATT-AD,MATT-AI,MATT-PD,MATT-PI,SAOC-ENG,SAOC-NIR,SAOC-SCT,SAOC-WLS,SCSC-ENG,SCSC-NIR,SCSC-SCT,SCSC-WLS,TONT-AD,TONT-AI,TONT-PD,TONT-PI.
+        /// </summary>
+        public static string UniqueReferences {
+            get {
+                return ResourceManager.GetString("UniqueReferences", resourceCulture);
             }
         }
     }

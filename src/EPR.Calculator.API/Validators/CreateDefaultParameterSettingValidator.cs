@@ -13,8 +13,8 @@ namespace EPR.Calculator.API.Validators
                 .WithMessage(ErrorMessages.YearRequired);
             this.RuleFor(x => x.SchemeParameterTemplateValues)
                 .NotNull()
-                .Must(x => x.Count() == DefaultParameterUniqueReferences.UniqueReferences.Length)
-                .WithMessage(ErrorMessages.SchemeParameterTemplateValuesMissing);
+                .Must(x => x.Count() == CommonResources.UniqueReferences.Split(',').Length)
+                .WithMessage(string.Format(CommonResources.SchemeParameterTemplateValuesMissing, CommonResources.UniqueReferences.Split(',').Length));
             this.RuleFor(x => x.ParameterFileName)
                 .NotEmpty()
                 .WithMessage(ErrorMessages.FileNameRequired);

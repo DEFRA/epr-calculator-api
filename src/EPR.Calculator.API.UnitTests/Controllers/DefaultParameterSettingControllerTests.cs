@@ -62,11 +62,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(201, actionResult?.StatusCode);
 
             Assert.AreEqual(
-                DefaultParameterUniqueReferences.UniqueReferences.Length,
+                CommonResources.UniqueReferences.Split(',').Length,
                 this.DbContext.DefaultParameterSettingDetail.Count());
             Assert.AreEqual(1, this.DbContext.DefaultParameterSettings.Count());
             Assert.AreEqual(
-                DefaultParameterUniqueReferences.UniqueReferences.Length,
+                CommonResources.UniqueReferences.Split(',').Length,
                 this.DbContext.DefaultParameterTemplateMasterList.Count());
         }
 
@@ -79,15 +79,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var actionResult2 = await this.DataPostCallAsync();
             Assert.AreEqual(201, actionResult2?.StatusCode);
 
-            var expectedLength = DefaultParameterUniqueReferences.UniqueReferences.Length * 2;
+            var expectedLength = CommonResources.UniqueReferences.Split(',').Length * 2;
             Assert.AreEqual(expectedLength, this.DbContext.DefaultParameterSettingDetail.Count());
             Assert.AreEqual(2, this.DbContext.DefaultParameterSettings.Count());
             Assert.AreEqual(
-                DefaultParameterUniqueReferences.UniqueReferences.Length,
+                CommonResources.UniqueReferences.Split(',').Length,
                 this.DbContext.DefaultParameterTemplateMasterList.Count());
 
             Assert.AreEqual(
-                DefaultParameterUniqueReferences.UniqueReferences.Length,
+                CommonResources.UniqueReferences.Split(',').Length,
                 this.DbContext.DefaultParameterSettingDetail.Count(x => x.DefaultParameterSettingMasterId == 2));
             Assert.AreEqual(1, this.DbContext.DefaultParameterSettings.Count(a => a.EffectiveTo == null));
         }
@@ -125,7 +125,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(200, okResult.StatusCode);
 
             var actionResul2 = okResult.Value as List<DefaultSchemeParametersDto>;
-            Assert.AreEqual(actionResul2?.Count, DefaultParameterUniqueReferences.UniqueReferences.Length);
+            Assert.AreEqual(actionResul2?.Count, CommonResources.UniqueReferences.Split(',').Length);
 
             Assert.AreEqual(tempdateData.Id, actionResul2?[0].Id);
             Assert.AreEqual(tempdateData.ParameterValue, actionResul2?[0].ParameterValue);
@@ -162,7 +162,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void Create_Default_Parameter_Setting_With_No_FileName()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
-            foreach (var item in DefaultParameterUniqueReferences.UniqueReferences)
+            foreach (var item in CommonResources.UniqueReferences.Split(','))
             {
                 if (item == "MATT-AD" || item == "MATT-PD" || item == "TONT-AD" || item == "TONT-PD")
                 {
@@ -199,7 +199,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void Create_Default_Parameter_Setting_With_Max_FileName_Length()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
-            foreach (var item in DefaultParameterUniqueReferences.UniqueReferences)
+            foreach (var item in CommonResources.UniqueReferences.Split(','))
             {
                 if (item == "MATT-AD" || item == "MATT-PD" || item == "TONT-AD" || item == "TONT-PD")
                 {
@@ -250,7 +250,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
 
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
-            foreach (var item in DefaultParameterUniqueReferences.UniqueReferences)
+            foreach (var item in CommonResources.UniqueReferences.Split(','))
             {
                 if (item == "MATT-AD" || item == "MATT-PD" || item == "TONT-AD" || item == "TONT-PD")
                 {
