@@ -19,10 +19,17 @@ public class AvailableClassificationsService(ApplicationDBContext context, ILogg
                 return new();
             }
 
-            return await context.CalculatorRunClassifications
-                .Where(c => validStatuses.Contains(c.Status))
+            var allClassifications = await context.CalculatorRunClassifications
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
+
+            return validStatuses
+                .Join(
+                    allClassifications,
+                    status => status,
+                    classification => classification.Status,
+                    (status, classification) => classification)
+                .ToList();
         }
         catch (Exception exception)
         {
