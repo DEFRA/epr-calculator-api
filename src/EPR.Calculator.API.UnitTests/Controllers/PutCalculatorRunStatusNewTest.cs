@@ -36,24 +36,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             this.mockBillingFileService = new Mock<IBillingFileService>();
             this.controller = new CalculatorNewController(this.context, this.mockValidator.Object, this.mockBillingFileService.Object);
-            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
-            {
-                Status = "DELETED",
-                Id = 6,
-                CreatedBy = "SomeUser",
-            });
-            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
-            {
-                Status = "INITIAL RUN COMPLETED",
-                Id = 7,
-                CreatedBy = "SomeUser",
-            });
-            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
-            {
-                Status = "INITIAL RUN",
-                Id = 8,
-                CreatedBy = "SomeUser",
-            });
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
