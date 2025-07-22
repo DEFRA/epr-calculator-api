@@ -81,12 +81,12 @@ namespace EPR.Calculator.API.Enums
         /// FINAL RUN COMPLETED.
         /// </summary>
         [Description("FINAL RUN COMPLETED")]
-        FINAL_RUN_COMPLETED = 13,
+        FINAL_RUN_COMPLETED = 14,
 
         /// <summary>
         /// FINAL RE-CALCULATION RUN COMPLETED.
         /// </summary>
         [Description("FINAL RE-CALCULATION RUN COMPLETED")]
-        FINAL_RECALCULATION_RUN_COMPLETED = 14,
+        FINAL_RECALCULATION_RUN_COMPLETED = 13,
     }
 }
