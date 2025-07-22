@@ -138,7 +138,7 @@ builder.Services.AddProblemDetails();
 builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
 // Configure endpoint timeout policies.
-foreach (string policy in TimeoutPolicies.AllPolicies)
+foreach (string policy in CommonResources.TimeoutPolicies.Split(','))
 {
     var timeout = builder.Configuration.GetSection("Timeouts").GetValue<double>(policy);
     builder.Services.AddRequestTimeouts(options =>

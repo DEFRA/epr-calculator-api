@@ -295,6 +295,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to RpdStatus,PrepareCalcResults,Transpose.
+        /// </summary>
+        public static string TimeoutPolicies {
+            get {
+                return ResourceManager.GetString("TimeoutPolicies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Parameter Year is required.
         /// </summary>
         public static string YearRequired {
