@@ -58,7 +58,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(200, okResult.StatusCode);
 
             var actionResul2 = okResult.Value as List<LapCapParameterDto>;
-            Assert.AreEqual(actionResul2?.Count, LapcapDataUniqueReferences.UniqueReferences.Length);
+            Assert.AreEqual(actionResul2?.Count, CommonResources.LapcapDataUniqueReferences.Split(',').Length);
 
             Assert.AreEqual(tempdateData.Id, actionResul2?[0].Id);
             Assert.AreEqual(tempdateData.TotalCost, actionResul2?[0].TotalCost);
@@ -114,7 +114,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(201, actionResult?.StatusCode);
 
             Assert.AreEqual(
-                LapcapDataUniqueReferences.UniqueReferences.Length,
+                CommonResources.LapcapDataUniqueReferences.Split(',').Length,
                 this.DbContext.LapcapDataDetail.Count());
             Assert.AreEqual(1, this.DbContext.LapcapDataMaster.Count());
         }

@@ -65,7 +65,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var lapcapDetail25 = new LapcapDataDetail
             {
                 LapcapDataMaster = lapcapMaster25,
-                UniqueReference = LapcapDataUniqueReferences.UniqueReferences.First(),
+                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',').First(),
             };
 
             var lapcapMaster26 = new LapcapDataMaster
@@ -78,7 +78,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var lapcapDetail26 = new LapcapDataDetail
             {
                 LapcapDataMaster = lapcapMaster26,
-                UniqueReference = LapcapDataUniqueReferences.UniqueReferences.First(),
+                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',').First(),
             };
             dbContext.LapcapDataMaster.Add(lapcapMaster25);
             dbContext.LapcapDataDetail.Add(lapcapDetail25);
@@ -179,7 +179,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var lapcapDetail25 = new LapcapDataDetail
             {
                 LapcapDataMaster = lapcapMaster25,
-                UniqueReference = LapcapDataUniqueReferences.UniqueReferences.First(),
+                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',').First(),
             };
 
             var lapcapMaster26 = new LapcapDataMaster
@@ -192,7 +192,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var lapcapDetail26 = new LapcapDataDetail
             {
                 LapcapDataMaster = lapcapMaster26,
-                UniqueReference = LapcapDataUniqueReferences.UniqueReferences.First(),
+                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',').First(),
             };
             dbContext.LapcapDataMaster.Add(lapcapMaster25);
             dbContext.LapcapDataDetail.Add(lapcapDetail25);
