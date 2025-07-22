@@ -27,8 +27,8 @@ namespace EPR.Calculator.API.Enums
         /// <summary>
         /// Play.
         /// </summary>
-        [Description(RunClassificationDescStatus.TEST_RUN)]
-        TEST_RUN = RunClassificationStatusIds.TEST_RUNID,
+        [Description(RunClassificationDescStatus.TESTRUN)]
+        TEST_RUN = RunClassificationStatusIds.TESTRUNID,
 
         /// <summary>
         /// Error.
@@ -45,49 +45,49 @@ namespace EPR.Calculator.API.Enums
         /// <summary>
         /// INITIAL RUN COMPLETED.
         /// </summary>
-        [Description(RunClassificationDescStatus.INITIAL_RUN_COMPLETED)]
-        INITIAL_RUN_COMPLETED = RunClassificationStatusIds.INITIAL_RUN_COMPLETEDID,
+        [Description(RunClassificationDescStatus.INITIALRUNCOMPLETED)]
+        INITIAL_RUN_COMPLETED = RunClassificationStatusIds.INITIALRUNCOMPLETEDID,
 
         /// <summary>
         /// INITIAL RUN.
         /// </summary>
-        [Description(RunClassificationDescStatus.INITIAL_RUN)]
-        INITIAL_RUN = RunClassificationStatusIds.INITIAL_RUNID,
+        [Description(RunClassificationDescStatus.INITIALRUN)]
+        INITIAL_RUN = RunClassificationStatusIds.INITIALRUNID,
 
         /// <summary>
         /// INTERIM RE-CALCULATION RUN.
         /// </summary>
-        [Description(RunClassificationDescStatus.INTERIM_RECALCULATION_RUN)]
-        INTERIM_RECALCULATION_RUN = RunClassificationStatusIds.INTERIM_RECALCULATION_RUNID,
+        [Description(RunClassificationDescStatus.INTERIMRECALCULATIONRUN)]
+        INTERIM_RECALCULATION_RUN = RunClassificationStatusIds.INTERIMRECALCULATIONRUNID,
 
         /// <summary>
         /// FINAL RUN.
         /// </summary>
-        [Description(RunClassificationDescStatus.FINAL_RUN)]
-        FINAL_RUN = RunClassificationStatusIds.FINAL_RUNID,
+        [Description(RunClassificationDescStatus.FINALRUN)]
+        FINAL_RUN = RunClassificationStatusIds.FINALRUNID,
 
         /// <summary>
         /// FINAL RE-CALCULATION RUN.
         /// </summary>
-        [Description(RunClassificationDescStatus.FINAL_RECALCULATION_RUN)]
-        FINAL_RECALCULATION_RUN = RunClassificationStatusIds.FINAL_RECALCULATION_RUNID,
+        [Description(RunClassificationDescStatus.FINALRECALCULATIONRUN)]
+        FINAL_RECALCULATION_RUN = RunClassificationStatusIds.FINALRECALCULATIONRUNID,
 
         /// <summary>
         /// INTERIM RE-CALCULATION RUN COMPLETED.
         /// </summary>
-        [Description(RunClassificationDescStatus.INTERM_RECALCULATION_RUN_COMP)]
-        INTERIM_RECALCULATION_RUN_COMPLETED = RunClassificationStatusIds.INTERM_RECALCULATION_RUN_COMPID,
+        [Description(RunClassificationDescStatus.INTERMRECALCULATIONRUNCOMP)]
+        INTERIM_RECALCULATION_RUN_COMPLETED = RunClassificationStatusIds.INTERMRECALCULATIONRUNCOMPID,
 
         /// <summary>
         /// FINAL RE-CALCULATION RUN COMPLETED.
         /// </summary>
-        [Description(RunClassificationDescStatus.FINAL_RECALCULATION_RUN_COMP)]
-        FINAL_RECALCULATION_RUN_COMPLETED = RunClassificationStatusIds.FINAL_RECALCULATION_RUN_COMPID,
+        [Description(RunClassificationDescStatus.FINALRECALCULATIONRUNCOMP)]
+        FINAL_RECALCULATION_RUN_COMPLETED = RunClassificationStatusIds.FINALRECALCULATIONRUNCOMPID,
 
         /// <summary>
         /// FINAL RUN COMPLETED.
         /// </summary>
-        [Description(RunClassificationDescStatus.FINAL_RUN_COMPLETED)]
-        FINAL_RUN_COMPLETED = RunClassificationStatusIds.FINAL_RUN_COMPLETEDID,
+        [Description(RunClassificationDescStatus.FINALRUNCOMPLETED)]
+        FINAL_RUN_COMPLETED = RunClassificationStatusIds.FINALRUNCOMPLETEDID,
     }
 }

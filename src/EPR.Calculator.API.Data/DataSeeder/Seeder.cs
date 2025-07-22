@@ -372,8 +372,8 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 },
                 new CalculatorRunClassification
                 {
-                    Id = RunClassificationStatusIds.TEST_RUNID,
-                    Status = RunClassificationDescStatus.TEST_RUN,
+                    Id = RunClassificationStatusIds.TESTRUNID,
+                    Status = RunClassificationDescStatus.TESTRUN,
                     CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
@@ -390,50 +390,50 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 },
                 new CalculatorRunClassification
                 {
-                    Id = 7,
-                    Status = "INITIAL RUN COMPLETED",
+                    Id = RunClassificationStatusIds.INITIALRUNCOMPLETEDID,
+                    Status = RunClassificationDescStatus.INITIALRUNCOMPLETED,
                     CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                    Id = RunClassificationStatusIds.INITIAL_RUNID,
-                    Status = RunClassificationDescStatus.INITIAL_RUN_COMPLETED,
+                    Id = RunClassificationStatusIds.INITIALRUNID,
+                    Status = RunClassificationDescStatus.INITIALRUN,
                     CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                    Id = RunClassificationStatusIds.INTERIM_RECALCULATION_RUNID,
-                    Status = RunClassificationDescStatus.INTERIM_RECALCULATION_RUN,
+                    Id = RunClassificationStatusIds.INTERIMRECALCULATIONRUNID,
+                    Status = RunClassificationDescStatus.INTERIMRECALCULATIONRUN,
                     CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                    Id = RunClassificationStatusIds.FINAL_RUNID,
-                    Status = RunClassificationDescStatus.FINAL_RUN,
+                    Id = RunClassificationStatusIds.FINALRUNID,
+                    Status = RunClassificationDescStatus.FINALRUN,
                     CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                     Id = RunClassificationStatusIds.FINAL_RECALCULATION_RUNID,
-                     Status = RunClassificationDescStatus.FINAL_RECALCULATION_RUN,
+                     Id = RunClassificationStatusIds.FINALRECALCULATIONRUNID,
+                     Status = RunClassificationDescStatus.FINALRECALCULATIONRUN,
                      CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                    Id = 12,
-                    Status = RunClassificationDescStatus.INTERM_RECALCULATION_RUN_COMP,
+                    Id = RunClassificationStatusIds.INTERMRECALCULATIONRUNCOMPID,
+                    Status = RunClassificationDescStatus.INTERMRECALCULATIONRUNCOMP,
                     CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                    Id = 13,
-                    Status = RunClassificationDescStatus.FINAL_RECALCULATION_RUN_COMP,
+                    Id = RunClassificationStatusIds.FINALRECALCULATIONRUNCOMPID,
+                    Status = RunClassificationDescStatus.FINALRECALCULATIONRUNCOMP,
                     CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                    Id = 14,
-                    Status = RunClassificationDescStatus.FINAL_RUN_COMPLETED,
+                    Id = RunClassificationStatusIds.FINALRUNCOMPLETEDID,
+                    Status = RunClassificationDescStatus.FINALRUNCOMPLETED,
                     CreatedBy = createdBy,
                 });
         }
