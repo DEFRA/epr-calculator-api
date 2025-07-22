@@ -1,6 +1,6 @@
-﻿using EnumsNET;
+﻿using System.ComponentModel;
+using EnumsNET;
 using EPR.Calculator.API.Data.DataModels;
-using System.ComponentModel;
 
 namespace EPR.Calculator.API.Enums
 {
