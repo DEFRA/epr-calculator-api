@@ -8,27 +8,22 @@ namespace EPR.Calculator.API.Services
 {
     public class BlobStorageService : IStorageService
     {
-        public const string BlobStorageSection = "BlobStorage";
-        public const string BlobSettingsMissingError = "BlobStorage settings are missing in configuration.";
-        public const string ContainerNameMissingError = "Container name is missing in configuration.";
-        public const string AccountNameMissingError = "Account name is missing in configuration.";
-        public const string OctetStream = "application/octet-stream";
         private readonly BlobContainerClient containerClient;
         private readonly StorageSharedKeyCredential sharedKeyCredential;
         private readonly ILogger<BlobStorageService> logger;
 
         public BlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration, ILogger<BlobStorageService> logger)
         {
-            var settings = configuration.GetSection(BlobStorageSection).Get<BlobStorageSettings>() ??
-                throw new ConfigurationErrorsException(BlobSettingsMissingError);
+            var settings = configuration.GetSection(CommonResources.BlobStorageSection).Get<BlobStorageSettings>() ??
+                throw new ConfigurationErrorsException(CommonResources.BlobSettingsMissingError);
 
             settings.ExtractAccountDetails();
 
             this.sharedKeyCredential = new StorageSharedKeyCredential(settings.AccountName, settings.AccountKey) ??
-                throw new ConfigurationErrorsException(AccountNameMissingError);
+                throw new ConfigurationErrorsException(CommonResources.AccountNameMissingError);
 
             this.containerClient = blobServiceClient.GetBlobContainerClient(settings.ResultFileCSVContainerName ??
-                throw new ConfigurationErrorsException(ContainerNameMissingError));
+                throw new ConfigurationErrorsException(CommonResources.ContainerNameMissingError));
 
             this.logger = logger;
         }
@@ -47,11 +42,11 @@ namespace EPR.Calculator.API.Services
             {
                 var downloadResult = await blobClient.DownloadContentAsync();
                 var content = downloadResult.Value.Content.ToString();
-                return Results.File(Encoding.Unicode.GetBytes(content), OctetStream, fileName);
+                return Results.File(Encoding.Unicode.GetBytes(content), CommonResources.OctetStream, fileName);
             }
             catch (Exception ex)
             {
-                return Results.Problem($"An error occurred while downloading the file: {ex.Message}");
+                return Results.Problem(string.Format(CommonResources.DownloadFileError, ex.Message));
             }
         }
 
@@ -75,7 +70,7 @@ namespace EPR.Calculator.API.Services
                 }
                 catch (UriFormatException exception)
                 {
-                    this.logger.LogError(exception, "Blob Uri is not in correct format.");
+                    this.logger.LogError(exception, CommonResources.IncorrectBlobUriFormat);
                     blobClient ??= this.containerClient.GetBlobClient(fileName);
                 }
             }

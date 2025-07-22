@@ -5,8 +5,6 @@ namespace EPR.Calculator.API.Validators
 {
     public class CreateLapcapDataValidator : AbstractValidator<CreateLapcapDataDto>
     {
-        private const int MaxFileNameSupported = 256;
-
         public CreateLapcapDataValidator()
         {
             this.RuleFor(x => x.ParameterYear)
@@ -19,7 +17,7 @@ namespace EPR.Calculator.API.Validators
                 .NotEmpty()
                 .WithMessage(CommonResources.FileNameRequired);
             this.RuleFor(x => x.LapcapFileName)
-                .MaximumLength(MaxFileNameSupported)
+                .MaximumLength(int.TryParse(CommonResources.MaxFileNameSupported, out int maxFileNameSupported) ? maxFileNameSupported : 256)
                 .WithMessage(CommonResources.MaxFileNameLength);
         }
     }

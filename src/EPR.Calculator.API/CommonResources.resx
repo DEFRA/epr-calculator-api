@@ -201,4 +201,34 @@
   <data name="TimeoutPolicies" xml:space="preserve">
     <value>RpdStatus,PrepareCalcResults,Transpose</value>
   </data>
+  <data name="BlobStorageSection" xml:space="preserve">
+    <value>BlobStorage</value>
+  </data>
+  <data name="BlobSettingsMissingError" xml:space="preserve">
+    <value>BlobStorage settings are missing in configuration.</value>
+  </data>
+  <data name="ContainerNameMissingError" xml:space="preserve">
+    <value>Container name is missing in configuration.</value>
+  </data>
+  <data name="AccountNameMissingError" xml:space="preserve">
+    <value>Account name is missing in configuration.</value>
+  </data>
+  <data name="OctetStream" xml:space="preserve">
+    <value>application/octet-stream</value>
+  </data>
+  <data name="DownloadFileError" xml:space="preserve">
+    <value>An error occurred while downloading the file: {0}</value>
+  </data>
+  <data name="IncorrectBlobUriFormat" xml:space="preserve">
+    <value>Blob Uri is not in correct format.</value>
+  </data>
+  <data name="InvalidFinancialYearFormat" xml:space="preserve">
+    <value>Invalid financial year format. Expected format: YYYY-YY (e.g., 2024-25).</value>
+  </data>
+  <data name="RunIdGreaterThan0" xml:space="preserve">
+    <value>RunId should have a value greater than 0</value>
+  </data>
+  <data name="MaxFileNameSupported" xml:space="preserve">
+    <value>256</value>
+  </data>
 </root>

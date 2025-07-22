@@ -61,6 +61,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Account name is missing in configuration..
+        /// </summary>
+        public static string AccountNameMissingError {
+            get {
+                return ResourceManager.GetString("AccountNameMissingError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Billing.
         /// </summary>
         public static string BillingMessageType {
@@ -79,11 +88,38 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to BlobStorage settings are missing in configuration..
+        /// </summary>
+        public static string BlobSettingsMissingError {
+            get {
+                return ResourceManager.GetString("BlobSettingsMissingError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BlobStorage.
+        /// </summary>
+        public static string BlobStorageSection {
+            get {
+                return ResourceManager.GetString("BlobStorageSection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The calculator is currently running. You will be able to run another calculation once the current one has finished..
         /// </summary>
         public static string CalculationAlreadyRunning {
             get {
                 return ResourceManager.GetString("CalculationAlreadyRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Container name is missing in configuration..
+        /// </summary>
+        public static string ContainerNameMissingError {
+            get {
+                return ResourceManager.GetString("ContainerNameMissingError", resourceCulture);
             }
         }
         
@@ -106,6 +142,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An error occurred while downloading the file: {0}.
+        /// </summary>
+        public static string DownloadFileError {
+            get {
+                return ResourceManager.GetString("DownloadFileError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to FileName is required.
         /// </summary>
         public static string FileNameRequired {
@@ -124,11 +169,29 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Blob Uri is not in correct format..
+        /// </summary>
+        public static string IncorrectBlobUriFormat {
+            get {
+                return ResourceManager.GetString("IncorrectBlobUriFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The financial year is invalid..
         /// </summary>
         public static string InvalidFinancialYear {
             get {
                 return ResourceManager.GetString("InvalidFinancialYear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid financial year format. Expected format: YYYY-YY (e.g., 2024-25)..
+        /// </summary>
+        public static string InvalidFinancialYearFormat {
+            get {
+                return ResourceManager.GetString("InvalidFinancialYearFormat", resourceCulture);
             }
         }
         
@@ -196,11 +259,29 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 256.
+        /// </summary>
+        public static string MaxFileNameSupported {
+            get {
+                return ResourceManager.GetString("MaxFileNameSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Classification status is not valid for this &apos;{0}&apos; run id to perform requested operation..
         /// </summary>
         public static string NotAValidClassificationStatus {
             get {
                 return ResourceManager.GetString("NotAValidClassificationStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to application/octet-stream.
+        /// </summary>
+        public static string OctetStream {
+            get {
+                return ResourceManager.GetString("OctetStream", resourceCulture);
             }
         }
         
@@ -255,6 +336,15 @@ namespace EPR.Calculator.API {
         public static string ResultMessageType {
             get {
                 return ResourceManager.GetString("ResultMessageType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RunId should have a value greater than 0.
+        /// </summary>
+        public static string RunIdGreaterThan0 {
+            get {
+                return ResourceManager.GetString("RunIdGreaterThan0", resourceCulture);
             }
         }
         
