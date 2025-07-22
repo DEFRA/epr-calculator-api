@@ -345,7 +345,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+            Assert.AreEqual(CommonResources.InvalidRunId, result.Message);
         }
 
         [TestMethod]
@@ -366,7 +366,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+            Assert.AreEqual(CommonResources.InvalidRunId, result.Message);
         }
 
         [TestMethod]
@@ -387,7 +387,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(ErrorMessages.InvalidOrganisationId, result.Message);
+            Assert.AreEqual(CommonResources.InvalidOrganisationId, result.Message);
         }
 
         [TestMethod]
@@ -495,7 +495,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+            Assert.AreEqual(CommonResources.InvalidRunId, result.Message);
         }
 
         [TestMethod]
@@ -506,7 +506,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(ErrorMessages.InvalidRunStatusForAcceptAll, result.Message);
+            Assert.AreEqual(CommonResources.InvalidRunStatusForAcceptAll, result.Message);
         }
 
         [TestMethod]

@@ -123,14 +123,35 @@
   <data name="BlobNotFoundErrorMessage" xml:space="preserve">
     <value>Blob not found for this '{0}' run id to perform requested operation.</value>
   </data>
+  <data name="CalculationAlreadyRunning" xml:space="preserve">
+    <value>The calculator is currently running. You will be able to run another calculation once the current one has finished.</value>
+  </data>
   <data name="CsvFileMetadataNotFoundErrorMessage" xml:space="preserve">
     <value>Result csv file metadata not found for this '{0}' run id to perform requested operation.</value>
+  </data>
+  <data name="FileNameRequired" xml:space="preserve">
+    <value>FileName is required</value>
   </data>
   <data name="GenerateBillingFileAlreadyRequest" xml:space="preserve">
     <value>Generating billing file for this '{0}' run id already requested.</value>
   </data>
+  <data name="InvalidFinancialYear" xml:space="preserve">
+    <value>The financial year is invalid.</value>
+  </data>
+  <data name="InvalidOrganisationId" xml:space="preserve">
+    <value>OrganisationId is invalid.</value>
+  </data>
+  <data name="InvalidRunId" xml:space="preserve">
+    <value>RunId is invalid.</value>
+  </data>
+  <data name="InvalidRunStatusForAcceptAll" xml:space="preserve">
+    <value>Run is not having the right status or Is Billing File Generating is already set to true</value>
+  </data>
   <data name="LapcapDataTemplateValuesMissing" xml:space="preserve">
     <value>Uploaded Lapcap parameter template should have a count of {0}</value>
+  </data>
+  <data name="MaxFileNameLength" xml:space="preserve">
+    <value>File name should be less than 256 characters</value>
   </data>
   <data name="NotAValidClassificationStatus" xml:space="preserve">
     <value>Classification status is not valid for this '{0}' run id to perform requested operation.</value>
@@ -153,6 +174,9 @@
   <data name="ResultMessageType" xml:space="preserve">
     <value>Result</value>
   </data>
+  <data name="RunNotFound" xml:space="preserve">
+    <value>A calculator run with the specified RunId was not found.</value>
+  </data>
   <data name="SASuperUserRole" xml:space="preserve">
     <value>SASuperUser</value>
   </data>
@@ -164,5 +188,8 @@
   </data>
   <data name="UniqueReferences" xml:space="preserve">
     <value>BADEBT-P,COMC-AL,COMC-FC,COMC-GL,COMC-PC,COMC-PL,COMC-ST,COMC-WD,COMC-OT,COMC-UK,COMC-ENG,COMC-WLS,COMC-SCT,COMC-NIR,LAPC-ENG,LAPC-NIR,LAPC-SCT,LAPC-WLS,LRET-AL,LRET-FC,LRET-GL,LRET-OT,LRET-PC,LRET-PL,LRET-ST,LRET-WD,MATT-AD,MATT-AI,MATT-PD,MATT-PI,SAOC-ENG,SAOC-NIR,SAOC-SCT,SAOC-WLS,SCSC-ENG,SCSC-NIR,SCSC-SCT,SCSC-WLS,TONT-AD,TONT-AI,TONT-PD,TONT-PI</value>
+  </data>
+  <data name="YearRequired" xml:space="preserve">
+    <value>Parameter Year is required</value>
   </data>
 </root>

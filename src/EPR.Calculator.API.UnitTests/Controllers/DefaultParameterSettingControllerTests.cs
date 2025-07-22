@@ -229,7 +229,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var result = validator.Validate(parameter);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(ErrorMessages.MaxFileNameLength, result.Errors.First().ErrorMessage);
+            Assert.AreEqual(CommonResources.MaxFileNameLength, result.Errors.First().ErrorMessage);
         }
 
         // Private Methods

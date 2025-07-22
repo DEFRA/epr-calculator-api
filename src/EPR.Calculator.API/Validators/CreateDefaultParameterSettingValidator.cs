@@ -10,17 +10,17 @@ namespace EPR.Calculator.API.Validators
         {
             this.RuleFor(x => x.ParameterYear)
                 .NotEmpty()
-                .WithMessage(ErrorMessages.YearRequired);
+                .WithMessage(CommonResources.YearRequired);
             this.RuleFor(x => x.SchemeParameterTemplateValues)
                 .NotNull()
                 .Must(x => x.Count() == CommonResources.UniqueReferences.Split(',').Length)
                 .WithMessage(string.Format(CommonResources.SchemeParameterTemplateValuesMissing, CommonResources.UniqueReferences.Split(',').Length));
             this.RuleFor(x => x.ParameterFileName)
                 .NotEmpty()
-                .WithMessage(ErrorMessages.FileNameRequired);
+                .WithMessage(CommonResources.FileNameRequired);
             this.RuleFor(x => x.ParameterFileName)
                 .MaximumLength(256)
-                .WithMessage(ErrorMessages.MaxFileNameLength);
+                .WithMessage(CommonResources.MaxFileNameLength);
         }
     }
 }

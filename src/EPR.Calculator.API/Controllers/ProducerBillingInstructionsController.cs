@@ -46,8 +46,8 @@ namespace EPR.Calculator.API.Controllers
                 {
                     return this.NotFound(new ErrorDto
                     {
-                        Message = ErrorMessages.RunNotFound,
-                        Description = ErrorMessages.RunNotFound,
+                        Message = CommonResources.RunNotFound,
+                        Description = CommonResources.RunNotFound,
                     });
                 }
 

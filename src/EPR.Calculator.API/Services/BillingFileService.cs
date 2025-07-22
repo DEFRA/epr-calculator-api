@@ -112,7 +112,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunId,
+                        Message = CommonResources.InvalidRunId,
                     };
                 }
 
@@ -126,7 +126,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidOrganisationId,
+                        Message = CommonResources.InvalidOrganisationId,
                     };
                 }
 
@@ -300,7 +300,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunId,
+                        Message = CommonResources.InvalidRunId,
                     };
                 }
 
@@ -309,7 +309,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunStatusForAcceptAll,
+                        Message = CommonResources.InvalidRunStatusForAcceptAll,
                     };
                 }
 
@@ -323,7 +323,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidOrganisationId,
+                        Message = CommonResources.InvalidOrganisationId,
                     };
                 }
 
@@ -369,7 +369,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunId,
+                        Message = CommonResources.InvalidRunId,
                     };
                 }
 
@@ -378,7 +378,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunStatusForAcceptAll,
+                        Message = CommonResources.InvalidRunStatusForAcceptAll,
                     };
                 }
 

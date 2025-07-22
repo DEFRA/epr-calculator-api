@@ -69,7 +69,7 @@ namespace EPR.Calculator.API.Controllers
                     run => run.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
                 if (isCalcAlreadyRunning)
                 {
-                    return new ObjectResult(new { Message = ErrorMessages.CalculationAlreadyRunning })
+                    return new ObjectResult(new { Message = CommonResources.CalculationAlreadyRunning })
                     {
                         StatusCode = StatusCodes.Status422UnprocessableEntity,
                     };
@@ -79,7 +79,7 @@ namespace EPR.Calculator.API.Controllers
                     year => year.Name == request.FinancialYear);
                 if (financialYear is null)
                 {
-                    return new ObjectResult(new { Message = ErrorMessages.InvalidFinancialYear })
+                    return new ObjectResult(new { Message = CommonResources.InvalidFinancialYear })
                     {
                         StatusCode = StatusCodes.Status400BadRequest,
                     };

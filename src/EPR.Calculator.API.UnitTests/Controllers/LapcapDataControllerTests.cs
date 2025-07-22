@@ -137,7 +137,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
             var createDefaultParameterDto = this.CreateDto();
             createDefaultParameterDto.ParameterYear = string.Empty;
-            this.LapcapDataController.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
+            this.LapcapDataController.ModelState.AddModelError("ParameterYear", CommonResources.YearRequired);
             var task = this.LapcapDataController.Create(createDefaultParameterDto);
             task.Wait();
             var actionResult = task.Result as ObjectResult;

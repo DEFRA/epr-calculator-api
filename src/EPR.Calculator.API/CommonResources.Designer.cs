@@ -79,11 +79,29 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The calculator is currently running. You will be able to run another calculation once the current one has finished..
+        /// </summary>
+        public static string CalculationAlreadyRunning {
+            get {
+                return ResourceManager.GetString("CalculationAlreadyRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Result csv file metadata not found for this &apos;{0}&apos; run id to perform requested operation..
         /// </summary>
         public static string CsvFileMetadataNotFoundErrorMessage {
             get {
                 return ResourceManager.GetString("CsvFileMetadataNotFoundErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to FileName is required.
+        /// </summary>
+        public static string FileNameRequired {
+            get {
+                return ResourceManager.GetString("FileNameRequired", resourceCulture);
             }
         }
         
@@ -97,11 +115,56 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The financial year is invalid..
+        /// </summary>
+        public static string InvalidFinancialYear {
+            get {
+                return ResourceManager.GetString("InvalidFinancialYear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OrganisationId is invalid..
+        /// </summary>
+        public static string InvalidOrganisationId {
+            get {
+                return ResourceManager.GetString("InvalidOrganisationId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RunId is invalid..
+        /// </summary>
+        public static string InvalidRunId {
+            get {
+                return ResourceManager.GetString("InvalidRunId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Run is not having the right status or Is Billing File Generating is already set to true.
+        /// </summary>
+        public static string InvalidRunStatusForAcceptAll {
+            get {
+                return ResourceManager.GetString("InvalidRunStatusForAcceptAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Uploaded Lapcap parameter template should have a count of {0}.
         /// </summary>
         public static string LapcapDataTemplateValuesMissing {
             get {
                 return ResourceManager.GetString("LapcapDataTemplateValuesMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File name should be less than 256 characters.
+        /// </summary>
+        public static string MaxFileNameLength {
+            get {
+                return ResourceManager.GetString("MaxFileNameLength", resourceCulture);
             }
         }
         
@@ -169,6 +232,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A calculator run with the specified RunId was not found..
+        /// </summary>
+        public static string RunNotFound {
+            get {
+                return ResourceManager.GetString("RunNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SASuperUser.
         /// </summary>
         public static string SASuperUserRole {
@@ -201,6 +273,15 @@ namespace EPR.Calculator.API {
         public static string UniqueReferences {
             get {
                 return ResourceManager.GetString("UniqueReferences", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parameter Year is required.
+        /// </summary>
+        public static string YearRequired {
+            get {
+                return ResourceManager.GetString("YearRequired", resourceCulture);
             }
         }
     }
