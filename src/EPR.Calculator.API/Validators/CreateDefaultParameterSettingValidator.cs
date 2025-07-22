@@ -1,5 +1,4 @@
-﻿using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Dtos;
+﻿using EPR.Calculator.API.Dtos;
 using FluentValidation;
 
 namespace EPR.Calculator.API.Validators

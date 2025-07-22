@@ -1,4 +1,4 @@
-﻿namespace EPR.Calculator.API.Constants
+﻿namespace EPR.Calculator.API.Utils
 {
     public class BlobStorageSettings
     {
@@ -20,16 +20,16 @@
 
         public void ExtractAccountDetails()
         {
-            var connectionStringParts = this.ConnectionString.Split(';');
+            var connectionStringParts = ConnectionString.Split(';');
             foreach (var part in connectionStringParts)
             {
                 if (part.StartsWith("AccountName=", StringComparison.OrdinalIgnoreCase))
                 {
-                    this.AccountName = part.Substring("AccountName=".Length);
+                    AccountName = part.Substring("AccountName=".Length);
                 }
                 else if (part.StartsWith("AccountKey=", StringComparison.OrdinalIgnoreCase))
                 {
-                    this.AccountKey = part.Substring("AccountKey=".Length);
+                    AccountKey = part.Substring("AccountKey=".Length);
                 }
             }
         }

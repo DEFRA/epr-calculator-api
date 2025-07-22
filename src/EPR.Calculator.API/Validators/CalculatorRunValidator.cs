@@ -1,5 +1,4 @@
-﻿using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data.DataModels;
 using FluentValidation;
 
 namespace EPR.Calculator.API.Validators

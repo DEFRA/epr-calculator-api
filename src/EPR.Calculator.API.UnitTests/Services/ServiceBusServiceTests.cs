@@ -2,7 +2,6 @@ namespace EPR.Calculator.API.UnitTests.Services
 {
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
-    using EPR.Calculator.API.Constants;
     using EPR.Calculator.API.Models;
     using EPR.Calculator.API.Services;
     using Microsoft.Extensions.Azure;

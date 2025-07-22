@@ -1,6 +1,4 @@
-﻿using EPR.Calculator.API.Constants;
-
-namespace EPR.Calculator.API.Dtos
+﻿namespace EPR.Calculator.API.Dtos
 {
     /// <summary>
     /// Represents a request to request producer billing instructions for a calculator run.
