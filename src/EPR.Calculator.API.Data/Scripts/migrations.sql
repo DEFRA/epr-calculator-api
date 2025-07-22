@@ -4366,8 +4366,8 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250721161415_GetInvoiceDetailsAtProducerLevel'
 )
 BEGIN
-    IF OBJECT_ID(N'[dbo].[GetInvoiceDetailsAtProducerLevel]', 'P') IS NOT NULL  
-    DROP PROCEDURE [dbo].[GetInvoiceDetailsAtProducerLevel];
+    IF OBJECT_ID(N'[dbo].[InsertInvoiceDetailsAtProducerLevel]', 'P') IS NOT NULL  
+    DROP PROCEDURE [dbo].[InsertInvoiceDetailsAtProducerLevel];
 END;
 GO
 
@@ -4377,7 +4377,7 @@ IF NOT EXISTS (
 )
 BEGIN
     DECLARE @sql NVARCHAR(MAX) 
-    SET @sql = N'CREATE PROCEDURE [dbo].[GetInvoiceDetailsAtProducerLevel]
+    SET @sql = N'CREATE PROCEDURE [dbo].[InsertInvoiceDetailsAtProducerLevel]
     (
         @instructionConfirmedBy NVARCHAR(4000),
         @instructionConfirmedDate DATETIME2(7),
@@ -4385,8 +4385,7 @@ BEGIN
     )
     AS
     BEGIN
-        SET NOCOUNT ON;
-
+        SET NOCOUNT OFF
         -- Temp table to hold calculated values
         CREATE TABLE #CalculatedValues (
             calculator_run_id INT,
@@ -4422,7 +4421,7 @@ BEGIN
             @instructionConfirmedDate AS instruction_confirmed_date,
             CONCAT(prsbi.calculator_run_id, ''-'', prsbi.producer_id) AS billing_instruction_id
         FROM dbo.producer_resultfile_suggested_billing_instruction AS prsbi
-        WHERE prsbi.calculator_run_id = @calculatorRunID;
+        WHERE prsbi.calculator_run_id = @calculatorRunID AND LOWER(prsbi.billing_instruction_accept_reject) = ''accepted'';
 
         -- First SELECT using the temp table
     	INSERT INTO [dbo].[producer_designated_run_invoice_instruction] (
