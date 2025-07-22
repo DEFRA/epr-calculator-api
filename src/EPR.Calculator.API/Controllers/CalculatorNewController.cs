@@ -200,8 +200,13 @@ namespace EPR.Calculator.API.Controllers
                 {
                     try
                     {
-                        var createRunInvoiceDetailsCommand = Util.GetFormattedSqlString(CommonConstants.InsertInvoiceDetailsAtProducerLevel, metadata.BillingFileAuthorisedBy, metadata.BillingFileAuthorisedDate, runId);
-                        int affectedRows = await this.Wrapper.ExecuteSqlAsync(createRunInvoiceDetailsCommand, cancellationToken);
+                        var createRunInvoiceDetailsCommand = Util.GetFormattedSqlString(
+                            CommonConstants.InsertInvoiceDetailsAtProducerLevel,
+                            metadata.BillingFileAuthorisedBy,
+                            metadata.BillingFileAuthorisedDate,
+                            runId);
+
+                        var affectedRows = await this.Wrapper.ExecuteSqlAsync(createRunInvoiceDetailsCommand, cancellationToken);
 
                         this.telemetryClient.TrackEvent(CommonConstants.InsertInvoiceDetailsAtProducerLevel, new Dictionary<string, string>
                         {
@@ -227,6 +232,11 @@ namespace EPR.Calculator.API.Controllers
                     {
                         // Error, rollback transaction
                         await transaction.RollbackAsync(cancellationToken);
+
+                        this.telemetryClient.TrackException(exception, new Dictionary<string, string>
+                        {
+                            { "RunId", runId.ToString() },
+                        });
 
                         // Return error status code: Internal Server Error
                         return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
