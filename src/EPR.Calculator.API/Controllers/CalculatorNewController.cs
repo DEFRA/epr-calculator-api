@@ -8,6 +8,7 @@ using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +21,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly ApplicationDBContext context;
         private readonly ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator;
         private readonly IBillingFileService billingFileService;
+        private readonly TelemetryClient _telemetryClient;
 
         private IInvoiceDetailsWrapper Wrapper { get; init; }
 
@@ -32,12 +34,14 @@ namespace EPR.Calculator.API.Controllers
             ApplicationDBContext context,
             ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
             IBillingFileService billingFileService,
-            IInvoiceDetailsWrapper invoiceDetailsWrapper)
+            IInvoiceDetailsWrapper invoiceDetailsWrapper,
+            TelemetryClient telemetryClient)
         {
             this.context = context;
             this.calculatorRunStatusDataValidator = calculatorRunStatusDataValidator;
             this.billingFileService = billingFileService;
             this.Wrapper = invoiceDetailsWrapper;
+            this._telemetryClient = telemetryClient;
         }
 
         [HttpPut]
@@ -196,8 +200,16 @@ namespace EPR.Calculator.API.Controllers
                 {
                     try
                     {
-                        var createRunInvoiceDetailsCommand = Util.GetFormattedSqlString("dbo.InsertInvoiceDetailsAtProducerLevel", metadata.BillingFileAuthorisedBy, metadata.BillingFileAuthorisedDate, runId);
-                        await this.Wrapper.ExecuteSqlAsync(createRunInvoiceDetailsCommand, cancellationToken);
+                        var createRunInvoiceDetailsCommand = Util.GetFormattedSqlString(CommonConstants.InsertInvoiceDetailsAtProducerLevel, metadata.BillingFileAuthorisedBy, metadata.BillingFileAuthorisedDate, runId);
+                        int affectedRows = await this.Wrapper.ExecuteSqlAsync(createRunInvoiceDetailsCommand, cancellationToken);
+
+                        this._telemetryClient.TrackEvent(CommonConstants.InsertInvoiceDetailsAtProducerLevel, new Dictionary<string, string>
+                        {
+                            { "Procedure", CommonConstants.InsertInvoiceDetailsAtProducerLevel },
+                            { "RunId", runId.ToString() },
+                            { "RowsAffected", affectedRows.ToString() },
+                        });
+
                         this.context.CalculatorRuns.Update(calculatorRun);
                         await this.context.SaveChangesAsync();
                         var result = await this.billingFileService.MoveBillingJsonFile(runId, cancellationToken);

@@ -8,6 +8,8 @@ using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -39,8 +41,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             this.mockBillingFileService = new Mock<IBillingFileService>();
             this.MockInvoiceDetailsWrapper = new Mock<IInvoiceDetailsWrapper>();
-
-            this.controller = new CalculatorNewController(this.context, this.mockValidator.Object, this.mockBillingFileService.Object, this.MockInvoiceDetailsWrapper.Object);
+            var config = TelemetryConfiguration.CreateDefault();
+            var telemetryClient = new TelemetryClient(config);
+            this.controller = new CalculatorNewController(this.context, this.mockValidator.Object, this.mockBillingFileService.Object, this.MockInvoiceDetailsWrapper.Object, telemetryClient);
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "DELETED",
