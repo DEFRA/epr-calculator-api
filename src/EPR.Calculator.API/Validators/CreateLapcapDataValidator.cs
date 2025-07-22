@@ -15,7 +15,7 @@ namespace EPR.Calculator.API.Validators
                 .WithMessage(CommonResources.YearRequired);
             this.RuleFor(x => x.LapcapDataTemplateValues).NotNull()
                 .Must(x => x.Count() == LapcapDataUniqueReferences.UniqueReferences.Length)
-                .WithMessage(string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.UniqueReferences.Split(',').Length));
+                .WithMessage(string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.DefaultParameterUniqueReferences.Split(',').Length));
             this.RuleFor(x => x.LapcapFileName)
                 .NotEmpty()
                 .WithMessage(CommonResources.FileNameRequired);

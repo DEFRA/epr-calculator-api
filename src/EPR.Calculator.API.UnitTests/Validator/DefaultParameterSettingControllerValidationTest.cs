@@ -38,14 +38,14 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             this.DefaultParameterSettingController.ModelState.AddModelError("ParameterYear", CommonResources.YearRequired);
-            this.DefaultParameterSettingController.ModelState.AddModelError("SchemeParameterTemplateValues", string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.UniqueReferences.Split(',').Length));
+            this.DefaultParameterSettingController.ModelState.AddModelError("SchemeParameterTemplateValues", string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.DefaultParameterUniqueReferences.Split(',').Length));
             var actionResult = await this.DefaultParameterSettingController.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
 
             var modelErrors = actionResult?.Value as IEnumerable<ModelError>;
             Assert.IsNotNull(modelErrors);
             Assert.IsTrue(modelErrors.Count(x => x.ErrorMessage == CommonResources.YearRequired) == 1);
-            Assert.IsTrue(modelErrors.Count(x => x.ErrorMessage == string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.UniqueReferences.Split(',').Length)) == 1);
+            Assert.IsTrue(modelErrors.Count(x => x.ErrorMessage == string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.DefaultParameterUniqueReferences.Split(',').Length)) == 1);
         }
 
         [TestMethod]
@@ -79,7 +79,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
             var errors = actionResult?.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
             Assert.IsNotNull(errors);
-            Assert.IsTrue(errors.Count() == CommonResources.UniqueReferences.Split(',').Length);
+            Assert.IsTrue(errors.Count() == CommonResources.DefaultParameterUniqueReferences.Split(',').Length);
         }
 
         [TestMethod]
@@ -99,7 +99,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 HttpContext = context,
             };
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
-            foreach (var uniqueRef in CommonResources.UniqueReferences.Split(','))
+            foreach (var uniqueRef in CommonResources.DefaultParameterUniqueReferences.Split(','))
             {
                 schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
                 {

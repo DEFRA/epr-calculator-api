@@ -39,7 +39,7 @@ builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 builder.Services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatusDataValidator>();
 builder.Services.AddScoped<IBillingFileService, BillingFileService>();
 
-if (environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
+if (environmentName == CommonResources.Local.ToLower())
 {
     builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
     builder.Services.AddScoped<IBlobStorageService2, LocalFileStorageService2>();
@@ -150,7 +150,7 @@ foreach (string policy in TimeoutPolicies.AllPolicies)
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
+if (app.Environment.IsDevelopment() || environmentName == CommonResources.Local.ToLower())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
