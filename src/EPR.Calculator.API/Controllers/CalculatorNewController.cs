@@ -192,7 +192,7 @@ namespace EPR.Calculator.API.Controllers
                 metadata.BillingFileAuthorisedBy = userName;
                 metadata.BillingFileAuthorisedDate = DateTime.UtcNow;
 
-                using (var transaction = await this.context.Database.BeginTransactionAsync())
+                using (var transaction = await this.context.Database.BeginTransactionAsync(cancellationToken))
                 {
                     try
                     {
@@ -207,14 +207,14 @@ namespace EPR.Calculator.API.Controllers
                         }
 
                         // All good, commit transaction
-                        await transaction.CommitAsync();
+                        await transaction.CommitAsync(cancellationToken);
                     }
 
                     // All good, commit transaction
                     catch (Exception exception)
                     {
                         // Error, rollback transaction
-                        await transaction.RollbackAsync();
+                        await transaction.RollbackAsync(cancellationToken);
 
                         // Return error status code: Internal Server Error
                         return this.StatusCode(StatusCodes.Status500InternalServerError, exception);

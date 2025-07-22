@@ -22,9 +22,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         private readonly Mock<IBillingFileService> mockBillingFileService;
         private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
+        private readonly Mock<IInvoiceDetailsWrapper> mockInvoiceDetailsWrapper;
         private ApplicationDBContext context;
         private CalculatorNewController controller;
-        private readonly Mock<IInvoiceDetailsWrapper> mockInvoiceDetailsWrapper;
 
         public CalculatorNewControllerTests()
         {
