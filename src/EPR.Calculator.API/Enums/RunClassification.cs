@@ -1,6 +1,6 @@
-﻿using System.ComponentModel;
-using EnumsNET;
-using EPR.Calculator.API.Constants;
+﻿using EnumsNET;
+using EPR.Calculator.API.Data.DataModels;
+using System.ComponentModel;
 
 namespace EPR.Calculator.API.Enums
 {
@@ -9,85 +9,85 @@ namespace EPR.Calculator.API.Enums
         /// <summary>
         /// In the Queue.
         /// </summary>
-        [Description("IN THE QUEUE")]
-        INTHEQUEUE = 1,
+        [Description(RunClassificationDescStatus.INTHEQUEUE)]
+        INTHEQUEUE = RunClassificationStatusIds.INTHEQUEUEID,
 
         /// <summary>
         /// Running.
         /// </summary>
-        [Description("RUNNING")]
-        RUNNING = 2,
+        [Description(RunClassificationDescStatus.RUNNING)]
+        RUNNING = RunClassificationStatusIds.RUNNINGID,
 
         /// <summary>
         /// Unclassified.
         /// </summary>
-        [Description("UNCLASSIFIED")]
-        UNCLASSIFIED = 3,
+        [Description(RunClassificationDescStatus.UNCLASSIFIED)]
+        UNCLASSIFIED = RunClassificationStatusIds.UNCLASSIFIEDID,
 
         /// <summary>
         /// Play.
         /// </summary>
-        [Description("TEST RUN")]
-        TEST_RUN = 4,
+        [Description(RunClassificationDescStatus.TEST_RUN)]
+        TEST_RUN = RunClassificationStatusIds.TEST_RUNID,
 
         /// <summary>
         /// Error.
         /// </summary>
-        [Description("ERROR")]
-        ERROR = 5,
+        [Description(RunClassificationDescStatus.ERROR)]
+        ERROR = RunClassificationStatusIds.ERRORID,
 
         /// <summary>
         /// Deleted.
         /// </summary>
-        [Description("DELETED")]
-        DELETED = 6,
+        [Description(RunClassificationDescStatus.DELETED)]
+        DELETED = RunClassificationStatusIds.DELETEDID,
 
         /// <summary>
         /// INITIAL RUN COMPLETED.
         /// </summary>
-        [Description("INITIAL RUN COMPLETED")]
-        INITIAL_RUN_COMPLETED = 7,
+        [Description(RunClassificationDescStatus.INITIAL_RUN_COMPLETED)]
+        INITIAL_RUN_COMPLETED = RunClassificationStatusIds.INITIAL_RUN_COMPLETEDID,
 
         /// <summary>
         /// INITIAL RUN.
         /// </summary>
-        [Description("INITIAL RUN")]
-        INITIAL_RUN = 8,
+        [Description(RunClassificationDescStatus.INITIAL_RUN)]
+        INITIAL_RUN = RunClassificationStatusIds.INITIAL_RUNID,
 
         /// <summary>
         /// INTERIM RE-CALCULATION RUN.
         /// </summary>
-        [Description("INTERIM RE-CALCULATION RUN")]
-        INTERIM_RECALCULATION_RUN = 9,
+        [Description(RunClassificationDescStatus.INTERIM_RECALCULATION_RUN)]
+        INTERIM_RECALCULATION_RUN = RunClassificationStatusIds.INTERIM_RECALCULATION_RUNID,
 
         /// <summary>
         /// FINAL RUN.
         /// </summary>
-        [Description("FINAL RUN")]
-        FINAL_RUN = 10,
+        [Description(RunClassificationDescStatus.FINAL_RUN)]
+        FINAL_RUN = RunClassificationStatusIds.FINAL_RUNID,
 
         /// <summary>
         /// FINAL RE-CALCULATION RUN.
         /// </summary>
-        [Description("FINAL RE-CALCULATION RUN")]
-        FINAL_RECALCULATION_RUN = 11,
+        [Description(RunClassificationDescStatus.FINAL_RECALCULATION_RUN)]
+        FINAL_RECALCULATION_RUN = RunClassificationStatusIds.FINAL_RECALCULATION_RUNID,
 
         /// <summary>
         /// INTERIM RE-CALCULATION RUN COMPLETED.
         /// </summary>
-        [Description(RunClassificationDescription.IntermDesc)]
-        INTERIM_RECALCULATION_RUN_COMPLETED = 12,
+        [Description(RunClassificationDescStatus.INTERM_RECALCULATION_RUN_COMP)]
+        INTERIM_RECALCULATION_RUN_COMPLETED = RunClassificationStatusIds.INTERM_RECALCULATION_RUN_COMPID,
 
         /// <summary>
         /// FINAL RE-CALCULATION RUN COMPLETED.
         /// </summary>
-        [Description(RunClassificationDescription.FinalRecalDesc)]
-        FINAL_RECALCULATION_RUN_COMPLETED = 13,
+        [Description(RunClassificationDescStatus.FINAL_RECALCULATION_RUN_COMP)]
+        FINAL_RECALCULATION_RUN_COMPLETED = RunClassificationStatusIds.FINAL_RECALCULATION_RUN_COMPID,
 
         /// <summary>
         /// FINAL RUN COMPLETED.
         /// </summary>
-        [Description(RunClassificationDescription.FinalDesc)]
-        FINAL_RUN_COMPLETED = 14,
+        [Description(RunClassificationDescStatus.FINAL_RUN_COMPLETED)]
+        FINAL_RUN_COMPLETED = RunClassificationStatusIds.FINAL_RUN_COMPLETEDID,
     }
 }

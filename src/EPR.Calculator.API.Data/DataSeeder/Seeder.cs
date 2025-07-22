@@ -1,6 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EPR.Calculator.API.Data.DataSeeder
 {
@@ -354,86 +354,86 @@ namespace EPR.Calculator.API.Data.DataSeeder
             modelBuilder.Entity<CalculatorRunClassification>().HasData(
                 new CalculatorRunClassification
                 {
-                    Id = 1,
-                    Status = "IN THE QUEUE",
-                    CreatedBy = "Test User",
+                    Id = RunClassificationStatusIds.INTHEQUEUEID,
+                    Status = RunClassificationDescStatus.INTHEQUEUE,
+                    CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                    Id = 2,
-                    Status = "RUNNING",
-                    CreatedBy = "Test User",
+                    Id = RunClassificationStatusIds.RUNNINGID,
+                    Status = RunClassificationDescStatus.RUNNING,
+                    CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                    Id = 3,
-                    Status = "UNCLASSIFIED",
-                    CreatedBy = "Test User",
+                    Id = RunClassificationStatusIds.UNCLASSIFIEDID,
+                    Status = RunClassificationDescStatus.UNCLASSIFIED,
+                    CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                    Id = 4,
-                    Status = "PLAY",
-                    CreatedBy = "Test User",
+                    Id = RunClassificationStatusIds.TEST_RUNID,
+                    Status = RunClassificationDescStatus.TEST_RUN,
+                    CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                    Id = 5,
-                    Status = "ERROR",
-                    CreatedBy = "Test User",
+                    Id = RunClassificationStatusIds.ERRORID,
+                    Status = RunClassificationDescStatus.ERROR,
+                    CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                    Id = 6,
-                    Status = "DELETED",
-                    CreatedBy = "System User",
+                    Id = RunClassificationStatusIds.DELETEDID,
+                    Status = RunClassificationDescStatus.DELETED,
+                    CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
                     Id = 7,
                     Status = "INITIAL RUN COMPLETED",
-                    CreatedBy = "System User",
+                    CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                    Id = 8,
-                    Status = "INITIAL RUN",
-                    CreatedBy = "Test User",
+                    Id = RunClassificationStatusIds.INITIAL_RUNID,
+                    Status = RunClassificationDescStatus.INITIAL_RUN_COMPLETED,
+                    CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                    Id = 9,
-                    Status = "INTERIM RE-CALCULATION RUN",
-                    CreatedBy = "Test User",
+                    Id = RunClassificationStatusIds.INTERIM_RECALCULATION_RUNID,
+                    Status = RunClassificationDescStatus.INTERIM_RECALCULATION_RUN,
+                    CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                    Id = 10,
-                    Status = "FINAL RUN",
-                    CreatedBy = "Test User",
+                    Id = RunClassificationStatusIds.FINAL_RUNID,
+                    Status = RunClassificationDescStatus.FINAL_RUN,
+                    CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
-                     Id = 11,
-                     Status = "FINAL RE-CALCULATION RUN",
-                     CreatedBy = "Test User",
+                     Id = RunClassificationStatusIds.FINAL_RECALCULATION_RUNID,
+                     Status = RunClassificationDescStatus.FINAL_RECALCULATION_RUN,
+                     CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
                     Id = 12,
-                    Status = "INTERIM RE-CALCULATION RUN COMPLETED",
+                    Status = RunClassificationDescStatus.INTERM_RECALCULATION_RUN_COMP,
                     CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
                     Id = 13,
-                    Status = "FINAL RE-CALCULATION RUN COMPLETED",
+                    Status = RunClassificationDescStatus.FINAL_RECALCULATION_RUN_COMP,
                     CreatedBy = createdBy,
                 },
                 new CalculatorRunClassification
                 {
                     Id = 14,
-                    Status = "FINAL RUN COMPLETED",
+                    Status = RunClassificationDescStatus.FINAL_RUN_COMPLETED,
                     CreatedBy = createdBy,
                 });
         }

@@ -62,10 +62,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("financial_year");
 
-                    b.Property<bool?>("IsBillingFileGenerating")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_billing_file_generating");
-
                     b.Property<int?>("LapcapDataMasterId")
                         .HasColumnType("int")
                         .HasColumnName("lapcap_data_master_id");
