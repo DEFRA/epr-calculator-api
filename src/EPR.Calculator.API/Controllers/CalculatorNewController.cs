@@ -21,7 +21,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly ApplicationDBContext context;
         private readonly ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator;
         private readonly IBillingFileService billingFileService;
-        private readonly TelemetryClient _telemetryClient;
+        private readonly TelemetryClient telemetryClient;
 
         private IInvoiceDetailsWrapper Wrapper { get; init; }
 
@@ -41,7 +41,7 @@ namespace EPR.Calculator.API.Controllers
             this.calculatorRunStatusDataValidator = calculatorRunStatusDataValidator;
             this.billingFileService = billingFileService;
             this.Wrapper = invoiceDetailsWrapper;
-            this._telemetryClient = telemetryClient;
+            this.telemetryClient = telemetryClient;
         }
 
         [HttpPut]
@@ -203,7 +203,7 @@ namespace EPR.Calculator.API.Controllers
                         var createRunInvoiceDetailsCommand = Util.GetFormattedSqlString(CommonConstants.InsertInvoiceDetailsAtProducerLevel, metadata.BillingFileAuthorisedBy, metadata.BillingFileAuthorisedDate, runId);
                         int affectedRows = await this.Wrapper.ExecuteSqlAsync(createRunInvoiceDetailsCommand, cancellationToken);
 
-                        this._telemetryClient.TrackEvent(CommonConstants.InsertInvoiceDetailsAtProducerLevel, new Dictionary<string, string>
+                        this.telemetryClient.TrackEvent(CommonConstants.InsertInvoiceDetailsAtProducerLevel, new Dictionary<string, string>
                         {
                             { "Procedure", CommonConstants.InsertInvoiceDetailsAtProducerLevel },
                             { "RunId", runId.ToString() },
