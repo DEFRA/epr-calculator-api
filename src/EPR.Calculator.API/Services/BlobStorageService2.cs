@@ -30,7 +30,7 @@ namespace EPR.Calculator.API.Services
             // Log if delete fails, but still return true if copy succeeded
             if (!deleteSucceeded)
             {
-                this.telemetryClient.TrackTrace($"Blob delete for: {blobName} unsuccessful");
+                this.telemetryClient.TrackTrace(string.Format(CommonResources.BlobDeleteUnsuccessful, blobName));
             }
 
             return true;

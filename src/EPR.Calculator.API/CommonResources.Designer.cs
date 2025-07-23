@@ -79,6 +79,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Blob delete for: {0} unsuccessful.
+        /// </summary>
+        public static string BlobDeleteUnsuccessful {
+            get {
+                return ResourceManager.GetString("BlobDeleteUnsuccessful", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Blob not found for this &apos;{0}&apos; run id to perform requested operation..
         /// </summary>
         public static string BlobNotFoundErrorMessage {
@@ -115,6 +124,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Calculator run name already exists: {0}.
+        /// </summary>
+        public static string CalculatorRunNameExists {
+            get {
+                return ResourceManager.GetString("CalculatorRunNameExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Calculator Run Name is Required.
         /// </summary>
         public static string CalculatorRunNameRequired {
@@ -142,6 +160,24 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Default parameter settings and Lapcap data not available for the financial year {0}..
+        /// </summary>
+        public static string DataNotAvaialbleForFinancialYear {
+            get {
+                return ResourceManager.GetString("DataNotAvaialbleForFinancialYear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Default parameter settings not available for the financial year {0}..
+        /// </summary>
+        public static string DefaultParameterNotAvailable {
+            get {
+                return ResourceManager.GetString("DefaultParameterNotAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to BADEBT-P,COMC-AL,COMC-FC,COMC-GL,COMC-PC,COMC-PL,COMC-ST,COMC-WD,COMC-OT,COMC-UK,COMC-ENG,COMC-WLS,COMC-SCT,COMC-NIR,LAPC-ENG,LAPC-NIR,LAPC-SCT,LAPC-WLS,LRET-AL,LRET-FC,LRET-GL,LRET-OT,LRET-PC,LRET-PL,LRET-ST,LRET-WD,MATT-AD,MATT-AI,MATT-PD,MATT-PI,SAOC-ENG,SAOC-NIR,SAOC-SCT,SAOC-WLS,SCSC-ENG,SCSC-NIR,SCSC-SCT,SCSC-WLS,TONT-AD,TONT-AI,TONT-PD,TONT-PI.
         /// </summary>
         public static string DefaultParameterUniqueReferences {
@@ -160,11 +196,29 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enter the total costs for {0} in {1}.
+        /// </summary>
+        public static string EnterTotalCosts {
+            get {
+                return ResourceManager.GetString("EnterTotalCosts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to FileName is required.
         /// </summary>
         public static string FileNameRequired {
             get {
                 return ResourceManager.GetString("FileNameRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File not found at path: {0}.
+        /// </summary>
+        public static string FileNotFound {
+            get {
+                return ResourceManager.GetString("FileNotFound", resourceCulture);
             }
         }
         
@@ -205,6 +259,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Classification for {0}.
+        /// </summary>
+        public static string InvalidClassification {
+            get {
+                return ResourceManager.GetString("InvalidClassification", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The financial year is invalid..
         /// </summary>
         public static string InvalidFinancialYear {
@@ -228,6 +291,15 @@ namespace EPR.Calculator.API {
         public static string InvalidFinancialYearProvided {
             get {
                 return ResourceManager.GetString("InvalidFinancialYearProvided", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid Run Id {0}.
+        /// </summary>
+        public static string InvalidForRunId {
+            get {
+                return ResourceManager.GetString("InvalidForRunId", resourceCulture);
             }
         }
         
@@ -264,6 +336,15 @@ namespace EPR.Calculator.API {
         public static string InvalidStatusValue {
             get {
                 return ResourceManager.GetString("InvalidStatusValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lapcap data not available for the financial year {0}..
+        /// </summary>
+        public static string LapcapDataNotAvailable {
+            get {
+                return ResourceManager.GetString("LapcapDataNotAvailable", resourceCulture);
             }
         }
         
@@ -313,6 +394,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No billing file metadata for Run Id {0}.
+        /// </summary>
+        public static string NoBillingFileMetadataForRunId {
+            get {
+                return ResourceManager.GetString("NoBillingFileMetadataForRunId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No claims in the request.
         /// </summary>
         public static string NoClaimInRequest {
@@ -327,6 +417,15 @@ namespace EPR.Calculator.API {
         public static string NoClassificationsFound {
             get {
                 return ResourceManager.GetString("NoClassificationsFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No CSV file found for Run Id {0}.
+        /// </summary>
+        public static string NoCSVFileFound {
+            get {
+                return ResourceManager.GetString("NoCSVFileFound", resourceCulture);
             }
         }
         
@@ -412,6 +511,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 1.Parameter File Name in DefaultParameter API :{0}.
+        /// </summary>
+        public static string ParameterFileName {
+            get {
+                return ResourceManager.GetString("ParameterFileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Parameter Year is required.
         /// </summary>
         public static string ParameterYearRequired {
@@ -484,11 +592,29 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to RunId {0} cannot be changed to classification {1}.
+        /// </summary>
+        public static string RunIdCannotBeChangedToClassification {
+            get {
+                return ResourceManager.GetString("RunIdCannotBeChangedToClassification", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to RunId should have a value greater than 0.
         /// </summary>
         public static string RunIdGreaterThan0 {
             get {
                 return ResourceManager.GetString("RunIdGreaterThan0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Run ID {0} was not found..
+        /// </summary>
+        public static string RunINotFound {
+            get {
+                return ResourceManager.GetString("RunINotFound", resourceCulture);
             }
         }
         
@@ -547,6 +673,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Status can only contain: {0}..
+        /// </summary>
+        public static string StatusCanOnlyContain {
+            get {
+                return ResourceManager.GetString("StatusCanOnlyContain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Status cannot contain duplicate values..
         /// </summary>
         public static string StatusDuplicateValues {
@@ -570,6 +705,69 @@ namespace EPR.Calculator.API {
         public static string TimeoutPolicies {
             get {
                 return ResourceManager.GetString("TimeoutPolicies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have entered the total costs for {0} in {1} more than once.
+        /// </summary>
+        public static string TotalCostForMaterialAndCountry {
+            get {
+                return ResourceManager.GetString("TotalCostForMaterialAndCountry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Total costs for {0} can only include numbers, commas and decimal points.
+        /// </summary>
+        public static string TotalCostsForMaterial {
+            get {
+                return ResourceManager.GetString("TotalCostsForMaterial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Total costs for {0} in {1} must be between £{2} and £{3}.
+        /// </summary>
+        public static string TotalCostsRange {
+            get {
+                return ResourceManager.GetString("TotalCostsRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to find Billing File Metadata for Run Id {0}.
+        /// </summary>
+        public static string UnableToFindBillingFileMetadata {
+            get {
+                return ResourceManager.GetString("UnableToFindBillingFileMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to find Classification Id {0}.
+        /// </summary>
+        public static string UnableToFindClassificationId {
+            get {
+                return ResourceManager.GetString("UnableToFindClassificationId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to find Run Id {0}.
+        /// </summary>
+        public static string UnableToFindRunId {
+            get {
+                return ResourceManager.GetString("UnableToFindRunId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to move billing json file for Run Id {0}.
+        /// </summary>
+        public static string UnableToMoveBillingFile {
+            get {
+                return ResourceManager.GetString("UnableToMoveBillingFile", resourceCulture);
             }
         }
     }

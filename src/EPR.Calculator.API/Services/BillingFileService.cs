@@ -410,7 +410,7 @@ namespace EPR.Calculator.API.Services
         {
             if (runStatus == null)
             {
-                throw new KeyNotFoundException($"Run ID {runId} was not found.");
+                throw new KeyNotFoundException(string.Format(CommonResources.RunINotFound, runId));
             }
 
             var validRunClassifications = new HashSet<int>

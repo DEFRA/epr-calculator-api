@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace EPR.Calculator.API.Services
@@ -35,7 +36,7 @@ namespace EPR.Calculator.API.Services
 
             if (!File.Exists(filePath))
             {
-                return Task.FromResult(Results.NotFound($"File not found at path: {filePath}"));
+                return Task.FromResult(Results.NotFound(string.Format(CommonResources.FileNotFound, filePath)));
             }
 
             var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);

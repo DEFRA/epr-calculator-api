@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Abstractions;
 using System;
+using System.Text;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -39,7 +40,7 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateDefaultParameterSettingDto request)
         {
-            this._telemetryClient.TrackTrace($"1.Parameter File Name in DefaultParameter API :{request.ParameterFileName}");
+            this._telemetryClient.TrackTrace(string.Format(CommonResources.ParameterFileName, request.ParameterFileName));
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {

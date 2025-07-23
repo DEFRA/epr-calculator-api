@@ -31,7 +31,7 @@ namespace EPR.Calculator.API.Validators
                         IsInvalid = true,
                         Errors = new List<string>
                         {
-                            $"Invalid Classification for {RunClassification.INITIAL_RUN}",
+                            string.Format(CommonResources.InvalidClassification, RunClassification.INITIAL_RUN),
                         },
                     };
                 case (int)RunClassification.INITIAL_RUN_COMPLETED:
@@ -48,7 +48,7 @@ namespace EPR.Calculator.API.Validators
                         IsInvalid = true,
                         Errors = new List<string>
                         {
-                            $"Invalid Classification for {RunClassification.INITIAL_RUN_COMPLETED}",
+                            string.Format(CommonResources.InvalidClassification, RunClassification.INITIAL_RUN_COMPLETED),
                         },
                     };
                 case (int)RunClassification.DELETED:
@@ -59,7 +59,7 @@ namespace EPR.Calculator.API.Validators
                             IsInvalid = true,
                             Errors = new List<string>
                             {
-                                $"Invalid Classification for {RunClassification.INITIAL_RUN}",
+                                string.Format(CommonResources.InvalidClassification, RunClassification.INITIAL_RUN),
                             },
                         };
                     }

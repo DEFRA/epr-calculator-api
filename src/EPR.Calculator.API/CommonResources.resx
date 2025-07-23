@@ -288,4 +288,70 @@
   <data name="StatusDuplicateValues" xml:space="preserve">
     <value>Status cannot contain duplicate values.</value>
   </data>
+  <data name="NoBillingFileMetadataForRunId" xml:space="preserve">
+    <value>No billing file metadata for Run Id {0}</value>
+  </data>
+  <data name="InvalidForRunId" xml:space="preserve">
+    <value>Invalid Run Id {0}</value>
+  </data>
+  <data name="RunIdCannotBeChangedToClassification" xml:space="preserve">
+    <value>RunId {0} cannot be changed to classification {1}</value>
+  </data>
+  <data name="CalculatorRunNameExists" xml:space="preserve">
+    <value>Calculator run name already exists: {0}</value>
+  </data>
+  <data name="DataNotAvaialbleForFinancialYear" xml:space="preserve">
+    <value>Default parameter settings and Lapcap data not available for the financial year {0}.</value>
+  </data>
+  <data name="DefaultParameterNotAvailable" xml:space="preserve">
+    <value>Default parameter settings not available for the financial year {0}.</value>
+  </data>
+  <data name="LapcapDataNotAvailable" xml:space="preserve">
+    <value>Lapcap data not available for the financial year {0}.</value>
+  </data>
+  <data name="UnableToFindRunId" xml:space="preserve">
+    <value>Unable to find Run Id {0}</value>
+  </data>
+  <data name="UnableToFindClassificationId" xml:space="preserve">
+    <value>Unable to find Classification Id {0}</value>
+  </data>
+  <data name="NoCSVFileFound" xml:space="preserve">
+    <value>No CSV file found for Run Id {0}</value>
+  </data>
+  <data name="UnableToFindBillingFileMetadata" xml:space="preserve">
+    <value>Unable to find Billing File Metadata for Run Id {0}</value>
+  </data>
+  <data name="UnableToMoveBillingFile" xml:space="preserve">
+    <value>Unable to move billing json file for Run Id {0}</value>
+  </data>
+  <data name="ParameterFileName" xml:space="preserve">
+    <value>1.Parameter File Name in DefaultParameter API :{0}</value>
+  </data>
+  <data name="RunINotFound" xml:space="preserve">
+    <value>Run ID {0} was not found.</value>
+  </data>
+  <data name="BlobDeleteUnsuccessful" xml:space="preserve">
+    <value>Blob delete for: {0} unsuccessful</value>
+  </data>
+  <data name="FileNotFound" xml:space="preserve">
+    <value>File not found at path: {0}</value>
+  </data>
+  <data name="InvalidClassification" xml:space="preserve">
+    <value>Invalid Classification for {0}</value>
+  </data>
+  <data name="StatusCanOnlyContain" xml:space="preserve">
+    <value>Status can only contain: {0}.</value>
+  </data>
+  <data name="EnterTotalCosts" xml:space="preserve">
+    <value>Enter the total costs for {0} in {1}</value>
+  </data>
+  <data name="TotalCostsForMaterial" xml:space="preserve">
+    <value>Total costs for {0} can only include numbers, commas and decimal points</value>
+  </data>
+  <data name="TotalCostsRange" xml:space="preserve">
+    <value>Total costs for {0} in {1} must be between £{2} and £{3}</value>
+  </data>
+  <data name="TotalCostForMaterialAndCountry" xml:space="preserve">
+    <value>You have entered the total costs for {0} in {1} more than once</value>
+  </data>
 </root>

@@ -26,7 +26,7 @@ public class ProducerBillingInstructionsSearchQueryDtoValidator : AbstractValida
                     var invalidStatuses = list.Where(s => !AllowedStatuses.Contains(s)).Distinct().ToList();
                     if (invalidStatuses.Count > 0)
                     {
-                        context.AddFailure($"Status can only contain: {string.Join(", ", AllowedStatuses)}.");
+                        context.AddFailure(string.Format(CommonResources.StatusCanOnlyContain, string.Join(", ", AllowedStatuses)));
                     }
 
                     // No duplicates (case-insensitive)

@@ -254,7 +254,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (calculatorRunDetail == null)
                 {
-                    return new NotFoundObjectResult($"Unable to find Run Id {runId}");
+                    return new NotFoundObjectResult(string.Format(CommonResources.UnableToFindRunId, runId));
                 }
 
                 var calcRun = calculatorRunDetail.Run;
@@ -294,7 +294,7 @@ namespace EPR.Calculator.API.Controllers
                 var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runStatusUpdateDto.RunId);
                 if (calculatorRun == null)
                 {
-                    return new ObjectResult($"Unable to find Run Id {runStatusUpdateDto.RunId}")
+                    return new ObjectResult(string.Format(CommonResources.UnableToFindRunId, runStatusUpdateDto.RunId))
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
@@ -304,14 +304,13 @@ namespace EPR.Calculator.API.Controllers
 
                 if (classification == null)
                 {
-                    return new ObjectResult($"Unable to find Classification Id {runStatusUpdateDto.ClassificationId}")
+                    return new ObjectResult(string.Format(CommonResources.UnableToFindClassificationId, runStatusUpdateDto.ClassificationId))
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
                 if (runStatusUpdateDto.ClassificationId == calculatorRun.CalculatorRunClassificationId)
                 {
-                    return new ObjectResult(
-                            $"RunId {runStatusUpdateDto.RunId} cannot be changed to classification {runStatusUpdateDto.ClassificationId}")
+                    return new ObjectResult(string.Format(CommonResources.RunIdCannotBeChangedToClassification, runStatusUpdateDto.RunId, runStatusUpdateDto.ClassificationId))
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
@@ -377,7 +376,7 @@ namespace EPR.Calculator.API.Controllers
                 SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId && metadata.FileName != null && metadata.FileName.Contains("_Results"));
             if (csvFileMetadata == null)
             {
-                return Results.NotFound($"No CSV file found for Run Id {runId}");
+                return Results.NotFound(string.Format(CommonResources.NoCSVFileFound, runId));
             }
 
             try
@@ -466,19 +465,19 @@ namespace EPR.Calculator.API.Controllers
             // Return no active default paramater settings and lapcap data message
             if (activeDefaultParameterSettings == null && activeLapcapData == null)
             {
-                return $"Default parameter settings and Lapcap data not available for the financial year {financialYear}.";
+                return string.Format(CommonResources.DataNotAvaialbleForFinancialYear, financialYear);
             }
 
             // Return no active default parameter settings found message
             if (activeDefaultParameterSettings == null)
             {
-                return $"Default parameter settings not available for the financial year {financialYear}.";
+                return string.Format(CommonResources.DefaultParameterNotAvailable, financialYear);
             }
 
             // Return no active lapcap data found message
             if (activeLapcapData == null)
             {
-                return $"Lapcap data not available for the financial year {financialYear}.";
+                return string.Format(CommonResources.LapcapDataNotAvailable, financialYear);
             }
 
             // All good, return empty string
@@ -492,7 +491,7 @@ namespace EPR.Calculator.API.Controllers
             // Return calculator run name already exists
             if (calculatorRun > 0)
             {
-                return $"Calculator run name already exists: {runName}";
+                return string.Format(CommonResources.CalculatorRunNameExists, runName);
             }
 
             // All good, return empty string
