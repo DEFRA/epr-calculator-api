@@ -9,7 +9,7 @@ namespace EPR.Calculator.API.Validators
         {
             this.RuleFor(x => x.ParameterYear)
                 .NotEmpty()
-                .WithMessage(CommonResources.YearRequired);
+                .WithMessage(CommonResources.ParameterYearRequired);
             this.RuleFor(x => x.LapcapDataTemplateValues).NotNull()
                 .Must(x => x.Count() == CommonResources.LapcapDataUniqueReferences.Split(',').Length)
                 .WithMessage(string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.DefaultParameterUniqueReferences.Split(',').Length));

@@ -189,7 +189,7 @@
   <data name="DefaultParameterUniqueReferences" xml:space="preserve">
     <value>BADEBT-P,COMC-AL,COMC-FC,COMC-GL,COMC-PC,COMC-PL,COMC-ST,COMC-WD,COMC-OT,COMC-UK,COMC-ENG,COMC-WLS,COMC-SCT,COMC-NIR,LAPC-ENG,LAPC-NIR,LAPC-SCT,LAPC-WLS,LRET-AL,LRET-FC,LRET-GL,LRET-OT,LRET-PC,LRET-PL,LRET-ST,LRET-WD,MATT-AD,MATT-AI,MATT-PD,MATT-PI,SAOC-ENG,SAOC-NIR,SAOC-SCT,SAOC-WLS,SCSC-ENG,SCSC-NIR,SCSC-SCT,SCSC-WLS,TONT-AD,TONT-AI,TONT-PD,TONT-PI</value>
   </data>
-  <data name="YearRequired" xml:space="preserve">
+  <data name="ParameterYearRequired" xml:space="preserve">
     <value>Parameter Year is required</value>
   </data>
   <data name="Local" xml:space="preserve">
@@ -223,12 +223,69 @@
     <value>Blob Uri is not in correct format.</value>
   </data>
   <data name="InvalidFinancialYearFormat" xml:space="preserve">
-    <value>Invalid financial year format. Expected format: YYYY-YY (e.g., 2024-25).</value>
+    <value>Financial year format is invalid. Expected format is 'YYYY-YY'.</value>
   </data>
   <data name="RunIdGreaterThan0" xml:space="preserve">
     <value>RunId should have a value greater than 0</value>
   </data>
   <data name="MaxFileNameSupported" xml:space="preserve">
     <value>256</value>
+  </data>
+  <data name="InvalidFinancialYearProvided" xml:space="preserve">
+    <value>Invalid financial year provided</value>
+  </data>
+  <data name="NoClaimInRequest" xml:space="preserve">
+    <value>No claims in the request</value>
+  </data>
+  <data name="NoDataForSpecifiedYear" xml:space="preserve">
+    <value>No data available for the specified year. Please check the year and try again.</value>
+  </data>
+  <data name="NoDataForCalcualtorName" xml:space="preserve">
+    <value>No data found for this calculator name</value>
+  </data>
+  <data name="NoClassificationsFound" xml:space="preserve">
+    <value>No classifications found.</value>
+  </data>
+  <data name="ServiceBusConnectionStringMissing" xml:space="preserve">
+    <value>Configuration item not found: ServiceBus__ConnectionString</value>
+  </data>
+  <data name="ServiceBusQueueNameMissing" xml:space="preserve">
+    <value>Configuration item not found: ServiceBus__QueueName</value>
+  </data>
+  <data name="NoFilePathProvided" xml:space="preserve">
+    <value>No file path provided.</value>
+  </data>
+  <data name="FinancialYearEmpty" xml:space="preserve">
+    <value>Financial year cannot be null or empty</value>
+  </data>
+  <data name="FinancialYearRequired" xml:space="preserve">
+    <value>Financial year is required.</value>
+  </data>
+  <data name="CalculatorRunNameRequired" xml:space="preserve">
+    <value>Calculator Run Name is Required</value>
+  </data>
+  <data name="OrganisationIdRequired" xml:space="preserve">
+    <value>Organisation Id is required.</value>
+  </data>
+  <data name="StatusRequired" xml:space="preserve">
+    <value>Status is required.</value>
+  </data>
+  <data name="InvalidStatusValue" xml:space="preserve">
+    <value>Invalid status value.</value>
+  </data>
+  <data name="ReasonForRejectionRequired" xml:space="preserve">
+    <value>Reason for rejection is required.</value>
+  </data>
+  <data name="PageNumberGreaterThan1" xml:space="preserve">
+    <value>PageNumber must be 1 or greater.</value>
+  </data>
+  <data name="PageSizeGreaterThan1" xml:space="preserve">
+    <value>PageSize must be at least 1 if provided.</value>
+  </data>
+  <data name="OrganisationIdGreaterThan0" xml:space="preserve">
+    <value>OrganisationId must be greater than 0 if provided.</value>
+  </data>
+  <data name="StatusDuplicateValues" xml:space="preserve">
+    <value>Status cannot contain duplicate values.</value>
   </data>
 </root>

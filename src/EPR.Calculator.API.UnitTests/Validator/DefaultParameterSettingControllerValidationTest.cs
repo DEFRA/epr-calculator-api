@@ -36,14 +36,14 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 ParameterFileName = "TestFileName",
             };
 
-            this.DefaultParameterSettingController.ModelState.AddModelError("ParameterYear", CommonResources.YearRequired);
+            this.DefaultParameterSettingController.ModelState.AddModelError("ParameterYear", CommonResources.ParameterYearRequired);
             this.DefaultParameterSettingController.ModelState.AddModelError("SchemeParameterTemplateValues", string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.DefaultParameterUniqueReferences.Split(',').Length));
             var actionResult = await this.DefaultParameterSettingController.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
 
             var modelErrors = actionResult?.Value as IEnumerable<ModelError>;
             Assert.IsNotNull(modelErrors);
-            Assert.IsTrue(modelErrors.Count(x => x.ErrorMessage == CommonResources.YearRequired) == 1);
+            Assert.IsTrue(modelErrors.Count(x => x.ErrorMessage == CommonResources.ParameterYearRequired) == 1);
             Assert.IsTrue(modelErrors.Count(x => x.ErrorMessage == string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.DefaultParameterUniqueReferences.Split(',').Length)) == 1);
         }
 

@@ -37,7 +37,7 @@ namespace EPR.Calculator.API.Controllers
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
-                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+                return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
             }
 
             var userName = claim.Value;
@@ -68,7 +68,7 @@ namespace EPR.Calculator.API.Controllers
 
                     if (financialYear == null)
                     {
-                        return new ObjectResult("No data available for the specified year. Please check the year and try again.")
+                        return new ObjectResult(CommonResources.NoDataForSpecifiedYear)
                         {
                             StatusCode = StatusCodes.Status400BadRequest,
                         };
@@ -147,7 +147,7 @@ namespace EPR.Calculator.API.Controllers
 
             if (lapcapDataMaster == null)
             {
-                return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
+                return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
             }
 
             try

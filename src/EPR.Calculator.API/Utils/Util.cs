@@ -205,14 +205,14 @@ namespace EPR.Calculator.API.Utils
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                throw new ArgumentException("Financial year cannot be null or empty", nameof(value));
+                throw new ArgumentException(CommonResources.FinancialYearEmpty, nameof(value));
             }
 
             string pattern = @"^\d{4}-\d{2}$";
             TimeSpan regexTimeout = TimeSpan.FromSeconds(1);
             if (!Regex.IsMatch(value, pattern, RegexOptions.None, regexTimeout))
             {
-                throw new FormatException("Financial year format is invalid. Expected format is 'YYYY-YY'.");
+                throw new FormatException(CommonResources.InvalidFinancialYearFormat);
             }
 
             var years = value.Split('-');
@@ -229,7 +229,7 @@ namespace EPR.Calculator.API.Utils
         {
             if (string.IsNullOrWhiteSpace(financialYear))
             {
-                throw new ArgumentException("Financial year cannot be null or empty", nameof(financialYear));
+                throw new ArgumentException(CommonResources.FinancialYearEmpty, nameof(financialYear));
             }
 
             int year = int.Parse(GetFinancialYearAsYYYY(financialYear));

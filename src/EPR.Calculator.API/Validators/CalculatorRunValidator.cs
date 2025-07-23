@@ -7,7 +7,7 @@ namespace EPR.Calculator.API.Validators
     {
         public CalculatorRunValidator()
         {
-            this.RuleFor(x => x).NotEmpty().WithMessage("Calculator Run Name is Required");
+            this.RuleFor(x => x).NotEmpty().WithMessage(CommonResources.CalculatorRunNameRequired);
         }
 
         public ValidationResult ValidateCalculatorRunIds(CalculatorRun calculatorRun)

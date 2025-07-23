@@ -50,7 +50,7 @@ namespace EPR.Calculator.API.Controllers
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
-                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+                return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
             }
 
             var userName = claim.Value;
@@ -107,12 +107,12 @@ namespace EPR.Calculator.API.Controllers
 
                 if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
                 {
-                    throw new ConfigurationErrorsException("Configuration item not found: ServiceBus__ConnectionString");
+                    throw new ConfigurationErrorsException(CommonResources.ServiceBusConnectionStringMissing);
                 }
 
                 if (string.IsNullOrWhiteSpace(serviceBusQueueName))
                 {
-                    throw new ConfigurationErrorsException("Configuration item not found: ServiceBus__QueueName");
+                    throw new ConfigurationErrorsException(CommonResources.ServiceBusQueueNameMissing);
                 }
 
                 // Get active default parameter settings master
@@ -191,7 +191,7 @@ namespace EPR.Calculator.API.Controllers
 
             if (string.IsNullOrWhiteSpace(request.FinancialYear))
             {
-                return new ObjectResult("Invalid financial year provided") { StatusCode = StatusCodes.Status400BadRequest };
+                return new ObjectResult(CommonResources.InvalidFinancialYearProvided) { StatusCode = StatusCodes.Status400BadRequest };
             }
 
             try
@@ -215,7 +215,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (calculatorRuns.Count == 0)
                 {
-                    return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
+                    return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
                 }
 
                 return new ObjectResult(calculatorRuns) { StatusCode = StatusCodes.Status200OK };
@@ -280,7 +280,7 @@ namespace EPR.Calculator.API.Controllers
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
-                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+                return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
             }
 
             var userName = claim.Value;
@@ -349,7 +349,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (calculatorRun <= 0)
                 {
-                    return new ObjectResult("No data found for this calculator name") { StatusCode = StatusCodes.Status404NotFound };
+                    return new ObjectResult(CommonResources.NoDataForCalcualtorName) { StatusCode = StatusCodes.Status404NotFound };
                 }
 
                 return new ObjectResult(StatusCodes.Status200OK);
@@ -441,7 +441,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (!classifications.Any())
                 {
-                    return this.NotFound("No classifications found.");
+                    return this.NotFound(CommonResources.NoClassificationsFound);
                 }
 
                 var runDto = FinancialYearClassificationsMapper.Map(request.FinancialYear, classifications);

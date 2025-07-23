@@ -43,7 +43,7 @@ namespace EPR.Calculator.API.Controllers
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
-                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+                return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
             }
 
             var userName = claim.Value;
@@ -123,7 +123,7 @@ namespace EPR.Calculator.API.Controllers
                 var financialYear = await this.context.FinancialYears.Where(x => x.Name == parameterYear).SingleOrDefaultAsync();
                 if (financialYear == null)
                 {
-                    return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status400BadRequest };
+                    return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
                 }
 
                 var currentDefaultSetting = await this.context.DefaultParameterSettings
@@ -131,7 +131,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (currentDefaultSetting == null)
                 {
-                    return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
+                    return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
                 }
 
                 var pramSettingDetails = await this.context.DefaultParameterSettingDetail

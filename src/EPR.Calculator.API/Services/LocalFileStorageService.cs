@@ -22,7 +22,7 @@ namespace EPR.Calculator.API.Services
         {
             if (string.IsNullOrWhiteSpace(blobUri))
             {
-                return Task.FromResult(Results.NotFound("No file path provided."));
+                return Task.FromResult(Results.NotFound(CommonResources.NoFilePathProvided));
             }
 
             // Normalize and check if blobUri already ends with fileName

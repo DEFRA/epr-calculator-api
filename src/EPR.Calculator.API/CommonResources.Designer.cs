@@ -115,6 +115,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Calculator Run Name is Required.
+        /// </summary>
+        public static string CalculatorRunNameRequired {
+            get {
+                return ResourceManager.GetString("CalculatorRunNameRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Container name is missing in configuration..
         /// </summary>
         public static string ContainerNameMissingError {
@@ -160,6 +169,24 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Financial year cannot be null or empty.
+        /// </summary>
+        public static string FinancialYearEmpty {
+            get {
+                return ResourceManager.GetString("FinancialYearEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Financial year is required..
+        /// </summary>
+        public static string FinancialYearRequired {
+            get {
+                return ResourceManager.GetString("FinancialYearRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Generating billing file for this &apos;{0}&apos; run id already requested..
         /// </summary>
         public static string GenerateBillingFileAlreadyRequest {
@@ -187,11 +214,20 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid financial year format. Expected format: YYYY-YY (e.g., 2024-25)..
+        ///   Looks up a localized string similar to Financial year format is invalid. Expected format is &apos;YYYY-YY&apos;..
         /// </summary>
         public static string InvalidFinancialYearFormat {
             get {
                 return ResourceManager.GetString("InvalidFinancialYearFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid financial year provided.
+        /// </summary>
+        public static string InvalidFinancialYearProvided {
+            get {
+                return ResourceManager.GetString("InvalidFinancialYearProvided", resourceCulture);
             }
         }
         
@@ -219,6 +255,15 @@ namespace EPR.Calculator.API {
         public static string InvalidRunStatusForAcceptAll {
             get {
                 return ResourceManager.GetString("InvalidRunStatusForAcceptAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid status value..
+        /// </summary>
+        public static string InvalidStatusValue {
+            get {
+                return ResourceManager.GetString("InvalidStatusValue", resourceCulture);
             }
         }
         
@@ -268,6 +313,51 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No claims in the request.
+        /// </summary>
+        public static string NoClaimInRequest {
+            get {
+                return ResourceManager.GetString("NoClaimInRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No classifications found..
+        /// </summary>
+        public static string NoClassificationsFound {
+            get {
+                return ResourceManager.GetString("NoClassificationsFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data found for this calculator name.
+        /// </summary>
+        public static string NoDataForCalcualtorName {
+            get {
+                return ResourceManager.GetString("NoDataForCalcualtorName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data available for the specified year. Please check the year and try again..
+        /// </summary>
+        public static string NoDataForSpecifiedYear {
+            get {
+                return ResourceManager.GetString("NoDataForSpecifiedYear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No file path provided..
+        /// </summary>
+        public static string NoFilePathProvided {
+            get {
+                return ResourceManager.GetString("NoFilePathProvided", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Classification status is not valid for this &apos;{0}&apos; run id to perform requested operation..
         /// </summary>
         public static string NotAValidClassificationStatus {
@@ -282,6 +372,51 @@ namespace EPR.Calculator.API {
         public static string OctetStream {
             get {
                 return ResourceManager.GetString("OctetStream", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OrganisationId must be greater than 0 if provided..
+        /// </summary>
+        public static string OrganisationIdGreaterThan0 {
+            get {
+                return ResourceManager.GetString("OrganisationIdGreaterThan0", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Organisation Id is required..
+        /// </summary>
+        public static string OrganisationIdRequired {
+            get {
+                return ResourceManager.GetString("OrganisationIdRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PageNumber must be 1 or greater..
+        /// </summary>
+        public static string PageNumberGreaterThan1 {
+            get {
+                return ResourceManager.GetString("PageNumberGreaterThan1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PageSize must be at least 1 if provided..
+        /// </summary>
+        public static string PageSizeGreaterThan1 {
+            get {
+                return ResourceManager.GetString("PageSizeGreaterThan1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parameter Year is required.
+        /// </summary>
+        public static string ParameterYearRequired {
+            get {
+                return ResourceManager.GetString("ParameterYearRequired", resourceCulture);
             }
         }
         
@@ -309,6 +444,15 @@ namespace EPR.Calculator.API {
         public static string ProducerBillingInstructionsDefaultPageSize {
             get {
                 return ResourceManager.GetString("ProducerBillingInstructionsDefaultPageSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reason for rejection is required..
+        /// </summary>
+        public static string ReasonForRejectionRequired {
+            get {
+                return ResourceManager.GetString("ReasonForRejectionRequired", resourceCulture);
             }
         }
         
@@ -385,20 +529,47 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Configuration item not found: ServiceBus__ConnectionString.
+        /// </summary>
+        public static string ServiceBusConnectionStringMissing {
+            get {
+                return ResourceManager.GetString("ServiceBusConnectionStringMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Configuration item not found: ServiceBus__QueueName.
+        /// </summary>
+        public static string ServiceBusQueueNameMissing {
+            get {
+                return ResourceManager.GetString("ServiceBusQueueNameMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Status cannot contain duplicate values..
+        /// </summary>
+        public static string StatusDuplicateValues {
+            get {
+                return ResourceManager.GetString("StatusDuplicateValues", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Status is required..
+        /// </summary>
+        public static string StatusRequired {
+            get {
+                return ResourceManager.GetString("StatusRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to RpdStatus,PrepareCalcResults,Transpose.
         /// </summary>
         public static string TimeoutPolicies {
             get {
                 return ResourceManager.GetString("TimeoutPolicies", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Parameter Year is required.
-        /// </summary>
-        public static string YearRequired {
-            get {
-                return ResourceManager.GetString("YearRequired", resourceCulture);
             }
         }
     }

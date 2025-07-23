@@ -45,7 +45,7 @@ namespace EPR.Calculator.API.Controllers
                 var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
                 if (claim == null)
                 {
-                    return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+                    return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
                 }
 
                 var userName = claim.Value;
@@ -151,7 +151,7 @@ namespace EPR.Calculator.API.Controllers
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
-                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+                return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
             }
 
             var userName = claim.Value;

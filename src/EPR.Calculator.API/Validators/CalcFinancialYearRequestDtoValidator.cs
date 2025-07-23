@@ -9,7 +9,7 @@ namespace EPR.Calculator.API.Validators
         {
             RuleFor(x => x.FinancialYear)
                 .NotEmpty()
-                .WithMessage("Financial year is required.")
+                .WithMessage(CommonResources.FinancialYearRequired)
                 .Matches(@"^\d{4}-\d{2}$")
                 .WithMessage(CommonResources.InvalidFinancialYearFormat);
         }
