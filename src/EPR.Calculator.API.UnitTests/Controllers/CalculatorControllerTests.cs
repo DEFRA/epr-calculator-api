@@ -514,8 +514,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var expectedClassifications = new List<CalculatorRunClassificationDto>
             {
-                new CalculatorRunClassificationDto{Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)},
-                new CalculatorRunClassificationDto{Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)},
+                new CalculatorRunClassificationDto {Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description) },
+                new CalculatorRunClassificationDto {Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)},
             };
 
             // Act
@@ -574,7 +574,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Returns(new ValidationResultDto<ErrorDto>
                 {
                     IsInvalid = true,
-                    Errors = new List<ErrorDto> { new ErrorDto { Message = "Invalid financial year format." } }
+                    Errors = new List<ErrorDto> { new ErrorDto { Message = "Invalid financial year format." } },
                 });
 
             var controller = new CalculatorController(

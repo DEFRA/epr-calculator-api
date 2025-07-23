@@ -92,7 +92,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void PutCalculatorRunStatusTest_Invalid_Classification_Id()
         {
             var runId = 1;
-            var invalidClassificationId = 10;
+            var invalidClassificationId = 16;
             var date = DateTime.Now;
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
