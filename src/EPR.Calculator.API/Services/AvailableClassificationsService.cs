@@ -45,7 +45,7 @@ public class AvailableClassificationsService(ApplicationDBContext context, ILogg
 
     private static bool IsDesignatedButIncomplete(List<RunClassificationStatus> currentClassifications)
     {
-        return currentClassifications.All(c => c.HasFlag(RunClassificationStatus.Designated) && !c.HasFlag(RunClassificationStatus.Complete));
+        return currentClassifications.Any(c => c.HasFlag(RunClassificationStatus.Designated) && !c.HasFlag(RunClassificationStatus.Complete));
     }
 
     private static bool HasNeitherFinalRunNorFinalRecalculationRun(List<RunClassificationStatus> currentClassifications)
