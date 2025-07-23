@@ -13,7 +13,7 @@ public class AvailableClassificationsService(ApplicationDBContext context, ILogg
     {
         try
         {
-            List<string> validStatuses = await this.DetermineAvailableClassificationsAsync(request, cancellationToken);
+            List<RunClassification> validStatuses = await this.DetermineAvailableClassificationsAsync(request, cancellationToken);
             if (validStatuses.Count == 0)
             {
                 return new();
@@ -26,8 +26,8 @@ public class AvailableClassificationsService(ApplicationDBContext context, ILogg
             return validStatuses
                 .Join(
                     allClassifications,
-                    status => status,
-                    classification => classification.Status,
+                    status => (int)status,
+                    classification => classification.Id,
                     (status, classification) => classification)
                 .ToList();
         }
@@ -67,7 +67,7 @@ public class AvailableClassificationsService(ApplicationDBContext context, ILogg
             && currentClassifications.Any(c => c == RunClassificationStatus.FINAL_RUN_COMPLETED);
     }
 
-    private async Task<List<string>> DetermineAvailableClassificationsAsync(CalcFinancialYearRequestDto request, CancellationToken cancellationToken)
+    private async Task<List<RunClassification>> DetermineAvailableClassificationsAsync(CalcFinancialYearRequestDto request, CancellationToken cancellationToken)
     {
         List<RunClassificationStatus> currentClassifications = await this.GetCurrentClassifications(request, cancellationToken);
 
@@ -75,8 +75,8 @@ public class AvailableClassificationsService(ApplicationDBContext context, ILogg
         {
             return new()
             {
-                RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)!,
-                RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                RunClassification.INITIAL_RUN,
+                RunClassification.TEST_RUN,
             };
         }
 
@@ -84,7 +84,7 @@ public class AvailableClassificationsService(ApplicationDBContext context, ILogg
         {
             return new()
             {
-                RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                RunClassification.TEST_RUN,
             };
         }
 
@@ -92,10 +92,10 @@ public class AvailableClassificationsService(ApplicationDBContext context, ILogg
         {
             return new()
             {
-                RunClassification.INTERIM_RECALCULATION_RUN.AsString(EnumFormat.Description)!,
-                RunClassification.FINAL_RECALCULATION_RUN.AsString(EnumFormat.Description)!,
-                RunClassification.FINAL_RUN.AsString(EnumFormat.Description)!,
-                RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                RunClassification.INTERIM_RECALCULATION_RUN,
+                RunClassification.FINAL_RECALCULATION_RUN,
+                RunClassification.FINAL_RUN,
+                RunClassification.TEST_RUN,
             };
         }
 
@@ -103,9 +103,9 @@ public class AvailableClassificationsService(ApplicationDBContext context, ILogg
         {
             return new()
             {
-                RunClassification.INTERIM_RECALCULATION_RUN.AsString(EnumFormat.Description)!,
-                RunClassification.FINAL_RUN.AsString(EnumFormat.Description)!,
-                RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                RunClassification.INTERIM_RECALCULATION_RUN,
+                RunClassification.FINAL_RUN,
+                RunClassification.TEST_RUN,
             };
         }
 
@@ -113,8 +113,8 @@ public class AvailableClassificationsService(ApplicationDBContext context, ILogg
         {
             return new()
             {
-                RunClassification.INTERIM_RECALCULATION_RUN.AsString(EnumFormat.Description)!,
-                RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                RunClassification.INTERIM_RECALCULATION_RUN,
+                RunClassification.TEST_RUN,
             };
         }
 
