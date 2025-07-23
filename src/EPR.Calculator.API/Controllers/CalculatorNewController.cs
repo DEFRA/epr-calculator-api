@@ -34,13 +34,13 @@ namespace EPR.Calculator.API.Controllers
             ApplicationDBContext context,
             ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
             IBillingFileService billingFileService,
-            IOrgAndPomWrapper Wrapper,
+            IOrgAndPomWrapper wrapper,
             TelemetryClient telemetryClient)
         {
             this.context = context;
             this.calculatorRunStatusDataValidator = calculatorRunStatusDataValidator;
             this.billingFileService = billingFileService;
-            this.Wrapper = Wrapper;
+            this.Wrapper = wrapper;
             this.telemetryClient = telemetryClient;
         }
 
@@ -216,7 +216,7 @@ namespace EPR.Calculator.API.Controllers
                         });
 
                         this.context.CalculatorRuns.Update(calculatorRun);
-                        await this.context.SaveChangesAsync();
+                        await this.context.SaveChangesAsync(cancellationToken);
                         var result = await this.billingFileService.MoveBillingJsonFile(runId, cancellationToken);
                         if (!result)
                         {
