@@ -17,12 +17,7 @@ GO
 IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'created_by', N'status') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
     SET IDENTITY_INSERT [calculator_run_classification] ON;
 INSERT INTO [calculator_run_classification] ([id], [created_by], [status])
-VALUES (6, @SystemUser, N'DELETED'),
-(7, @SystemUser, N'INITIAL RUN COMPLETED'),
-(8, @TestUser, N'INITIAL RUN'),
-(9, @TestUser, N'INTERIM RE-CALCULATION RUN'),
-(10, @TestUser, N'FINAL RUN'),
-(11, @TestUser, N'FINAL RE-CALCULATION RUN'),
+VALUES 
 (12, @SystemUser, N'INTERIM RE-CALCULATION RUN COMPLETED'),
 (13, @SystemUser, N'FINAL RE-CALCULATION RUN COMPLETED'),
 (14, @SystemUser, N'FINAL RUN COMPLETED');
