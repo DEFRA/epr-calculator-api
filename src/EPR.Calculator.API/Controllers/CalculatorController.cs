@@ -422,17 +422,38 @@ namespace EPR.Calculator.API.Controllers
                     return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
                 }
 
-                var validationResult = this.validator.Validate(request);
+                var initialRun = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description);
+                var testRun = RunClassification.TEST_RUN.AsString(EnumFormat.Description);
+
+                if (initialRun == null || testRun == null)
+                {
+                    return this.BadRequest("Invalid run classifications.");
+                }
+
+                var validationResult = await this.validator.Validate(request);
                 if (validationResult.IsInvalid)
                 {
                     return this.BadRequest(validationResult.Errors);
                 }
 
-                var validStatuses = new[]
+                var anyInitialRunExists = await this.context.CalculatorRuns.AnyAsync(x =>
+                    x.FinancialYearId == request.FinancialYear
+                    &&
+                    (x.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN
+                    ||
+                    x.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED));
+
+                var validStatuses = new List<string>();
+
+                if (anyInitialRunExists)
                 {
-                    RunClassification.INITIAL_RUN.AsString(EnumFormat.Description),
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description),
-                };
+                    validStatuses.Add(testRun);
+                }
+                else
+                {
+                    validStatuses.AddRange(
+                        [initialRun, testRun]);
+                }
 
                 var classifications = await this.context.CalculatorRunClassifications
                     .Where(c => validStatuses.Contains(c.Status))
@@ -446,7 +467,7 @@ namespace EPR.Calculator.API.Controllers
                 var runDto = FinancialYearClassificationsMapper.Map(request.FinancialYear, classifications);
                 return this.Ok(runDto);
             }
-            catch (Exception exception)
+            catch (Exception)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
             }
