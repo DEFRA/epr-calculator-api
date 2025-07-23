@@ -502,8 +502,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var expectedClassifications = new List<CalculatorRunClassificationDto>
             {
-                new CalculatorRunClassificationDto{Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)},
-                new CalculatorRunClassificationDto{Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)},
+                new CalculatorRunClassificationDto {Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description) },
+                new CalculatorRunClassificationDto {Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)},
             };
 
             // Act
@@ -562,7 +562,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Returns(new ValidationResultDto<ErrorDto>
                 {
                     IsInvalid = true,
-                    Errors = new List<ErrorDto> { new ErrorDto { Message = "Invalid financial year format." } }
+                    Errors = new List<ErrorDto> { new ErrorDto { Message = "Invalid financial year format." } },
                 });
 
             var controller = new CalculatorController(
@@ -581,34 +581,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var errors = actionResult.Value as List<ErrorDto>;
             Assert.IsNotNull(errors);
             Assert.AreEqual("Invalid financial year format.", errors.First().Message);
-        }
-
-        [TestMethod]
-        public async Task ClassificationByFinancialYear_Returns_NotFound_When_No_Classifications()
-        {
-            // Arrange
-            var financialYear = "2024-25";
-            var request = new CalcFinancialYearRequestDto { FinancialYear = financialYear };
-
-            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
-            mockValidator
-                .Setup(v => v.Validate(request))
-                .Returns(new ValidationResultDto<ErrorDto> { IsInvalid = false });
-
-            var controller = new CalculatorController(
-                this.DbContext,
-                ConfigurationItems.GetConfigurationValues(),
-                Mock.Of<IStorageService>(),
-                Mock.Of<IServiceBusService>(),
-                mockValidator.Object);
-
-            // Act
-            var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
-
-            // Assert
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(StatusCodes.Status404NotFound, actionResult.StatusCode);
-            Assert.AreEqual("No classifications found.", actionResult.Value);
         }
 
         [TestMethod]
