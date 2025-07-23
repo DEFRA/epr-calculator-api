@@ -499,7 +499,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .ReturnsAsync(new List<CalculatorRunClassification>
                 {
                     new CalculatorRunClassification { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)! },
-                    new CalculatorRunClassification { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)!},
+                    new CalculatorRunClassification { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)! },
                 });
 
             var mockDbContext = MockDbContextForCalculatorRunClassifications();
