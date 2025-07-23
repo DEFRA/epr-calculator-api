@@ -37,7 +37,7 @@ namespace EPR.Calculator.API.Validators
 
                 if (matchingTemplates.Count() > 1)
                 {
-                    var errorMessage = $"Expecting only One with Parameter Type {Util.FormattedErrorForMoreThanOneUniqueRefs(defaultParameterTemplateMaster)}";
+                    var errorMessage = string.Format(CommonResources.ExpectingParameterType, Util.FormattedErrorForMoreThanOneUniqueRefs(defaultParameterTemplateMaster));
                     var error = Util.CreateErrorDto(defaultParameterTemplateMaster, errorMessage);
                     errors.Add(error);
                 }

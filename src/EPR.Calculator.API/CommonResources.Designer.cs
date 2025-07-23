@@ -142,6 +142,24 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to can only include numbers, commas and decimal points.
+        /// </summary>
+        public static string CanOnlyIncludeNumbers {
+            get {
+                return ResourceManager.GetString("CanOnlyIncludeNumbers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to can only include numbers, commas, decimal points and a percentage symbol (%).
+        /// </summary>
+        public static string CanOnlyIncudeNumbersAndPercentage {
+            get {
+                return ResourceManager.GetString("CanOnlyIncudeNumbersAndPercentage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Container name is missing in configuration..
         /// </summary>
         public static string ContainerNameMissingError {
@@ -196,11 +214,56 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enter the {0} for {1}.
+        /// </summary>
+        public static string EnterDefaultParameterType {
+            get {
+                return ResourceManager.GetString("EnterDefaultParameterType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter the {0} decrease.
+        /// </summary>
+        public static string EnterTheDecrease {
+            get {
+                return ResourceManager.GetString("EnterTheDecrease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter the {0} increase.
+        /// </summary>
+        public static string EnterTheIncrease {
+            get {
+                return ResourceManager.GetString("EnterTheIncrease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enter the total costs for {0} in {1}.
         /// </summary>
         public static string EnterTotalCosts {
             get {
                 return ResourceManager.GetString("EnterTotalCosts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Exception copying blob for: {0} with exception :{1}.
+        /// </summary>
+        public static string ExceptionCopyingBlob {
+            get {
+                return ResourceManager.GetString("ExceptionCopyingBlob", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expecting only One with Parameter Type {0}.
+        /// </summary>
+        public static string ExpectingParameterType {
+            get {
+                return ResourceManager.GetString("ExpectingParameterType", resourceCulture);
             }
         }
         
@@ -255,6 +318,15 @@ namespace EPR.Calculator.API {
         public static string IncorrectBlobUriFormat {
             get {
                 return ResourceManager.GetString("IncorrectBlobUriFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 500InternalServerError Exception :{0}.
+        /// </summary>
+        public static string InternalServerErrorException {
+            get {
+                return ResourceManager.GetString("InternalServerErrorException", resourceCulture);
             }
         }
         
@@ -367,6 +439,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Lapcap File Name in lapcapData API :{0}.
+        /// </summary>
+        public static string LapcapFileName {
+            get {
+                return ResourceManager.GetString("LapcapFileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to local.
         /// </summary>
         public static string Local {
@@ -390,6 +471,15 @@ namespace EPR.Calculator.API {
         public static string MaxFileNameSupported {
             get {
                 return ResourceManager.GetString("MaxFileNameSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to must be between {0} and {1} .
+        /// </summary>
+        public static string MustBeBetween {
+            get {
+                return ResourceManager.GetString("MustBeBetween", resourceCulture);
             }
         }
         
@@ -511,11 +601,38 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 1.Parameter File Name in DefaultParameter API :{0}.
+        ///   Looks up a localized string similar to and Parameter Category {0} .
+        /// </summary>
+        public static string ParameterCategory {
+            get {
+                return ResourceManager.GetString("ParameterCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parameter File Name in API :{0}.
         /// </summary>
         public static string ParameterFileName {
             get {
                 return ResourceManager.GetString("ParameterFileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parameter Type {0} .
+        /// </summary>
+        public static string ParameterType {
+            get {
+                return ResourceManager.GetString("ParameterType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  Parameter Unique ref {0}.
+        /// </summary>
+        public static string ParameterUniqueRef {
+            get {
+                return ResourceManager.GetString("ParameterUniqueRef", resourceCulture);
             }
         }
         
@@ -525,6 +642,24 @@ namespace EPR.Calculator.API {
         public static string ParameterYearRequired {
             get {
                 return ResourceManager.GetString("ParameterYearRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} percentage decrease .
+        /// </summary>
+        public static string PercentageDecrease {
+            get {
+                return ResourceManager.GetString("PercentageDecrease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} percentage increase .
+        /// </summary>
+        public static string PercentageIncrease {
+            get {
+                return ResourceManager.GetString("PercentageIncrease", resourceCulture);
             }
         }
         
@@ -768,6 +903,15 @@ namespace EPR.Calculator.API {
         public static string UnableToMoveBillingFile {
             get {
                 return ResourceManager.GetString("UnableToMoveBillingFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Validation errors :{0}.
+        /// </summary>
+        public static string ValidationErrors {
+            get {
+                return ResourceManager.GetString("ValidationErrors", resourceCulture);
             }
         }
     }

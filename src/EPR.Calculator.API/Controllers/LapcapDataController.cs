@@ -33,7 +33,7 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateLapcapDataDto request)
         {
-            this._telemetryClient.TrackTrace($"1.Lapcap File Name in lapcapData API :{request.LapcapFileName}");
+            this._telemetryClient.TrackTrace(string.Format(CommonResources.LapcapFileName, request.LapcapFileName));
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
@@ -49,8 +49,8 @@ namespace EPR.Calculator.API.Controllers
             var validationResult = this.validator.Validate(request);
             if (validationResult.IsInvalid)
             {
-                this._telemetryClient.TrackTrace($"2.Lapcap File Name in lapcapData API :{request.LapcapFileName}");
-                this._telemetryClient.TrackTrace($"3.Validation errors :{validationResult.Errors}");
+                this._telemetryClient.TrackTrace(string.Format(CommonResources.LapcapFileName, request.LapcapFileName));
+                this._telemetryClient.TrackTrace(string.Format(CommonResources.InternalServerErrorException, validationResult.Errors));
                 return this.BadRequest(validationResult.Errors);
             }
 
@@ -104,7 +104,7 @@ namespace EPR.Calculator.API.Controllers
                 catch (Exception exception)
                 {
                     await transaction.RollbackAsync();
-                    this._telemetryClient.TrackTrace($"4.500InternalServerError Exception :{exception}");
+                    this._telemetryClient.TrackTrace(string.Format(CommonResources.InternalServerErrorException, exception));
                     return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
             }

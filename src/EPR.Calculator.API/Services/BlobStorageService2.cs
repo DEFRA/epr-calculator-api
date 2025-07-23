@@ -55,7 +55,7 @@ namespace EPR.Calculator.API.Services
             }
             catch (Exception e)
             {
-                this.telemetryClient.TrackTrace($"Exception copying blob for: {blobName} with exception :{e.Message}");
+                this.telemetryClient.TrackTrace(string.Format(CommonResources.ExceptionCopyingBlob, blobName, e.Message));
                 return false;
             }
         }
@@ -71,7 +71,7 @@ namespace EPR.Calculator.API.Services
             }
             catch (Exception e)
             {
-                this.telemetryClient.TrackTrace($"Exception deleting blob for: {blobName} with exception :{e.Message}");
+                this.telemetryClient.TrackTrace(string.Format(CommonResources.ExceptionCopyingBlob, blobName, e.Message));
                 return false;
             }
         }
