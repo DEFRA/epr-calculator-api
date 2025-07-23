@@ -67,6 +67,10 @@ namespace EPR.Calculator.API.Data.Migrations
                        .HasColumnType("bit")
                        .HasDefaultValue(false);
 
+                    b.Property<bool?>("IsBillingFileGenerating")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_billing_file_generating");
+
                     b.Property<int?>("LapcapDataMasterId")
                         .HasColumnType("int")
                         .HasColumnName("lapcap_data_master_id");
