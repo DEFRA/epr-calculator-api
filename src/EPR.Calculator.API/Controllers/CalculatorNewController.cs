@@ -23,7 +23,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly IBillingFileService billingFileService;
         private readonly TelemetryClient telemetryClient;
 
-        private IInvoiceDetailsWrapper Wrapper { get; init; }
+        private IOrgAndPomWrapper Wrapper { get; init; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CalculatorNewController"/> class.
@@ -34,13 +34,13 @@ namespace EPR.Calculator.API.Controllers
             ApplicationDBContext context,
             ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
             IBillingFileService billingFileService,
-            IInvoiceDetailsWrapper invoiceDetailsWrapper,
+            IOrgAndPomWrapper Wrapper,
             TelemetryClient telemetryClient)
         {
             this.context = context;
             this.calculatorRunStatusDataValidator = calculatorRunStatusDataValidator;
             this.billingFileService = billingFileService;
-            this.Wrapper = invoiceDetailsWrapper;
+            this.Wrapper = Wrapper;
             this.telemetryClient = telemetryClient;
         }
 

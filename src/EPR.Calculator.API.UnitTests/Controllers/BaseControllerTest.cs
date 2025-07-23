@@ -30,7 +30,7 @@
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(this.DbContext);
             this.LapcapDataController = new LapcapDataController(this.DbContext, lapcapDataValidator, new TelemetryClient());
 
-            this.Wrapper = new Mock<IInvoiceDetailsWrapper>().Object;
+            this.Wrapper = new Mock<IOrgAndPomWrapper>().Object;
             var mockStorageService = new Mock<IStorageService>();
             var mockServiceBusService = new Mock<IServiceBusService>();
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
@@ -61,7 +61,7 @@
 
         protected CalculatorController CalculatorController { get; set; }
 
-        protected IInvoiceDetailsWrapper Wrapper { get; set; }
+        protected IOrgAndPomWrapper Wrapper { get; set; }
 
         public static IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
         {

@@ -24,7 +24,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         private readonly Mock<IBillingFileService> mockBillingFileService;
         private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
-        private readonly Mock<IInvoiceDetailsWrapper> mockInvoiceDetailsWrapper;
+        private readonly Mock<IOrgAndPomWrapper> mockWrapper;
         private ApplicationDBContext context;
         private CalculatorNewController controller;
 
@@ -39,10 +39,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             this.mockBillingFileService = new Mock<IBillingFileService>();
-            this.mockInvoiceDetailsWrapper = new Mock<IInvoiceDetailsWrapper>();
+            this.mockWrapper = new Mock<IOrgAndPomWrapper>();
             var config = TelemetryConfiguration.CreateDefault();
             var telemetryClient = new TelemetryClient(config);
-            this.controller = new CalculatorNewController(this.context, this.mockValidator.Object, this.mockBillingFileService.Object, this.mockInvoiceDetailsWrapper.Object, telemetryClient);
+            this.controller = new CalculatorNewController(this.context, this.mockValidator.Object, this.mockBillingFileService.Object, this.mockWrapper.Object, telemetryClient);
             this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Status = "DELETED",
