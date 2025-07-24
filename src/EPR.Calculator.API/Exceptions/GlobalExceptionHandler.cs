@@ -36,7 +36,7 @@ namespace EPR.Calculator.API.Exceptions
                 Title = CommonResources.AnErrorProcessingYourRequest,
                 exception.Message,
                 Instance = httpContext.Request.Path,
-                Detail = this.env.IsDevelopment() || this.env.EnvironmentName?.ToLower() == CommonResources.Local.ToLower() ? exception.StackTrace : null,
+                Detail = this.env.IsDevelopment() || this.env.EnvironmentName.Equals(CommonResources.Local, StringComparison.OrdinalIgnoreCase) ? exception.StackTrace : null,
             };
 
             var errorJson = JsonSerializer.Serialize(errorResponse, Options);

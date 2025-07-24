@@ -39,7 +39,7 @@ builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 builder.Services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatusDataValidator>();
 builder.Services.AddScoped<IBillingFileService, BillingFileService>();
 
-if (environmentName == CommonResources.Local.ToLower())
+if (environmentName.Equals(CommonResources.Local, StringComparison.OrdinalIgnoreCase))
 {
     builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
     builder.Services.AddScoped<IBlobStorageService2, LocalFileStorageService2>();
@@ -150,7 +150,7 @@ foreach (string policy in CommonResources.TimeoutPolicies.Split(','))
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || environmentName == CommonResources.Local.ToLower())
+if (app.Environment.IsDevelopment() || environmentName.Equals(CommonResources.Local, StringComparison.OrdinalIgnoreCase))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
