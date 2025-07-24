@@ -1,27 +1,22 @@
+using System.Security.Claims;
+using System.Security.Principal;
+using AutoFixture;
+using EnumsNET;
+using EPR.Calculator.API.Controllers;
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Services;
+using EPR.Calculator.API.UnitTests.Helpers;
+using EPR.Calculator.API.Validators;
+using FluentAssertions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
-    using System;
-    using System.Security.Claims;
-    using System.Security.Principal;
-    using System.Threading.Tasks;
-    using AutoFixture;
-    using EnumsNET;
-    using EPR.Calculator.API.Controllers;
-    using EPR.Calculator.API.Data;
-    using EPR.Calculator.API.Data.DataModels;
-    using EPR.Calculator.API.Dtos;
-    using EPR.Calculator.API.Enums;
-    using EPR.Calculator.API.Services;
-    using EPR.Calculator.API.UnitTests.Helpers;
-    using EPR.Calculator.API.Validators;
-    using FluentAssertions;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Azure.Amqp.Transaction;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Moq;
-
     [TestClass]
     public class CalculatorControllerTests : BaseControllerTest
     {
@@ -482,6 +477,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task ClassificationByFinancialYear_Returns_Options_For_Valid_FinancialYear()
         {
+            var initialRun = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description);
+            var testRun = RunClassification.TEST_RUN.AsString(EnumFormat.Description);
+
+            if (initialRun == null || testRun == null)
+            {
+                Assert.Fail("Run classifications Enums not loaded");
+            }
+
             // Arrange
             var financialYear = "2024-25";
             var request = new CalcFinancialYearRequestDto { FinancialYear = financialYear };
@@ -489,12 +492,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
             mockValidator
                 .Setup(v => v.Validate(request))
-                .Returns(new ValidationResultDto<ErrorDto> { IsInvalid = false });
+                .ReturnsAsync(new ValidationResultDto<ErrorDto> { IsInvalid = false });
 
-            var mockDbContext = MockDbContextForCalculatorRunClassifications();
+            // Ensure only the required classifications exist for this test
+            this.DbContext.CalculatorRunClassifications.RemoveRange(this.DbContext.CalculatorRunClassifications);
+            this.DbContext.SaveChanges();
 
-            var individualCalcController = new CalculatorController(
-                mockDbContext.Object,
+            this.DbContext.CalculatorRunClassifications.AddRange(
+                new CalculatorRunClassification { Id = (int)RunClassification.INITIAL_RUN, Status = initialRun, CreatedBy = "Test user" },
+                new CalculatorRunClassification { Id = (int)RunClassification.TEST_RUN, Status = testRun, CreatedBy = "Test user" });
+            this.DbContext.SaveChanges();
+
+            var controller = new CalculatorController(
+                this.DbContext,
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
@@ -507,7 +517,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
 
             // Act
-            var actionResult = await individualCalcController.ClassificationByFinancialYear(request) as ObjectResult;
+            var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(actionResult);
@@ -516,37 +526,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(result);
             var typeToAssert = typeof(CalculatorRunClassificationDto);
             Assert.IsInstanceOfType(expectedClassifications[0], typeToAssert);
-            Assert.IsInstanceOfType(result.Classifications[1], typeToAssert);
+            result.Classifications[0].Should().BeAssignableTo<CalculatorRunClassificationDto>();
             result.Classifications.Should().BeEquivalentTo(expectedClassifications);
             Assert.IsTrue(financialYear == result.FinancialYear);
-        }
-
-        private static Mock<ApplicationDBContext> MockDbContextForCalculatorRunClassifications()
-        {
-            var mockClassifications = new List<CalculatorRunClassification>
-            {
-                new CalculatorRunClassification { Id = 1, Status = "IN THE QUEUE", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 2, Status = "RUNNING", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 3, Status = "UNCLASSIFIED", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 4, Status = "TEST RUN", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 5, Status = "ERROR", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 6, Status = "DELETED", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 7, Status = "INITIAL RUN COMPLETED", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 8, Status = "INITIAL RUN", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 9, Status = "INTERIM RE-CALCULATION RUN", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 10, Status = "FINAL RUN", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 11, Status = "FINAL RE-CALCULATION RUN", CreatedBy = "Test user" },
-            }.AsQueryable();
-            var mockDbContext = new Mock<ApplicationDBContext>();
-            var mockClassificationsDbSet = new Mock<DbSet<CalculatorRunClassification>>();
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.Provider).Returns(new TestAsyncQueryProvider<CalculatorRunClassification>(mockClassifications.Provider));
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.Expression).Returns(mockClassifications.Expression);
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.ElementType).Returns(mockClassifications.ElementType);
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.GetEnumerator()).Returns(mockClassifications.GetEnumerator());
-            mockClassificationsDbSet.As<IAsyncEnumerable<CalculatorRunClassification>>().Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>())).Returns(new TestAsyncEnumerator<CalculatorRunClassification>(mockClassifications.GetEnumerator()));
-
-            mockDbContext.Setup(c => c.CalculatorRunClassifications).Returns(mockClassificationsDbSet.Object);
-            return mockDbContext;
         }
 
         [TestMethod]
@@ -559,7 +541,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
             mockValidator
                 .Setup(v => v.Validate(request))
-                .Returns(new ValidationResultDto<ErrorDto>
+                .ReturnsAsync(new ValidationResultDto<ErrorDto>
                 {
                     IsInvalid = true,
                     Errors = new List<ErrorDto> { new ErrorDto { Message = "Invalid financial year format." } },
@@ -581,6 +563,36 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var errors = actionResult.Value as List<ErrorDto>;
             Assert.IsNotNull(errors);
             Assert.AreEqual("Invalid financial year format.", errors.First().Message);
+        }
+
+        [TestMethod]
+        public async Task ClassificationByFinancialYear_Returns_NotFound_When_No_Classifications()
+        {
+            // Arrange
+            var financialYear = "2024-25";
+            var request = new CalcFinancialYearRequestDto { FinancialYear = financialYear };
+
+            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
+            mockValidator
+                .Setup(v => v.Validate(request))
+                .ReturnsAsync(new ValidationResultDto<ErrorDto> { IsInvalid = false });
+
+            this.DbContext.CalculatorRunClassifications.RemoveRange(this.DbContext.CalculatorRunClassifications);
+            this.DbContext.SaveChanges();
+            var controller = new CalculatorController(
+                this.DbContext,
+                ConfigurationItems.GetConfigurationValues(),
+                Mock.Of<IStorageService>(),
+                Mock.Of<IServiceBusService>(),
+                mockValidator.Object);
+
+            // Act
+            var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
+
+            // Assert
+            Assert.IsNotNull(actionResult);
+            Assert.AreEqual(StatusCodes.Status404NotFound, actionResult.StatusCode);
+            Assert.AreEqual("No classifications found.", actionResult.Value);
         }
 
         [TestMethod]
