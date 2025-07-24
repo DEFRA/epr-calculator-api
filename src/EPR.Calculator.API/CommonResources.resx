@@ -411,4 +411,13 @@
   <data name="AnErrorProcessingYourRequest" xml:space="preserve">
     <value>An error occurred while processing your request.</value>
   </data>
+  <data name="FinancialYearNotInDatabase" xml:space="preserve">
+    <value>Financial year not found in the database.</value>
+  </data>
+  <data name="NoMatchingRunFound" xml:space="preserve">
+    <value>No matching run found with the specified financial year.</value>
+  </data>
+  <data name="InvalidClassificationId" xml:space="preserve">
+    <value>Invalid ClassificationId</value>
+  </data>
 </root>

@@ -313,6 +313,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Financial year not found in the database..
+        /// </summary>
+        public static string FinancialYearNotInDatabase {
+            get {
+                return ResourceManager.GetString("FinancialYearNotInDatabase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Financial year is required..
         /// </summary>
         public static string FinancialYearRequired {
@@ -354,6 +363,15 @@ namespace EPR.Calculator.API {
         public static string InvalidClassification {
             get {
                 return ResourceManager.GetString("InvalidClassification", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid ClassificationId.
+        /// </summary>
+        public static string InvalidClassificationId {
+            get {
+                return ResourceManager.GetString("InvalidClassificationId", resourceCulture);
             }
         }
         
@@ -570,6 +588,15 @@ namespace EPR.Calculator.API {
         public static string NoFilePathProvided {
             get {
                 return ResourceManager.GetString("NoFilePathProvided", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No matching run found with the specified financial year..
+        /// </summary>
+        public static string NoMatchingRunFound {
+            get {
+                return ResourceManager.GetString("NoMatchingRunFound", resourceCulture);
             }
         }
         
