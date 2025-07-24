@@ -26,14 +26,14 @@ namespace EPR.Calculator.API.Exceptions
             Exception exception,
             CancellationToken cancellationToken)
         {
-            this.logger.LogError(exception, "An unhandled exception occurred.");
+            this.logger.LogError(exception, CommonResources.AnUnexpectedErrorOccurred);
             httpContext.Response.ContentType = "application/json";
             httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
             var errorResponse = new
             {
                 Status = httpContext.Response.StatusCode,
-                Title = "An error occurred while processing your request.",
+                Title = CommonResources.AnErrorProcessingYourRequest,
                 exception.Message,
                 Instance = httpContext.Request.Path,
                 Detail = this.env.IsDevelopment() || this.env.EnvironmentName?.ToLower() == CommonResources.Local.ToLower() ? exception.StackTrace : null,

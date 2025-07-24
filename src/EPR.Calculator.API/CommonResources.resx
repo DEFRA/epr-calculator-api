@@ -402,4 +402,13 @@
   <data name="EnterTheDecrease" xml:space="preserve">
     <value>Enter the {0} decrease</value>
   </data>
+  <data name="InvalidRunClassifications" xml:space="preserve">
+    <value>Invalid run classifications.</value>
+  </data>
+  <data name="AnUnexpectedErrorOccurred" xml:space="preserve">
+    <value>An unexpected error occurred.</value>
+  </data>
+  <data name="AnErrorProcessingYourRequest" xml:space="preserve">
+    <value>An error occurred while processing your request.</value>
+  </data>
 </root>

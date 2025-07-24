@@ -70,6 +70,24 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An error occurred while processing your request..
+        /// </summary>
+        public static string AnErrorProcessingYourRequest {
+            get {
+                return ResourceManager.GetString("AnErrorProcessingYourRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An unexpected error occurred..
+        /// </summary>
+        public static string AnUnexpectedErrorOccurred {
+            get {
+                return ResourceManager.GetString("AnUnexpectedErrorOccurred", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Billing.
         /// </summary>
         public static string BillingMessageType {
@@ -381,6 +399,15 @@ namespace EPR.Calculator.API {
         public static string InvalidOrganisationId {
             get {
                 return ResourceManager.GetString("InvalidOrganisationId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid run classifications..
+        /// </summary>
+        public static string InvalidRunClassifications {
+            get {
+                return ResourceManager.GetString("InvalidRunClassifications", resourceCulture);
             }
         }
         

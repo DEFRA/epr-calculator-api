@@ -38,8 +38,8 @@ namespace EPR.Calculator.API.Controllers
 
             if (serviceProcessResponseDto.StatusCode == HttpStatusCode.OK)
             {
-                var serviceBusQueueName = configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
-                await serviceBusService.SendMessage(serviceBusQueueName, new BillingFileGenerationMessage() { ApprovedBy = userName, CalculatorRunId = runId, MessageType = CommonResources.BillingMessageType });
+                //var serviceBusQueueName = configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
+                //await serviceBusService.SendMessage(serviceBusQueueName, new BillingFileGenerationMessage() { ApprovedBy = userName, CalculatorRunId = runId, MessageType = CommonConstants.BillingMessageType });
             }
 
             return new ObjectResult(serviceProcessResponseDto.Message)

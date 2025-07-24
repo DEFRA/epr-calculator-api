@@ -153,7 +153,7 @@ namespace EPR.Calculator.API.Controllers
                         };
 
                         // Send message
-                        await this.serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
+                        //await serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
 
                         // All good, commit transaction
                         await transaction.CommitAsync();
@@ -427,7 +427,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (initialRun == null || testRun == null)
                 {
-                    return this.BadRequest("Invalid run classifications.");
+                    return this.BadRequest(CommonResources.InvalidRunClassifications);
                 }
 
                 var validationResult = await this.validator.Validate(request);
@@ -469,7 +469,7 @@ namespace EPR.Calculator.API.Controllers
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
+                return this.StatusCode(StatusCodes.Status500InternalServerError, CommonResources.AnUnexpectedErrorOccurred);
             }
         }
 
