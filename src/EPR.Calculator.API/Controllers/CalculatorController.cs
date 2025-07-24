@@ -411,7 +411,6 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         [Route("ClassificationByFinancialYear")]
         [ProducesResponseType(typeof(FinancialYearClassificationResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
