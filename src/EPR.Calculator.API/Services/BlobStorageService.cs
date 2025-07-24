@@ -70,7 +70,7 @@ namespace EPR.Calculator.API.Services
                 }
                 catch (UriFormatException exception)
                 {
-                    this.logger.LogError(exception, (string?)CommonResources.IncorrectBlobUriFormat, blobUri);
+                    this.logger.LogError(exception, CommonResources.IncorrectBlobUriFormat);
                     blobClient ??= this.containerClient.GetBlobClient(fileName);
                 }
             }
