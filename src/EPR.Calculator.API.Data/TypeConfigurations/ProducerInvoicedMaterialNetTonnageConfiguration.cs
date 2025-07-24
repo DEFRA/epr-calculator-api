@@ -30,6 +30,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
 
             builder.Property(p => p.InvoicedNetTonnage)
                    .HasColumnName("invoiced_net_tonnage")
+                   .HasPrecision(18, 3)
                    .HasMaxLength(4000);
         }
     }
