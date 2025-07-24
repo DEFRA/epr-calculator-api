@@ -209,6 +209,7 @@ namespace EPR.Calculator.API.Controllers
                                         run.CreatedBy,
                                         run.CalculatorRunClassificationId,
                                         HasBillingFileGenerated = billFile.Any(),
+                                        run.IsBillingFileGenerating,
                                     })
                        .OrderByDescending(run => run.CreatedAt)
                        .ToListAsync();
