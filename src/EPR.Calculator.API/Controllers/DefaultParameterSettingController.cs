@@ -5,12 +5,8 @@ using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Validators;
 using FluentValidation;
 using Microsoft.ApplicationInsights;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Abstractions;
-using System;
-using System.Text;
 
 namespace EPR.Calculator.API.Controllers
 {
