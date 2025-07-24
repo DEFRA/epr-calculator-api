@@ -4185,3 +4185,99 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250717154431_DeleteFinancialYearsData'
+)
+BEGIN
+    EXEC(N'DELETE FROM [calculator_run_financial_years]
+    WHERE [financial_Year] = N''2026-27'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250717154431_DeleteFinancialYearsData'
+)
+BEGIN
+    EXEC(N'DELETE FROM [calculator_run_financial_years]
+    WHERE [financial_Year] = N''2027-28'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250717154431_DeleteFinancialYearsData'
+)
+BEGIN
+    EXEC(N'DELETE FROM [calculator_run_financial_years]
+    WHERE [financial_Year] = N''2028-29'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250717154431_DeleteFinancialYearsData'
+)
+BEGIN
+    EXEC(N'DELETE FROM [calculator_run_financial_years]
+    WHERE [financial_Year] = N''2029-30'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250717154431_DeleteFinancialYearsData'
+)
+BEGIN
+    EXEC(N'DELETE FROM [calculator_run_financial_years]
+    WHERE [financial_Year] = N''2030-31'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250717154431_DeleteFinancialYearsData'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250717154431_DeleteFinancialYearsData', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250723131102_MarkInitialRunsAsDeleted'
+)
+BEGIN
+    update dbo.calculator_run SET calculator_run_classification_id  = 6 where calculator_run_classification_id in (7,8)
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250723131102_MarkInitialRunsAsDeleted'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250723131102_MarkInitialRunsAsDeleted', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
