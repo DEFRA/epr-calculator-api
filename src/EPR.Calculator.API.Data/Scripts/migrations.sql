@@ -4256,3 +4256,28 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250723131102_MarkInitialRunsAsDeleted'
+)
+BEGIN
+    update dbo.calculator_run SET calculator_run_classification_id  = 6 where calculator_run_classification_id in (7,8)
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250723131102_MarkInitialRunsAsDeleted'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250723131102_MarkInitialRunsAsDeleted', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
