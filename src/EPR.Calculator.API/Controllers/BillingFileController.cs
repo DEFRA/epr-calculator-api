@@ -64,7 +64,7 @@ namespace EPR.Calculator.API.Controllers
         {
             if (runId <= 0)
             {
-                return this.StatusCode(StatusCodes.Status400BadRequest, $"Invalid Run Id {runId}");
+                return this.StatusCode(StatusCodes.Status400BadRequest, string.Format(CommonResources.InvalidForRunId, runId));
             }
 
             try
@@ -74,7 +74,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (responseDto == null || (responseDto.ProducersInstructionDetails == null && responseDto.ProducersInstructionSummary == null))
                 {
-                    return this.StatusCode(StatusCodes.Status404NotFound, $"No billing instructions found for Run Id {runId}");
+                    return this.StatusCode(StatusCodes.Status404NotFound, string.Format(CommonResources.NoBillingFileMetadataForRunId, runId));
                 }
 
                 return Ok(responseDto);
@@ -117,11 +117,11 @@ namespace EPR.Calculator.API.Controllers
 
             if (latestBillingFileMetaData == null)
             {
-                return Results.NotFound($"No billing file metadata for Run Id {runId}");
+                return Results.NotFound(string.Format(CommonResources.NoBillingFileMetadataForRunId, runId));
             }
             else if (string.IsNullOrEmpty(latestBillingFileMetaData.BillingCsvFileName))
             {
-                return Results.NotFound($"No billing file name found for Run Id {runId}");
+                return Results.NotFound(string.Format(CommonResources.NoBillingFileMetadataForRunId, runId));
             }
 
             var csvFileMetaData = await context.CalculatorRunCsvFileMetadata.
@@ -132,7 +132,7 @@ namespace EPR.Calculator.API.Controllers
 
             if (csvFileMetaData == null)
             {
-                return Results.NotFound($"No billing file uri found for Run Id {runId}");
+                return Results.NotFound(string.Format(CommonResources.NoBillingFileMetadataForRunId, runId));
             }
 
             try

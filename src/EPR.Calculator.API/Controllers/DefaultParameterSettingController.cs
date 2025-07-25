@@ -5,11 +5,8 @@ using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Validators;
 using FluentValidation;
 using Microsoft.ApplicationInsights;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Abstractions;
-using System;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -39,11 +36,11 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateDefaultParameterSettingDto request)
         {
-            this._telemetryClient.TrackTrace($"1.Parameter File Name in DefaultParameter API :{request.ParameterFileName}");
+            this._telemetryClient.TrackTrace(string.Format(CommonResources.ParameterFileName, request.ParameterFileName));
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
-                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+                return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
             }
 
             var userName = claim.Value;
@@ -55,8 +52,8 @@ namespace EPR.Calculator.API.Controllers
             var validationResult = this.validator.Validate(request);
             if (validationResult != null && validationResult.IsInvalid)
             {
-                this._telemetryClient.TrackTrace($"2.Parameter File Name in API :{request.ParameterFileName}");
-                this._telemetryClient.TrackTrace($"3.Validation errors :{validationResult.Errors}");
+                this._telemetryClient.TrackTrace(string.Format(CommonResources.ParameterFileName, request.ParameterFileName));
+                this._telemetryClient.TrackTrace(string.Format(CommonResources.ValidationErrors, validationResult.Errors));
                 return this.BadRequest(validationResult.Errors);
             }
 
@@ -98,7 +95,7 @@ namespace EPR.Calculator.API.Controllers
                 catch (Exception exception)
                 {
                     await transaction.RollbackAsync();
-                    this._telemetryClient.TrackTrace($"4.500InternalServerError Exception :{exception}");
+                    this._telemetryClient.TrackTrace(string.Format(CommonResources.InternalServerErrorException, exception));
                     return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
                 }
             }
@@ -123,7 +120,7 @@ namespace EPR.Calculator.API.Controllers
                 var financialYear = await this.context.FinancialYears.Where(x => x.Name == parameterYear).SingleOrDefaultAsync();
                 if (financialYear == null)
                 {
-                    return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status400BadRequest };
+                    return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
                 }
 
                 var currentDefaultSetting = await this.context.DefaultParameterSettings
@@ -131,7 +128,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (currentDefaultSetting == null)
                 {
-                    return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
+                    return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
                 }
 
                 var pramSettingDetails = await this.context.DefaultParameterSettingDetail

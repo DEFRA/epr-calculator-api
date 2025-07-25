@@ -1,4 +1,4 @@
-﻿namespace EPR.Calculator.API.Constants
+﻿namespace EPR.Calculator.API.Utils
 {
     public class BlobStorageSettings
     {
