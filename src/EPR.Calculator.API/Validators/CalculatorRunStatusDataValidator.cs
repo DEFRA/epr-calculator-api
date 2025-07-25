@@ -15,6 +15,18 @@ namespace EPR.Calculator.API.Validators
             CalculatorRun calculatorRun,
             CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
+            if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED)
+            {
+                return new GenericValidationResultDto
+                {
+                    IsInvalid = true,
+                    Errors = new List<string>
+                    {
+                        "Cannot reclassify a run once the initial run is completed.",
+                    },
+                };
+            }
+
             switch (runStatusUpdateDto.ClassificationId)
             {
                 case (int)RunClassification.INITIAL_RUN:

@@ -4329,3 +4329,151 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250723132540_UpdateInvoiceNetTonnageColumnPrecision'
+)
+BEGIN
+    DECLARE @var29 sysname;
+    SELECT @var29 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_invoiced_material_net_tonnage]') AND [c].[name] = N'invoiced_net_tonnage');
+    IF @var29 IS NOT NULL EXEC(N'ALTER TABLE [producer_invoiced_material_net_tonnage] DROP CONSTRAINT [' + @var29 + '];');
+    ALTER TABLE [producer_invoiced_material_net_tonnage] ALTER COLUMN [invoiced_net_tonnage] decimal(18,3) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250723132540_UpdateInvoiceNetTonnageColumnPrecision'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250723132540_UpdateInvoiceNetTonnageColumnPrecision', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250723143822_AddFinancialYears'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] ON;
+    EXEC(N'INSERT INTO [calculator_run_financial_years] ([financial_Year])
+    VALUES (N''2026-27'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250723143822_AddFinancialYears'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] ON;
+    EXEC(N'INSERT INTO [calculator_run_financial_years] ([financial_Year])
+    VALUES (N''2027-28'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250723143822_AddFinancialYears'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] ON;
+    EXEC(N'INSERT INTO [calculator_run_financial_years] ([financial_Year])
+    VALUES (N''2028-29'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250723143822_AddFinancialYears'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] ON;
+    EXEC(N'INSERT INTO [calculator_run_financial_years] ([financial_Year])
+    VALUES (N''2029-30'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250723143822_AddFinancialYears'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] ON;
+    EXEC(N'INSERT INTO [calculator_run_financial_years] ([financial_Year])
+    VALUES (N''2030-31'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
+        SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250723143822_AddFinancialYears'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250723143822_AddFinancialYears', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250724153138_UpdateNetTonnagePrecision'
+)
+BEGIN
+    DECLARE @var30 sysname;
+    SELECT @var30 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_invoiced_material_net_tonnage]') AND [c].[name] = N'invoiced_net_tonnage');
+    IF @var30 IS NOT NULL EXEC(N'ALTER TABLE [producer_invoiced_material_net_tonnage] DROP CONSTRAINT [' + @var30 + '];');
+    ALTER TABLE [producer_invoiced_material_net_tonnage] ALTER COLUMN [invoiced_net_tonnage] decimal(18,3) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250724153138_UpdateNetTonnagePrecision'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250724153138_UpdateNetTonnagePrecision', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
