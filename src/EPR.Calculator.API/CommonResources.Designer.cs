@@ -349,6 +349,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to dbo.InsertInvoiceDetailsAtProducerLevel.
+        /// </summary>
+        public static string InsertInvoiceDetailsAtProducerLevel {
+            get {
+                return ResourceManager.GetString("InsertInvoiceDetailsAtProducerLevel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 500InternalServerError Exception :{0}.
         /// </summary>
         public static string InternalServerErrorException {

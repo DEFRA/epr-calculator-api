@@ -243,6 +243,11 @@ namespace EPR.Calculator.API.Utils
             return $"exec {procedureName} @RunId ={runId}, @calendarYear = {calendarYear}, @createdBy = {createdBy}";
         }
 
+        public static FormattableString GetFormattedSqlString(string procedureName, string? instructionConfirmedBy, DateTime? instructionConfirmedDate, int runId)
+        {
+            return $"exec {procedureName} @instructionConfirmedBy = {instructionConfirmedBy}, @instructionConfirmedDate = {instructionConfirmedDate}, @calculatorRunID ={runId}";
+        }
+
         public static IEnumerable<int> AcceptableRunStatusForBillingInstructions()
         {
             var validRunClassifications = new List<int>

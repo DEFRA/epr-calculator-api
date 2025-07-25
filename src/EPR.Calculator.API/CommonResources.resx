@@ -420,4 +420,7 @@
   <data name="InvalidClassificationId" xml:space="preserve">
     <value>Invalid ClassificationId</value>
   </data>
+  <data name="InsertInvoiceDetailsAtProducerLevel" xml:space="preserve">
+    <value>dbo.InsertInvoiceDetailsAtProducerLevel</value>
+  </data>
 </root>
