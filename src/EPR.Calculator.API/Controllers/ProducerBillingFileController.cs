@@ -41,6 +41,7 @@ namespace EPR.Calculator.API.Controllers
             {
                 var serviceBusQueueName = configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
                 await serviceBusService.SendMessage(serviceBusQueueName, new BillingFileGenerationMessage() { ApprovedBy = userName, CalculatorRunId = runId, MessageType = CommonConstants.BillingMessageType });
+                return this.Accepted();
             }
 
             return new ObjectResult(serviceProcessResponseDto.Message)

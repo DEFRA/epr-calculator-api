@@ -43,16 +43,16 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        [DataRow(StatusCodes.Status200OK, "OK")]
-        [DataRow(StatusCodes.Status400BadRequest, "Bad Request.")]
-        [DataRow(StatusCodes.Status422UnprocessableEntity, "Unprocessable Entity")]
+        [DataRow(HttpStatusCode.OK, HttpStatusCode.Accepted)]
+        [DataRow(HttpStatusCode.BadRequest, HttpStatusCode.BadRequest)]
+        [DataRow(StatusCodes.Status422UnprocessableEntity, HttpStatusCode.UnprocessableEntity)]
         public async Task ProducerBillingInstructions_ShouldReturn202Accepted_WhenUpdateSuccessful(
-            int httpStatusCode,
-            string message)
+            HttpStatusCode billingFileServiceReturnCode,
+            HttpStatusCode apiExpectedReturnCode)
         {
             // Arrange
             this.billingFileServiceMock.Setup(s => s.StartGeneratingBillingFileAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new ServiceProcessResponseDto { StatusCode = (HttpStatusCode)httpStatusCode });
+                .ReturnsAsync(new ServiceProcessResponseDto { StatusCode = billingFileServiceReturnCode });
 
             this.serviceBusServiceMock.Setup(s => s.SendMessage(It.IsAny<string>(), It.IsAny<BillingFileGenerationMessage>()));
             this.configMock.Setup(s => s.GetSection(It.IsAny<string>()).GetSection(It.IsAny<string>()).Value).Returns("test");
@@ -62,7 +62,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(httpStatusCode, result.StatusCode);
+            Assert.AreEqual(apiExpectedReturnCode, (HttpStatusCode)result.StatusCode);
         }
     }
 }
