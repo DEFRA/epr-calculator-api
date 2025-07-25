@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Data.DataModels;
+﻿using AutoFixture;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Validators;
@@ -10,6 +11,13 @@ namespace EPR.Calculator.API.UnitTests.Validator
     public class CalculatorRunStatusDataValidatorTest
     {
         private readonly CalculatorRunStatusDataValidator validator = new();
+
+        public CalculatorRunStatusDataValidatorTest()
+        {
+            this.Fixture = new Fixture();
+        }
+
+        private Fixture Fixture { get; init; }
 
         [TestMethod]
         public void Validate_InitialRun_Test()
@@ -140,6 +148,29 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
             var vr = validator.Validate(calculatorRun, runStatusUpdateDto);
             Assert.IsNotNull(vr);
+            Assert.IsTrue(vr.IsInvalid);
+        }
+
+        /// <summary>
+        /// Checks that the validation fails when trying to reclassify a run that has already completed the initial run.
+        /// </summary>
+        [TestMethod]
+        public void Validate_InvalidWhenInitialRunCompleted()
+        {
+            // Arrange
+            var calculatorRun = this.Fixture.Create<CalculatorRun>();
+            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
+
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)RunClassification.DELETED,
+                RunId = 1,
+            };
+
+            // Act
+            var vr = this.validator.Validate(calculatorRun, runStatusUpdateDto);
+
+            // assert
             Assert.IsTrue(vr.IsInvalid);
         }
     }
