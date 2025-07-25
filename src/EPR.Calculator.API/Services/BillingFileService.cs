@@ -5,6 +5,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exceptions;
+using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -211,21 +212,69 @@ namespace EPR.Calculator.API.Services
 
             var searchQuery = requestDto.SearchQuery;
 
-            var query =
-                from ins in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                join pd in applicationDBContext.ProducerDetail
-                    on ins.ProducerId equals pd.ProducerId
-                where ins.CalculatorRunId == runId
-                    && pd.CalculatorRunId == runId
-                    && pd.SubsidiaryId == null
-                select new ProducerBillingInstructionsDto
+            var parentProducers = await applicationDBContext.CalculatorRunOrganisationDataDetails
+                .Where(odd => odd.SubsidaryId == null)
+                .Join(
+                    applicationDBContext.CalculatorRunOrganisationDataMaster,
+                    odd => odd.CalculatorRunOrganisationDataMasterId,
+                    odm => odm.Id,
+                    (odd, odm) => new { odd, odm })
+                .Join(
+                    applicationDBContext.CalculatorRuns,
+                    x => x.odm.Id,
+                    run => run.CalculatorRunOrganisationDataMasterId,
+                    (x, run) => new { x.odd, run })
+                .Where(x => x.run.Id == runId)
+                .Select(x => new ParentProducer
                 {
-                    ProducerName = pd.ProducerName,
-                    ProducerId = ins.ProducerId,
-                    SuggestedBillingInstruction = ins.SuggestedBillingInstruction,
-                    SuggestedInvoiceAmount = ins.SuggestedInvoiceAmount,
-                    BillingInstructionAcceptReject = string.IsNullOrWhiteSpace(ins.BillingInstructionAcceptReject) ? BillingStatus.Pending.ToString() : ins.BillingInstructionAcceptReject.Trim(),
-                };
+                    ProducerId = x.odd.OrganisationId ?? 0,
+                    ProducerName = x.odd.OrganisationName,
+                })
+                .ToListAsync();
+
+            var parentProducerIds = applicationDBContext.ProducerDetail
+                .Where(pd => pd.SubsidiaryId == null)
+                .Select(pd => pd.ProducerId);
+
+            var part1 = applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                .Where(bi => bi.CalculatorRunId == runId)
+                .Join(
+                    applicationDBContext.ProducerDetail,
+                    bi => bi.ProducerId,
+                    pd => pd.ProducerId,
+                    (bi, pd) => new { bi, pd })
+                .Where(x => x.pd.SubsidiaryId == null)
+                .Select(x => new ProducerBillingInstructionsDto
+                {
+                    ProducerId = x.pd.ProducerId,
+                    SuggestedBillingInstruction = x.bi.SuggestedBillingInstruction,
+                    SuggestedInvoiceAmount = x.bi.SuggestedInvoiceAmount,
+                    BillingInstructionAcceptReject = x.bi.BillingInstructionAcceptReject ?? BillingStatus.Pending.ToString(),
+                });
+
+            var part2 = applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                .Where(bi => bi.CalculatorRunId == runId)
+                .Join(
+                    applicationDBContext.ProducerDetail,
+                    bi => bi.ProducerId,
+                    pd => pd.ProducerId,
+                    (bi, pd) => new { bi, pd })
+                .Where(x => x.pd.SubsidiaryId != null && !parentProducerIds.Contains(x.pd.ProducerId))
+                .GroupBy(x => new
+                {
+                    x.pd.ProducerId,
+                    x.bi.SuggestedBillingInstruction,
+                    BillingInstructionAcceptReject = x.bi.BillingInstructionAcceptReject ?? BillingStatus.Pending.ToString(),
+                })
+                .Select(g => new ProducerBillingInstructionsDto
+                {
+                    ProducerId = g.Key.ProducerId,
+                    SuggestedBillingInstruction = g.Key.SuggestedBillingInstruction,
+                    SuggestedInvoiceAmount = g.Sum(x => x.bi.SuggestedInvoiceAmount),
+                    BillingInstructionAcceptReject = g.Key.BillingInstructionAcceptReject,
+                });
+
+            var query = await part1.Union(part2).ToListAsync(cancellationToken);
 
             // Group by on BillingInstructionAcceptReject
             var groupedStatus = query
@@ -240,30 +289,33 @@ namespace EPR.Calculator.API.Services
             if (searchQuery?.OrganisationId.HasValue == true)
             {
                 var orgId = searchQuery.OrganisationId.Value;
-                query = query.Where(x => x.ProducerId == orgId);
+                query = (List<ProducerBillingInstructionsDto>)query.Where(x => x.ProducerId == orgId);
             }
 
             // Apply Status filter if provided and not empty
             if (searchQuery?.Status != null && searchQuery.Status.Any())
             {
                 var statusList = searchQuery.Status.ToList();
-                query = query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject));
+                query = (List<ProducerBillingInstructionsDto>)query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject));
             }
 
-            query = query.Distinct().OrderBy(x => x.ProducerId);
+            query = query.Distinct().OrderBy(x => x.ProducerId).ToList();
 
             requestDto.PageNumber ??= CommonConstants.ProducerBillingInstructionsDefaultPageNumber;
             requestDto.PageSize ??= CommonConstants.ProducerBillingInstructionsDefaultPageSize;
 
-            var pagedResult = await query
+            var pagedResult = query
                 .Skip((requestDto.PageNumber.Value - 1) * requestDto.PageSize.Value)
-                .Take(requestDto.PageSize.Value)
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
+                .Take(requestDto.PageSize.Value);
 
-            var allProducerIds = await query.Select(x => x.ProducerId).Distinct().ToListAsync(cancellationToken);
+            var allProducerIds = query.Select(x => x.ProducerId).Distinct();
 
-            var groupedStatusResult = await groupedStatus.ToListAsync(cancellationToken);
+            foreach (var record in pagedResult)
+            {
+                record.ProducerName = parentProducers.FirstOrDefault(p => p.ProducerId == record.ProducerId)?.ProducerName ?? string.Empty;
+            }
+
+            var groupedStatusResult = groupedStatus.ToList();
 
             var totalAcceptedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Accepted.ToString())?.TotalRecords ?? 0;
             var totalRejectedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Rejected.ToString())?.TotalRecords ?? 0;
@@ -271,7 +323,7 @@ namespace EPR.Calculator.API.Services
 
             return new ProducerBillingInstructionsResponseDto
             {
-                Records = pagedResult,
+                Records = pagedResult.ToList(),
                 PageNumber = requestDto.PageNumber,
                 PageSize = requestDto.PageSize,
                 TotalRecords = groupedStatusResult.Sum(s => s.TotalRecords),
