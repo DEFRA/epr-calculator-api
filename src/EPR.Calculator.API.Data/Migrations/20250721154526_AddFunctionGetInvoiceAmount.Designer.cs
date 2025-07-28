@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250721154526_AddFunctionGetInvoiceAmount")]
+    partial class AddFunctionGetInvoiceAmount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -206,60 +209,6 @@ namespace EPR.Calculator.API.Data.Migrations
                             Id = 5,
                             CreatedBy = "Test User",
                             Status = "ERROR"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CreatedBy = "System User",
-                            Status = "DELETED"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CreatedBy = "System User",
-                            Status = "INITIAL RUN COMPLETED"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            CreatedBy = "Test User",
-                            Status = "INITIAL RUN"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            CreatedBy = "Test User",
-                            Status = "INTERIM RE-CALCULATION RUN"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            CreatedBy = "Test User",
-                            Status = "FINAL RUN"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            CreatedBy = "Test User",
-                            Status = "FINAL RE-CALCULATION RUN"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            CreatedBy = "System User",
-                            Status = "INTERIM RE-CALCULATION RUN COMPLETED"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            CreatedBy = "System User",
-                            Status = "FINAL RE-CALCULATION RUN COMPLETED"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            CreatedBy = "System User",
-                            Status = "FINAL RUN COMPLETED"
                         });
                 });
 
@@ -1624,8 +1573,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.Property<decimal?>("InvoicedNetTonnage")
                         .HasMaxLength(4000)
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
+                        .HasColumnType("decimal(18,2)")
                         .HasColumnName("invoiced_net_tonnage");
 
                     b.Property<int>("MaterialId")

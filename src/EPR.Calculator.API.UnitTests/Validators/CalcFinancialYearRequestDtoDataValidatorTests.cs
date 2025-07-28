@@ -62,7 +62,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
         [DataRow(null)]
         [DataRow("")]
         [DataRow("\t")]
-        public void Validate_ReturnsInvalid_WhenFinancialYearNullOrWhiteSpace(string financialYear)
+        public async Task Validate_ReturnsInvalid_WhenFinancialYearNullOrWhiteSpace(string financialYear)
         {
             // Arrange
             var request = new CalcFinancialYearRequestDto
@@ -72,7 +72,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             };
 
             // Act
-            var result = this.validator.Validate(request);
+            var result = await this.validator.Validate(request);
 
             // Assert
             result.IsInvalid.Should().BeTrue();
@@ -81,7 +81,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
 
         [TestMethod]
         [DataRow("1923-24")]
-        public void Validate_ReturnsInvalid_WhenFinancialYearNotFoundInDatabase(string financialYear)
+        public async Task Validate_ReturnsInvalid_WhenFinancialYearNotFoundInDatabase(string financialYear)
         {
             // Arrange
             var request = new CalcFinancialYearRequestDto
@@ -91,7 +91,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             };
 
             // Act
-            var result = this.validator.Validate(request);
+            var result = await this.validator.Validate(request);
 
             // Assert
             result.IsInvalid.Should().BeTrue();
@@ -100,7 +100,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
 
         [TestMethod]
         [DataRow(-1)]
-        public void Validate_ReturnsInvalid_WhenRunNotFoundInDatabase(int runId)
+        public async Task Validate_ReturnsInvalid_WhenRunNotFoundInDatabase(int runId)
         {
             // Arrange
             var request = new CalcFinancialYearRequestDto
@@ -110,7 +110,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             };
 
             // Act
-            var result = this.validator.Validate(request);
+            var result = await this.validator.Validate(request);
 
             // Assert
             result.IsInvalid.Should().BeTrue();
@@ -118,7 +118,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
         }
 
         [TestMethod]
-        public void Validate_ReturnsInvalid_WhenRunIsAlreadyClassified()
+        public async Task Validate_ReturnsInvalid_WhenRunIsAlreadyClassified()
         {
             // Arrange
             var request = new CalcFinancialYearRequestDto
@@ -128,7 +128,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             };
 
             // Act
-            var result = this.validator.Validate(request);
+            var result = await this.validator.Validate(request);
 
             // Assert
             result.IsInvalid.Should().BeTrue();
@@ -136,7 +136,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
         }
 
         [TestMethod]
-        public void Validate_ReturnsValid_WhenAllCriteriaMet()
+        public async Task Validate_ReturnsValid_WhenAllCriteriaMet()
         {
             // Arrange
             var request = new CalcFinancialYearRequestDto
@@ -146,7 +146,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             };
 
             // Act
-            var result = this.validator.Validate(request);
+            var result = await this.validator.Validate(request);
 
             // Assert
             result.IsInvalid.Should().BeFalse();

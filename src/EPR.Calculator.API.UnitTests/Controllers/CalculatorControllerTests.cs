@@ -1,27 +1,24 @@
+using AutoFixture;
+using EnumsNET;
+using EPR.Calculator.API.Controllers;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Services;
+using EPR.Calculator.API.UnitTests.Helpers;
+using EPR.Calculator.API.Validators;
+using FluentAssertions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using System.Security.Claims;
+using System.Security.Principal;
+
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
-    using System;
-    using System.Security.Claims;
-    using System.Security.Principal;
-    using System.Threading.Tasks;
-    using AutoFixture;
-    using EnumsNET;
-    using EPR.Calculator.API.Controllers;
-    using EPR.Calculator.API.Data;
-    using EPR.Calculator.API.Data.DataModels;
-    using EPR.Calculator.API.Dtos;
-    using EPR.Calculator.API.Enums;
-    using EPR.Calculator.API.Services;
-    using EPR.Calculator.API.UnitTests.Helpers;
-    using EPR.Calculator.API.Validators;
-    using FluentAssertions;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Azure.Amqp.Transaction;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Moq;
-
     [TestClass]
     public class CalculatorControllerTests : BaseControllerTest
     {
@@ -484,14 +481,22 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task ClassificationByFinancialYear_Returns_Options_For_Valid_FinancialYear()
         {
+            var initialRun = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description);
+            var testRun = RunClassification.TEST_RUN.AsString(EnumFormat.Description);
+
+            if (initialRun == null || testRun == null)
+            {
+                Assert.Fail("Run classifications Enums not loaded");
+            }
+
             // Arrange
             var financialYear = "2024-25";
             var request = new CalcFinancialYearRequestDto { FinancialYear = financialYear };
 
             var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
             mockValidator
-                .Setup(v => v.Validate(request))
-                .Returns(new ValidationResultDto<ErrorDto> { IsInvalid = false });
+                .Setup(v => v.Validate(request, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new ValidationResultDto<ErrorDto> { IsInvalid = false });
 
             var mockAvailableClassificationsService = new Mock<IAvailableClassificationsService>();
             mockAvailableClassificationsService
@@ -570,8 +575,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
             mockValidator
-                .Setup(v => v.Validate(request))
-                .Returns(new ValidationResultDto<ErrorDto>
+                .Setup(v => v.Validate(request, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new ValidationResultDto<ErrorDto>
                 {
                     IsInvalid = true,
                     Errors = new List<ErrorDto> { new ErrorDto { Message = "Invalid financial year format." } },
@@ -605,8 +610,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
             mockValidator
-                .Setup(v => v.Validate(request))
-                .Returns(new ValidationResultDto<ErrorDto> { IsInvalid = false });
+                .Setup(v => v.Validate(request, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new ValidationResultDto<ErrorDto> { IsInvalid = false });
 
             var mockAvailableClassificationsService = new Mock<IAvailableClassificationsService>();
             mockAvailableClassificationsService
@@ -639,7 +644,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
             mockValidator
-                .Setup(v => v.Validate(request))
+                .Setup(v => v.Validate(request, It.IsAny<CancellationToken>()))
                 .Throws(new Exception());
 
             var controller = new CalculatorController(

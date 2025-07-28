@@ -4,13 +4,17 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>1.0.13</Version>
+    <Version>1.0.16</Version>
   </PropertyGroup>
 
 	<Target Name="GenerateSqlScript" AfterTargets="AfterBuild" Condition="$(AzureBuild) != true">
 		<Exec Condition="$(Configuration) == Release" Command="dotnet-ef migrations script --configuration Release --verbose --no-build --context EPR.Calculator.API.Data.ApplicationDBContext --idempotent --output Scripts/migrations.sql" />
 	</Target>
 
+   <ItemGroup>
+	<Folder Include="Migrations\" />
+   </ItemGroup>
+	
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.7">
       <PrivateAssets>all</PrivateAssets>

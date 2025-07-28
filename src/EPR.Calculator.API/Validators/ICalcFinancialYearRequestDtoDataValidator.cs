@@ -4,6 +4,6 @@ namespace EPR.Calculator.API.Validators
 {
     public interface ICalcFinancialYearRequestDtoDataValidator
     {
-        ValidationResultDto<ErrorDto> Validate(CalcFinancialYearRequestDto request);
+        Task<ValidationResultDto<ErrorDto>> Validate(CalcFinancialYearRequestDto request, CancellationToken cancellationToken = default);
     }
 }

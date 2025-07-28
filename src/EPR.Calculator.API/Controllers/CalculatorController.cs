@@ -212,6 +212,7 @@ namespace EPR.Calculator.API.Controllers
                                         run.CreatedBy,
                                         run.CalculatorRunClassificationId,
                                         HasBillingFileGenerated = billFile.Any(),
+                                        run.IsBillingFileGenerating,
                                     })
                        .OrderByDescending(run => run.CreatedAt)
                        .ToListAsync();
@@ -425,7 +426,7 @@ namespace EPR.Calculator.API.Controllers
                     return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
                 }
 
-                var validationResult = this.validator.Validate(request);
+                var validationResult = await this.validator.Validate(request);
                 if (validationResult.IsInvalid)
                 {
                     return this.BadRequest(validationResult.Errors);
@@ -441,7 +442,7 @@ namespace EPR.Calculator.API.Controllers
 
                 return this.Ok(runDto);
             }
-            catch (Exception exception)
+            catch (Exception)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
             }

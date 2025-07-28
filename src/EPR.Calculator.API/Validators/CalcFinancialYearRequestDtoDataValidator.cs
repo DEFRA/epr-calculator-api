@@ -14,7 +14,7 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
         this.context = context;
     }
 
-    public ValidationResultDto<ErrorDto> Validate(CalcFinancialYearRequestDto request)
+    public async Task<ValidationResultDto<ErrorDto>> Validate(CalcFinancialYearRequestDto request, CancellationToken cancellationToken = default)
     {
         var validationResult = new ValidationResultDto<ErrorDto>();
 
@@ -31,9 +31,9 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
         }
 
         // Check if financialYear exists in the database
-        var dbYear = this.context.FinancialYears
+        var dbYear = await this.context.FinancialYears
             .AsNoTracking()
-            .SingleOrDefault(y => y.Name == request.FinancialYear);
+            .SingleOrDefaultAsync(y => y.Name == request.FinancialYear, cancellationToken);
 
         if (dbYear == null)
         {
@@ -45,9 +45,9 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
             return validationResult;
         }
 
-        var currentRun = this.context.CalculatorRuns
+        var currentRun = await this.context.CalculatorRuns
             .AsNoTracking()
-            .SingleOrDefault(run => run.Id == request.RunId);
+            .SingleOrDefaultAsync(run => run.Id == request.RunId, cancellationToken);
 
         // Check that the run esists
         if (currentRun == null)
@@ -60,6 +60,15 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
             return validationResult;
         }
 
+        if (currentRun.FinancialYearId != request.FinancialYear)
+        {
+            validationResult.IsInvalid = true;
+            validationResult.Errors.Add(new ErrorDto
+            {
+                Message = "No matching run found with the specified financial year.",
+            });
+        }
+
         // Check that the run is unclassified
         if (currentRun.CalculatorRunClassificationId != (int)RunClassification.UNCLASSIFIED)
         {
@@ -69,7 +78,6 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
                 Message = "Run is already classified.",
             });
         }
-
         return validationResult;
     }
 }

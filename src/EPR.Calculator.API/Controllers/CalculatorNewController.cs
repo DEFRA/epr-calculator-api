@@ -5,7 +5,10 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Services.Abstractions;
+using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
+using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +21,9 @@ namespace EPR.Calculator.API.Controllers
         private readonly ApplicationDBContext context;
         private readonly ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator;
         private readonly IBillingFileService billingFileService;
+        private readonly TelemetryClient telemetryClient;
+
+        private IOrgAndPomWrapper Wrapper { get; init; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CalculatorNewController"/> class.
@@ -27,11 +33,15 @@ namespace EPR.Calculator.API.Controllers
         public CalculatorNewController(
             ApplicationDBContext context,
             ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
-            IBillingFileService billingFileService)
+            IBillingFileService billingFileService,
+            IOrgAndPomWrapper wrapper,
+            TelemetryClient telemetryClient)
         {
             this.context = context;
             this.calculatorRunStatusDataValidator = calculatorRunStatusDataValidator;
             this.billingFileService = billingFileService;
+            this.Wrapper = wrapper;
+            this.telemetryClient = telemetryClient;
         }
 
         [HttpPut]
@@ -171,40 +181,66 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                try
+                // Update calculation run classification status: Initial run completed
+                calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
+                var metadata = await this.context.CalculatorRunBillingFileMetadata.
+                    Where(x => x.CalculatorRunId == runId).OrderByDescending(x => x.BillingFileCreatedDate).
+                    FirstOrDefaultAsync();
+
+                if (metadata == null)
                 {
-                    // Update calculation run classification status: Initial run completed
-                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
-                    var metadata = await this.context.CalculatorRunBillingFileMetadata.
-                        Where(x => x.CalculatorRunId == runId).OrderByDescending(x => x.BillingFileCreatedDate).
-                        FirstOrDefaultAsync();
+                    return new ObjectResult($"Unable to find Billing File Metadata for Run Id {runId}")
+                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
 
-                    if (metadata == null)
+                metadata.BillingFileAuthorisedBy = userName;
+                metadata.BillingFileAuthorisedDate = DateTime.UtcNow;
+
+                using (var transaction = await this.context.Database.BeginTransactionAsync(cancellationToken))
+                {
+                    try
                     {
-                        return new ObjectResult($"Unable to find Billing File Metadata for Run Id {runId}")
-                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
-                    }
+                        var createRunInvoiceDetailsCommand = Util.GetFormattedSqlString(
+                            CommonConstants.InsertInvoiceDetailsAtProducerLevel,
+                            metadata.BillingFileAuthorisedBy,
+                            metadata.BillingFileAuthorisedDate,
+                            runId);
 
-                    metadata.BillingFileAuthorisedBy = userName;
-                    metadata.BillingFileAuthorisedDate = DateTime.UtcNow;
+                        var affectedRows = await this.Wrapper.ExecuteSqlAsync(createRunInvoiceDetailsCommand, cancellationToken);
 
-                    this.context.CalculatorRuns.Update(calculatorRun);
+                        this.telemetryClient.TrackEvent(CommonConstants.InsertInvoiceDetailsAtProducerLevel, new Dictionary<string, string>
+                        {
+                            { "Procedure", CommonConstants.InsertInvoiceDetailsAtProducerLevel },
+                            { "RunId", runId.ToString() },
+                            { "RowsAffected", affectedRows.ToString() },
+                        });
 
-                    await this.context.SaveChangesAsync();
+                        this.context.CalculatorRuns.Update(calculatorRun);
+                        await this.context.SaveChangesAsync(cancellationToken);
+                        var result = await this.billingFileService.MoveBillingJsonFile(runId, cancellationToken);
+                        if (!result)
+                        {
+                            return this.StatusCode(StatusCodes.Status422UnprocessableEntity, $"Unable to move billing json file for Run Id {runId}");
+                        }
 
-                    var result = await this.billingFileService.MoveBillingJsonFile(runId, cancellationToken);
-
-                    if (!result)
-                    {
-                        return this.StatusCode(StatusCodes.Status422UnprocessableEntity, $"Unable to move billing json file for Run Id {runId}");
+                        // All good, commit transaction
+                        await transaction.CommitAsync(cancellationToken);
                     }
 
                     // All good, commit transaction
-                }
-                catch (Exception exception)
-                {
-                    // Return error status code: Internal Server Error
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                    catch (Exception exception)
+                    {
+                        // Error, rollback transaction
+                        await transaction.RollbackAsync(cancellationToken);
+
+                        this.telemetryClient.TrackException(exception, new Dictionary<string, string>
+                        {
+                            { "RunId", runId.ToString() },
+                        });
+
+                        // Return error status code: Internal Server Error
+                        return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                    }
                 }
 
                 // Return accepted status code
