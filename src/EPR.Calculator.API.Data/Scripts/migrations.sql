@@ -1,4 +1,4 @@
-IF OBJECT_ID(N'dbo.__EFMigrationsHistory') IS NULL
+IF OBJECT_ID(N'dbo.__EFMigrationsHistory', N'U') IS NULL
 BEGIN
     CREATE TABLE [__EFMigrationsHistory] (
         [MigrationId] nvarchar(150) NOT NULL,
