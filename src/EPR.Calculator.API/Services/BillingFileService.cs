@@ -239,18 +239,12 @@ namespace EPR.Calculator.API.Services
                     pd => pd.ProducerId,
                     (bi, pd) => new { bi, pd })
                 .Where(x => x.pd.SubsidiaryId != null && !parentProducerIds.Contains(x.pd.ProducerId))
-                .GroupBy(x => new
-                {
-                    x.pd.ProducerId,
-                    x.bi.SuggestedBillingInstruction,
-                    BillingInstructionAcceptReject = x.bi.BillingInstructionAcceptReject ?? BillingStatus.Pending.ToString(),
-                })
                 .Select(g => new ProducerBillingInstructionsDto
                 {
-                    ProducerId = g.Key.ProducerId,
-                    SuggestedBillingInstruction = g.Key.SuggestedBillingInstruction,
-                    SuggestedInvoiceAmount = g.Sum(x => x.bi.SuggestedInvoiceAmount),
-                    BillingInstructionAcceptReject = g.Key.BillingInstructionAcceptReject,
+                    ProducerId = g.bi.ProducerId,
+                    SuggestedBillingInstruction = g.bi.SuggestedBillingInstruction,
+                    SuggestedInvoiceAmount = g.bi.SuggestedInvoiceAmount,
+                    BillingInstructionAcceptReject = g.bi.BillingInstructionAcceptReject,
                 });
 
             var query = await billingInstructions.Union(billingInstructionsWithOutParentPomRecords).ToListAsync(cancellationToken);
