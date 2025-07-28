@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Reflection.Metadata.Ecma335;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -211,43 +212,37 @@ namespace EPR.Calculator.API.Services
 
             var searchQuery = requestDto.SearchQuery;
 
-            var parentProducers = await this.GetParentProducersAsync(runId, cancellationToken);
+            var parentProducers = await this.GetParentProducersLatestAsync(runId, cancellationToken);
 
             var parentProducerIds = await this.GetParentProducerIdsAsync(cancellationToken);
 
-            var billingInstructions = applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                .Where(bi => bi.CalculatorRunId == runId)
-                .Join(
-                    applicationDBContext.ProducerDetail,
-                    bi => bi.ProducerId,
-                    pd => pd.ProducerId,
-                    (bi, pd) => new { bi, pd })
-                .Where(x => x.pd.SubsidiaryId == null)
-                .Select(x => new ProducerBillingInstructionsDto
-                {
-                    ProducerId = x.pd.ProducerId,
-                    SuggestedBillingInstruction = x.bi.SuggestedBillingInstruction,
-                    SuggestedInvoiceAmount = x.bi.SuggestedInvoiceAmount,
-                    BillingInstructionAcceptReject = x.bi.BillingInstructionAcceptReject ?? BillingStatus.Pending.ToString(),
-                });
+            var biNew = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                        join pd in applicationDBContext.ProducerDetail
+                        on prsi.ProducerId equals pd.ProducerId
+                        where prsi.CalculatorRunId == runId && pd.CalculatorRunId == runId && pd.SubsidiaryId == null 
+                        select new ProducerBillingInstructionsDto()
+                        {
+                            ProducerId = pd.ProducerId,
+                            BillingInstructionAcceptReject = prsi.BillingInstructionAcceptReject ?? BillingStatus.Pending.ToString(),
+                            SuggestedBillingInstruction = prsi.SuggestedBillingInstruction,
+                            SuggestedInvoiceAmount = prsi.SuggestedInvoiceAmount,
+                        };
 
-            var billingInstructionsWithOutParentPomRecords = applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                .Where(bi => bi.CalculatorRunId == runId)
-                .Join(
-                    applicationDBContext.ProducerDetail,
-                    bi => bi.ProducerId,
-                    pd => pd.ProducerId,
-                    (bi, pd) => new { bi, pd })
-                .Where(x => x.pd.SubsidiaryId != null && !parentProducerIds.Contains(x.pd.ProducerId))
-                .Select(g => new ProducerBillingInstructionsDto
-                {
-                    ProducerId = g.bi.ProducerId,
-                    SuggestedBillingInstruction = g.bi.SuggestedBillingInstruction,
-                    SuggestedInvoiceAmount = g.bi.SuggestedInvoiceAmount,
-                    BillingInstructionAcceptReject = g.bi.BillingInstructionAcceptReject,
-                });
+            var biNewSub = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                           join pd in applicationDBContext.ProducerDetail
+                           on prsi.ProducerId equals pd.ProducerId
+                           where prsi.CalculatorRunId == runId && pd.CalculatorRunId == runId && pd.SubsidiaryId == null && !parentProducerIds.Contains(pd.ProducerId)
+                           select new ProducerBillingInstructionsDto()
+                           {
+                               ProducerId = pd.ProducerId,
+                               BillingInstructionAcceptReject = prsi.BillingInstructionAcceptReject ?? BillingStatus.Pending.ToString(),
+                               SuggestedBillingInstruction = prsi.SuggestedBillingInstruction,
+                               SuggestedInvoiceAmount = prsi.SuggestedInvoiceAmount,
+                           };
 
-            var query = await billingInstructions.Union(billingInstructionsWithOutParentPomRecords).ToListAsync(cancellationToken);
+            //  var query = await billingInstructions.Union(billingInstructionsWithOutParentPomRecords).ToListAsync(cancellationToken);
+
+            var query = await biNew.Union(biNewSub).ToListAsync(cancellationToken);
 
             // Group by on BillingInstructionAcceptReject
             var groupedStatus = query
@@ -521,25 +516,17 @@ namespace EPR.Calculator.API.Services
                 .Select(pd => pd.ProducerId)
                 .ToListAsync(cancellationToken);
 
-        private Task<List<ParentProducer>> GetParentProducersAsync(int runId, CancellationToken cancellationToken) =>
-            applicationDBContext.CalculatorRunOrganisationDataDetails
-                .Where(odd => odd.SubsidaryId == null)
-                .Join(
-                    applicationDBContext.CalculatorRunOrganisationDataMaster,
-                    odd => odd.CalculatorRunOrganisationDataMasterId,
-                    odm => odm.Id,
-                    (odd, odm) => new { odd, odm })
-                .Join(
-                    applicationDBContext.CalculatorRuns,
-                    x => x.odm.Id,
-                    cr => cr.CalculatorRunOrganisationDataMasterId,
-                    (x, cr) => new { x.odd, cr })
-                .Where(x => x.cr.Id == runId)
-                .Select(x => new ParentProducer
-                {
-                    ProducerId = x.odd.OrganisationId ?? 0,
-                    ProducerName = x.odd.OrganisationName,
-                })
-                .ToListAsync(cancellationToken);
+        private Task<List<ParentProducer>> GetParentProducersLatestAsync(int runId, CancellationToken cancellationToken) =>
+            (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
+            join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster
+            on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
+            join run in applicationDBContext.CalculatorRuns on crdm.Id equals run.CalculatorRunOrganisationDataMasterId
+            where run.Id == runId
+             select new
+            ParentProducer
+            {
+                ProducerId = odd.OrganisationId ?? 0,
+                ProducerName= odd.OrganisationName,
+            }).ToListAsync(cancellationToken);
     }
 }
