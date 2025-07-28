@@ -214,7 +214,7 @@ namespace EPR.Calculator.API.Services
 
             var parentProducers = await this.GetParentProducersLatestAsync(runId, cancellationToken);
 
-            var parentProducerIds = await this.GetParentProducerIdsAsync(cancellationToken,runId);
+            var parentProducerIds = await this.GetParentProducerIdsAsync(runId, cancellationToken);
 
             var billingInstructions = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
                         join pd in applicationDBContext.ProducerDetail
@@ -508,7 +508,7 @@ namespace EPR.Calculator.API.Services
             applicationDBContext.CalculatorRuns
                 .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
-        private Task<List<int>> GetParentProducerIdsAsync(CancellationToken cancellationToken, int runid) =>
+        private Task<List<int>> GetParentProducerIdsAsync(int runid, CancellationToken cancellationToken) =>
             applicationDBContext.ProducerDetail
                 .Where(pd => pd.SubsidiaryId == null && pd.CalculatorRunId == runid)
                 .Select(pd => pd.ProducerId)
