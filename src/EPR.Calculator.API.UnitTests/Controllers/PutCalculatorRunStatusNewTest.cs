@@ -1,18 +1,19 @@
-﻿using System.Security.Claims;
-using System.Security.Principal;
-using EPR.Calculator.API.Controllers;
+﻿using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services.Abstractions;
-using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Validators;
+using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Security.Claims;
+using System.Security.Principal;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -21,6 +22,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
         private readonly Mock<IBillingFileService> mockBillingFileService;
+        private readonly Mock<IOrgAndPomWrapper> mockOrgAndPomWrapper;
+        private readonly Mock<TelemetryClient> mockTelemetryClient;
+
         private ApplicationDBContext context;
         private CalculatorNewController controller;
 
@@ -33,9 +37,37 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.context = new ApplicationDBContext(dbContextOptions);
             this.context.Database.EnsureCreated();
 
+
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             this.mockBillingFileService = new Mock<IBillingFileService>();
-            this.controller = new CalculatorNewController(this.context, this.mockValidator.Object, this.mockBillingFileService.Object);
+            this.mockOrgAndPomWrapper = new Mock<IOrgAndPomWrapper>();
+            this.mockTelemetryClient = new Mock<TelemetryClient>();
+
+            this.controller = new CalculatorNewController(
+                this.context,
+                this.mockValidator.Object,
+                this.mockBillingFileService.Object,
+                this.mockOrgAndPomWrapper.Object,
+                this.mockTelemetryClient.Object);
+
+            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
+            {
+                Status = "DELETED",
+                Id = 6,
+                CreatedBy = "SomeUser",
+            });
+            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
+            {
+                Status = "INITIAL RUN COMPLETED",
+                Id = 7,
+                CreatedBy = "SomeUser",
+            });
+            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
+            {
+                Status = "INITIAL RUN",
+                Id = 8,
+                CreatedBy = "SomeUser",
+            });
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
