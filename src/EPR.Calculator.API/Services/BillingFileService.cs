@@ -216,10 +216,10 @@ namespace EPR.Calculator.API.Services
 
             var parentProducerIds = await this.GetParentProducerIdsAsync(cancellationToken);
 
-            var biNew = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+            var billingInstructions = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
                         join pd in applicationDBContext.ProducerDetail
                         on prsi.ProducerId equals pd.ProducerId
-                        where prsi.CalculatorRunId == runId && pd.CalculatorRunId == runId && pd.SubsidiaryId == null 
+                        where prsi.CalculatorRunId == runId && pd.CalculatorRunId == runId && pd.SubsidiaryId == null
                         select new ProducerBillingInstructionsDto()
                         {
                             ProducerId = pd.ProducerId,
@@ -228,10 +228,10 @@ namespace EPR.Calculator.API.Services
                             SuggestedInvoiceAmount = prsi.SuggestedInvoiceAmount,
                         };
 
-            var biNewSub = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+            var billingInstructionsWithoutParentPomRecords = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
                            join pd in applicationDBContext.ProducerDetail
                            on prsi.ProducerId equals pd.ProducerId
-                           where prsi.CalculatorRunId == runId && pd.CalculatorRunId == runId && pd.SubsidiaryId == null && !parentProducerIds.Contains(pd.ProducerId)
+                           where prsi.CalculatorRunId == runId && pd.CalculatorRunId == runId && pd.SubsidiaryId != null && !parentProducerIds.Contains(pd.ProducerId)
                            select new ProducerBillingInstructionsDto()
                            {
                                ProducerId = pd.ProducerId,
@@ -240,9 +240,7 @@ namespace EPR.Calculator.API.Services
                                SuggestedInvoiceAmount = prsi.SuggestedInvoiceAmount,
                            };
 
-            //  var query = await billingInstructions.Union(billingInstructionsWithOutParentPomRecords).ToListAsync(cancellationToken);
-
-            var query = await biNew.Union(biNewSub).ToListAsync(cancellationToken);
+            var query = await billingInstructions.Union(billingInstructionsWithoutParentPomRecords).ToListAsync(cancellationToken);
 
             // Group by on BillingInstructionAcceptReject
             var groupedStatus = query
