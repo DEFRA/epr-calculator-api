@@ -4834,3 +4834,119 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250728083102_UpdateBillingInstructionId'
+)
+BEGIN
+    IF OBJECT_ID(N'[dbo].[InsertInvoiceDetailsAtProducerLevel]', 'P') IS NOT NULL  
+    DROP PROCEDURE [dbo].[InsertInvoiceDetailsAtProducerLevel];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250728083102_UpdateBillingInstructionId'
+)
+BEGIN
+    DECLARE @sql NVARCHAR(MAX) 
+    SET @sql = N'CREATE PROCEDURE [dbo].[InsertInvoiceDetailsAtProducerLevel]
+        (
+            @instructionConfirmedBy NVARCHAR(4000),
+            @instructionConfirmedDate DATETIME2(7),
+            @calculatorRunID INT
+        )
+        AS
+        BEGIN
+            SET NOCOUNT OFF
+            -- Temp table to hold calculated values
+            CREATE TABLE #CalculatedValues (
+                calculator_run_id INT,
+                producer_id INT,
+                total_producer_bill_with_bad_debt DECIMAL(18,2),
+                current_year_invoice_total_to_date DECIMAL(18,2),
+                amount_liability_difference_calc_vs_prev DECIMAL(18,2),
+                suggested_billing_instruction NVARCHAR(4000),
+                billing_instruction_accept_reject NVARCHAR(4000),
+                invoice_amount DECIMAL(18,2),
+                instruction_confirmed_by NVARCHAR(4000),
+                instruction_confirmed_date DATETIME2(7),
+                billing_instruction_id NVARCHAR(4000)
+            );
+
+            -- Insert into temp table
+            INSERT INTO #CalculatedValues
+            SELECT 
+                prsbi.calculator_run_id,
+                prsbi.producer_id,
+                prsbi.total_producer_bill_with_bad_debt, 
+                prsbi.current_year_invoice_total_to_date,
+                prsbi.amount_liability_difference_calc_vs_prev,
+                prsbi.suggested_billing_instruction,
+                prsbi.billing_instruction_accept_reject,
+                dbo.GetInvoiceAmount(
+                    prsbi.billing_instruction_accept_reject,
+                    prsbi.suggested_billing_instruction,
+                    prsbi.total_producer_bill_with_bad_debt,
+                    prsbi.amount_liability_difference_calc_vs_prev
+                ) AS invoice_amount,
+                @instructionConfirmedBy AS instruction_confirmed_by,
+                @instructionConfirmedDate AS instruction_confirmed_date,
+                CONCAT(prsbi.calculator_run_id, ''_'', prsbi.producer_id) AS billing_instruction_id
+            FROM dbo.producer_resultfile_suggested_billing_instruction AS prsbi
+            WHERE prsbi.calculator_run_id = @calculatorRunID
+
+            -- First SELECT using the temp table
+        	INSERT INTO [dbo].[producer_designated_run_invoice_instruction] (
+        		producer_id,
+        		calculator_run_id,
+        		current_year_invoiced_total_after_this_run,
+        		invoice_amount,
+        		outstanding_balance,
+        		billing_instruction_id,
+        		instruction_confirmed_date,
+        		instruction_confirmed_by
+        		)
+        			SELECT 
+        				cv.producer_id,
+        				cv.calculator_run_id,
+        				dbo.GetCurrentYearInvoicedTotalAfterThisRun(
+        					cv.billing_instruction_accept_reject,
+        					cv.suggested_billing_instruction,
+        					cv.current_year_invoice_total_to_date,
+        					cv.invoice_amount
+        				) AS current_year_invoiced_total_after_this_run,
+        				cv.invoice_amount,
+        				dbo.GetOutstandingBalance(
+        					cv.billing_instruction_accept_reject,
+        					cv.suggested_billing_instruction,
+        					cv.total_producer_bill_with_bad_debt,
+        					cv.amount_liability_difference_calc_vs_prev
+        				) AS outstanding_balance,
+        				cv.billing_instruction_id,
+        				cv.instruction_confirmed_date,
+        				cv.instruction_confirmed_by			
+        			FROM #CalculatedValues AS cv;
+
+            DROP TABLE #CalculatedValues;
+        END'
+    EXEC(@sql)
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250728083102_UpdateBillingInstructionId'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250728083102_UpdateBillingInstructionId', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
