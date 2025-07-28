@@ -423,4 +423,7 @@
   <data name="InsertInvoiceDetailsAtProducerLevel" xml:space="preserve">
     <value>dbo.InsertInvoiceDetailsAtProducerLevel</value>
   </data>
+  <data name="MustBeBetweenWithCurrency" xml:space="preserve">
+    <value>must be between £{0} and £{1}</value>
+  </data>
 </root>

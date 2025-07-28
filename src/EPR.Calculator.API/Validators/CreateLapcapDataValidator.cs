@@ -12,7 +12,7 @@ namespace EPR.Calculator.API.Validators
                 .WithMessage(CommonResources.ParameterYearRequired);
             this.RuleFor(x => x.LapcapDataTemplateValues).NotNull()
                 .Must(x => x.Count() == CommonResources.LapcapDataUniqueReferences.Split(',').Length)
-                .WithMessage(string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.DefaultParameterUniqueReferences.Split(',').Length));
+                .WithMessage(string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.LapcapDataUniqueReferences.Split(',').Length));
             this.RuleFor(x => x.LapcapFileName)
                 .NotEmpty()
                 .WithMessage(CommonResources.FileNameRequired);

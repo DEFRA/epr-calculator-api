@@ -538,6 +538,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to must be between £{0} and £{1}.
+        /// </summary>
+        public static string MustBeBetweenWithCurrency {
+            get {
+                return ResourceManager.GetString("MustBeBetweenWithCurrency", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No billing file metadata for Run Id {0}.
         /// </summary>
         public static string NoBillingFileMetadataForRunId {

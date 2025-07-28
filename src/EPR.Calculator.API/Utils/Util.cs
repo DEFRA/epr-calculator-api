@@ -125,7 +125,7 @@ namespace EPR.Calculator.API.Utils
             else
             {
                 sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
-                sb.Append(string.Format(CommonResources.MustBeBetween, Math.Round(defaulTemplate.ValidRangeFrom, 2, MidpointRounding.ToZero), Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)));
+                sb.Append(string.Format(CommonResources.MustBeBetweenWithCurrency, Math.Round(defaulTemplate.ValidRangeFrom, 2, MidpointRounding.ToZero), Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)));
             }
 
             return sb.ToString();
