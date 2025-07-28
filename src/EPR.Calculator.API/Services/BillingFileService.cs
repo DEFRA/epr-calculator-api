@@ -524,7 +524,7 @@ namespace EPR.Calculator.API.Services
             ParentProducer
             {
                 ProducerId = odd.OrganisationId ?? 0,
-                ProducerName= odd.OrganisationName,
+                ProducerName = odd.OrganisationName,
             }).ToListAsync(cancellationToken);
     }
 }
