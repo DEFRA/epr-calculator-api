@@ -356,31 +356,31 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 {
                     Id = RunClassificationStatusIds.INTHEQUEUEID,
                     Status = RunClassificationDescStatus.INTHEQUEUE,
-                    CreatedBy = CreatedBy,
+                    CreatedBy = "Test User",
                 },
                 new CalculatorRunClassification
                 {
                     Id = RunClassificationStatusIds.RUNNINGID,
                     Status = RunClassificationDescStatus.RUNNING,
-                    CreatedBy = CreatedBy,
+                    CreatedBy = "Test User",
                 },
                 new CalculatorRunClassification
                 {
                     Id = RunClassificationStatusIds.UNCLASSIFIEDID,
                     Status = RunClassificationDescStatus.UNCLASSIFIED,
-                    CreatedBy = CreatedBy,
+                    CreatedBy = "Test User",
                 },
                 new CalculatorRunClassification
                 {
                     Id = RunClassificationStatusIds.TESTRUNID,
                     Status = RunClassificationDescStatus.TESTRUN,
-                    CreatedBy = CreatedBy,
+                    CreatedBy = "Test User",
                 },
                 new CalculatorRunClassification
                 {
                     Id = RunClassificationStatusIds.ERRORID,
                     Status = RunClassificationDescStatus.ERROR,
-                    CreatedBy = CreatedBy,
+                    CreatedBy = "Test User",
                 },
                 new CalculatorRunClassification
                 {
@@ -398,25 +398,25 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 {
                     Id = RunClassificationStatusIds.INITIALRUNID,
                     Status = RunClassificationDescStatus.INITIALRUN,
-                    CreatedBy = CreatedBy,
+                    CreatedBy = "Test user",
                 },
                 new CalculatorRunClassification
                 {
                     Id = RunClassificationStatusIds.INTERIMRECALCULATIONRUNID,
                     Status = RunClassificationDescStatus.INTERIMRECALCULATIONRUN,
-                    CreatedBy = CreatedBy,
+                    CreatedBy = "Test user",
                 },
                 new CalculatorRunClassification
                 {
                     Id = RunClassificationStatusIds.FINALRUNID,
                     Status = RunClassificationDescStatus.FINALRUN,
-                    CreatedBy = CreatedBy,
+                    CreatedBy = "Test user",
                 },
                 new CalculatorRunClassification
                 {
-                     Id = RunClassificationStatusIds.FINALRECALCULATIONRUNID,
-                     Status = RunClassificationDescStatus.FINALRECALCULATIONRUN,
-                     CreatedBy = CreatedBy,
+                    Id = RunClassificationStatusIds.FINALRECALCULATIONRUNID,
+                    Status = RunClassificationDescStatus.FINALRECALCULATIONRUN,
+                    CreatedBy = "Test user",
                 },
                 new CalculatorRunClassification
                 {

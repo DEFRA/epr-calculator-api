@@ -1,4 +1,6 @@
-﻿using EPR.Calculator.API.Controllers;
+﻿using System.Security.Claims;
+using System.Security.Principal;
+using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -13,8 +15,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.Security.Claims;
-using System.Security.Principal;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -24,7 +24,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
         private readonly Mock<IBillingFileService> mockBillingFileService;
         private readonly Mock<IOrgAndPomWrapper> mockOrgAndPomWrapper;
-        
+
         private ApplicationDBContext context;
         private CalculatorNewController controller;
 
@@ -37,12 +37,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.context = new ApplicationDBContext(dbContextOptions);
             this.context.Database.EnsureCreated();
 
-
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             this.mockBillingFileService = new Mock<IBillingFileService>();
             this.mockOrgAndPomWrapper = new Mock<IOrgAndPomWrapper>();
             var config = TelemetryConfiguration.CreateDefault();
-            var telemetryClient = new TelemetryClient(config); ;
+            var telemetryClient = new TelemetryClient(config);
 
             this.controller = new CalculatorNewController(
                 this.context,
@@ -51,24 +50,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 this.mockOrgAndPomWrapper.Object,
                 telemetryClient);
 
-            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
-            {
-                Status = "DELETED",
-                Id = 6,
-                CreatedBy = "SomeUser",
-            });
-            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
-            {
-                Status = "INITIAL RUN COMPLETED",
-                Id = 7,
-                CreatedBy = "SomeUser",
-            });
-            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
-            {
-                Status = "INITIAL RUN",
-                Id = 8,
-                CreatedBy = "SomeUser",
-            });
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
