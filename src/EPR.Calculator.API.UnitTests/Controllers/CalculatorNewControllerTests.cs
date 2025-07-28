@@ -43,7 +43,24 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var config = TelemetryConfiguration.CreateDefault();
             var telemetryClient = new TelemetryClient(config);
             this.controller = new CalculatorNewController(this.context, this.mockValidator.Object, this.mockBillingFileService.Object, this.mockWrapper.Object, telemetryClient);
-
+            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
+            {
+                Status = "DELETED",
+                Id = 6,
+                CreatedBy = "SomeUser",
+            });
+            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
+            {
+                Status = "INITIAL RUN COMPLETED",
+                Id = 7,
+                CreatedBy = "SomeUser",
+            });
+            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
+            {
+                Status = "INITIAL RUN",
+                Id = 8,
+                CreatedBy = "SomeUser",
+            });
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 CalculatorRunClassificationId = 8,

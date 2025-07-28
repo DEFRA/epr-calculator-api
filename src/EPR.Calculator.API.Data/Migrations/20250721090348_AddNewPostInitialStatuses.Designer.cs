@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250728101207_AddNewPostInitialStatuses")]
+    [Migration("20250721090348_AddNewPostInitialStatuses")]
     partial class AddNewPostInitialStatuses
     {
         /// <inheritdoc />
@@ -183,31 +183,31 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedBy = "System User",
+                            CreatedBy = "Test User",
                             Status = "IN THE QUEUE"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedBy = "System User",
+                            CreatedBy = "Test User",
                             Status = "RUNNING"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedBy = "System User",
+                            CreatedBy = "Test User",
                             Status = "UNCLASSIFIED"
                         },
                         new
                         {
                             Id = 4,
-                            CreatedBy = "System User",
-                            Status = "TEST RUN"
+                            CreatedBy = "Test User",
+                            Status = "PLAY"
                         },
                         new
                         {
                             Id = 5,
-                            CreatedBy = "System User",
+                            CreatedBy = "Test User",
                             Status = "ERROR"
                         },
                         new
@@ -225,25 +225,25 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             Id = 8,
-                            CreatedBy = "System User",
+                            CreatedBy = "Test User",
                             Status = "INITIAL RUN"
                         },
                         new
                         {
                             Id = 9,
-                            CreatedBy = "System User",
+                            CreatedBy = "Test User",
                             Status = "INTERIM RE-CALCULATION RUN"
                         },
                         new
                         {
                             Id = 10,
-                            CreatedBy = "System User",
+                            CreatedBy = "Test User",
                             Status = "FINAL RUN"
                         },
                         new
                         {
                             Id = 11,
-                            CreatedBy = "System User",
+                            CreatedBy = "Test User",
                             Status = "FINAL RE-CALCULATION RUN"
                         },
                         new
@@ -1627,8 +1627,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.Property<decimal?>("InvoicedNetTonnage")
                         .HasMaxLength(4000)
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
+                        .HasColumnType("decimal(18,2)")
                         .HasColumnName("invoiced_net_tonnage");
 
                     b.Property<int>("MaterialId")
