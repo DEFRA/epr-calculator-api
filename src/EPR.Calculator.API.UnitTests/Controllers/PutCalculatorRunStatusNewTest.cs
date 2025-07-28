@@ -24,7 +24,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
         private readonly Mock<IBillingFileService> mockBillingFileService;
         private readonly Mock<IOrgAndPomWrapper> mockOrgAndPomWrapper;
-        
+
         private ApplicationDBContext context;
         private CalculatorNewController controller;
 
@@ -37,12 +37,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.context = new ApplicationDBContext(dbContextOptions);
             this.context.Database.EnsureCreated();
 
-
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             this.mockBillingFileService = new Mock<IBillingFileService>();
             this.mockOrgAndPomWrapper = new Mock<IOrgAndPomWrapper>();
             var config = TelemetryConfiguration.CreateDefault();
-            var telemetryClient = new TelemetryClient(config); ;
+            var telemetryClient = new TelemetryClient(config);
 
             this.controller = new CalculatorNewController(
                 this.context,
