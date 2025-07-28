@@ -180,31 +180,31 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedBy = "Test User",
+                            CreatedBy = "System User",
                             Status = "IN THE QUEUE"
                         },
                         new
                         {
                             Id = 2,
-                            CreatedBy = "Test User",
+                            CreatedBy = "System User",
                             Status = "RUNNING"
                         },
                         new
                         {
                             Id = 3,
-                            CreatedBy = "Test User",
+                            CreatedBy = "System User",
                             Status = "UNCLASSIFIED"
                         },
                         new
                         {
                             Id = 4,
-                            CreatedBy = "Test User",
-                            Status = "PLAY"
+                            CreatedBy = "System User",
+                            Status = "TEST RUN"
                         },
                         new
                         {
                             Id = 5,
-                            CreatedBy = "Test User",
+                            CreatedBy = "System User",
                             Status = "ERROR"
                         },
                         new
@@ -222,25 +222,25 @@ namespace EPR.Calculator.API.Data.Migrations
                         new
                         {
                             Id = 8,
-                            CreatedBy = "Test User",
+                            CreatedBy = "System User",
                             Status = "INITIAL RUN"
                         },
                         new
                         {
                             Id = 9,
-                            CreatedBy = "Test User",
+                            CreatedBy = "System User",
                             Status = "INTERIM RE-CALCULATION RUN"
                         },
                         new
                         {
                             Id = 10,
-                            CreatedBy = "Test User",
+                            CreatedBy = "System User",
                             Status = "FINAL RUN"
                         },
                         new
                         {
                             Id = 11,
-                            CreatedBy = "Test User",
+                            CreatedBy = "System User",
                             Status = "FINAL RE-CALCULATION RUN"
                         },
                         new

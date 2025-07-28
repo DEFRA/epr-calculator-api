@@ -51,24 +51,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 this.mockOrgAndPomWrapper.Object,
                 telemetryClient);
 
-            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
-            {
-                Status = "DELETED",
-                Id = 6,
-                CreatedBy = "SomeUser",
-            });
-            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
-            {
-                Status = "INITIAL RUN COMPLETED",
-                Id = 7,
-                CreatedBy = "SomeUser",
-            });
-            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
-            {
-                Status = "INITIAL RUN",
-                Id = 8,
-                CreatedBy = "SomeUser",
-            });
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
