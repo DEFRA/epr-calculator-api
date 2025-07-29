@@ -78,6 +78,7 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
                 Message = "Run is already classified.",
             });
         }
+
         return validationResult;
     }
 }
