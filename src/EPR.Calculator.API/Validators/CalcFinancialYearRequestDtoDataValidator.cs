@@ -1,7 +1,9 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Validators;
+using EPR.Calculator.API.Enums;
 using Microsoft.EntityFrameworkCore;
+
+namespace EPR.Calculator.API.Validators;
 
 public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearRequestDtoDataValidator
 {
@@ -12,7 +14,7 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
         this.context = context;
     }
 
-    public async Task<ValidationResultDto<ErrorDto>> Validate(CalcFinancialYearRequestDto request)
+    public async Task<ValidationResultDto<ErrorDto>> Validate(CalcFinancialYearRequestDto request, CancellationToken cancellationToken = default)
     {
         var validationResult = new ValidationResultDto<ErrorDto>();
 
@@ -29,7 +31,10 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
         }
 
         // Check if financialYear exists in the database
-        var dbYear = await this.context.FinancialYears.SingleOrDefaultAsync(y => y.Name == request.FinancialYear);
+        var dbYear = await this.context.FinancialYears
+            .AsNoTracking()
+            .SingleOrDefaultAsync(y => y.Name == request.FinancialYear, cancellationToken);
+
         if (dbYear == null)
         {
             validationResult.IsInvalid = true;
@@ -37,19 +42,40 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
             {
                 Message = "Financial year not found in the database.",
             });
+            return validationResult;
         }
 
-        var anyMatchingRunWithFinancialYear = await this.context.CalculatorRuns.AnyAsync(x =>
-            x.FinancialYearId == request.FinancialYear
-            &&
-            request.RunId == x.Id);
+        var currentRun = await this.context.CalculatorRuns
+            .AsNoTracking()
+            .SingleOrDefaultAsync(run => run.Id == request.RunId, cancellationToken);
 
-        if (!anyMatchingRunWithFinancialYear)
+        // Check that the run esists
+        if (currentRun == null)
+        {
+            validationResult.IsInvalid = true;
+            validationResult.Errors.Add(new ErrorDto
+            {
+                Message = "Run not found in the database.",
+            });
+            return validationResult;
+        }
+
+        if (currentRun.FinancialYearId != request.FinancialYear)
         {
             validationResult.IsInvalid = true;
             validationResult.Errors.Add(new ErrorDto
             {
                 Message = "No matching run found with the specified financial year.",
+            });
+        }
+
+        // Check that the run is unclassified
+        if (currentRun.CalculatorRunClassificationId != (int)RunClassification.UNCLASSIFIED)
+        {
+            validationResult.IsInvalid = true;
+            validationResult.Errors.Add(new ErrorDto
+            {
+                Message = "Run is already classified.",
             });
         }
 
