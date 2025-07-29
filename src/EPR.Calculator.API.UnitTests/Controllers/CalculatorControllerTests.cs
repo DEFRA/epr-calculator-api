@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using System.Security.Principal;
 using AutoFixture;
 using EnumsNET;
 using EPR.Calculator.API.Controllers;
@@ -14,8 +16,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.Security.Claims;
-using System.Security.Principal;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
