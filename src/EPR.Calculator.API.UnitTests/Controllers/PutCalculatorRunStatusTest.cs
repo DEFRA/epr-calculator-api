@@ -71,7 +71,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
-                    this.mockValidator.Object);
+                    this.mockValidator.Object,
+                    Mock.Of<IAvailableClassificationsService>());
             controller.ControllerContext = new ControllerContext
             {
                 HttpContext = defaultContext,
@@ -91,7 +92,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void PutCalculatorRunStatusTest_Invalid_Classification_Id()
         {
             var runId = 1;
-            var invalidClassificationId = 10;
+            var invalidClassificationId = 16;
             var date = DateTime.Now;
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
@@ -111,7 +112,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
-                    this.mockValidator.Object);
+                    this.mockValidator.Object,
+                    Mock.Of<IAvailableClassificationsService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -160,7 +162,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
-                    this.mockValidator.Object);
+                    this.mockValidator.Object,
+                    Mock.Of<IAvailableClassificationsService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -212,7 +215,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
-                    this.mockValidator.Object);
+                    this.mockValidator.Object,
+                    Mock.Of<IAvailableClassificationsService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
