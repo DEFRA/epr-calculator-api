@@ -259,6 +259,24 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enter the {0} percentage decrease.
+        /// </summary>
+        public static string EnterThePercentageDecrease {
+            get {
+                return ResourceManager.GetString("EnterThePercentageDecrease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter the {0} percentage increase.
+        /// </summary>
+        public static string EnterThePercentageIncrease {
+            get {
+                return ResourceManager.GetString("EnterThePercentageIncrease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enter the total costs for {0} in {1}.
         /// </summary>
         public static string EnterTotalCosts {
@@ -547,6 +565,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to must be between {0}% and {1}%.
+        /// </summary>
+        public static string MustBeBetweenWithPercentage {
+            get {
+                return ResourceManager.GetString("MustBeBetweenWithPercentage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No billing file metadata for Run Id {0}.
         /// </summary>
         public static string NoBillingFileMetadataForRunId {
@@ -700,7 +727,7 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  Parameter Unique ref {0}.
+        ///   Looks up a localized string similar to Parameter Unique ref {0}.
         /// </summary>
         public static string ParameterUniqueRef {
             get {

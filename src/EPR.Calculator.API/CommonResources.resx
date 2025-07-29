@@ -388,7 +388,7 @@
     <value>and Parameter Category {0} </value>
   </data>
   <data name="ParameterUniqueRef" xml:space="preserve">
-    <value> Parameter Unique ref {0}</value>
+    <value>Parameter Unique ref {0}</value>
   </data>
   <data name="MustBeBetween" xml:space="preserve">
     <value>must be between {0} and {1} </value>
@@ -425,5 +425,14 @@
   </data>
   <data name="MustBeBetweenWithCurrency" xml:space="preserve">
     <value>must be between £{0} and £{1}</value>
+  </data>
+  <data name="EnterThePercentageIncrease" xml:space="preserve">
+    <value>Enter the {0} percentage increase</value>
+  </data>
+  <data name="EnterThePercentageDecrease" xml:space="preserve">
+    <value>Enter the {0} percentage decrease</value>
+  </data>
+  <data name="MustBeBetweenWithPercentage" xml:space="preserve">
+    <value>must be between {0}% and {1}%</value>
   </data>
 </root>

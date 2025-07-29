@@ -37,11 +37,11 @@ namespace EPR.Calculator.API.Utils
             }
             else if (IsPercentageIncrease(defaultTemplate))
             {
-                sb.Append(string.Format(CommonResources.PercentageIncrease, defaultTemplate.ParameterType));
+                sb.Append(string.Format(CommonResources.EnterThePercentageIncrease, defaultTemplate.ParameterType));
             }
             else
             {
-                sb.Append(string.Format(CommonResources.PercentageDecrease, defaultTemplate.ParameterType));
+                sb.Append(string.Format(CommonResources.EnterThePercentageDecrease, defaultTemplate.ParameterType));
             }
 
             return sb.ToString();
@@ -110,17 +110,17 @@ namespace EPR.Calculator.API.Utils
             else if (IsBadDebt(defaulTemplate))
             {
                 sb.Append($"The {defaulTemplate.ParameterType} ");
-                sb.Append(string.Format(CommonResources.MustBeBetween, decimal.Truncate(defaulTemplate.ValidRangeFrom), Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)));
+                sb.Append(string.Format(CommonResources.MustBeBetweenWithPercentage, decimal.Truncate(defaulTemplate.ValidRangeFrom), Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)));
             }
             else if (IsPercentageIncrease(defaulTemplate))
             {
                 sb.Append(string.Format(CommonResources.PercentageIncrease, defaulTemplate.ParameterType));
-                sb.Append(string.Format(CommonResources.MustBeBetween, decimal.Truncate(defaulTemplate.ValidRangeFrom), Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)));
+                sb.Append(string.Format(CommonResources.MustBeBetweenWithPercentage, decimal.Truncate(defaulTemplate.ValidRangeFrom), Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)));
             }
             else if (IsPercentageDecrease(defaulTemplate))
             {
                 sb.Append(string.Format(CommonResources.PercentageDecrease, defaulTemplate.ParameterType));
-                sb.Append(string.Format(CommonResources.MustBeBetween, Math.Round(defaulTemplate.ValidRangeFrom, 2, MidpointRounding.ToZero), decimal.Truncate(defaulTemplate.ValidRangeTo)));
+                sb.Append(string.Format(CommonResources.MustBeBetweenWithPercentage, Math.Round(defaulTemplate.ValidRangeFrom, 2, MidpointRounding.ToZero), decimal.Truncate(defaulTemplate.ValidRangeTo)));
             }
             else
             {
