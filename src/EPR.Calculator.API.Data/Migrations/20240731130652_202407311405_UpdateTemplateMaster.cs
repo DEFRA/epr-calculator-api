@@ -12,13 +12,16 @@ namespace EPR.Calculator.API.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // Commented out for debugging purposes (suspected source of pipeline failure)
+
+            /*
             migrationBuilder.InsertData(
                 table: "default_parameter_template_master",
                 columns: new[] { "parameter_unique_ref", "parameter_type", "parameter_category", "valid_Range_from", "valid_Range_to" },
                 values: new Object[,] {
-                                {
-                                    "TONT-AD", "Amount Decrease", "Tonnage change threshold", 0.00M, 999999999.99M
-                                }
+                    {
+                        "TONT-AD", "Amount Decrease", "Tonnage change threshold", 0.00M, 999999999.99M
+                    }
                 }
             );
 
@@ -35,6 +38,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 keyColumn: "parameter_unique_ref",
                 keyValue: "TONT-DI"
             );
+            */
         }
 
         /// <inheritdoc />
