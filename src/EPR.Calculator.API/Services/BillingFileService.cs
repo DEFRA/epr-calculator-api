@@ -6,6 +6,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exceptions;
+using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Utils;
@@ -214,33 +215,26 @@ namespace EPR.Calculator.API.Services
 
             var parentProducers = await this.GetParentProducersLatestAsync(runId, cancellationToken);
 
-            var parentProducerIds = await this.GetParentProducerIdsAsync(runId, cancellationToken);
-
             var billingInstructions = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
                         join pd in applicationDBContext.ProducerDetail
                         on prsi.ProducerId equals pd.ProducerId
-                        where prsi.CalculatorRunId == runId && pd.CalculatorRunId == runId && pd.SubsidiaryId == null
-                        select new ProducerBillingInstructionsDto()
+                        where prsi.CalculatorRunId == runId && pd.CalculatorRunId == runId
+                        select new ProducerBillingInstructionDetails()
                         {
                             ProducerId = pd.ProducerId,
                             BillingInstructionAcceptReject = prsi.BillingInstructionAcceptReject ?? BillingStatus.Pending.ToString(),
                             SuggestedBillingInstruction = prsi.SuggestedBillingInstruction,
                             SuggestedInvoiceAmount = prsi.SuggestedInvoiceAmount,
+                            SubsidaryId = pd.SubsidiaryId,
                         };
 
-            var billingInstructionsWithoutParentPomRecords = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                           join pd in applicationDBContext.ProducerDetail
-                           on prsi.ProducerId equals pd.ProducerId
-                           where prsi.CalculatorRunId == runId && pd.CalculatorRunId == runId && pd.SubsidiaryId != null && !parentProducerIds.Contains(pd.ProducerId)
-                           select new ProducerBillingInstructionsDto()
-                           {
-                               ProducerId = pd.ProducerId,
-                               BillingInstructionAcceptReject = prsi.BillingInstructionAcceptReject ?? BillingStatus.Pending.ToString(),
-                               SuggestedBillingInstruction = prsi.SuggestedBillingInstruction,
-                               SuggestedInvoiceAmount = prsi.SuggestedInvoiceAmount,
-                           };
+            var billingInstructionsWithParents = ProducerBillingInstructionDetailsMapper.Map(await billingInstructions.Where(t => t.SubsidaryId == null).ToListAsync());
+            var parentProducerIds = billingInstructionsWithParents?.Select(t => t.ProducerId).ToList() ?? [];
+            var billingInstructionsWithOutParents = ProducerBillingInstructionDetailsMapper.Map(await billingInstructions.Where(t => t.SubsidaryId != null && !parentProducerIds.Contains(t.ProducerId)).ToListAsync());
 
-            var query = await billingInstructions.Union(billingInstructionsWithoutParentPomRecords).ToListAsync(cancellationToken);
+            billingInstructionsWithOutParents = billingInstructionsWithOutParents.GroupBy(t => t.ProducerId).Select(i => i.First()).ToList();
+
+            var query = billingInstructionsWithParents is null ? billingInstructionsWithOutParents: billingInstructionsWithParents.Union(billingInstructionsWithOutParents);
 
             // Group by on BillingInstructionAcceptReject
             var groupedStatus = query
@@ -507,12 +501,6 @@ namespace EPR.Calculator.API.Services
         private Task<CalculatorRun?> GetRunAsync(int runId, CancellationToken cancellationToken) =>
             applicationDBContext.CalculatorRuns
                 .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
-
-        private Task<List<int>> GetParentProducerIdsAsync(int runid, CancellationToken cancellationToken) =>
-            applicationDBContext.ProducerDetail
-                .Where(pd => pd.SubsidiaryId == null && pd.CalculatorRunId == runid)
-                .Select(pd => pd.ProducerId)
-                .ToListAsync(cancellationToken);
 
         private Task<List<ParentProducer>> GetParentProducersLatestAsync(int runId, CancellationToken cancellationToken) =>
             (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
