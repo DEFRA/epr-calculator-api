@@ -1,5 +1,4 @@
-﻿using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Dtos;
+﻿using EPR.Calculator.API.Dtos;
 using FluentValidation;
 
 namespace EPR.Calculator.API.Validators
@@ -10,17 +9,17 @@ namespace EPR.Calculator.API.Validators
         {
             this.RuleFor(x => x.ParameterYear)
                 .NotEmpty()
-                .WithMessage(ErrorMessages.YearRequired);
+                .WithMessage(CommonResources.ParameterYearRequired);
             this.RuleFor(x => x.SchemeParameterTemplateValues)
                 .NotNull()
-                .Must(x => x.Count() == DefaultParameterUniqueReferences.UniqueReferences.Length)
-                .WithMessage(ErrorMessages.SchemeParameterTemplateValuesMissing);
+                .Must(x => x.Count() == CommonResources.DefaultParameterUniqueReferences.Split(',').Length)
+                .WithMessage(string.Format(CommonResources.SchemeParameterTemplateValuesMissing, CommonResources.DefaultParameterUniqueReferences.Split(',').Length));
             this.RuleFor(x => x.ParameterFileName)
                 .NotEmpty()
-                .WithMessage(ErrorMessages.FileNameRequired);
+                .WithMessage(CommonResources.FileNameRequired);
             this.RuleFor(x => x.ParameterFileName)
                 .MaximumLength(256)
-                .WithMessage(ErrorMessages.MaxFileNameLength);
+                .WithMessage(CommonResources.MaxFileNameLength);
         }
     }
 }

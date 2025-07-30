@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -112,7 +111,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunId,
+                        Message = CommonResources.InvalidRunId,
                     };
                 }
 
@@ -126,7 +125,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidOrganisationId,
+                        Message = CommonResources.InvalidOrganisationId,
                     };
                 }
 
@@ -252,8 +251,8 @@ namespace EPR.Calculator.API.Services
 
             query = query.Distinct().OrderBy(x => x.ProducerId);
 
-            requestDto.PageNumber ??= CommonConstants.ProducerBillingInstructionsDefaultPageNumber;
-            requestDto.PageSize ??= CommonConstants.ProducerBillingInstructionsDefaultPageSize;
+            requestDto.PageNumber ??= int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageNumber, out int pageNumber) ? pageNumber : 1;
+            requestDto.PageSize ??= int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageSize, out int pageSize) ? pageSize : 10;
 
             var pagedResult = await query
                 .Skip((requestDto.PageNumber.Value - 1) * requestDto.PageSize.Value)
@@ -300,7 +299,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunId,
+                        Message = CommonResources.InvalidRunId,
                     };
                 }
 
@@ -309,7 +308,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunStatusForAcceptAll,
+                        Message = CommonResources.InvalidRunStatusForAcceptAll,
                     };
                 }
 
@@ -323,7 +322,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidOrganisationId,
+                        Message = CommonResources.InvalidOrganisationId,
                     };
                 }
 
@@ -369,7 +368,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunId,
+                        Message = CommonResources.InvalidRunId,
                     };
                 }
 
@@ -378,7 +377,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunStatusForAcceptAll,
+                        Message = CommonResources.InvalidRunStatusForAcceptAll,
                     };
                 }
 
@@ -411,7 +410,7 @@ namespace EPR.Calculator.API.Services
         {
             if (runStatus == null)
             {
-                throw new KeyNotFoundException($"Run ID {runId} was not found.");
+                throw new KeyNotFoundException(string.Format(CommonResources.RunINotFound, runId));
             }
 
             var validRunClassifications = new HashSet<int>

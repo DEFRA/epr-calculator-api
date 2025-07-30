@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using System.Security.Principal;
-using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.UnitTests.Controllers;
 using Microsoft.AspNetCore.Http;
@@ -37,15 +36,15 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 ParameterFileName = "TestFileName",
             };
 
-            this.DefaultParameterSettingController.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
-            this.DefaultParameterSettingController.ModelState.AddModelError("SchemeParameterTemplateValues", ErrorMessages.SchemeParameterTemplateValuesMissing);
+            this.DefaultParameterSettingController.ModelState.AddModelError("ParameterYear", CommonResources.ParameterYearRequired);
+            this.DefaultParameterSettingController.ModelState.AddModelError("SchemeParameterTemplateValues", string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.DefaultParameterUniqueReferences.Split(',').Length));
             var actionResult = await this.DefaultParameterSettingController.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
 
             var modelErrors = actionResult?.Value as IEnumerable<ModelError>;
             Assert.IsNotNull(modelErrors);
-            Assert.IsTrue(modelErrors.Count(x => x.ErrorMessage == ErrorMessages.YearRequired) == 1);
-            Assert.IsTrue(modelErrors.Count(x => x.ErrorMessage == ErrorMessages.SchemeParameterTemplateValuesMissing) == 1);
+            Assert.IsTrue(modelErrors.Count(x => x.ErrorMessage == CommonResources.ParameterYearRequired) == 1);
+            Assert.IsTrue(modelErrors.Count(x => x.ErrorMessage == string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.DefaultParameterUniqueReferences.Split(',').Length)) == 1);
         }
 
         [TestMethod]
@@ -79,7 +78,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
             var errors = actionResult?.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
             Assert.IsNotNull(errors);
-            Assert.IsTrue(errors.Count() == DefaultParameterUniqueReferences.UniqueReferences.Length);
+            Assert.IsTrue(errors.Count() == CommonResources.DefaultParameterUniqueReferences.Split(',').Length);
         }
 
         [TestMethod]
@@ -99,7 +98,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 HttpContext = context,
             };
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
-            foreach (var uniqueRef in DefaultParameterUniqueReferences.UniqueReferences)
+            foreach (var uniqueRef in CommonResources.DefaultParameterUniqueReferences.Split(','))
             {
                 schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
                 {
