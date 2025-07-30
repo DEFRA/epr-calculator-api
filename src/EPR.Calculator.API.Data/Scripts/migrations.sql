@@ -154,6 +154,62 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20240731130652_202407311405_UpdateTemplateMaster'
 )
 BEGIN
+
+                    IF NOT EXISTS (
+                        SELECT 1 FROM [default_parameter_template_master]
+                        WHERE [parameter_unique_ref] = 'TONT-AD'
+                    )
+                    BEGIN
+                        IF EXISTS (
+                            SELECT * FROM [sys].[identity_columns]
+                            WHERE [object_id] = OBJECT_ID('default_parameter_template_master')
+                        )
+                            SET IDENTITY_INSERT [default_parameter_template_master] ON;
+
+                        INSERT INTO [default_parameter_template_master]
+                        ([parameter_unique_ref], [parameter_type], [parameter_category], [valid_Range_from], [valid_Range_to])
+                        VALUES ('TONT-AD', 'Amount Decrease', 'Tonnage change threshold', 0.00, 999999999.99);
+
+                        IF EXISTS (
+                            SELECT * FROM [sys].[identity_columns]
+                            WHERE [object_id] = OBJECT_ID('default_parameter_template_master')
+                        )
+                            SET IDENTITY_INSERT [default_parameter_template_master] OFF;
+                    END
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240731130652_202407311405_UpdateTemplateMaster'
+)
+BEGIN
+
+                    UPDATE [default_parameter_setting_detail]
+                    SET [parameter_unique_ref] = 'TONT-AD'
+                    WHERE [parameter_unique_ref] = 'TONT-DI';
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240731130652_202407311405_UpdateTemplateMaster'
+)
+BEGIN
+
+                    DELETE FROM [default_parameter_template_master]
+                    WHERE [parameter_unique_ref] = 'TONT-DI';
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20240731130652_202407311405_UpdateTemplateMaster'
+)
+BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
     VALUES (N'20240731130652_202407311405_UpdateTemplateMaster', N'8.0.7');
 END;
