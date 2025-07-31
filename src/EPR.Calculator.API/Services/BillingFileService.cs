@@ -228,13 +228,13 @@ namespace EPR.Calculator.API.Services
                             SubsidaryId = pd.SubsidiaryId,
                         };
 
-            var billingInstructionsWithParents = ProducerBillingInstructionDetailsMapper.Map(await billingInstructions.Where(t => t.SubsidaryId == null).ToListAsync());
+            var billingInstructionsWithParents = ProducerBillingInstructionDetailsMapper.Map(await billingInstructions.Where(t => t.SubsidaryId == null).ToListAsync(cancellationToken));
             var parentProducerIds = billingInstructionsWithParents?.Select(t => t.ProducerId).ToList() ?? [];
-            var billingInstructionsWithOutParents = ProducerBillingInstructionDetailsMapper.Map(await billingInstructions.Where(t => t.SubsidaryId != null && !parentProducerIds.Contains(t.ProducerId)).ToListAsync());
+            var billingInstructionsWithOutParents = ProducerBillingInstructionDetailsMapper.Map(await billingInstructions.Where(t => t.SubsidaryId != null && !parentProducerIds.Contains(t.ProducerId)).ToListAsync(cancellationToken));
 
             billingInstructionsWithOutParents = billingInstructionsWithOutParents.GroupBy(t => t.ProducerId).Select(i => i.First()).ToList();
 
-            var query = billingInstructionsWithParents is null ? billingInstructionsWithOutParents: billingInstructionsWithParents.Union(billingInstructionsWithOutParents);
+            var query = billingInstructionsWithParents is null ? billingInstructionsWithOutParents : billingInstructionsWithParents.Union(billingInstructionsWithOutParents);
 
             // Group by on BillingInstructionAcceptReject
             var groupedStatus = query
