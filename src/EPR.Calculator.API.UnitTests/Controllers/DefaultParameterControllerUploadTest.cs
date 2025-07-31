@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using System.Security.Principal;
-using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -75,7 +74,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var defaultParameterDetail25 = new DefaultParameterSettingDetail
             {
                 DefaultParameterSettingMaster = DefaultParameterSettingMaster25,
-                ParameterUniqueReferenceId = DefaultParameterUniqueReferences.UniqueReferences.First(),
+                ParameterUniqueReferenceId = CommonResources.DefaultParameterUniqueReferences.Split(',').First(),
             };
 
             var DefaultParameterSettingMaster26 = new DefaultParameterSettingMaster
@@ -88,7 +87,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var defaultParameterDetail26 = new DefaultParameterSettingDetail
             {
                 DefaultParameterSettingMaster = DefaultParameterSettingMaster26,
-                ParameterUniqueReferenceId = DefaultParameterUniqueReferences.UniqueReferences.First(),
+                ParameterUniqueReferenceId = CommonResources.DefaultParameterUniqueReferences.Split(',').First(),
             };
             this.DbContext.DefaultParameterSettings.Add(DefaultParameterSettingMaster25);
             this.DbContext.DefaultParameterSettingDetail.Add(defaultParameterDetail25);

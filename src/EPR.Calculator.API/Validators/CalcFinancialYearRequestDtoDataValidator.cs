@@ -1,3 +1,4 @@
+using EPR.Calculator.API;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
@@ -22,7 +23,7 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
             validationResult.IsInvalid = true;
             validationResult.Errors.Add(new ErrorDto
             {
-                Message = "Financial year is required.",
+                Message = CommonResources.FinancialYearRequired,
                 Description = null,
             });
             return validationResult;
@@ -35,7 +36,7 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
             validationResult.IsInvalid = true;
             validationResult.Errors.Add(new ErrorDto
             {
-                Message = "Financial year not found in the database.",
+                Message = CommonResources.FinancialYearNotInDatabase,
             });
         }
 
@@ -49,7 +50,7 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
             validationResult.IsInvalid = true;
             validationResult.Errors.Add(new ErrorDto
             {
-                Message = "No matching run found with the specified financial year.",
+                Message = CommonResources.NoMatchingRunFound,
             });
         }
 

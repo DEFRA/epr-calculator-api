@@ -1,5 +1,4 @@
 ﻿using Azure.Messaging.ServiceBus;
-using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Models;
 using Microsoft.Extensions.Azure;
 using Newtonsoft.Json;
@@ -29,7 +28,7 @@ namespace EPR.Calculator.API.Services
 
         private async Task SendMessageAsync(string queueName, string message)
         {
-            var client = this.serviceBusClientFactory.CreateClient(CommonConstants.ServiceBusClientName);
+            var client = this.serviceBusClientFactory.CreateClient(CommonResources.ServiceBusClientName);
             var serviceBusSender = client.CreateSender(queueName);
             ServiceBusMessage serviceBusMessage = new ServiceBusMessage(message);
             await serviceBusSender.SendMessageAsync(serviceBusMessage);
