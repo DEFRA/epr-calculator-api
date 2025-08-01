@@ -212,7 +212,7 @@ namespace EPR.Calculator.API.Services
             var searchQuery = requestDto.SearchQuery;
 
             var query = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                        where prsi.CalculatorRunId == runId 
+                        where prsi.CalculatorRunId == runId
                         select new ProducerBillingInstructionsDto()
                         {
                             ProducerId = prsi.ProducerId,
@@ -258,7 +258,7 @@ namespace EPR.Calculator.API.Services
 
             var allProducerIds = query.Select(x => x.ProducerId).Distinct();
 
-            var parentProducers = await this.GetParentProducersLatestAsync(runId, cancellationToken, allProducerIds);
+            var parentProducers = await this.GetParentProducersLatestAsync(runId, allProducerIds, cancellationToken);
 
             foreach (var record in pagedResult)
             {
@@ -491,7 +491,7 @@ namespace EPR.Calculator.API.Services
             applicationDBContext.CalculatorRuns
                 .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
-        private Task<List<ParentProducer>> GetParentProducersLatestAsync(int runId, CancellationToken cancellationToken, IEnumerable<int> producerIds) =>
+        private Task<List<ParentProducer>> GetParentProducersLatestAsync(int runId, IEnumerable<int> producerIds, CancellationToken cancellationToken) =>
             (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
             join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster
             on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
