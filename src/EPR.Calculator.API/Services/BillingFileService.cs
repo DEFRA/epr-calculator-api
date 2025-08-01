@@ -211,28 +211,15 @@ namespace EPR.Calculator.API.Services
 
             var searchQuery = requestDto.SearchQuery;
 
-            var parentProducers = await this.GetParentProducersLatestAsync(runId, cancellationToken);
-
-            var billingInstructions = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                        join pd in applicationDBContext.ProducerDetail
-                        on prsi.ProducerId equals pd.ProducerId
-                        where prsi.CalculatorRunId == runId && pd.CalculatorRunId == runId
-                        select new ProducerBillingInstructionDetails()
+            var query = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                        where prsi.CalculatorRunId == runId 
+                        select new ProducerBillingInstructionsDto()
                         {
-                            ProducerId = pd.ProducerId,
+                            ProducerId = prsi.ProducerId,
                             BillingInstructionAcceptReject = prsi.BillingInstructionAcceptReject ?? BillingStatus.Pending.ToString(),
                             SuggestedBillingInstruction = prsi.SuggestedBillingInstruction,
                             SuggestedInvoiceAmount = prsi.SuggestedInvoiceAmount,
-                            SubsidaryId = pd.SubsidiaryId,
                         };
-
-            var billingInstructionsWithParents = ProducerBillingInstructionDetailsMapper.Map(await billingInstructions.Where(t => t.SubsidaryId == null).ToListAsync(cancellationToken));
-            var parentProducerIds = billingInstructionsWithParents?.Select(t => t.ProducerId).ToList() ?? [];
-            var billingInstructionsWithOutParents = ProducerBillingInstructionDetailsMapper.Map(await billingInstructions.Where(t => t.SubsidaryId != null && !parentProducerIds.Contains(t.ProducerId)).ToListAsync(cancellationToken));
-
-            billingInstructionsWithOutParents = billingInstructionsWithOutParents.GroupBy(t => t.ProducerId).Select(i => i.First()).ToList();
-
-            var query = billingInstructionsWithParents is null ? billingInstructionsWithOutParents : billingInstructionsWithParents.Union(billingInstructionsWithOutParents);
 
             // Group by on BillingInstructionAcceptReject
             var groupedStatus = query
@@ -247,7 +234,7 @@ namespace EPR.Calculator.API.Services
             if (searchQuery?.OrganisationId.HasValue == true)
             {
                 var orgId = searchQuery.OrganisationId.Value;
-                query = query.Where(x => x.ProducerId == orgId).ToList() ?? [];
+                query = query.Where(x => x.ProducerId == orgId).AsQueryable();
             }
 
             // Apply Status filter if provided and not empty
@@ -255,26 +242,30 @@ namespace EPR.Calculator.API.Services
             {
                 var statusList = searchQuery.Status.ToList();
 
-                query = query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject)).ToList() ?? [];
+                query = query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject)).AsQueryable();
             }
 
-            query = query.Distinct().OrderBy(x => x.ProducerId).ToList();
+            query = query.Distinct().OrderBy(x => x.ProducerId).AsQueryable();
 
             requestDto.PageNumber ??= int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageNumber, out int pageNumber) ? pageNumber : 1;
             requestDto.PageSize ??= int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageSize, out int pageSize) ? pageSize : 10;
 
-            var pagedResult = query
-                .Skip((requestDto.PageNumber.Value - 1) * requestDto.PageSize.Value)
-                .Take(requestDto.PageSize.Value);
+            var pagedResult = await query
+                          .Skip((requestDto.PageNumber.Value - 1) * requestDto.PageSize.Value)
+                          .Take(requestDto.PageSize.Value)
+                          .AsNoTracking()
+                          .ToListAsync(cancellationToken);
 
             var allProducerIds = query.Select(x => x.ProducerId).Distinct();
+
+            var parentProducers = await this.GetParentProducersLatestAsync(runId, cancellationToken, allProducerIds);
 
             foreach (var record in pagedResult)
             {
                 record.ProducerName = parentProducers.FirstOrDefault(p => p.ProducerId == record.ProducerId)?.ProducerName ?? string.Empty;
             }
 
-            var groupedStatusResult = groupedStatus.ToList();
+            var groupedStatusResult = await groupedStatus.ToListAsync(cancellationToken);
 
             var totalAcceptedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Accepted.ToString())?.TotalRecords ?? 0;
             var totalRejectedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Rejected.ToString())?.TotalRecords ?? 0;
@@ -282,7 +273,7 @@ namespace EPR.Calculator.API.Services
 
             return new ProducerBillingInstructionsResponseDto
             {
-                Records = pagedResult.ToList(),
+                Records = pagedResult,
                 PageNumber = requestDto.PageNumber,
                 PageSize = requestDto.PageSize,
                 TotalRecords = groupedStatusResult.Sum(s => s.TotalRecords),
@@ -500,12 +491,12 @@ namespace EPR.Calculator.API.Services
             applicationDBContext.CalculatorRuns
                 .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
-        private Task<List<ParentProducer>> GetParentProducersLatestAsync(int runId, CancellationToken cancellationToken) =>
+        private Task<List<ParentProducer>> GetParentProducersLatestAsync(int runId, CancellationToken cancellationToken, IEnumerable<int> producerIds) =>
             (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
             join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster
             on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
             join run in applicationDBContext.CalculatorRuns on crdm.Id equals run.CalculatorRunOrganisationDataMasterId
-            where run.Id == runId
+             where run.Id == runId && producerIds.ToList().Contains(odd.OrganisationId ?? 0)
              select new
             ParentProducer
             {
