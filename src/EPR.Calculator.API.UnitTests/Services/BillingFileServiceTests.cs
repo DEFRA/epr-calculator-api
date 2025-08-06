@@ -647,7 +647,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task GetProducerBillingInstructionsAsync_ReturnsEmpty_WhenNoRecords()
         {
             // Arrange
-            var runId = 1;
+            var runId = 2;
             var requestDto = new ProducerBillingInstructionsRequestDto
             {
                 PageNumber = 1,
