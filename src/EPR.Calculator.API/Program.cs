@@ -2,12 +2,13 @@ using System.Configuration;
 using System.Reflection;
 using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
-using EPR.Calculator.API.Constants;
+using EPR.Calculator.API;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.HealthCheck;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
+using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using FluentValidation;
@@ -38,7 +39,7 @@ builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 builder.Services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatusDataValidator>();
 builder.Services.AddScoped<IBillingFileService, BillingFileService>();
 
-if (environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
+if (environmentName.Equals(CommonResources.Local, StringComparison.OrdinalIgnoreCase))
 {
     builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
     builder.Services.AddScoped<IBlobStorageService2, LocalFileStorageService2>();
@@ -59,7 +60,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorizationBuilder()
         .SetFallbackPolicy(new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
-        .RequireRole(CommonConstants.SASuperUserRole)
+        .RequireRole(CommonResources.SASuperUserRole)
         .Build());
 
 builder.Services.AddControllers();
@@ -121,23 +122,12 @@ builder.Services.AddAzureClients(builder =>
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 });
 
-// Add CORS services
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(
-        CommonConstants.PolicyName,
-        policy => policy.AllowAnyOrigin()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod()
-                        .WithExposedHeaders("Content-Disposition"));
-});
-
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
 // Configure endpoint timeout policies.
-foreach (string policy in TimeoutPolicies.AllPolicies)
+foreach (string policy in CommonResources.TimeoutPolicies.Split(','))
 {
     var timeout = builder.Configuration.GetSection("Timeouts").GetValue<double>(policy);
     builder.Services.AddRequestTimeouts(options =>
@@ -149,7 +139,7 @@ foreach (string policy in TimeoutPolicies.AllPolicies)
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || environmentName == EPR.Calculator.API.Constants.Environment.Local.ToLower())
+if (app.Environment.IsDevelopment() || environmentName.Equals(CommonResources.Local, StringComparison.OrdinalIgnoreCase))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -158,7 +148,7 @@ if (app.Environment.IsDevelopment() || environmentName == EPR.Calculator.API.Con
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.MapControllers();
-app.UseCors(CommonConstants.PolicyName);
+app.UseCors(CommonResources.PolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRequestTimeouts();

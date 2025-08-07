@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -345,7 +344,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+            Assert.AreEqual(CommonResources.InvalidRunId, result.Message);
         }
 
         [TestMethod]
@@ -366,7 +365,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+            Assert.AreEqual(CommonResources.InvalidRunId, result.Message);
         }
 
         [TestMethod]
@@ -387,7 +386,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(ErrorMessages.InvalidOrganisationId, result.Message);
+            Assert.AreEqual(CommonResources.InvalidOrganisationId, result.Message);
         }
 
         [TestMethod]
@@ -495,7 +494,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(ErrorMessages.InvalidRunId, result.Message);
+            Assert.AreEqual(CommonResources.InvalidRunId, result.Message);
         }
 
         [TestMethod]
@@ -506,7 +505,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(ErrorMessages.InvalidRunStatusForAcceptAll, result.Message);
+            Assert.AreEqual(CommonResources.InvalidRunStatusForAcceptAll, result.Message);
         }
 
         [TestMethod]
@@ -648,7 +647,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task GetProducerBillingInstructionsAsync_ReturnsEmpty_WhenNoRecords()
         {
             // Arrange
-            var runId = 1;
+            var runId = 2;
             var requestDto = new ProducerBillingInstructionsRequestDto
             {
                 PageNumber = 1,

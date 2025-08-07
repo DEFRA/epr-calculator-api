@@ -1,11 +1,12 @@
-﻿using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Services.Abstractions;
+using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
+using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +19,9 @@ namespace EPR.Calculator.API.Controllers
         private readonly ApplicationDBContext context;
         private readonly ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator;
         private readonly IBillingFileService billingFileService;
+        private readonly TelemetryClient telemetryClient;
+
+        private IOrgAndPomWrapper Wrapper { get; init; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CalculatorNewController"/> class.
@@ -27,11 +31,15 @@ namespace EPR.Calculator.API.Controllers
         public CalculatorNewController(
             ApplicationDBContext context,
             ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
-            IBillingFileService billingFileService)
+            IBillingFileService billingFileService,
+            IOrgAndPomWrapper wrapper,
+            TelemetryClient telemetryClient)
         {
             this.context = context;
             this.calculatorRunStatusDataValidator = calculatorRunStatusDataValidator;
             this.billingFileService = billingFileService;
+            this.Wrapper = wrapper;
+            this.telemetryClient = telemetryClient;
         }
 
         [HttpPut]
@@ -47,7 +55,7 @@ namespace EPR.Calculator.API.Controllers
                 var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
                 if (claim == null)
                 {
-                    return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+                    return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
                 }
 
                 var userName = claim.Value;
@@ -57,7 +65,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (classification == null)
                 {
-                    return new ObjectResult($"Unable to find Classification Id {runStatusUpdateDto.ClassificationId}")
+                    return new ObjectResult(string.Format(CommonResources.UnableToFindClassificationId, runStatusUpdateDto.ClassificationId))
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
@@ -65,7 +73,7 @@ namespace EPR.Calculator.API.Controllers
                             x => x.Id == runStatusUpdateDto.RunId);
                 if (calculatorRun == null)
                 {
-                    return new ObjectResult($"Unable to find Run Id {runStatusUpdateDto.RunId}")
+                    return new ObjectResult(string.Format(CommonResources.UnableToFindRunId, runStatusUpdateDto.RunId))
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
@@ -102,7 +110,7 @@ namespace EPR.Calculator.API.Controllers
         {
             if (runId <= 0)
             {
-                return this.StatusCode(StatusCodes.Status400BadRequest, $"Invalid Run Id {runId}");
+                return this.StatusCode(StatusCodes.Status400BadRequest, string.Format(CommonResources.InvalidForRunId, runId));
             }
 
             try
@@ -125,7 +133,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (calculatorRunDetail == null)
                 {
-                    return new NotFoundObjectResult($"Unable to find Run Id {runId}");
+                    return new NotFoundObjectResult(string.Format(CommonResources.UnableToFindRunId, runId));
                 }
 
                 var calcRun = calculatorRunDetail.Run;
@@ -153,7 +161,7 @@ namespace EPR.Calculator.API.Controllers
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
-                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+                return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
             }
 
             var userName = claim.Value;
@@ -161,50 +169,76 @@ namespace EPR.Calculator.API.Controllers
             {
                 if (runId <= 0)
                 {
-                    return this.StatusCode(StatusCodes.Status400BadRequest, $"Invalid Run Id {runId}");
+                    return this.StatusCode(StatusCodes.Status400BadRequest, string.Format(CommonResources.InvalidForRunId, runId));
                 }
 
                 var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId);
                 if (calculatorRun == null)
                 {
-                    return new ObjectResult($"Unable to find Run Id {runId}")
+                    return new ObjectResult(string.Format(CommonResources.UnableToFindRunId, runId))
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                try
+                // Update calculation run classification status: Initial run completed
+                calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
+                var metadata = await this.context.CalculatorRunBillingFileMetadata.
+                    Where(x => x.CalculatorRunId == runId).OrderByDescending(x => x.BillingFileCreatedDate).
+                    FirstOrDefaultAsync();
+
+                if (metadata == null)
                 {
-                    // Update calculation run classification status: Initial run completed
-                    calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
-                    var metadata = await this.context.CalculatorRunBillingFileMetadata.
-                        Where(x => x.CalculatorRunId == runId).OrderByDescending(x => x.BillingFileCreatedDate).
-                        FirstOrDefaultAsync();
+                    return new ObjectResult(string.Format(CommonResources.UnableToFindBillingFileMetadata, runId))
+                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
 
-                    if (metadata == null)
+                metadata.BillingFileAuthorisedBy = userName;
+                metadata.BillingFileAuthorisedDate = DateTime.UtcNow;
+
+                using (var transaction = await this.context.Database.BeginTransactionAsync(cancellationToken))
+                {
+                    try
                     {
-                        return new ObjectResult($"Unable to find Billing File Metadata for Run Id {runId}")
-                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
-                    }
+                        var createRunInvoiceDetailsCommand = Util.GetFormattedSqlString(
+                            CommonResources.InsertInvoiceDetailsAtProducerLevel,
+                            metadata.BillingFileAuthorisedBy,
+                            metadata.BillingFileAuthorisedDate,
+                            runId);
 
-                    metadata.BillingFileAuthorisedBy = userName;
-                    metadata.BillingFileAuthorisedDate = DateTime.UtcNow;
+                        var affectedRows = await this.Wrapper.ExecuteSqlAsync(createRunInvoiceDetailsCommand, cancellationToken);
 
-                    this.context.CalculatorRuns.Update(calculatorRun);
+                        this.telemetryClient.TrackEvent(CommonResources.InsertInvoiceDetailsAtProducerLevel, new Dictionary<string, string>
+                        {
+                            { "Procedure", CommonResources.InsertInvoiceDetailsAtProducerLevel },
+                            { "RunId", runId.ToString() },
+                            { "RowsAffected", affectedRows.ToString() },
+                        });
 
-                    await this.context.SaveChangesAsync();
+                        this.context.CalculatorRuns.Update(calculatorRun);
+                        await this.context.SaveChangesAsync(cancellationToken);
+                        var result = await this.billingFileService.MoveBillingJsonFile(runId, cancellationToken);
+                        if (!result)
+                        {
+                            return this.StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format(CommonResources.UnableToMoveBillingFile, runId));
+                        }
 
-                    var result = await this.billingFileService.MoveBillingJsonFile(runId, cancellationToken);
-
-                    if (!result)
-                    {
-                        return this.StatusCode(StatusCodes.Status422UnprocessableEntity, $"Unable to move billing json file for Run Id {runId}");
+                        // All good, commit transaction
+                        await transaction.CommitAsync(cancellationToken);
                     }
 
                     // All good, commit transaction
-                }
-                catch (Exception exception)
-                {
-                    // Return error status code: Internal Server Error
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                    catch (Exception exception)
+                    {
+                        // Error, rollback transaction
+                        await transaction.RollbackAsync(cancellationToken);
+
+                        this.telemetryClient.TrackException(exception, new Dictionary<string, string>
+                        {
+                            { "RunId", runId.ToString() },
+                        });
+
+                        // Return error status code: Internal Server Error
+                        return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                    }
                 }
 
                 // Return accepted status code

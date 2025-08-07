@@ -52,7 +52,7 @@ namespace EPR.Calculator.API.UnitTests.Global
                logger => logger.Log(
                    LogLevel.Error,
                    It.IsAny<EventId>(),
-                   It.Is<It.IsAnyType>((state, t) => state.ToString()!.Contains("An unhandled exception occurred.")),
+                   It.Is<It.IsAnyType>((state, t) => state.ToString()!.Contains(CommonResources.AnUnexpectedErrorOccurred)),
                    exception,
                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                Times.Once);

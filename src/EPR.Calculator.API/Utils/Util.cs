@@ -1,8 +1,11 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Text.RegularExpressions;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using Microsoft.Extensions.Primitives;
+using Microsoft.OpenApi.Models;
 
 namespace EPR.Calculator.API.Utils
 {
@@ -30,15 +33,15 @@ namespace EPR.Calculator.API.Utils
             var sb = new StringBuilder();
             if (IsNotPercentage(defaultTemplate))
             {
-                sb.Append($"Enter the {defaultTemplate.ParameterType} for {defaultTemplate.ParameterCategory}");
+                sb.Append(string.Format(CommonResources.EnterDefaultParameterType, defaultTemplate.ParameterType, defaultTemplate.ParameterCategory));
             }
             else if (IsPercentageIncrease(defaultTemplate))
             {
-                sb.Append($"Enter the {defaultTemplate.ParameterType} percentage increase");
+                sb.Append(string.Format(CommonResources.EnterThePercentageIncrease, defaultTemplate.ParameterType));
             }
             else
             {
-                sb.Append($"Enter the {defaultTemplate.ParameterType} percentage decrease");
+                sb.Append(string.Format(CommonResources.EnterThePercentageDecrease, defaultTemplate.ParameterType));
             }
 
             return sb.ToString();
@@ -47,9 +50,9 @@ namespace EPR.Calculator.API.Utils
         public static string FormattedErrorForMoreThanOneUniqueRefs(DefaultParameterTemplateMaster defaultParameterTemplateMaster)
         {
             var sb = new StringBuilder();
-            sb.Append($"Parameter Type {defaultParameterTemplateMaster.ParameterType} ");
-            sb.Append($"and Parameter Category {defaultParameterTemplateMaster.ParameterCategory} ");
-            sb.Append($"and Parameter Unique ref {defaultParameterTemplateMaster.ParameterUniqueReferenceId}");
+            sb.Append(string.Format(CommonResources.ParameterType, defaultParameterTemplateMaster.ParameterType));
+            sb.Append(string.Format(CommonResources.ParameterCategory, defaultParameterTemplateMaster.ParameterCategory));
+            sb.Append(string.Format(CommonResources.ParameterUniqueRef, defaultParameterTemplateMaster.ParameterUniqueReferenceId));
             return sb.ToString();
         }
 
@@ -59,37 +62,36 @@ namespace EPR.Calculator.API.Utils
             if (IsNotPercentage(defaulTemplate))
             {
                 sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
-                sb.Append($"can only include numbers, commas and decimal points");
+                sb.Append(CommonResources.CanOnlyIncludeNumbers);
             }
             else if (IsPercentageIncrease(defaulTemplate))
             {
-                sb.Append($"The {defaulTemplate.ParameterType} percentage increase ");
-                sb.Append($"can only include numbers, commas, decimal points and a percentage symbol (%)");
+                sb.Append(string.Format(CommonResources.PercentageIncrease, defaulTemplate.ParameterType));
+                sb.Append(CommonResources.CanOnlyIncudeNumbersAndPercentage);
             }
             else
             {
-                sb.Append($"The {defaulTemplate.ParameterType} percentage decrease ");
-                sb.Append($"can only include numbers, commas, decimal points and a percentage symbol (%)");
+                sb.Append(string.Format(CommonResources.PercentageDecrease, defaulTemplate.ParameterType));
+                sb.Append(CommonResources.CanOnlyIncudeNumbersAndPercentage);
             }
 
             return sb.ToString();
         }
 
-        public static string FormattedErrorForMissingValues(DefaultParameterTemplateMaster defaulTemplate)
+        public static string FormattedErrorForMissingValues(DefaultParameterTemplateMaster defaultTemplate)
         {
             var sb = new StringBuilder();
-            if (IsNotPercentage(defaulTemplate))
+            if (IsNotPercentage(defaultTemplate))
             {
-                sb.Append($"Enter the {defaulTemplate.ParameterType} ");
-                sb.Append($"for {defaulTemplate.ParameterCategory}");
+                sb.Append(string.Format(CommonResources.EnterDefaultParameterType, defaultTemplate.ParameterType, defaultTemplate.ParameterCategory));
             }
-            else if (IsPercentageIncrease(defaulTemplate))
+            else if (IsPercentageIncrease(defaultTemplate))
             {
-                sb.Append($"Enter the {defaulTemplate.ParameterType} increase");
+                sb.Append(string.Format(CommonResources.EnterTheIncrease, defaultTemplate.ParameterType));
             }
             else
             {
-                sb.Append($"Enter the {defaulTemplate.ParameterType} decrease");
+                sb.Append(string.Format(CommonResources.EnterTheDecrease, defaultTemplate.ParameterType));
             }
 
             return sb.ToString();
@@ -102,28 +104,28 @@ namespace EPR.Calculator.API.Utils
             if (IsTonnage(defaulTemplate))
             {
                 sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
-                sb.Append($"must be between {decimal.Truncate(defaulTemplate.ValidRangeFrom)} and {Math.Round(defaulTemplate.ValidRangeTo, 3, MidpointRounding.ToZero)} ");
+                sb.Append(string.Format(CommonResources.MustBeBetween, decimal.Truncate(defaulTemplate.ValidRangeFrom), Math.Round(defaulTemplate.ValidRangeTo, 3, MidpointRounding.ToZero)));
                 sb.Append("tons");
             }
             else if (IsBadDebt(defaulTemplate))
             {
                 sb.Append($"The {defaulTemplate.ParameterType} ");
-                sb.Append($"must be between {decimal.Truncate(defaulTemplate.ValidRangeFrom)}% and {Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)}%");
+                sb.Append(string.Format(CommonResources.MustBeBetweenWithPercentage, decimal.Truncate(defaulTemplate.ValidRangeFrom), Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)));
             }
             else if (IsPercentageIncrease(defaulTemplate))
             {
-                sb.Append($"The {defaulTemplate.ParameterType} percentage increase ");
-                sb.Append($"must be between {decimal.Truncate(defaulTemplate.ValidRangeFrom)}% and {Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)}%");
+                sb.Append(string.Format(CommonResources.PercentageIncrease, defaulTemplate.ParameterType));
+                sb.Append(string.Format(CommonResources.MustBeBetweenWithPercentage, decimal.Truncate(defaulTemplate.ValidRangeFrom), Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)));
             }
             else if (IsPercentageDecrease(defaulTemplate))
             {
-                sb.Append($"The {defaulTemplate.ParameterType} percentage decrease ");
-                sb.Append($"must be between {Math.Round(defaulTemplate.ValidRangeFrom, 2, MidpointRounding.ToZero)}% and {decimal.Truncate(defaulTemplate.ValidRangeTo)}%");
+                sb.Append(string.Format(CommonResources.PercentageDecrease, defaulTemplate.ParameterType));
+                sb.Append(string.Format(CommonResources.MustBeBetweenWithPercentage, Math.Round(defaulTemplate.ValidRangeFrom, 2, MidpointRounding.ToZero), decimal.Truncate(defaulTemplate.ValidRangeTo)));
             }
             else
             {
                 sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
-                sb.Append($"must be between £{Math.Round(defaulTemplate.ValidRangeFrom, 2, MidpointRounding.ToZero)} and £{Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)}");
+                sb.Append(string.Format(CommonResources.MustBeBetweenWithCurrency, Math.Round(defaulTemplate.ValidRangeFrom, 2, MidpointRounding.ToZero), Math.Round(defaulTemplate.ValidRangeTo, 2, MidpointRounding.ToZero)));
             }
 
             return sb.ToString();
@@ -205,14 +207,14 @@ namespace EPR.Calculator.API.Utils
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                throw new ArgumentException("Financial year cannot be null or empty", nameof(value));
+                throw new ArgumentException(CommonResources.FinancialYearEmpty, nameof(value));
             }
 
             string pattern = @"^\d{4}-\d{2}$";
             TimeSpan regexTimeout = TimeSpan.FromSeconds(1);
             if (!Regex.IsMatch(value, pattern, RegexOptions.None, regexTimeout))
             {
-                throw new FormatException("Financial year format is invalid. Expected format is 'YYYY-YY'.");
+                throw new FormatException(CommonResources.InvalidFinancialYearFormat);
             }
 
             var years = value.Split('-');
@@ -229,7 +231,7 @@ namespace EPR.Calculator.API.Utils
         {
             if (string.IsNullOrWhiteSpace(financialYear))
             {
-                throw new ArgumentException("Financial year cannot be null or empty", nameof(financialYear));
+                throw new ArgumentException(CommonResources.FinancialYearEmpty, nameof(financialYear));
             }
 
             int year = int.Parse(GetFinancialYearAsYYYY(financialYear));
@@ -239,6 +241,11 @@ namespace EPR.Calculator.API.Utils
         public static FormattableString GetFormattedSqlString(string procedureName, int runId, string calendarYear, string createdBy)
         {
             return $"exec {procedureName} @RunId ={runId}, @calendarYear = {calendarYear}, @createdBy = {createdBy}";
+        }
+
+        public static FormattableString GetFormattedSqlString(string procedureName, string? instructionConfirmedBy, DateTime? instructionConfirmedDate, int runId)
+        {
+            return $"exec {procedureName} @instructionConfirmedBy = {instructionConfirmedBy}, @instructionConfirmedDate = {instructionConfirmedDate}, @calculatorRunID ={runId}";
         }
 
         public static IEnumerable<int> AcceptableRunStatusForBillingInstructions()
