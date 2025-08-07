@@ -5,6 +5,8 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exceptions;
+using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -201,8 +203,7 @@ namespace EPR.Calculator.API.Services
             ProducerBillingInstructionsRequestDto requestDto,
             CancellationToken cancellationToken)
         {
-            var run = await applicationDBContext.CalculatorRuns
-                .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
+            var run = await this.GetRunAsync(runId, cancellationToken);
 
             if (run == null)
             {
@@ -211,21 +212,15 @@ namespace EPR.Calculator.API.Services
 
             var searchQuery = requestDto.SearchQuery;
 
-            var query =
-                from ins in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                join pd in applicationDBContext.ProducerDetail
-                    on ins.ProducerId equals pd.ProducerId
-                where ins.CalculatorRunId == runId
-                    && pd.CalculatorRunId == runId
-                    && pd.SubsidiaryId == null
-                select new ProducerBillingInstructionsDto
-                {
-                    ProducerName = pd.ProducerName,
-                    ProducerId = ins.ProducerId,
-                    SuggestedBillingInstruction = ins.SuggestedBillingInstruction,
-                    SuggestedInvoiceAmount = ins.SuggestedInvoiceAmount,
-                    BillingInstructionAcceptReject = string.IsNullOrWhiteSpace(ins.BillingInstructionAcceptReject) ? BillingStatus.Pending.ToString() : ins.BillingInstructionAcceptReject.Trim(),
-                };
+            var query = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                        where prsi.CalculatorRunId == runId
+                        select new ProducerBillingInstructionsDto()
+                        {
+                            ProducerId = prsi.ProducerId,
+                            BillingInstructionAcceptReject = prsi.BillingInstructionAcceptReject ?? BillingStatus.Pending.ToString(),
+                            SuggestedBillingInstruction = prsi.SuggestedBillingInstruction,
+                            SuggestedInvoiceAmount = prsi.SuggestedInvoiceAmount,
+                        };
 
             // Group by on BillingInstructionAcceptReject
             var groupedStatus = query
@@ -240,28 +235,35 @@ namespace EPR.Calculator.API.Services
             if (searchQuery?.OrganisationId.HasValue == true)
             {
                 var orgId = searchQuery.OrganisationId.Value;
-                query = query.Where(x => x.ProducerId == orgId);
+                query = query.Where(x => x.ProducerId == orgId).AsQueryable();
             }
 
             // Apply Status filter if provided and not empty
             if (searchQuery?.Status != null && searchQuery.Status.Any())
             {
                 var statusList = searchQuery.Status.ToList();
-                query = query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject));
+                query = query.Where(x => x.BillingInstructionAcceptReject != null &&
+                statusList.Contains(x.BillingInstructionAcceptReject)).AsQueryable();
             }
 
-            query = query.Distinct().OrderBy(x => x.ProducerId);
+            query = query.Distinct().OrderBy(x => x.ProducerId).AsQueryable();
 
             requestDto.PageNumber ??= CommonConstants.ProducerBillingInstructionsDefaultPageNumber;
             requestDto.PageSize ??= CommonConstants.ProducerBillingInstructionsDefaultPageSize;
 
             var pagedResult = await query
                 .Skip((requestDto.PageNumber.Value - 1) * requestDto.PageSize.Value)
-                .Take(requestDto.PageSize.Value)
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
+                          .Take(requestDto.PageSize.Value)
+                          .AsNoTracking()
+                          .ToListAsync(cancellationToken);
 
-            var allProducerIds = await query.Select(x => x.ProducerId).Distinct().ToListAsync(cancellationToken);
+            var allProducerIds = query.Select(x => x.ProducerId).Distinct();
+            var parentProducers = await this.GetParentProducersLatestAsync(runId, allProducerIds, cancellationToken);
+
+            foreach (var record in pagedResult)
+            {
+                record.ProducerName = parentProducers.FirstOrDefault(p => p.ProducerId == record.ProducerId)?.ProducerName ?? string.Empty;
+            }
 
             var groupedStatusResult = await groupedStatus.ToListAsync(cancellationToken);
 
@@ -484,5 +486,22 @@ namespace EPR.Calculator.API.Services
             row.LastModifiedAcceptReject = DateTime.UtcNow;
             row.LastModifiedAcceptRejectBy = userName;
         }
+
+        private Task<CalculatorRun?> GetRunAsync(int runId, CancellationToken cancellationToken) =>
+            applicationDBContext.CalculatorRuns
+                .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
+
+        private Task<List<ParentProducer>> GetParentProducersLatestAsync(int runId, IEnumerable<int> producerIds, CancellationToken cancellationToken) =>
+            (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
+             join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster
+             on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
+             join run in applicationDBContext.CalculatorRuns on crdm.Id equals run.CalculatorRunOrganisationDataMasterId
+             where run.Id == runId && producerIds.ToList().Contains(odd.OrganisationId ?? 0)
+             select new
+            ParentProducer
+             {
+                 ProducerId = odd.OrganisationId ?? 0,
+                 ProducerName = odd.OrganisationName,
+             }).ToListAsync(cancellationToken);
     }
 }
