@@ -4978,15 +4978,8 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250814125052_AlterCreateRunPomProcedure'
 )
 BEGIN
-    DROP PROCEDURE[dbo].[CreateRunPom]
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250814125052_AlterCreateRunPomProcedure'
-)
-BEGIN
+    IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND OBJECT_ID = OBJECT_ID('[dbo].[CreateRunPom]'))
+    DROP PROCEDURE [dbo].[CreateRunPom];
     declare @Sql varchar(max)
     SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunPom]
     (
@@ -5075,15 +5068,8 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250814130248_AlterCreateRunOrganisationProcedure'
 )
 BEGIN
-    DROP PROCEDURE[dbo].[CreateRunOrganization]
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250814130248_AlterCreateRunOrganisationProcedure'
-)
-BEGIN
+    IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND OBJECT_ID = OBJECT_ID('[dbo].[CreateRunOrganization]'))
+     DROP PROCEDURE[dbo].[CreateRunOrganization];
     declare @Sql varchar(max)
     SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]
                     (
