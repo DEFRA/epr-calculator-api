@@ -5141,3 +5141,37 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250815134048_AddProducerIdIndex'
+)
+BEGIN
+    CREATE INDEX [IX_producer_resultfile_suggested_billing_instruction_producer_id] ON [producer_resultfile_suggested_billing_instruction] ([producer_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250815134048_AddProducerIdIndex'
+)
+BEGIN
+    CREATE INDEX [IX_producer_detail_producer_id] ON [producer_detail] ([producer_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250815134048_AddProducerIdIndex'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250815134048_AddProducerIdIndex', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
