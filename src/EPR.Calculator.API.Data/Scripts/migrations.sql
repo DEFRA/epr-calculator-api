@@ -154,12 +154,29 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20240731130652_202407311405_UpdateTemplateMaster'
 )
 BEGIN
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_type', N'parameter_category', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
-        SET IDENTITY_INSERT [default_parameter_template_master] ON;
-    EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_type], [parameter_category], [valid_Range_from], [valid_Range_to])
-    VALUES (N''TONT-AD'', N''Amount Decrease'', N''Tonnage change threshold'', 0.0, 999999999.99)');
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_type', N'parameter_category', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
-        SET IDENTITY_INSERT [default_parameter_template_master] OFF;
+
+                    IF NOT EXISTS (
+                        SELECT 1 FROM [default_parameter_template_master]
+                        WHERE [parameter_unique_ref] = 'TONT-AD'
+                    )
+                    BEGIN
+                        IF EXISTS (
+                            SELECT * FROM [sys].[identity_columns]
+                            WHERE [object_id] = OBJECT_ID('default_parameter_template_master')
+                        )
+                            SET IDENTITY_INSERT [default_parameter_template_master] ON;
+
+                        INSERT INTO [default_parameter_template_master]
+                        ([parameter_unique_ref], [parameter_type], [parameter_category], [valid_Range_from], [valid_Range_to])
+                        VALUES ('TONT-AD', 'Amount Decrease', 'Tonnage change threshold', 0.00, 999999999.99);
+
+                        IF EXISTS (
+                            SELECT * FROM [sys].[identity_columns]
+                            WHERE [object_id] = OBJECT_ID('default_parameter_template_master')
+                        )
+                            SET IDENTITY_INSERT [default_parameter_template_master] OFF;
+                    END
+                
 END;
 GO
 
@@ -168,9 +185,11 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20240731130652_202407311405_UpdateTemplateMaster'
 )
 BEGIN
-    EXEC(N'UPDATE [default_parameter_setting_detail] SET [parameter_unique_ref] = N''TONT-AD''
-    WHERE [parameter_unique_ref] = N''TONT-DI'';
-    SELECT @@ROWCOUNT');
+
+                    UPDATE [default_parameter_setting_detail]
+                    SET [parameter_unique_ref] = 'TONT-AD'
+                    WHERE [parameter_unique_ref] = 'TONT-DI';
+                
 END;
 GO
 
@@ -179,9 +198,10 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20240731130652_202407311405_UpdateTemplateMaster'
 )
 BEGIN
-    EXEC(N'DELETE FROM [default_parameter_template_master]
-    WHERE [parameter_unique_ref] = N''TONT-DI'';
-    SELECT @@ROWCOUNT');
+
+                    DELETE FROM [default_parameter_template_master]
+                    WHERE [parameter_unique_ref] = 'TONT-DI';
+                
 END;
 GO
 
@@ -5115,6 +5135,40 @@ IF NOT EXISTS (
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
     VALUES (N'20250814130248_AlterCreateRunOrganisationProcedure', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250815134048_AddProducerIdIndex'
+)
+BEGIN
+    CREATE INDEX [IX_producer_resultfile_suggested_billing_instruction_producer_id] ON [producer_resultfile_suggested_billing_instruction] ([producer_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250815134048_AddProducerIdIndex'
+)
+BEGIN
+    CREATE INDEX [IX_producer_detail_producer_id] ON [producer_detail] ([producer_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250815134048_AddProducerIdIndex'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250815134048_AddProducerIdIndex', N'8.0.7');
 END;
 GO
 
