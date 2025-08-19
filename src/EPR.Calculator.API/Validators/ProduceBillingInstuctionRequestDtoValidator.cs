@@ -10,19 +10,19 @@ namespace EPR.Calculator.API.Validators
         {
             this.RuleFor(x => x.OrganisationIds)
                 .Must(ids => ids != null && ids.Any())
-                .WithMessage("Organisation Id is required.");
+                .WithMessage(CommonResources.OrganisationIdRequired);
 
             this.RuleFor(x => x.Status)
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .WithMessage("Status is required.")
+                .WithMessage(CommonResources.StatusRequired)
                 .Must(value => Enum.TryParse(typeof(BillingStatus), value, true, out _))
-                .WithMessage("Invalid status value.");
+                .WithMessage(CommonResources.InvalidStatusValue);
 
             this.RuleFor(x => x.ReasonForRejection)
                 .NotEmpty()
                 .When(x => string.Equals(x.Status, BillingStatus.Rejected.ToString()))
-                .WithMessage("Reason for rejection is required.");
+                .WithMessage(CommonResources.ReasonForRejectionRequired);
         }
     }
 }

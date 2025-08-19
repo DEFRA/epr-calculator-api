@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
@@ -40,7 +39,7 @@ namespace EPR.Calculator.API.Controllers
             if (serviceProcessResponseDto.StatusCode == HttpStatusCode.OK)
             {
                 var serviceBusQueueName = configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
-                await serviceBusService.SendMessage(serviceBusQueueName, new BillingFileGenerationMessage() { ApprovedBy = userName, CalculatorRunId = runId, MessageType = CommonConstants.BillingMessageType });
+                await serviceBusService.SendMessage(serviceBusQueueName, new BillingFileGenerationMessage() { ApprovedBy = userName, CalculatorRunId = runId, MessageType = CommonResources.BillingMessageType });
             }
 
             return new ObjectResult(serviceProcessResponseDto.Message)
