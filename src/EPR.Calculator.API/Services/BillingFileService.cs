@@ -257,8 +257,8 @@ namespace EPR.Calculator.API.Services
                           .ToListAsync(cancellationToken);
 
             var allProducerIds = query.Select(x => x.ProducerId).Distinct();
-
-            var parentProducers = await this.GetParentProducersLatestAsync(runId, allProducerIds, cancellationToken);
+            var pagedProducerIds = pagedResult.Select(x => x.ProducerId).Distinct();
+            var parentProducers = await this.GetParentProducersLatestAsync(runId, pagedProducerIds, cancellationToken);
 
             foreach (var record in pagedResult)
             {
