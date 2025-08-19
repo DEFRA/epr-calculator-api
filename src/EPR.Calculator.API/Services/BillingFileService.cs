@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -114,7 +113,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunId,
+                        Message = CommonResources.InvalidRunId,
                     };
                 }
 
@@ -128,7 +127,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidOrganisationId,
+                        Message = CommonResources.InvalidOrganisationId,
                     };
                 }
 
@@ -242,22 +241,23 @@ namespace EPR.Calculator.API.Services
             if (searchQuery?.Status != null && searchQuery.Status.Any())
             {
                 var statusList = searchQuery.Status.ToList();
-                query = query.Where(x => x.BillingInstructionAcceptReject != null &&
-                statusList.Contains(x.BillingInstructionAcceptReject)).AsQueryable();
+
+                query = query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject)).AsQueryable();
             }
 
             query = query.Distinct().OrderBy(x => x.ProducerId).AsQueryable();
 
-            requestDto.PageNumber ??= CommonConstants.ProducerBillingInstructionsDefaultPageNumber;
-            requestDto.PageSize ??= CommonConstants.ProducerBillingInstructionsDefaultPageSize;
+            requestDto.PageNumber ??= int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageNumber, out int pageNumber) ? pageNumber : 1;
+            requestDto.PageSize ??= int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageSize, out int pageSize) ? pageSize : 10;
 
             var pagedResult = await query
-                .Skip((requestDto.PageNumber.Value - 1) * requestDto.PageSize.Value)
+                          .Skip((requestDto.PageNumber.Value - 1) * requestDto.PageSize.Value)
                           .Take(requestDto.PageSize.Value)
                           .AsNoTracking()
                           .ToListAsync(cancellationToken);
 
             var allProducerIds = query.Select(x => x.ProducerId).Distinct();
+
             var parentProducers = await this.GetParentProducersLatestAsync(runId, allProducerIds, cancellationToken);
 
             foreach (var record in pagedResult)
@@ -302,7 +302,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunId,
+                        Message = CommonResources.InvalidRunId,
                     };
                 }
 
@@ -311,7 +311,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunStatusForAcceptAll,
+                        Message = CommonResources.InvalidRunStatusForAcceptAll,
                     };
                 }
 
@@ -325,7 +325,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidOrganisationId,
+                        Message = CommonResources.InvalidOrganisationId,
                     };
                 }
 
@@ -371,7 +371,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunId,
+                        Message = CommonResources.InvalidRunId,
                     };
                 }
 
@@ -380,7 +380,7 @@ namespace EPR.Calculator.API.Services
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = ErrorMessages.InvalidRunStatusForAcceptAll,
+                        Message = CommonResources.InvalidRunStatusForAcceptAll,
                     };
                 }
 
@@ -413,7 +413,7 @@ namespace EPR.Calculator.API.Services
         {
             if (runStatus == null)
             {
-                throw new KeyNotFoundException($"Run ID {runId} was not found.");
+                throw new KeyNotFoundException(string.Format(CommonResources.RunINotFound, runId));
             }
 
             var validRunClassifications = new HashSet<int>
@@ -493,15 +493,15 @@ namespace EPR.Calculator.API.Services
 
         private Task<List<ParentProducer>> GetParentProducersLatestAsync(int runId, IEnumerable<int> producerIds, CancellationToken cancellationToken) =>
             (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
-             join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster
-             on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
-             join run in applicationDBContext.CalculatorRuns on crdm.Id equals run.CalculatorRunOrganisationDataMasterId
+            join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster
+            on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
+            join run in applicationDBContext.CalculatorRuns on crdm.Id equals run.CalculatorRunOrganisationDataMasterId
              where run.Id == runId && producerIds.ToList().Contains(odd.OrganisationId ?? 0)
              select new
             ParentProducer
-             {
-                 ProducerId = odd.OrganisationId ?? 0,
-                 ProducerName = odd.OrganisationName,
-             }).ToListAsync(cancellationToken);
+            {
+                ProducerId = odd.OrganisationId ?? 0,
+                ProducerName = odd.OrganisationName,
+            }).ToListAsync(cancellationToken);
     }
 }

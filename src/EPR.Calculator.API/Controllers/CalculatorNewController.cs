@@ -1,6 +1,4 @@
-﻿using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
@@ -57,7 +55,7 @@ namespace EPR.Calculator.API.Controllers
                 var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
                 if (claim == null)
                 {
-                    return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+                    return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
                 }
 
                 var userName = claim.Value;
@@ -67,7 +65,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (classification == null)
                 {
-                    return new ObjectResult($"Unable to find Classification Id {runStatusUpdateDto.ClassificationId}")
+                    return new ObjectResult(string.Format(CommonResources.UnableToFindClassificationId, runStatusUpdateDto.ClassificationId))
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
@@ -75,7 +73,7 @@ namespace EPR.Calculator.API.Controllers
                             x => x.Id == runStatusUpdateDto.RunId);
                 if (calculatorRun == null)
                 {
-                    return new ObjectResult($"Unable to find Run Id {runStatusUpdateDto.RunId}")
+                    return new ObjectResult(string.Format(CommonResources.UnableToFindRunId, runStatusUpdateDto.RunId))
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
@@ -112,7 +110,7 @@ namespace EPR.Calculator.API.Controllers
         {
             if (runId <= 0)
             {
-                return this.StatusCode(StatusCodes.Status400BadRequest, $"Invalid Run Id {runId}");
+                return this.StatusCode(StatusCodes.Status400BadRequest, string.Format(CommonResources.InvalidForRunId, runId));
             }
 
             try
@@ -135,7 +133,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (calculatorRunDetail == null)
                 {
-                    return new NotFoundObjectResult($"Unable to find Run Id {runId}");
+                    return new NotFoundObjectResult(string.Format(CommonResources.UnableToFindRunId, runId));
                 }
 
                 var calcRun = calculatorRunDetail.Run;
@@ -163,7 +161,7 @@ namespace EPR.Calculator.API.Controllers
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
-                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+                return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
             }
 
             var userName = claim.Value;
@@ -171,13 +169,13 @@ namespace EPR.Calculator.API.Controllers
             {
                 if (runId <= 0)
                 {
-                    return this.StatusCode(StatusCodes.Status400BadRequest, $"Invalid Run Id {runId}");
+                    return this.StatusCode(StatusCodes.Status400BadRequest, string.Format(CommonResources.InvalidForRunId, runId));
                 }
 
                 var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId);
                 if (calculatorRun == null)
                 {
-                    return new ObjectResult($"Unable to find Run Id {runId}")
+                    return new ObjectResult(string.Format(CommonResources.UnableToFindRunId, runId))
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
@@ -189,7 +187,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (metadata == null)
                 {
-                    return new ObjectResult($"Unable to find Billing File Metadata for Run Id {runId}")
+                    return new ObjectResult(string.Format(CommonResources.UnableToFindBillingFileMetadata, runId))
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
@@ -201,16 +199,16 @@ namespace EPR.Calculator.API.Controllers
                     try
                     {
                         var createRunInvoiceDetailsCommand = Util.GetFormattedSqlString(
-                            CommonConstants.InsertInvoiceDetailsAtProducerLevel,
+                            CommonResources.InsertInvoiceDetailsAtProducerLevel,
                             metadata.BillingFileAuthorisedBy,
                             metadata.BillingFileAuthorisedDate,
                             runId);
 
                         var affectedRows = await this.Wrapper.ExecuteSqlAsync(createRunInvoiceDetailsCommand, cancellationToken);
 
-                        this.telemetryClient.TrackEvent(CommonConstants.InsertInvoiceDetailsAtProducerLevel, new Dictionary<string, string>
+                        this.telemetryClient.TrackEvent(CommonResources.InsertInvoiceDetailsAtProducerLevel, new Dictionary<string, string>
                         {
-                            { "Procedure", CommonConstants.InsertInvoiceDetailsAtProducerLevel },
+                            { "Procedure", CommonResources.InsertInvoiceDetailsAtProducerLevel },
                             { "RunId", runId.ToString() },
                             { "RowsAffected", affectedRows.ToString() },
                         });
@@ -220,7 +218,7 @@ namespace EPR.Calculator.API.Controllers
                         var result = await this.billingFileService.MoveBillingJsonFile(runId, cancellationToken);
                         if (!result)
                         {
-                            return this.StatusCode(StatusCodes.Status422UnprocessableEntity, $"Unable to move billing json file for Run Id {runId}");
+                            return this.StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format(CommonResources.UnableToMoveBillingFile, runId));
                         }
 
                         // All good, commit transaction

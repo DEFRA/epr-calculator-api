@@ -9,11 +9,11 @@ namespace EPR.Calculator.API.Validators
         {
             this.RuleFor(x => x.PageNumber)
                 .GreaterThanOrEqualTo(1)
-                .WithMessage("PageNumber must be 1 or greater.");
+                .WithMessage(CommonResources.PageNumberGreaterThan1);
 
             this.RuleFor(x => x.PageSize)
                 .GreaterThanOrEqualTo(1)
-                .WithMessage("PageSize must be at least 1 if provided.");
+                .WithMessage(CommonResources.PageSizeGreaterThan1);
 
             this.RuleFor(x => x.SearchQuery)
                 .SetValidator(new ProducerBillingInstructionsSearchQueryDtoValidator()!)
