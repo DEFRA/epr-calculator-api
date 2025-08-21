@@ -496,7 +496,7 @@ namespace EPR.Calculator.API.Services
             join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster
             on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
             join run in applicationDBContext.CalculatorRuns on crdm.Id equals run.CalculatorRunOrganisationDataMasterId
-             where run.Id == runId && producerIds.ToList().Contains(odd.OrganisationId ?? 0)
+             where run.Id == runId && producerIds.ToList().Contains(odd.OrganisationId ?? 0) && odd.SubsidaryId == null
              select new
             ParentProducer
             {
