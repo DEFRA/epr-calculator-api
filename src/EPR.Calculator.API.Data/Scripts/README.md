@@ -1,6 +1,6 @@
 ## Local test of migration Docker container ##
 
-### Prepare Azure SQL Edge Database
+### Prepare Azure SQL Edge Database1
 Test
 1. Start container using azure-sql-edge:latest image. 
    ```shell
