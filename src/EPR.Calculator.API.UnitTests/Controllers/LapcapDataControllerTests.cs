@@ -1,8 +1,5 @@
 ﻿using System.Security.Claims;
 using System.Security.Principal;
-using EPR.Calculator.API.Constants;
-using EPR.Calculator.API.Controllers;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -58,7 +55,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(200, okResult.StatusCode);
 
             var actionResul2 = okResult.Value as List<LapCapParameterDto>;
-            Assert.AreEqual(actionResul2?.Count, LapcapDataUniqueReferences.UniqueReferences.Length);
+            Assert.AreEqual(actionResul2?.Count, CommonResources.LapcapDataUniqueReferences.Split(',').Length);
 
             Assert.AreEqual(tempdateData.Id, actionResul2?[0].Id);
             Assert.AreEqual(tempdateData.TotalCost, actionResul2?[0].TotalCost);
@@ -114,7 +111,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(201, actionResult?.StatusCode);
 
             Assert.AreEqual(
-                LapcapDataUniqueReferences.UniqueReferences.Length,
+                CommonResources.LapcapDataUniqueReferences.Split(',').Length,
                 this.DbContext.LapcapDataDetail.Count());
             Assert.AreEqual(1, this.DbContext.LapcapDataMaster.Count());
         }
@@ -137,7 +134,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
             var createDefaultParameterDto = this.CreateDto();
             createDefaultParameterDto.ParameterYear = string.Empty;
-            this.LapcapDataController.ModelState.AddModelError("ParameterYear", ErrorMessages.YearRequired);
+            this.LapcapDataController.ModelState.AddModelError("ParameterYear", CommonResources.ParameterYearRequired);
             var task = this.LapcapDataController.Create(createDefaultParameterDto);
             task.Wait();
             var actionResult = task.Result as ObjectResult;

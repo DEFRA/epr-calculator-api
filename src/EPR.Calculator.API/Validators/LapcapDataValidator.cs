@@ -33,11 +33,11 @@ namespace EPR.Calculator.API.Validators
 
                 if (matchingCount == 0)
                 {
-                    errorMessage = $"Enter the total costs for {material} in {country}";
+                    errorMessage = string.Format(CommonResources.EnterTotalCosts, material, country);
                 }
                 else if (matchingCount > 1)
                 {
-                    errorMessage = $"You have entered the total costs for {material} in {country} more than once";
+                    errorMessage = string.Format(CommonResources.TotalCostForMaterialAndCountry, material, country);
                 }
                 else
                 {
@@ -46,19 +46,19 @@ namespace EPR.Calculator.API.Validators
                     var totalCostStr = data.TotalCost;
                     if (string.IsNullOrEmpty(totalCostStr))
                     {
-                        errorMessage = $"Enter the total costs for {material} in {country}";
+                        errorMessage = string.Format(CommonResources.EnterTotalCosts, material, country);
                     }
                     else if (decimal.TryParse(totalCostStr, out totalCostValue))
                     {
                         if (totalCostValue < lapcapTemplate.TotalCostFrom ||
                             totalCostValue > lapcapTemplate.TotalCostTo)
                         {
-                            errorMessage = $"Total costs for {material} in {country} must be between £{Convert.ToInt16(totalCostFrom)} and £{totalCostTo.ToString("#,##0.00")}";
+                            errorMessage = string.Format(CommonResources.TotalCostsRange, material, country, Convert.ToInt16(totalCostFrom), totalCostTo.ToString("#,##0.00"));
                         }
                     }
                     else
                     {
-                        errorMessage = $"Total costs for {material} can only include numbers, commas and decimal points";
+                        errorMessage = string.Format(CommonResources.TotalCostsForMaterial, material);
                     }
                 }
 

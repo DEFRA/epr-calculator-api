@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using EnumsNET;
 using EPR.Calculator.API.Constants;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -53,7 +54,7 @@ namespace EPR.Calculator.API.Controllers
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
-                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+                return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
             }
 
             var userName = claim.Value;
@@ -71,7 +72,7 @@ namespace EPR.Calculator.API.Controllers
                     run => run.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
                 if (isCalcAlreadyRunning)
                 {
-                    return new ObjectResult(new { Message = ErrorMessages.CalculationAlreadyRunning })
+                    return new ObjectResult(new { Message = CommonResources.CalculationAlreadyRunning })
                     {
                         StatusCode = StatusCodes.Status422UnprocessableEntity,
                     };
@@ -81,7 +82,7 @@ namespace EPR.Calculator.API.Controllers
                     year => year.Name == request.FinancialYear);
                 if (financialYear is null)
                 {
-                    return new ObjectResult(new { Message = ErrorMessages.InvalidFinancialYear })
+                    return new ObjectResult(new { Message = CommonResources.InvalidFinancialYear })
                     {
                         StatusCode = StatusCodes.Status400BadRequest,
                     };
@@ -110,12 +111,12 @@ namespace EPR.Calculator.API.Controllers
 
                 if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
                 {
-                    throw new ConfigurationErrorsException("Configuration item not found: ServiceBus__ConnectionString");
+                    throw new ConfigurationErrorsException(CommonResources.ServiceBusConnectionStringMissing);
                 }
 
                 if (string.IsNullOrWhiteSpace(serviceBusQueueName))
                 {
-                    throw new ConfigurationErrorsException("Configuration item not found: ServiceBus__QueueName");
+                    throw new ConfigurationErrorsException(CommonResources.ServiceBusQueueNameMissing);
                 }
 
                 // Get active default parameter settings master
@@ -152,7 +153,7 @@ namespace EPR.Calculator.API.Controllers
                             CalculatorRunId = calculatorRun.Id,
                             FinancialYear = calculatorRun.Financial_Year.Name,
                             CreatedBy = this.User.Identity?.Name ?? userName,
-                            MessageType = CommonConstants.ResultMessageType,
+                            MessageType = CommonResources.ResultMessageType,
                         };
 
                         // Send message
@@ -194,7 +195,7 @@ namespace EPR.Calculator.API.Controllers
 
             if (string.IsNullOrWhiteSpace(request.FinancialYear))
             {
-                return new ObjectResult("Invalid financial year provided") { StatusCode = StatusCodes.Status400BadRequest };
+                return new ObjectResult(CommonResources.InvalidFinancialYearProvided) { StatusCode = StatusCodes.Status400BadRequest };
             }
 
             try
@@ -219,7 +220,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (calculatorRuns.Count == 0)
                 {
-                    return new ObjectResult("No data available for the specified year. Please check the year and try again.") { StatusCode = StatusCodes.Status404NotFound };
+                    return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
                 }
 
                 return new ObjectResult(calculatorRuns) { StatusCode = StatusCodes.Status200OK };
@@ -258,7 +259,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (calculatorRunDetail == null)
                 {
-                    return new NotFoundObjectResult($"Unable to find Run Id {runId}");
+                    return new NotFoundObjectResult(string.Format(CommonResources.UnableToFindRunId, runId));
                 }
 
                 var calcRun = calculatorRunDetail.Run;
@@ -284,7 +285,7 @@ namespace EPR.Calculator.API.Controllers
             var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
             if (claim == null)
             {
-                return new ObjectResult("No claims in the request") { StatusCode = StatusCodes.Status401Unauthorized };
+                return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
             }
 
             var userName = claim.Value;
@@ -298,7 +299,7 @@ namespace EPR.Calculator.API.Controllers
                 var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runStatusUpdateDto.RunId);
                 if (calculatorRun == null)
                 {
-                    return new ObjectResult($"Unable to find Run Id {runStatusUpdateDto.RunId}")
+                    return new ObjectResult(string.Format(CommonResources.UnableToFindRunId, runStatusUpdateDto.RunId))
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
@@ -308,14 +309,13 @@ namespace EPR.Calculator.API.Controllers
 
                 if (classification == null)
                 {
-                    return new ObjectResult($"Unable to find Classification Id {runStatusUpdateDto.ClassificationId}")
+                    return new ObjectResult(string.Format(CommonResources.UnableToFindClassificationId, runStatusUpdateDto.ClassificationId))
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
                 if (runStatusUpdateDto.ClassificationId == calculatorRun.CalculatorRunClassificationId)
                 {
-                    return new ObjectResult(
-                            $"RunId {runStatusUpdateDto.RunId} cannot be changed to classification {runStatusUpdateDto.ClassificationId}")
+                    return new ObjectResult(string.Format(CommonResources.RunIdCannotBeChangedToClassification, runStatusUpdateDto.RunId, runStatusUpdateDto.ClassificationId))
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
@@ -353,7 +353,7 @@ namespace EPR.Calculator.API.Controllers
 
                 if (calculatorRun <= 0)
                 {
-                    return new ObjectResult("No data found for this calculator name") { StatusCode = StatusCodes.Status404NotFound };
+                    return new ObjectResult(CommonResources.NoDataForCalcualtorName) { StatusCode = StatusCodes.Status404NotFound };
                 }
 
                 return new ObjectResult(StatusCodes.Status200OK);
@@ -381,7 +381,7 @@ namespace EPR.Calculator.API.Controllers
                 SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId && metadata.FileName != null && metadata.FileName.Contains("_Results"));
             if (csvFileMetadata == null)
             {
-                return Results.NotFound($"No CSV file found for Run Id {runId}");
+                return Results.NotFound(string.Format(CommonResources.NoCSVFileFound, runId));
             }
 
             try
@@ -435,7 +435,7 @@ namespace EPR.Calculator.API.Controllers
                 var classifications = await this.availableClassificationsService.GetAvailableClassificationsForFinancialYearAsync(request);
                 if (!classifications.Any())
                 {
-                    return this.NotFound("No classifications found.");
+                    return this.NotFound(CommonResources.NoClassificationsFound);
                 }
 
                 var runDto = FinancialYearClassificationsMapper.Map(request.FinancialYear, classifications);
@@ -444,7 +444,7 @@ namespace EPR.Calculator.API.Controllers
             }
             catch (Exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
+                return this.StatusCode(StatusCodes.Status500InternalServerError, CommonResources.AnUnexpectedErrorOccurred);
             }
         }
 
@@ -461,19 +461,19 @@ namespace EPR.Calculator.API.Controllers
             // Return no active default paramater settings and lapcap data message
             if (activeDefaultParameterSettings == null && activeLapcapData == null)
             {
-                return $"Default parameter settings and Lapcap data not available for the financial year {financialYear}.";
+                return string.Format(CommonResources.DataNotAvaialbleForFinancialYear, financialYear);
             }
 
             // Return no active default parameter settings found message
             if (activeDefaultParameterSettings == null)
             {
-                return $"Default parameter settings not available for the financial year {financialYear}.";
+                return string.Format(CommonResources.DefaultParameterNotAvailable, financialYear);
             }
 
             // Return no active lapcap data found message
             if (activeLapcapData == null)
             {
-                return $"Lapcap data not available for the financial year {financialYear}.";
+                return string.Format(CommonResources.LapcapDataNotAvailable, financialYear);
             }
 
             // All good, return empty string
@@ -487,7 +487,7 @@ namespace EPR.Calculator.API.Controllers
             // Return calculator run name already exists
             if (calculatorRun > 0)
             {
-                return $"Calculator run name already exists: {runName}";
+                return string.Format(CommonResources.CalculatorRunNameExists, runName);
             }
 
             // All good, return empty string
