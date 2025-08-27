@@ -10,7 +10,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
     [TestClass]
     public class CalculatorRunStatusDataValidatorTest
     {
-        private readonly CalculatorRunStatusDataValidator validator = new();
+        private readonly CalculatorRunStatusDataValidator calculatorRunStatusDataValidatorUnderTest = new();
 
         public CalculatorRunStatusDataValidatorTest()
         {
@@ -19,9 +19,48 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
         private Fixture Fixture { get; init; }
 
-        [TestMethod]
-        public void Validate_InitialRun_Test()
+        [DataTestMethod]
+        [DataRow(RunClassification.INITIAL_RUN)]
+        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RUN)]
+        public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenRunIsAlreadyCompleted(
+          RunClassification runClassification)
         {
+            // Arrange
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)runClassification,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)RunClassification.INITIAL_RUN,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsTrue(genericValidationResultDto.IsInvalid);
+        }
+
+        [DataTestMethod]
+        [DataRow(RunClassification.INITIAL_RUN)]
+        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RUN)]
+        [DataRow(RunClassification.TEST_RUN)]
+        public void ValidateMethod_ShouldReturnIsInvalidAsFalse_WhenItsValidDesignatedRunAndExistingRunIsUnClassified(
+            RunClassification runClassification)
+        {
+            // Arrange
             var calculatorRun = new CalculatorRun
             {
                 Financial_Year = new CalculatorRunFinancialYear
@@ -33,17 +72,60 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.INITIAL_RUN,
+                ClassificationId = (int)runClassification,
                 RunId = 1,
             };
-            var vr = validator.Validate(calculatorRun, runStatusUpdateDto);
-            Assert.IsNotNull(vr);
-            Assert.IsFalse(vr.IsInvalid);
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsFalse(genericValidationResultDto.IsInvalid);
         }
 
-        [TestMethod]
-        public void Validate_InitialRun_Invalid_Test()
+        [DataTestMethod]
+        [DataRow(RunClassification.INITIAL_RUN, RunClassification.INITIAL_RUN_COMPLETED)]
+        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.INITIAL_RUN_COMPLETED)]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
+        [DataRow(RunClassification.FINAL_RUN, RunClassification.FINAL_RUN_COMPLETED)]
+        public void ValidateMethod_ShouldReturnIsInvalidAsFalse_WhenItsValidDesignatedCompletedRunAndExistingRunIsCorrectUnCompletedRun(
+          RunClassification runClassificationFrom,
+          RunClassification runClassificationTo)
         {
+            // Arrange
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)runClassificationFrom,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)runClassificationTo,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsFalse(genericValidationResultDto.IsInvalid);
+        }
+
+        [DataTestMethod]
+        [DataRow(RunClassification.INITIAL_RUN)]
+        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RUN)]
+        public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsInValidDesignatedRunAndAndExistingRunIsRunning(
+            RunClassification runClassification)
+        {
+            // Arrange
             var calculatorRun = new CalculatorRun
             {
                 Financial_Year = new CalculatorRunFinancialYear
@@ -55,61 +137,22 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.INITIAL_RUN,
+                ClassificationId = (int)runClassification,
                 RunId = 1,
             };
-            var vr = validator.Validate(calculatorRun, runStatusUpdateDto);
-            Assert.IsNotNull(vr);
-            Assert.IsTrue(vr.IsInvalid);
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
 
         [TestMethod]
-        public void Validate_InitialRunComplete_Test()
+        public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsDeletedRunAndExistingRunIsAlreadyMarkedAsDeleted()
         {
-            var calculatorRun = new CalculatorRun
-            {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
-                Name = "Name",
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-            };
-            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
-            {
-                ClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
-                RunId = 1,
-            };
-            var vr = validator.Validate(calculatorRun, runStatusUpdateDto);
-            Assert.IsNotNull(vr);
-            Assert.IsFalse(vr.IsInvalid);
-        }
-
-        [TestMethod]
-        public void Validate_Delete_Test()
-        {
-            var calculatorRun = new CalculatorRun
-            {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
-                Name = "Name",
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-            };
-            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
-            {
-                ClassificationId = (int)RunClassification.DELETED,
-                RunId = 1,
-            };
-            var vr = validator.Validate(calculatorRun, runStatusUpdateDto);
-            Assert.IsNotNull(vr);
-            Assert.IsFalse(vr.IsInvalid);
-        }
-
-        [TestMethod]
-        public void Validate_Delete_Invalid_Test()
-        {
+            // Arrange
             var calculatorRun = new CalculatorRun
             {
                 Financial_Year = new CalculatorRunFinancialYear
@@ -124,14 +167,100 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 ClassificationId = (int)RunClassification.DELETED,
                 RunId = 1,
             };
-            var vr = validator.Validate(calculatorRun, runStatusUpdateDto);
-            Assert.IsNotNull(vr);
-            Assert.IsTrue(vr.IsInvalid);
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
 
         [TestMethod]
-        public void Validate_Unsupported_Status_Test()
+        public void ValidateMethod_ShouldReturnIsInvalidAsFalse_WhenItsDeletedRunAndExistingRunIsIsUnClassified()
         {
+            // Arrange
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)RunClassification.DELETED,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsFalse(genericValidationResultDto.IsInvalid);
+        }
+
+        [TestMethod]
+        public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsTestRunAndExistingRunIsAlreadyMarkedAsTest()
+        {
+            // Arrange
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)RunClassification.TEST_RUN,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)RunClassification.TEST_RUN,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsTrue(genericValidationResultDto.IsInvalid);
+        }
+
+        [TestMethod]
+        public void ValidateMethod_ShouldReturnIsInvalidAsFalse_WhenItsTestRunAndExistingRunIsIsUnClassified()
+        {
+            // Arrange
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)RunClassification.TEST_RUN,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsFalse(genericValidationResultDto.IsInvalid);
+        }
+
+        [TestMethod]
+        public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsUnsupportedStatus()
+        {
+            // Arrange
             var calculatorRun = new CalculatorRun
             {
                 Financial_Year = new CalculatorRunFinancialYear
@@ -146,32 +275,13 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 ClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN,
                 RunId = 1,
             };
-            var vr = validator.Validate(calculatorRun, runStatusUpdateDto);
-            Assert.IsNotNull(vr);
-            Assert.IsTrue(vr.IsInvalid);
-        }
-
-        /// <summary>
-        /// Checks that the validation fails when trying to reclassify a run that has already completed the initial run.
-        /// </summary>
-        [TestMethod]
-        public void Validate_InvalidWhenInitialRunCompleted()
-        {
-            // Arrange
-            var calculatorRun = this.Fixture.Create<CalculatorRun>();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
-
-            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
-            {
-                ClassificationId = (int)RunClassification.DELETED,
-                RunId = 1,
-            };
 
             // Act
-            var vr = this.validator.Validate(calculatorRun, runStatusUpdateDto);
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
 
-            // assert
-            Assert.IsTrue(vr.IsInvalid);
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
     }
 }
