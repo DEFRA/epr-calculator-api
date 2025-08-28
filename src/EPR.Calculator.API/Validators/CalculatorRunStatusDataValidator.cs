@@ -171,7 +171,7 @@ namespace EPR.Calculator.API.Validators
                             IsInvalid = true,
                             Errors =
                             [
-                                string.Format(CommonResources.InvalidClassification, RunClassification.INITIAL_RUN),
+                                string.Format(CommonResources.InvalidClassification, RunClassification.DELETED),
                             ],
                         };
                     }
@@ -207,6 +207,14 @@ namespace EPR.Calculator.API.Validators
                         ],
                     };
             }
+        }
+
+        public GenericValidationResultDto Validate(
+            List<ClassifiedCalculatorRunDto> designatedRuns,
+            CalculatorRun calculatorRun,
+            CalculatorRunStatusUpdateDto runStatusUpdateDto)
+        {
+            throw new NotImplementedException();
         }
     }
 }
