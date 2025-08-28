@@ -72,7 +72,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
                     this.mockValidator.Object,
-                    Mock.Of<IAvailableClassificationsService>());
+                    Mock.Of<IAvailableClassificationsService>(),
+                    Mock.Of<ICalculationRunService>());
             controller.ControllerContext = new ControllerContext
             {
                 HttpContext = defaultContext,
@@ -113,7 +114,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
                     this.mockValidator.Object,
-                    Mock.Of<IAvailableClassificationsService>());
+                    Mock.Of<IAvailableClassificationsService>(),
+                    Mock.Of<ICalculationRunService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -163,7 +165,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
                     this.mockValidator.Object,
-                    Mock.Of<IAvailableClassificationsService>());
+                    Mock.Of<IAvailableClassificationsService>(),
+                    Mock.Of<ICalculationRunService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -216,7 +219,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
                     this.mockValidator.Object,
-                    Mock.Of<IAvailableClassificationsService>());
+                    Mock.Of<IAvailableClassificationsService>(),
+                    Mock.Of<ICalculationRunService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
