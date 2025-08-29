@@ -55,7 +55,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
             dbContext.Add(year25);
 
-            var lapcapMaster25 = new LapcapDataMaster 
+            var lapcapMaster25 = new LapcapDataMaster
             {
                 ProjectionYearId = "2029-30",
                 EffectiveFrom = new DateTime(2025, 1, 1),

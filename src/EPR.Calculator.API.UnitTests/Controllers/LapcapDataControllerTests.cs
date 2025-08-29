@@ -202,7 +202,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(1, errors.Count(x => x.Message == "You have entered the total costs for Wood in England more than once"));
         }
 
-        public static CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
+        private static CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
         {
             var lapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>();
             var masterData = GetLapcapTemplateMasterData();
