@@ -1,4 +1,6 @@
-﻿using EPR.Calculator.API.Controllers;
+﻿using System.Security.Claims;
+using System.Security.Principal;
+using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -10,8 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.Security.Claims;
-using System.Security.Principal;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -44,18 +44,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var year24 = new CalculatorRunFinancialYear
             {
                 Name = "2029-30",
-                Description = ""
+                Description = string.Empty
             };
             dbContext.Add(year24);
 
             var year25 = new CalculatorRunFinancialYear
             {
                 Name = "2030-31",
-                Description = ""
+                Description = string.Empty
             };
             dbContext.Add(year25);
 
-            var lapcapMaster25 = new LapcapDataMaster {
+            var lapcapMaster25 = new LapcapDataMaster 
+            {
                 ProjectionYearId = "2029-30",
                 EffectiveFrom = new DateTime(2025, 1, 1),
                 EffectiveTo = null,
@@ -157,14 +158,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var year24 = new CalculatorRunFinancialYear
             {
                 Name = "202930",
-                Description = ""
+                Description = string.Empty
             };
             dbContext.Add(year24);
 
             var year25 = new CalculatorRunFinancialYear
             {
                 Name = "203031",
-                Description = ""
+                Description = string.Empty
             };
             dbContext.Add(year25);
 
@@ -226,8 +227,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var objectResult = result as ObjectResult;
             Assert.IsNotNull(objectResult);
             Assert.AreEqual(400, objectResult.StatusCode);
-            Assert.AreEqual("No data available for the specified year. Please check the year and try again.",
-                objectResult?.Value?.ToString());
+            Assert.AreEqual("No data available for the specified year. Please check the year and try again.", objectResult?.Value?.ToString());
 
             var lapcapLatest = dbContext.LapcapDataMaster.Where(x => x.EffectiveTo == null).ToList();
             Assert.AreEqual(2, lapcapLatest.Count);

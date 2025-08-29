@@ -27,8 +27,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private ApplicationDBContext context;
         private CalculatorNewController controller;
 
-        private Mock<IOrgAndPomWrapper> MockWrapper { get; init; }
-
         public PutCalculatorRunStatusNewTest()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
@@ -70,6 +68,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             });
             this.context.SaveChanges();
         }
+
+        private Mock<IOrgAndPomWrapper> MockWrapper { get; init; }
 
         [TestCleanup]
         public void CleanUp()

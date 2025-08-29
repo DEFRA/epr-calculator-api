@@ -14,7 +14,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task Get_RequestOkResult_WithLapCapParametersDto_WhenDataExist()
         {
-            var createDefaultParameterDto = this.CreateDto();
+            var createDefaultParameterDto = CreateDto();
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
             var principal = new ClaimsPrincipal(identity);
@@ -104,7 +104,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 HttpContext = context,
             };
-            var createDefaultParameterDto = this.CreateDto();
+            var createDefaultParameterDto = CreateDto();
             var task = this.LapcapDataController.Create(createDefaultParameterDto);
             task.Wait();
             var actionResult = task.Result as ObjectResult;
@@ -132,7 +132,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 HttpContext = context,
             };
-            var createDefaultParameterDto = this.CreateDto();
+            var createDefaultParameterDto = CreateDto();
             createDefaultParameterDto.ParameterYear = string.Empty;
             this.LapcapDataController.ModelState.AddModelError("ParameterYear", CommonResources.ParameterYearRequired);
             var task = this.LapcapDataController.Create(createDefaultParameterDto);
@@ -158,7 +158,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 HttpContext = context,
             };
             var uniqueRef = "ENG-WD";
-            var createDefaultParameterDto = this.CreateDto([uniqueRef]);
+            var createDefaultParameterDto = CreateDto([uniqueRef]);
             var task = this.LapcapDataController.Create(createDefaultParameterDto);
             task.Wait();
             var actionResult = task.Result as ObjectResult;
@@ -185,7 +185,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 HttpContext = context,
             };
-            var createDefaultParameterDto = this.CreateDto();
+            var createDefaultParameterDto = CreateDto();
             var list = new List<LapcapDataTemplateValueDto>(createDefaultParameterDto.LapcapDataTemplateValues);
             if (list != null)
             {
@@ -202,7 +202,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(1, errors.Count(x => x.Message == "You have entered the total costs for Wood in England more than once"));
         }
 
-        public CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
+        public static CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
         {
             var lapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>();
             var masterData = GetLapcapTemplateMasterData();

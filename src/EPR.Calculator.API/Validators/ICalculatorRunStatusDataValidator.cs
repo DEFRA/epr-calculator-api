@@ -5,7 +5,6 @@ namespace EPR.Calculator.API.Validators
 {
     public interface ICalculatorRunStatusDataValidator
     {
-        GenericValidationResultDto Validate(CalculatorRun calculatorRun,
-            CalculatorRunStatusUpdateDto runStatusUpdateDto);
+        GenericValidationResultDto Validate(CalculatorRun calculatorRun, CalculatorRunStatusUpdateDto runStatusUpdateDto);
     }
 }

@@ -64,7 +64,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
             DbContext.Add(year30);
 
-            var DefaultParameterSettingMaster25 = new DefaultParameterSettingMaster
+            var defaultParameterSettingMaster25 = new DefaultParameterSettingMaster
             {
                 ParameterYearId = "2029-30",
                 EffectiveFrom = new DateTime(2025, 4, 1),
@@ -73,11 +73,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
             var defaultParameterDetail25 = new DefaultParameterSettingDetail
             {
-                DefaultParameterSettingMaster = DefaultParameterSettingMaster25,
+                DefaultParameterSettingMaster = defaultParameterSettingMaster25,
                 ParameterUniqueReferenceId = CommonResources.DefaultParameterUniqueReferences.Split(',').First(),
             };
 
-            var DefaultParameterSettingMaster26 = new DefaultParameterSettingMaster
+            var defaultParameterSettingMaster26 = new DefaultParameterSettingMaster
             {
                 ParameterYearId = "2030-31",
                 EffectiveFrom = new DateTime(2025, 4, 1),
@@ -86,19 +86,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
             var defaultParameterDetail26 = new DefaultParameterSettingDetail
             {
-                DefaultParameterSettingMaster = DefaultParameterSettingMaster26,
+                DefaultParameterSettingMaster = defaultParameterSettingMaster26,
                 ParameterUniqueReferenceId = CommonResources.DefaultParameterUniqueReferences.Split(',').First(),
             };
-            this.DbContext.DefaultParameterSettings.Add(DefaultParameterSettingMaster25);
+            this.DbContext.DefaultParameterSettings.Add(defaultParameterSettingMaster25);
             this.DbContext.DefaultParameterSettingDetail.Add(defaultParameterDetail25);
-            this.DbContext.DefaultParameterSettings.Add(DefaultParameterSettingMaster26);
+            this.DbContext.DefaultParameterSettings.Add(defaultParameterSettingMaster26);
             this.DbContext.DefaultParameterSettingDetail.Add(defaultParameterDetail26);
             this.DbContext.SaveChanges();
 
-            var DefaultParameterValidator = new Mock<ICreateDefaultParameterDataValidator>();
-            DefaultParameterValidator.Setup(x => x.Validate(It.IsAny<CreateDefaultParameterSettingDto>()))
+            var defaultParameterValidator = new Mock<ICreateDefaultParameterDataValidator>();
+            defaultParameterValidator.Setup(x => x.Validate(It.IsAny<CreateDefaultParameterSettingDto>()))
                 .Returns(new ValidationResultDto<CreateDefaultParameterSettingErrorDto> { IsInvalid = false });
-            this.DefaultParameterController = new DefaultParameterSettingController(this.DbContext, DefaultParameterValidator.Object, new Microsoft.ApplicationInsights.TelemetryClient())
+            this.DefaultParameterController = new DefaultParameterSettingController(this.DbContext, defaultParameterValidator.Object, new Microsoft.ApplicationInsights.TelemetryClient())
             {
                 ControllerContext = new ControllerContext
                 {

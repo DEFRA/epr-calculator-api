@@ -42,11 +42,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.DbContext.SaveChanges();
         }
 
+        protected CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
+
         private ApplicationDBContext DbContext { get; set; }
 
         private DefaultParameterSettingController DefaultParameterSettingController { get; set; }
-
-        protected CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
 
         [TestCleanup]
         public void TearDown()

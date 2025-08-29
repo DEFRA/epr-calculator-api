@@ -460,7 +460,7 @@ namespace EPR.Calculator.API.Controllers
                     .Where(c => validStatuses.Contains(c.Status))
                     .ToListAsync();
 
-                if (!classifications.Any())
+                if (classifications.Count == 0)
                 {
                     return this.NotFound(CommonResources.NoClassificationsFound);
                 }
