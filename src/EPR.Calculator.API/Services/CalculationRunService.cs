@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services;
 
-public class CaculationRunService : ICalculationRunService
+public class CalculationRunService : ICalculationRunService
 {
     private readonly ApplicationDBContext context;
-    private readonly ILogger<CaculationRunService> logger;
+    private readonly ILogger<CalculationRunService> logger;
     private readonly IEnumerable<int> wantedClassificationIds;
 
-    public CaculationRunService(ApplicationDBContext context, ILogger<CaculationRunService> logger)
+    public CalculationRunService(ApplicationDBContext context, ILogger<CalculationRunService> logger)
     {
         this.context = context;
         this.logger = logger;
