@@ -2,7 +2,7 @@
 
 public class ClassifiedCalculatorRunDto
 {
-    public int RunId {get; init; }
+    public int RunId { get; init; }
 
     public DateTime CreatedAt { get; init; }
 
