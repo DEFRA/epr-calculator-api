@@ -970,6 +970,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Classification {0} is not valid to be completed..
+        /// </summary>
+        public static string UnableToChangeStatusToCompleted {
+            get {
+                return ResourceManager.GetString("UnableToChangeStatusToCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to find Billing File Metadata for Run Id {0}.
         /// </summary>
         public static string UnableToFindBillingFileMetadata {
