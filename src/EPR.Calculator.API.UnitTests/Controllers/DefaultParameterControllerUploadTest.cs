@@ -17,9 +17,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     [TestClass]
     public class DefaultParameterControllerUploadTest
     {
-        private ApplicationDBContext DbContext { get; set; }
+        private ApplicationDBContext DbContext { get; set; } = null!;
 
-        private DefaultParameterSettingController DefaultParameterController { get; set; }
+        private DefaultParameterSettingController DefaultParameterController { get; set; } = null!;
 
         [TestInitialize]
         public void SetUp()

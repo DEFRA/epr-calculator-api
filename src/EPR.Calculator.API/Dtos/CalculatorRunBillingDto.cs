@@ -14,7 +14,7 @@ namespace EPR.Calculator.API.Dtos
 
         public string? UpdatedBy { get; init; }
 
-        public string CreatedBy { get; init; }
+        public string CreatedBy { get; init; } = null!;
 
         public DateTime? UpdatedAt { get; init; }
 
@@ -22,7 +22,7 @@ namespace EPR.Calculator.API.Dtos
 
         public required string RunClassificationStatus { get; init; }
 
-        public string FinancialYear { get; init; }
+        public string FinancialYear { get; init; } = null!;
 
         public int? BillingFileId { get; init; }
 
