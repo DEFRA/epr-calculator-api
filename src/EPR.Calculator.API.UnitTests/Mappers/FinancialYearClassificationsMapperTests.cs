@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Data.DataModels;
+﻿using AutoFixture;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
 using FluentAssertions;
@@ -9,8 +10,10 @@ namespace EPR.Calculator.API.UnitTests.Mappers;
 [TestClass]
 public class FinancialYearClassificationsMapperTests
 {
+    private Fixture Fixture { get; } = new Fixture();
+
     [TestMethod]
-    public void Map_ReturnsExpectedClassifications()
+    public void Map_WhenNotGivenCalculatorRuns_ReturnsExpectedClassifications()
     {
         // Arrange
         List<CalculatorRunClassification> classifications =
@@ -39,5 +42,39 @@ public class FinancialYearClassificationsMapperTests
                 second.Id.Should().Be(2);
                 second.Status.Should().Be("Willing");
             });
+    }
+
+    [TestMethod]
+    public void Map_WhenGivenNullCalculatorRuns_ReturnsExpectedClassifications()
+    {
+        // Arrange
+        var classifications = this.Fixture.Create<List<CalculatorRunClassification>>();
+
+        // Act
+        var result = FinancialYearClassificationsMapper.Map("2024-25", classifications, null);
+
+        // Assert
+        Assert.IsInstanceOfType<FinancialYearClassificationResponseDto>(result);
+        result.FinancialYear.Should().Be("2024-25");
+        result.Classifications.Count.Should().Be(classifications.Count);
+        result.ClassifiedRuns.Should().BeNull();
+    }
+
+    [TestMethod]
+    public void Map_WhenGivenCalculatorRuns_ReturnsExpectedClassificationsAndRuns()
+    {
+        // Arrange
+        var classifications = this.Fixture.Create<List<CalculatorRunClassification>>();
+        var runs = this.Fixture.Create<List<ClassifiedCalculatorRunDto>>();
+
+        // Act
+        var result = FinancialYearClassificationsMapper.Map("2024-25", classifications, runs);
+
+        // Assert
+        Assert.IsInstanceOfType<FinancialYearClassificationResponseDto>(result);
+        result.FinancialYear.Should().Be("2024-25");
+        result.Classifications.Count.Should().Be(classifications.Count);
+        result.ClassifiedRuns.Should().NotBeNull().And.HaveCount(runs.Count);
+        result.ClassifiedRuns.Should().BeEquivalentTo(runs);
     }
 }

@@ -24,7 +24,7 @@ namespace EPR.Calculator.API.Mappers
         public static FinancialYearClassificationResponseDto Map(
             string financialYear,
             IEnumerable<CalculatorRunClassification> classifications,
-            List<ClassifiedCalculatorRunDto> runs)
+            List<ClassifiedCalculatorRunDto>? runs)
         {
             if (runs is null)
             {

@@ -118,6 +118,34 @@ public class CalculationRunServiceTests
         result.Should().HaveCount(expectedRowCount);
     }
 
+    [TestMethod]
+    public async Task GetDesignatedRunsByFinanialYear_ExcludesRunsInWrongFinancialYearOrClassification()
+    {
+        // Arrange
+        this.AddRunToDb(RunClassification.INITIAL_RUN, requestId: 1, WrongFinancialYear);
+        this.AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 2, FinancialYear);
+        this.AddRunToDb(RunClassification.INTERIM_RECALCULATION_RUN, requestId: 3, FinancialYear);
+        this.AddRunToDb(RunClassification.TEST_RUN, requestId: 4, FinancialYear);
+
+        // Act
+        var result = await this.service.GetDesignatedRunsByFinanialYear(FinancialYear);
+
+        // Assert
+        result.Should().HaveCount(2);
+
+        result.Should().SatisfyRespectively(
+            first =>
+            {
+                first.RunId.Should().Be(2);
+                first.RunClassificationId.Should().Be((int)RunClassification.INITIAL_RUN_COMPLETED);
+            },
+            second =>
+            {
+                second.RunId.Should().Be(3);
+                second.RunClassificationId.Should().Be((int) RunClassification.INTERIM_RECALCULATION_RUN);
+            });
+    }
+
     private void AddRunToDb(RunClassification classification, int requestId, string financialYearId)
     {
         this.dbContext.CalculatorRuns.Add(new CalculatorRun
