@@ -5,7 +5,6 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services.Abstractions;
-using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using Microsoft.ApplicationInsights;
@@ -24,10 +23,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
         private readonly Mock<IBillingFileService> mockBillingFileService;
+        private readonly Mock<IOrgAndPomWrapper> mockOrgAndPomWrapper;
+
         private ApplicationDBContext context;
         private CalculatorNewController controller;
-
-        private Mock<IOrgAndPomWrapper> MockWrapper { get; init; }
 
         public PutCalculatorRunStatusNewTest()
         {
@@ -40,28 +39,17 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             this.mockBillingFileService = new Mock<IBillingFileService>();
-            this.MockWrapper = new Mock<IOrgAndPomWrapper>();
+            this.mockOrgAndPomWrapper = new Mock<IOrgAndPomWrapper>();
             var config = TelemetryConfiguration.CreateDefault();
             var telemetryClient = new TelemetryClient(config);
-            this.controller = new CalculatorNewController(this.context, this.mockValidator.Object, this.mockBillingFileService.Object, this.MockWrapper.Object, telemetryClient);
-            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
-            {
-                Status = "DELETED",
-                Id = 6,
-                CreatedBy = "SomeUser",
-            });
-            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
-            {
-                Status = "INITIAL RUN COMPLETED",
-                Id = 7,
-                CreatedBy = "SomeUser",
-            });
-            this.context.CalculatorRunClassifications.Add(new CalculatorRunClassification
-            {
-                Status = "INITIAL RUN",
-                Id = 8,
-                CreatedBy = "SomeUser",
-            });
+
+            this.controller = new CalculatorNewController(
+                this.context,
+                this.mockValidator.Object,
+                this.mockBillingFileService.Object,
+                this.mockOrgAndPomWrapper.Object,
+                telemetryClient);
+
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
