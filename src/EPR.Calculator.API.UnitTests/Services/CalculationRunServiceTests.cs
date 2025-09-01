@@ -142,7 +142,7 @@ public class CalculationRunServiceTests
             second =>
             {
                 second.RunId.Should().Be(3);
-                second.RunClassificationId.Should().Be((int) RunClassification.INTERIM_RECALCULATION_RUN);
+                second.RunClassificationId.Should().Be((int)RunClassification.INTERIM_RECALCULATION_RUN);
             });
     }
 
