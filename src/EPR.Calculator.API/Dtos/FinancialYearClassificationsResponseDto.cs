@@ -6,6 +6,6 @@
 
         public List<CalculatorRunClassificationDto> Classifications { get; set; }
 
-        public List<ClassifiedCalculatorRunDto>? ClassifiedRuns { get; set; }
+        public List<ClassifiedCalculatorRunDto> ClassifiedRuns { get; set; }
     }
 }

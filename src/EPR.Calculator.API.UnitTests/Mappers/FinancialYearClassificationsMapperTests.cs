@@ -18,8 +18,8 @@ public class FinancialYearClassificationsMapperTests
         // Arrange
         List<CalculatorRunClassification> classifications =
         [
-            new() { Id = 1, Status = "Ready" },
-            new() { Id = 2, Status = "Willing" }
+            new() { Id = 1, Status = "RUNNING" },
+            new() { Id = 2, Status = "UNCLASSIFIED" }
         ];
 
         // Act
@@ -35,12 +35,12 @@ public class FinancialYearClassificationsMapperTests
             first =>
             {
                 first.Id.Should().Be(1);
-                first.Status.Should().Be("Ready");
+                first.Status.Should().Be("RUNNING");
             },
             second =>
             {
                 second.Id.Should().Be(2);
-                second.Status.Should().Be("Willing");
+                second.Status.Should().Be("UNCLASSIFIED");
             });
     }
 
