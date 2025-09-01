@@ -214,7 +214,95 @@ namespace EPR.Calculator.API.Validators
             CalculatorRun calculatorRun,
             CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
-            throw new NotImplementedException();
+            if (designatedRuns.Count == 0)
+            {
+                return new GenericValidationResultDto
+                {
+                    IsInvalid = false,
+                };
+            }
+
+            if (designatedRuns.Any(x => x.RunId != runStatusUpdateDto.RunId
+                && (x.RunClassificationId == (int)RunClassification.INITIAL_RUN
+                || x.RunClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN
+                || x.RunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
+                || x.RunClassificationId == (int)RunClassification.FINAL_RUN))
+                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.INITIAL_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RUN))
+            {
+                return new GenericValidationResultDto
+                {
+                    IsInvalid = true,
+                    Errors =
+                    [
+                       "Another run already have been classified.",
+                    ],
+                };
+            }
+            else if (designatedRuns.Any(x => x.RunId != runStatusUpdateDto.RunId
+                && x.RunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED)
+                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.INITIAL_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED))
+            {
+                return new GenericValidationResultDto
+                {
+                    IsInvalid = true,
+                    Errors =
+                    [
+                       $"Another '{RunClassification.INITIAL_RUN}' run already have been completed for '{calculatorRun.FinancialYearId}'.",
+                    ],
+                };
+            }
+            else if (designatedRuns.Any(x => x.RunId != runStatusUpdateDto.RunId
+                && x.RunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)
+                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED))
+            {
+                return new GenericValidationResultDto
+                {
+                    IsInvalid = true,
+                    Errors =
+                    [
+                       $"Another '{RunClassification.FINAL_RECALCULATION_RUN}' run already have been completed for '{calculatorRun.FinancialYearId}'.",
+                    ],
+                };
+            }
+            else if (designatedRuns.Any(x => x.RunId != runStatusUpdateDto.RunId
+                && (x.RunClassificationId == (int)RunClassification.FINAL_RUN
+                || x.RunClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED))
+                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED))
+            {
+                return new GenericValidationResultDto
+                {
+                    IsInvalid = true,
+                    Errors =
+                    [
+                       $"Another '{RunClassification.FINAL_RUN}' already performed for '{calculatorRun.FinancialYearId}'.",
+                    ],
+                };
+            }
+            else if (designatedRuns.Any(x => x.RunId != runStatusUpdateDto.RunId
+               && x.RunClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED)
+               && (runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RUN
+               || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED))
+            {
+                return new GenericValidationResultDto
+                {
+                    IsInvalid = true,
+                    Errors =
+                    [
+                       $"Another '{RunClassification.FINAL_RUN}' run already have been completed for '{calculatorRun.FinancialYearId}'.",
+                    ],
+                };
+            }
+
+            return new GenericValidationResultDto
+                {
+                    IsInvalid = false,
+                };
         }
     }
 }

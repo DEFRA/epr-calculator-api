@@ -54,7 +54,8 @@ namespace EPR.Calculator.API.Controllers
             this.telemetryClient = telemetryClient;
 
             this.calculationRunService = calculationRunService;
-        }
+        }
+
         [HttpPut]
         [Route("calculatorRuns")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -198,7 +199,7 @@ namespace EPR.Calculator.API.Controllers
                     return this.StatusCode(StatusCodes.Status400BadRequest, string.Format(CommonResources.InvalidForRunId, runId));
                 }
 
-                var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId);
+                var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
                 if (calculatorRun == null)
                 {
                     return new ObjectResult(string.Format(CommonResources.UnableToFindRunId, runId))
@@ -209,7 +210,7 @@ namespace EPR.Calculator.API.Controllers
                 calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
                 var metadata = await this.context.CalculatorRunBillingFileMetadata.
                     Where(x => x.CalculatorRunId == runId).OrderByDescending(x => x.BillingFileCreatedDate).
-                    FirstOrDefaultAsync();
+                    FirstOrDefaultAsync(cancellationToken);
 
                 if (metadata == null)
                 {
