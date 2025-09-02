@@ -29,7 +29,7 @@ public class FinancialYearClassificationsMapperTests
         Assert.IsInstanceOfType<FinancialYearClassificationResponseDto>(result);
         result.FinancialYear.Should().Be("2024-25");
         result.Classifications.Count.Should().Be(classifications.Count);
-        result.ClassifiedRuns.Should().BeNull();
+        result.ClassifiedRuns.Should().BeEmpty();
 
         result.Classifications.Should().SatisfyRespectively(
             first =>
@@ -57,7 +57,7 @@ public class FinancialYearClassificationsMapperTests
         Assert.IsInstanceOfType<FinancialYearClassificationResponseDto>(result);
         result.FinancialYear.Should().Be("2024-25");
         result.Classifications.Count.Should().Be(classifications.Count);
-        result.ClassifiedRuns.Should().BeNull();
+        result.ClassifiedRuns.Should().BeEmpty();
     }
 
     [TestMethod]
@@ -74,7 +74,7 @@ public class FinancialYearClassificationsMapperTests
         Assert.IsInstanceOfType<FinancialYearClassificationResponseDto>(result);
         result.FinancialYear.Should().Be("2024-25");
         result.Classifications.Count.Should().Be(classifications.Count);
-        result.ClassifiedRuns.Should().NotBeNull().And.HaveCount(runs.Count);
+        result.ClassifiedRuns.Should().HaveCount(runs.Count);
         result.ClassifiedRuns.Should().BeEquivalentTo(runs);
     }
 }
