@@ -16,7 +16,7 @@ using Moq;
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
-    public class LapcapDataControllerUploadTest
+    public class LapcapDataControllerUploadTest : BaseControllerTest
     {
         private LapcapDataController LapcapDataController { get; set; } = null!;
 
@@ -92,7 +92,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.LapcapDataController = new LapcapDataController(
                 dbContext,
                 lapcapDataValidator.Object,
-                new TelemetryClient())
+                TelemetryClient)
             {
                 ControllerContext = new ControllerContext
                 {
@@ -206,7 +206,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.LapcapDataController = new LapcapDataController(
                 dbContext,
                 lapcapDataValidator.Object,
-                new TelemetryClient())
+                TelemetryClient)
             {
                 ControllerContext = new ControllerContext
                 {

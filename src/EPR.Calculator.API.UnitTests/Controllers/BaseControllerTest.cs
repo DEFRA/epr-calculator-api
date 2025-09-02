@@ -1,4 +1,6 @@
-﻿namespace EPR.Calculator.API.UnitTests.Controllers
+﻿using Microsoft.ApplicationInsights.Extensibility;
+
+namespace EPR.Calculator.API.UnitTests.Controllers
 {
     using Azure.Messaging.ServiceBus;
     using EPR.Calculator.API.Controllers;
@@ -25,10 +27,12 @@
                 DefaultParameterSettingHelper.GetDefaultParameterTemplateMasterData().ToList());
             this.DbContext.SaveChanges();
 
+            TelemetryClient = new TelemetryClient(new TelemetryConfiguration());
+
             var validator = new CreateDefaultParameterDataValidator(this.DbContext);
-            this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator, new TelemetryClient());
+            this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator, TelemetryClient);
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(this.DbContext);
-            this.LapcapDataController = new LapcapDataController(this.DbContext, lapcapDataValidator, new TelemetryClient());
+            this.LapcapDataController = new LapcapDataController(this.DbContext, lapcapDataValidator, TelemetryClient);
 
             this.Wrapper = new Mock<IOrgAndPomWrapper>().Object;
             var mockStorageService = new Mock<IStorageService>();
@@ -62,6 +66,8 @@
         protected CalculatorController CalculatorController { get; set; }
 
         protected IOrgAndPomWrapper Wrapper { get; set; }
+
+        protected TelemetryClient TelemetryClient { get; set; }
 
         public static IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
         {

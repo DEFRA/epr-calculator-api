@@ -68,6 +68,8 @@
 
         public virtual DbSet<CalculatorRunFinancialYear> FinancialYears { get; set; }
 
+        public virtual DbSet<CalculatorRunBillingFileMetadata> CalculatorRunBillingFileMetadata { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -75,8 +77,6 @@
                 optionsBuilder.UseSqlServer();
             }
         }
-
-        public virtual DbSet<CalculatorRunBillingFileMetadata> CalculatorRunBillingFileMetadata { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
