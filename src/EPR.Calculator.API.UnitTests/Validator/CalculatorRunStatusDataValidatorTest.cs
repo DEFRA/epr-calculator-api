@@ -203,8 +203,13 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsFalse(genericValidationResultDto.IsInvalid);
         }
 
-        [TestMethod]
-        public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsTestRunAndExistingRunIsAlreadyMarkedAsTest()
+        [DataTestMethod]
+        [DataRow(RunClassification.TEST_RUN)]
+        [DataRow(RunClassification.INTHEQUEUE)]
+        [DataRow(RunClassification.RUNNING)]
+        [DataRow(RunClassification.ERROR)]
+        public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsTestRunAndExistingRunIsAlreadyMarkedAsTestOrOthers(
+            RunClassification runClassification)
         {
             // Arrange
             var calculatorRun = new CalculatorRun
@@ -214,7 +219,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     Name = "Name",
                 },
                 Name = "Name",
-                CalculatorRunClassificationId = (int)RunClassification.TEST_RUN,
+                CalculatorRunClassificationId = (int)runClassification,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
@@ -282,6 +287,520 @@ namespace EPR.Calculator.API.UnitTests.Validator
             // Assert
             Assert.IsNotNull(genericValidationResultDto);
             Assert.IsTrue(genericValidationResultDto.IsInvalid);
+        }
+
+        [TestMethod]
+        public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsFalse_WhenNoDesignatedRunPerformed()
+        {
+            // Arrange
+            List<ClassifiedCalculatorRunDto> designatedRuns = [];
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)RunClassification.INITIAL_RUN,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+                designatedRuns,
+                calculatorRun,
+                runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsFalse(genericValidationResultDto.IsInvalid);
+        }
+
+        [DataTestMethod]
+        [DataRow(RunClassification.INITIAL_RUN, RunClassification.INITIAL_RUN)]
+        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.INTERIM_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.INTERIM_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RUN, RunClassification.INTERIM_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.FINAL_RECALCULATION_RUN)]
+        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.FINAL_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RUN, RunClassification.FINAL_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RUN, RunClassification.FINAL_RUN)]
+        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.FINAL_RUN)]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.FINAL_RUN)]
+        public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenAnotherRunIsMarkedAsDesignatedRunButNotCompleted(
+            RunClassification existingRunClassification,
+            RunClassification requestRunClassification)
+        {
+            // Arrange
+            List<ClassifiedCalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(new ClassifiedCalculatorRunDto
+            {
+                RunId = 101,
+                RunName = $"My - {existingRunClassification}",
+                RunClassificationId = (int)existingRunClassification,
+                RunClassificationStatus = existingRunClassification.ToString(),
+                CreatedAt = DateTime.Now.AddDays(-1),
+                UpdatedAt = DateTime.Now.AddDays(-1),
+            });
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)requestRunClassification,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+                designatedRuns,
+                calculatorRun,
+                runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsTrue(genericValidationResultDto.IsInvalid);
+        }
+
+        [DataTestMethod]
+        [DataRow(RunClassification.INITIAL_RUN)]
+        [DataRow(RunClassification.INITIAL_RUN_COMPLETED)]
+        public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenAnotherRunIsMarkedAsInitialRunCompleted(
+            RunClassification requestRunClassification)
+        {
+            // Arrange
+            List<ClassifiedCalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(new ClassifiedCalculatorRunDto
+            {
+                RunId = 101,
+                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
+                RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
+                RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
+                CreatedAt = DateTime.Now.AddDays(-1),
+                UpdatedAt = DateTime.Now.AddDays(-1),
+            });
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)requestRunClassification,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+                designatedRuns,
+                calculatorRun,
+                runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsTrue(genericValidationResultDto.IsInvalid);
+        }
+
+        [DataTestMethod]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
+        public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenAnotherRunIsMarkedAsFinalRecalculationRunCompleted(
+           RunClassification requestRunClassification)
+        {
+            // Arrange
+            List<ClassifiedCalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(new ClassifiedCalculatorRunDto
+            {
+                RunId = 101,
+                RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
+                RunClassificationId = (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
+                RunClassificationStatus = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.ToString(),
+                CreatedAt = DateTime.Now.AddDays(-1),
+                UpdatedAt = DateTime.Now.AddDays(-1),
+            });
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)requestRunClassification,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+                designatedRuns,
+                calculatorRun,
+                runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsTrue(genericValidationResultDto.IsInvalid);
+        }
+
+        [DataTestMethod]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
+        [DataRow(RunClassification.FINAL_RUN)]
+        [DataRow(RunClassification.FINAL_RUN_COMPLETED)]
+        public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenAnotherRunIsMarkedAsFinalRunCompleted(
+          RunClassification requestRunClassification)
+        {
+            // Arrange
+            List<ClassifiedCalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(new ClassifiedCalculatorRunDto
+            {
+                RunId = 101,
+                RunName = $"My - {RunClassification.FINAL_RUN_COMPLETED}",
+                RunClassificationId = (int)RunClassification.FINAL_RUN_COMPLETED,
+                RunClassificationStatus = RunClassification.FINAL_RUN_COMPLETED.ToString(),
+                CreatedAt = DateTime.Now.AddDays(-1),
+                UpdatedAt = DateTime.Now.AddDays(-1),
+            });
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)requestRunClassification,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+                designatedRuns,
+                calculatorRun,
+                runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsTrue(genericValidationResultDto.IsInvalid);
+        }
+
+        [DataTestMethod]
+        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
+        public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenSystemDontHaveInitialRunCompleted(
+          RunClassification requestRunClassification)
+        {
+            // Arrange
+            List<ClassifiedCalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(new ClassifiedCalculatorRunDto
+            {
+                RunId = 101,
+                RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
+                RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
+                RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
+                CreatedAt = DateTime.Now.AddDays(-1),
+                UpdatedAt = DateTime.Now.AddDays(-1),
+            });
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)requestRunClassification,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+                designatedRuns,
+                calculatorRun,
+                runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsTrue(genericValidationResultDto.IsInvalid);
+        }
+
+        [TestMethod]
+        public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenSystemDontHaveValidRunsToPerformFinalRun()
+        {
+            // Arrange
+            List<ClassifiedCalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(new ClassifiedCalculatorRunDto
+            {
+                RunId = 101,
+                RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
+                RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
+                RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
+                CreatedAt = DateTime.Now.AddDays(-1),
+                UpdatedAt = DateTime.Now.AddDays(-1),
+            });
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)RunClassification.FINAL_RUN,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+                designatedRuns,
+                calculatorRun,
+                runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsTrue(genericValidationResultDto.IsInvalid);
+        }
+
+        [DataTestMethod]
+        [DataRow(false, false, false)]
+        [DataRow(true, false, false)]
+        [DataRow(true, true, false)]
+        [DataRow(true, true, true)]
+        [DataRow(true, false, true)]
+        public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsFalse_WhenSystemHaveCorrectDesignatedRunsToPerformInterimRecalculationRun(
+          bool haveInterimRecalculationRunCompleted,
+          bool haveFinalRecalculationRunCompleted,
+          bool haveFinalRunCompleted)
+        {
+            // Arrange
+            List<ClassifiedCalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(new ClassifiedCalculatorRunDto
+            {
+                RunId = 101,
+                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
+                RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
+                RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
+                CreatedAt = DateTime.Now.AddDays(-1),
+                UpdatedAt = DateTime.Now.AddDays(-1),
+            });
+
+            if (haveInterimRecalculationRunCompleted)
+            {
+                designatedRuns.Add(new ClassifiedCalculatorRunDto
+                {
+                    RunId = 102,
+                    RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
+                    RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
+                    RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
+                    CreatedAt = DateTime.Now.AddDays(-1),
+                    UpdatedAt = DateTime.Now.AddDays(-1),
+                });
+            }
+
+            if (haveFinalRecalculationRunCompleted)
+            {
+                designatedRuns.Add(new ClassifiedCalculatorRunDto
+                {
+                    RunId = 102,
+                    RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
+                    RunClassificationId = (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
+                    RunClassificationStatus = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.ToString(),
+                    CreatedAt = DateTime.Now.AddDays(-1),
+                    UpdatedAt = DateTime.Now.AddDays(-1),
+                });
+            }
+
+            if (haveFinalRunCompleted)
+            {
+                designatedRuns.Add(new ClassifiedCalculatorRunDto
+                {
+                    RunId = 102,
+                    RunName = $"My - {RunClassification.FINAL_RUN_COMPLETED}",
+                    RunClassificationId = (int)RunClassification.FINAL_RUN_COMPLETED,
+                    RunClassificationStatus = RunClassification.FINAL_RUN_COMPLETED.ToString(),
+                    CreatedAt = DateTime.Now.AddDays(-1),
+                    UpdatedAt = DateTime.Now.AddDays(-1),
+                });
+            }
+
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+                designatedRuns,
+                calculatorRun,
+                runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsFalse(genericValidationResultDto.IsInvalid);
+        }
+
+        [DataTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsFalse_WhenSystemHaveCorrectDesignatedRunsToPerformFinalRecalculationRun(
+            bool haveInterimRecalculationRunCompleted)
+        {
+            // Arrange
+            List<ClassifiedCalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(new ClassifiedCalculatorRunDto
+            {
+                RunId = 101,
+                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
+                RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
+                RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
+                CreatedAt = DateTime.Now.AddDays(-1),
+                UpdatedAt = DateTime.Now.AddDays(-1),
+            });
+
+            if (haveInterimRecalculationRunCompleted)
+            {
+                designatedRuns.Add(new ClassifiedCalculatorRunDto
+                {
+                    RunId = 102,
+                    RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
+                    RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
+                    RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
+                    CreatedAt = DateTime.Now.AddDays(-1),
+                    UpdatedAt = DateTime.Now.AddDays(-1),
+                });
+            }
+
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)RunClassification.FINAL_RECALCULATION_RUN,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+                designatedRuns,
+                calculatorRun,
+                runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsFalse(genericValidationResultDto.IsInvalid);
+        }
+
+        [DataTestMethod]
+        [DataRow(true, false)]
+        [DataRow(true, true)]
+        [DataRow(false, true)]
+        public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsFalse_WhenSystemHaveCorrectDesignatedRunsToPerformInterimFinalRun(
+            bool haveInterimRecalculationRunCompleted,
+            bool haveFinalRecalculationRunCompleted)
+        {
+            // Arrange
+            List<ClassifiedCalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(new ClassifiedCalculatorRunDto
+            {
+                RunId = 101,
+                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
+                RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
+                RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
+                CreatedAt = DateTime.Now.AddDays(-1),
+                UpdatedAt = DateTime.Now.AddDays(-1),
+            });
+
+            if (haveInterimRecalculationRunCompleted)
+            {
+                designatedRuns.Add(new ClassifiedCalculatorRunDto
+                {
+                    RunId = 102,
+                    RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
+                    RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
+                    RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
+                    CreatedAt = DateTime.Now.AddDays(-1),
+                    UpdatedAt = DateTime.Now.AddDays(-1),
+                });
+            }
+
+            if (haveFinalRecalculationRunCompleted)
+            {
+                designatedRuns.Add(new ClassifiedCalculatorRunDto
+                {
+                    RunId = 103,
+                    RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
+                    RunClassificationId = (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
+                    RunClassificationStatus = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.ToString(),
+                    CreatedAt = DateTime.Now.AddDays(-1),
+                    UpdatedAt = DateTime.Now.AddDays(-1),
+                });
+            }
+
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)RunClassification.FINAL_RUN,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+                designatedRuns,
+                calculatorRun,
+                runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsFalse(genericValidationResultDto.IsInvalid);
         }
     }
 }
