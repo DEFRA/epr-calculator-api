@@ -5183,7 +5183,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250902101703_UpdateLapcapTotalCostFromValue'
 )
 BEGIN
-    UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99 WHERE [total_cost_from] = 0.00
+    UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
 END;
 GO
 
