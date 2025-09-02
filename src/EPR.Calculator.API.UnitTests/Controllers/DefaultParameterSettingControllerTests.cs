@@ -31,8 +31,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator, TelemetryClient);
         }
 
-        //protected CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
-
         private ApplicationDBContext DbContext { get; set; }
 
         private DefaultParameterSettingController DefaultParameterSettingController { get; set; }
