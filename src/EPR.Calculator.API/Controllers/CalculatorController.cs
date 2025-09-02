@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Data;
+﻿using System.Configuration;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -8,7 +9,6 @@ using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Configuration;
 
 namespace EPR.Calculator.API.Controllers
 {
