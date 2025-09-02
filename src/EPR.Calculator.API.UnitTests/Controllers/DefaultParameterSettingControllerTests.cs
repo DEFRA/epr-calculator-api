@@ -2,9 +2,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,25 +18,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public DefaultParameterSettingControllerTests()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-        .UseInMemoryDatabase(databaseName: "PayCal")
-        .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-        .Options;
+                .UseInMemoryDatabase(databaseName: "PayCal")
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+                .Options;
 
             this.DbContext = new ApplicationDBContext(dbContextOptions);
             this.DbContext.Database.EnsureCreated();
 
             var validator = new CreateDefaultParameterDataValidator(this.DbContext);
             this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator, TelemetryClient);
-        }
-
-        private ApplicationDBContext DbContext { get; set; }
-
-        private DefaultParameterSettingController DefaultParameterSettingController { get; set; }
-
-        [TestCleanup]
-        public void TearDown()
-        {
-            this.DbContext.Database.EnsureDeleted();
         }
 
         [TestMethod]

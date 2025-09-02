@@ -15,10 +15,8 @@ using Moq;
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
-    public class DefaultParameterControllerUploadTest
+    public class DefaultParameterControllerUploadTest : BaseControllerTest
     {
-        private ApplicationDBContext DbContext { get; set; } = null!;
-
         private DefaultParameterSettingController DefaultParameterController { get; set; } = null!;
 
         [TestInitialize]
@@ -31,11 +29,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             this.DbContext = new ApplicationDBContext(dbContextOptions);
             this.DbContext.Database.EnsureCreated();
-        }
-
-        public void TearDown()
-        {
-            this.DbContext.Database.EnsureDeleted();
         }
 
         [TestMethod]
@@ -98,7 +91,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var defaultParameterValidator = new Mock<ICreateDefaultParameterDataValidator>();
             defaultParameterValidator.Setup(x => x.Validate(It.IsAny<CreateDefaultParameterSettingDto>()))
                 .Returns(new ValidationResultDto<CreateDefaultParameterSettingErrorDto> { IsInvalid = false });
-            this.DefaultParameterController = new DefaultParameterSettingController(this.DbContext, defaultParameterValidator.Object, new Microsoft.ApplicationInsights.TelemetryClient())
+            this.DefaultParameterController = new DefaultParameterSettingController(this.DbContext, defaultParameterValidator.Object, TelemetryClient)
             {
                 ControllerContext = new ControllerContext
                 {

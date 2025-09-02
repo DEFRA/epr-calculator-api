@@ -18,8 +18,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     [TestClass]
     public class LapcapDataControllerUploadTest : BaseControllerTest
     {
-        private LapcapDataController LapcapDataController { get; set; } = null!;
-
         [TestMethod]
         public void Test_With_Multiple_Financial_Years()
         {
