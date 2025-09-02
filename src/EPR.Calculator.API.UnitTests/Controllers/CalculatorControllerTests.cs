@@ -235,7 +235,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     mockStorageService.Object,
                     mockServiceBusService.Object,
                     mockValidator.Object,
-                    Mock.Of<IAvailableClassificationsService>());
+                    Mock.Of<IAvailableClassificationsService>(),
+                    Mock.Of<ICalculationRunService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -303,7 +304,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     mockStorageService.Object,
                     mockServiceBusService.Object,
                     mockValidator.Object,
-                    Mock.Of<IAvailableClassificationsService>());
+                    Mock.Of<IAvailableClassificationsService>(),
+                    Mock.Of<ICalculationRunService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -515,7 +517,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
                 mockValidator.Object,
-                mockAvailableClassificationsService.Object);
+                mockAvailableClassificationsService.Object,
+                Mock.Of<ICalculationRunService>());
 
             var expectedClassifications = new List<CalculatorRunClassificationDto>
             {
@@ -588,7 +591,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
                 mockValidator.Object,
-                Mock.Of<IAvailableClassificationsService>());
+                Mock.Of<IAvailableClassificationsService>(),
+                Mock.Of<ICalculationRunService>());
 
             // Act
             var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
@@ -624,7 +628,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
                 mockValidator.Object,
-                mockAvailableClassificationsService.Object);
+                mockAvailableClassificationsService.Object,
+                Mock.Of<ICalculationRunService>());
 
             // Act
             var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
@@ -653,7 +658,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
                 mockValidator.Object,
-                Mock.Of<IAvailableClassificationsService>());
+                Mock.Of<IAvailableClassificationsService>(),
+                Mock.Of<ICalculationRunService>());
 
             // Act
             var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;

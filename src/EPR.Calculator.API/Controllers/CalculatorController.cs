@@ -21,6 +21,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly IServiceBusService serviceBusService;
         private readonly ICalcFinancialYearRequestDtoDataValidator validator;
         private readonly IAvailableClassificationsService availableClassificationsService;
+        private readonly ICalculationRunService calculatorRunService;
 
         public CalculatorController(
             ApplicationDBContext context,
@@ -28,7 +29,8 @@ namespace EPR.Calculator.API.Controllers
             IStorageService storageService,
             IServiceBusService serviceBusService,
             ICalcFinancialYearRequestDtoDataValidator validator,
-            IAvailableClassificationsService availableClassificationsService)
+            IAvailableClassificationsService availableClassificationsService,
+            ICalculationRunService calculationRunService)
         {
             this.context = context;
             this.configuration = configuration;
@@ -36,6 +38,7 @@ namespace EPR.Calculator.API.Controllers
             this.serviceBusService = serviceBusService;
             this.validator = validator;
             this.availableClassificationsService = availableClassificationsService;
+            this.calculatorRunService = calculationRunService;
         }
 
         [HttpPost]
@@ -435,7 +438,9 @@ namespace EPR.Calculator.API.Controllers
                     return this.NotFound(CommonResources.NoClassificationsFound);
                 }
 
-                var runDto = FinancialYearClassificationsMapper.Map(request.FinancialYear, classifications);
+                var runs = await this.calculatorRunService.GetDesignatedRunsByFinanialYear(request.FinancialYear);
+
+                var runDto = FinancialYearClassificationsMapper.Map(request.FinancialYear, classifications, runs);
 
                 return this.Ok(runDto);
             }
