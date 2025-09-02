@@ -17,7 +17,30 @@ namespace EPR.Calculator.API.Mappers
                     {
                         Id = c.Id,
                         Status = c.Status,
-                    }).ToList()
+                    }).ToList(),
+            };
+        }
+
+        public static FinancialYearClassificationResponseDto Map(
+            string financialYear,
+            IEnumerable<CalculatorRunClassification> classifications,
+            List<ClassifiedCalculatorRunDto>? runs)
+        {
+            if (runs is null)
+            {
+                return Map(financialYear, classifications);
+            }
+
+            return new FinancialYearClassificationResponseDto
+            {
+                FinancialYear = financialYear,
+                Classifications = classifications.Select(c =>
+                    new CalculatorRunClassificationDto
+                    {
+                        Id = c.Id,
+                        Status = c.Status,
+                    }).ToList(),
+                ClassifiedRuns = runs,
             };
         }
     }
