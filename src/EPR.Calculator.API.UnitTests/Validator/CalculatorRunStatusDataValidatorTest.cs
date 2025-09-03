@@ -551,15 +551,6 @@ namespace EPR.Calculator.API.UnitTests.Validator
         {
             // Arrange
             List<ClassifiedCalculatorRunDto> designatedRuns = [];
-            designatedRuns.Add(new ClassifiedCalculatorRunDto
-            {
-                RunId = 101,
-                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
-                RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
-                RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.Now.AddDays(-1),
-                UpdatedAt = DateTime.Now.AddDays(-1),
-            });
             var calculatorRun = new CalculatorRun
             {
                 Financial_Year = new CalculatorRunFinancialYear

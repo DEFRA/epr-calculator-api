@@ -218,7 +218,7 @@ namespace EPR.Calculator.API.Validators
             CalculatorRun calculatorRun,
             CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {
-            if (designatedRuns.Count == 0)
+            if (designatedRuns.Count == 0 && runStatusUpdateDto.ClassificationId == (int)RunClassification.INITIAL_RUN)
             {
                 return new GenericValidationResultDto
                 {
@@ -316,7 +316,8 @@ namespace EPR.Calculator.API.Validators
                 };
             }
             else if (!designatedRuns.Any(x => x.RunId != runStatusUpdateDto.RunId
-               && (x.RunClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED
+               && (x.RunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED
+               || x.RunClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED
                || x.RunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED))
                && runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RUN)
             {
