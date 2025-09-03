@@ -554,9 +554,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
             designatedRuns.Add(new ClassifiedCalculatorRunDto
             {
                 RunId = 101,
-                RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
-                RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
-                RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
+                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
+                RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
+                RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
                 CreatedAt = DateTime.Now.AddDays(-1),
                 UpdatedAt = DateTime.Now.AddDays(-1),
             });

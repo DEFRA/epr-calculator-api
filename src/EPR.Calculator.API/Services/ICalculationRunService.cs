@@ -1,11 +1,9 @@
-﻿using EPR.Calculator.API.Dtos;
+﻿using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Dtos;
 
-namespace EPR.Calculator.API.Services
+namespace EPR.Calculator.API.Services;
+
+public interface ICalculationRunService
 {
-    public interface ICalculationRunService
-    {
-        Task<List<ClassifiedCalculatorRunDto>> GetDesignatedRunsByFinanialYear(
-            string financialYear,
-            CancellationToken cancellationToken = default);
-    }
+    Task<List<ClassifiedCalculatorRunDto>> GetDesignatedRunsByFinanialYear(string financialYear, CancellationToken cancellationToken = default);
 }
