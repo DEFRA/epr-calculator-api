@@ -8,6 +8,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using EPR.Calculator.API.Data;
     using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.Dtos;
+    using EPR.Calculator.API.Services;
     using EPR.Calculator.API.Validators;
     using EPR.Calculator.API.Wrapper;
     using Microsoft.ApplicationInsights;
@@ -25,6 +26,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<IBillingFileService> mockBillingFileService;
         private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
         private readonly Mock<IOrgAndPomWrapper> mockWrapper;
+        private readonly Mock<ICalculationRunService> mockCalculationRunService;
         private ApplicationDBContext context;
         private CalculatorNewController controller;
 
@@ -40,9 +42,18 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             this.mockBillingFileService = new Mock<IBillingFileService>();
             this.mockWrapper = new Mock<IOrgAndPomWrapper>();
+            this.mockCalculationRunService = new Mock<ICalculationRunService>();
+
             var config = TelemetryConfiguration.CreateDefault();
             var telemetryClient = new TelemetryClient(config);
-            this.controller = new CalculatorNewController(this.context, this.mockValidator.Object, this.mockBillingFileService.Object, this.mockWrapper.Object, telemetryClient);
+
+            this.controller = new CalculatorNewController(
+                this.context,
+                this.mockValidator.Object,
+                this.mockBillingFileService.Object,
+                this.mockWrapper.Object,
+                telemetryClient,
+                this.mockCalculationRunService.Object);
 
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
