@@ -21,8 +21,6 @@ namespace EPR.Calculator.API.Controllers
         private readonly IBillingFileService billingFileService;
         private readonly TelemetryClient telemetryClient;
 
-        private IOrgAndPomWrapper Wrapper { get; init; }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CalculatorNewController"/> class.
         /// </summary>
@@ -41,6 +39,8 @@ namespace EPR.Calculator.API.Controllers
             this.Wrapper = wrapper;
             this.telemetryClient = telemetryClient;
         }
+
+        private IOrgAndPomWrapper Wrapper { get; init; }
 
         [HttpPut]
         [Route("calculatorRuns")]
@@ -172,7 +172,7 @@ namespace EPR.Calculator.API.Controllers
                     return this.StatusCode(StatusCodes.Status400BadRequest, string.Format(CommonResources.InvalidForRunId, runId));
                 }
 
-                var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId);
+                var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId, cancellationToken: cancellationToken);
                 if (calculatorRun == null)
                 {
                     return new ObjectResult(string.Format(CommonResources.UnableToFindRunId, runId))
@@ -183,7 +183,7 @@ namespace EPR.Calculator.API.Controllers
                 calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
                 var metadata = await this.context.CalculatorRunBillingFileMetadata.
                     Where(x => x.CalculatorRunId == runId).OrderByDescending(x => x.BillingFileCreatedDate).
-                    FirstOrDefaultAsync();
+                    FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
                 if (metadata == null)
                 {

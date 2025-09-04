@@ -6,8 +6,6 @@
 
         public string? Description { get; set; }
 
-        public override string ToString() => Name;
-
         public ICollection<CalculatorRun> CalculatorRuns { get; }
             = new List<CalculatorRun>();
 
@@ -16,5 +14,7 @@
 
         public ICollection<LapcapDataMaster> LapcapDataMasters { get; }
             = new List<LapcapDataMaster>();
+
+        public override string ToString() => Name;
     }
 }

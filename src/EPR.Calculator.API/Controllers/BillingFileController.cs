@@ -72,21 +72,23 @@ namespace EPR.Calculator.API.Controllers
                 var responseDto = await billingFileService.GetProducersInstructionResponseAsync(
                     runId, cancellationToken).ConfigureAwait(false);
 
-                if (responseDto == null || (responseDto.ProducersInstructionDetails == null && responseDto.ProducersInstructionSummary == null))
+                if (responseDto == null || (responseDto.ProducersInstructionDetails == null &&
+                                            responseDto.ProducersInstructionSummary == null))
                 {
-                    return this.StatusCode(StatusCodes.Status404NotFound, string.Format(CommonResources.NoBillingFileMetadataForRunId, runId));
+                    return this.StatusCode(
+                        StatusCodes.Status404NotFound,
+                        string.Format(CommonResources.NoBillingFileMetadataForRunId, runId));
                 }
 
                 return Ok(responseDto);
             }
-            catch (Exception ex)
+            catch (UnprocessableEntityException ex)
             {
-                return ex switch
-                {
-                    UnprocessableEntityException unEx => this.StatusCode(StatusCodes.Status422UnprocessableEntity, unEx.Message),
-                    KeyNotFoundException keyEx => this.StatusCode(StatusCodes.Status404NotFound, keyEx.Message),
-                    _ => throw ex,
-                };
+                return StatusCode(StatusCodes.Status422UnprocessableEntity, ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, ex.Message);
             }
         }
 

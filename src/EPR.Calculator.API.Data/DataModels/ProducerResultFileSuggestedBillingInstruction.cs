@@ -26,7 +26,7 @@
 
         public string? TonnagePercentageThresholdBreached { get; set; }
 
-        public string SuggestedBillingInstruction { get; set; }
+        public string SuggestedBillingInstruction { get; set; } = null!;
 
         public decimal SuggestedInvoiceAmount { get; set; }
 

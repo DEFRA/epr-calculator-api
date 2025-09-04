@@ -4,7 +4,7 @@
     {
         public int Id { get; set; }
 
-        public string ProjectionYearId { get; set; }
+        public string ProjectionYearId { get; set; } = null!;
 
         public required CalculatorRunFinancialYear ProjectionYear { get; set; }
 
