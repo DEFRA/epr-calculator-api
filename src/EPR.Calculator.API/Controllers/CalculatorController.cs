@@ -1,6 +1,4 @@
-﻿using System.Configuration;
-using EnumsNET;
-using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -8,9 +6,9 @@ using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -22,19 +20,25 @@ namespace EPR.Calculator.API.Controllers
         private readonly IStorageService storageService;
         private readonly IServiceBusService serviceBusService;
         private readonly ICalcFinancialYearRequestDtoDataValidator validator;
+        private readonly IAvailableClassificationsService availableClassificationsService;
+        private readonly ICalculationRunService calculatorRunService;
 
         public CalculatorController(
             ApplicationDBContext context,
             IConfiguration configuration,
             IStorageService storageService,
             IServiceBusService serviceBusService,
-            ICalcFinancialYearRequestDtoDataValidator validator)
+            ICalcFinancialYearRequestDtoDataValidator validator,
+            IAvailableClassificationsService availableClassificationsService,
+            ICalculationRunService calculationRunService)
         {
             this.context = context;
             this.configuration = configuration;
             this.storageService = storageService;
             this.serviceBusService = serviceBusService;
             this.validator = validator;
+            this.availableClassificationsService = availableClassificationsService;
+            this.calculatorRunService = calculationRunService;
         }
 
         [HttpPost]
@@ -408,7 +412,6 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
         [Route("ClassificationByFinancialYear")]
         [ProducesResponseType(typeof(FinancialYearClassificationResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -423,49 +426,22 @@ namespace EPR.Calculator.API.Controllers
                     return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
                 }
 
-                var initialRun = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description);
-                var testRun = RunClassification.TEST_RUN.AsString(EnumFormat.Description);
-
-                if (initialRun == null || testRun == null)
-                {
-                    return this.BadRequest(CommonResources.InvalidRunClassifications);
-                }
-
                 var validationResult = await this.validator.Validate(request);
                 if (validationResult.IsInvalid)
                 {
                     return this.BadRequest(validationResult.Errors);
                 }
 
-                var anyInitialRunExists = await this.context.CalculatorRuns.AnyAsync(x =>
-                    x.FinancialYearId == request.FinancialYear
-                    &&
-                    (x.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN
-                    ||
-                    x.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED));
-
-                var validStatuses = new List<string>();
-
-                if (anyInitialRunExists)
-                {
-                    validStatuses.Add(testRun);
-                }
-                else
-                {
-                    validStatuses.AddRange(
-                        [initialRun, testRun]);
-                }
-
-                var classifications = await this.context.CalculatorRunClassifications
-                    .Where(c => validStatuses.Contains(c.Status))
-                    .ToListAsync();
-
-                if (classifications.Count == 0)
+                var classifications = await this.availableClassificationsService.GetAvailableClassificationsForFinancialYearAsync(request);
+                if (!classifications.Any())
                 {
                     return this.NotFound(CommonResources.NoClassificationsFound);
                 }
 
-                var runDto = FinancialYearClassificationsMapper.Map(request.FinancialYear, classifications);
+                var runs = await this.calculatorRunService.GetDesignatedRunsByFinanialYear(request.FinancialYear);
+
+                var runDto = FinancialYearClassificationsMapper.Map(request.FinancialYear, classifications, runs);
+
                 return this.Ok(runDto);
             }
             catch (Exception)

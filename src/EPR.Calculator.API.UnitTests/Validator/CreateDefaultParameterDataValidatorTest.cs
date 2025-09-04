@@ -18,7 +18,15 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
             this.Context = new ApplicationDBContext(dbContextOptions);
-            this.Context.DefaultParameterTemplateMasterList.AddRange(this.Data);
+            if (this?.Context?.DefaultParameterTemplateMasterList?.Count() > 0)
+            {
+                this.Context.DefaultParameterTemplateMasterList.UpdateRange(this.Data);
+            }
+            else
+            {
+                this.Context.DefaultParameterTemplateMasterList.AddRange(this.Data);
+            }
+
             this.Context.SaveChanges();
             this.Context.Database.EnsureCreated();
             this.Validator = new CreateDefaultParameterDataValidator(this.Context);

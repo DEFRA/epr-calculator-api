@@ -38,6 +38,8 @@ builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 builder.Services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatusDataValidator>();
 builder.Services.AddScoped<IBillingFileService, BillingFileService>();
+builder.Services.AddScoped<IAvailableClassificationsService, AvailableClassificationsService>();
+builder.Services.AddScoped<ICalculationRunService, CalculationRunService>();
 
 if (environmentName.Equals(CommonResources.Local, StringComparison.OrdinalIgnoreCase))
 {
