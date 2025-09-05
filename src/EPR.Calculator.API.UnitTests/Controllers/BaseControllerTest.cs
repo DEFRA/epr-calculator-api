@@ -48,7 +48,8 @@
                 mockStorageService.Object,
                 mockServiceBusService.Object,
                 mockValidator.Object,
-                Mock.Of<IAvailableClassificationsService>());
+                Mock.Of<IAvailableClassificationsService>(),
+                Mock.Of<ICalculationRunService>());
 
             this.DbContext.Material.RemoveRange(this.DbContext.Material.ToList());
             this.DbContext.SaveChanges();
