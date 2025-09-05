@@ -435,4 +435,7 @@
   <data name="MustBeBetweenWithPercentage" xml:space="preserve">
     <value>must be between {0}% and {1}%</value>
   </data>
+  <data name="UnableToChangeStatusToCompleted" xml:space="preserve">
+    <value>Classification {0} is not valid to be completed.</value>
+  </data>
 </root>
