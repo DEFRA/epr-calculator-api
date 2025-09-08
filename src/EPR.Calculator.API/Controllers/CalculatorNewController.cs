@@ -179,8 +179,28 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                // Update calculation run classification status: Initial run completed
-                calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
+                RunClassification newClassificationValue;
+                try
+                {
+                    // Update calculation run classification status: Initial run completed
+                    newClassificationValue = calculatorRun.CalculatorRunClassificationId switch
+                    {
+                        (int)RunClassification.INITIAL_RUN => RunClassification.INITIAL_RUN_COMPLETED,
+                        (int)RunClassification.INTERIM_RECALCULATION_RUN => RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
+                        (int)RunClassification.FINAL_RECALCULATION_RUN => RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
+                        (int)RunClassification.FINAL_RUN => RunClassification.FINAL_RUN_COMPLETED,
+                        _ => throw new InvalidOperationException(),
+                    };
+                }
+                catch (InvalidOperationException)
+                {
+                    return new ObjectResult(string.Format(
+                        CommonResources.UnableToChangeStatusToCompleted,
+                        (RunClassification)calculatorRun.CalculatorRunClassificationId))
+                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
+
+                calculatorRun.CalculatorRunClassificationId = (int)newClassificationValue;
                 var metadata = await this.context.CalculatorRunBillingFileMetadata.
                     Where(x => x.CalculatorRunId == runId).OrderByDescending(x => x.BillingFileCreatedDate).
                     FirstOrDefaultAsync(cancellationToken: cancellationToken);
