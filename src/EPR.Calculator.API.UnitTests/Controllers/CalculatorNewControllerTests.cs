@@ -1,4 +1,8 @@
-﻿using AutoFixture;
+﻿using System.Data;
+using System.Net;
+using System.Security.Claims;
+using System.Security.Principal;
+using AutoFixture;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -16,10 +20,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.Data;
-using System.Net;
-using System.Security.Claims;
-using System.Security.Principal;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
