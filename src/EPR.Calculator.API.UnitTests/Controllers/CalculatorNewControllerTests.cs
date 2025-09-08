@@ -1,25 +1,27 @@
-﻿using EPR.Calculator.API.Services.Abstractions;
+﻿using System.Net;
+using System.Security.Claims;
+using System.Security.Principal;
+using AutoFixture;
+using EPR.Calculator.API.Controllers;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Services.Abstractions;
+using EPR.Calculator.API.Validators;
+using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
-    using System.Security.Claims;
-    using System.Security.Principal;
-    using EPR.Calculator.API.Controllers;
-    using EPR.Calculator.API.Data;
-    using EPR.Calculator.API.Data.DataModels;
-    using EPR.Calculator.API.Dtos;
-    using EPR.Calculator.API.Services;
-    using EPR.Calculator.API.Validators;
-    using EPR.Calculator.API.Wrapper;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.ApplicationInsights.Extensibility;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Diagnostics;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Moq;
-
     [TestClass]
     public class CalculatorNewControllerTests
     {
@@ -27,11 +29,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
         private readonly Mock<IOrgAndPomWrapper> mockWrapper;
         private readonly Mock<ICalculationRunService> mockCalculationRunService;
-        private ApplicationDBContext context;
-        private CalculatorNewController controller;
+        private readonly ApplicationDBContext context;
+        private readonly CalculatorNewController controller;
 
         public CalculatorNewControllerTests()
         {
+            this.Fixture = new Fixture();
+
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
@@ -89,6 +93,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             });
             this.context.SaveChanges();
         }
+
+        private Fixture Fixture { get; init; }
 
         [TestCleanup]
         public void CleanUp()
@@ -207,6 +213,97 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(result);
             Assert.AreEqual(422, result.StatusCode);
             Assert.AreEqual("Unable to move billing json file for Run Id 1", result.Value);
+
+            this.context.CalculatorRunBillingFileMetadata.RemoveRange(this.context.CalculatorRunBillingFileMetadata);
+            this.context.SaveChanges();
+        }
+
+        /// <summary>
+        /// Checks that the CalculatorRunClassificationId value is updated to the correct "completed" status
+        /// when the classification is set to valid initial values.
+        /// </summary>
+        /// <param name="initialValue">The initial value of the run status.</param>
+        /// <param name="expectedNewValue">The value the status should have after the method is run.</param>
+        /// <returns>A <see cref="Task"/>.</returns>
+        [TestMethod]
+        [DataRow(RunClassification.INITIAL_RUN, RunClassification.INITIAL_RUN_COMPLETED)]
+        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED)]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
+        [DataRow(RunClassification.FINAL_RUN, RunClassification.FINAL_RUN_COMPLETED)]
+        public async Task PrepareBillingFileSendToFSS_UpdateToCompleted(
+            RunClassification initialValue,
+            RunClassification expectedNewValue)
+        {
+            // Arrange
+            this.ControllerContext();
+
+            var calculatorRunId = 1;
+            var calculatorRun = this.context.CalculatorRuns
+                .Single(run => run.Id == calculatorRunId);
+
+            calculatorRun.CalculatorRunClassificationId = (int)initialValue;
+
+            // Set up the billings service to report that the file was successfully transfered.
+            this.mockBillingFileService
+                .Setup(x => x.MoveBillingJsonFile(calculatorRunId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+
+            this.context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            {
+                BillingCsvFileName = "test2.csv",
+                BillingJsonFileName = "test2.json",
+                BillingFileCreatedBy = "testUser",
+                BillingFileCreatedDate = DateTime.Now,
+                CalculatorRunId = calculatorRunId,
+            });
+
+            this.context.SaveChanges();
+
+            // Act
+            var result = (StatusCodeResult)await this.controller.PrepareBillingFileSendToFSS(calculatorRunId);
+            var newClassification = (RunClassification)this.context.CalculatorRuns
+                .Single(run => run.Id == calculatorRunId).CalculatorRunClassificationId;
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(HttpStatusCode.Accepted, (HttpStatusCode)result.StatusCode);
+            Assert.AreEqual(expectedNewValue, newClassification);
+
+            this.context.CalculatorRunBillingFileMetadata.RemoveRange(this.context.CalculatorRunBillingFileMetadata);
+            this.context.SaveChanges();
+        }
+
+        /// <summary>
+        /// Checks that when the initial CalculatorRunClassificationId is not one of the valid initial
+        /// values, an error is returned, and the classification is not updated.
+        /// </summary>
+        /// <param name="initialValue">The initial value of the run status.</param>
+        /// <returns>A <see cref="Task"/>.</returns>
+        [TestMethod]
+        [DataRow(RunClassification.RUNNING)]
+        [DataRow(RunClassification.TEST_RUN)]
+        [DataRow(RunClassification.DELETED)]
+        [DataRow(RunClassification.INTHEQUEUE)]
+        public async Task PrepareBillingFileSendToFSS_FailWhenInvalidClassification(RunClassification initialValue)
+        {
+            this.ControllerContext();
+
+            var calculatorRunId = 1;
+            var calculatorRun = this.context.CalculatorRuns
+                .Single(run => run.Id == calculatorRunId);
+
+            calculatorRun.CalculatorRunClassificationId = (int)initialValue;
+
+            // Act
+            var result = (ObjectResult)await this.controller.PrepareBillingFileSendToFSS(1);
+            var newClassification = (RunClassification)this.context.CalculatorRuns
+                    .Single(run => run.Id == calculatorRunId).CalculatorRunClassificationId;
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.UnprocessableContent, (HttpStatusCode)result.StatusCode!);
+            Assert.AreEqual(initialValue, newClassification);
+            var expectedMessage = $"Classification {(RunClassification)calculatorRun.CalculatorRunClassificationId} is not valid to be completed.";
+            Assert.AreEqual(expectedMessage, result.Value);
 
             this.context.CalculatorRunBillingFileMetadata.RemoveRange(this.context.CalculatorRunBillingFileMetadata);
             this.context.SaveChanges();
