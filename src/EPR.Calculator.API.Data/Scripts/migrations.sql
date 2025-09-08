@@ -5223,3 +5223,28 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250902101703_UpdateLapcapTotalCostFromValue'
+)
+BEGIN
+    UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250902101703_UpdateLapcapTotalCostFromValue'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250902101703_UpdateLapcapTotalCostFromValue', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
