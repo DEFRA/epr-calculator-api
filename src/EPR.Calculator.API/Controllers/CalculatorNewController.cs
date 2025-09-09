@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
@@ -20,26 +21,39 @@ namespace EPR.Calculator.API.Controllers
         private readonly ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator;
         private readonly IBillingFileService billingFileService;
         private readonly TelemetryClient telemetryClient;
+        private readonly ICalculationRunService calculationRunService;
 
         private IOrgAndPomWrapper Wrapper { get; init; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CalculatorNewController"/> class.
         /// </summary>
-        /// <param name="context">Db Context</param>
-        /// <param name="calculatorRunStatusDataValidator">Db Validator</param>
+        /// <param name="context">Db Context.</param>
+        /// <param name="calculatorRunStatusDataValidator">Db Validator.</param>
+        /// <param name="billingFileService">Service for handling billing file operations.</param>
+        /// <param name="wrapper">Wrapper for organization and POM data.</param>
+        /// <param name="telemetryClient">Telemetry client for logging and tracking.</param>
+        /// <param name="calculationRunService">Service for managing calculation runs.</param>
         public CalculatorNewController(
             ApplicationDBContext context,
             ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
             IBillingFileService billingFileService,
             IOrgAndPomWrapper wrapper,
-            TelemetryClient telemetryClient)
+            TelemetryClient telemetryClient,
+            ICalculationRunService calculationRunService)
         {
+
             this.context = context;
+
             this.calculatorRunStatusDataValidator = calculatorRunStatusDataValidator;
+
             this.billingFileService = billingFileService;
+
             this.Wrapper = wrapper;
+
             this.telemetryClient = telemetryClient;
+
+            this.calculationRunService = calculationRunService;
         }
 
         [HttpPut]
@@ -77,11 +91,24 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                var validationResult = this.calculatorRunStatusDataValidator.Validate(calculatorRun, runStatusUpdateDto);
+                // Perform basic validation on classification status
+                GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidator.Validate(calculatorRun, runStatusUpdateDto);
 
-                if (validationResult.IsInvalid)
+                if (genericValidationResultDto.IsInvalid)
                 {
-                    return new ObjectResult(validationResult.Errors)
+                    return new ObjectResult(genericValidationResultDto.Errors)
+                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
+
+                // Perform validation to check other designated runs are not in progress and not already completed for the same financial year
+                List<ClassifiedCalculatorRunDto> designatedRuns = await this.calculationRunService.GetDesignatedRunsByFinanialYear(
+                    calculatorRun.FinancialYearId);
+
+                genericValidationResultDto = this.calculatorRunStatusDataValidator.Validate(designatedRuns, calculatorRun, runStatusUpdateDto);
+
+                if (genericValidationResultDto.IsInvalid)
+                {
+                    return new ObjectResult(genericValidationResultDto.Errors)
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
@@ -172,18 +199,38 @@ namespace EPR.Calculator.API.Controllers
                     return this.StatusCode(StatusCodes.Status400BadRequest, string.Format(CommonResources.InvalidForRunId, runId));
                 }
 
-                var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId);
+                var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
                 if (calculatorRun == null)
                 {
                     return new ObjectResult(string.Format(CommonResources.UnableToFindRunId, runId))
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                // Update calculation run classification status: Initial run completed
-                calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED;
+                RunClassification newClassificationValue;
+                try
+                {
+                    // Update calculation run classification status: Initial run completed
+                    newClassificationValue = calculatorRun.CalculatorRunClassificationId switch
+                    {
+                        (int)RunClassification.INITIAL_RUN => RunClassification.INITIAL_RUN_COMPLETED,
+                        (int)RunClassification.INTERIM_RECALCULATION_RUN => RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
+                        (int)RunClassification.FINAL_RECALCULATION_RUN => RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
+                        (int)RunClassification.FINAL_RUN => RunClassification.FINAL_RUN_COMPLETED,
+                        _ => throw new InvalidOperationException(),
+                    };
+                }
+                catch (InvalidOperationException)
+                {
+                    return new ObjectResult(string.Format(
+                        CommonResources.UnableToChangeStatusToCompleted,
+                        (RunClassification)calculatorRun.CalculatorRunClassificationId))
+                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
+
+                calculatorRun.CalculatorRunClassificationId = (int)newClassificationValue;
                 var metadata = await this.context.CalculatorRunBillingFileMetadata.
                     Where(x => x.CalculatorRunId == runId).OrderByDescending(x => x.BillingFileCreatedDate).
-                    FirstOrDefaultAsync();
+                    FirstOrDefaultAsync(cancellationToken);
 
                 if (metadata == null)
                 {
