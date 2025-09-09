@@ -4210,54 +4210,6 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250721090348_AddNewPostInitialStatuses'
-)
-BEGIN
-    DECLARE @var29 sysname;
-    SELECT @var29 = [d].[name]
-    FROM [sys].[default_constraints] [d]
-    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'HasBillingFileGenerated');
-    IF @var29 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT [' + @var29 + '];');
-    ALTER TABLE [calculator_run] DROP COLUMN [HasBillingFileGenerated];
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250721090348_AddNewPostInitialStatuses'
-)
-BEGIN
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'created_by', N'status') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
-        SET IDENTITY_INSERT [calculator_run_classification] ON;
-    EXEC(N'INSERT INTO [calculator_run_classification] ([id], [created_by], [status])
-    VALUES 
-    (12, N''System User'', N''INTERIM RE-CALCULATION RUN COMPLETED''),
-    (13, N''System User'', N''FINAL RE-CALCULATION RUN COMPLETED''),
-    (14, N''System User'', N''FINAL RUN COMPLETED'')');
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'created_by', N'status') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
-        SET IDENTITY_INSERT [calculator_run_classification] OFF;
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250721090348_AddNewPostInitialStatuses'
-)
-BEGIN
-    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250721090348_AddNewPostInitialStatuses', N'8.0.7');
-END;
-GO
-
-COMMIT;
-GO
-
-BEGIN TRANSACTION;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250717154431_DeleteFinancialYearsData'
 )
 BEGIN
@@ -4318,6 +4270,38 @@ IF NOT EXISTS (
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
     VALUES (N'20250717154431_DeleteFinancialYearsData', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250721090348_AddNewPostInitialStatuses'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'created_by', N'status') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
+        SET IDENTITY_INSERT [calculator_run_classification] ON;
+    EXEC(N'INSERT INTO [calculator_run_classification] ([id], [created_by], [status])
+    VALUES (12, N''System User'', N''INTERIM RE-CALCULATION RUN COMPLETED''),
+    (13, N''System User'', N''FINAL RE-CALCULATION RUN COMPLETED''),
+    (14, N''System User'', N''FINAL RUN COMPLETED'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'created_by', N'status') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
+        SET IDENTITY_INSERT [calculator_run_classification] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250721090348_AddNewPostInitialStatuses'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250721090348_AddNewPostInitialStatuses', N'8.0.7');
 END;
 GO
 
@@ -5217,6 +5201,107 @@ IF NOT EXISTS (
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
     VALUES (N'20250815134048_AddProducerIdIndex', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250909091510_UpdateProducerSuggestedBilling'
+)
+BEGIN
+    DECLARE @var31 sysname;
+    SELECT @var31 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_resultfile_suggested_billing_instruction]') AND [c].[name] = N'total_producer_bill_with_bad_debt');
+    IF @var31 IS NOT NULL EXEC(N'ALTER TABLE [producer_resultfile_suggested_billing_instruction] DROP CONSTRAINT [' + @var31 + '];');
+    ALTER TABLE [producer_resultfile_suggested_billing_instruction] ALTER COLUMN [total_producer_bill_with_bad_debt] decimal(18,2) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250909091510_UpdateProducerSuggestedBilling'
+)
+BEGIN
+    DECLARE @var32 sysname;
+    SELECT @var32 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_resultfile_suggested_billing_instruction]') AND [c].[name] = N'suggested_invoice_amount');
+    IF @var32 IS NOT NULL EXEC(N'ALTER TABLE [producer_resultfile_suggested_billing_instruction] DROP CONSTRAINT [' + @var32 + '];');
+    ALTER TABLE [producer_resultfile_suggested_billing_instruction] ALTER COLUMN [suggested_invoice_amount] decimal(18,2) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250909091510_UpdateProducerSuggestedBilling'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [status] = N''TEST RUN''
+    WHERE [id] = 4;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250909091510_UpdateProducerSuggestedBilling'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''Test user''
+    WHERE [id] = 8;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250909091510_UpdateProducerSuggestedBilling'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''Test user''
+    WHERE [id] = 9;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250909091510_UpdateProducerSuggestedBilling'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''Test user''
+    WHERE [id] = 10;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250909091510_UpdateProducerSuggestedBilling'
+)
+BEGIN
+    EXEC(N'UPDATE [calculator_run_classification] SET [created_by] = N''Test user''
+    WHERE [id] = 11;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250909091510_UpdateProducerSuggestedBilling'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250909091510_UpdateProducerSuggestedBilling', N'8.0.7');
 END;
 GO
 
