@@ -26,8 +26,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
 
             builder.Property(p => p.TotalProducerBillWithBadDebt)
                    .HasColumnName("total_producer_bill_with_bad_debt")
-                   .HasPrecision(18, 2)
-                   .IsRequired();
+                   .HasPrecision(18, 2);
 
             builder.Property(p => p.CurrentYearInvoiceTotalToDate)
                    .HasColumnName("current_year_invoice_total_to_date")
@@ -68,8 +67,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
 
             builder.Property(p => p.SuggestedInvoiceAmount)
                    .HasColumnName("suggested_invoice_amount")
-                   .HasPrecision(18, 2)
-                   .IsRequired();
+                   .HasPrecision(18, 2);
 
             builder.Property(p => p.BillingInstructionAcceptReject)
                    .HasColumnName("billing_instruction_accept_reject")
