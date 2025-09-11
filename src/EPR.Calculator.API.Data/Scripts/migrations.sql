@@ -5308,19 +5308,3 @@ GO
 COMMIT;
 GO
 
-BEGIN TRANSACTION;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20250911083535_UpdateSuggestedBillingTb'
-)
-BEGIN
-    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250911083535_UpdateSuggestedBillingTb', N'8.0.7');
-END;
-GO
-
-COMMIT;
-GO
-
