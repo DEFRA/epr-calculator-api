@@ -33,41 +33,6 @@ namespace EPR.Calculator.API.Data.Migrations
                 oldType: "decimal(18,2)",
                 oldPrecision: 18,
                 oldScale: 2);
-
-            migrationBuilder.UpdateData(
-                table: "calculator_run_classification",
-                keyColumn: "id",
-                keyValue: 4,
-                column: "status",
-                value: "TEST RUN");
-
-            migrationBuilder.UpdateData(
-                table: "calculator_run_classification",
-                keyColumn: "id",
-                keyValue: 8,
-                column: "created_by",
-                value: "Test user");
-
-            migrationBuilder.UpdateData(
-                table: "calculator_run_classification",
-                keyColumn: "id",
-                keyValue: 9,
-                column: "created_by",
-                value: "Test user");
-
-            migrationBuilder.UpdateData(
-                table: "calculator_run_classification",
-                keyColumn: "id",
-                keyValue: 10,
-                column: "created_by",
-                value: "Test user");
-
-            migrationBuilder.UpdateData(
-                table: "calculator_run_classification",
-                keyColumn: "id",
-                keyValue: 11,
-                column: "created_by",
-                value: "Test user");
         }
 
         /// <inheritdoc />
@@ -100,41 +65,6 @@ namespace EPR.Calculator.API.Data.Migrations
                 oldPrecision: 18,
                 oldScale: 2,
                 oldNullable: true);
-
-            migrationBuilder.UpdateData(
-                table: "calculator_run_classification",
-                keyColumn: "id",
-                keyValue: 4,
-                column: "status",
-                value: "PLAY");
-
-            migrationBuilder.UpdateData(
-                table: "calculator_run_classification",
-                keyColumn: "id",
-                keyValue: 8,
-                column: "created_by",
-                value: "Test User");
-
-            migrationBuilder.UpdateData(
-                table: "calculator_run_classification",
-                keyColumn: "id",
-                keyValue: 9,
-                column: "created_by",
-                value: "Test User");
-
-            migrationBuilder.UpdateData(
-                table: "calculator_run_classification",
-                keyColumn: "id",
-                keyValue: 10,
-                column: "created_by",
-                value: "Test User");
-
-            migrationBuilder.UpdateData(
-                table: "calculator_run_classification",
-                keyColumn: "id",
-                keyValue: 11,
-                column: "created_by",
-                value: "Test User");
         }
     }
 }
