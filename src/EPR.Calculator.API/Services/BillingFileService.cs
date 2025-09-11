@@ -408,6 +408,7 @@ namespace EPR.Calculator.API.Services
             var lastModifiedAcceptreject = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
                 .Where(x => x.CalculatorRunId == runId)
                 .OrderByDescending(x => x.LastModifiedAcceptReject)
+                .AsNoTracking()
                 .Select(x => x.LastModifiedAcceptReject)
                 .FirstOrDefaultAsync(cancellationToken)
                 .ConfigureAwait(false);
@@ -415,6 +416,7 @@ namespace EPR.Calculator.API.Services
             var billingGeneratedDate = await applicationDBContext.CalculatorRunBillingFileMetadata
                 .Where(x => x.CalculatorRunId == runId)
                 .OrderByDescending(x => x.BillingFileCreatedDate)
+                .AsNoTracking()
                 .Select(x => x.BillingFileCreatedDate)
                 .FirstOrDefaultAsync(cancellationToken)
                 .ConfigureAwait(false);
