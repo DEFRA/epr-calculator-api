@@ -403,14 +403,14 @@ namespace EPR.Calculator.API.Services
             }
         }
 
-        public async Task<bool> IsBillingFileGeneratedLatest(int runId, CancellationToken cancellationToken)
+        public async Task<bool> IsBillingFileGeneratedLatest(int runId)
         {
             var lastModifiedAcceptreject = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
                 .Where(x => x.CalculatorRunId == runId)
                 .OrderByDescending(x => x.LastModifiedAcceptReject)
                 .AsNoTracking()
                 .Select(x => x.LastModifiedAcceptReject)
-                .FirstOrDefaultAsync(cancellationToken)
+                .FirstOrDefaultAsync()
                 .ConfigureAwait(false);
 
             var billingGeneratedDate = await applicationDBContext.CalculatorRunBillingFileMetadata
@@ -418,7 +418,7 @@ namespace EPR.Calculator.API.Services
                 .OrderByDescending(x => x.BillingFileCreatedDate)
                 .AsNoTracking()
                 .Select(x => x.BillingFileCreatedDate)
-                .FirstOrDefaultAsync(cancellationToken)
+                .FirstOrDefaultAsync()
                 .ConfigureAwait(false);
 
             return lastModifiedAcceptreject != null && billingGeneratedDate > lastModifiedAcceptreject;

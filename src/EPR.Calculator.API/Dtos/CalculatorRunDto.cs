@@ -23,5 +23,7 @@
         public string FinancialYear { get; set; }
 
         public bool? IsBillingFileGenerating { get; set; }
+
+        public bool IsBillingFileGeneratedLatest { get; set; }
     }
 }

@@ -7,7 +7,7 @@ namespace EPR.Calculator.API.Mappers
     {
         public static readonly string FileExtension = "CSV";
 
-        public static CalculatorRunDto Map(CalculatorRun run, CalculatorRunClassification classification)
+        public static CalculatorRunDto Map(CalculatorRun run, CalculatorRunClassification classification, bool isBillingFileGeneratedLatest)
         {
             return new CalculatorRunDto
             {
@@ -22,6 +22,7 @@ namespace EPR.Calculator.API.Mappers
                 RunClassificationStatus = classification.Status,
                 FinancialYear = run.FinancialYearId,
                 IsBillingFileGenerating = run.IsBillingFileGenerating,
+                IsBillingFileGeneratedLatest = isBillingFileGeneratedLatest,
             };
         }
     }
