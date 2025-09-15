@@ -421,7 +421,7 @@ namespace EPR.Calculator.API.Services
                 .FirstOrDefaultAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            return lastModifiedAcceptReject != null && billingGeneratedDate > lastModifiedAcceptReject;
+            return lastModifiedAcceptReject.HasValue && billingGeneratedDate > lastModifiedAcceptReject.Value;
         }
 
         private async Task<CalculatorRun?> GetRunStatusAsync(int runId, CancellationToken cancellationToken)
