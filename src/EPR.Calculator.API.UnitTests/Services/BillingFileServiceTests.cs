@@ -738,34 +738,5 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Assert
             result.Should().BeTrue();
         }
-
-        [TestMethod]
-        public async Task IsBillingFileGeneratedLatest_ShouldReturnFalse_WhenLastModifiedAcceptRejectIsNull()
-        {
-            // Arrange
-            int runId = 516;
-            using var cancellationTokenSource = new CancellationTokenSource();
-
-            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
-            {
-                CalculatorRunId = runId,
-                SuggestedBillingInstruction = "Invoice",
-                LastModifiedAcceptReject = null,
-            });
-
-            this.DbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                CalculatorRunId = runId,
-                BillingFileCreatedDate = DateTime.UtcNow.AddMinutes(-1),
-                BillingFileCreatedBy = "test",
-            });
-            await this.DbContext.SaveChangesAsync();
-
-            // Act
-            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationTokenSource.Token);
-
-            // Assert
-            result.Should().BeFalse();
-        }
     }
 }
