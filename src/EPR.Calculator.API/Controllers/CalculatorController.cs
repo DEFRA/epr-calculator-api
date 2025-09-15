@@ -241,7 +241,7 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetCalculatorRun(int runId)
+        public async Task<IActionResult> GetCalculatorRun(int runId, CancellationToken cancellationToken = default)
         {
             if (!this.ModelState.IsValid)
             {
@@ -268,7 +268,7 @@ namespace EPR.Calculator.API.Controllers
 
                 var calcRun = calculatorRunDetail.Run;
                 var runClassification = calculatorRunDetail.Classification;
-                var isBillingFileGeneratedLatest = await this.billingFileService.IsBillingFileGeneratedLatest(runId);
+                var isBillingFileGeneratedLatest = await this.billingFileService.IsBillingFileGeneratedLatest(runId, cancellationToken);
                 var runDto = CalcRunMapper.Map(calcRun, runClassification, isBillingFileGeneratedLatest);
                 return new ObjectResult(runDto);
             }
