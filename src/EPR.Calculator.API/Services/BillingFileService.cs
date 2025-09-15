@@ -405,6 +405,15 @@ namespace EPR.Calculator.API.Services
 
         public async Task<bool> IsBillingFileGeneratedLatest(int runId, CancellationToken cancellationToken)
         {
+            if (!await applicationDBContext.ProducerResultFileSuggestedBillingInstruction.AnyAsync(
+                    x => x.CalculatorRunId == runId, cancellationToken).ConfigureAwait(false)
+                ||
+                !await applicationDBContext.CalculatorRunBillingFileMetadata.AnyAsync(
+                    x => x.CalculatorRunId == runId, cancellationToken).ConfigureAwait(false))
+            {
+                return false;
+            }
+
             var lastModifiedAcceptReject = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
                 .Where(x => x.CalculatorRunId == runId)
                 .OrderByDescending(x => x.LastModifiedAcceptReject)
