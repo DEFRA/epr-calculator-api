@@ -118,7 +118,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
                     Mock.Of<ICalculationRunService>(),
-                Mock.Of<IBillingFileService>());
+                    Mock.Of<IBillingFileService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
