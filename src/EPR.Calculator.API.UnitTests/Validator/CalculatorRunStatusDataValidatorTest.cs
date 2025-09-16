@@ -149,8 +149,12 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
 
-        [TestMethod]
-        public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsDeletedRunAndExistingRunIsAlreadyMarkedAsDeleted()
+        [DataTestMethod]
+        [DataRow(RunClassification.RUNNING)]
+        [DataRow(RunClassification.INTHEQUEUE)]
+        [DataRow(RunClassification.DELETED)]
+        public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsDeletedRunAndExistingRunStatusIsNotToMarkAsDeleted(
+            RunClassification runClassification)
         {
             // Arrange
             var calculatorRun = new CalculatorRun
@@ -160,7 +164,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     Name = "Name",
                 },
                 Name = "Name",
-                CalculatorRunClassificationId = (int)RunClassification.DELETED,
+                CalculatorRunClassificationId = (int)runClassification,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
@@ -176,8 +180,16 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
 
-        [TestMethod]
-        public void ValidateMethod_ShouldReturnIsInvalidAsFalse_WhenItsDeletedRunAndExistingRunIsIsUnClassified()
+        [DataTestMethod]
+        [DataRow(RunClassification.UNCLASSIFIED)]
+        [DataRow(RunClassification.ERROR)]
+        [DataRow(RunClassification.INITIAL_RUN)]
+        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RUN)]
+        [DataRow(RunClassification.TEST_RUN)]
+        public void ValidateMethod_ShouldReturnIsInvalidAsFalse_WhenItsDeletedRunAndExistingRunStatusIsValidToMarkAsDeleted(
+            RunClassification runClassification)
         {
             // Arrange
             var calculatorRun = new CalculatorRun
@@ -187,7 +199,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     Name = "Name",
                 },
                 Name = "Name",
-                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+                CalculatorRunClassificationId = (int)runClassification,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
@@ -208,6 +220,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
         [DataRow(RunClassification.INTHEQUEUE)]
         [DataRow(RunClassification.RUNNING)]
         [DataRow(RunClassification.ERROR)]
+        [DataRow(RunClassification.DELETED)]
         public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsTestRunAndExistingRunIsAlreadyMarkedAsTestOrOthers(
             RunClassification runClassification)
         {
@@ -235,8 +248,14 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
 
-        [TestMethod]
-        public void ValidateMethod_ShouldReturnIsInvalidAsFalse_WhenItsTestRunAndExistingRunIsIsUnClassified()
+        [DataTestMethod]
+        [DataRow(RunClassification.UNCLASSIFIED)]
+        [DataRow(RunClassification.INITIAL_RUN)]
+        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
+        [DataRow(RunClassification.FINAL_RUN)]
+        public void ValidateMethod_ShouldReturnIsInvalidAsFalse_WhenItsTestRunExistingRunStatusIsValidToMarkAsTestRun(
+            RunClassification runClassification)
         {
             // Arrange
             var calculatorRun = new CalculatorRun
@@ -246,7 +265,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     Name = "Name",
                 },
                 Name = "Name",
-                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+                CalculatorRunClassificationId = (int)runClassification,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {

@@ -164,7 +164,9 @@ namespace EPR.Calculator.API.Validators
                         ],
                     };
                 case (int)RunClassification.DELETED:
-                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.DELETED)
+                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.DELETED
+                        || calculatorRun.CalculatorRunClassificationId == (int)RunClassification.INTHEQUEUE
+                        || calculatorRun.CalculatorRunClassificationId == (int)RunClassification.RUNNING)
                     {
                         return new GenericValidationResultDto
                         {
