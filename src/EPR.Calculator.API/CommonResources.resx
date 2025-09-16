@@ -438,4 +438,7 @@
   <data name="UnableToChangeStatusToCompleted" xml:space="preserve">
     <value>Classification {0} is not valid to be completed.</value>
   </data>
+  <data name="BillingFileOutdated" xml:space="preserve">
+    <value>Billing file is not the latest one.</value>
+  </data>
 </root>
