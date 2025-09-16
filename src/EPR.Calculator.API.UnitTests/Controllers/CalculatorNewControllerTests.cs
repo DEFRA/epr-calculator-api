@@ -135,7 +135,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void PrepareBillingFileSendToFSS_SendFile_Successfully1()
+        public void PrepareBillingFileSendToFSS_SendFile_BillingFileOutdated()
         {
             this.ControllerContext();
 
