@@ -6,6 +6,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -73,7 +74,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockServiceBusService.Object,
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>());
+                    Mock.Of<ICalculationRunService>(),
+                    Mock.Of<IBillingFileService>());
             controller.ControllerContext = new ControllerContext
             {
                 HttpContext = defaultContext,
@@ -115,7 +117,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockServiceBusService.Object,
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>());
+                    Mock.Of<ICalculationRunService>(),
+                Mock.Of<IBillingFileService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -166,7 +169,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockServiceBusService.Object,
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>());
+                    Mock.Of<ICalculationRunService>(),
+                    Mock.Of<IBillingFileService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -220,7 +224,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockServiceBusService.Object,
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>());
+                    Mock.Of<ICalculationRunService>(),
+                    Mock.Of<IBillingFileService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));

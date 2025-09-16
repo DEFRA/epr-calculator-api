@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -85,7 +86,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockServiceBusService.Object,
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>());
+                    Mock.Of<ICalculationRunService>(),
+                    Mock.Of<IBillingFileService>());
             var mockResult = new Mock<IResult>();
             this.mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(mockResult.Object);
 
@@ -134,7 +136,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockServiceBusService.Object,
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>());
+                    Mock.Of<ICalculationRunService>(),
+                    Mock.Of<IBillingFileService>());
             var mockResult = new Mock<IResult>();
             this.mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(Results.NotFound(fileName));
 
