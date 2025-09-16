@@ -202,7 +202,7 @@ namespace EPR.Calculator.API.Controllers
                 var isBillingFileLatest = await this.billingFileService.IsBillingFileGeneratedLatest(
                     runId, cancellationToken).ConfigureAwait(false);
 
-                if (!isBillingFileLatest)
+                if (isBillingFileLatest.HasValue && !isBillingFileLatest.Value)
                 {
                     return new ObjectResult(string.Format(CommonResources.BillingFileOutdated, runId))
                     {
