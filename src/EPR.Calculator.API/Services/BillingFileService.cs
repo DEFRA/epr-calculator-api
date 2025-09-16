@@ -258,7 +258,7 @@ namespace EPR.Calculator.API.Services
 
             var allProducerIds = query.Select(x => x.ProducerId).Distinct();
             var pagedProducerIds = pagedResult.Select(x => x.ProducerId).Distinct();
-            var parentProducers = await this.GetParentProducersLatestAsync(runId, pagedProducerIds, cancellationToken);
+            var parentProducers = await this.GetParentProducersLatestAsync(run.FinancialYearId, pagedProducerIds, cancellationToken);
 
             foreach (var record in pagedResult)
             {
@@ -491,17 +491,22 @@ namespace EPR.Calculator.API.Services
             applicationDBContext.CalculatorRuns
                 .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
-        private Task<List<ParentProducer>> GetParentProducersLatestAsync(int runId, IEnumerable<int> producerIds, CancellationToken cancellationToken) =>
-            (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
-            join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster
-            on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
-            join run in applicationDBContext.CalculatorRuns on crdm.Id equals run.CalculatorRunOrganisationDataMasterId
-             where run.Id == runId && producerIds.ToList().Contains(odd.OrganisationId ?? 0) && odd.SubsidaryId == null
+        private Task<List<ParentProducer>> GetParentProducersLatestAsync(string financialYear, IEnumerable<int> producerIds, CancellationToken cancellationToken) =>
+            (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails.AsNoTracking()
+             join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster.AsNoTracking()
+             on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
+             join run in applicationDBContext.CalculatorRuns.AsNoTracking()
+             on crdm.Id equals run.CalculatorRunOrganisationDataMasterId
+             join pd in applicationDBContext.ProducerDetail.AsNoTracking()
+             on odd.OrganisationId equals pd.ProducerId
+             where producerIds.ToList().Contains(odd.OrganisationId ?? 0) && odd.SubsidaryId == null &&
+             run.FinancialYearId == financialYear
+             group odd by new { odd.OrganisationId, odd.OrganisationName } into g
              select new
             ParentProducer
-            {
-                ProducerId = odd.OrganisationId ?? 0,
-                ProducerName = odd.OrganisationName,
-            }).ToListAsync(cancellationToken);
+             {
+                 ProducerId = g.Key.OrganisationId ?? 0,
+                 ProducerName = g.Key.OrganisationName,
+             }).ToListAsync(cancellationToken);
     }
 }
