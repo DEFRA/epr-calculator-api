@@ -68,6 +68,6 @@ namespace EPR.Calculator.API.Services.Abstractions
         /// <param name="runId">The calculator run id.</param>
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="bool"/> Return True if billing file is latest which means its valid.</returns>
-        Task<bool> IsBillingFileGeneratedLatest(int runId, CancellationToken cancellationToken);
+        Task<bool?> IsBillingFileGeneratedLatest(int runId, CancellationToken cancellationToken);
     }
 }
