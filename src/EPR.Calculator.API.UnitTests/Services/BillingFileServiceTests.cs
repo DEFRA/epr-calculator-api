@@ -674,7 +674,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             this.DbContext.CalculatorRuns.Add(new CalculatorRun
             {
-                Id = runId-1,
+                Id = 9199,
                 Name = runName,
                 Financial_Year = financialYear,
                 CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
@@ -764,7 +764,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Act
             var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
 
-            var cancelledProducer = result.Records.First(t => t.SuggestedBillingInstruction == "Cancel");
+            var cancelledProducer = result?.Records.First(t => t.SuggestedBillingInstruction == "Cancel");
 
             // Assert
             Assert.IsNotNull(result);
