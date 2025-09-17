@@ -619,6 +619,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 SuggestedInvoiceAmount = 100,
                 BillingInstructionAcceptReject = "Accepted",
             });
+
             await this.DbContext.SaveChangesAsync();
 
             var requestDto = new ProducerBillingInstructionsRequestDto
@@ -638,6 +639,132 @@ namespace EPR.Calculator.API.UnitTests.Services
             Assert.AreEqual(1, result.PageNumber);
             Assert.AreEqual(10, result.PageSize);
             Assert.AreEqual(runName, result.RunName);
+
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.RemoveRange(this.DbContext.ProducerResultFileSuggestedBillingInstruction);
+            await this.DbContext.SaveChangesAsync();
+        }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructionsAsync_ReturnsRecords_WhenValid_cancelled_Producers()
+        {
+            // Arrange
+            var runId = 9200;
+            var runName = $"{runId} - potato";
+            var financialYear = this.DbContext.FinancialYears.SingleOrDefault(y => y.Name == "2024-25");
+            financialYear = financialYear ?? new CalculatorRunFinancialYear { Name = "2024-25" };
+
+            this.DbContext.CalculatorRuns.Add(new CalculatorRun
+            {
+                Id = runId,
+                Name = runName,
+                Financial_Year = financialYear,
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                CalculatorRunOrganisationDataMasterId = 2,
+            });
+
+            this.DbContext.CalculatorRuns.Add(new CalculatorRun
+            {
+                Id = runId-1,
+                Name = runName,
+                Financial_Year = financialYear,
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
+                CalculatorRunOrganisationDataMasterId = 1,
+            });
+
+            this.DbContext.CalculatorRunOrganisationDataMaster.Add(
+               new CalculatorRunOrganisationDataMaster
+               {
+                   Id = 1,
+                   CalendarYear = "2025",
+                   EffectiveFrom = DateTime.Now,
+                   CreatedAt = DateTime.Now,
+                   CreatedBy = "Test User",
+               });
+            this.DbContext.CalculatorRunOrganisationDataMaster.Add(
+              new CalculatorRunOrganisationDataMaster
+              {
+                  Id = 2,
+                  CalendarYear = "2025",
+                  EffectiveFrom = DateTime.Now,
+                  CreatedAt = DateTime.Now,
+                  CreatedBy = "Test User",
+              });
+
+            this.DbContext.CalculatorRunOrganisationDataDetails.Add(
+                new CalculatorRunOrganisationDataDetail
+                {
+                    Id = 1,
+                    OrganisationId = 1,
+                    SubsidaryId = null,
+                    OrganisationName = "Producer1",
+                    LoadTimeStamp = DateTime.Now,
+                    SubmissionPeriodDesc = "January to Dec 2025",
+                    CalculatorRunOrganisationDataMasterId = 2,
+                });
+
+            this.DbContext.CalculatorRunOrganisationDataDetails.Add(
+               new CalculatorRunOrganisationDataDetail
+               {
+                   Id = 2,
+                   OrganisationId = 2,
+                   SubsidaryId = null,
+                   OrganisationName = "Producer2",
+                   LoadTimeStamp = DateTime.Now,
+                   SubmissionPeriodDesc = "January to Dec 2025",
+                   CalculatorRunOrganisationDataMasterId = 1,
+               });
+
+            this.DbContext.ProducerDetail.Add(new ProducerDetail
+            {
+                ProducerId = 1,
+                CalculatorRunId = runId,
+                ProducerName = "Producer1",
+            });
+            this.DbContext.ProducerDetail.Add(new ProducerDetail
+            {
+                ProducerId = 2,
+                CalculatorRunId = runId,
+                ProducerName = "Producer2",
+            });
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
+            {
+                ProducerId = 1,
+                CalculatorRunId = runId,
+                SuggestedBillingInstruction = "Invoice",
+                SuggestedInvoiceAmount = 100,
+                BillingInstructionAcceptReject = "Accepted",
+            });
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
+            {
+                ProducerId = 2,
+                CalculatorRunId = runId,
+                SuggestedBillingInstruction = "Cancel",
+                SuggestedInvoiceAmount = 200,
+                BillingInstructionAcceptReject = "Rejected",
+            });
+
+            await this.DbContext.SaveChangesAsync();
+
+            var requestDto = new ProducerBillingInstructionsRequestDto
+            {
+                PageNumber = 1,
+                PageSize = 10,
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
+
+            var cancelledProducer = result.Records.First(t => t.SuggestedBillingInstruction == "Cancel");
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(2, result.Records.Count);
+            Assert.AreEqual(2, result.TotalRecords);
+            Assert.AreEqual(1, result.PageNumber);
+            Assert.AreEqual(10, result.PageSize);
+            Assert.AreEqual(runName, result.RunName);
+            Assert.IsNotNull(cancelledProducer);
+            Assert.AreEqual("Producer2", cancelledProducer.ProducerName);
 
             this.DbContext.ProducerResultFileSuggestedBillingInstruction.RemoveRange(this.DbContext.ProducerResultFileSuggestedBillingInstruction);
             await this.DbContext.SaveChangesAsync();
