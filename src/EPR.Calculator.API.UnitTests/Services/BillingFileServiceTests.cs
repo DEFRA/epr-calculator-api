@@ -37,6 +37,16 @@ namespace EPR.Calculator.API.UnitTests.Services
                 this.mockConfiguration.Object);
         }
 
+        [TestCleanup]
+        public void Teardown()
+        {
+            if (this.DbContext != null)
+            {
+                this.DbContext.Database.EnsureDeleted();
+                this.DbContext.Dispose();
+            }
+        }
+
         [TestMethod]
         public async Task GenerateBillingFileAsyncMethod_ShouldReturnNotFound_WhenCalculatorRunDoesNotExist()
         {
