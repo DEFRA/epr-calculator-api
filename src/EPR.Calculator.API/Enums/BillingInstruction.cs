@@ -6,6 +6,6 @@
         Delta,
         Rebill,
         Cancelbill,
-        Noaction
+        Noaction,
     }
 }

@@ -139,7 +139,14 @@ namespace EPR.Calculator.API.UnitTests.Validators
             {
                 SearchQuery = new ProducerBillingInstructionsSearchQueryDto
                 {
-                    BillingInstruction = new[] { "Initial", "Delta", "Rebill", "Cancelbill", "Noaction" }
+                    BillingInstruction = new[]
+                    {
+                        "Initial",
+                        "Delta",
+                        "Rebill",
+                        "Cancelbill",
+                        "Noaction",
+                    },
                 },
             };
             var result = this.validator.TestValidate(dto);
