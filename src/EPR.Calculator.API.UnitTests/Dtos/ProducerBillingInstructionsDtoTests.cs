@@ -58,6 +58,11 @@ namespace EPR.Calculator.API.UnitTests.Dtos
                 TotalAcceptedRecords = 1,
                 TotalRejectedRecords = 0,
                 TotalPendingRecords = 0,
+                TotalInitialRecords = 0,
+                TotalDeltaRecords = 0,
+                TotalRebillRecords = 0,
+                TotalCancelBillRecords = 0,
+                TotalNoActionRecords = 0,
                 PageNumber = 1,
                 PageSize = 10,
                 RunName = "Test Run",
@@ -71,6 +76,11 @@ namespace EPR.Calculator.API.UnitTests.Dtos
             Assert.AreEqual(1, dto.TotalAcceptedRecords);
             Assert.AreEqual(0, dto.TotalRejectedRecords);
             Assert.AreEqual(0, dto.TotalPendingRecords);
+            Assert.AreEqual(0, dto.TotalInitialRecords);
+            Assert.AreEqual(0, dto.TotalDeltaRecords);
+            Assert.AreEqual(0, dto.TotalRebillRecords);
+            Assert.AreEqual(0, dto.TotalCancelBillRecords);
+            Assert.AreEqual(0, dto.TotalNoActionRecords);
             Assert.AreEqual(1, dto.PageNumber);
             Assert.AreEqual(10, dto.PageSize);
         }
