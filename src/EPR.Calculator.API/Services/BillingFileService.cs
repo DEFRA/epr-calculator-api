@@ -218,7 +218,7 @@ namespace EPR.Calculator.API.Services
                             ProducerId = prsi.ProducerId,
                             BillingInstructionAcceptReject = prsi.BillingInstructionAcceptReject ?? BillingStatus.Pending.ToString(),
                             SuggestedBillingInstruction = prsi.SuggestedBillingInstruction,
-                            SuggestedInvoiceAmount = prsi.SuggestedInvoiceAmount,
+                            SuggestedInvoiceAmount = (prsi.SuggestedBillingInstruction ?? string.Empty).ToLower() == "cancel" ? prsi.CurrentYearInvoiceTotalToDate : prsi.SuggestedInvoiceAmount,
                         };
 
             // Group by on BillingInstructionAcceptReject
@@ -493,15 +493,15 @@ namespace EPR.Calculator.API.Services
 
         private Task<List<ParentProducer>> GetParentProducersLatestAsync(int runId, IEnumerable<int> producerIds, CancellationToken cancellationToken) =>
             (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
-            join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster
-            on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
-            join run in applicationDBContext.CalculatorRuns on crdm.Id equals run.CalculatorRunOrganisationDataMasterId
+             join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster
+             on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
+             join run in applicationDBContext.CalculatorRuns on crdm.Id equals run.CalculatorRunOrganisationDataMasterId
              where run.Id == runId && producerIds.ToList().Contains(odd.OrganisationId ?? 0) && odd.SubsidaryId == null
              select new
             ParentProducer
-            {
-                ProducerId = odd.OrganisationId ?? 0,
-                ProducerName = odd.OrganisationName,
-            }).ToListAsync(cancellationToken);
+             {
+                 ProducerId = odd.OrganisationId ?? 0,
+                 ProducerName = odd.OrganisationName,
+             }).ToListAsync(cancellationToken);
     }
 }
