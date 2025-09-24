@@ -107,5 +107,50 @@ namespace EPR.Calculator.API.UnitTests.Validators
             var result = this.validator.TestValidate(dto);
             result.ShouldNotHaveAnyValidationErrors();
         }
+
+        [TestMethod]
+        public void Should_HaveValidationError_When_BillingInstruction_HasInvalidValue()
+        {
+            var dto = new ProducerBillingInstructionsRequestDto
+            {
+                SearchQuery = new ProducerBillingInstructionsSearchQueryDto { BillingInstruction = new[] { "InvalidInstruction" } },
+            };
+            var result = this.validator.TestValidate(dto);
+            result.ShouldHaveValidationErrorFor("SearchQuery.BillingInstruction")
+                    .WithErrorMessage("Billing instruction can only contain: Initial, Delta, Rebill, Cancelbill, Noaction.");
+        }
+
+        [TestMethod]
+        public void Should_HaveValidationError_When_BillingInstruction_HasDuplicates()
+        {
+            var dto = new ProducerBillingInstructionsRequestDto
+            {
+                SearchQuery = new ProducerBillingInstructionsSearchQueryDto { BillingInstruction = new[] { "Initial", "Initial" } },
+            };
+            var result = this.validator.TestValidate(dto);
+            result.ShouldHaveValidationErrorFor("SearchQuery.BillingInstruction")
+                .WithErrorMessage("Billing instruction cannot contain duplicate values.");
+        }
+
+        [TestMethod]
+        public void Should_NotHaveValidationError_When_BillingInstruction_IsValid()
+        {
+            var dto = new ProducerBillingInstructionsRequestDto
+            {
+                SearchQuery = new ProducerBillingInstructionsSearchQueryDto
+                {
+                    BillingInstruction = new[]
+                    {
+                        "Initial",
+                        "Delta",
+                        "Rebill",
+                        "Cancelbill",
+                        "Noaction",
+                    },
+                },
+            };
+            var result = this.validator.TestValidate(dto);
+            result.ShouldNotHaveValidationErrorFor("SearchQuery.BillingInstruction");
+        }
     }
 }

@@ -615,7 +615,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             {
                 ProducerId = 1,
                 CalculatorRunId = runId,
-                SuggestedBillingInstruction = "Invoice",
+                SuggestedBillingInstruction = "Initial",
                 SuggestedInvoiceAmount = 100,
                 BillingInstructionAcceptReject = "Accepted",
             });
@@ -635,6 +635,12 @@ namespace EPR.Calculator.API.UnitTests.Services
             Assert.AreEqual(1, result.Records.Count);
             Assert.AreEqual(1, result.TotalRecords);
             Assert.AreEqual(1, result.TotalAcceptedRecords);
+            Assert.AreEqual(1, result.TotalInitialRecords);
+            Assert.AreEqual(0, result.TotalDeltaRecords);
+            Assert.AreEqual(0, result.TotalRejectedRecords);
+            Assert.AreEqual(0, result.TotalRebillRecords);
+            Assert.AreEqual(0, result.TotalCancelBillRecords);
+            Assert.AreEqual(0, result.TotalNoActionRecords);
             Assert.AreEqual(1, result.PageNumber);
             Assert.AreEqual(10, result.PageSize);
             Assert.AreEqual(runName, result.RunName);
