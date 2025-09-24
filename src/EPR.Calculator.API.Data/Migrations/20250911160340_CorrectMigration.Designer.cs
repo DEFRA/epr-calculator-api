@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250911160340_CorrectMigration")]
+    partial class CorrectMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1749,7 +1752,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(4000)")
                         .HasColumnName("suggested_billing_instruction");
 
-                    b.Property<decimal?>("SuggestedInvoiceAmount")
+                    b.Property<decimal>("SuggestedInvoiceAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("suggested_invoice_amount");
@@ -1769,7 +1772,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(4000)")
                         .HasColumnName("tonnage_pound_threshold_breached");
 
-                    b.Property<decimal?>("TotalProducerBillWithBadDebt")
+                    b.Property<decimal>("TotalProducerBillWithBadDebt")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("total_producer_bill_with_bad_debt");
