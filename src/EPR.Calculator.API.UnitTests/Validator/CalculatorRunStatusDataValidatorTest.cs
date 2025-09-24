@@ -150,7 +150,6 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [DataTestMethod]
-        [DataRow(RunClassification.RUNNING)]
         [DataRow(RunClassification.INTHEQUEUE)]
         [DataRow(RunClassification.DELETED)]
         public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsDeletedRunAndExistingRunStatusIsNotToMarkAsDeleted(
@@ -188,6 +187,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
         [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
         [DataRow(RunClassification.FINAL_RUN)]
         [DataRow(RunClassification.TEST_RUN)]
+        [DataRow(RunClassification.RUNNING)]
         public void ValidateMethod_ShouldReturnIsInvalidAsFalse_WhenItsDeletedRunAndExistingRunStatusIsValidToMarkAsDeleted(
             RunClassification runClassification)
         {
