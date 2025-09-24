@@ -11,7 +11,7 @@ public class ProducerBillingInstructionsDto
 
     public string SuggestedBillingInstruction { get; set; } = string.Empty;
 
-    public decimal SuggestedInvoiceAmount { get; set; }
+    public decimal? SuggestedInvoiceAmount { get; set; }
 
     public string? BillingInstructionAcceptReject { get; set; }
 }
