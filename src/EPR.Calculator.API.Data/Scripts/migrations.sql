@@ -5212,6 +5212,52 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250909091510_UpdateProducerSuggestedBilling'
+)
+BEGIN
+    DECLARE @var31 sysname;
+    SELECT @var31 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_resultfile_suggested_billing_instruction]') AND [c].[name] = N'total_producer_bill_with_bad_debt');
+    IF @var31 IS NOT NULL EXEC(N'ALTER TABLE [producer_resultfile_suggested_billing_instruction] DROP CONSTRAINT [' + @var31 + '];');
+    ALTER TABLE [producer_resultfile_suggested_billing_instruction] ALTER COLUMN [total_producer_bill_with_bad_debt] decimal(18,2) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250909091510_UpdateProducerSuggestedBilling'
+)
+BEGIN
+    DECLARE @var32 sysname;
+    SELECT @var32 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_resultfile_suggested_billing_instruction]') AND [c].[name] = N'suggested_invoice_amount');
+    IF @var32 IS NOT NULL EXEC(N'ALTER TABLE [producer_resultfile_suggested_billing_instruction] DROP CONSTRAINT [' + @var32 + '];');
+    ALTER TABLE [producer_resultfile_suggested_billing_instruction] ALTER COLUMN [suggested_invoice_amount] decimal(18,2) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20250909091510_UpdateProducerSuggestedBilling'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20250909091510_UpdateProducerSuggestedBilling', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250911160340_CorrectMigration'
 )
 BEGIN
