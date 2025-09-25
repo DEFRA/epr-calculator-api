@@ -8,14 +8,6 @@ namespace EPR.Calculator.API.UnitTests.Dtos
     [TestClass]
     public class FinancialYearDtoTests
     {
-        private FinancialYearDto TestClass { get; init; }
-
-        private IFixture Fixture { get; init; }
-
-        private string Name { get; init; }
-
-        private string Description { get; init; }
-
         public FinancialYearDtoTests()
         {
             this.Fixture = new Fixture();
@@ -27,6 +19,14 @@ namespace EPR.Calculator.API.UnitTests.Dtos
                 Description = this.Description,
             };
         }
+
+        private FinancialYearDto TestClass { get; init; }
+
+        private IFixture Fixture { get; init; }
+
+        private string Name { get; init; }
+
+        private string Description { get; init; }
 
         [TestMethod]
         public void CanInitialize()

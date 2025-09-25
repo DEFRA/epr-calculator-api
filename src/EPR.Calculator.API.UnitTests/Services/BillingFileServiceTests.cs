@@ -319,8 +319,8 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.ProducersInstructionDetails.Count);
-            Assert.AreEqual("Accepted", result.ProducersInstructionDetails.First().Status.ToString());
+            Assert.AreEqual(1, result.ProducersInstructionDetails!.Count);
+            Assert.AreEqual("Accepted", result.ProducersInstructionDetails[0].Status!);
 
             this.DbContext.ProducerResultFileSuggestedBillingInstruction.RemoveRange(this.DbContext.ProducerResultFileSuggestedBillingInstruction);
             await this.DbContext.SaveChangesAsync();

@@ -12,7 +12,7 @@
 
         public string? UpdatedBy { get; set; }
 
-        public string CreatedBy { get; set; }
+        public string CreatedBy { get; set; } = null!;
 
         public DateTime? UpdatedAt { get; set; }
 
@@ -20,7 +20,7 @@
 
         public required string RunClassificationStatus { get; set; }
 
-        public string FinancialYear { get; set; }
+        public string FinancialYear { get; set; } = null!;
 
         public bool? IsBillingFileGenerating { get; set; }
     }

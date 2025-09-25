@@ -245,10 +245,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual($"RunId {runId} cannot be changed to classification {classificationId}", result.Value);
         }
 
-        private IEnumerable<CalculatorRun> GetCalculatorRuns()
+        private List<CalculatorRun> GetCalculatorRuns()
         {
-            return new List<CalculatorRun>()
-            {
+            return
+            [
                 new CalculatorRun
                 {
                     Id = 1,
@@ -258,6 +258,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
                     CreatedBy = "Test User",
                 },
+
                 new CalculatorRun
                 {
                     Id = 2,
@@ -267,6 +268,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
                     CreatedBy = "Test User",
                 },
+
                 new CalculatorRun
                 {
                     Id = 3,
@@ -278,6 +280,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     CalculatorRunOrganisationDataMasterId = 1,
                     CalculatorRunPomDataMasterId = 1,
                 },
+
                 new CalculatorRun
                 {
                     Id = 4,
@@ -288,8 +291,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     CreatedBy = "Test User",
                     CalculatorRunOrganisationDataMasterId = 2,
                     CalculatorRunPomDataMasterId = 2,
-                },
-            };
+                }
+
+            ];
         }
     }
 }

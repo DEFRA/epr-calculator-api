@@ -23,8 +23,6 @@ namespace EPR.Calculator.API.Controllers
         private readonly TelemetryClient telemetryClient;
         private readonly ICalculationRunService calculationRunService;
 
-        private IOrgAndPomWrapper Wrapper { get; init; }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CalculatorNewController"/> class.
         /// </summary>
@@ -55,6 +53,8 @@ namespace EPR.Calculator.API.Controllers
 
             this.calculationRunService = calculationRunService;
         }
+
+        private IOrgAndPomWrapper Wrapper { get; init; }
 
         [HttpPut]
         [Route("calculatorRuns")]
