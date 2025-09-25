@@ -5,7 +5,7 @@
         Initial,
         Delta,
         Rebill,
-        Cancelbill,
+        Cancel,
         Noaction,
     }
 }

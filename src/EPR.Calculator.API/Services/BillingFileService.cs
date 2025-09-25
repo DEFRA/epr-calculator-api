@@ -449,7 +449,7 @@ namespace EPR.Calculator.API.Services
             response.TotalInitialRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Initial.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
             response.TotalDeltaRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Delta.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
             response.TotalRebillRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Rebill.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
-            response.TotalCancelBillRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Cancelbill.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalCancelBillRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Cancel.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
             response.TotalNoActionRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
         }
 

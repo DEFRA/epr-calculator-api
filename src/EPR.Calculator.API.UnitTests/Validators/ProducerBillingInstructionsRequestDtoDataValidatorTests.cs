@@ -117,7 +117,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             };
             var result = this.validator.TestValidate(dto);
             result.ShouldHaveValidationErrorFor("SearchQuery.BillingInstruction")
-                    .WithErrorMessage("Billing instruction can only contain: Initial, Delta, Rebill, Cancelbill, Noaction.");
+                    .WithErrorMessage("Billing instruction can only contain: Initial, Delta, Rebill, Cancel, Noaction.");
         }
 
         [TestMethod]
@@ -144,7 +144,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
                         "Initial",
                         "Delta",
                         "Rebill",
-                        "Cancelbill",
+                        "Cancel",
                         "Noaction",
                     },
                 },
