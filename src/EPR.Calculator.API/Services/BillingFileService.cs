@@ -86,7 +86,6 @@ namespace EPR.Calculator.API.Services
                 }
                 else
                 {
-
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.Accepted,
@@ -155,11 +154,11 @@ namespace EPR.Calculator.API.Services
 
         public async Task<ProducersInstructionResponse?> GetProducersInstructionResponseAsync(int runId, CancellationToken cancellationToken)
         {
-            this.ValidateRunClassification(await this.GetRunStatusAsync(runId, cancellationToken), runId);
+            ValidateRunClassification(await this.GetRunStatusAsync(runId, cancellationToken), runId);
 
             var details = await this.GetInstructionDetailsAsync(runId, cancellationToken);
 
-            if (!details.Any())
+            if (details.Count == 0)
             {
                 return null;
             }
@@ -403,52 +402,7 @@ namespace EPR.Calculator.API.Services
             }
         }
 
-        private async Task<CalculatorRun?> GetRunStatusAsync(int runId, CancellationToken cancellationToken)
-        {
-            return await applicationDBContext.CalculatorRuns
-                .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken);
-        }
-
-        private void ValidateRunClassification(CalculatorRun? runStatus, int runId)
-        {
-            if (runStatus == null)
-            {
-                throw new KeyNotFoundException(string.Format(CommonResources.RunINotFound, runId));
-            }
-
-            var validRunClassifications = new HashSet<int>
-                    {
-                        (int)RunClassification.INITIAL_RUN,
-                        (int)RunClassification.INTERIM_RECALCULATION_RUN,
-                        (int)RunClassification.FINAL_RUN,
-                        (int)RunClassification.FINAL_RECALCULATION_RUN,
-                    };
-
-            if (!validRunClassifications.Contains(runStatus.CalculatorRunClassificationId))
-            {
-                throw new UnprocessableEntityException(string.Format(CommonResources.NotAValidClassificationStatus, runId));
-            }
-        }
-
-        private async Task<List<ProducersInstructionDetail>> GetInstructionDetailsAsync(int runId, CancellationToken cancellationToken)
-        {
-            return await (
-                from billing in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                join producer in applicationDBContext.ProducerDetail
-                    on new { billing.ProducerId, billing.CalculatorRunId }
-                    equals new { producer.ProducerId, producer.CalculatorRunId }
-                where billing.CalculatorRunId == runId && producer.SubsidiaryId == null
-                select new ProducersInstructionDetail
-                {
-                    OrganisationId = producer.ProducerId,
-                    OrganisationName = producer.ProducerName,
-                    BillingInstruction = billing.SuggestedBillingInstruction,
-                    InvoiceAmount = $"£{billing.SuggestedInvoiceAmount:N2}",
-                    Status = string.IsNullOrWhiteSpace(billing.BillingInstructionAcceptReject) ? string.Empty : billing.BillingInstructionAcceptReject,
-                }).Distinct().ToListAsync(cancellationToken);
-        }
-
-        private ProducersInstructionSummary GenerateInstructionSummary(List<ProducersInstructionDetail> details)
+        private static ProducersInstructionSummary GenerateInstructionSummary(List<ProducersInstructionDetail> details)
         {
             var statusGroups = details
                 .GroupBy(d => string.IsNullOrWhiteSpace(d.Status) ? string.Empty : d.Status)
@@ -467,10 +421,31 @@ namespace EPR.Calculator.API.Services
             };
         }
 
+        private static void ValidateRunClassification(CalculatorRun? runStatus, int runId)
+        {
+            if (runStatus == null)
+            {
+                throw new KeyNotFoundException(string.Format(CommonResources.RunINotFound, runId));
+            }
+
+            var validRunClassifications = new HashSet<int>
+            {
+                (int)RunClassification.INITIAL_RUN,
+                (int)RunClassification.INTERIM_RECALCULATION_RUN,
+                (int)RunClassification.FINAL_RUN,
+                (int)RunClassification.FINAL_RECALCULATION_RUN,
+            };
+
+            if (!validRunClassifications.Contains(runStatus.CalculatorRunClassificationId))
+            {
+                throw new UnprocessableEntityException(string.Format(CommonResources.NotAValidClassificationStatus, runId));
+            }
+        }
+
         private static void UpdateBillingInstruction(
-                string userName,
-                ProduceBillingInstuctionRequestDto produceBillingInstuctionRequestDto,
-                ProducerResultFileSuggestedBillingInstruction row)
+            string userName,
+            ProduceBillingInstuctionRequestDto produceBillingInstuctionRequestDto,
+            ProducerResultFileSuggestedBillingInstruction row)
         {
             row.BillingInstructionAcceptReject = produceBillingInstuctionRequestDto.Status;
 
@@ -485,6 +460,30 @@ namespace EPR.Calculator.API.Services
 
             row.LastModifiedAcceptReject = DateTime.UtcNow;
             row.LastModifiedAcceptRejectBy = userName;
+        }
+
+        private async Task<CalculatorRun?> GetRunStatusAsync(int runId, CancellationToken cancellationToken)
+        {
+            return await applicationDBContext.CalculatorRuns
+                .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken);
+        }
+
+        private async Task<List<ProducersInstructionDetail>> GetInstructionDetailsAsync(int runId, CancellationToken cancellationToken)
+        {
+            return await (
+                from billing in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                join producer in applicationDBContext.ProducerDetail
+                    on new { billing.ProducerId, billing.CalculatorRunId }
+                    equals new { producer.ProducerId, producer.CalculatorRunId }
+                where billing.CalculatorRunId == runId && producer.SubsidiaryId == null
+                select new ProducersInstructionDetail
+                {
+                    OrganisationId = producer.ProducerId,
+                    OrganisationName = producer.ProducerName,
+                    BillingInstruction = billing.SuggestedBillingInstruction,
+                    InvoiceAmount = $"£{billing.SuggestedInvoiceAmount:N2}",
+                    Status = string.IsNullOrWhiteSpace(billing.BillingInstructionAcceptReject) ? string.Empty : billing.BillingInstructionAcceptReject,
+                }).Distinct().ToListAsync(cancellationToken);
         }
 
         private Task<CalculatorRun?> GetRunAsync(int runId, CancellationToken cancellationToken) =>
