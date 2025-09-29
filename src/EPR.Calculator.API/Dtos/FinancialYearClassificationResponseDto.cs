@@ -2,9 +2,9 @@
 {
     public class FinancialYearClassificationResponseDto
     {
-        public string FinancialYear { get; set; }
+        public string FinancialYear { get; set; } = null!;
 
-        public List<CalculatorRunClassificationDto> Classifications { get; set; }
+        public List<CalculatorRunClassificationDto> Classifications { get; set; } = [];
 
         public List<ClassifiedCalculatorRunDto> ClassifiedRuns { get; set; } = [];
     }

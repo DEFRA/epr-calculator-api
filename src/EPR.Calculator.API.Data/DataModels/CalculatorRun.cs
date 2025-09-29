@@ -8,7 +8,7 @@
 
         public required string Name { get; set; }
 
-        public string FinancialYearId { get; set; }
+        public string FinancialYearId { get; set; } = null!;
 
         public required CalculatorRunFinancialYear Financial_Year { get; set; }
 
