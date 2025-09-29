@@ -65,6 +65,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.context.SaveChanges();
         }
 
+        private Mock<IOrgAndPomWrapper> MockWrapper { get; init; } = null!;
+
         [TestCleanup]
         public void CleanUp()
         {

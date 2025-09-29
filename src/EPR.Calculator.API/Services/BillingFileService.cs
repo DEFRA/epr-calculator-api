@@ -86,7 +86,6 @@ namespace EPR.Calculator.API.Services
                 }
                 else
                 {
-
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.Accepted,
@@ -155,11 +154,11 @@ namespace EPR.Calculator.API.Services
 
         public async Task<ProducersInstructionResponse?> GetProducersInstructionResponseAsync(int runId, CancellationToken cancellationToken)
         {
-            this.ValidateRunClassification(await this.GetRunStatusAsync(runId, cancellationToken), runId);
+            ValidateRunClassification(await this.GetRunStatusAsync(runId, cancellationToken), runId);
 
             var details = await this.GetInstructionDetailsAsync(runId, cancellationToken);
 
-            if (!details.Any())
+            if (details.Count == 0)
             {
                 return null;
             }
@@ -218,7 +217,7 @@ namespace EPR.Calculator.API.Services
                             ProducerId = prsi.ProducerId,
                             BillingInstructionAcceptReject = prsi.BillingInstructionAcceptReject ?? BillingStatus.Pending.ToString(),
                             SuggestedBillingInstruction = prsi.SuggestedBillingInstruction,
-                            SuggestedInvoiceAmount = prsi.SuggestedInvoiceAmount,
+                            SuggestedInvoiceAmount = (prsi.SuggestedBillingInstruction ?? string.Empty).ToLower() == "cancel" ? prsi.CurrentYearInvoiceTotalToDate : prsi.SuggestedInvoiceAmount,
                         };
 
             // Group by on BillingInstructionAcceptReject
@@ -433,13 +432,26 @@ namespace EPR.Calculator.API.Services
             return lastModifiedAcceptReject.HasValue && billingGeneratedDate > lastModifiedAcceptReject.Value;
         }
 
-        private async Task<CalculatorRun?> GetRunStatusAsync(int runId, CancellationToken cancellationToken)
+        private static ProducersInstructionSummary GenerateInstructionSummary(List<ProducersInstructionDetail> details)
         {
-            return await applicationDBContext.CalculatorRuns
-                .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken);
+            var statusGroups = details
+                .GroupBy(d => string.IsNullOrWhiteSpace(d.Status) ? string.Empty : d.Status)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            var orderedStatuses = new Dictionary<string, int> { { "All", details.Count }, };
+
+            foreach (var kvp in statusGroups)
+            {
+                orderedStatuses[kvp.Key] = kvp.Value;
+            }
+
+            return new ProducersInstructionSummary
+            {
+                Statuses = orderedStatuses,
+            };
         }
 
-        private void ValidateRunClassification(CalculatorRun? runStatus, int runId)
+        private static void ValidateRunClassification(CalculatorRun? runStatus, int runId)
         {
             if (runStatus == null)
             {
@@ -447,17 +459,43 @@ namespace EPR.Calculator.API.Services
             }
 
             var validRunClassifications = new HashSet<int>
-                    {
-                        (int)RunClassification.INITIAL_RUN,
-                        (int)RunClassification.INTERIM_RECALCULATION_RUN,
-                        (int)RunClassification.FINAL_RUN,
-                        (int)RunClassification.FINAL_RECALCULATION_RUN,
-                    };
+            {
+                (int)RunClassification.INITIAL_RUN,
+                (int)RunClassification.INTERIM_RECALCULATION_RUN,
+                (int)RunClassification.FINAL_RUN,
+                (int)RunClassification.FINAL_RECALCULATION_RUN,
+            };
 
             if (!validRunClassifications.Contains(runStatus.CalculatorRunClassificationId))
             {
                 throw new UnprocessableEntityException(string.Format(CommonResources.NotAValidClassificationStatus, runId));
             }
+        }
+
+        private static void UpdateBillingInstruction(
+            string userName,
+            ProduceBillingInstuctionRequestDto produceBillingInstuctionRequestDto,
+            ProducerResultFileSuggestedBillingInstruction row)
+        {
+            row.BillingInstructionAcceptReject = produceBillingInstuctionRequestDto.Status;
+
+            if (string.Equals(produceBillingInstuctionRequestDto.Status, BillingStatus.Rejected.ToString()))
+            {
+                row.ReasonForRejection = produceBillingInstuctionRequestDto.ReasonForRejection;
+            }
+            else
+            {
+                row.ReasonForRejection = null;
+            }
+
+            row.LastModifiedAcceptReject = DateTime.UtcNow;
+            row.LastModifiedAcceptRejectBy = userName;
+        }
+
+        private async Task<CalculatorRun?> GetRunStatusAsync(int runId, CancellationToken cancellationToken)
+        {
+            return await applicationDBContext.CalculatorRuns
+                .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken);
         }
 
         private async Task<List<ProducersInstructionDetail>> GetInstructionDetailsAsync(int runId, CancellationToken cancellationToken)
@@ -478,60 +516,21 @@ namespace EPR.Calculator.API.Services
                 }).Distinct().ToListAsync(cancellationToken);
         }
 
-        private ProducersInstructionSummary GenerateInstructionSummary(List<ProducersInstructionDetail> details)
-        {
-            var statusGroups = details
-                .GroupBy(d => string.IsNullOrWhiteSpace(d.Status) ? string.Empty : d.Status)
-                .ToDictionary(g => g.Key, g => g.Count());
-
-            var orderedStatuses = new Dictionary<string, int> { { "All", details.Count }, };
-
-            foreach (var kvp in statusGroups)
-            {
-                orderedStatuses[kvp.Key] = kvp.Value;
-            }
-
-            return new ProducersInstructionSummary
-            {
-                Statuses = orderedStatuses,
-            };
-        }
-
-        private static void UpdateBillingInstruction(
-                string userName,
-                ProduceBillingInstuctionRequestDto produceBillingInstuctionRequestDto,
-                ProducerResultFileSuggestedBillingInstruction row)
-        {
-            row.BillingInstructionAcceptReject = produceBillingInstuctionRequestDto.Status;
-
-            if (string.Equals(produceBillingInstuctionRequestDto.Status, BillingStatus.Rejected.ToString()))
-            {
-                row.ReasonForRejection = produceBillingInstuctionRequestDto.ReasonForRejection;
-            }
-            else
-            {
-                row.ReasonForRejection = null;
-            }
-
-            row.LastModifiedAcceptReject = DateTime.UtcNow;
-            row.LastModifiedAcceptRejectBy = userName;
-        }
-
         private Task<CalculatorRun?> GetRunAsync(int runId, CancellationToken cancellationToken) =>
             applicationDBContext.CalculatorRuns
                 .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
         private Task<List<ParentProducer>> GetParentProducersLatestAsync(int runId, IEnumerable<int> producerIds, CancellationToken cancellationToken) =>
             (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
-            join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster
-            on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
-            join run in applicationDBContext.CalculatorRuns on crdm.Id equals run.CalculatorRunOrganisationDataMasterId
+             join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster
+             on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
+             join run in applicationDBContext.CalculatorRuns on crdm.Id equals run.CalculatorRunOrganisationDataMasterId
              where run.Id == runId && producerIds.ToList().Contains(odd.OrganisationId ?? 0) && odd.SubsidaryId == null
              select new
             ParentProducer
-            {
-                ProducerId = odd.OrganisationId ?? 0,
-                ProducerName = odd.OrganisationName,
-            }).ToListAsync(cancellationToken);
+             {
+                 ProducerId = odd.OrganisationId ?? 0,
+                 ProducerName = odd.OrganisationName,
+             }).ToListAsync(cancellationToken);
     }
 }

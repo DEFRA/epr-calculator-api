@@ -8,7 +8,7 @@
 
         public int ProducerId { get; set; }
 
-        public decimal TotalProducerBillWithBadDebt { get; set; }
+        public decimal? TotalProducerBillWithBadDebt { get; set; }
 
         public decimal? CurrentYearInvoiceTotalToDate { get; set; }
 
@@ -26,9 +26,9 @@
 
         public string? TonnagePercentageThresholdBreached { get; set; }
 
-        public string SuggestedBillingInstruction { get; set; }
+        public string SuggestedBillingInstruction { get; set; } = null!;
 
-        public decimal SuggestedInvoiceAmount { get; set; }
+        public decimal? SuggestedInvoiceAmount { get; set; }
 
         public string? BillingInstructionAcceptReject { get; set; }
 

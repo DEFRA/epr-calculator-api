@@ -2,9 +2,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,43 +13,20 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
-    public class DefaultParameterSettingControllerTests
+    public class DefaultParameterSettingControllerTests : BaseControllerTest
     {
         public DefaultParameterSettingControllerTests()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-        .UseInMemoryDatabase(databaseName: "PayCal")
-        .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-        .Options;
+                .UseInMemoryDatabase(databaseName: "PayCal")
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+                .Options;
 
             this.DbContext = new ApplicationDBContext(dbContextOptions);
             this.DbContext.Database.EnsureCreated();
-            this.DbContext.DefaultParameterTemplateMasterList.RemoveRange(
-                this.DbContext.DefaultParameterTemplateMasterList);
-            this.DbContext.SaveChanges();
-
-            this.DbContext.DefaultParameterTemplateMasterList.AddRange(
-                DefaultParameterSettingHelper.GetDefaultParameterTemplateMasterData().ToList());
-            this.DbContext.SaveChanges();
 
             var validator = new CreateDefaultParameterDataValidator(this.DbContext);
-            this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator, new Microsoft.ApplicationInsights.TelemetryClient());
-
-            this.FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
-            this.DbContext.FinancialYears.Add(this.FinancialYear24_25);
-            this.DbContext.SaveChanges();
-        }
-
-        private ApplicationDBContext DbContext { get; set; }
-
-        private DefaultParameterSettingController DefaultParameterSettingController { get; set; }
-
-        protected CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
-
-        [TestCleanup]
-        public void TearDown()
-        {
-            this.DbContext.Database.EnsureDeleted();
+            this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator, TelemetryClient);
         }
 
         [TestMethod]

@@ -39,7 +39,7 @@ namespace EPR.Calculator.API.Services.Abstractions
         /// <param name="runId"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<ProducersInstructionResponse> GetProducersInstructionResponseAsync(
+        Task<ProducersInstructionResponse?> GetProducersInstructionResponseAsync(
             int runId,
             CancellationToken cancellationToken);
 

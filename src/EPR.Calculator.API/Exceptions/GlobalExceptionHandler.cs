@@ -26,7 +26,7 @@ namespace EPR.Calculator.API.Exceptions
             Exception exception,
             CancellationToken cancellationToken)
         {
-            this.logger.LogError(exception, CommonResources.AnUnexpectedErrorOccurred);
+            this.logger.LogError(exception, "An unexpected error occurred.");
             httpContext.Response.ContentType = "application/json";
             httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 

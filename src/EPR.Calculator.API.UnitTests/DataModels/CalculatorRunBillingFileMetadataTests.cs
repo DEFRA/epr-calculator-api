@@ -18,7 +18,6 @@ namespace EPR.Calculator.API.UnitTests.DataModels
 
         private IFixture Fixture { get; }
 
-
         [TestMethod]
         public void CanSetAndGetId()
         {
