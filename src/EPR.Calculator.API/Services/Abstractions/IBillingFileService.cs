@@ -60,5 +60,14 @@ namespace EPR.Calculator.API.Services.Abstractions
         /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
         /// <returns>A <see cref="ProducerBillingInstructionsResponseDto"/> response containing records and pagination data.</returns>
         Task<ProducerBillingInstructionsResponseDto?> GetProducerBillingInstructionsAsync(int runId, ProducerBillingInstructionsRequestDto requestDto, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Return True if billing file is latest which means its valid.
+        /// Return False if billing file is not the latest which means its invalid.
+        /// </summary>
+        /// <param name="runId">The calculator run id.</param>
+        /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+        /// <returns>A <see cref="bool"/> Return True if billing file is latest which means its valid.</returns>
+        Task<bool?> IsBillingFileGeneratedLatest(int runId, CancellationToken cancellationToken);
     }
 }
