@@ -199,6 +199,17 @@ namespace EPR.Calculator.API.Controllers
                     return this.StatusCode(StatusCodes.Status400BadRequest, string.Format(CommonResources.InvalidForRunId, runId));
                 }
 
+                var isBillingFileLatest = await this.billingFileService.IsBillingFileGeneratedLatest(
+                    runId, cancellationToken).ConfigureAwait(false);
+
+                if (isBillingFileLatest.HasValue && !isBillingFileLatest.Value)
+                {
+                    return new ObjectResult(string.Format(CommonResources.BillingFileOutdated, runId))
+                    {
+                        StatusCode = StatusCodes.Status422UnprocessableEntity,
+                    };
+                }
+
                 var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
                 if (calculatorRun == null)
                 {

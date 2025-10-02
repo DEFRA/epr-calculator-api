@@ -88,6 +88,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Billing file is not the latest one..
+        /// </summary>
+        public static string BillingFileOutdated {
+            get {
+                return ResourceManager.GetString("BillingFileOutdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Billing instruction can only contain: {0}..
         /// </summary>
         public static string BillingInstructionCanOnlyContain {

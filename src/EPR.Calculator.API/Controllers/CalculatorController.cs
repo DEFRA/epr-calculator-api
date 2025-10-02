@@ -5,6 +5,7 @@ using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly ICalcFinancialYearRequestDtoDataValidator validator;
         private readonly IAvailableClassificationsService availableClassificationsService;
         private readonly ICalculationRunService calculatorRunService;
+        private readonly IBillingFileService billingFileService;
 
         public CalculatorController(
             ApplicationDBContext context,
@@ -30,7 +32,8 @@ namespace EPR.Calculator.API.Controllers
             IServiceBusService serviceBusService,
             ICalcFinancialYearRequestDtoDataValidator validator,
             IAvailableClassificationsService availableClassificationsService,
-            ICalculationRunService calculationRunService)
+            ICalculationRunService calculationRunService,
+            IBillingFileService billingFileService)
         {
             this.context = context;
             this.configuration = configuration;
@@ -39,6 +42,7 @@ namespace EPR.Calculator.API.Controllers
             this.validator = validator;
             this.availableClassificationsService = availableClassificationsService;
             this.calculatorRunService = calculationRunService;
+            this.billingFileService = billingFileService;
         }
 
         [HttpPost]
@@ -237,7 +241,7 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetCalculatorRun(int runId)
+        public async Task<IActionResult> GetCalculatorRun(int runId, CancellationToken cancellationToken = default)
         {
             if (!this.ModelState.IsValid)
             {
@@ -264,7 +268,8 @@ namespace EPR.Calculator.API.Controllers
 
                 var calcRun = calculatorRunDetail.Run;
                 var runClassification = calculatorRunDetail.Classification;
-                var runDto = CalcRunMapper.Map(calcRun, runClassification);
+                var isBillingFileGeneratedLatest = await this.billingFileService.IsBillingFileGeneratedLatest(runId, cancellationToken);
+                var runDto = CalcRunMapper.Map(calcRun, runClassification, isBillingFileGeneratedLatest);
                 return new ObjectResult(runDto);
             }
             catch (Exception exception)

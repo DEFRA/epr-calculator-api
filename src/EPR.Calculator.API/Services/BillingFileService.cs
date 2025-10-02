@@ -399,6 +399,36 @@ namespace EPR.Calculator.API.Services
             }
         }
 
+        public async Task<bool?> IsBillingFileGeneratedLatest(int runId, CancellationToken cancellationToken)
+        {
+            if (!await applicationDBContext.ProducerResultFileSuggestedBillingInstruction.AnyAsync(
+                    x => x.CalculatorRunId == runId, cancellationToken).ConfigureAwait(false)
+                ||
+                !await applicationDBContext.CalculatorRunBillingFileMetadata.AnyAsync(
+                    x => x.CalculatorRunId == runId, cancellationToken).ConfigureAwait(false))
+            {
+                return null;
+            }
+
+            var lastModifiedAcceptReject = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                .Where(x => x.CalculatorRunId == runId)
+                .OrderByDescending(x => x.LastModifiedAcceptReject)
+                .AsNoTracking()
+                .Select(x => x.LastModifiedAcceptReject)
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            var billingGeneratedDate = await applicationDBContext.CalculatorRunBillingFileMetadata
+                .Where(x => x.CalculatorRunId == runId)
+                .OrderByDescending(x => x.BillingFileCreatedDate)
+                .AsNoTracking()
+                .Select(x => x.BillingFileCreatedDate)
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            return lastModifiedAcceptReject.HasValue && billingGeneratedDate > lastModifiedAcceptReject.Value;
+        }
+
         private static ProducersInstructionSummary GenerateInstructionSummary(List<ProducersInstructionDetail> details)
         {
             var statusGroups = details

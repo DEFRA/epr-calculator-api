@@ -406,7 +406,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
 
             // Assert
-            var updatedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.FirstOrDefault();
+            var updatedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.OrderBy(x => x.CalculatorRunId).FirstOrDefault();
             Assert.AreEqual(updatedRecord?.BillingInstructionAcceptReject, BillingStatus.Accepted.ToString());
             Assert.IsNotNull(updatedRecord?.LastModifiedAcceptReject);
             Assert.IsNotNull(updatedRecord?.LastModifiedAcceptRejectBy);
@@ -431,7 +431,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
 
             // Assert
-            var updatedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.FirstOrDefault();
+            var updatedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.OrderBy(x => x.CalculatorRunId).FirstOrDefault();
             Assert.AreEqual(updatedRecord?.BillingInstructionAcceptReject, BillingStatus.Rejected.ToString());
             Assert.AreEqual(updatedRecord?.ReasonForRejection, requestDto.ReasonForRejection);
             Assert.IsNotNull(updatedRecord?.LastModifiedAcceptReject);
@@ -464,7 +464,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 runId, "TestUser", rejectRequest, CancellationToken.None);
 
             // Assert rejection applied
-            var rejectedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.FirstOrDefault();
+            var rejectedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.OrderBy(x => x.CalculatorRunId).FirstOrDefault();
             Assert.AreEqual(BillingStatus.Rejected.ToString(), rejectedRecord?.BillingInstructionAcceptReject);
             Assert.AreEqual(initialReason, rejectedRecord?.ReasonForRejection);
 
@@ -481,7 +481,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 runId, "TestUser", acceptRequest, CancellationToken.None);
 
             // Assert acceptance and reason cleared
-            var acceptedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.FirstOrDefault();
+            var acceptedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.OrderBy(x => x.CalculatorRunId).FirstOrDefault();
             Assert.AreEqual(BillingStatus.Accepted.ToString(), acceptedRecord?.BillingInstructionAcceptReject);
             Assert.IsNull(acceptedRecord?.ReasonForRejection);
         }
@@ -685,6 +685,64 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public async Task IsBillingFileGeneratedLatest_ShouldReturnFalse_WhenModifiedAfterBillGenerated()
+        {
+            // Arrange
+            int runId = 516;
+            using var cancellationTokenSource = new CancellationTokenSource();
+
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
+            {
+                CalculatorRunId = runId,
+                SuggestedBillingInstruction = "Invoice",
+                LastModifiedAcceptReject = DateTime.UtcNow.AddMinutes(-1),
+            });
+
+            this.DbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            {
+                CalculatorRunId = runId,
+                BillingFileCreatedDate = DateTime.UtcNow.AddDays(-1),
+                BillingFileCreatedBy = "test",
+            });
+            await this.DbContext.SaveChangesAsync();
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationTokenSource.Token);
+
+            // Assert
+            result.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public async Task IsBillingFileGeneratedLatest_ShouldReturnTrue_WhenBillingFileGeneratedLatest()
+        {
+            // Arrange
+            int runId = 516;
+            using var cancellationTokenSource = new CancellationTokenSource();
+
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
+            {
+                CalculatorRunId = runId,
+                SuggestedBillingInstruction = "Invoice",
+                LastModifiedAcceptReject = DateTime.UtcNow.AddDays(-1),
+            });
+
+            this.DbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            {
+                CalculatorRunId = runId,
+                BillingFileCreatedDate = DateTime.UtcNow.AddMinutes(-1),
+                BillingFileCreatedBy = "test",
+            });
+            await this.DbContext.SaveChangesAsync();
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationTokenSource.Token);
+
+            // Assert
+            result.Should().BeTrue();
         }
     }
 }

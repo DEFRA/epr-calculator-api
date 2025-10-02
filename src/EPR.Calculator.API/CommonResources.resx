@@ -345,7 +345,7 @@
   <data name="BillingInstructionCanOnlyContain" xml:space="preserve">
     <value>Billing instruction can only contain: {0}.</value>
   </data>
- <data name="BillingInstructionDuplicateValues" xml:space="preserve">
+  <data name="BillingInstructionDuplicateValues" xml:space="preserve">
     <value>Billing instruction cannot contain duplicate values.</value>
   </data>
   <data name="EnterTotalCosts" xml:space="preserve">
@@ -443,5 +443,8 @@
   </data>
   <data name="UnableToChangeStatusToCompleted" xml:space="preserve">
     <value>Classification {0} is not valid to be completed.</value>
+  </data>
+  <data name="BillingFileOutdated" xml:space="preserve">
+    <value>Billing file is not the latest one.</value>
   </data>
 </root>
