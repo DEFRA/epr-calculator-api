@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
@@ -157,8 +156,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CalculatorRunId = 1,
             });
             this.context.SaveChanges();
-            var task = this.controller.PrepareBillingFileSendToFSS(1);
-            task.Wait();
+
+            using var cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = cancellationTokenSource.Token;
+
+            var task = this.controller.PrepareBillingFileSendToFSS(1, cancellationToken);
+            task.Wait(cancellationToken);
 
             var result = task.Result as ObjectResult;
 

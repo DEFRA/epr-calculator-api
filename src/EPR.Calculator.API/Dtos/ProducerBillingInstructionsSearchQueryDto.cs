@@ -14,4 +14,9 @@ public class ProducerBillingInstructionsSearchQueryDto
     /// Gets or sets the status or statuses to filter by.
     /// </summary>
     public IEnumerable<string>? Status { get; set; } = new List<string>();
+
+    /// <summary>
+    /// Gets or sets the billing instruction or billing instruction to filter by.
+    /// </summary>
+    public IEnumerable<string>? BillingInstruction { get; set; } = new List<string>();
 }

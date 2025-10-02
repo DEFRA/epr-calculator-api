@@ -342,6 +342,12 @@
   <data name="StatusCanOnlyContain" xml:space="preserve">
     <value>Status can only contain: {0}.</value>
   </data>
+  <data name="BillingInstructionCanOnlyContain" xml:space="preserve">
+    <value>Billing instruction can only contain: {0}.</value>
+  </data>
+  <data name="BillingInstructionDuplicateValues" xml:space="preserve">
+    <value>Billing instruction cannot contain duplicate values.</value>
+  </data>
   <data name="EnterTotalCosts" xml:space="preserve">
     <value>Enter the total costs for {0} in {1}</value>
   </data>

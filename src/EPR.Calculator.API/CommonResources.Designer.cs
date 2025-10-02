@@ -97,6 +97,24 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Billing instruction can only contain: {0}..
+        /// </summary>
+        public static string BillingInstructionCanOnlyContain {
+            get {
+                return ResourceManager.GetString("BillingInstructionCanOnlyContain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Billing instruction cannot contain duplicate values..
+        /// </summary>
+        public static string BillingInstructionDuplicateValues {
+            get {
+                return ResourceManager.GetString("BillingInstructionDuplicateValues", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Billing.
         /// </summary>
         public static string BillingMessageType {

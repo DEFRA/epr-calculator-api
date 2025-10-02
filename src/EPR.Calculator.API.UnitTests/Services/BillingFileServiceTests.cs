@@ -8,7 +8,6 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Services
@@ -615,7 +614,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             {
                 ProducerId = 1,
                 CalculatorRunId = runId,
-                SuggestedBillingInstruction = "Invoice",
+                SuggestedBillingInstruction = "Initial",
                 SuggestedInvoiceAmount = 100,
                 BillingInstructionAcceptReject = "Accepted",
             });
@@ -635,6 +634,12 @@ namespace EPR.Calculator.API.UnitTests.Services
             Assert.AreEqual(1, result.Records.Count);
             Assert.AreEqual(1, result.TotalRecords);
             Assert.AreEqual(1, result.TotalAcceptedRecords);
+            Assert.AreEqual(1, result.TotalInitialRecords);
+            Assert.AreEqual(0, result.TotalDeltaRecords);
+            Assert.AreEqual(0, result.TotalRejectedRecords);
+            Assert.AreEqual(0, result.TotalRebillRecords);
+            Assert.AreEqual(0, result.TotalCancelBillRecords);
+            Assert.AreEqual(0, result.TotalNoActionRecords);
             Assert.AreEqual(1, result.PageNumber);
             Assert.AreEqual(10, result.PageSize);
             Assert.AreEqual(runName, result.RunName);
@@ -687,6 +692,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             int runId = 516;
             using var cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = cancellationTokenSource.Token;
 
             this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
             {
@@ -701,10 +707,11 @@ namespace EPR.Calculator.API.UnitTests.Services
                 BillingFileCreatedDate = DateTime.UtcNow.AddDays(-1),
                 BillingFileCreatedBy = "test",
             });
-            await this.DbContext.SaveChangesAsync();
+
+            await this.DbContext.SaveChangesAsync(cancellationToken);
 
             // Act
-            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationTokenSource.Token);
+            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationToken);
 
             // Assert
             result.Should().BeFalse();
@@ -716,6 +723,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             int runId = 516;
             using var cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = cancellationTokenSource.Token;
 
             this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
             {
@@ -730,10 +738,10 @@ namespace EPR.Calculator.API.UnitTests.Services
                 BillingFileCreatedDate = DateTime.UtcNow.AddMinutes(-1),
                 BillingFileCreatedBy = "test",
             });
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(cancellationToken);
 
             // Act
-            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationTokenSource.Token);
+            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationToken);
 
             // Assert
             result.Should().BeTrue();

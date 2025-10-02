@@ -28,6 +28,31 @@ public class ProducerBillingInstructionsResponseDto
     public int TotalPendingRecords { get; set; }
 
     /// <summary>
+    /// Gets or sets the total number of Initial billing instruction records.
+    /// </summary>
+    public int TotalInitialRecords { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total number of Delta billing instruction records.
+    /// </summary>
+    public int TotalDeltaRecords { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total number of Rebill billing instruction records.
+    /// </summary>
+    public int TotalRebillRecords { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total number of Cancel Bill billing instruction records.
+    /// </summary>
+    public int TotalCancelBillRecords { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total number of No Action billing instruction records.
+    /// </summary>
+    public int TotalNoActionRecords { get; set; }
+
+    /// <summary>
     /// Gets or sets the calculator run Id.
     /// </summary>
     public int CalculatorRunId { get; set; }
