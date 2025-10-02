@@ -8,7 +8,6 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Services
@@ -693,6 +692,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             int runId = 516;
             using var cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = cancellationTokenSource.Token;
 
             this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
             {
@@ -707,10 +707,11 @@ namespace EPR.Calculator.API.UnitTests.Services
                 BillingFileCreatedDate = DateTime.UtcNow.AddDays(-1),
                 BillingFileCreatedBy = "test",
             });
-            await this.DbContext.SaveChangesAsync();
+
+            await this.DbContext.SaveChangesAsync(cancellationToken);
 
             // Act
-            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationTokenSource.Token);
+            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationToken);
 
             // Assert
             result.Should().BeFalse();
@@ -722,6 +723,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             int runId = 516;
             using var cancellationTokenSource = new CancellationTokenSource();
+            var cancellationToken = cancellationTokenSource.Token;
 
             this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
             {
@@ -736,10 +738,10 @@ namespace EPR.Calculator.API.UnitTests.Services
                 BillingFileCreatedDate = DateTime.UtcNow.AddMinutes(-1),
                 BillingFileCreatedBy = "test",
             });
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(cancellationToken);
 
             // Act
-            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationTokenSource.Token);
+            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationToken);
 
             // Assert
             result.Should().BeTrue();

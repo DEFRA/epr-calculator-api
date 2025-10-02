@@ -3,7 +3,6 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Validators;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests.Validator
 {
@@ -19,7 +18,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
         private Fixture Fixture { get; init; }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(RunClassification.INITIAL_RUN)]
         [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
         [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
@@ -51,7 +50,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(RunClassification.INITIAL_RUN)]
         [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
         [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
@@ -84,7 +83,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsFalse(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(RunClassification.INITIAL_RUN, RunClassification.INITIAL_RUN_COMPLETED)]
         [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED)]
         [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
@@ -117,7 +116,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsFalse(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(RunClassification.INITIAL_RUN)]
         [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
         [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
@@ -149,7 +148,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(RunClassification.INTHEQUEUE)]
         [DataRow(RunClassification.DELETED)]
         public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsDeletedRunAndExistingRunStatusIsNotToMarkAsDeleted(
@@ -179,7 +178,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(RunClassification.UNCLASSIFIED)]
         [DataRow(RunClassification.ERROR)]
         [DataRow(RunClassification.INITIAL_RUN)]
@@ -215,7 +214,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsFalse(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(RunClassification.TEST_RUN)]
         [DataRow(RunClassification.INTHEQUEUE)]
         [DataRow(RunClassification.RUNNING)]
@@ -248,7 +247,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(RunClassification.UNCLASSIFIED)]
         [DataRow(RunClassification.INITIAL_RUN)]
         [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
@@ -339,7 +338,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsFalse(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(RunClassification.INITIAL_RUN, RunClassification.INITIAL_RUN)]
         [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.INTERIM_RECALCULATION_RUN)]
         [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.INTERIM_RECALCULATION_RUN)]
@@ -391,7 +390,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(RunClassification.INITIAL_RUN)]
         [DataRow(RunClassification.INITIAL_RUN_COMPLETED)]
         public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenAnotherRunIsMarkedAsInitialRunCompleted(
@@ -434,7 +433,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
         [DataRow(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
         public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenAnotherRunIsMarkedAsFinalRecalculationRunCompleted(
@@ -477,7 +476,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
         [DataRow(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
         [DataRow(RunClassification.FINAL_RUN)]
@@ -522,7 +521,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
         [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
         public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenSystemDontHaveInitialRunCompleted(
@@ -596,7 +595,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false, false, false)]
         [DataRow(true, false, false)]
         [DataRow(true, true, false)]
@@ -684,7 +683,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsFalse(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(false)]
         [DataRow(true)]
         public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsFalse_WhenSystemHaveCorrectDesignatedRunsToPerformFinalRecalculationRun(
@@ -741,7 +740,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.IsFalse(genericValidationResultDto.IsInvalid);
         }
 
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(true, false)]
         [DataRow(true, true)]
         [DataRow(false, true)]
