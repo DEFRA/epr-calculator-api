@@ -5297,19 +5297,23 @@ BEGIN
     RETURNS DECIMAL(18,2)
     AS
     BEGIN
-        -- Rule 1: Cancelled instruction always returns NULL
-        IF @suggestedBillingInstruction = ''CANCEL''
+        -- Rule 1: Cancelled and Rejected instruction always returns last invoiced values
+        IF @suggestedBillingInstruction = ''CANCEL'' AND @billingInstructionAcceptReject = ''Rejected''
              RETURN ISNULL(@currentYearInvoicedTotalToDate, 0);
 
-        -- Rule 2: Rejected INITIAL returns NULL
+        -- Rule 2: Cancelled instruction always returns NULL
+        IF @suggestedBillingInstruction = ''CANCEL'' AND @billingInstructionAcceptReject = ''Accepted''
+            RETURN NULL;
+
+        -- Rule 3: Rejected INITIAL returns NULL
         IF @billingInstructionAcceptReject = ''Rejected'' AND @suggestedBillingInstruction = ''INITIAL''
             RETURN NULL;
 
-        -- Rule 3: Rejected (but not INITIAL) returns current total as-is
+        -- Rule 4: Rejected (but not INITIAL) returns current total as-is
         IF @billingInstructionAcceptReject = ''Rejected''
             RETURN ISNULL(@currentYearInvoicedTotalToDate, 0);
 
-        -- Rule 4: Accepted or any other case adds invoice amount
+        -- Rule 5: Accepted or any other case adds invoice amount
         RETURN ISNULL(@currentYearInvoicedTotalToDate, 0) + ISNULL(@invoiceAmount, 0);
     END'
     EXEC(@sql)
