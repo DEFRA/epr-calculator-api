@@ -72,10 +72,11 @@ public class AvailableClassificationsService(ApplicationDBContext context, ILogg
         List<CalculatorRun> filteredRuns,
         CancellationToken cancellationToken)
     {
-        IList<int> compledRunIds = filteredRuns.Where(run => run.CalculatorRunClassificationId == (int)RunClassificationStatus.INITIAL_RUN_COMPLETED
-                                                   || run.CalculatorRunClassificationId == (int)RunClassificationStatus.INTERIM_RECALCULATION_RUN_COMPLETED
-                                                   || run.CalculatorRunClassificationId == (int)RunClassificationStatus.FINAL_RECALCULATION_RUN_COMPLETED
-                                                   || run.CalculatorRunClassificationId == (int)RunClassificationStatus.FINAL_RUN_COMPLETED).Select(run => run.Id)
+        IList<int> compledRunIds = filteredRuns.Where(run => run.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED
+                                                   || run.CalculatorRunClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED
+                                                   || run.CalculatorRunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED
+                                                   || run.CalculatorRunClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED)
+                                               .Select(run => run.Id)
                                                .ToList();
 
         var runs = await

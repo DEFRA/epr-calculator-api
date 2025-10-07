@@ -6,7 +6,6 @@ using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Services
@@ -26,6 +25,8 @@ namespace EPR.Calculator.API.UnitTests.Services
         private AvailableClassificationsService service = null!;
         private Mock<ILogger<AvailableClassificationsService>> loggerMock = null!;
 
+        public TestContext TestContext { get; set; }
+
         /// <summary>
         /// Sets up a fresh in-memory context and service for each test.
         /// </summary>
@@ -36,12 +37,12 @@ namespace EPR.Calculator.API.UnitTests.Services
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
 
-            this.dbContext = new ApplicationDBContext(options);
+            dbContext = new ApplicationDBContext(options);
 
             // Add all possible classifications
             foreach (RunClassification value in Enum.GetValues(typeof(RunClassification)))
             {
-                this.dbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification
+                dbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification
                 {
                     Id = (int)value,
                     Status = value.AsString(EnumFormat.Description)!, // not null by contract
@@ -49,21 +50,21 @@ namespace EPR.Calculator.API.UnitTests.Services
             }
 
             // Add dummy FinancialYear for navigation property
-            this.dbContext.FinancialYears.Add(new CalculatorRunFinancialYear
+            dbContext.FinancialYears.Add(new CalculatorRunFinancialYear
             {
                 Name = FinancialYear,
             });
 
-            this.dbContext.SaveChanges();
+            dbContext.SaveChanges();
 
-            this.loggerMock = new Mock<ILogger<AvailableClassificationsService>>();
-            this.service = new AvailableClassificationsService(this.dbContext, this.loggerMock.Object);
+            loggerMock = new Mock<ILogger<AvailableClassificationsService>>();
+            service = new AvailableClassificationsService(dbContext, loggerMock.Object);
         }
 
         [TestCleanup]
         public void Cleanup()
         {
-            this.dbContext.Dispose();
+            dbContext.Dispose();
         }
 
         [TestMethod]
@@ -76,8 +77,10 @@ namespace EPR.Calculator.API.UnitTests.Services
                 FinancialYear = FinancialYear,
             };
 
+            AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
+
             // Act
-            var result = await this.service.GetAvailableClassificationsForFinancialYearAsync(request);
+            var result = await service.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
 
             // Assert
             var statuses = result.Select(c => c.Status).ToList();
@@ -94,15 +97,17 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task ReturnsTestRun_WhenOnlyDesignatedNotComplete()
         {
             // Arrange
-            this.AddRunToDb(RunClassification.INITIAL_RUN, requestId: 10, isComplete: false);
             var request = new CalcFinancialYearRequestDto
             {
                 RunId = 99,
                 FinancialYear = FinancialYear,
             };
 
+            AddRunToDb(RunClassification.INITIAL_RUN, requestId: 10, isComplete: false);
+            AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
+
             // Act
-            var result = await this.service.GetAvailableClassificationsForFinancialYearAsync(request);
+            var result = await service.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
 
             // Assert
             var statuses = result.Select(c => c.Status).ToList();
@@ -118,15 +123,19 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task ReturnsInterimFinalFinalRecalcTest_WhenHasInitialRunCompleted()
         {
             // Arrange
-            this.AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
             var request = new CalcFinancialYearRequestDto
             {
                 RunId = 999,
                 FinancialYear = FinancialYear,
             };
 
+            AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
+
+            await Task.Delay(3, TestContext.CancellationTokenSource.Token); // ensure different CreatedAt timestamps
+            AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
+
             // Act
-            var result = await this.service.GetAvailableClassificationsForFinancialYearAsync(request);
+            var result = await service.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
 
             // Assert
             var statuses = result.Select(c => c.Status).ToList();
@@ -142,20 +151,78 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
+        public async Task ReturnsTestRun_WhenHasInitialRunCompletedAndCurrentUnclassifiedRunIsOlder()
+        {
+            // Arrange
+            var request = new CalcFinancialYearRequestDto
+            {
+                RunId = 999,
+                FinancialYear = FinancialYear,
+            };
+
+            AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
+
+            // Act
+            var result = await service.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
+
+            // Assert
+            var statuses = result.Select(c => c.Status).ToList();
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                },
+                statuses);
+        }
+
+        [TestMethod]
+        public async Task ReturnsTestRun_WhenHasCompletedRunsAndCurrentUnclassifiedRunIsOlder()
+        {
+            // Arrange
+            var request = new CalcFinancialYearRequestDto
+            {
+                RunId = 999,
+                FinancialYear = FinancialYear,
+            };
+
+            AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
+            AddRunToDb(RunClassification.INTERIM_RECALCULATION_RUN, requestId: 11, isComplete: true);
+            AddRunToDb(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED, requestId: 12, isComplete: true);
+            AddRunToDb(RunClassification.FINAL_RUN_COMPLETED, requestId: 13, isComplete: true);
+
+            // Act
+            var result = await service.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
+
+            // Assert
+            var statuses = result.Select(c => c.Status).ToList();
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                },
+                statuses);
+        }
+
+        [TestMethod]
         public async Task ReturnsInterimFinalTest_WhenHasFinalRecalcButNoFinalRun()
         {
             // Arrange
-            this.AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
-            this.AddRunToDb(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED, requestId: 11, isComplete: true);
-
             var request = new CalcFinancialYearRequestDto
             {
                 RunId = 888,
                 FinancialYear = FinancialYear,
             };
 
+            AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
+            AddRunToDb(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED, requestId: 11, isComplete: true);
+
+            await Task.Delay(3, TestContext.CancellationTokenSource.Token); // ensure different CreatedAt timestamps
+            AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
+
             // Act
-            var result = await this.service.GetAvailableClassificationsForFinancialYearAsync(request);
+            var result = await service.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
 
             // Assert
             var statuses = result.Select(c => c.Status).ToList();
@@ -173,17 +240,20 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task ReturnsInterimTest_WhenHasFinalRun()
         {
             // Arrange
-            this.AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
-            this.AddRunToDb(RunClassification.FINAL_RUN_COMPLETED, requestId: 11, isComplete: true);
-
             var request = new CalcFinancialYearRequestDto
             {
                 RunId = 777,
                 FinancialYear = FinancialYear,
             };
 
+            AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
+            AddRunToDb(RunClassification.FINAL_RUN_COMPLETED, requestId: 11, isComplete: true);
+
+            await Task.Delay(3, TestContext.CancellationTokenSource.Token); // ensure different CreatedAt timestamps
+            AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
+
             // Act
-            var result = await this.service.GetAvailableClassificationsForFinancialYearAsync(request);
+            var result = await service.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
 
             // Assert
             var statuses = result.Select(c => c.Status).ToList();
@@ -202,7 +272,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange: setup broken context
             var brokenContext = new Mock<ApplicationDBContext>();
             brokenContext.Setup(x => x.CalculatorRuns).Throws(new Exception("DB fail"));
-            var serviceLocal = new AvailableClassificationsService(brokenContext.Object, this.loggerMock.Object);
+            var serviceLocal = new AvailableClassificationsService(brokenContext.Object, loggerMock.Object);
 
             var request = new CalcFinancialYearRequestDto
             {
@@ -211,31 +281,47 @@ namespace EPR.Calculator.API.UnitTests.Services
             };
 
             // Act & Assert
-            await Assert.ThrowsExceptionAsync<Exception>(async () =>
+            await Assert.ThrowsExactlyAsync<Exception>(async () =>
             {
-                await serviceLocal.GetAvailableClassificationsForFinancialYearAsync(request);
+                await serviceLocal.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
             });
         }
 
         /// <summary>
         /// Helper method to add a CalculatorRun to the database.
         /// </summary>
-        /// <param name="classification">Classification enum value</param>
-        /// <param name="requestId">Run Id</param>
-        /// <param name="isComplete">If run is completed</param>
+        /// <param name="classification">Classification enum value.</param>
+        /// <param name="requestId">Run Id.</param>
+        /// <param name="isComplete">If run is completed.</param>
         private void AddRunToDb(RunClassification classification, int requestId, bool isComplete)
         {
-            this.dbContext.CalculatorRuns.Add(new CalculatorRun
+            var currentTime = DateTime.UtcNow;
+            string userName = "TestUser";
+
+            dbContext.CalculatorRuns.Add(new CalculatorRun
             {
                 Id = requestId,
                 CalculatorRunClassificationId = (int)classification,
                 Name = "Test",
                 FinancialYearId = FinancialYear,
-                Financial_Year = this.dbContext.FinancialYears.First(),
-                CreatedBy = "TestUser",
-                CreatedAt = DateTime.UtcNow,
+                Financial_Year = dbContext.FinancialYears.First(),
+                CreatedBy = userName,
+                CreatedAt = currentTime,
             });
-            this.dbContext.SaveChanges();
+
+            if (isComplete)
+            {
+                dbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+                {
+                    CalculatorRunId = requestId,
+                    BillingFileCreatedBy = userName,
+                    BillingFileCreatedDate = currentTime.AddMicroseconds(1),
+                    BillingFileAuthorisedBy = userName,
+                    BillingFileAuthorisedDate = currentTime.AddMicroseconds(2), // ensure it's after CreatedAt
+                });
+            }
+
+            dbContext.SaveChanges();
         }
     }
 }
