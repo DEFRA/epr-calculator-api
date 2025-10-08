@@ -6,7 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services;
 
-public class AvailableClassificationsService(ApplicationDBContext context, ILogger<AvailableClassificationsService> logger) : IAvailableClassificationsService
+public class AvailableClassificationsService(
+    ApplicationDBContext context,
+    ILogger<AvailableClassificationsService> logger) : IAvailableClassificationsService
 {
     public async Task<List<CalculatorRunClassification>> GetAvailableClassificationsForFinancialYearAsync(CalcFinancialYearRequestDto request, CancellationToken cancellationToken = default)
     {
@@ -68,9 +70,9 @@ public class AvailableClassificationsService(ApplicationDBContext context, ILogg
     }
 
     private async Task<bool> IsCurrentRunOlderThanOtherCompletedRuns(
-        CalculatorRun currentRun,
-        List<CalculatorRun> filteredRuns,
-        CancellationToken cancellationToken)
+       CalculatorRun currentRun,
+       List<CalculatorRun> filteredRuns,
+       CancellationToken cancellationToken)
     {
         IList<int> compledRunIds = filteredRuns.Where(run => run.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED
                                                    || run.CalculatorRunClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED
@@ -92,7 +94,8 @@ public class AvailableClassificationsService(ApplicationDBContext context, ILogg
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-        return runs.Where(run => run.BillingFileAuthorisedDate.HasValue).All(run => (run.BillingFileAuthorisedDate!.Value >= currentRun.CreatedAt));
+        return runs.Where(run => run.BillingFileAuthorisedDate.HasValue)
+                   .All(run => (run.BillingFileAuthorisedDate!.Value >= currentRun.CreatedAt));
     }
 
     private async Task<List<RunClassification>> DetermineAvailableClassificationsAsync(

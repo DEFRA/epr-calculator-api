@@ -331,11 +331,38 @@ namespace EPR.Calculator.API.Validators
                     ],
                 };
             }
+            else if ((runStatusUpdateDto.ClassificationId == (int)RunClassification.INITIAL_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED)
+                && IsCurrentRunOlderThanOtherCompletedRuns(designatedRuns, calculatorRun))
+            {
+                return new GenericValidationResultDto
+                {
+                    IsInvalid = true,
+                    Errors =
+                    [
+                       $"You can't classified older run as designated run for '{calculatorRun.FinancialYearId}'.",
+                    ],
+                };
+            }
 
             return new GenericValidationResultDto
-                {
-                    IsInvalid = false,
-                };
+            {
+                IsInvalid = false,
+            };
+        }
+
+        private static bool IsCurrentRunOlderThanOtherCompletedRuns(
+            List<ClassifiedCalculatorRunDto> designatedRuns,
+            CalculatorRun calculatorRun)
+        {
+            return designatedRuns.Where(run => run.BillingFileAuthorisedDate.HasValue)
+                                 .All(run => (run.BillingFileAuthorisedDate!.Value >= calculatorRun.CreatedAt));
         }
     }
 }
