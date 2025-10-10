@@ -74,7 +74,7 @@ public class AvailableClassificationsService(
        List<CalculatorRun> filteredRuns,
        CancellationToken cancellationToken)
     {
-        IList<int> compledRunIds = filteredRuns.Where(run => run.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED
+        List<int> compledRunIds = filteredRuns.Where(run => run.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED
                                                    || run.CalculatorRunClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED
                                                    || run.CalculatorRunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED
                                                    || run.CalculatorRunClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED)
@@ -169,7 +169,7 @@ public class AvailableClassificationsService(
     private async Task<List<CalculatorRun>> GetCalculatorRuns(CalcFinancialYearRequestDto request, CancellationToken cancellationToken)
     {
         List<CalculatorRun> currentRuns = await context.CalculatorRuns
-            .Where(run => run.FinancialYearId == request.FinancialYear 
+            .Where(run => run.FinancialYearId == request.FinancialYear
                 && (run.CalculatorRunClassificationId != (int)RunClassification.DELETED
                 || run.CalculatorRunClassificationId != (int)RunClassification.ERROR
                 || run.CalculatorRunClassificationId != (int)RunClassification.RUNNING
