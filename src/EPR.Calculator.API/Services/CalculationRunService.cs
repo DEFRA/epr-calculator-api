@@ -36,6 +36,9 @@ public class CalculationRunService : ICalculationRunService
                 (from run in this.context.CalculatorRuns
                  join classification in this.context.CalculatorRunClassifications
                      on run.CalculatorRunClassificationId equals classification.Id
+                 join calculatorRunBillingFileMetadata in this.context.CalculatorRunBillingFileMetadata
+                            on run.Id equals calculatorRunBillingFileMetadata.CalculatorRunId into billingFileMetadataGroup
+                 from billingFileMetadata in billingFileMetadataGroup.DefaultIfEmpty()
                  where run.FinancialYearId == financialYear && this.wantedClassificationIds.Contains(run.CalculatorRunClassificationId)
                  select new ClassifiedCalculatorRunDto
                  {
@@ -45,6 +48,8 @@ public class CalculationRunService : ICalculationRunService
                      RunClassificationId = run.CalculatorRunClassificationId,
                      RunClassificationStatus = classification.Status,
                      UpdatedAt = run.UpdatedAt,
+                     BillingFileAuthorisedBy = billingFileMetadata != null ? billingFileMetadata.BillingFileAuthorisedBy : string.Empty,
+                     BillingFileAuthorisedDate = billingFileMetadata != null ? billingFileMetadata.BillingFileAuthorisedDate : null,
                  })
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);

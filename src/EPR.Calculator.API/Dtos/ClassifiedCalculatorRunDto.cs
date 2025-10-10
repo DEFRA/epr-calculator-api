@@ -13,4 +13,8 @@ public class ClassifiedCalculatorRunDto
     public required string RunClassificationStatus { get; init; }
 
     public DateTime? UpdatedAt { get; init; }
+
+    public string? BillingFileAuthorisedBy { get; init; }
+
+    public DateTime? BillingFileAuthorisedDate { get; init; }
 }
