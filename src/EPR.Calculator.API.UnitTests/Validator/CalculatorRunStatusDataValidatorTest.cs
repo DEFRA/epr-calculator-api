@@ -616,6 +616,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
                 CreatedAt = DateTime.Now.AddDays(-1),
                 UpdatedAt = DateTime.Now.AddDays(-1),
+                BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
             });
 
             if (haveInterimRecalculationRunCompleted)
@@ -628,6 +629,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
                     CreatedAt = DateTime.Now.AddDays(-1),
                     UpdatedAt = DateTime.Now.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
                 });
             }
 
@@ -641,6 +643,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunClassificationStatus = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.ToString(),
                     CreatedAt = DateTime.Now.AddDays(-1),
                     UpdatedAt = DateTime.Now.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
                 });
             }
 
@@ -654,6 +657,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunClassificationStatus = RunClassification.FINAL_RUN_COMPLETED.ToString(),
                     CreatedAt = DateTime.Now.AddDays(-1),
                     UpdatedAt = DateTime.Now.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
                 });
             }
 
@@ -699,6 +703,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
                 CreatedAt = DateTime.Now.AddDays(-1),
                 UpdatedAt = DateTime.Now.AddDays(-1),
+                BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
             });
 
             if (haveInterimRecalculationRunCompleted)
@@ -711,6 +716,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
                     CreatedAt = DateTime.Now.AddDays(-1),
                     UpdatedAt = DateTime.Now.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
                 });
             }
 
@@ -758,6 +764,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
                 CreatedAt = DateTime.Now.AddDays(-1),
                 UpdatedAt = DateTime.Now.AddDays(-1),
+                BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
             });
 
             if (haveInterimRecalculationRunCompleted)
@@ -770,6 +777,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
                     CreatedAt = DateTime.Now.AddDays(-1),
                     UpdatedAt = DateTime.Now.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
                 });
             }
 
@@ -783,6 +791,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunClassificationStatus = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.ToString(),
                     CreatedAt = DateTime.Now.AddDays(-1),
                     UpdatedAt = DateTime.Now.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
                 });
             }
 
@@ -810,6 +819,99 @@ namespace EPR.Calculator.API.UnitTests.Validator
             // Assert
             Assert.IsNotNull(genericValidationResultDto);
             Assert.IsFalse(genericValidationResultDto.IsInvalid);
+        }
+
+        [TestMethod]
+        [DataRow(false, false, false)]
+        [DataRow(true, false, false)]
+        [DataRow(true, true, false)]
+        [DataRow(true, true, true)]
+        [DataRow(true, false, true)]
+        public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenCurrentRunIsOlderRunAndCantBeClassified(
+            bool haveInterimRecalculationRunCompleted,
+            bool haveFinalRecalculationRunCompleted,
+            bool haveFinalRunCompleted)
+        {
+            // Arrange
+            List<ClassifiedCalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(new ClassifiedCalculatorRunDto
+            {
+                RunId = 101,
+                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
+                RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
+                RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
+                CreatedAt = DateTime.Now.AddDays(-1),
+                UpdatedAt = DateTime.Now.AddDays(-1),
+                BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+            });
+
+            if (haveInterimRecalculationRunCompleted)
+            {
+                designatedRuns.Add(new ClassifiedCalculatorRunDto
+                {
+                    RunId = 102,
+                    RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
+                    RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
+                    RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
+                    CreatedAt = DateTime.Now.AddDays(-1),
+                    UpdatedAt = DateTime.Now.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                });
+            }
+
+            if (haveFinalRecalculationRunCompleted)
+            {
+                designatedRuns.Add(new ClassifiedCalculatorRunDto
+                {
+                    RunId = 102,
+                    RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
+                    RunClassificationId = (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
+                    RunClassificationStatus = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.ToString(),
+                    CreatedAt = DateTime.Now.AddDays(-1),
+                    UpdatedAt = DateTime.Now.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                });
+            }
+
+            if (haveFinalRunCompleted)
+            {
+                designatedRuns.Add(new ClassifiedCalculatorRunDto
+                {
+                    RunId = 102,
+                    RunName = $"My - {RunClassification.FINAL_RUN_COMPLETED}",
+                    RunClassificationId = (int)RunClassification.FINAL_RUN_COMPLETED,
+                    RunClassificationStatus = RunClassification.FINAL_RUN_COMPLETED.ToString(),
+                    CreatedAt = DateTime.Now.AddDays(-1),
+                    UpdatedAt = DateTime.Now.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                });
+            }
+
+            var calculatorRun = new CalculatorRun
+            {
+                Financial_Year = new CalculatorRunFinancialYear
+                {
+                    Name = "Name",
+                },
+                Name = "Name",
+                CreatedAt = DateTime.Now.AddDays(-2), // Older run
+                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN,
+                RunId = 1,
+            };
+
+            // Act
+            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+                designatedRuns,
+                calculatorRun,
+                runStatusUpdateDto);
+
+            // Assert
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsTrue(genericValidationResultDto.IsInvalid);
         }
     }
 }
