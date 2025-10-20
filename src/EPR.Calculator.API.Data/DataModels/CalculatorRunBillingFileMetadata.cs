@@ -8,7 +8,7 @@
 
         public string? BillingJsonFileName { get; set; }
 
-        public required DateTime BillingFileCreatedDate { get; set; } = DateTime.Now;
+        public required DateTime BillingFileCreatedDate { get; set; } = DateTime.UtcNow;
 
         public required string BillingFileCreatedBy { get; set; }
 

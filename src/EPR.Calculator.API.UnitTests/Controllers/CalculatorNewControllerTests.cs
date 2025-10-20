@@ -85,9 +85,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BillingCsvFileName = "test.csv",
                 BillingJsonFileName = "test.json",
                 BillingFileCreatedBy = "testUser",
-                BillingFileAuthorisedDate = DateTime.Now,
+                BillingFileAuthorisedDate = DateTime.UtcNow,
                 BillingFileAuthorisedBy = "testUser",
-                BillingFileCreatedDate = DateTime.Now,
+                BillingFileCreatedDate = DateTime.UtcNow,
                 CalculatorRunId = 3,
             });
             this.context.SaveChanges();
@@ -120,7 +120,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BillingCsvFileName = "test2.csv",
                 BillingJsonFileName = "test2.json",
                 BillingFileCreatedBy = "testUser",
-                BillingFileCreatedDate = DateTime.Now,
+                BillingFileCreatedDate = DateTime.UtcNow,
                 CalculatorRunId = 1,
             });
             this.context.SaveChanges();
@@ -152,7 +152,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BillingCsvFileName = "test2.csv",
                 BillingJsonFileName = "test2.json",
                 BillingFileCreatedBy = "testUser",
-                BillingFileCreatedDate = DateTime.Now,
+                BillingFileCreatedDate = DateTime.UtcNow,
                 CalculatorRunId = 1,
             });
             this.context.SaveChanges();
@@ -243,7 +243,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BillingCsvFileName = "test2.csv",
                 BillingJsonFileName = "test2.json",
                 BillingFileCreatedBy = "testUser",
-                BillingFileCreatedDate = DateTime.Now,
+                BillingFileCreatedDate = DateTime.UtcNow,
                 CalculatorRunId = 1,
             });
 
@@ -302,7 +302,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BillingCsvFileName = "test2.csv",
                 BillingJsonFileName = "test2.json",
                 BillingFileCreatedBy = "testUser",
-                BillingFileCreatedDate = DateTime.Now,
+                BillingFileCreatedDate = DateTime.UtcNow,
                 CalculatorRunId = calculatorRunId,
             });
 

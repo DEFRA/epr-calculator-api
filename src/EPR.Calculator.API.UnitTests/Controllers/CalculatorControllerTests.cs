@@ -56,8 +56,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 ParameterYear = this.FinancialYear24_25,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
 
@@ -66,8 +66,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 ProjectionYear = this.FinancialYear24_25,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
             this.DbContext.SaveChanges();
@@ -91,8 +91,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 ParameterYear = this.FinancialYear23_24,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
             this.DbContext.SaveChanges();
@@ -102,8 +102,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 ProjectionYear = this.FinancialYear23_24,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
             this.DbContext.SaveChanges();
@@ -130,8 +130,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 ParameterYear = this.FinancialYear23_24,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
 
@@ -140,8 +140,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 ProjectionYear = this.FinancialYear24_25,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
             this.DbContext.SaveChanges();
@@ -168,8 +168,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 ParameterYear = financialYear27_28,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
             this.DbContext.SaveChanges();
@@ -179,8 +179,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 ProjectionYear = this.FinancialYear23_24,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
             this.DbContext.SaveChanges();
@@ -205,8 +205,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 ParameterYear = this.FinancialYear24_25,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
             this.DbContext.SaveChanges();
@@ -216,8 +216,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 ProjectionYear = this.FinancialYear24_25,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
             this.DbContext.SaveChanges();
@@ -276,8 +276,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 ParameterYear = this.FinancialYear24_25,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
             this.DbContext.SaveChanges();
@@ -287,8 +287,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 ProjectionYear = this.FinancialYear24_25,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
             this.DbContext.SaveChanges();
@@ -436,8 +436,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 ParameterYear = this.FinancialYear23_24,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
             this.DbContext.SaveChanges();
@@ -447,8 +447,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Id = 1,
                 ProjectionYear = this.FinancialYear23_24,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
             this.DbContext.SaveChanges();
@@ -456,7 +456,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.DbContext.CalculatorRuns.Add(new CalculatorRun
             {
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
                 CalculatorRunClassificationId = 2,
                 Financial_Year = this.FinancialYear23_24,
                 Name = "TestOneAtATime",

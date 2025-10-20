@@ -54,7 +54,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task GetCalculatorRunTest_Get_Valid_Run()
         {
-            var date = DateTime.Now;
+            var date = DateTime.UtcNow;
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",

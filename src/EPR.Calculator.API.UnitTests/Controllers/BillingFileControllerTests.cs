@@ -219,7 +219,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BillingCsvFileName = "csvfile.json",
                 BillingJsonFileName = "jsonfile.json",
                 BillingFileCreatedBy = "user",
-                BillingFileCreatedDate = DateTime.Now,
+                BillingFileCreatedDate = DateTime.UtcNow,
             };
 
             var csvMeta = new CalculatorRunCsvFileMetadata()
@@ -259,7 +259,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BillingCsvFileName = "csvfile.json",
                 BillingJsonFileName = "file2.json",
                 BillingFileCreatedBy = "user",
-                BillingFileCreatedDate = DateTime.Now,
+                BillingFileCreatedDate = DateTime.UtcNow,
             };
             var csvMeta = new CalculatorRunCsvFileMetadata
             {
