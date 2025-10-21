@@ -38,12 +38,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
                 LapcapTempUniqueRef = "ENG-AL",
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
 
                 Country = "England",
                 Material = "Aluminium",
                 TotalCost = 20m,
-                EffectiveFrom = DateTime.Now,
+                EffectiveFrom = DateTime.UtcNow,
             };
 
             // Act

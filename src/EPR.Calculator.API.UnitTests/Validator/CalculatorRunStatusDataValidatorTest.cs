@@ -361,8 +361,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 RunName = $"My - {existingRunClassification}",
                 RunClassificationId = (int)existingRunClassification,
                 RunClassificationStatus = existingRunClassification.ToString(),
-                CreatedAt = DateTime.Now.AddDays(-1),
-                UpdatedAt = DateTime.Now.AddDays(-1),
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                UpdatedAt = DateTime.UtcNow.AddDays(-1),
             });
             var calculatorRun = new CalculatorRun
             {
@@ -404,8 +404,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
                 RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
                 RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.Now.AddDays(-1),
-                UpdatedAt = DateTime.Now.AddDays(-1),
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                UpdatedAt = DateTime.UtcNow.AddDays(-1),
             });
             var calculatorRun = new CalculatorRun
             {
@@ -447,8 +447,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
                 RunClassificationId = (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
                 RunClassificationStatus = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.Now.AddDays(-1),
-                UpdatedAt = DateTime.Now.AddDays(-1),
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                UpdatedAt = DateTime.UtcNow.AddDays(-1),
             });
             var calculatorRun = new CalculatorRun
             {
@@ -492,8 +492,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 RunName = $"My - {RunClassification.FINAL_RUN_COMPLETED}",
                 RunClassificationId = (int)RunClassification.FINAL_RUN_COMPLETED,
                 RunClassificationStatus = RunClassification.FINAL_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.Now.AddDays(-1),
-                UpdatedAt = DateTime.Now.AddDays(-1),
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                UpdatedAt = DateTime.UtcNow.AddDays(-1),
             });
             var calculatorRun = new CalculatorRun
             {
@@ -535,8 +535,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
                 RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
                 RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.Now.AddDays(-1),
-                UpdatedAt = DateTime.Now.AddDays(-1),
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                UpdatedAt = DateTime.UtcNow.AddDays(-1),
             });
             var calculatorRun = new CalculatorRun
             {
@@ -614,9 +614,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
                 RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
                 RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.Now.AddDays(-1),
-                UpdatedAt = DateTime.Now.AddDays(-1),
-                BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
             });
 
             if (haveInterimRecalculationRunCompleted)
@@ -627,9 +627,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
                     RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
                     RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.Now.AddDays(-1),
-                    UpdatedAt = DateTime.Now.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
                 });
             }
 
@@ -641,9 +641,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
                     RunClassificationId = (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
                     RunClassificationStatus = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.Now.AddDays(-1),
-                    UpdatedAt = DateTime.Now.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
                 });
             }
 
@@ -655,9 +655,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunName = $"My - {RunClassification.FINAL_RUN_COMPLETED}",
                     RunClassificationId = (int)RunClassification.FINAL_RUN_COMPLETED,
                     RunClassificationStatus = RunClassification.FINAL_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.Now.AddDays(-1),
-                    UpdatedAt = DateTime.Now.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
                 });
             }
 
@@ -701,9 +701,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
                 RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
                 RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.Now.AddDays(-1),
-                UpdatedAt = DateTime.Now.AddDays(-1),
-                BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
             });
 
             if (haveInterimRecalculationRunCompleted)
@@ -714,9 +714,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
                     RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
                     RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.Now.AddDays(-1),
-                    UpdatedAt = DateTime.Now.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
                 });
             }
 
@@ -762,9 +762,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
                 RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
                 RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.Now.AddDays(-1),
-                UpdatedAt = DateTime.Now.AddDays(-1),
-                BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
             });
 
             if (haveInterimRecalculationRunCompleted)
@@ -775,9 +775,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
                     RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
                     RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.Now.AddDays(-1),
-                    UpdatedAt = DateTime.Now.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
                 });
             }
 
@@ -789,9 +789,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
                     RunClassificationId = (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
                     RunClassificationStatus = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.Now.AddDays(-1),
-                    UpdatedAt = DateTime.Now.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
                 });
             }
 
@@ -840,9 +840,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
                 RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
                 RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.Now.AddDays(-1),
-                UpdatedAt = DateTime.Now.AddDays(-1),
-                BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
             });
 
             if (haveInterimRecalculationRunCompleted)
@@ -853,9 +853,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
                     RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
                     RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.Now.AddDays(-1),
-                    UpdatedAt = DateTime.Now.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
                 });
             }
 
@@ -867,9 +867,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
                     RunClassificationId = (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
                     RunClassificationStatus = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.Now.AddDays(-1),
-                    UpdatedAt = DateTime.Now.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
                 });
             }
 
@@ -881,9 +881,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     RunName = $"My - {RunClassification.FINAL_RUN_COMPLETED}",
                     RunClassificationId = (int)RunClassification.FINAL_RUN_COMPLETED,
                     RunClassificationStatus = RunClassification.FINAL_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.Now.AddDays(-1),
-                    UpdatedAt = DateTime.Now.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.Now.AddDays(-1)
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
                 });
             }
 
@@ -894,7 +894,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     Name = "Name",
                 },
                 Name = "Name",
-                CreatedAt = DateTime.Now.AddDays(-2), // Older run
+                CreatedAt = DateTime.UtcNow.AddDays(-2), // Older run
                 CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto

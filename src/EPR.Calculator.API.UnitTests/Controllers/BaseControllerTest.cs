@@ -422,9 +422,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 {
                     Id = 1,
                     CalendarYear = "2024-25",
-                    EffectiveFrom = DateTime.Now,
+                    EffectiveFrom = DateTime.UtcNow,
                     CreatedBy = "Test user",
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
                 },
             };
             return list;
@@ -445,7 +445,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     PackagingClass = "O1",
                     PackagingMaterial = "PC",
                     PackagingMaterialWeight = 1000,
-                    LoadTimeStamp = DateTime.Now,
+                    LoadTimeStamp = DateTime.UtcNow,
                     CalculatorRunPomDataMasterId = 1,
                     SubmissionPeriodDesc = "July to December 2023",
                     CalculatorRunPomDataMaster = GetCalculatorRunPomDataMaster().ToList()[0],
@@ -462,9 +462,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 {
                     Id = 1,
                     CalendarYear = "2024-25",
-                    EffectiveFrom = DateTime.Now,
+                    EffectiveFrom = DateTime.UtcNow,
                     CreatedBy = "Test user",
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
                 },
             };
             return list;
@@ -481,16 +481,16 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     OrganisationId = 1,
                     OrganisationName = "UPU LIMITED",
                     TradingName = "UPU LTD",
-                    LoadTimeStamp = DateTime.Now,
+                    LoadTimeStamp = DateTime.UtcNow,
                     CalculatorRunOrganisationDataMasterId = 1,
                     SubmissionPeriodDesc = "July to December 2023",
                     CalculatorRunOrganisationDataMaster = new CalculatorRunOrganisationDataMaster
                     {
                         Id = 1,
                         CalendarYear = "2024-25",
-                        EffectiveFrom = DateTime.Now,
+                        EffectiveFrom = DateTime.UtcNow,
                         CreatedBy = "Test user",
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow,
                     },
                 },
                 new CalculatorRunOrganisationDataDetail
@@ -500,16 +500,16 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     SubsidaryId = "SUBSID1",
                     OrganisationName = "UPU LIMITED",
                     TradingName = "UPU LTD",
-                    LoadTimeStamp = DateTime.Now,
+                    LoadTimeStamp = DateTime.UtcNow,
                     CalculatorRunOrganisationDataMasterId = 1,
                     SubmissionPeriodDesc = "July to December 2023",
                     CalculatorRunOrganisationDataMaster = new CalculatorRunOrganisationDataMaster
                     {
                         Id = 1,
                         CalendarYear = "2024-25",
-                        EffectiveFrom = DateTime.Now,
+                        EffectiveFrom = DateTime.UtcNow,
                         CreatedBy = "Test user",
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow,
                     },
                 },
             });

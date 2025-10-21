@@ -16,8 +16,8 @@ namespace EPR.Calculator.API.UnitTests
                 Id = 2,
                 ProjectionYear = this.FinancialYear24_25,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
-                EffectiveFrom = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
             };
             var details = new List<LapcapDataDetail>
             {

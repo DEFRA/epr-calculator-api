@@ -76,11 +76,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 Id = 1,
                 ParameterYear = "2024-25",
-                EffectiveFrom = DateTime.Now,
+                EffectiveFrom = DateTime.UtcNow,
 
                 EffectiveTo = null,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
 
                 DefaultParameterSettingMasterId = 1,
                 ParameterUniqueRef = "BADEBT-P",
