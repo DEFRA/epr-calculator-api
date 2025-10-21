@@ -137,7 +137,7 @@ namespace EPR.Calculator.API.Controllers
                     Name = request.CalculatorRunName,
                     Financial_Year = financialYear,
                     CreatedBy = userName,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow,
                     CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                     DefaultParameterSettingMasterId = activeDefaultParameterSettingsMaster.Id,
                     LapcapDataMasterId = activeLapcapDataMaster.Id,
@@ -325,7 +325,7 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
-                calculatorRun.UpdatedAt = DateTime.Now;
+                calculatorRun.UpdatedAt = DateTime.UtcNow;
                 calculatorRun.UpdatedBy = userName;
 
                 this.context.CalculatorRuns.Update(calculatorRun);

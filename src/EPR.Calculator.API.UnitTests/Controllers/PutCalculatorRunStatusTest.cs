@@ -96,7 +96,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             var runId = 1;
             var invalidClassificationId = 16;
-            var date = DateTime.Now;
+            var date = DateTime.UtcNow;
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",
@@ -148,7 +148,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             var runId = 1;
             var validClassificationId = 5;
-            var date = DateTime.Now;
+            var date = DateTime.UtcNow;
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",
@@ -203,7 +203,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             var runId = 2;
             var classificationId = 5;
-            var date = DateTime.Now;
+            var date = DateTime.UtcNow;
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",

@@ -62,16 +62,16 @@ namespace EPR.Calculator.API.Controllers
                 try
                 {
                     var oldDefaultSettings = await this.context.DefaultParameterSettings.Where(x => x.EffectiveTo == null && x.ParameterYear.Name == request.ParameterYear).ToListAsync();
-                    oldDefaultSettings.ForEach(x => { x.EffectiveTo = DateTime.Now; });
+                    oldDefaultSettings.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; });
 
                     var financialYear = await this.context.FinancialYears.Where(
                         x => x.Name == request.ParameterYear).SingleAsync();
 
                     var defaultParamSettingMaster = new DefaultParameterSettingMaster
                     {
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow,
                         CreatedBy = userName,
-                        EffectiveFrom = DateTime.Now,
+                        EffectiveFrom = DateTime.UtcNow,
                         EffectiveTo = null,
                         ParameterYear = financialYear,
                         ParameterFileName = request.ParameterFileName,

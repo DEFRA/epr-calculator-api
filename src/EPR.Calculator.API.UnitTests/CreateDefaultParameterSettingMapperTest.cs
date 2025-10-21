@@ -16,7 +16,7 @@ namespace EPR.Calculator.API.UnitTests
                 Id = 200,
                 ParameterYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
             };
 
             var details = new List<DefaultParameterSettingDetail>
