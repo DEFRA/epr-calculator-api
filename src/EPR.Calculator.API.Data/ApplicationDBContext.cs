@@ -70,6 +70,10 @@
 
         public virtual DbSet<CalculatorRunBillingFileMetadata> CalculatorRunBillingFileMetadata { get; set; }
 
+        public virtual DbSet<ErrorType> ErrorType { get; set; }
+
+        public virtual DbSet<ErrorReport> ErrorReport { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
