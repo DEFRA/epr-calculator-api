@@ -5333,3 +5333,64 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251022145716_AddNewColumnsToPomandOrgDataTables'
+)
+BEGIN
+    ALTER TABLE [pom_data] ADD [submitter_org_id] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251022145716_AddNewColumnsToPomandOrgDataTables'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [leaver_code] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251022145716_AddNewColumnsToPomandOrgDataTables'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [leaver_date] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251022145716_AddNewColumnsToPomandOrgDataTables'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [joiner_date] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251022145716_AddNewColumnsToPomandOrgDataTables'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [submitter_org_id] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251022145716_AddNewColumnsToPomandOrgDataTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251022145716_AddNewColumnsToPomandOrgDataTables', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
