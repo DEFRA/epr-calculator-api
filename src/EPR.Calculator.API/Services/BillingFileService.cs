@@ -517,16 +517,31 @@ namespace EPR.Calculator.API.Services
             applicationDBContext.CalculatorRuns
                 .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
-        private Task<List<ParentProducer>> GetParentProducersLatestAsync(string financialYear, IEnumerable<int> producerIds, CancellationToken cancellationToken) =>
-            (from p in applicationDBContext.ProducerDetail
-             join r in applicationDBContext.CalculatorRuns on p.CalculatorRunId equals r.Id
-             where r.FinancialYearId == financialYear && producerIds.Contains(p.ProducerId) && p.SubsidiaryId == null
-             orderby p.Id descending
-             select new ParentProducer
-             {
-                 ProducerId = p.ProducerId,
-                 ProducerName = p.ProducerName ?? string.Empty,
-             }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
+        private Task<List<ParentProducer>> GetParentProducersLatestAsync(string financialYear, IEnumerable<int> producerIds, CancellationToken cancellationToken)
+        {
+            var runClassificationsToIgnore = new List<int>
+            {
+                (int)RunClassification.INTHEQUEUE,
+                (int)RunClassification.RUNNING,
+                (int)RunClassification.TEST_RUN,
+                (int)RunClassification.ERROR,
+                (int)RunClassification.DELETED,
+            };
+
+            return (from p in applicationDBContext.ProducerDetail
+                    join r in applicationDBContext.CalculatorRuns on p.CalculatorRunId equals r.Id
+                    where r.FinancialYearId == financialYear
+                           && !runClassificationsToIgnore.Contains(r.CalculatorRunClassificationId)
+                           && producerIds.Contains(p.ProducerId)
+                           && p.SubsidiaryId == null
+                    orderby p.Id descending
+                    select new ParentProducer
+                    {
+                        Id = p.Id,
+                        ProducerId = p.ProducerId,
+                        ProducerName = p.ProducerName ?? string.Empty,
+                    }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
+        }
 
         private async Task PopulatePagedBillingInstructionsAsync(
             IQueryable<ProducerBillingInstructionsDto> query,
