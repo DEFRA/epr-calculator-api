@@ -275,7 +275,7 @@ namespace EPR.Calculator.API.Services
                 CalculatorRunId = run.Id,
             };
 
-            await this.PopulatePagedBillingInstructionsAsync(query, requestDto, runId, response, cancellationToken);
+            await this.PopulatePagedBillingInstructionsAsync(query, requestDto, run.FinancialYearId, response, cancellationToken);
             await this.PopulateBillingStatusCountsAsync(groupedStatus, response, cancellationToken);
             await this.PopulateBillingInstructionCountsAsync(groupedBillingInstruction, response, cancellationToken);
 
@@ -517,25 +517,38 @@ namespace EPR.Calculator.API.Services
             applicationDBContext.CalculatorRuns
                 .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
-        private Task<List<ParentProducer>> GetParentProducersLatestAsync(int runId, IEnumerable<int> producerIds, CancellationToken cancellationToken) =>
-            (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
-             join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster
-             on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
-             join run in applicationDBContext.CalculatorRuns on crdm.Id equals run.CalculatorRunOrganisationDataMasterId
-             where run.Id == runId && producerIds.ToList().Contains(odd.OrganisationId ?? 0) && odd.SubsidaryId == null
-             select new
-            ParentProducer
-             {
-                 ProducerId = odd.OrganisationId ?? 0,
-                 ProducerName = odd.OrganisationName,
-             }).ToListAsync(cancellationToken);
+        private Task<List<ParentProducer>> GetParentProducersLatestAsync(string financialYear, IEnumerable<int> producerIds, CancellationToken cancellationToken)
+        {
+            var runClassificationsToIgnore = new List<int>
+            {
+                (int)RunClassification.INTHEQUEUE,
+                (int)RunClassification.RUNNING,
+                (int)RunClassification.TEST_RUN,
+                (int)RunClassification.ERROR,
+                (int)RunClassification.DELETED,
+            };
+
+            return (from p in applicationDBContext.ProducerDetail
+                    join r in applicationDBContext.CalculatorRuns on p.CalculatorRunId equals r.Id
+                    where r.FinancialYearId == financialYear
+                           && !runClassificationsToIgnore.Contains(r.CalculatorRunClassificationId)
+                           && producerIds.Contains(p.ProducerId)
+                           && p.SubsidiaryId == null
+                    orderby p.Id descending
+                    select new ParentProducer
+                    {
+                        Id = p.Id,
+                        ProducerId = p.ProducerId,
+                        ProducerName = p.ProducerName ?? string.Empty,
+                    }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
+        }
 
         private async Task PopulatePagedBillingInstructionsAsync(
-    IQueryable<ProducerBillingInstructionsDto> query,
-    ProducerBillingInstructionsRequestDto requestDto,
-    int runId,
-    ProducerBillingInstructionsResponseDto response,
-    CancellationToken cancellationToken)
+            IQueryable<ProducerBillingInstructionsDto> query,
+            ProducerBillingInstructionsRequestDto requestDto,
+            string financialYear,
+            ProducerBillingInstructionsResponseDto response,
+            CancellationToken cancellationToken)
         {
             var pagedResult = await query
                           .Skip((requestDto.PageNumber!.Value - 1) * requestDto.PageSize!.Value)
@@ -545,7 +558,7 @@ namespace EPR.Calculator.API.Services
 
             var allProducerIds = query.Select(x => x.ProducerId).Distinct();
             var pagedProducerIds = pagedResult.Select(x => x.ProducerId).Distinct();
-            var parentProducers = await this.GetParentProducersLatestAsync(runId, pagedProducerIds, cancellationToken);
+            var parentProducers = await this.GetParentProducersLatestAsync(financialYear, pagedProducerIds, cancellationToken);
 
             foreach (var record in pagedResult)
             {
