@@ -65,6 +65,12 @@ namespace EPR.Calculator.API.Data.Migrations
                 name: "IX_error_report_error_type_id",
                 table: "error_report",
                 column: "error_type_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_error_type_name",
+                table: "error_type",
+                column: "name",
+                unique: true);
         }
 
         /// <inheritdoc />

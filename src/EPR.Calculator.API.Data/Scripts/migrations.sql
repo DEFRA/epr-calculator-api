@@ -5338,7 +5338,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251022122809_AddErrorTables'
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
 )
 BEGIN
     CREATE TABLE [error_type] (
@@ -5352,7 +5352,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251022122809_AddErrorTables'
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
 )
 BEGIN
     CREATE TABLE [error_report] (
@@ -5373,7 +5373,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251022122809_AddErrorTables'
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
 )
 BEGIN
     CREATE INDEX [IX_error_report_calculator_run_id] ON [error_report] ([calculator_run_id]);
@@ -5382,7 +5382,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251022122809_AddErrorTables'
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
 )
 BEGIN
     CREATE INDEX [IX_error_report_error_type_id] ON [error_report] ([error_type_id]);
@@ -5391,11 +5391,20 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251022122809_AddErrorTables'
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_error_type_name] ON [error_type] ([name]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251022122809_AddErrorTables', N'8.0.7');
+    VALUES (N'20251023100303_AddErrorTables', N'8.0.7');
 END;
 GO
 

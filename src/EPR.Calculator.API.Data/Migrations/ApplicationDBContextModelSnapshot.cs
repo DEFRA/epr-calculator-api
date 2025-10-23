@@ -1103,6 +1103,9 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("error_type", (string)null);
                 });
 
