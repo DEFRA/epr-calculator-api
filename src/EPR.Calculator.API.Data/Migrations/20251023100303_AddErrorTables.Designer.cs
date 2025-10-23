@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20251022122809_AddErrorTables")]
+    [Migration("20251023100303_AddErrorTables")]
     partial class AddErrorTables
     {
         /// <inheritdoc />
@@ -1105,6 +1105,9 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("name");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("error_type", (string)null);
                 });
