@@ -5333,3 +5333,64 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023123530_AddNonClusteredIndexes'
+)
+BEGIN
+    DROP INDEX [IX_producer_designated_run_invoice_instruction_calculator_run_id] ON [producer_designated_run_invoice_instruction];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023123530_AddNonClusteredIndexes'
+)
+BEGIN
+    DROP INDEX [IX_calculator_run_calculator_run_classification_id] ON [calculator_run];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023123530_AddNonClusteredIndexes'
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_index_producer_invoiced_material_net_tonnage] ON [producer_invoiced_material_net_tonnage] ([producer_id], [calculator_run_id], [id]) INCLUDE ([material_id], [invoiced_net_tonnage]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023123530_AddNonClusteredIndexes'
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_index_producer_designated_run_invoice] ON [producer_designated_run_invoice_instruction] ([calculator_run_id], [producer_id], [id]) INCLUDE ([current_year_invoiced_total_after_this_run], [invoice_amount], [outstanding_balance], [billing_instruction_id], [instruction_confirmed_date], [instruction_confirmed_by]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023123530_AddNonClusteredIndexes'
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_index_calculator_run] ON [calculator_run] ([calculator_run_classification_id], [financial_year], [is_billing_file_generating], [id]) INCLUDE ([name], [created_by], [created_at], [updated_by], [updated_at], [calculator_run_organization_data_master_id], [calculator_run_pom_data_master_id], [default_parameter_setting_master_id], [lapcap_data_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023123530_AddNonClusteredIndexes'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251023123530_AddNonClusteredIndexes', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
