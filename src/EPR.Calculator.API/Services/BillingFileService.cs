@@ -562,7 +562,10 @@ namespace EPR.Calculator.API.Services
 
             foreach (var record in pagedResult)
             {
-                record.ProducerName = parentProducers.FirstOrDefault(p => p.ProducerId == record.ProducerId)?.ProducerName ?? string.Empty;
+                record.ProducerName = parentProducers
+                    .Where(p => p.ProducerId == record.ProducerId)
+                    .OrderByDescending(p => p.Id)
+                    .FirstOrDefault()?.ProducerName ?? string.Empty;
             }
 
             response.Records = pagedResult;
