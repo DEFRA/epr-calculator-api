@@ -13,31 +13,31 @@ namespace EPR.Calculator.API.Data.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "submitter_org_id",
                 table: "pom_data",
-                type: "nvarchar(max)",
+                type: "nvarchar(4000)",
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "leaver_code",
                 table: "organisation_data",
-                type: "nvarchar(max)",
+                type: "nvarchar(4000)",
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "leaver_date",
                 table: "organisation_data",
-                type: "nvarchar(max)",
+                type: "nvarchar(4000)",
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
                name: "joiner_date",
                table: "organisation_data",
-               type: "nvarchar(max)",
+               type: "nvarchar(4000)",
                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "submitter_org_id",
                 table: "organisation_data",
-                type: "nvarchar(max)",
+                type: "nvarchar(4000)",
                 nullable: true);
         }
 

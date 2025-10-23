@@ -51,7 +51,8 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
                    .HasColumnName("load_ts");
 
             builder.Property(p => p.SubmitterOrgId)
-                   .HasColumnName("submitter_org_id");
+                   .HasColumnName("submitter_org_id")
+                   .HasMaxLength(4000);
         }
     }
 }

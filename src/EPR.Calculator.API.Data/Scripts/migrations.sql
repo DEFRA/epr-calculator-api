@@ -5341,7 +5341,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20251022145716_AddNewColumnsToPomandOrgDataTables'
 )
 BEGIN
-    ALTER TABLE [pom_data] ADD [submitter_org_id] nvarchar(max) NULL;
+    ALTER TABLE [pom_data] ADD [submitter_org_id] nvarchar(4000) NULL;
 END;
 GO
 
@@ -5350,7 +5350,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20251022145716_AddNewColumnsToPomandOrgDataTables'
 )
 BEGIN
-    ALTER TABLE [organisation_data] ADD [leaver_code] nvarchar(max) NULL;
+    ALTER TABLE [organisation_data] ADD [leaver_code] nvarchar(4000) NULL;
 END;
 GO
 
@@ -5359,7 +5359,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20251022145716_AddNewColumnsToPomandOrgDataTables'
 )
 BEGIN
-    ALTER TABLE [organisation_data] ADD [leaver_date] nvarchar(max) NULL;
+    ALTER TABLE [organisation_data] ADD [leaver_date] nvarchar(4000) NULL;
 END;
 GO
 
@@ -5368,7 +5368,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20251022145716_AddNewColumnsToPomandOrgDataTables'
 )
 BEGIN
-    ALTER TABLE [organisation_data] ADD [joiner_date] nvarchar(max) NULL;
+    ALTER TABLE [organisation_data] ADD [joiner_date] nvarchar(4000) NULL;
 END;
 GO
 
@@ -5377,7 +5377,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20251022145716_AddNewColumnsToPomandOrgDataTables'
 )
 BEGIN
-    ALTER TABLE [organisation_data] ADD [submitter_org_id] nvarchar(max) NULL;
+    ALTER TABLE [organisation_data] ADD [submitter_org_id] nvarchar(4000) NULL; 
 END;
 GO
 
