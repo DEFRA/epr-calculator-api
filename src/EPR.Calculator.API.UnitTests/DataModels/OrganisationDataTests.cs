@@ -95,5 +95,57 @@ namespace EPR.Calculator.API.UnitTests.DataModels
             // Assert
             Assert.AreEqual(testValue, this.TestClass.LoadTimestamp);
         }
+
+        [TestMethod]
+        public void CanSetAndGetLeaverCode()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<string>();
+
+            // Act
+            this.TestClass.LeaverCode = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.LeaverCode);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetLeaverDate()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<string>();
+
+            // Act
+            this.TestClass.LeaverDate = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.LeaverDate);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetJoinerDate()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<string>();
+
+            // Act
+            this.TestClass.JoinerDate = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.JoinerDate);
+        }
+
+        [TestMethod]
+        public void CanSetAndGetSubmittedOrgId()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<string>();
+
+            // Act
+            this.TestClass.SubmitterOrgId = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.SubmitterOrgId);
+        }
     }
 }

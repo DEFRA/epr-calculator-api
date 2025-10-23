@@ -35,6 +35,22 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
 
             builder.Property(p => p.LoadTimestamp)
                    .HasColumnName("load_ts");
+
+            builder.Property(p => p.LeaverCode)
+                   .HasColumnName("leaver_code")
+                   .HasMaxLength(4000);
+
+            builder.Property(p => p.LeaverDate)
+                  .HasColumnName("leaver_date")
+                   .HasMaxLength(4000);
+
+            builder.Property(p => p.JoinerDate)
+                 .HasColumnName("joiner_date")
+                   .HasMaxLength(4000);
+
+            builder.Property(p => p.SubmitterOrgId)
+                   .HasColumnName("submitter_org_id")
+                   .HasMaxLength(4000);
         }
     }
 }

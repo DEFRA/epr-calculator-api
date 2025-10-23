@@ -13,5 +13,13 @@
         public required string SubmissionPeriodDesc { get; set; }
 
         public required DateTime LoadTimestamp { get; set; }
+
+        public string? LeaverCode { get; set; }
+
+        public string? LeaverDate { get; set; }
+
+        public string? JoinerDate { get; set; }
+
+        public string? SubmitterOrgId { get; set; }
     }
 }

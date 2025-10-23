@@ -147,5 +147,18 @@ namespace EPR.Calculator.API.UnitTests.DataModels
             // Assert
             Assert.AreEqual(testValue, this.TestClass.LoadTimeStamp);
         }
+
+        [TestMethod]
+        public void CanSetAndGetSubmittedOrgId()
+        {
+            // Arrange
+            var testValue = this.Fixture.Create<string>();
+
+            // Act
+            this.TestClass.SubmitterOrgId = testValue;
+
+            // Assert
+            Assert.AreEqual(testValue, this.TestClass.SubmitterOrgId);
+        }
     }
 }
