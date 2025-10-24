@@ -14,6 +14,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             InitializeDefaultParameterTemplateMaster(modelBuilder);
             InitializeCalculatorRunClassification(modelBuilder);
             InitializeLapcapData(modelBuilder);
+            InitializeErrorTypes(modelBuilder);
         }
 
         public static void InitializeDefaultParameterTemplateMaster(ModelBuilder modelBuilder)
@@ -697,6 +698,20 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     TotalCostFrom = 0M,
                     TotalCostTo = 999999999.99M,
                 });
+        }
+
+        public static void InitializeErrorTypes(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ErrorType>().HasData(
+                new ErrorType { Id = 1, Name = "Missing Registration Data", Description = "Where there is a misalignment between the POM files structure and the Registration file structure re Producer IDs and Subsidiary IDs" },
+                new ErrorType { Id = 2, Name = "Conflicting Obligations (Leaver Codes)", Description = "Where there is more than one entry for a producer that has an obligated leaver code." },
+                new ErrorType { Id = 3, Name = "Conflicting Obligations (Blank)", Description = "Where there is more than one entry for a producer that has a blank leaver code and where there are no obligated leaver code entries" },
+                new ErrorType { Id = 4, Name = "No longer trading", Description = "Where a producer is flagged with a leaver code of 11 (Insolvent) or 12 (No longer performing a producer function)" },
+                new ErrorType { Id = 5, Name = "Not Obligated", Description = "Where a producer only appears with Not Obligated leaver codes." },
+                new ErrorType { Id = 6, Name = "Compliance Scheme Leaver", Description = "Where the producer is only flagged as a leaver of a compliance scheme (Leaver Code 13 and 14)" },
+                new ErrorType { Id = 7, Name = "Compliance Scheme to Direct Producer", Description = "Where a producer leaves a compliance scheme and is obligated as a direct producer." },
+                new ErrorType { Id = 8, Name = "Invalid Leaver Code", Description = "Where a producer has an entry for a non-valid leaver code." },
+                new ErrorType { Id = 9, Name = "Unknown error", Description = "Catch all for other errors" });
         }
     }
 }
