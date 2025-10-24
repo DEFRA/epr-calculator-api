@@ -18,6 +18,16 @@
 
         public int CalculatorRunOrganisationDataMasterId { get; set; }
 
+        public required bool IsValid { get; set; } = true;
+
+        public string? LeaverCode { get; set; }
+
+        public string? LeaverDate { get; set; }
+
+        public string? JoinerDate { get; set; }
+
+        public string? SubmitterOrgId { get; set; }
+
         public virtual CalculatorRunOrganisationDataMaster? CalculatorRunOrganisationDataMaster { get; set; }
     }
 }
