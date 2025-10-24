@@ -52,8 +52,8 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.Property(p => p.ObligatedDays)
                    .HasColumnName("obligated_days");
 
-            builder.Property(p => p.ObligationPercentage)
-                   .HasColumnName("obligation_percentage")
+            builder.Property(p => p.ObligatedPercentage)
+                   .HasColumnName("obligated_percentage")
                    .HasPrecision(18, 3);
 
             builder.HasMany(e => e.ProducerReportedMaterials)

@@ -24,7 +24,7 @@
 
         public int? ObligatedDays { get; set; }
 
-        public decimal? ObligationPercentage { get; set; }
+        public decimal? ObligatedPercentage { get; set; }
 
         public ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = new List<ProducerReportedMaterial>();
 

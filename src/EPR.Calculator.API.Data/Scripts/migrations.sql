@@ -5403,3 +5403,28 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251024105410_AddProducerDetailscolumnsChanges'
+)
+BEGIN
+    EXEC sp_rename N'[producer_detail].[obligation_percentage]', N'obligated_percentage', N'COLUMN';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251024105410_AddProducerDetailscolumnsChanges'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251024105410_AddProducerDetailscolumnsChanges', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
