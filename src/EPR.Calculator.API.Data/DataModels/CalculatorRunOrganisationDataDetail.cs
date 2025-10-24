@@ -18,7 +18,7 @@
 
         public int CalculatorRunOrganisationDataMasterId { get; set; }
 
-        public required bool IsValid { get; set; } = true;
+        public bool IsValid { get; set; } = true;
 
         public string? LeaverCode { get; set; }
 

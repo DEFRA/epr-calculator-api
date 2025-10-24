@@ -449,7 +449,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     CalculatorRunPomDataMasterId = 1,
                     SubmissionPeriodDesc = "July to December 2023",
                     CalculatorRunPomDataMaster = GetCalculatorRunPomDataMaster().ToList()[0],
-                    IsValid = true,
                 },
             };
             return list;
@@ -493,7 +492,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                         CreatedBy = "Test user",
                         CreatedAt = DateTime.UtcNow,
                     },
-                    IsValid = true,
                 },
                 new CalculatorRunOrganisationDataDetail
                 {
@@ -513,7 +511,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                         CreatedBy = "Test user",
                         CreatedAt = DateTime.UtcNow,
                     },
-                    IsValid = true,
                 },
             });
             return list;

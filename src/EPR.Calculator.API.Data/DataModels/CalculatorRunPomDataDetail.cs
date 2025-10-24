@@ -26,7 +26,7 @@
 
         public int CalculatorRunPomDataMasterId { get; set; }
 
-        public required bool IsValid { get; set; } = true;
+        public bool IsValid { get; set; } = true;
 
         public string? SubmitterOrgId { get; set; }
 
