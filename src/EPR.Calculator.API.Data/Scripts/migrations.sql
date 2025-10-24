@@ -5333,3 +5333,73 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251024085502_AddProducerDetailsChanges'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [days_in_submission_year] int NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251024085502_AddProducerDetailsChanges'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [joiner_date] datetime2 NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251024085502_AddProducerDetailsChanges'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [leaver_code] nvarchar(4000) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251024085502_AddProducerDetailsChanges'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [leaver_date] datetime2 NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251024085502_AddProducerDetailsChanges'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [obligated_days] int NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251024085502_AddProducerDetailsChanges'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [obligation_percentage] decimal(18,3) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251024085502_AddProducerDetailsChanges'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251024085502_AddProducerDetailsChanges', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+

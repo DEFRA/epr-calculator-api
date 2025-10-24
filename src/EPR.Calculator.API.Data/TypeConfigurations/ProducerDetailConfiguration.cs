@@ -36,6 +36,26 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.Property(p => p.CalculatorRunId)
                    .HasColumnName("calculator_run_id");
 
+            builder.Property(p => p.DaysInSubmissionYear)
+                   .HasColumnName("days_in_submission_year");
+
+            builder.Property(p => p.JoinerDate)
+                   .HasColumnName("joiner_date");
+
+            builder.Property(p => p.LeaverDate)
+                   .HasColumnName("leaver_date");
+
+            builder.Property(p => p.LeaverCode)
+                   .HasColumnName("leaver_code")
+                   .HasMaxLength(4000);
+
+            builder.Property(p => p.ObligatedDays)
+                   .HasColumnName("obligated_days");
+
+            builder.Property(p => p.ObligationPercentage)
+                   .HasColumnName("obligation_percentage")
+                   .HasPrecision(18, 3);
+
             builder.HasMany(e => e.ProducerReportedMaterials)
                    .WithOne(e => e.ProducerDetail)
                    .HasForeignKey(e => e.ProducerDetailId);
