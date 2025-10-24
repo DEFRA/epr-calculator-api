@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251024085502_AddProducerDetailsChanges")]
+    partial class AddProducerDetailsChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1604,10 +1607,10 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("obligated_days");
 
-                    b.Property<decimal?>("ObligatedPercentage")
+                    b.Property<decimal?>("ObligationPercentage")
                         .HasPrecision(18, 3)
                         .HasColumnType("decimal(18,3)")
-                        .HasColumnName("obligated_percentage");
+                        .HasColumnName("obligation_percentage");
 
                     b.Property<int>("ProducerId")
                         .HasColumnType("int")

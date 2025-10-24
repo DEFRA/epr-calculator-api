@@ -14,6 +14,18 @@
 
         public int CalculatorRunId { get; set; }
 
+        public int? DaysInSubmissionYear { get; set; }
+
+        public DateTime? JoinerDate { get; set; }
+
+        public DateTime? LeaverDate { get; set; }
+
+        public string? LeaverCode { get; set; }
+
+        public int? ObligatedDays { get; set; }
+
+        public decimal? ObligatedPercentage { get; set; }
+
         public ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = new List<ProducerReportedMaterial>();
 
         public virtual CalculatorRun? CalculatorRun { get; set; }
