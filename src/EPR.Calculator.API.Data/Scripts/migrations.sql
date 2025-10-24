@@ -5338,6 +5338,84 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
+)
+BEGIN
+    CREATE TABLE [error_type] (
+        [id] int NOT NULL IDENTITY,
+        [name] nvarchar(250) NOT NULL,
+        [description] nvarchar(max) NULL,
+        CONSTRAINT [PK_error_type] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
+)
+BEGIN
+    CREATE TABLE [error_report] (
+        [id] int NOT NULL IDENTITY,
+        [producer_id] int NOT NULL,
+        [subsidiary_id] nvarchar(400) NULL,
+        [calculator_run_id] int NOT NULL,
+        [leaver_code] nvarchar(max) NULL,
+        [error_type_id] int NOT NULL,
+        [created_at] datetime2 NOT NULL,
+        [created_by] nvarchar(400) NOT NULL,
+        CONSTRAINT [PK_error_report] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_error_report_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE,
+        CONSTRAINT [FK_error_report_error_type_error_type_id] FOREIGN KEY ([error_type_id]) REFERENCES [error_type] ([id]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
+)
+BEGIN
+    CREATE INDEX [IX_error_report_calculator_run_id] ON [error_report] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
+)
+BEGIN
+    CREATE INDEX [IX_error_report_error_type_id] ON [error_report] ([error_type_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_error_type_name] ON [error_type] ([name]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251023100303_AddErrorTables', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251023123530_AddNonClusteredIndexes'
 )
 BEGIN

@@ -49,5 +49,7 @@
         public ICollection<ProducerDesignatedRunInvoiceInstruction> ProducerDesignatedRunInvoiceInstruction { get; } = [];
 
         public ICollection<ProducerResultFileSuggestedBillingInstruction> ProducerResultFileSuggestedBillingInstruction { get; } = [];
+
+        public ICollection<ErrorReport> ErrorReports { get; } = new List<ErrorReport>();
     }
 }

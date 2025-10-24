@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251023100303_AddErrorTables")]
+    partial class AddErrorTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,6 +90,8 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CalculatorRunClassificationId");
+
                     b.HasIndex("CalculatorRunOrganisationDataMasterId");
 
                     b.HasIndex("CalculatorRunPomDataMasterId");
@@ -96,12 +101,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.HasIndex("FinancialYearId");
 
                     b.HasIndex("LapcapDataMasterId");
-
-                    b.HasIndex("CalculatorRunClassificationId", "FinancialYearId", "IsBillingFileGenerating", "Id")
-                        .HasDatabaseName("IX_index_calculator_run");
-
-                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("CalculatorRunClassificationId", "FinancialYearId", "IsBillingFileGenerating", "Id"), false);
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CalculatorRunClassificationId", "FinancialYearId", "IsBillingFileGenerating", "Id"), new[] { "Name", "CreatedBy", "CreatedAt", "UpdatedBy", "UpdatedAt", "CalculatorRunOrganisationDataMasterId", "CalculatorRunPomDataMasterId", "DefaultParameterSettingMasterId", "LapcapDataMasterId" });
 
                     b.ToTable("calculator_run", (string)null);
                 });
@@ -1645,11 +1644,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CalculatorRunId", "ProducerId", "Id")
-                        .HasDatabaseName("IX_index_producer_designated_run_invoice");
-
-                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("CalculatorRunId", "ProducerId", "Id"), false);
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CalculatorRunId", "ProducerId", "Id"), new[] { "CurrentYearInvoicedTotalAfterThisRun", "InvoiceAmount", "OutstandingBalance", "BillingInstructionId", "InstructionConfirmedDate", "InstructionConfirmedBy" });
+                    b.HasIndex("CalculatorRunId");
 
                     b.ToTable("producer_designated_run_invoice_instruction", (string)null);
                 });
@@ -1725,12 +1720,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.HasIndex("CalculatorRunId");
 
                     b.HasIndex("MaterialId");
-
-                    b.HasIndex("ProducerId", "CalculatorRunId", "Id")
-                        .HasDatabaseName("IX_index_producer_invoiced_material_net_tonnage");
-
-                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("ProducerId", "CalculatorRunId", "Id"), false);
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("ProducerId", "CalculatorRunId", "Id"), new[] { "MaterialId", "InvoicedNetTonnage" });
 
                     b.ToTable("producer_invoiced_material_net_tonnage", (string)null);
                 });
