@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251023123530_AddNonClusteredIndexes")]
+    partial class AddNonClusteredIndexes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -326,18 +329,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("calculator_run_organization_data_master_id");
 
-                    b.Property<bool>("IsValid")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("JoinerDate")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LeaverCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LeaverDate")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("LoadTimeStamp")
                         .HasColumnType("datetime2")
                         .HasColumnName("load_ts");
@@ -355,9 +346,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<string>("SubmissionPeriodDesc")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
-
-                    b.Property<string>("SubmitterOrgId")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)
@@ -424,9 +412,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("calculator_run_pom_data_master_id");
 
-                    b.Property<bool>("IsValid")
-                        .HasColumnType("bit");
-
                     b.Property<DateTime>("LoadTimeStamp")
                         .HasColumnType("datetime2")
                         .HasColumnName("load_ts");
@@ -467,9 +452,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<string>("SubmissionPeriodDesc")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
-
-                    b.Property<string>("SubmitterOrgId")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)
@@ -1056,82 +1038,6 @@ namespace EPR.Calculator.API.Data.Migrations
                             ValidRangeFrom = 0m,
                             ValidRangeTo = 999999999.99m
                         });
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ErrorReport", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CalculatorRunId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("created_by");
-
-                    b.Property<int>("ErrorTypeId")
-                        .HasColumnType("int")
-                        .HasColumnName("error_type_id");
-
-                    b.Property<string>("LeaverCode")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("leaver_code");
-
-                    b.Property<int>("ProducerId")
-                        .HasColumnType("int")
-                        .HasColumnName("producer_id");
-
-                    b.Property<string>("SubsidiaryId")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("subsidiary_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CalculatorRunId");
-
-                    b.HasIndex("ErrorTypeId");
-
-                    b.ToTable("error_report", (string)null);
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ErrorType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("error_type", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.LapcapDataDetail", b =>
@@ -2073,25 +1979,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("ParameterYear");
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ErrorReport", b =>
-                {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
-                        .WithMany("ErrorReports")
-                        .HasForeignKey("CalculatorRunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.ErrorType", "ErrorType")
-                        .WithMany("ErrorReports")
-                        .HasForeignKey("ErrorTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CalculatorRun");
-
-                    b.Navigation("ErrorType");
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.LapcapDataDetail", b =>
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.LapcapDataMaster", "LapcapDataMaster")
@@ -2191,8 +2078,6 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.Navigation("CountryApportionments");
 
-                    b.Navigation("ErrorReports");
-
                     b.Navigation("ProducerDesignatedRunInvoiceInstruction");
 
                     b.Navigation("ProducerDetails");
@@ -2245,11 +2130,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("Details");
 
                     b.Navigation("RunDetails");
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ErrorType", b =>
-                {
-                    b.Navigation("ErrorReports");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.LapcapDataMaster", b =>

@@ -5338,6 +5338,145 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
+)
+BEGIN
+    CREATE TABLE [error_type] (
+        [id] int NOT NULL IDENTITY,
+        [name] nvarchar(250) NOT NULL,
+        [description] nvarchar(max) NULL,
+        CONSTRAINT [PK_error_type] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
+)
+BEGIN
+    CREATE TABLE [error_report] (
+        [id] int NOT NULL IDENTITY,
+        [producer_id] int NOT NULL,
+        [subsidiary_id] nvarchar(400) NULL,
+        [calculator_run_id] int NOT NULL,
+        [leaver_code] nvarchar(max) NULL,
+        [error_type_id] int NOT NULL,
+        [created_at] datetime2 NOT NULL,
+        [created_by] nvarchar(400) NOT NULL,
+        CONSTRAINT [PK_error_report] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_error_report_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE,
+        CONSTRAINT [FK_error_report_error_type_error_type_id] FOREIGN KEY ([error_type_id]) REFERENCES [error_type] ([id]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
+)
+BEGIN
+    CREATE INDEX [IX_error_report_calculator_run_id] ON [error_report] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
+)
+BEGIN
+    CREATE INDEX [IX_error_report_error_type_id] ON [error_report] ([error_type_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_error_type_name] ON [error_type] ([name]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023100303_AddErrorTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251023100303_AddErrorTables', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023123530_AddNonClusteredIndexes'
+)
+BEGIN
+    DROP INDEX [IX_producer_designated_run_invoice_instruction_calculator_run_id] ON [producer_designated_run_invoice_instruction];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023123530_AddNonClusteredIndexes'
+)
+BEGIN
+    DROP INDEX [IX_calculator_run_calculator_run_classification_id] ON [calculator_run];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023123530_AddNonClusteredIndexes'
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_index_producer_invoiced_material_net_tonnage] ON [producer_invoiced_material_net_tonnage] ([producer_id], [calculator_run_id], [id]) INCLUDE ([material_id], [invoiced_net_tonnage]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023123530_AddNonClusteredIndexes'
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_index_producer_designated_run_invoice] ON [producer_designated_run_invoice_instruction] ([calculator_run_id], [producer_id], [id]) INCLUDE ([current_year_invoiced_total_after_this_run], [invoice_amount], [outstanding_balance], [billing_instruction_id], [instruction_confirmed_date], [instruction_confirmed_by]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023123530_AddNonClusteredIndexes'
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_index_calculator_run] ON [calculator_run] ([calculator_run_classification_id], [financial_year], [is_billing_file_generating], [id]) INCLUDE ([name], [created_by], [created_at], [updated_by], [updated_at], [calculator_run_organization_data_master_id], [calculator_run_pom_data_master_id], [default_parameter_setting_master_id], [lapcap_data_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251023123530_AddNonClusteredIndexes'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251023123530_AddNonClusteredIndexes', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251022131319_AddColumnsToCalculatorRunDetail'
 )
 BEGIN
