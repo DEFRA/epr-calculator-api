@@ -5481,6 +5481,10 @@ IF NOT EXISTS (
 )
 BEGIN
     ALTER TABLE [calculator_run_pom_data_detail] ADD [is_valid] bit NOT NULL DEFAULT CAST(0 AS bit);
+    WHERE [MigrationId] = N'20251024094126_AddErrorTypesReferenceData'
+)
+BEGIN
+    DROP INDEX [IX_error_type_name] ON [error_type];
 END;
 GO
 
@@ -5490,6 +5494,23 @@ IF NOT EXISTS (
 )
 BEGIN
     ALTER TABLE [calculator_run_pom_data_detail] ADD [submitter_org_id] nvarchar(4000) NULL;
+    WHERE [MigrationId] = N'20251024094126_AddErrorTypesReferenceData'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'description', N'name') AND [object_id] = OBJECT_ID(N'[error_type]'))
+        SET IDENTITY_INSERT [error_type] ON;
+    EXEC(N'INSERT INTO [error_type] ([id], [description], [name])
+    VALUES (1, N''Where there is a misalignment between the POM files structure and the Registration file structure re Producer IDs and Subsidiary IDs'', N''Missing Registration Data''),
+    (2, N''Where there is more than one entry for a producer that has an obligated leaver code.'', N''Conflicting Obligations (Leaver Codes)''),
+    (3, N''Where there is more than one entry for a producer that has a blank leaver code and where there are no obligated leaver code entries'', N''Conflicting Obligations (Blank)''),
+    (4, N''Where a producer is flagged with a leaver code of 11 (Insolvent) or 12 (No longer performing a producer function)'', N''No longer trading''),
+    (5, N''Where a producer only appears with Not Obligated leaver codes.'', N''Not Obligated''),
+    (6, N''Where the producer is only flagged as a leaver of a compliance scheme (Leaver Code 13 and 14)'', N''Compliance Scheme Leaver''),
+    (7, N''Where a producer leaves a compliance scheme and is obligated as a direct producer.'', N''Compliance Scheme to Direct Producer''),
+    (8, N''Where a producer has an entry for a non-valid leaver code.'', N''Invalid Leaver Code''),
+    (9, N''Catch all for other errors'', N''Unknown error'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'description', N'name') AND [object_id] = OBJECT_ID(N'[error_type]'))
+        SET IDENTITY_INSERT [error_type] OFF;
 END;
 GO
 
@@ -5545,6 +5566,11 @@ IF NOT EXISTS (
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
     VALUES (N'20251022131319_AddColumnsToCalculatorRunDetail', N'8.0.7');
+    WHERE [MigrationId] = N'20251024094126_AddErrorTypesReferenceData'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251024094126_AddErrorTypesReferenceData', N'8.0.7');
 END;
 GO
 

@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251024094126_AddErrorTypesReferenceData")]
+    partial class AddErrorTypesReferenceData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -326,18 +329,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("calculator_run_organization_data_master_id");
 
-                    b.Property<bool>("IsValid")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("JoinerDate")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LeaverCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LeaverDate")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("LoadTimeStamp")
                         .HasColumnType("datetime2")
                         .HasColumnName("load_ts");
@@ -355,9 +346,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<string>("SubmissionPeriodDesc")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
-
-                    b.Property<string>("SubmitterOrgId")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)
@@ -424,9 +412,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("calculator_run_pom_data_master_id");
 
-                    b.Property<bool>("IsValid")
-                        .HasColumnType("bit");
-
                     b.Property<DateTime>("LoadTimeStamp")
                         .HasColumnType("datetime2")
                         .HasColumnName("load_ts");
@@ -467,9 +452,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<string>("SubmissionPeriodDesc")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
-
-                    b.Property<string>("SubmitterOrgId")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)
