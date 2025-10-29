@@ -13,7 +13,8 @@ WORKDIR /home/nonroot/sql
 # Copy the migration files and script and set their owners to non-root
 # so migration script can be executable
 COPY --chown=nonroot migrations.sql .
+COPY --chown=nonroot seed.sql .
 COPY --chown=nonroot run-migrations.sh .
 
 RUN chmod +x run-migrations.sh
-CMD ["/bin/bash", "/home/nonroot/sql/run-migrations.sh", "/home/nonroot/sql/migrations.sql"]
+CMD ["/bin/bash", "/home/nonroot/sql/run-migrations.sh", "/home/nonroot/sql/migrations.sql", "/home/nonroot/sql/seed.sql"]
