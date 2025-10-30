@@ -5519,3 +5519,44 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251029132348_UpdateErrorTypesSeedDataReplaceUnknownType'
+)
+BEGIN
+    EXEC(N'UPDATE [error_type] SET [description] = N''Where a leaver or joiner date falls outside of the calendar year boundary.'', [name] = N''Date input issue''
+    WHERE [id] = 9;
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251029132348_UpdateErrorTypesSeedDataReplaceUnknownType'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'description', N'name') AND [object_id] = OBJECT_ID(N'[error_type]'))
+        SET IDENTITY_INSERT [error_type] ON;
+    EXEC(N'INSERT INTO [error_type] ([id], [description], [name])
+    VALUES (10, N''Where a Organisation (Producer or Subsidiary) ID does not conform to the 6 digit structure.'', N''Invalid Organisation ID'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'description', N'name') AND [object_id] = OBJECT_ID(N'[error_type]'))
+        SET IDENTITY_INSERT [error_type] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251029132348_UpdateErrorTypesSeedDataReplaceUnknownType'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251029132348_UpdateErrorTypesSeedDataReplaceUnknownType', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
