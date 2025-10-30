@@ -540,20 +540,21 @@ namespace EPR.Calculator.API.Services
                 (int)RunClassification.DELETED,
             };
 
-            // Identify and populate the parent producers with producer name
-            var parentProducers = (from p in applicationDBContext.ProducerDetail
-                    join r in applicationDBContext.CalculatorRuns on p.CalculatorRunId equals r.Id
-                    where r.FinancialYearId == financialYear
-                           && !runClassificationsToIgnore.Contains(r.CalculatorRunClassificationId)
-                           && producerIds.Contains(p.ProducerId)
-                           && p.SubsidiaryId == null
-                    orderby p.Id descending
-                    select new ParentProducer
-                    {
-                        Id = p.Id,
-                        ProducerId = p.ProducerId,
-                        ProducerName = p.ProducerName ?? string.Empty,
-                    }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
+            var parentProducers = (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
+                                   join odm in applicationDBContext.CalculatorRunOrganisationDataMaster
+                                       on odd.CalculatorRunOrganisationDataMasterId equals odm.Id
+                                   join run in applicationDBContext.CalculatorRuns
+                                       on odm.Id equals run.CalculatorRunOrganisationDataMasterId
+                                   where run.Id == runId
+                                       && producerIds.Contains(odd.OrganisationId ?? 0)
+                                       && odd.SubsidaryId == null
+                                   orderby odd.Id descending
+                                   select new ParentProducer
+                                   {
+                                       Id = odd.Id,
+                                       ProducerId = odd.OrganisationId ?? 0,
+                                       ProducerName = odd.OrganisationName
+                                   }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
 
             // Get the distinct list of parent producer ids
             var parentProducerIds = parentProducers.Result.Select(pp => pp.ProducerId).Distinct();
@@ -565,21 +566,19 @@ namespace EPR.Calculator.API.Services
             // This is because for these parent producers, there are no producer detail records because of no pom data submissions
             if (outstandingProducerIds.Any())
             {
-                var outstandingParentProducers = (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
-                    join odm in applicationDBContext.CalculatorRunOrganisationDataMaster
-                        on odd.CalculatorRunOrganisationDataMasterId equals odm.Id
-                    join run in applicationDBContext.CalculatorRuns
-                        on odm.Id equals run.CalculatorRunOrganisationDataMasterId
-                    where run.Id == runId
-                        && outstandingProducerIds.Contains(odd.OrganisationId ?? 0)
-                        && odd.SubsidaryId == null
-                    orderby odd.Id descending
-                    select new ParentProducer
-                    {
-                        Id = odd.Id,
-                        ProducerId = odd.OrganisationId ?? 0,
-                        ProducerName = odd.OrganisationName
-                    }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
+                var outstandingParentProducers = (from p in applicationDBContext.ProducerDetail
+                                                  join r in applicationDBContext.CalculatorRuns on p.CalculatorRunId equals r.Id
+                                                  where r.FinancialYearId == financialYear
+                                                         && !runClassificationsToIgnore.Contains(r.CalculatorRunClassificationId)
+                                                         && outstandingProducerIds.Contains(p.ProducerId)
+                                                         && p.SubsidiaryId == null
+                                                  orderby p.Id descending
+                                                  select new ParentProducer
+                                                  {
+                                                      Id = p.Id,
+                                                      ProducerId = p.ProducerId,
+                                                      ProducerName = p.ProducerName ?? string.Empty,
+                                                  }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
 
                 parentProducers.Result.AddRange(outstandingParentProducers.Result);
             }
