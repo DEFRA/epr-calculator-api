@@ -58,6 +58,9 @@ builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
+Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
+Microsoft.IdentityModel.Logging.IdentityModelEventSource.LogCompleteSecurityArtifact = true;
+
 // Adding Authorization with Global Policy.
 builder.Services.AddAuthorizationBuilder()
         .SetFallbackPolicy(new AuthorizationPolicyBuilder()
