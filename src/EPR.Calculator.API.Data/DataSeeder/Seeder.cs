@@ -711,7 +711,8 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 new ErrorType { Id = 6, Name = "Compliance Scheme Leaver", Description = "Where the producer is only flagged as a leaver of a compliance scheme (Leaver Code 13 and 14)" },
                 new ErrorType { Id = 7, Name = "Compliance Scheme to Direct Producer", Description = "Where a producer leaves a compliance scheme and is obligated as a direct producer." },
                 new ErrorType { Id = 8, Name = "Invalid Leaver Code", Description = "Where a producer has an entry for a non-valid leaver code." },
-                new ErrorType { Id = 9, Name = "Unknown error", Description = "Catch all for other errors" });
+                new ErrorType { Id = 9, Name = "Date input issue", Description = "Where a leaver or joiner date falls outside of the calendar year boundary." },
+                new ErrorType { Id = 10, Name = "Invalid Organisation ID", Description = "Where a Organisation (Producer or Subsidiary) ID does not conform to the 6 digit structure." });
         }
     }
 }
