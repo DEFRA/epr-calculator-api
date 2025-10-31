@@ -5560,3 +5560,43 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251031131142_RemoveErrorTypeDescriptionColumnAndSeedData'
+)
+BEGIN
+    DECLARE @var33 sysname;
+    SELECT @var33 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[error_type]') AND [c].[name] = N'description');
+    IF @var33 IS NOT NULL EXEC(N'ALTER TABLE [error_type] DROP CONSTRAINT [' + @var33 + '];');
+    ALTER TABLE [error_type] DROP COLUMN [description];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251031131142_RemoveErrorTypeDescriptionColumnAndSeedData'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_error_type_name] ON [error_type] ([name]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251031131142_RemoveErrorTypeDescriptionColumnAndSeedData'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251031131142_RemoveErrorTypeDescriptionColumnAndSeedData', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+

@@ -14,6 +14,7 @@ public class ErrorTypeConfiguration : IEntityTypeConfiguration<ErrorType>
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Id).HasColumnName("id");
         builder.Property(e => e.Name).HasColumnName("name").HasMaxLength(250).IsRequired();
-        builder.Property(e => e.Description).HasColumnName("description");
+
+        builder.HasIndex(e => e.Name).IsUnique();
     }
 }
