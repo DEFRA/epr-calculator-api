@@ -703,16 +703,16 @@ namespace EPR.Calculator.API.Data.DataSeeder
         public static void InitializeErrorTypes(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ErrorType>().HasData(
-                new ErrorType { Id = 1, Name = "Missing Registration Data", Description = "Where there is a misalignment between the POM files structure and the Registration file structure re Producer IDs and Subsidiary IDs" },
-                new ErrorType { Id = 2, Name = "Conflicting Obligations (Leaver Codes)", Description = "Where there is more than one entry for a producer that has an obligated leaver code." },
-                new ErrorType { Id = 3, Name = "Conflicting Obligations (Blank)", Description = "Where there is more than one entry for a producer that has a blank leaver code and where there are no obligated leaver code entries" },
-                new ErrorType { Id = 4, Name = "No longer trading", Description = "Where a producer is flagged with a leaver code of 11 (Insolvent) or 12 (No longer performing a producer function)" },
-                new ErrorType { Id = 5, Name = "Not Obligated", Description = "Where a producer only appears with Not Obligated leaver codes." },
-                new ErrorType { Id = 6, Name = "Compliance Scheme Leaver", Description = "Where the producer is only flagged as a leaver of a compliance scheme (Leaver Code 13 and 14)" },
-                new ErrorType { Id = 7, Name = "Compliance Scheme to Direct Producer", Description = "Where a producer leaves a compliance scheme and is obligated as a direct producer." },
-                new ErrorType { Id = 8, Name = "Invalid Leaver Code", Description = "Where a producer has an entry for a non-valid leaver code." },
-                new ErrorType { Id = 9, Name = "Date input issue", Description = "Where a leaver or joiner date falls outside of the calendar year boundary." },
-                new ErrorType { Id = 10, Name = "Invalid Organisation ID", Description = "Where a Organisation (Producer or Subsidiary) ID does not conform to the 6 digit structure." });
+                new ErrorType { Id = 1, Name = "Missing Registration Data" },
+                new ErrorType { Id = 2, Name = "Conflicting Obligations (Leaver Codes)" },
+                new ErrorType { Id = 3, Name = "Conflicting Obligations (Blank)" },
+                new ErrorType { Id = 4, Name = "No longer trading" },
+                new ErrorType { Id = 5, Name = "Not Obligated" },
+                new ErrorType { Id = 6, Name = "Compliance Scheme Leaver" },
+                new ErrorType { Id = 7, Name = "Compliance Scheme to Direct Producer" },
+                new ErrorType { Id = 8, Name = "Invalid Leaver Code" },
+                new ErrorType { Id = 9, Name = "Date input issue" },
+                new ErrorType { Id = 10, Name = "Invalid Organisation ID" });
         }
     }
 }
