@@ -87,7 +87,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         /// throws an exception when an empty key is passed.
         /// </summary>
         /// <param name="value">The key value to test.</param>
-        [DataTestMethod]
+        [TestMethod]
         [DataRow(null)]
         [DataRow("")]
         [DataRow("   ")]

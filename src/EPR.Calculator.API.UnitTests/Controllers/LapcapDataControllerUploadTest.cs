@@ -56,27 +56,27 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var lapcapMaster25 = new LapcapDataMaster
             {
                 ProjectionYearId = "2029-30",
-                EffectiveFrom = new DateTime(2025, 1, 1),
+                EffectiveFrom = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
                 EffectiveTo = null,
                 ProjectionYear = year24,
             };
             var lapcapDetail25 = new LapcapDataDetail
             {
                 LapcapDataMaster = lapcapMaster25,
-                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',').First(),
+                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',')[0],
             };
 
             var lapcapMaster26 = new LapcapDataMaster
             {
                 ProjectionYearId = "2030-31",
-                EffectiveFrom = new DateTime(2025, 1, 1),
+                EffectiveFrom = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
                 EffectiveTo = null,
                 ProjectionYear = year25,
             };
             var lapcapDetail26 = new LapcapDataDetail
             {
                 LapcapDataMaster = lapcapMaster26,
-                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',').First(),
+                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',')[0],
             };
             dbContext.LapcapDataMaster.Add(lapcapMaster25);
             dbContext.LapcapDataDetail.Add(lapcapDetail25);
@@ -170,14 +170,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var lapcapMaster25 = new LapcapDataMaster
             {
                 ProjectionYearId = "202930",
-                EffectiveFrom = new DateTime(2025, 1, 1),
+                EffectiveFrom = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
                 EffectiveTo = null,
                 ProjectionYear = year24,
             };
             var lapcapDetail25 = new LapcapDataDetail
             {
                 LapcapDataMaster = lapcapMaster25,
-                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',').First(),
+                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',')[0],
             };
 
             var lapcapMaster26 = new LapcapDataMaster
@@ -190,7 +190,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var lapcapDetail26 = new LapcapDataDetail
             {
                 LapcapDataMaster = lapcapMaster26,
-                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',').First(),
+                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',')[0],
             };
             dbContext.LapcapDataMaster.Add(lapcapMaster25);
             dbContext.LapcapDataDetail.Add(lapcapDetail25);

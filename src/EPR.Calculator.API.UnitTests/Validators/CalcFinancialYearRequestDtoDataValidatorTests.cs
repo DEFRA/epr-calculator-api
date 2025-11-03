@@ -5,7 +5,6 @@ using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Validators;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests.Validators
 {
@@ -42,8 +41,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
                     CreatedBy = "Test",
                     CreatedAt = DateTime.UtcNow,
                 },
-                new CalculatorRun
-                {
+                new() {
                     CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
                     Financial_Year = calculatorRunFinancialYear,
                     Name = "Test",
@@ -110,7 +108,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             };
 
             // Act
-            var result = await this.validator.Validate(request);
+            var result = await validator.Validate(request);
 
             // Assert
             result.IsInvalid.Should().BeTrue();

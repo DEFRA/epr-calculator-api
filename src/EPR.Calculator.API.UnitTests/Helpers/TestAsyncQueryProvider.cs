@@ -37,7 +37,7 @@ public class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
         return new TestAsyncEnumerable<TResult>(expression);
     }
 
-    public TResult ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
+    public TResult ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken = default)
     {
         return Execute<TResult>(expression);
     }

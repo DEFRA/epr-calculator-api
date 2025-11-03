@@ -57,7 +57,7 @@ namespace EPR.Calculator.API.UnitTests
                     this.DbContext.LapcapDataTemplateMaster);
 
                 // Assert
-                var mappedItem = result.First();
+                var mappedItem = result[0];
                 Assert.AreEqual(detail.Id, mappedItem.Id);
                 Assert.AreEqual(defaultParameterSettingMaster.ProjectionYear.Name, mappedItem.ProjectionYear);
                 Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);

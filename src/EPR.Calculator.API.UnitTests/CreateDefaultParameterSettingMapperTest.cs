@@ -59,7 +59,7 @@ namespace EPR.Calculator.API.UnitTests
                 Assert.AreEqual(1, result.Count);
                 Assert.IsNotNull(result);
                 //// Assert
-                var mappedItem = result.First();
+                var mappedItem = result[0];
                 Assert.AreEqual(detail.Id, mappedItem.Id);
                 Assert.AreEqual(defaultParameterSettingMaster.ParameterYear.Name, mappedItem.ParameterYear);
                 Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);

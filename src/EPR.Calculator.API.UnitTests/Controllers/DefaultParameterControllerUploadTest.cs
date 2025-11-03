@@ -60,27 +60,27 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var defaultParameterSettingMaster25 = new DefaultParameterSettingMaster
             {
                 ParameterYearId = "2029-30",
-                EffectiveFrom = new DateTime(2025, 4, 1),
+                EffectiveFrom = new DateTime(2025, 4, 1, 0, 0, 0, DateTimeKind.Local),
                 EffectiveTo = null,
                 ParameterYear = year29,
             };
             var defaultParameterDetail25 = new DefaultParameterSettingDetail
             {
                 DefaultParameterSettingMaster = defaultParameterSettingMaster25,
-                ParameterUniqueReferenceId = CommonResources.DefaultParameterUniqueReferences.Split(',').First(),
+                ParameterUniqueReferenceId = CommonResources.DefaultParameterUniqueReferences.Split(',')[0],
             };
 
             var defaultParameterSettingMaster26 = new DefaultParameterSettingMaster
             {
                 ParameterYearId = "2030-31",
-                EffectiveFrom = new DateTime(2025, 4, 1),
+                EffectiveFrom = new DateTime(2025, 4, 1, 0, 0, 0, DateTimeKind.Local),
                 EffectiveTo = null,
                 ParameterYear = year30,
             };
             var defaultParameterDetail26 = new DefaultParameterSettingDetail
             {
                 DefaultParameterSettingMaster = defaultParameterSettingMaster26,
-                ParameterUniqueReferenceId = CommonResources.DefaultParameterUniqueReferences.Split(',').First(),
+                ParameterUniqueReferenceId = CommonResources.DefaultParameterUniqueReferences.Split(',')[0],
             };
             this.DbContext.DefaultParameterSettings.Add(defaultParameterSettingMaster25);
             this.DbContext.DefaultParameterSettingDetail.Add(defaultParameterDetail25);

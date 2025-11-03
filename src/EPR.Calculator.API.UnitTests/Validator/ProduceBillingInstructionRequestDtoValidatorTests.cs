@@ -21,7 +21,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             var model = new ProduceBillingInstuctionRequestDto { OrganisationIds = [], Status = "Accepted" };
             var result = this.validator.Validate(model);
 
-            Assert.AreEqual("Organisation Id is required.", result.Errors.First().ErrorMessage);
+            Assert.AreEqual("Organisation Id is required.", result.Errors[0].ErrorMessage);
         }
 
         [TestMethod]
@@ -30,7 +30,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             var model = new ProduceBillingInstuctionRequestDto { OrganisationIds = [1], Status = string.Empty };
             var result = this.validator.Validate(model);
 
-            Assert.AreEqual("Status is required.", result.Errors.First().ErrorMessage);
+            Assert.AreEqual("Status is required.", result.Errors[0].ErrorMessage);
         }
 
         [TestMethod]
@@ -39,7 +39,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             var model = new ProduceBillingInstuctionRequestDto { OrganisationIds = [1], Status = "Test" };
             var result = this.validator.Validate(model);
 
-            Assert.AreEqual("Invalid status value.", result.Errors.First().ErrorMessage);
+            Assert.AreEqual("Invalid status value.", result.Errors[0].ErrorMessage);
         }
 
         [TestMethod]
@@ -53,7 +53,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
             var result = this.validator.Validate(model);
 
-            Assert.AreEqual("Reason for rejection is required.", result.Errors.First().ErrorMessage);
+            Assert.AreEqual("Reason for rejection is required.", result.Errors[0].ErrorMessage);
         }
     }
 }

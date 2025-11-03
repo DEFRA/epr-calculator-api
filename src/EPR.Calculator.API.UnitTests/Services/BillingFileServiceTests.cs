@@ -241,7 +241,6 @@ namespace EPR.Calculator.API.UnitTests.Services
                 result.Should().NotBeNull();
                 result.StatusCode.Should().Be(HttpStatusCode.Accepted);
                 result.Message.Should().Be(CommonResources.RequestAcceptedMessage);
-                calculatorRun = await this.DbContext.CalculatorRuns.SingleAsync(x => x.Id == generateBillingFileRequestDto.CalculatorRunId, cancellationTokenSource.Token);
 
                 // Verify
                 this.mockIStorageService.Verify(
@@ -260,7 +259,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var runId = 999;
 
             // Act + Assert
-            await Assert.ThrowsExceptionAsync<KeyNotFoundException>(() =>
+            await Assert.ThrowsExactlyAsync<KeyNotFoundException>(() =>
                 billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None));
         }
 
@@ -271,7 +270,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var runId = 2;
 
             // Act + Assert
-            await Assert.ThrowsExceptionAsync<UnprocessableEntityException>(() =>
+            await Assert.ThrowsExactlyAsync<UnprocessableEntityException>(() =>
                 billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None));
         }
 

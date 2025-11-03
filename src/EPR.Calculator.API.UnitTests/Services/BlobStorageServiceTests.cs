@@ -54,7 +54,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             configurationMock.Setup(x => x.GetSection("BlobStorage")).Returns(configurationSectionMock.Object);
 
             // Act & Assert is handled by ExpectedException
-            Assert.ThrowsException<ConfigurationErrorsException>(
+            Assert.ThrowsExactly<ConfigurationErrorsException>(
                 () => new BlobStorageService(
                     this.mockBlobServiceClient.Object,
                     configurationMock.Object,

@@ -138,7 +138,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     Mock.Of<IAvailableClassificationsService>(),
                     Mock.Of<ICalculationRunService>(),
                     Mock.Of<IBillingFileService>());
-            var mockResult = new Mock<IResult>();
+
             this.mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(Results.NotFound(fileName));
 
             // Act
