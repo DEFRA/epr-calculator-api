@@ -275,7 +275,7 @@ namespace EPR.Calculator.API.Services
                 CalculatorRunId = run.Id,
             };
 
-            await this.PopulatePagedBillingInstructionsAsync(query, requestDto, runId, response, cancellationToken);
+            await this.PopulatePagedBillingInstructionsAsync(query, requestDto, run.Id, run.FinancialYearId, response, cancellationToken);
             await this.PopulateBillingStatusCountsAsync(groupedStatus, response, cancellationToken);
             await this.PopulateBillingInstructionCountsAsync(groupedBillingInstruction, response, cancellationToken);
 
@@ -517,25 +517,82 @@ namespace EPR.Calculator.API.Services
             applicationDBContext.CalculatorRuns
                 .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
-        private Task<List<ParentProducer>> GetParentProducersLatestAsync(int runId, IEnumerable<int> producerIds, CancellationToken cancellationToken) =>
-            (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
-             join crdm in applicationDBContext.CalculatorRunOrganisationDataMaster
-             on odd.CalculatorRunOrganisationDataMasterId equals crdm.Id
-             join run in applicationDBContext.CalculatorRuns on crdm.Id equals run.CalculatorRunOrganisationDataMasterId
-             where run.Id == runId && producerIds.ToList().Contains(odd.OrganisationId ?? 0) && odd.SubsidaryId == null
-             select new
-            ParentProducer
-             {
-                 ProducerId = odd.OrganisationId ?? 0,
-                 ProducerName = odd.OrganisationName,
-             }).ToListAsync(cancellationToken);
+        /// <summary>
+        /// Get the producer names for the list of producer ids provided.
+        /// </summary>
+        /// <param name="runId">Current run id.</param>
+        /// <param name="financialYear">Financial year of the current run.</param>
+        /// <param name="producerIds">List of procuder ids requiring producer name.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Task list of parent producers with producer name.</returns>
+        private Task<List<ParentProducer>> GetParentProducersLatestAsync(
+            int runId,
+            string financialYear,
+            IEnumerable<int> producerIds,
+            CancellationToken cancellationToken)
+        {
+            var runClassificationsToIgnore = new List<int>
+            {
+                (int)RunClassification.INTHEQUEUE,
+                (int)RunClassification.RUNNING,
+                (int)RunClassification.TEST_RUN,
+                (int)RunClassification.ERROR,
+                (int)RunClassification.DELETED,
+            };
+
+            var parentProducers = (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
+                                   join odm in applicationDBContext.CalculatorRunOrganisationDataMaster
+                                       on odd.CalculatorRunOrganisationDataMasterId equals odm.Id
+                                   join run in applicationDBContext.CalculatorRuns
+                                       on odm.Id equals run.CalculatorRunOrganisationDataMasterId
+                                   where run.Id == runId
+                                       && producerIds.Contains(odd.OrganisationId ?? 0)
+                                       && odd.SubsidaryId == null
+                                   orderby odd.Id descending
+                                   select new ParentProducer
+                                   {
+                                       Id = odd.Id,
+                                       ProducerId = odd.OrganisationId ?? 0,
+                                       ProducerName = odd.OrganisationName
+                                   }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
+
+            // Get the distinct list of parent producer ids
+            var parentProducerIds = parentProducers.Result.Select(pp => pp.ProducerId).Distinct();
+
+            // Identify the producers that still do not have a producer name
+            var outstandingProducerIds = producerIds.Where(producerId => !parentProducerIds.Contains(producerId)).ToList();
+
+            // If the list contains any value that means the previous query was not able to identify the producer name
+            // This is because for these parent producers, there are no producer detail records because of no pom data submissions
+            if (outstandingProducerIds.Any())
+            {
+                var outstandingParentProducers = (from p in applicationDBContext.ProducerDetail
+                                                  join r in applicationDBContext.CalculatorRuns on p.CalculatorRunId equals r.Id
+                                                  where r.FinancialYearId == financialYear
+                                                         && !runClassificationsToIgnore.Contains(r.CalculatorRunClassificationId)
+                                                         && outstandingProducerIds.Contains(p.ProducerId)
+                                                         && p.SubsidiaryId == null
+                                                  orderby p.Id descending
+                                                  select new ParentProducer
+                                                  {
+                                                      Id = p.Id,
+                                                      ProducerId = p.ProducerId,
+                                                      ProducerName = p.ProducerName ?? string.Empty,
+                                                  }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
+
+                parentProducers.Result.AddRange(outstandingParentProducers.Result);
+            }
+
+            return parentProducers;
+        }
 
         private async Task PopulatePagedBillingInstructionsAsync(
-    IQueryable<ProducerBillingInstructionsDto> query,
-    ProducerBillingInstructionsRequestDto requestDto,
-    int runId,
-    ProducerBillingInstructionsResponseDto response,
-    CancellationToken cancellationToken)
+            IQueryable<ProducerBillingInstructionsDto> query,
+            ProducerBillingInstructionsRequestDto requestDto,
+            int runId,
+            string financialYear,
+            ProducerBillingInstructionsResponseDto response,
+            CancellationToken cancellationToken)
         {
             var pagedResult = await query
                           .Skip((requestDto.PageNumber!.Value - 1) * requestDto.PageSize!.Value)
@@ -545,11 +602,14 @@ namespace EPR.Calculator.API.Services
 
             var allProducerIds = query.Select(x => x.ProducerId).Distinct();
             var pagedProducerIds = pagedResult.Select(x => x.ProducerId).Distinct();
-            var parentProducers = await this.GetParentProducersLatestAsync(runId, pagedProducerIds, cancellationToken);
+            var parentProducers = await this.GetParentProducersLatestAsync(runId, financialYear, pagedProducerIds, cancellationToken);
 
             foreach (var record in pagedResult)
             {
-                record.ProducerName = parentProducers.FirstOrDefault(p => p.ProducerId == record.ProducerId)?.ProducerName ?? string.Empty;
+                record.ProducerName = parentProducers
+                    .Where(p => p.ProducerId == record.ProducerId)
+                    .OrderByDescending(p => p.Id)
+                    .FirstOrDefault()?.ProducerName ?? string.Empty;
             }
 
             response.Records = pagedResult;

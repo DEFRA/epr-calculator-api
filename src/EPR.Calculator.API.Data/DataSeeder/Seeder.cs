@@ -14,6 +14,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
             InitializeDefaultParameterTemplateMaster(modelBuilder);
             InitializeCalculatorRunClassification(modelBuilder);
             InitializeLapcapData(modelBuilder);
+            InitializeErrorTypes(modelBuilder);
         }
 
         public static void InitializeDefaultParameterTemplateMaster(ModelBuilder modelBuilder)
@@ -697,6 +698,21 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     TotalCostFrom = 0M,
                     TotalCostTo = 999999999.99M,
                 });
+        }
+
+        public static void InitializeErrorTypes(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ErrorType>().HasData(
+                new ErrorType { Id = 1, Name = "Missing Registration Data" },
+                new ErrorType { Id = 2, Name = "Conflicting Obligations (Leaver Codes)" },
+                new ErrorType { Id = 3, Name = "Conflicting Obligations (Blank)" },
+                new ErrorType { Id = 4, Name = "No longer trading" },
+                new ErrorType { Id = 5, Name = "Not Obligated" },
+                new ErrorType { Id = 6, Name = "Compliance Scheme Leaver" },
+                new ErrorType { Id = 7, Name = "Compliance Scheme to Direct Producer" },
+                new ErrorType { Id = 8, Name = "Invalid Leaver Code" },
+                new ErrorType { Id = 9, Name = "Date input issue" },
+                new ErrorType { Id = 10, Name = "Invalid Organisation ID" });
         }
     }
 }
