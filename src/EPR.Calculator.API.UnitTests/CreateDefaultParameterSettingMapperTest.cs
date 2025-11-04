@@ -1,7 +1,6 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.UnitTests.Controllers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests
 {
@@ -21,7 +20,7 @@ namespace EPR.Calculator.API.UnitTests
 
             var details = new List<DefaultParameterSettingDetail>
             {
-                new DefaultParameterSettingDetail
+                new()
                 {
                     Id = 150,
                     DefaultParameterSettingMasterId = 200,
@@ -50,13 +49,13 @@ namespace EPR.Calculator.API.UnitTests
             };
 
             // Check if dbContext is not null
-            if (this.DbContext != null)
+            if (DbContext != null)
             {
                 // Act
                 var result = CreateDefaultParameterSettingMapper.Map(
                     defaultParameterSettingMaster,
-                    this.DbContext.DefaultParameterTemplateMasterList);
-                Assert.AreEqual(1, result.Count);
+                    DbContext.DefaultParameterTemplateMasterList);
+                Assert.HasCount(1, result);
                 Assert.IsNotNull(result);
                 //// Assert
                 var mappedItem = result[0];

@@ -15,7 +15,6 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
@@ -28,14 +27,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         /// </summary>
         public CalculatorControllerTests()
         {
-            this.Fixture = new Fixture();
+            Fixture = new Fixture();
 
             // Set up authorisation.
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
             var principal = new ClaimsPrincipal(identity);
             var context = new DefaultHttpContext { User = principal };
-            this.CalculatorController.ControllerContext = new ControllerContext { HttpContext = context };
+            CalculatorController.ControllerContext = new ControllerContext { HttpContext = context };
         }
 
         public Fixture Fixture { get; init; }
@@ -51,28 +50,29 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 FinancialYear = "2024-25",
             };
 
-            this.DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = this.FinancialYear24_25,
+                ParameterYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
 
-            this.DbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = this.FinancialYear24_25,
+                ProjectionYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
-            this.DbContext.SaveChanges();
 
-            var actionResult = await this.CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
+            DbContext.SaveChanges();
+
+            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(202, actionResult.StatusCode);
         }
@@ -86,30 +86,30 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 FinancialYear = "2024-25",
             };
 
-            this.DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = this.FinancialYear23_24,
+                ParameterYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
-            this.DbContext.SaveChanges();
+            DbContext.SaveChanges();
 
-            this.DbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = this.FinancialYear23_24,
+                ProjectionYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
-            this.DbContext.SaveChanges();
+            DbContext.SaveChanges();
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var actionResult = await this.CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(424, actionResult.StatusCode);
@@ -125,28 +125,28 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 FinancialYear = "2024-25",
             };
 
-            this.DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = this.FinancialYear23_24,
+                ParameterYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
 
-            this.DbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = this.FinancialYear24_25,
+                ProjectionYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
-            this.DbContext.SaveChanges();
+            DbContext.SaveChanges();
 
-            var actionResult = await this.CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(424, actionResult.StatusCode);
             Assert.AreEqual("Default parameter settings not available for the financial year 2024-25.", actionResult.Value);
@@ -163,7 +163,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 FinancialYear = "2027-28",
             };
 
-            this.DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
                 ParameterYear = financialYear27_28,
@@ -172,20 +172,20 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
-            this.DbContext.SaveChanges();
+            DbContext.SaveChanges();
 
-            this.DbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = this.FinancialYear23_24,
+                ProjectionYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
-            this.DbContext.SaveChanges();
+            DbContext.SaveChanges();
 
-            var actionResult = await this.CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(424, actionResult.StatusCode);
             Assert.AreEqual("Lapcap data not available for the financial year 2027-28.", actionResult.Value);
@@ -200,27 +200,27 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 FinancialYear = "2024-25",
             };
 
-            this.DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = this.FinancialYear24_25,
+                ParameterYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
-            this.DbContext.SaveChanges();
+            DbContext.SaveChanges();
 
-            this.DbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = this.FinancialYear24_25,
+                ProjectionYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
-            this.DbContext.SaveChanges();
+            DbContext.SaveChanges();
 
             var configs = ConfigurationItems.GetConfigurationValues();
             configs.GetSection("ServiceBus").GetSection("ConnectionString").Value = string.Empty;
@@ -229,9 +229,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var mockStorageService = new Mock<IStorageService>();
             var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
 
-            this.CalculatorController =
+            CalculatorController =
                 new CalculatorController(
-                    this.DbContext,
+                    DbContext,
                     configs,
                     mockStorageService.Object,
                     mockServiceBusService.Object,
@@ -249,12 +249,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal,
             };
 
-            this.CalculatorController.ControllerContext = new ControllerContext
+            CalculatorController.ControllerContext = new ControllerContext
             {
                 HttpContext = context,
             };
 
-            var actionResult = await this.CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
             var actionResultValue = actionResult?.Value as System.Configuration.ConfigurationErrorsException;
 
             Assert.IsNotNull(actionResult);
@@ -271,27 +271,27 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 FinancialYear = "2024-25",
             };
 
-            this.DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = this.FinancialYear24_25,
+                ParameterYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
-            this.DbContext.SaveChanges();
+            DbContext.SaveChanges();
 
-            this.DbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = this.FinancialYear24_25,
+                ProjectionYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
-            this.DbContext.SaveChanges();
+            DbContext.SaveChanges();
 
             var configs = ConfigurationItems.GetConfigurationValues();
             configs.GetSection("ServiceBus").GetSection("QueueName").Value = string.Empty;
@@ -299,9 +299,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var mockServiceBusService = new Mock<IServiceBusService>();
             var mockStorageService = new Mock<IStorageService>();
             var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
-            this.CalculatorController =
+            CalculatorController =
                 new CalculatorController(
-                    this.DbContext,
+                    DbContext,
                     configs,
                     mockStorageService.Object,
                     mockServiceBusService.Object,
@@ -319,12 +319,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal,
             };
 
-            this.CalculatorController.ControllerContext = new ControllerContext
+            CalculatorController.ControllerContext = new ControllerContext
             {
                 HttpContext = context,
             };
 
-            var actionResult = await this.CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
             var actionResultValue = actionResult?.Value as System.Configuration.ConfigurationErrorsException;
 
             Assert.IsNotNull(actionResult);
@@ -338,9 +338,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                FinancialYear = this.Fixture.Create<string>(),
+                FinancialYear = Fixture.Create<string>(),
             };
-            var actionResult = await this.CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(StatusCodes.Status400BadRequest, actionResult.StatusCode);
         }
@@ -352,7 +352,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 FinancialYear = "2024-25",
             };
-            var actionResult = await this.CalculatorController.GetCalculatorRuns(runParams) as ObjectResult;
+            var actionResult = await CalculatorController.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.StatusCode);
         }
@@ -364,7 +364,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 FinancialYear = "2022-23",
             };
-            var actionResult = await this.CalculatorController.GetCalculatorRuns(runParams) as ObjectResult;
+            var actionResult = await CalculatorController.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(404, actionResult.StatusCode);
         }
@@ -376,7 +376,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 FinancialYear = string.Empty,
             };
-            var actionResult = await this.CalculatorController.GetCalculatorRuns(runParams) as ObjectResult;
+            var actionResult = await CalculatorController.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(400, actionResult.StatusCode);
         }
@@ -397,7 +397,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             string calculatorRunName = "Test Run";
 
-            var actionResult = await this.CalculatorController.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
+            var actionResult = await CalculatorController.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.Value);
         }
@@ -407,7 +407,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             string calculatorRunName = "test 45610";
 
-            var actionResult = await this.CalculatorController.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
+            var actionResult = await CalculatorController.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(404, actionResult.StatusCode);
         }
@@ -417,7 +417,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             string calculatorRunName = "TEST run";
 
-            var actionResult = await this.CalculatorController.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
+            var actionResult = await CalculatorController.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.Value);
         }
@@ -431,39 +431,39 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 FinancialYear = "2024-25",
             };
 
-            this.DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = this.FinancialYear23_24,
+                ParameterYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
-            this.DbContext.SaveChanges();
+            DbContext.SaveChanges();
 
-            this.DbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = this.FinancialYear23_24,
+                ProjectionYear = FinancialYear23_24,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
                 EffectiveTo = null,
             });
-            this.DbContext.SaveChanges();
+            DbContext.SaveChanges();
 
-            this.DbContext.CalculatorRuns.Add(new CalculatorRun
+            DbContext.CalculatorRuns.Add(new CalculatorRun
             {
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 CalculatorRunClassificationId = 2,
-                Financial_Year = this.FinancialYear23_24,
+                Financial_Year = FinancialYear23_24,
                 Name = "TestOneAtATime",
             });
-            this.DbContext.SaveChanges();
+            DbContext.SaveChanges();
 
-            var actionResult = await this.CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
+            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(422, actionResult.StatusCode);
             var expectedJson = "{\"Message\":\"The calculator is currently running. You will be able to run another calculation once the current one has finished.\"}";
@@ -475,12 +475,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public async Task CanCallFinancialYears()
         {
             // Act
-            var result = await this.CalculatorController.FinancialYears() as ObjectResult;
+            var result = await CalculatorController.FinancialYears() as ObjectResult;
             var resultList = result?.Value as IEnumerable<FinancialYearDto>;
 
             // Assert
             Assert.IsInstanceOfType<IEnumerable<FinancialYearDto>>(resultList);
-            Assert.IsTrue(resultList?.Single().Name == "2024-25");
+            Assert.AreEqual("2024-25", resultList?.Single().Name);
         }
 
         [TestMethod]
@@ -508,8 +508,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Setup(s => s.GetAvailableClassificationsForFinancialYearAsync(request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<CalculatorRunClassification>
                 {
-                    new CalculatorRunClassification { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)! },
-                    new CalculatorRunClassification { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)! },
+                    new() { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)! },
+                    new() { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)! },
                 });
 
             var mockDbContext = MockDbContextForCalculatorRunClassifications();
@@ -527,7 +527,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var expectedClassifications = new List<CalculatorRunClassificationDto>
             {
                 new CalculatorRunClassificationDto { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)! },
-                new CalculatorRunClassificationDto { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)! },
+                new() { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)! },
             };
 
             // Act
@@ -542,7 +542,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsInstanceOfType(expectedClassifications[0], typeToAssert);
             Assert.IsInstanceOfType(result.Classifications[1], typeToAssert);
             result.Classifications.Should().BeEquivalentTo(expectedClassifications);
-            Assert.IsTrue(financialYear == result.FinancialYear);
+            Assert.AreEqual(result.FinancialYear, financialYear);
         }
 
         [TestMethod]
@@ -562,7 +562,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 });
 
             var controller = new CalculatorController(
-                this.DbContext,
+                DbContext,
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
@@ -600,7 +600,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .ReturnsAsync(new List<CalculatorRunClassification>());
 
             var controller = new CalculatorController(
-                this.DbContext,
+                DbContext,
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
@@ -631,7 +631,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Throws(new Exception());
 
             var controller = new CalculatorController(
-                this.DbContext,
+                DbContext,
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
@@ -648,23 +648,24 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(StatusCodes.Status500InternalServerError, actionResult.StatusCode);
             Assert.AreEqual("An unexpected error occurred.", actionResult.Value);
         }
-        
+
         private static Mock<ApplicationDBContext> MockDbContextForCalculatorRunClassifications()
         {
             var mockClassifications = new List<CalculatorRunClassification>
             {
-                new CalculatorRunClassification { Id = 1, Status = "IN THE QUEUE", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 2, Status = "RUNNING", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 3, Status = "UNCLASSIFIED", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 4, Status = "TEST RUN", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 5, Status = "ERROR", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 6, Status = "DELETED", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 7, Status = "INITIAL RUN COMPLETED", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 8, Status = "INITIAL RUN", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 9, Status = "INTERIM RE-CALCULATION RUN", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 10, Status = "FINAL RUN", CreatedBy = "Test user" },
-                new CalculatorRunClassification { Id = 11, Status = "FINAL RE-CALCULATION RUN", CreatedBy = "Test user" },
+                new() { Id = 1, Status = "IN THE QUEUE", CreatedBy = "Test user" },
+                new() { Id = 2, Status = "RUNNING", CreatedBy = "Test user" },
+                new() { Id = 3, Status = "UNCLASSIFIED", CreatedBy = "Test user" },
+                new() { Id = 4, Status = "TEST RUN", CreatedBy = "Test user" },
+                new() { Id = 5, Status = "ERROR", CreatedBy = "Test user" },
+                new() { Id = 6, Status = "DELETED", CreatedBy = "Test user" },
+                new() { Id = 7, Status = "INITIAL RUN COMPLETED", CreatedBy = "Test user" },
+                new() { Id = 8, Status = "INITIAL RUN", CreatedBy = "Test user" },
+                new() { Id = 9, Status = "INTERIM RE-CALCULATION RUN", CreatedBy = "Test user" },
+                new() { Id = 10, Status = "FINAL RUN", CreatedBy = "Test user" },
+                new() { Id = 11, Status = "FINAL RE-CALCULATION RUN", CreatedBy = "Test user" },
             }.AsQueryable();
+
             var mockDbContext = new Mock<ApplicationDBContext>();
             var mockClassificationsDbSet = new Mock<DbSet<CalculatorRunClassification>>();
             mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.Provider).Returns(new TestAsyncQueryProvider<CalculatorRunClassification>(mockClassifications.Provider));

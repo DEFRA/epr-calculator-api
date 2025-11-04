@@ -48,6 +48,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context.SaveChanges();
         }
 
+        public TestContext TestContext { get; set; }
+
         private CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
 
         [TestCleanup]
@@ -135,7 +137,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
             var task = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
                 { ClassificationId = invalidClassificationId, RunId = runId });
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
             var result = task.Result as ObjectResult;
             Assert.IsNotNull(result);
 
@@ -187,7 +189,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
             var task = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
             { ClassificationId = validClassificationId, RunId = runId });
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
             var result = task.Result as StatusCodeResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(201, result.StatusCode);

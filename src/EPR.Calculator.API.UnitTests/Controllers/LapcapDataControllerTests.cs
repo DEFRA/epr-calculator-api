@@ -3,13 +3,14 @@ using System.Security.Principal;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
     public class LapcapDataControllerTests : BaseControllerTest
     {
+        public TestContext TestContext { get; set; }
+
         // GET API
         [TestMethod]
         public async Task Get_RequestOkResult_WithLapCapParametersDto_WhenDataExist()
@@ -106,7 +107,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
             var createDefaultParameterDto = CreateDto();
             var task = this.LapcapDataController.Create(createDefaultParameterDto);
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
             var actionResult = task.Result as ObjectResult;
             Assert.AreEqual(201, actionResult?.StatusCode);
 

@@ -36,6 +36,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                 this.mockConfiguration.Object);
         }
 
+        public TestContext TestContext { get; set; }
+
         [TestMethod]
         public async Task GenerateBillingFileAsyncMethod_ShouldReturnNotFound_WhenCalculatorRunDoesNotExist()
         {
@@ -110,7 +112,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.Last();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(TestContext.CancellationTokenSource.Token);
 
             GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
             {
@@ -317,8 +319,8 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.ProducersInstructionDetails!.Count);
-            Assert.AreEqual("Accepted", result.ProducersInstructionDetails[0].Status!);
+            Assert.HasCount(1, result.ProducersInstructionDetails!);
+            Assert.AreEqual("Accepted", result.ProducersInstructionDetails![0].Status!);
 
             this.DbContext.ProducerResultFileSuggestedBillingInstruction.RemoveRange(this.DbContext.ProducerResultFileSuggestedBillingInstruction);
             await this.DbContext.SaveChangesAsync();
@@ -630,7 +632,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Records.Count);
+            Assert.HasCount(1, result.Records);
             Assert.AreEqual(1, result.TotalRecords);
             Assert.AreEqual(1, result.TotalAcceptedRecords);
             Assert.AreEqual(1, result.TotalInitialRecords);
@@ -663,7 +665,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Records.Count);
+            Assert.IsEmpty(result.Records);
             Assert.AreEqual(0, result.TotalRecords);
         }
 

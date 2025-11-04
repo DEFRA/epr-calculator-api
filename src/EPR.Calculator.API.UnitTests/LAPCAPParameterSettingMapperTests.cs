@@ -1,7 +1,6 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.UnitTests.Controllers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests
 {
@@ -14,22 +13,24 @@ namespace EPR.Calculator.API.UnitTests
             var defaultParameterSettingMaster = new LapcapDataMaster
             {
                 Id = 2,
-                ProjectionYear = this.FinancialYear24_25,
+                ProjectionYear = FinancialYear24_25,
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
             };
+
             var details = new List<LapcapDataDetail>
             {
-                new LapcapDataDetail
+                new()
                 {
                     Id = 1,
                     LapcapDataMasterId = 1,
                     LapcapDataMaster = defaultParameterSettingMaster,
                     UniqueReference = "ENG-AL",
                     TotalCost = 30.99m,
-                },
+                }
             };
+
             var detail = new LapcapDataDetail
             {
                 Id = 1,
@@ -49,12 +50,12 @@ namespace EPR.Calculator.API.UnitTests
             };
 
             // Check if dbContext is not null
-            if (this.DbContext != null)
+            if (DbContext != null)
             {
                 // Act
                 var result = LapcapDataParameterSettingMapper.Map(
                     defaultParameterSettingMaster,
-                    this.DbContext.LapcapDataTemplateMaster);
+                    DbContext.LapcapDataTemplateMaster);
 
                 // Assert
                 var mappedItem = result[0];

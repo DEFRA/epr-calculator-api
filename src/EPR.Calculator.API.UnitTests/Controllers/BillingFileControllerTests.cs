@@ -137,7 +137,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             int invalidRunId = 0;
 
             // Act
-            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(invalidRunId) as ObjectResult;
+            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(invalidRunId, CancellationToken.None) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(result);
@@ -154,7 +154,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .ReturnsAsync(new ProducersInstructionResponse());
 
             // Act
-            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(validRunId) as ObjectResult;
+            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(validRunId, CancellationToken.None) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(result);
@@ -177,7 +177,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .ReturnsAsync(expectedResponse);
 
             // Act
-            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(validRunId);
+            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(validRunId, CancellationToken.None);
 
             // Assert
             var okResult = result as OkObjectResult;

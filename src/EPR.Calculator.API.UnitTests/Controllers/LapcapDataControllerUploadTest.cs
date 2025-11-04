@@ -5,12 +5,10 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
-using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
@@ -18,6 +16,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     [TestClass]
     public class LapcapDataControllerUploadTest : BaseControllerTest
     {
+        public TestContext TestContext { get; set; }
+
         [TestMethod]
         public void Test_With_Multiple_Financial_Years()
         {
@@ -113,7 +113,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(201, objectResult.StatusCode);
 
             var lapcapLatest = dbContext.LapcapDataMaster.Where(x => x.EffectiveTo == null).ToList();
-            Assert.AreEqual(2, lapcapLatest.Count);
+            Assert.HasCount(2, lapcapLatest);
             Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.ProjectionYearId == "2029-30" && x.EffectiveTo == null));
             Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.ProjectionYearId == "2030-31" && x.EffectiveTo == null));
 
@@ -183,7 +183,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var lapcapMaster26 = new LapcapDataMaster
             {
                 ProjectionYearId = "203031",
-                EffectiveFrom = new DateTime(2025, 1, 1),
+                EffectiveFrom = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
                 EffectiveTo = null,
                 ProjectionYear = year25,
             };
@@ -219,7 +219,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 LapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>(),
             };
             var task = this.LapcapDataController.Create(request);
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
             var result = task.Result;
             Assert.IsNotNull(result);
             var objectResult = result as ObjectResult;
@@ -228,7 +228,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual("No data available for the specified year. Please check the year and try again.", objectResult?.Value?.ToString());
 
             var lapcapLatest = dbContext.LapcapDataMaster.Where(x => x.EffectiveTo == null).ToList();
-            Assert.AreEqual(2, lapcapLatest.Count);
+            Assert.HasCount(2, lapcapLatest);
             Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.ProjectionYearId == "202930" && x.EffectiveTo == null));
             Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.ProjectionYearId == "203031" && x.EffectiveTo == null));
 

@@ -3,7 +3,6 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests
 {
@@ -24,31 +23,31 @@ namespace EPR.Calculator.API.UnitTests
                                        .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                                        .Options;
 
-            this.DbContext = new ApplicationDBContext(dbContextOptions);
+            DbContext = new ApplicationDBContext(dbContextOptions);
 
-            this.DbContext.Database.EnsureCreated();
+            DbContext.Database.EnsureCreated();
 
-            if (!this.DbContext.FinancialYears.Any())
+            if (!DbContext.FinancialYears.Any())
             {
-                this.FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
-                this.DbContext.FinancialYears.Add(this.FinancialYear24_25);
-                this.DbContext.SaveChanges();
+                FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
+                DbContext.FinancialYears.Add(FinancialYear24_25);
+                DbContext.SaveChanges();
             }
             else
             {
-                this.FinancialYear24_25 = this.DbContext.FinancialYears.First(x => x.Name == "2024-25");
+                FinancialYear24_25 = DbContext.FinancialYears.First(x => x.Name == "2024-25");
             }
 
-            if (!this.DbContext.CalculatorRuns.Any())
+            if (!DbContext.CalculatorRuns.Any())
             {
-                this.DbContext.CalculatorRuns.AddRange(this.GetCalculatorRuns());
-                this.DbContext.SaveChanges();
+                DbContext.CalculatorRuns.AddRange(GetCalculatorRuns());
+                DbContext.SaveChanges();
             }
 
-            if (!this.DbContext.ProducerResultFileSuggestedBillingInstruction.Any())
+            if (!DbContext.ProducerResultFileSuggestedBillingInstruction.Any())
             {
-                this.DbContext.ProducerResultFileSuggestedBillingInstruction.AddRange(GetProducerResultFileSuggestedBillingInstruction());
-                this.DbContext.SaveChanges();
+                DbContext.ProducerResultFileSuggestedBillingInstruction.AddRange(GetProducerResultFileSuggestedBillingInstruction());
+                DbContext.SaveChanges();
             }
         }
 
@@ -88,7 +87,7 @@ namespace EPR.Calculator.API.UnitTests
                     {
                         CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
                         Name = "Test Run",
-                        Financial_Year = this.FinancialYear24_25,
+                        Financial_Year = FinancialYear24_25,
                         CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
                         CreatedBy = "Test User",
                     },
@@ -96,7 +95,7 @@ namespace EPR.Calculator.API.UnitTests
                     {
                         CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
                         Name = "Test Calculated Result",
-                        Financial_Year = this.FinancialYear24_25,
+                        Financial_Year = FinancialYear24_25,
                         CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
                         CreatedBy = "Test User",
                     },
@@ -104,7 +103,7 @@ namespace EPR.Calculator.API.UnitTests
                     {
                         CalculatorRunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN,
                         Name = "Test Run",
-                        Financial_Year = this.FinancialYear24_25,
+                        Financial_Year = FinancialYear24_25,
                         CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
                         CreatedBy = "Test User",
                         CalculatorRunOrganisationDataMasterId = 1,
@@ -114,7 +113,7 @@ namespace EPR.Calculator.API.UnitTests
                     {
                         CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
                         Name = "Test 422 error",
-                        Financial_Year = this.FinancialYear24_25,
+                        Financial_Year = FinancialYear24_25,
                         CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
                         CreatedBy = "Test User",
                         CalculatorRunOrganisationDataMasterId = 2,
@@ -126,7 +125,7 @@ namespace EPR.Calculator.API.UnitTests
                     {
                         CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
                         Name = "Test Calculated Result",
-                        Financial_Year = this.FinancialYear24_25,
+                        Financial_Year = FinancialYear24_25,
                         CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
                         CreatedBy = "Test User",
                         CalculatorRunOrganisationDataMasterId = 2,

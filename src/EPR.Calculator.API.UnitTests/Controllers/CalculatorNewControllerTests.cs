@@ -33,53 +33,53 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
         public CalculatorNewControllerTests()
         {
-            this.Fixture = new Fixture();
+            Fixture = new Fixture();
 
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
-            this.context = new ApplicationDBContext(dbContextOptions);
-            this.context.Database.EnsureCreated();
+            context = new ApplicationDBContext(dbContextOptions);
+            context.Database.EnsureCreated();
 
-            this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
-            this.mockBillingFileService = new Mock<IBillingFileService>();
-            this.mockWrapper = new Mock<IOrgAndPomWrapper>();
-            this.mockCalculationRunService = new Mock<ICalculationRunService>();
+            mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
+            mockBillingFileService = new Mock<IBillingFileService>();
+            mockWrapper = new Mock<IOrgAndPomWrapper>();
+            mockCalculationRunService = new Mock<ICalculationRunService>();
 
             var config = TelemetryConfiguration.CreateDefault();
             var telemetryClient = new TelemetryClient(config);
 
-            this.controller = new CalculatorNewController(
-                this.context,
-                this.mockValidator.Object,
-                this.mockBillingFileService.Object,
-                this.mockWrapper.Object,
+            controller = new CalculatorNewController(
+                context,
+                mockValidator.Object,
+                mockBillingFileService.Object,
+                mockWrapper.Object,
                 telemetryClient,
-                this.mockCalculationRunService.Object);
+                mockCalculationRunService.Object);
 
-            this.context.CalculatorRuns.Add(new CalculatorRun
+            context.CalculatorRuns.Add(new CalculatorRun
             {
                 CalculatorRunClassificationId = 8,
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
                 Name = "Name",
                 Id = 1,
             });
-            this.context.CalculatorRuns.Add(new CalculatorRun
+            context.CalculatorRuns.Add(new CalculatorRun
             {
                 CalculatorRunClassificationId = 3,
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2025-26" },
                 Name = "Second run",
                 Id = 2,
             });
-            this.context.CalculatorRuns.Add(new CalculatorRun
+            context.CalculatorRuns.Add(new CalculatorRun
             {
                 CalculatorRunClassificationId = 7,
                 Financial_Year = new CalculatorRunFinancialYear { Name = "2023-24" },
                 Name = "Calc Billing Run Test",
                 Id = 3,
             });
-            this.context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
             {
                 Id = 1,
                 BillingCsvFileName = "test.csv",
@@ -90,32 +90,34 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BillingFileCreatedDate = DateTime.UtcNow,
                 CalculatorRunId = 3,
             });
-            this.context.SaveChanges();
+            context.SaveChanges();
         }
+
+        public TestContext TestContext { get; set; }
 
         private Fixture Fixture { get; init; }
 
         [TestCleanup]
         public void CleanUp()
         {
-            this.context.Database.EnsureDeleted();
+            context.Database.EnsureDeleted();
         }
 
         [TestMethod]
         public void PrepareBillingFileSendToFSS_SendFile_Successfully()
         {
-            this.ControllerContext();
+            ControllerContext();
 
             // Set up the mock to return a value
-            this.mockBillingFileService
+            mockBillingFileService
                 .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
-            this.mockBillingFileService
+            mockBillingFileService
                .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
                .ReturnsAsync(true);
 
-            this.context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
             {
                 BillingCsvFileName = "test2.csv",
                 BillingJsonFileName = "test2.json",
@@ -123,9 +125,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BillingFileCreatedDate = DateTime.UtcNow,
                 CalculatorRunId = 1,
             });
-            this.context.SaveChanges();
-            var task = this.controller.PrepareBillingFileSendToFSS(1);
-            task.Wait();
+            context.SaveChanges();
+            var task = controller.PrepareBillingFileSendToFSS(1, CancellationToken.None);
+            task.Wait(TestContext.CancellationTokenSource.Token);
 
             var result = task.Result as StatusCodeResult;
 
@@ -136,18 +138,18 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public void PrepareBillingFileSendToFSS_SendFile_BillingFileOutdated()
         {
-            this.ControllerContext();
+            ControllerContext();
 
             // Set up the mock to return a value
-            this.mockBillingFileService
+            mockBillingFileService
                 .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
-            this.mockBillingFileService
+            mockBillingFileService
                 .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
-            this.context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
             {
                 BillingCsvFileName = "test2.csv",
                 BillingJsonFileName = "test2.json",
@@ -155,12 +157,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BillingFileCreatedDate = DateTime.UtcNow,
                 CalculatorRunId = 1,
             });
-            this.context.SaveChanges();
+            context.SaveChanges();
 
             using var cancellationTokenSource = new CancellationTokenSource();
             var cancellationToken = cancellationTokenSource.Token;
 
-            var task = this.controller.PrepareBillingFileSendToFSS(1, cancellationToken);
+            var task = controller.PrepareBillingFileSendToFSS(1, cancellationToken);
             task.Wait(cancellationToken);
 
             var result = task.Result as ObjectResult;
@@ -174,9 +176,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public void PrepareBillingFileSendToFSS_Invalid()
         {
-            this.ControllerContext();
-            var task = this.controller.PrepareBillingFileSendToFSS(-1);
-            task.Wait();
+            ControllerContext();
+            var task = controller.PrepareBillingFileSendToFSS(-1);
+            task.Wait(TestContext.CancellationTokenSource.Token);
 
             var result = task.Result as ObjectResult;
 
@@ -189,8 +191,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task GetCalculatorRunWithBillingDetails_Get_Valid_Run()
         {
-            this.ControllerContext();
-            var response = await this.controller.GetCalculatorRun(3) as ObjectResult;
+            ControllerContext();
+            var response = await controller.GetCalculatorRun(3) as ObjectResult;
 
             Assert.IsNotNull(response);
             var run = response.Value as CalculatorRunBillingDto;
@@ -207,8 +209,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task GetCalculatorRunWithBillingDetails_Get_NotFound_Run()
         {
-            this.ControllerContext();
-            var response = await this.controller.GetCalculatorRun(5) as ObjectResult;
+            ControllerContext();
+            var response = await controller.GetCalculatorRun(5) as ObjectResult;
             Assert.IsNotNull(response);
             Assert.AreEqual(404, response.StatusCode);
             Assert.AreEqual("Unable to find Run Id 5", response.Value);
@@ -217,8 +219,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task GetCalculatorRunWithBillingDetails_Get_InValid_Run()
         {
-            this.ControllerContext();
-            var response = await this.controller.GetCalculatorRun(-1) as ObjectResult;
+            ControllerContext();
+            var response = await controller.GetCalculatorRun(-1) as ObjectResult;
             Assert.IsNotNull(response);
             Assert.AreEqual(400, response.StatusCode);
             Assert.AreEqual("Invalid Run Id -1", response.Value);
@@ -227,18 +229,18 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public void PrepareBillingFileSendToFSS_MoveBillingJsonFileFails_Returns422()
         {
-            this.ControllerContext();
+            ControllerContext();
 
             // Arrange: runId 1 is valid and meets preconditions
-            this.mockBillingFileService
+            mockBillingFileService
                 .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
-            this.mockBillingFileService
+            mockBillingFileService
                .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
                .ReturnsAsync(true);
 
-            this.context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
             {
                 BillingCsvFileName = "test2.csv",
                 BillingJsonFileName = "test2.json",
@@ -247,11 +249,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CalculatorRunId = 1,
             });
 
-            this.context.SaveChanges();
+            context.SaveChanges();
 
             // Act
-            var task = this.controller.PrepareBillingFileSendToFSS(1);
-            task.Wait();
+            var task = controller.PrepareBillingFileSendToFSS(1, CancellationToken.None);
+            task.Wait(TestContext.CancellationTokenSource.Token);
 
             // Assert
             var result = task.Result as ObjectResult;
@@ -259,8 +261,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(422, result.StatusCode);
             Assert.AreEqual("Unable to move billing json file for Run Id 1", result.Value);
 
-            this.context.CalculatorRunBillingFileMetadata.RemoveRange(this.context.CalculatorRunBillingFileMetadata);
-            this.context.SaveChanges();
+            context.CalculatorRunBillingFileMetadata.RemoveRange(context.CalculatorRunBillingFileMetadata);
+            context.SaveChanges();
         }
 
         /// <summary>
@@ -280,24 +282,24 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             RunClassification expectedNewValue)
         {
             // Arrange
-            this.ControllerContext();
+            ControllerContext();
 
             var calculatorRunId = 1;
-            var calculatorRun = this.context.CalculatorRuns
+            var calculatorRun = context.CalculatorRuns
                 .Single(run => run.Id == calculatorRunId);
 
             calculatorRun.CalculatorRunClassificationId = (int)initialValue;
 
             // Set up the billings service to report that the file was successfully transfered.
-            this.mockBillingFileService
+            mockBillingFileService
                 .Setup(x => x.MoveBillingJsonFile(calculatorRunId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
-            this.mockBillingFileService
+            mockBillingFileService
                .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
                .ReturnsAsync(true);
 
-            this.context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
             {
                 BillingCsvFileName = "test2.csv",
                 BillingJsonFileName = "test2.json",
@@ -306,11 +308,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CalculatorRunId = calculatorRunId,
             });
 
-            this.context.SaveChanges();
+            context.SaveChanges();
 
             // Act
-            var result = (StatusCodeResult)await this.controller.PrepareBillingFileSendToFSS(calculatorRunId);
-            var newClassification = (RunClassification)this.context.CalculatorRuns
+            var result = (StatusCodeResult)await controller.PrepareBillingFileSendToFSS(calculatorRunId, CancellationToken.None);
+            var newClassification = (RunClassification)context.CalculatorRuns
                 .Single(run => run.Id == calculatorRunId).CalculatorRunClassificationId;
 
             // Assert
@@ -318,8 +320,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(HttpStatusCode.Accepted, (HttpStatusCode)result.StatusCode);
             Assert.AreEqual(expectedNewValue, newClassification);
 
-            this.context.CalculatorRunBillingFileMetadata.RemoveRange(this.context.CalculatorRunBillingFileMetadata);
-            this.context.SaveChanges();
+            context.CalculatorRunBillingFileMetadata.RemoveRange(context.CalculatorRunBillingFileMetadata);
+            context.SaveChanges();
         }
 
         /// <summary>
@@ -335,21 +337,21 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [DataRow(RunClassification.INTHEQUEUE)]
         public async Task PrepareBillingFileSendToFSS_FailWhenInvalidClassification(RunClassification initialValue)
         {
-            this.ControllerContext();
+            ControllerContext();
 
             var calculatorRunId = 1;
-            var calculatorRun = this.context.CalculatorRuns
+            var calculatorRun = context.CalculatorRuns
                 .Single(run => run.Id == calculatorRunId);
 
             calculatorRun.CalculatorRunClassificationId = (int)initialValue;
 
-            this.mockBillingFileService
+            mockBillingFileService
                .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
                .ReturnsAsync(true);
 
             // Act
-            var result = (ObjectResult)await this.controller.PrepareBillingFileSendToFSS(1);
-            var newClassification = (RunClassification)this.context.CalculatorRuns
+            var result = (ObjectResult)await controller.PrepareBillingFileSendToFSS(1, CancellationToken.None);
+            var newClassification = (RunClassification)context.CalculatorRuns
                     .Single(run => run.Id == calculatorRunId).CalculatorRunClassificationId;
 
             // Assert
@@ -358,8 +360,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var expectedMessage = $"Classification {(RunClassification)calculatorRun.CalculatorRunClassificationId} is not valid to be completed.";
             Assert.AreEqual(expectedMessage, result.Value);
 
-            this.context.CalculatorRunBillingFileMetadata.RemoveRange(this.context.CalculatorRunBillingFileMetadata);
-            this.context.SaveChanges();
+            context.CalculatorRunBillingFileMetadata.RemoveRange(context.CalculatorRunBillingFileMetadata);
+            context.SaveChanges();
         }
 
         private void ControllerContext()
@@ -373,7 +375,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal,
             };
 
-            this.controller.ControllerContext = new ControllerContext
+            controller.ControllerContext = new ControllerContext
             {
                 HttpContext = userContext,
             };

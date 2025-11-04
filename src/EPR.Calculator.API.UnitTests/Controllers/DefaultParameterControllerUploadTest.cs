@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
@@ -17,6 +16,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     [TestClass]
     public class DefaultParameterControllerUploadTest : BaseControllerTest
     {
+        public TestContext TestContext { get; set; }
+
         private DefaultParameterSettingController DefaultParameterController { get; set; } = null!;
 
         [TestInitialize]
@@ -106,12 +107,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 SchemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>(),
             };
             var task = this.DefaultParameterController.Create(request);
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
             var result = task.Result;
             Assert.IsNotNull(result);
 
             var defaultParameterLatest = DbContext.DefaultParameterSettings.Where(x => x.EffectiveTo == null).ToList();
-            Assert.AreEqual(2, defaultParameterLatest.Count);
+            Assert.HasCount(2, defaultParameterLatest);
             Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.ParameterYearId == "2029-30" && x.EffectiveTo == null));
             Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.ParameterYearId == "2030-31" && x.EffectiveTo == null));
         }
