@@ -108,7 +108,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     Mock.Of<ICalculationRunService>(),
                     Mock.Of<IBillingFileService>());
 
-            var response = await controller.GetCalculatorRun(1) as ObjectResult;
+            var response = await controller.GetCalculatorRun(1, CancellationToken.None) as ObjectResult;
             Assert.IsNotNull(response);
             Assert.AreEqual(404, response.StatusCode);
             Assert.AreEqual("Unable to find Run Id 1", response.Value);

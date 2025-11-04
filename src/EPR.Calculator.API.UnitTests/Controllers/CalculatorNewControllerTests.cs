@@ -177,7 +177,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void PrepareBillingFileSendToFSS_Invalid()
         {
             ControllerContext();
-            var task = controller.PrepareBillingFileSendToFSS(-1);
+            var task = controller.PrepareBillingFileSendToFSS(-1, CancellationToken.None);
             task.Wait(TestContext.CancellationTokenSource.Token);
 
             var result = task.Result as ObjectResult;
