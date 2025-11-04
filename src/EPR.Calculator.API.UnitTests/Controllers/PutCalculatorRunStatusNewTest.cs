@@ -64,6 +64,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.context.SaveChanges();
         }
 
+        public TestContext TestContext { get; set; }
+
         private Mock<IOrgAndPomWrapper> MockWrapper { get; init; } = null!;
 
         [TestCleanup]
@@ -303,7 +305,5 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     It.IsAny<CalculatorRunStatusUpdateDto>()),
                 Times.Once());
         }
-
-        public TestContext TestContext { get; set; }
     }
 }

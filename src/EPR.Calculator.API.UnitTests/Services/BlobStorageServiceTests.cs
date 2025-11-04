@@ -8,7 +8,6 @@ using EPR.Calculator.API.Utils;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Services
@@ -42,6 +41,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                 configs,
                 this.mockLogger.Object);
         }
+
+        public TestContext TestContext { get; set; }
 
         [TestMethod]
         public void Constructor_ShouldThrowException_WhenBlobStorageSettingsMissing()
@@ -78,7 +79,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 details: downloadDetails);
 
             this.mockBlobClient.Setup(x => x.ExistsAsync(default)).ReturnsAsync(Response.FromValue(true, null!));
-            this.mockBlobClient.Setup(x => x.DownloadContentAsync()).ReturnsAsync(Response.FromValue(downloadResult, null!));
+            this.mockBlobClient.Setup(x => x.DownloadContentAsync(TestContext.CancellationTokenSource.Token)).ReturnsAsync(Response.FromValue(downloadResult, null!));
             this.mockBlobClient.Setup(x => x.Uri).Returns(new Uri(blobUri));
             blobUri = string.Empty;
 

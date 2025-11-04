@@ -119,7 +119,7 @@ namespace EPR.Calculator.API.UnitTests.Global
             await this.exceptionHandler.TryHandleAsync(this.httpContext, exception, this.cancellationToken);
 
             this.httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
-            var jsonResponse = await new StreamReader(this.httpContext.Response.Body).ReadToEndAsync();
+            var jsonResponse = await new StreamReader(this.httpContext.Response.Body).ReadToEndAsync(TestContext.CancellationTokenSource.Token);
             var responseObject = JsonSerializer.Deserialize<JsonElement>(jsonResponse);
 
             Assert.AreEqual(StatusCodes.Status500InternalServerError, responseObject.GetProperty("Status").GetInt32());
