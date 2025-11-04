@@ -71,7 +71,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             };
 
             // Act
-            var result = await validator.Validate(request);
+            var result = await validator.Validate(request, CancellationToken.None);
 
             // Assert
             result.IsInvalid.Should().BeTrue();
@@ -90,7 +90,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             };
 
             // Act
-            var result = await validator.Validate(request);
+            var result = await validator.Validate(request, CancellationToken.None);
 
             // Assert
             result.IsInvalid.Should().BeTrue();
@@ -109,7 +109,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             };
 
             // Act
-            var result = await validator.Validate(request);
+            var result = await validator.Validate(request, CancellationToken.None);
 
             // Assert
             result.IsInvalid.Should().BeTrue();
@@ -127,7 +127,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             };
 
             // Act
-            var result = await validator.Validate(request);
+            var result = await validator.Validate(request, CancellationToken.None);
 
             // Assert
             result.IsInvalid.Should().BeTrue();
@@ -145,7 +145,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             };
 
             // Act
-            var result = await validator.Validate(request);
+            var result = await validator.Validate(request, CancellationToken.None);
 
             // Assert
             result.IsInvalid.Should().BeFalse();
