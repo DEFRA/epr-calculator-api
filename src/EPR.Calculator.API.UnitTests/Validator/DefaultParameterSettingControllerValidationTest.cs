@@ -120,7 +120,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
             var errors = actionResult?.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
             Assert.IsNotNull(errors);
-            Assert.IsTrue(errors.Count() == 1);
+            Assert.AreEqual(1, errors.Count());
             var firstError = errors.First();
             Assert.AreEqual("BADEBT-P", firstError.ParameterUniqueRef);
             Assert.AreEqual("Bad debt provision", firstError.ParameterCategory);

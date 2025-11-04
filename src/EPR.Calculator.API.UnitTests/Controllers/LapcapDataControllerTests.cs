@@ -137,7 +137,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             createDefaultParameterDto.ParameterYear = string.Empty;
             this.LapcapDataController.ModelState.AddModelError("ParameterYear", CommonResources.ParameterYearRequired);
             var task = this.LapcapDataController.Create(createDefaultParameterDto);
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
             var actionResult = task.Result as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
         }
@@ -161,7 +161,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var uniqueRef = "ENG-WD";
             var createDefaultParameterDto = CreateDto([uniqueRef]);
             var task = this.LapcapDataController.Create(createDefaultParameterDto);
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
             var actionResult = task.Result as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
             var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;
@@ -195,7 +195,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             }
 
             var task = this.LapcapDataController.Create(createDefaultParameterDto);
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
             var actionResult = task.Result as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
             var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;

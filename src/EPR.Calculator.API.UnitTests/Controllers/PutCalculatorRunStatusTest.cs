@@ -85,7 +85,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var runId = 0;
             var task = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
                 { ClassificationId = 5, RunId = runId });
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
             var result = task.Result as ObjectResult;
             Assert.IsNotNull(result);
 

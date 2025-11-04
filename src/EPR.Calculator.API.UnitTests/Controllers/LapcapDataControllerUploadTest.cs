@@ -105,7 +105,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 LapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>(),
             };
             var task = this.LapcapDataController.Create(request);
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
             var result = task.Result;
             Assert.IsNotNull(result);
             var objectResult = result as ObjectResult;

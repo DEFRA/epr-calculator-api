@@ -118,7 +118,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Act
             var task = this.calculatorNewControllerUnderTest.PutCalculatorRunStatus(runStatusUpdateDto);
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
 
             // Assert
             var result = task.Result as StatusCodeResult;
@@ -184,7 +184,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Act
             var task = this.calculatorNewControllerUnderTest.PutCalculatorRunStatus(runStatusUpdateDto);
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
 
             // Assert
             var result = task.Result as ObjectResult;
@@ -275,7 +275,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Act
             var task = this.calculatorNewControllerUnderTest.PutCalculatorRunStatus(runStatusUpdateDto);
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
 
             // Assert
             var result = task.Result as ObjectResult;
@@ -304,5 +304,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     It.IsAny<CalculatorRunStatusUpdateDto>()),
                 Times.Once());
         }
+
+        public TestContext TestContext { get; set; }
     }
 }
