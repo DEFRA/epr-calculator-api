@@ -71,7 +71,7 @@ namespace EPR.Calculator.API.UnitTests.Dtos
 
             Assert.AreEqual("Test Run", dto.RunName);
             Assert.AreEqual(1, dto.CalculatorRunId);
-            Assert.AreEqual(1, dto.Records.Count);
+            Assert.HasCount(1, dto.Records);
             Assert.AreEqual(1, dto.TotalRecords);
             Assert.AreEqual(1, dto.TotalAcceptedRecords);
             Assert.AreEqual(0, dto.TotalRejectedRecords);

@@ -36,6 +36,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                 this.mockConfiguration.Object);
         }
 
+        public TestContext TestContext { get; set; }
+
         [TestMethod]
         public async Task GenerateBillingFileAsyncMethod_ShouldReturnNotFound_WhenCalculatorRunDoesNotExist()
         {
@@ -74,7 +76,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
             {
@@ -110,7 +112,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.Last();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(TestContext.CancellationTokenSource.Token);
 
             GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
             {
@@ -159,7 +161,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 });
             }
 
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
             {
@@ -216,7 +218,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 });
             }
 
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
             GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
             {
                 CalculatorRunId = calculatorRun.Id,
@@ -241,7 +243,6 @@ namespace EPR.Calculator.API.UnitTests.Services
                 result.Should().NotBeNull();
                 result.StatusCode.Should().Be(HttpStatusCode.Accepted);
                 result.Message.Should().Be(CommonResources.RequestAcceptedMessage);
-                calculatorRun = await this.DbContext.CalculatorRuns.SingleAsync(x => x.Id == generateBillingFileRequestDto.CalculatorRunId, cancellationTokenSource.Token);
 
                 // Verify
                 this.mockIStorageService.Verify(
@@ -260,7 +261,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var runId = 999;
 
             // Act + Assert
-            await Assert.ThrowsExceptionAsync<KeyNotFoundException>(() =>
+            await Assert.ThrowsExactlyAsync<KeyNotFoundException>(() =>
                 billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None));
         }
 
@@ -271,7 +272,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var runId = 2;
 
             // Act + Assert
-            await Assert.ThrowsExceptionAsync<UnprocessableEntityException>(() =>
+            await Assert.ThrowsExactlyAsync<UnprocessableEntityException>(() =>
                 billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None));
         }
 
@@ -311,18 +312,18 @@ namespace EPR.Calculator.API.UnitTests.Services
                 BillingInstructionAcceptReject = "Accepted",
             });
 
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Act
             var result = await this.billingFileServiceUnderTest.GetProducersInstructionResponseAsync(runId, CancellationToken.None);
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.ProducersInstructionDetails!.Count);
-            Assert.AreEqual("Accepted", result.ProducersInstructionDetails[0].Status!);
+            Assert.HasCount(1, result.ProducersInstructionDetails!);
+            Assert.AreEqual("Accepted", result.ProducersInstructionDetails![0].Status!);
 
             this.DbContext.ProducerResultFileSuggestedBillingInstruction.RemoveRange(this.DbContext.ProducerResultFileSuggestedBillingInstruction);
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
         }
 
         [TestMethod]
@@ -336,7 +337,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             };
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Act
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(100, "TestUser", requestDto, CancellationToken.None);
@@ -357,7 +358,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             };
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Act
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(2, "TestUser", requestDto, CancellationToken.None);
@@ -378,7 +379,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             };
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Act
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
@@ -399,7 +400,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             };
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Act
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
@@ -424,7 +425,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             };
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Act
             var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
@@ -449,7 +450,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Ensure a CalculatorRun exists and is in the correct state
             var calculatorRun = this.DbContext.CalculatorRuns.First();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // First, reject the record with a reason
             var rejectRequest = new ProduceBillingInstuctionRequestDto
@@ -514,7 +515,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
             calculatorRun.IsBillingFileGenerating = false;
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Act
             var result = await this.billingFileServiceUnderTest.StartGeneratingBillingFileAsync(1, "TestUser", CancellationToken.None);
@@ -558,7 +559,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 BillingFileCreatedDate = DateTime.UtcNow,
                 BillingFileCreatedBy = "test",
             });
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Mock configuration for container names
             var blobStorageSettings = new Dictionary<string, string>
@@ -618,7 +619,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 SuggestedInvoiceAmount = 100,
                 BillingInstructionAcceptReject = "Accepted",
             });
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             var requestDto = new ProducerBillingInstructionsRequestDto
             {
@@ -631,7 +632,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Records.Count);
+            Assert.HasCount(1, result.Records);
             Assert.AreEqual(1, result.TotalRecords);
             Assert.AreEqual(1, result.TotalAcceptedRecords);
             Assert.AreEqual(1, result.TotalInitialRecords);
@@ -645,7 +646,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             Assert.AreEqual(runName, result.RunName);
 
             this.DbContext.ProducerResultFileSuggestedBillingInstruction.RemoveRange(this.DbContext.ProducerResultFileSuggestedBillingInstruction);
-            await this.DbContext.SaveChangesAsync();
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
         }
 
         [TestMethod]
@@ -664,7 +665,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Records.Count);
+            Assert.IsEmpty(result.Records);
             Assert.AreEqual(0, result.TotalRecords);
         }
 

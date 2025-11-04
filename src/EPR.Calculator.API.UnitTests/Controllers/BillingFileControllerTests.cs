@@ -31,17 +31,17 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
         public BillingFileControllerTests()
         {
-            this.billingFileServiceMock = new Mock<IBillingFileService>();
-            this.storageServiceMock = new Mock<IStorageService>();
+            billingFileServiceMock = new Mock<IBillingFileService>();
+            storageServiceMock = new Mock<IStorageService>();
 
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
-            this.context = new ApplicationDBContext(dbContextOptions);
-            this.context.Database.EnsureCreated();
+            context = new ApplicationDBContext(dbContextOptions);
+            context.Database.EnsureCreated();
 
-            this.billingFileControllerUnderTest = new BillingFileController(this.billingFileServiceMock.Object, this.storageServiceMock.Object, this.context);
+            billingFileControllerUnderTest = new BillingFileController(billingFileServiceMock.Object, storageServiceMock.Object, context);
         }
 
         [TestMethod]
@@ -58,9 +58,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             using CancellationTokenSource cancellationTokenSource = new();
 
             // Act
-            IActionResult result = await this.billingFileControllerUnderTest.GenerateBillingFile(
+#pragma warning disable CS0618 // 'Type or member is obsolete'
+            IActionResult result = await billingFileControllerUnderTest.GenerateBillingFile(
                 generateBillingFileRequestDto,
                 cancellationTokenSource.Token);
+#pragma warning restore CS0618
 
             // Assert
             using (new AssertionScope())
@@ -73,7 +75,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 notFoundResult.Value.Should().NotBeNull();
 
                 // Verify
-                this.billingFileServiceMock.Verify(
+                billingFileServiceMock.Verify(
                     x => x.GenerateBillingFileAsync(
                         generateBillingFileRequestDto,
                         cancellationTokenSource.Token),
@@ -102,16 +104,18 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
 
             // Setup
-            this.billingFileServiceMock.Setup(
+            billingFileServiceMock.Setup(
                     x => x.GenerateBillingFileAsync(
                         generateBillingFileRequestDto,
                         cancellationTokenSource.Token))
                 .ReturnsAsync(serviceProcessResponseDto);
 
             // Act
-            IActionResult result = await this.billingFileControllerUnderTest.GenerateBillingFile(
+#pragma warning disable CS0618 // 'Type or member is obsolete'
+            IActionResult result = await billingFileControllerUnderTest.GenerateBillingFile(
                 generateBillingFileRequestDto,
                 cancellationTokenSource.Token);
+#pragma warning restore CS0618
 
             // Assert
             using (new AssertionScope())
@@ -133,7 +137,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             int invalidRunId = 0;
 
             // Act
-            var result = await this.billingFileControllerUnderTest.ProducerBillingInstructions(invalidRunId) as ObjectResult;
+            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(invalidRunId, CancellationToken.None) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(result);
@@ -145,12 +149,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Arrange
             int validRunId = 10;
-            this.billingFileServiceMock
+            billingFileServiceMock
                 .Setup(s => s.GetProducersInstructionResponseAsync(validRunId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ProducersInstructionResponse());
 
             // Act
-            var result = await this.billingFileControllerUnderTest.ProducerBillingInstructions(validRunId) as ObjectResult;
+            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(validRunId, CancellationToken.None) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(result);
@@ -168,12 +172,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ProducersInstructionSummary = new ProducersInstructionSummary(),
             };
 
-            this.billingFileServiceMock
+            billingFileServiceMock
                 .Setup(s => s.GetProducersInstructionResponseAsync(validRunId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedResponse);
 
             // Act
-            var result = await this.billingFileControllerUnderTest.ProducerBillingInstructions(validRunId);
+            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(validRunId, CancellationToken.None);
 
             // Assert
             var okResult = result as OkObjectResult;
@@ -186,10 +190,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public async Task DownloadBillingFile_ReturnsBadRequest_WhenModelStateIsInvalid()
         {
             // Arrange
-            this.billingFileControllerUnderTest.ModelState.AddModelError("key", "error");
+            billingFileControllerUnderTest.ModelState.AddModelError("key", "error");
 
             // Act
-            var result = await this.billingFileControllerUnderTest.DownloadCsvBillingFile(1);
+            var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(1);
 
             // Assert
             result.Should().BeOfType<BadRequest<IEnumerable<ModelError>>>();
@@ -202,7 +206,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             int runId = 9999; // Use a runId that does not exist in the in-memory DB
 
             // Act
-            var result = await this.billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
+            var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
 
             // Assert
             result.Should().BeOfType<NotFound<string>>();
@@ -228,24 +232,24 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BlobUri = "C:\\dev\\file.json",
                 CalculatorRunId = runId,
             };
-            this.context.CalculatorRunBillingFileMetadata.Add(billingMeta);
-            this.context.CalculatorRunCsvFileMetadata.Add(csvMeta);
-            this.context.SaveChanges();
+            context.CalculatorRunBillingFileMetadata.Add(billingMeta);
+            context.CalculatorRunCsvFileMetadata.Add(csvMeta);
+            context.SaveChanges();
 
-            this.storageServiceMock
+            storageServiceMock
                 .Setup(x => x.DownloadFile("csvfile.json", "C:\\dev\\file.json"))
                 .ThrowsAsync(new Exception("fail"));
 
             // Act
-            var result = await this.billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
+            var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
 
             // Assert
             result.Should().BeOfType<ProblemHttpResult>();
 
             // Tidy Up
-            this.context.CalculatorRunBillingFileMetadata.Remove(billingMeta);
-            this.context.CalculatorRunCsvFileMetadata.Remove(csvMeta);
-            this.context.SaveChanges();
+            context.CalculatorRunBillingFileMetadata.Remove(billingMeta);
+            context.CalculatorRunCsvFileMetadata.Remove(csvMeta);
+            context.SaveChanges();
         }
 
         [TestMethod]
@@ -267,25 +271,25 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BlobUri = "C:\\dev\\csvfile.json",
                 CalculatorRunId = runId,
             };
-            this.context.CalculatorRunBillingFileMetadata.Add(billingMeta);
-            this.context.CalculatorRunCsvFileMetadata.Add(csvMeta);
-            this.context.SaveChanges();
+            context.CalculatorRunBillingFileMetadata.Add(billingMeta);
+            context.CalculatorRunCsvFileMetadata.Add(csvMeta);
+            context.SaveChanges();
 
             var expectedResult = Mock.Of<IResult>();
-            this.storageServiceMock
+            storageServiceMock
                 .Setup(x => x.DownloadFile("csvfile.json", "C:\\dev\\csvfile.json"))
                 .ReturnsAsync(expectedResult);
 
             // Act
-            var result = await this.billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
+            var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
 
             // Assert
             result.Should().BeSameAs(expectedResult);
 
             // Tidy Up
-            this.context.CalculatorRunBillingFileMetadata.Remove(billingMeta);
-            this.context.CalculatorRunCsvFileMetadata.Remove(csvMeta);
-            this.context.SaveChanges();
+            context.CalculatorRunBillingFileMetadata.Remove(billingMeta);
+            context.CalculatorRunCsvFileMetadata.Remove(csvMeta);
+            context.SaveChanges();
         }
     }
 }

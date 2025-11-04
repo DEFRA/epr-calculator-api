@@ -88,7 +88,7 @@ namespace EPR.Calculator.API.UnitTests.Utils
         public void GetFinancialYearAsYYYY_InvalidString_ShouldThrowFormatException(string financialYear)
         {
             var exception =
-                Assert.ThrowsException<FormatException>(() => Util.GetFinancialYearAsYYYY(financialYear));
+                Assert.ThrowsExactly<FormatException>(() => Util.GetFinancialYearAsYYYY(financialYear));
             Assert.AreEqual("Financial year format is invalid. Expected format is 'YYYY-YY'.", exception.Message);
         }
 
@@ -103,7 +103,7 @@ namespace EPR.Calculator.API.UnitTests.Utils
         public void GetFinancialYearAsYYYY_NullOrEmptyString_ShouldThrowArgumentException(string financialYear)
         {
             var exception =
-                Assert.ThrowsException<ArgumentException>(() => Util.GetFinancialYearAsYYYY(financialYear));
+                Assert.ThrowsExactly<ArgumentException>(() => Util.GetFinancialYearAsYYYY(financialYear));
             Assert.AreEqual("Financial year cannot be null or empty (Parameter 'value')", exception.Message);
         }
 
@@ -134,7 +134,7 @@ namespace EPR.Calculator.API.UnitTests.Utils
         [DataRow(" ")]
         public void GetCalendarYear_NullOrEmptyString_ShouldThrowArgumentException(string financialYear)
         {
-            var exception = Assert.ThrowsException<ArgumentException>(() => Util.GetCalendarYear(financialYear));
+            var exception = Assert.ThrowsExactly<ArgumentException>(() => Util.GetCalendarYear(financialYear));
             Assert.AreEqual("Financial year cannot be null or empty (Parameter 'financialYear')", exception.Message);
         }
 
