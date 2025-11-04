@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
