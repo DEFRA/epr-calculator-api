@@ -23,7 +23,6 @@ public class CalculationRunServiceTests
 
     public TestContext TestContext { get; set; }
 
-
     [TestInitialize]
     public void Setup()
     {
