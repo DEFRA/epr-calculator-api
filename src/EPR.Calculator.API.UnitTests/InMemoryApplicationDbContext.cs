@@ -9,7 +9,6 @@ namespace EPR.Calculator.API.UnitTests
     /// <summary>
     /// Provides an in-memory implementation of the <see cref="ApplicationDBContext"/> for unit testing purposes.
     /// </summary>
-    [TestClass]
     public abstract class InMemoryApplicationDbContext
     {
         /// <summary>
