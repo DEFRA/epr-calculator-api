@@ -14,7 +14,6 @@ parameters:
     default: 'SonarQube'
     values:
       - 'SonarQube'
-      # - 'SonarQubeLatest'
 
 pool: DEFRA-COMMON-ubuntu2004-SSV3
 
@@ -46,32 +45,37 @@ resources:
       type: git
       ref: main
 
-steps:
-  # Ensure full history so SonarQube does not warn about shallow clone
-  - checkout: self
-    fetchDepth: 0          # full history
-    clean: true
-    persistCredentials: true
+stages:
+- stage: Build
+  displayName: Build and Scan
+  jobs:
+  - job: BuildJob
+    displayName: Build Job
+    steps:
+      - checkout: self
+        fetchDepth: 0
+        clean: true
+        persistCredentials: true
 
-  # (Optional) If the template itself checks out other repos, add similar checkout for them:
-  # - checkout: CommonTemplates
-  #   fetchDepth: 0
+      # If the common template also needs full history:
+      # - checkout: CommonTemplates
+      #   fetchDepth: 0
 
-  - template: epr-build-pipeline.yaml@CommonTemplates
-    parameters:
-      solutionFolder: ${{ variables.solutionFolder }}
-      projectFolder: ${{ variables.projectFolder }}
-      testProjectFolder: ${{ variables.testProjectFolder }}
-      DataFolder: ${{ variables.DataFolder }}
-      sonarQubeProjectKey: ${{ variables.sonarQubeProjectKey }}
-      sonarQubeProjectName: ${{ variables.sonarQubeProjectName }}
-      runTests: ${{ variables.runTests }}
-      azureSubscription: $(azureSubscription)
-      acrAzureContainerRegistryName: $(acr.azureContainerRegistryName)
-      acrRepositoryName: $(acr.repositoryName)
-      branchName: ${{ replace(replace(variables['Build.SourceBranch'], 'refs/heads/', ''), '/', '_') }}
-      runNugetTasks: ${{ variables.runNugetTasks }}
-      buildMigrationScript: true
-      serviceName: $(serviceName)
-      sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
-      dotnetVersion: ${{ variables.dotnetVersion }}
+      - template: epr-build-pipeline.yaml@CommonTemplates
+        parameters:
+          solutionFolder: ${{ variables.solutionFolder }}
+          projectFolder: ${{ variables.projectFolder }}
+          testProjectFolder: ${{ variables.testProjectFolder }}
+          DataFolder: ${{ variables.DataFolder }}
+          sonarQubeProjectKey: ${{ variables.sonarQubeProjectKey }}
+          sonarQubeProjectName: ${{ variables.sonarQubeProjectName }}
+          runTests: ${{ variables.runTests }}
+          azureSubscription: $(azureSubscription)
+          acrAzureContainerRegistryName: $(acr.azureContainerRegistryName)
+          acrRepositoryName: $(acr.repositoryName)
+          branchName: ${{ replace(replace(variables['Build.SourceBranch'], 'refs/heads/', ''), '/', '_') }}
+          runNugetTasks: ${{ variables.runNugetTasks }}
+          buildMigrationScript: true
+          serviceName: $(serviceName)
+          sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
+          dotnetVersion: ${{ variables.dotnetVersion }}
