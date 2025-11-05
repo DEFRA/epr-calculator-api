@@ -46,6 +46,12 @@ resources:
       type: git
       ref: main
 
+steps:
+  - checkout: self
+    fetchDepth: 0     # 0 = full history (disables shallow clone)
+    clean: true       # optional: ensures a clean workspace
+    persistCredentials: true  # useful if later Git operations occur
+
 extends:
   template: epr-build-pipeline.yaml@CommonTemplates
   parameters:
