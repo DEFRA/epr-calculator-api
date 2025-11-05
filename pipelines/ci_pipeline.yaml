@@ -44,7 +44,7 @@ resources:
     - repository: CommonTemplates
       name: RWD-CPR-EPR4P-ADO/epr-webapps-code-deploy-templates
       type: git
-      ref: main
+      ref: feauture/sonar-qube-clone-depth-fix
 
 extends:
   template: epr-build-pipeline.yaml@CommonTemplates
