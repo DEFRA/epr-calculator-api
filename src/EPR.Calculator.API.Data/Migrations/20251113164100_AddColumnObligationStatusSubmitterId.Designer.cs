@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251113164100_AddColumnObligationStatusSubmitterId")]
+    partial class AddColumnObligationStatusSubmitterId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -330,11 +333,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("load_ts");
 
-                    b.Property<string>("ObligationStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("obligation_status");
-
                     b.Property<int?>("OrganisationId")
                         .HasColumnType("int")
                         .HasColumnName("organisation_id");
@@ -348,10 +346,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<string>("SubmissionPeriodDesc")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
-
-                    b.Property<int?>("SubmitterId")
-                        .HasColumnType("int")
-                        .HasColumnName("submitter_id");
 
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)

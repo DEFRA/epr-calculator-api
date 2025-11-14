@@ -24,3 +24,4 @@ api/obj/project.nuget.cache
 /.vs
 /src/EPR.Calculator.API.Data/obj
 *.user
+/obj
