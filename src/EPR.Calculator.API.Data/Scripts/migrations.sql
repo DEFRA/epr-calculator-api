@@ -5600,3 +5600,157 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251113164100_AddColumnObligationStatusSubmitterId'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [obligation_status] nvarchar(max) NOT NULL DEFAULT N'';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251113164100_AddColumnObligationStatusSubmitterId'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [submitter_id] int NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251113164100_AddColumnObligationStatusSubmitterId'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251113164100_AddColumnObligationStatusSubmitterId', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251114110315_AddObligationStatusSubmitterIdInDetails'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [obligation_status] nvarchar(max) NOT NULL DEFAULT N'';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251114110315_AddObligationStatusSubmitterIdInDetails'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [submitter_id] int NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251114110315_AddObligationStatusSubmitterIdInDetails'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251114110315_AddObligationStatusSubmitterIdInDetails', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251114133552_UpdateCreateRunOrganizationSProc'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND OBJECT_ID = OBJECT_ID('[dbo].[CreteRunOrganization]]'))
+    DROP PROCEDURE [dbo].[CreateRunOrganization];
+    declare @Sql varchar(max)
+    SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]
+    (
+    @RunId int,
+    @calendarYear varchar(400),
+    @createdBy varchar(400)
+    )
+    AS
+    BEGIN
+    SET NOCOUNT ON
+
+    declare @DateNow datetime, @orgDataMasterid int
+    SET @DateNow = GETDATE()
+
+    declare @oldCalcRunOrgMasterId int
+    SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)
+
+    Update calculator_run_organization_data_master SET effective_to = @DateNow WHERE id = @oldCalcRunOrgMasterId
+
+    INSERT into dbo.calculator_run_organization_data_master
+    (calendar_year, created_at, created_by, effective_from, effective_to)
+    values
+    (@calendarYear, @DateNow, @createdBy, @DateNow, NULL)
+
+    SET @orgDataMasterid  = CAST(scope_identity() AS int);
+
+    INSERT 
+    into 
+        dbo.calculator_run_organization_data_detail
+        (calculator_run_organization_data_master_id, 
+            load_ts,
+            organisation_id,
+            organisation_name,
+            trading_name,
+            submission_period_desc,
+            subsidiary_id,
+    							obligation_status, 
+    							submitter_id)
+    SELECT  @orgDataMasterid, 
+            load_ts,
+            organisation_id,
+            organisation_name,
+            trading_name,
+            submission_period_desc
+            CASE			
+    							WHEN LTRIM(RTRIM(subsidiary_id)) = ''
+    							THEN NULL
+    							ELSE subsidiary_id
+    							END			
+    							as subsidiary_id,
+    							obligation_status, 
+    							submitter_id
+            from 
+            dbo.organisation_data
+
+    Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
+
+    END
+    '
+    EXEC(@Sql)
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251114133552_UpdateCreateRunOrganizationSProc'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251114133552_UpdateCreateRunOrganizationSProc', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
