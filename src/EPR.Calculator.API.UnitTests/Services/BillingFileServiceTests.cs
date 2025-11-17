@@ -761,7 +761,9 @@ namespace EPR.Calculator.API.UnitTests.Services
             {
                 financialYear = new CalculatorRunFinancialYear { Name = financialYearName };
                 this.DbContext.FinancialYears.Add(financialYear);
-                await this.DbContext.SaveChangesAsync();
+
+                using var cts = new CancellationTokenSource();
+                await this.DbContext.SaveChangesAsync(cts.Token);
             }
 
             this.DbContext.CalculatorRuns.Add(new CalculatorRun
@@ -770,7 +772,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Name = runName,
                 Financial_Year = financialYear,
                 FinancialYearId = financialYear.Name,
-                CalculatorRunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN 
+                CalculatorRunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN
             });
 
             int missingProducerId = 999; // does NOT exist in current ProducerDetail
@@ -824,11 +826,11 @@ namespace EPR.Calculator.API.UnitTests.Services
                 PageSize = 10
             };
 
-            //Act
+            // Act
             var result = await this.billingFileServiceUnderTest
                 .GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
 
-            //Assert
+            // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(1, result.Records.Count);
             Assert.AreEqual("Fallback Producer Name", result.Records[0].ProducerName);
