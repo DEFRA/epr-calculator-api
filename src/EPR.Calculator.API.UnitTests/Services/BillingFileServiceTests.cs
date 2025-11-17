@@ -746,5 +746,92 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Assert
             result.Should().BeTrue();
         }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructionsAsync_ShouldUseFallback_WhenProducerNameMissingInCurrentRun()
+        {
+            // Arrange
+            var runId = 4962;
+            var runName = "Run 4962";
+            var financialYearName = "2024-25";
+
+            var financialYear = this.DbContext.FinancialYears.SingleOrDefault(f => f.Name == financialYearName);
+
+            if (financialYear == null)
+            {
+                financialYear = new CalculatorRunFinancialYear { Name = financialYearName };
+                this.DbContext.FinancialYears.Add(financialYear);
+                await this.DbContext.SaveChangesAsync();
+            }
+
+            this.DbContext.CalculatorRuns.Add(new CalculatorRun
+            {
+                Id = runId,
+                Name = runName,
+                Financial_Year = financialYear,
+                FinancialYearId = financialYear.Name,
+                CalculatorRunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN 
+            });
+
+            int missingProducerId = 999; // does NOT exist in current ProducerDetail
+
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(
+                new ProducerResultFileSuggestedBillingInstruction
+                {
+                    ProducerId = missingProducerId,
+                    CalculatorRunId = runId,
+                    SuggestedBillingInstruction = "Initial",
+                    SuggestedInvoiceAmount = 100,
+                    BillingInstructionAcceptReject = "Pending"
+                });
+
+            var master = new CalculatorRunOrganisationDataMaster
+            {
+                CalendarYear = "2024",
+                EffectiveFrom = DateTime.UtcNow.AddDays(-5),
+                EffectiveTo = null,
+                CreatedBy = "testsuperuser.paycal",
+                CreatedAt = DateTime.UtcNow.AddDays(-5)
+            };
+            this.DbContext.CalculatorRunOrganisationDataMaster.Add(master);
+
+            var previousRun = new CalculatorRun
+            {
+                Name = "Previous Run Snapshot",
+                Financial_Year = financialYear,
+                FinancialYearId = financialYear.Name,
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                CalculatorRunOrganisationDataMasterId = master.Id
+            };
+            this.DbContext.CalculatorRuns.Add(previousRun);
+
+            // Add fallback OrganisationData details
+            this.DbContext.CalculatorRunOrganisationDataDetails.Add(
+                new CalculatorRunOrganisationDataDetail
+                {
+                    CalculatorRunOrganisationDataMasterId = master.Id,
+                    OrganisationId = missingProducerId,
+                    OrganisationName = "Fallback Producer Name",
+                    SubsidaryId = null,
+                    SubmissionPeriodDesc = "Q1"
+                });
+
+            await this.DbContext.SaveChangesAsync();
+
+            var requestDto = new ProducerBillingInstructionsRequestDto
+            {
+                PageNumber = 1,
+                PageSize = 10
+            };
+
+            //Act
+            var result = await this.billingFileServiceUnderTest
+                .GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
+
+            //Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(1, result.Records.Count);
+            Assert.AreEqual("Fallback Producer Name", result.Records[0].ProducerName);
+        }
     }
 }

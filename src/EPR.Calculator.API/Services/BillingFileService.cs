@@ -581,6 +581,31 @@ namespace EPR.Calculator.API.Services
                                                   }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
 
                 parentProducers.Result.AddRange(outstandingParentProducers.Result);
+
+                var stillMissingIds = outstandingProducerIds.Where(id => !parentProducers.Result.Any(p => p.ProducerId == id)).ToList();
+
+                // fallback option -- lookup organisation snapshot from previous runs as it was deleted in the pom data and not exists in the producer details
+                if (stillMissingIds.Any())
+                {
+                    var previousRunNames = (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
+                                            join odm in applicationDBContext.CalculatorRunOrganisationDataMaster on odd.CalculatorRunOrganisationDataMasterId equals odm.Id
+                                            join run in applicationDBContext.CalculatorRuns on odm.Id equals run.CalculatorRunOrganisationDataMasterId
+                                            where run.FinancialYearId == financialYear
+                                                  && stillMissingIds.Contains(odd.OrganisationId ?? 0)
+                                                  && odd.SubsidaryId == null
+                                            orderby odd.Id descending
+                                            select new ParentProducer
+                                            {
+                                                Id = odd.Id,
+                                                ProducerId = odd.OrganisationId ?? 0,
+                                                ProducerName = odd.OrganisationName
+                                            })
+                                            .AsNoTracking()
+                                            .Distinct()
+                                            .ToListAsync(cancellationToken);
+
+                    parentProducers.Result.AddRange(previousRunNames.Result);
+                }
             }
 
             return parentProducers;
