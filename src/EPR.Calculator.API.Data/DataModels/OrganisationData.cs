@@ -16,6 +16,6 @@
 
         public string ObligationStatus { get; set; } = string.Empty;
 
-        public int? SubmitterId { get; set; }
+        public Guid? SubmitterId { get; set; }
     }
 }

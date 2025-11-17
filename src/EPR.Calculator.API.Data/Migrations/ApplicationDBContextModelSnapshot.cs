@@ -349,8 +349,8 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
 
-                    b.Property<int?>("SubmitterId")
-                        .HasColumnType("int")
+                    b.Property<Guid?>("SubmitterId")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("submitter_id");
 
                     b.Property<string>("SubsidaryId")
@@ -458,6 +458,10 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<string>("SubmissionPeriodDesc")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
+
+                    b.Property<Guid?>("SubmitterId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("submitter_id");
 
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)
@@ -1596,8 +1600,8 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
 
-                    b.Property<int?>("SubmitterId")
-                        .HasColumnType("int")
+                    b.Property<Guid?>("SubmitterId")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("submitter_id");
 
                     b.Property<string>("SubsidaryId")
@@ -1654,6 +1658,10 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<string>("SubmissionPeriodDesc")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
+
+                    b.Property<Guid?>("SubmitterId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("submitter_id");
 
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)

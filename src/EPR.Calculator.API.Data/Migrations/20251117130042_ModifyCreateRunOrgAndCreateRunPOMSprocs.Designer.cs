@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20251113164100_AddColumnObligationStatusSubmitterId")]
-    partial class AddColumnObligationStatusSubmitterId
+    [Migration("20251117130042_ModifyCreateRunOrgAndCreateRunPOMSprocs")]
+    partial class ModifyCreateRunOrgAndCreateRunPOMSprocs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -333,6 +333,11 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("load_ts");
 
+                    b.Property<string>("ObligationStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("obligation_status");
+
                     b.Property<int?>("OrganisationId")
                         .HasColumnType("int")
                         .HasColumnName("organisation_id");
@@ -346,6 +351,10 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<string>("SubmissionPeriodDesc")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
+
+                    b.Property<Guid?>("SubmitterId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("submitter_id");
 
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)
@@ -452,6 +461,10 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<string>("SubmissionPeriodDesc")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
+
+                    b.Property<Guid?>("SubmitterId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("submitter_id");
 
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)
@@ -1590,8 +1603,8 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
 
-                    b.Property<int?>("SubmitterId")
-                        .HasColumnType("int")
+                    b.Property<Guid?>("SubmitterId")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("submitter_id");
 
                     b.Property<string>("SubsidaryId")
@@ -1648,6 +1661,10 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<string>("SubmissionPeriodDesc")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("submission_period_desc");
+
+                    b.Property<Guid?>("SubmitterId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("submitter_id");
 
                     b.Property<string>("SubsidaryId")
                         .HasMaxLength(400)
