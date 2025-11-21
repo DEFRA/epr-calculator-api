@@ -620,7 +620,7 @@ namespace EPR.Calculator.API.Services
                           .AsNoTracking()
                           .ToListAsync(cancellationToken);
 
-            var allProducerIds = query.Where(x => x.SuggestedBillingInstruction != NoActionPlaceholder).Select(x => x.ProducerId).Distinct();
+            var allProducerIdsExcludingIdsWithSuggestedBillingInstructionNoAction = query.Where(x => x.SuggestedBillingInstruction != NoActionPlaceholder).Select(x => x.ProducerId).Distinct();
 
             var pagedProducerIds = pagedResult.Select(x => x.ProducerId).Distinct();
             var parentProducers = await this.GetParentProducersLatestAsync(runId, financialYear, pagedProducerIds, cancellationToken);
@@ -634,7 +634,7 @@ namespace EPR.Calculator.API.Services
             }
 
             response.Records = pagedResult;
-            response.AllProducerIds = allProducerIds;
+            response.AllProducerIds = allProducerIdsExcludingIdsWithSuggestedBillingInstructionNoAction;
         }
 
         private async Task PopulateBillingStatusCountsAsync(
