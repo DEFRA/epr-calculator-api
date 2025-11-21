@@ -22,6 +22,7 @@ namespace EPR.Calculator.API.Services
     /// <param name="storageService">The storage service <seealso cref="IStorageService"/>.</param>
     public class BillingFileService(ApplicationDBContext applicationDBContext, IStorageService storageService, IBlobStorageService2 blobStorageService2, IConfiguration configuration) : IBillingFileService
     {
+        private const string NoActionPlaceholder = "-";
         /// <summary>
         /// Validates the run ID for accepting all billing instructions.
         /// </summary>
@@ -221,19 +222,26 @@ namespace EPR.Calculator.API.Services
                         };
 
             // Group by on BillingInstructionAcceptReject before filtering
-            var groupedStatus = query
-                        .AsNoTracking()
-                        .GroupBy(x => string.IsNullOrWhiteSpace(x.BillingInstructionAcceptReject) ? BillingStatus.Pending.ToString() : x.BillingInstructionAcceptReject.Trim())
-                        .Select(g => new ProducerBillingInstructionsStatus
-                        {
-                            Status = g.Key,
-                            TotalRecords = g.Count(),
-                        });
+            var groupedStatus = applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                .Where(prsi => prsi.CalculatorRunId == runId)
+                .AsNoTracking()
+                .GroupBy(prsi => string.IsNullOrWhiteSpace(prsi.BillingInstructionAcceptReject)
+                    ? ((string.IsNullOrWhiteSpace(prsi.SuggestedBillingInstruction) || prsi.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
+                        ? BillingInstruction.Noaction.ToString()
+                        : BillingStatus.Pending.ToString())
+                    : prsi.BillingInstructionAcceptReject.Trim())
+                .Select(g => new ProducerBillingInstructionsStatus
+                {
+                    Status = g.Key,
+                    TotalRecords = g.Count(),
+                });
 
             // Group by on BillingInstructionAcceptReject before filtering
             var groupedBillingInstruction = query
                         .AsNoTracking()
-                        .GroupBy(x => string.IsNullOrWhiteSpace(x.SuggestedBillingInstruction) ? BillingInstruction.Noaction.ToString() : x.SuggestedBillingInstruction.Trim())
+                        .GroupBy(x => (string.IsNullOrWhiteSpace(x.SuggestedBillingInstruction) || x.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
+                            ? BillingInstruction.Noaction.ToString()
+                            : x.SuggestedBillingInstruction.Trim())
                         .Select(g => new ProducerBillingInstructionSuggestion
                         {
                             Suggestion = g.Key,
@@ -251,15 +259,27 @@ namespace EPR.Calculator.API.Services
             if (searchQuery?.Status != null && searchQuery.Status.Any())
             {
                 var statusList = searchQuery.Status.ToList();
-
                 query = query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject)).AsQueryable();
             }
 
             // Apply BillingInstruction filter if provided and not empty
             if (searchQuery?.BillingInstruction != null && searchQuery.BillingInstruction.Any())
             {
-                var billingInstructionList = searchQuery.BillingInstruction.ToList();
-                query = query.Where(x => x.SuggestedBillingInstruction != null && billingInstructionList.Contains(x.SuggestedBillingInstruction)).AsQueryable();
+                var billingInstructionList = searchQuery.BillingInstruction.Select(b => b?.Trim()).Where(b => !string.IsNullOrWhiteSpace(b)).ToList();
+
+                bool includeNoAction = billingInstructionList.Any(b => string.Equals(b, BillingInstruction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase));
+
+                if (includeNoAction)
+                {
+                    query = query.Where(x =>
+                        (string.IsNullOrWhiteSpace(x.SuggestedBillingInstruction) || x.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
+                        || (x.SuggestedBillingInstruction != null && billingInstructionList.Contains(x.SuggestedBillingInstruction.Trim())))
+                        .AsQueryable();
+                }
+                else
+                {
+                    query = query.Where(x => x.SuggestedBillingInstruction != null && billingInstructionList.Contains(x.SuggestedBillingInstruction.Trim())).AsQueryable();
+                }
             }
 
             query = query.Distinct().OrderBy(x => x.ProducerId).AsQueryable();
@@ -600,7 +620,8 @@ namespace EPR.Calculator.API.Services
                           .AsNoTracking()
                           .ToListAsync(cancellationToken);
 
-            var allProducerIds = query.Select(x => x.ProducerId).Distinct();
+            var allProducerIdsExcludingIdsWithSuggestedBillingInstructionNoAction = query.Where(x => x.SuggestedBillingInstruction != NoActionPlaceholder).Select(x => x.ProducerId).Distinct();
+
             var pagedProducerIds = pagedResult.Select(x => x.ProducerId).Distinct();
             var parentProducers = await this.GetParentProducersLatestAsync(runId, financialYear, pagedProducerIds, cancellationToken);
 
@@ -613,7 +634,7 @@ namespace EPR.Calculator.API.Services
             }
 
             response.Records = pagedResult;
-            response.AllProducerIds = allProducerIds;
+            response.AllProducerIds = allProducerIdsExcludingIdsWithSuggestedBillingInstructionNoAction;
         }
 
         private async Task PopulateBillingStatusCountsAsync(
