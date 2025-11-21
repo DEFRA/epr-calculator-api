@@ -95,7 +95,7 @@ public class AvailableClassificationsService(
                 .ToListAsync(cancellationToken);
 
         return runs.Where(run => run.BillingFileAuthorisedDate.HasValue)
-                   .All(run => (run.BillingFileAuthorisedDate!.Value >= currentRun.CreatedAt));
+                   .Any(run => (run.BillingFileAuthorisedDate!.Value >= currentRun.CreatedAt));
     }
 
     private async Task<List<RunClassification>> DetermineAvailableClassificationsAsync(
