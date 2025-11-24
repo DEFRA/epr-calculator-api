@@ -216,7 +216,12 @@ namespace EPR.Calculator.API.Services
                         select new ProducerBillingInstructionsDto()
                         {
                             ProducerId = prsi.ProducerId,
-                            BillingInstructionAcceptReject = prsi.BillingInstructionAcceptReject ?? BillingStatus.Pending.ToString(),
+                            BillingInstructionAcceptReject =
+                                string.IsNullOrWhiteSpace(prsi.BillingInstructionAcceptReject)
+                                    ? ((string.IsNullOrWhiteSpace(prsi.SuggestedBillingInstruction) || prsi.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
+                                        ? BillingInstruction.Noaction.ToString()
+                                        : BillingStatus.Pending.ToString())
+                                    : prsi.BillingInstructionAcceptReject.Trim(),
                             SuggestedBillingInstruction = prsi.SuggestedBillingInstruction,
                             SuggestedInvoiceAmount = (prsi.SuggestedBillingInstruction ?? string.Empty).ToLower() == "cancel" ? prsi.CurrentYearInvoiceTotalToDate : prsi.SuggestedInvoiceAmount,
                         };
