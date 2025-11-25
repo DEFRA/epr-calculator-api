@@ -5477,6 +5477,10 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251022131319_AddColumnsToCalculatorRunDetail'
+)
+BEGIN
+    ALTER TABLE [calculator_run_pom_data_detail] ADD [is_valid] bit NOT NULL DEFAULT CAST(0 AS bit);
     WHERE [MigrationId] = N'20251024094126_AddErrorTypesReferenceData'
 )
 BEGIN
@@ -5486,6 +5490,10 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251022131319_AddColumnsToCalculatorRunDetail'
+)
+BEGIN
+    ALTER TABLE [calculator_run_pom_data_detail] ADD [submitter_org_id] nvarchar(4000) NULL;
     WHERE [MigrationId] = N'20251024094126_AddErrorTypesReferenceData'
 )
 BEGIN
@@ -5508,6 +5516,56 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251022131319_AddColumnsToCalculatorRunDetail'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [is_valid] bit NOT NULL DEFAULT CAST(0 AS bit);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251022131319_AddColumnsToCalculatorRunDetail'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [joiner_date] nvarchar(4000) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251022131319_AddColumnsToCalculatorRunDetail'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [leaver_code] nvarchar(4000) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251022131319_AddColumnsToCalculatorRunDetail'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [leaver_date] nvarchar(4000) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251022131319_AddColumnsToCalculatorRunDetail'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [submitter_org_id] nvarchar(4000) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251022131319_AddColumnsToCalculatorRunDetail'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251022131319_AddColumnsToCalculatorRunDetail', N'8.0.7');
     WHERE [MigrationId] = N'20251024094126_AddErrorTypesReferenceData'
 )
 BEGIN
