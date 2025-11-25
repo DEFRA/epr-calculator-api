@@ -550,7 +550,7 @@ namespace EPR.Calculator.API.Services
         /// <param name="producerIds">List of procuder ids requiring producer name.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Task list of parent producers with producer name.</returns>
-        private Task<List<ParentProducer>> GetParentProducersLatestAsync(
+        private async Task<List<ParentProducer>> GetParentProducersLatestAsync(
             int runId,
             string financialYear,
             IEnumerable<int> producerIds,
@@ -565,7 +565,7 @@ namespace EPR.Calculator.API.Services
                 (int)RunClassification.DELETED,
             };
 
-            var parentProducers = (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
+            var parentProducers = await (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
                                    join odm in applicationDBContext.CalculatorRunOrganisationDataMaster
                                        on odd.CalculatorRunOrganisationDataMasterId equals odm.Id
                                    join run in applicationDBContext.CalculatorRuns
@@ -582,7 +582,7 @@ namespace EPR.Calculator.API.Services
                                    }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
 
             // Get the distinct list of parent producer ids
-            var parentProducerIds = parentProducers.Result.Select(pp => pp.ProducerId).Distinct();
+            var parentProducerIds = parentProducers.Select(pp => pp.ProducerId).Distinct();
 
             // Identify the producers that still do not have a producer name
             var outstandingProducerIds = producerIds.Where(producerId => !parentProducerIds.Contains(producerId)).ToList();
@@ -591,7 +591,7 @@ namespace EPR.Calculator.API.Services
             // This is because for these parent producers, there are no producer detail records because of no pom data submissions
             if (outstandingProducerIds.Any())
             {
-                var outstandingParentProducers = (from p in applicationDBContext.ProducerDetail
+                var outstandingParentProducers = await (from p in applicationDBContext.ProducerDetail
                                                   join r in applicationDBContext.CalculatorRuns on p.CalculatorRunId equals r.Id
                                                   where r.FinancialYearId == financialYear
                                                          && !runClassificationsToIgnore.Contains(r.CalculatorRunClassificationId)
@@ -605,14 +605,14 @@ namespace EPR.Calculator.API.Services
                                                       ProducerName = p.ProducerName ?? string.Empty,
                                                   }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
 
-                parentProducers.Result.AddRange(outstandingParentProducers.Result);
+                parentProducers.AddRange(outstandingParentProducers);
 
-                var stillMissingIds = outstandingProducerIds.Where(id => !parentProducers.Result.Any(p => p.ProducerId == id)).ToList();
+                var stillMissingIds = outstandingProducerIds.Where(id => !parentProducers.Any(p => p.ProducerId == id)).ToList();
 
                 // fallback option -- lookup organisation snapshot from previous runs as it was deleted in the pom data and not exists in the producer details
                 if (stillMissingIds.Count > 0)
                 {
-                    var previousRunNames = (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
+                    var previousRunNames = await (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
                                             join odm in applicationDBContext.CalculatorRunOrganisationDataMaster on odd.CalculatorRunOrganisationDataMasterId equals odm.Id
                                             join run in applicationDBContext.CalculatorRuns on odm.Id equals run.CalculatorRunOrganisationDataMasterId
                                             where run.FinancialYearId == financialYear
@@ -629,7 +629,7 @@ namespace EPR.Calculator.API.Services
                                             .Distinct()
                                             .ToListAsync(cancellationToken);
 
-                    parentProducers.Result.AddRange(previousRunNames.Result);
+                    parentProducers.AddRange(previousRunNames);
                 }
             }
 
