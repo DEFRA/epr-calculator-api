@@ -16,6 +16,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
 
+    [TestClass]
     public class BaseControllerTest : InMemoryApplicationDbContext
     {
         public BaseControllerTest()

@@ -22,6 +22,7 @@ namespace EPR.Calculator.API.Services
     /// <param name="storageService">The storage service <seealso cref="IStorageService"/>.</param>
     public class BillingFileService(ApplicationDBContext applicationDBContext, IStorageService storageService, IBlobStorageService2 blobStorageService2, IConfiguration configuration) : IBillingFileService
     {
+        private const string NoActionPlaceholder = "-";
         /// <summary>
         /// Validates the run ID for accepting all billing instructions.
         /// </summary>
@@ -215,25 +216,37 @@ namespace EPR.Calculator.API.Services
                         select new ProducerBillingInstructionsDto()
                         {
                             ProducerId = prsi.ProducerId,
-                            BillingInstructionAcceptReject = prsi.BillingInstructionAcceptReject ?? BillingStatus.Pending.ToString(),
+                            BillingInstructionAcceptReject =
+                                string.IsNullOrWhiteSpace(prsi.BillingInstructionAcceptReject)
+                                    ? ((string.IsNullOrWhiteSpace(prsi.SuggestedBillingInstruction) || prsi.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
+                                        ? BillingInstruction.Noaction.ToString()
+                                        : BillingStatus.Pending.ToString())
+                                    : prsi.BillingInstructionAcceptReject.Trim(),
                             SuggestedBillingInstruction = prsi.SuggestedBillingInstruction,
                             SuggestedInvoiceAmount = (prsi.SuggestedBillingInstruction ?? string.Empty).ToLower() == "cancel" ? prsi.CurrentYearInvoiceTotalToDate : prsi.SuggestedInvoiceAmount,
                         };
 
             // Group by on BillingInstructionAcceptReject before filtering
-            var groupedStatus = query
-                        .AsNoTracking()
-                        .GroupBy(x => string.IsNullOrWhiteSpace(x.BillingInstructionAcceptReject) ? BillingStatus.Pending.ToString() : x.BillingInstructionAcceptReject.Trim())
-                        .Select(g => new ProducerBillingInstructionsStatus
-                        {
-                            Status = g.Key,
-                            TotalRecords = g.Count(),
-                        });
+            var groupedStatus = applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                .Where(prsi => prsi.CalculatorRunId == runId)
+                .AsNoTracking()
+                .GroupBy(prsi => string.IsNullOrWhiteSpace(prsi.BillingInstructionAcceptReject)
+                    ? ((string.IsNullOrWhiteSpace(prsi.SuggestedBillingInstruction) || prsi.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
+                        ? BillingInstruction.Noaction.ToString()
+                        : BillingStatus.Pending.ToString())
+                    : prsi.BillingInstructionAcceptReject.Trim())
+                .Select(g => new ProducerBillingInstructionsStatus
+                {
+                    Status = g.Key,
+                    TotalRecords = g.Count(),
+                });
 
             // Group by on BillingInstructionAcceptReject before filtering
             var groupedBillingInstruction = query
                         .AsNoTracking()
-                        .GroupBy(x => string.IsNullOrWhiteSpace(x.SuggestedBillingInstruction) ? BillingInstruction.Noaction.ToString() : x.SuggestedBillingInstruction.Trim())
+                        .GroupBy(x => (string.IsNullOrWhiteSpace(x.SuggestedBillingInstruction) || x.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
+                            ? BillingInstruction.Noaction.ToString()
+                            : x.SuggestedBillingInstruction.Trim())
                         .Select(g => new ProducerBillingInstructionSuggestion
                         {
                             Suggestion = g.Key,
@@ -251,15 +264,27 @@ namespace EPR.Calculator.API.Services
             if (searchQuery?.Status != null && searchQuery.Status.Any())
             {
                 var statusList = searchQuery.Status.ToList();
-
                 query = query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject)).AsQueryable();
             }
 
             // Apply BillingInstruction filter if provided and not empty
             if (searchQuery?.BillingInstruction != null && searchQuery.BillingInstruction.Any())
             {
-                var billingInstructionList = searchQuery.BillingInstruction.ToList();
-                query = query.Where(x => x.SuggestedBillingInstruction != null && billingInstructionList.Contains(x.SuggestedBillingInstruction)).AsQueryable();
+                var billingInstructionList = searchQuery.BillingInstruction.Select(b => b?.Trim()).Where(b => !string.IsNullOrWhiteSpace(b)).ToList();
+
+                bool includeNoAction = billingInstructionList.Any(b => string.Equals(b, BillingInstruction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase));
+
+                if (includeNoAction)
+                {
+                    query = query.Where(x =>
+                        (string.IsNullOrWhiteSpace(x.SuggestedBillingInstruction) || x.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
+                        || (x.SuggestedBillingInstruction != null && billingInstructionList.Contains(x.SuggestedBillingInstruction.Trim())))
+                        .AsQueryable();
+                }
+                else
+                {
+                    query = query.Where(x => x.SuggestedBillingInstruction != null && billingInstructionList.Contains(x.SuggestedBillingInstruction.Trim())).AsQueryable();
+                }
             }
 
             query = query.Distinct().OrderBy(x => x.ProducerId).AsQueryable();
@@ -275,7 +300,7 @@ namespace EPR.Calculator.API.Services
                 CalculatorRunId = run.Id,
             };
 
-            await this.PopulatePagedBillingInstructionsAsync(query, requestDto, run.FinancialYearId, response, cancellationToken);
+            await this.PopulatePagedBillingInstructionsAsync(query, requestDto, run.Id, run.FinancialYearId, response, cancellationToken);
             await this.PopulateBillingStatusCountsAsync(groupedStatus, response, cancellationToken);
             await this.PopulateBillingInstructionCountsAsync(groupedBillingInstruction, response, cancellationToken);
 
@@ -517,7 +542,19 @@ namespace EPR.Calculator.API.Services
             applicationDBContext.CalculatorRuns
                 .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
-        private Task<List<ParentProducer>> GetParentProducersLatestAsync(string financialYear, IEnumerable<int> producerIds, CancellationToken cancellationToken)
+        /// <summary>
+        /// Get the producer names for the list of producer ids provided.
+        /// </summary>
+        /// <param name="runId">Current run id.</param>
+        /// <param name="financialYear">Financial year of the current run.</param>
+        /// <param name="producerIds">List of procuder ids requiring producer name.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Task list of parent producers with producer name.</returns>
+        private Task<List<ParentProducer>> GetParentProducersLatestAsync(
+            int runId,
+            string financialYear,
+            IEnumerable<int> producerIds,
+            CancellationToken cancellationToken)
         {
             var runClassificationsToIgnore = new List<int>
             {
@@ -528,24 +565,56 @@ namespace EPR.Calculator.API.Services
                 (int)RunClassification.DELETED,
             };
 
-            return (from p in applicationDBContext.ProducerDetail
-                    join r in applicationDBContext.CalculatorRuns on p.CalculatorRunId equals r.Id
-                    where r.FinancialYearId == financialYear
-                           && !runClassificationsToIgnore.Contains(r.CalculatorRunClassificationId)
-                           && producerIds.Contains(p.ProducerId)
-                           && p.SubsidiaryId == null
-                    orderby p.Id descending
-                    select new ParentProducer
-                    {
-                        Id = p.Id,
-                        ProducerId = p.ProducerId,
-                        ProducerName = p.ProducerName ?? string.Empty,
-                    }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
+            var parentProducers = (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
+                                   join odm in applicationDBContext.CalculatorRunOrganisationDataMaster
+                                       on odd.CalculatorRunOrganisationDataMasterId equals odm.Id
+                                   join run in applicationDBContext.CalculatorRuns
+                                       on odm.Id equals run.CalculatorRunOrganisationDataMasterId
+                                   where run.Id == runId
+                                       && producerIds.Contains(odd.OrganisationId ?? 0)
+                                       && odd.SubsidaryId == null
+                                   orderby odd.Id descending
+                                   select new ParentProducer
+                                   {
+                                       Id = odd.Id,
+                                       ProducerId = odd.OrganisationId ?? 0,
+                                       ProducerName = odd.OrganisationName
+                                   }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
+
+            // Get the distinct list of parent producer ids
+            var parentProducerIds = parentProducers.Result.Select(pp => pp.ProducerId).Distinct();
+
+            // Identify the producers that still do not have a producer name
+            var outstandingProducerIds = producerIds.Where(producerId => !parentProducerIds.Contains(producerId)).ToList();
+
+            // If the list contains any value that means the previous query was not able to identify the producer name
+            // This is because for these parent producers, there are no producer detail records because of no pom data submissions
+            if (outstandingProducerIds.Any())
+            {
+                var outstandingParentProducers = (from p in applicationDBContext.ProducerDetail
+                                                  join r in applicationDBContext.CalculatorRuns on p.CalculatorRunId equals r.Id
+                                                  where r.FinancialYearId == financialYear
+                                                         && !runClassificationsToIgnore.Contains(r.CalculatorRunClassificationId)
+                                                         && outstandingProducerIds.Contains(p.ProducerId)
+                                                         && p.SubsidiaryId == null
+                                                  orderby p.Id descending
+                                                  select new ParentProducer
+                                                  {
+                                                      Id = p.Id,
+                                                      ProducerId = p.ProducerId,
+                                                      ProducerName = p.ProducerName ?? string.Empty,
+                                                  }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
+
+                parentProducers.Result.AddRange(outstandingParentProducers.Result);
+            }
+
+            return parentProducers;
         }
 
         private async Task PopulatePagedBillingInstructionsAsync(
             IQueryable<ProducerBillingInstructionsDto> query,
             ProducerBillingInstructionsRequestDto requestDto,
+            int runId,
             string financialYear,
             ProducerBillingInstructionsResponseDto response,
             CancellationToken cancellationToken)
@@ -556,17 +625,21 @@ namespace EPR.Calculator.API.Services
                           .AsNoTracking()
                           .ToListAsync(cancellationToken);
 
-            var allProducerIds = query.Select(x => x.ProducerId).Distinct();
+            var allProducerIdsExcludingIdsWithSuggestedBillingInstructionNoAction = query.Where(x => x.SuggestedBillingInstruction != NoActionPlaceholder).Select(x => x.ProducerId).Distinct();
+
             var pagedProducerIds = pagedResult.Select(x => x.ProducerId).Distinct();
-            var parentProducers = await this.GetParentProducersLatestAsync(financialYear, pagedProducerIds, cancellationToken);
+            var parentProducers = await this.GetParentProducersLatestAsync(runId, financialYear, pagedProducerIds, cancellationToken);
 
             foreach (var record in pagedResult)
             {
-                record.ProducerName = parentProducers.FirstOrDefault(p => p.ProducerId == record.ProducerId)?.ProducerName ?? string.Empty;
+                record.ProducerName = parentProducers
+                    .Where(p => p.ProducerId == record.ProducerId)
+                    .OrderByDescending(p => p.Id)
+                    .FirstOrDefault()?.ProducerName ?? string.Empty;
             }
 
             response.Records = pagedResult;
-            response.AllProducerIds = allProducerIds;
+            response.AllProducerIds = allProducerIdsExcludingIdsWithSuggestedBillingInstructionNoAction;
         }
 
         private async Task PopulateBillingStatusCountsAsync(

@@ -4,7 +4,6 @@ using EPR.Calculator.API.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Global
@@ -27,6 +26,8 @@ namespace EPR.Calculator.API.UnitTests.Global
             this.httpContext.Response.Body = new MemoryStream();
             this.cancellationToken = CancellationToken.None;
         }
+
+        public TestContext TestContext { get; set; }
 
         public static Exception CreateExceptionWithDummyStackTrace(string message, string dummyStackTrace)
         {
@@ -80,7 +81,7 @@ namespace EPR.Calculator.API.UnitTests.Global
             await this.exceptionHandler.TryHandleAsync(this.httpContext, exception, this.cancellationToken);
 
             this.httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
-            var jsonResponse = await new StreamReader(this.httpContext.Response.Body).ReadToEndAsync();
+            var jsonResponse = await new StreamReader(this.httpContext.Response.Body).ReadToEndAsync(TestContext.CancellationTokenSource.Token);
             var responseObject = JsonSerializer.Deserialize<JsonElement>(jsonResponse);
 
             Assert.AreEqual(StatusCodes.Status500InternalServerError, responseObject.GetProperty("Status").GetInt32());
@@ -100,7 +101,7 @@ namespace EPR.Calculator.API.UnitTests.Global
             await this.exceptionHandler.TryHandleAsync(this.httpContext, exception, this.cancellationToken);
 
             this.httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
-            var jsonResponse = await new StreamReader(this.httpContext.Response.Body).ReadToEndAsync();
+            var jsonResponse = await new StreamReader(this.httpContext.Response.Body).ReadToEndAsync(TestContext.CancellationTokenSource.Token);
             var responseObject = JsonSerializer.Deserialize<JsonElement>(jsonResponse);
 
             Assert.AreEqual(StatusCodes.Status500InternalServerError, responseObject.GetProperty("Status").GetInt32());
@@ -118,7 +119,7 @@ namespace EPR.Calculator.API.UnitTests.Global
             await this.exceptionHandler.TryHandleAsync(this.httpContext, exception, this.cancellationToken);
 
             this.httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
-            var jsonResponse = await new StreamReader(this.httpContext.Response.Body).ReadToEndAsync();
+            var jsonResponse = await new StreamReader(this.httpContext.Response.Body).ReadToEndAsync(TestContext.CancellationTokenSource.Token);
             var responseObject = JsonSerializer.Deserialize<JsonElement>(jsonResponse);
 
             Assert.AreEqual(StatusCodes.Status500InternalServerError, responseObject.GetProperty("Status").GetInt32());

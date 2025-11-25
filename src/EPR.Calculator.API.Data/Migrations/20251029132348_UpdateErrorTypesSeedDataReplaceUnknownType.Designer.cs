@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251029132348_UpdateErrorTypesSeedDataReplaceUnknownType")]
+    partial class UpdateErrorTypesSeedDataReplaceUnknownType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1095,6 +1098,10 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("description");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -1103,60 +1110,67 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.ToTable("error_type", (string)null);
 
                     b.HasData(
                         new
                         {
                             Id = 1,
+                            Description = "Where there is a misalignment between the POM files structure and the Registration file structure re Producer IDs and Subsidiary IDs",
                             Name = "Missing Registration Data"
                         },
                         new
                         {
                             Id = 2,
+                            Description = "Where there is more than one entry for a producer that has an obligated leaver code.",
                             Name = "Conflicting Obligations (Leaver Codes)"
                         },
                         new
                         {
                             Id = 3,
+                            Description = "Where there is more than one entry for a producer that has a blank leaver code and where there are no obligated leaver code entries",
                             Name = "Conflicting Obligations (Blank)"
                         },
                         new
                         {
                             Id = 4,
+                            Description = "Where a producer is flagged with a leaver code of 11 (Insolvent) or 12 (No longer performing a producer function)",
                             Name = "No longer trading"
                         },
                         new
                         {
                             Id = 5,
+                            Description = "Where a producer only appears with Not Obligated leaver codes.",
                             Name = "Not Obligated"
                         },
                         new
                         {
                             Id = 6,
+                            Description = "Where the producer is only flagged as a leaver of a compliance scheme (Leaver Code 13 and 14)",
                             Name = "Compliance Scheme Leaver"
                         },
                         new
                         {
                             Id = 7,
+                            Description = "Where a producer leaves a compliance scheme and is obligated as a direct producer.",
                             Name = "Compliance Scheme to Direct Producer"
                         },
                         new
                         {
                             Id = 8,
+                            Description = "Where a producer has an entry for a non-valid leaver code.",
                             Name = "Invalid Leaver Code"
                         },
                         new
                         {
                             Id = 9,
+                            Description = "Where a leaver or joiner date falls outside of the calendar year boundary.",
                             Name = "Date input issue"
                         },
                         new
                         {
                             Id = 10,
+                            Description = "Where a Organisation (Producer or Subsidiary) ID does not conform to the 6 digit structure.",
                             Name = "Invalid Organisation ID"
                         });
                 });

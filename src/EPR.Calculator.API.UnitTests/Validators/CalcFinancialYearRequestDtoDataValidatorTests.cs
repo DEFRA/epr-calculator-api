@@ -5,7 +5,6 @@ using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Validators;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests.Validators
 {
@@ -27,9 +26,9 @@ namespace EPR.Calculator.API.UnitTests.Validators
             var options = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: dbName)
                 .Options;
-            this.dbContext = new ApplicationDBContext(options);
+            dbContext = new ApplicationDBContext(options);
 
-            var calculatorRunFinancialYear = new CalculatorRunFinancialYear { Name = this.financialYear };
+            var calculatorRunFinancialYear = new CalculatorRunFinancialYear { Name = financialYear };
 
             var calcRuns = new List<CalculatorRun>()
             {
@@ -38,24 +37,24 @@ namespace EPR.Calculator.API.UnitTests.Validators
                     CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
                     Financial_Year = calculatorRunFinancialYear,
                     Name = "Test",
-                    Id = this.calcRunId,
+                    Id = calcRunId,
                     CreatedBy = "Test",
                     CreatedAt = DateTime.UtcNow,
                 },
-                new CalculatorRun
+                new()
                 {
                     CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
                     Financial_Year = calculatorRunFinancialYear,
                     Name = "Test",
-                    Id = this.unclassifiedRunId,
+                    Id = unclassifiedRunId,
                     CreatedBy = "Test",
                     CreatedAt = DateTime.UtcNow,
                 },
             };
 
-            this.dbContext.CalculatorRuns.AddRange(calcRuns);
-            this.dbContext.SaveChanges();
-            this.validator = new CalcFinancialYearRequestDtoDataValidator(this.dbContext);
+            dbContext.CalculatorRuns.AddRange(calcRuns);
+            dbContext.SaveChanges();
+            validator = new CalcFinancialYearRequestDtoDataValidator(dbContext);
         }
 
         [TestMethod]
@@ -67,12 +66,12 @@ namespace EPR.Calculator.API.UnitTests.Validators
             // Arrange
             var request = new CalcFinancialYearRequestDto
             {
-                RunId = this.calcRunId,
+                RunId = calcRunId,
                 FinancialYear = financialYear,
             };
 
             // Act
-            var result = await this.validator.Validate(request);
+            var result = await validator.Validate(request, CancellationToken.None);
 
             // Assert
             result.IsInvalid.Should().BeTrue();
@@ -86,12 +85,12 @@ namespace EPR.Calculator.API.UnitTests.Validators
             // Arrange
             var request = new CalcFinancialYearRequestDto
             {
-                RunId = this.calcRunId,
+                RunId = calcRunId,
                 FinancialYear = financialYear,
             };
 
             // Act
-            var result = await this.validator.Validate(request);
+            var result = await validator.Validate(request, CancellationToken.None);
 
             // Assert
             result.IsInvalid.Should().BeTrue();
@@ -106,11 +105,11 @@ namespace EPR.Calculator.API.UnitTests.Validators
             var request = new CalcFinancialYearRequestDto
             {
                 RunId = runId,
-                FinancialYear = this.financialYear,
+                FinancialYear = financialYear,
             };
 
             // Act
-            var result = await this.validator.Validate(request);
+            var result = await validator.Validate(request, CancellationToken.None);
 
             // Assert
             result.IsInvalid.Should().BeTrue();
@@ -123,12 +122,12 @@ namespace EPR.Calculator.API.UnitTests.Validators
             // Arrange
             var request = new CalcFinancialYearRequestDto
             {
-                RunId = this.calcRunId,
-                FinancialYear = this.financialYear,
+                RunId = calcRunId,
+                FinancialYear = financialYear,
             };
 
             // Act
-            var result = await this.validator.Validate(request);
+            var result = await validator.Validate(request, CancellationToken.None);
 
             // Assert
             result.IsInvalid.Should().BeTrue();
@@ -141,12 +140,12 @@ namespace EPR.Calculator.API.UnitTests.Validators
             // Arrange
             var request = new CalcFinancialYearRequestDto
             {
-                RunId = this.unclassifiedRunId,
-                FinancialYear = this.financialYear,
+                RunId = unclassifiedRunId,
+                FinancialYear = financialYear,
             };
 
             // Act
-            var result = await this.validator.Validate(request);
+            var result = await validator.Validate(request, CancellationToken.None);
 
             // Assert
             result.IsInvalid.Should().BeFalse();

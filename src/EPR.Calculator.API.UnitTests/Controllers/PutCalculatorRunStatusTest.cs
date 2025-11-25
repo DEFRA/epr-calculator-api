@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
@@ -47,6 +46,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context.CalculatorRuns.AddRange(GetCalculatorRuns());
             context.SaveChanges();
         }
+
+        public TestContext TestContext { get; set; }
 
         private CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
 
@@ -83,7 +84,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var runId = 0;
             var task = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
                 { ClassificationId = 5, RunId = runId });
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
             var result = task.Result as ObjectResult;
             Assert.IsNotNull(result);
 
@@ -135,7 +136,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
             var task = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
                 { ClassificationId = invalidClassificationId, RunId = runId });
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
             var result = task.Result as ObjectResult;
             Assert.IsNotNull(result);
 
@@ -187,7 +188,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
             var task = controller.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto
             { ClassificationId = validClassificationId, RunId = runId });
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
             var result = task.Result as StatusCodeResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(201, result.StatusCode);
