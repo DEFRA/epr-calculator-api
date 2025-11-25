@@ -2,13 +2,13 @@
 
 namespace EPR.Calculator.API.UnitTests.Helpers
 {
-    public class DefaultParameterSettingHelper
+    public static class DefaultParameterSettingHelper
     {
         public static IEnumerable<DefaultParameterTemplateMaster> GetDefaultParameterTemplateMasterData()
         {
             var list = new List<DefaultParameterTemplateMaster>
             {
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "COMC-ENG",
                     ParameterCategory = "England",
@@ -16,7 +16,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "COMC-NIR",
                     ParameterCategory = "Northern Ireland",
@@ -24,7 +24,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "COMC-SCT",
                     ParameterCategory = "Scotland",
@@ -32,7 +32,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "COMC-UK",
                     ParameterCategory = "United Kingdom",
@@ -40,7 +40,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "COMC-WLS",
                     ParameterCategory = "Wales",
@@ -48,7 +48,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "COMC-AL",
                     ParameterCategory = "Aluminium",
@@ -56,7 +56,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "COMC-FC",
                     ParameterCategory = "Fibre composite",
@@ -64,7 +64,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "COMC-GL",
                     ParameterCategory = "Glass",
@@ -72,7 +72,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "COMC-PC",
                     ParameterCategory = "Paper or card",
@@ -80,7 +80,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "COMC-PL",
                     ParameterCategory = "Plastic",
@@ -88,7 +88,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "COMC-ST",
                     ParameterCategory = "Steel",
@@ -96,7 +96,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "COMC-WD",
                     ParameterCategory = "Wood",
@@ -104,7 +104,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "LRET-FC",
                     ParameterCategory = "Fibre composite",
@@ -112,7 +112,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "LRET-GL",
                     ParameterCategory = "Glass",
@@ -120,7 +120,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "LRET-AL",
                     ParameterCategory = "Aluminium",
@@ -128,7 +128,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "LRET-WD",
                     ParameterCategory = "Wood",
@@ -136,7 +136,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "LRET-ST",
                     ParameterCategory = "Steel",
@@ -144,7 +144,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "LRET-PC",
                     ParameterCategory = "Paper or card",
@@ -152,7 +152,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "LAPC-ENG",
                     ParameterCategory = "England",
@@ -160,7 +160,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "LAPC-NIR",
                     ParameterCategory = "Northern Ireland",
@@ -168,7 +168,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "LAPC-SCT",
                     ParameterCategory = "Scotland",
@@ -176,7 +176,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "LAPC-WLS",
                     ParameterCategory = "Wales",
@@ -184,7 +184,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "MATT-AD",
                     ParameterCategory = "Amount Decrease",
@@ -192,7 +192,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = -999999999.990m,
                     ValidRangeTo = 0.00m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "MATT-AI",
                     ParameterCategory = "Amount Increase",
@@ -200,7 +200,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "MATT-PD",
                     ParameterCategory = "Percent Decrease",
@@ -208,7 +208,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = -999.990m,
                     ValidRangeTo = 0.00m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "MATT-PI",
                     ParameterCategory = "Percent Increase",
@@ -216,7 +216,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999.990m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "COMC-OT",
                     ParameterCategory = "Other",
@@ -224,7 +224,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "LRET-OT",
                     ParameterCategory = "Other materials",
@@ -232,7 +232,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "BADEBT-P",
                     ParameterCategory = "Bad debt provision",
@@ -240,7 +240,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 1000.000m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "LRET-PL",
                     ParameterCategory = "Plastic",
@@ -248,7 +248,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "SAOC-ENG",
                     ParameterCategory = "England",
@@ -256,7 +256,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "SAOC-NIR",
                     ParameterCategory = "Northern Ireland",
@@ -264,7 +264,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "SAOC-SCT",
                     ParameterCategory = "Scotland",
@@ -272,7 +272,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "SAOC-WLS",
                     ParameterCategory = "Wales",
@@ -280,7 +280,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "SCSC-ENG",
                     ParameterCategory = "England",
@@ -288,7 +288,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "SCSC-NIR",
                     ParameterCategory = "Northern Ireland",
@@ -296,7 +296,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "SCSC-SCT",
                     ParameterCategory = "Scotland",
@@ -304,7 +304,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "SCSC-WLS",
                     ParameterCategory = "Wales",
@@ -312,7 +312,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "TONT-AD",
                     ParameterCategory = "Amount Decrease",
@@ -320,7 +320,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = -999999999.990m,
                     ValidRangeTo = 0.00m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "TONT-AI",
                     ParameterCategory = "Amount Increase",
@@ -328,7 +328,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "TONT-PD",
                     ParameterCategory = "Percent Decrease",
@@ -336,7 +336,7 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = -999.990m,
                     ValidRangeTo = 0.00m,
                 },
-                new DefaultParameterTemplateMaster
+                new()
                 {
                     ParameterUniqueReferenceId = "TONT-PI",
                     ParameterCategory = "Percent Increase",

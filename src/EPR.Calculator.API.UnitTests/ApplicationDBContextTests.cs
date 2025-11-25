@@ -14,9 +14,9 @@ namespace EPR.Calculator.API.UnitTests
     {
         public ApplicationDBContextTests()
         {
-            this.Options = new Mock<DbContextOptions<ApplicationDBContext>>().Object;
-            this.Options = new DbContextOptionsBuilder<ApplicationDBContext>().Options;
-            this.TestClass = new TestApplicationDBContext(this.Options);
+            Options = new Mock<DbContextOptions<ApplicationDBContext>>().Object;
+            Options = new DbContextOptionsBuilder<ApplicationDBContext>().Options;
+            TestClass = new TestApplicationDBContext(Options);
         }
 
         private TestApplicationDBContext TestClass { get; init; }
@@ -31,10 +31,10 @@ namespace EPR.Calculator.API.UnitTests
             var optionsBuilder = fixture.Create<DbContextOptionsBuilder>();
 
             // Act
-            this.TestClass.PublicOnConfiguring(optionsBuilder);
+            TestClass.PublicOnConfiguring(optionsBuilder);
 
             // Assert
-            Assert.AreEqual(true, optionsBuilder.IsConfigured);
+            Assert.IsTrue(optionsBuilder.IsConfigured);
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace EPR.Calculator.API.UnitTests
         {
             public void PublicOnConfiguring(DbContextOptionsBuilder optionsBuilder)
             {
-                this.OnConfiguring(optionsBuilder);
+                OnConfiguring(optionsBuilder);
             }
         }
     }

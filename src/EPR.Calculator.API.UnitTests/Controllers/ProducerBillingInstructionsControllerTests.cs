@@ -87,7 +87,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(StatusCodes.Status200OK, okResult.StatusCode);
             var returnedDto = okResult.Value as ProducerBillingInstructionsResponseDto;
             Assert.IsNotNull(returnedDto);
-            Assert.AreEqual(1, returnedDto.Records.Count);
+            Assert.HasCount(1, returnedDto.Records);
             Assert.AreEqual("Test Run", returnedDto.RunName);
         }
 
@@ -120,7 +120,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(StatusCodes.Status200OK, okResult.StatusCode);
             var returnedDto = okResult.Value as ProducerBillingInstructionsResponseDto;
             Assert.IsNotNull(returnedDto);
-            Assert.AreEqual(0, returnedDto.Records.Count);
+            Assert.IsEmpty(returnedDto.Records);
             Assert.AreEqual("Test Run", returnedDto.RunName);
         }
     }

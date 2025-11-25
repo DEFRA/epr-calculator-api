@@ -8,7 +8,6 @@ using EPR.Calculator.API.Utils;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Services
@@ -43,6 +42,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                 this.mockLogger.Object);
         }
 
+        public TestContext TestContext { get; set; }
+
         [TestMethod]
         public void Constructor_ShouldThrowException_WhenBlobStorageSettingsMissing()
         {
@@ -54,7 +55,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             configurationMock.Setup(x => x.GetSection("BlobStorage")).Returns(configurationSectionMock.Object);
 
             // Act & Assert is handled by ExpectedException
-            Assert.ThrowsException<ConfigurationErrorsException>(
+            Assert.ThrowsExactly<ConfigurationErrorsException>(
                 () => new BlobStorageService(
                     this.mockBlobServiceClient.Object,
                     configurationMock.Object,

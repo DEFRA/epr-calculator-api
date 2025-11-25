@@ -19,5 +19,9 @@
         public int CalculatorRunOrganisationDataMasterId { get; set; }
 
         public virtual CalculatorRunOrganisationDataMaster? CalculatorRunOrganisationDataMaster { get; set; }
+
+        public string ObligationStatus { get; set; } = string.Empty;
+
+        public Guid? SubmitterId { get; set; }
     }
 }

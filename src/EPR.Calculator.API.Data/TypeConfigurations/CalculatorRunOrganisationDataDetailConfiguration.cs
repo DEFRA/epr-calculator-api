@@ -39,6 +39,13 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
 
             builder.Property(p => p.CalculatorRunOrganisationDataMasterId)
                    .HasColumnName("calculator_run_organization_data_master_id");
+
+            builder.Property(p => p.ObligationStatus)
+                   .HasColumnName("obligation_status");
+
+            builder.Property(p => p.SubmitterId)
+                   .HasColumnName("submitter_id");
+
         }
     }
 }

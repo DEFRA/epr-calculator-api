@@ -21,6 +21,8 @@ public class CalculationRunServiceTests
     private CalculationRunService service = null!;
     private Mock<ILogger<CalculationRunService>> loggerMock = null!;
 
+    public TestContext TestContext { get; set; }
+
     [TestInitialize]
     public void Setup()
     {
@@ -83,7 +85,7 @@ public class CalculationRunServiceTests
         this.AddRunToDb(classification, requestId: 1, WrongFinancialYear);
 
         // Act
-        var result = await this.service.GetDesignatedRunsByFinanialYear(FinancialYear);
+        var result = await this.service.GetDesignatedRunsByFinanialYear(FinancialYear, TestContext.CancellationTokenSource.Token);
 
         // Assert
         result.Should().HaveCount(0);
@@ -112,7 +114,7 @@ public class CalculationRunServiceTests
         this.AddRunToDb(classification, requestId: 1, FinancialYear);
 
         // Act
-        var result = await this.service.GetDesignatedRunsByFinanialYear(FinancialYear);
+        var result = await this.service.GetDesignatedRunsByFinanialYear(FinancialYear, TestContext.CancellationTokenSource.Token);
 
         // Assert
         result.Should().HaveCount(expectedRowCount);
@@ -128,7 +130,7 @@ public class CalculationRunServiceTests
         this.AddRunToDb(RunClassification.TEST_RUN, requestId: 4, FinancialYear);
 
         // Act
-        var result = await this.service.GetDesignatedRunsByFinanialYear(FinancialYear);
+        var result = await this.service.GetDesignatedRunsByFinanialYear(FinancialYear, TestContext.CancellationTokenSource.Token);
 
         // Assert
         result.Should().HaveCount(2);

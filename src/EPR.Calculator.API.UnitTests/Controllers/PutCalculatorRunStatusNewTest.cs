@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
@@ -64,6 +63,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             });
             this.context.SaveChanges();
         }
+
+        public TestContext TestContext { get; set; }
 
         private Mock<IOrgAndPomWrapper> MockWrapper { get; init; } = null!;
 
@@ -118,7 +119,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Act
             var task = this.calculatorNewControllerUnderTest.PutCalculatorRunStatus(runStatusUpdateDto);
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
 
             // Assert
             var result = task.Result as StatusCodeResult;
@@ -184,7 +185,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Act
             var task = this.calculatorNewControllerUnderTest.PutCalculatorRunStatus(runStatusUpdateDto);
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
 
             // Assert
             var result = task.Result as ObjectResult;
@@ -275,7 +276,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Act
             var task = this.calculatorNewControllerUnderTest.PutCalculatorRunStatus(runStatusUpdateDto);
-            task.Wait();
+            task.Wait(TestContext.CancellationTokenSource.Token);
 
             // Assert
             var result = task.Result as ObjectResult;

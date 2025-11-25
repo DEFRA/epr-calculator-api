@@ -13,7 +13,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
         public CalculatorRunStatusDataValidatorTest()
         {
-            this.Fixture = new Fixture();
+            Fixture = new Fixture();
         }
 
         private Fixture Fixture { get; init; }
@@ -43,7 +43,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
 
             // Assert
             Assert.IsNotNull(genericValidationResultDto);
@@ -76,7 +76,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
 
             // Assert
             Assert.IsNotNull(genericValidationResultDto);
@@ -109,7 +109,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
 
             // Assert
             Assert.IsNotNull(genericValidationResultDto);
@@ -141,7 +141,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
 
             // Assert
             Assert.IsNotNull(genericValidationResultDto);
@@ -171,7 +171,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
 
             // Assert
             Assert.IsNotNull(genericValidationResultDto);
@@ -207,7 +207,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
 
             // Assert
             Assert.IsNotNull(genericValidationResultDto);
@@ -240,7 +240,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
 
             // Assert
             Assert.IsNotNull(genericValidationResultDto);
@@ -273,7 +273,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
 
             // Assert
             Assert.IsNotNull(genericValidationResultDto);
@@ -300,7 +300,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
 
             // Assert
             Assert.IsNotNull(genericValidationResultDto);
@@ -328,7 +328,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(
                 designatedRuns,
                 calculatorRun,
                 runStatusUpdateDto);
@@ -380,7 +380,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(
                 designatedRuns,
                 calculatorRun,
                 runStatusUpdateDto);
@@ -423,7 +423,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(
                 designatedRuns,
                 calculatorRun,
                 runStatusUpdateDto);
@@ -466,7 +466,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(
                 designatedRuns,
                 calculatorRun,
                 runStatusUpdateDto);
@@ -511,7 +511,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(
                 designatedRuns,
                 calculatorRun,
                 runStatusUpdateDto);
@@ -554,7 +554,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(
                 designatedRuns,
                 calculatorRun,
                 runStatusUpdateDto);
@@ -585,7 +585,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(
                 designatedRuns,
                 calculatorRun,
                 runStatusUpdateDto);
@@ -677,7 +677,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(
                 designatedRuns,
                 calculatorRun,
                 runStatusUpdateDto);
@@ -736,7 +736,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(
                 designatedRuns,
                 calculatorRun,
                 runStatusUpdateDto);
@@ -811,7 +811,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(
                 designatedRuns,
                 calculatorRun,
                 runStatusUpdateDto);
@@ -904,7 +904,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             // Act
-            GenericValidationResultDto genericValidationResultDto = this.calculatorRunStatusDataValidatorUnderTest.Validate(
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(
                 designatedRuns,
                 calculatorRun,
                 runStatusUpdateDto);

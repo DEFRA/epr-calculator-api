@@ -129,7 +129,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var result = validator.Validate(parameter);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual("Parameter Year is required", result.Errors.First().ErrorMessage);
+            Assert.AreEqual("Parameter Year is required", result.Errors[0].ErrorMessage);
         }
 
         [TestMethod]
@@ -166,7 +166,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var result = validator.Validate(parameter);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual("FileName is required", result.Errors.First().ErrorMessage);
+            Assert.AreEqual("FileName is required", result.Errors[0].ErrorMessage);
         }
 
         [TestMethod]
@@ -203,7 +203,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var result = validator.Validate(parameter);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(CommonResources.MaxFileNameLength, result.Errors.First().ErrorMessage);
+            Assert.AreEqual(CommonResources.MaxFileNameLength, result.Errors[0].ErrorMessage);
         }
 
         // Private Methods
