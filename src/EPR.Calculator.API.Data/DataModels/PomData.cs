@@ -21,5 +21,7 @@
         public required string? SubmissionPeriodDesc { get; set; }
 
         public required DateTime LoadTimeStamp { get; set; }
+
+        public Guid? SubmitterId { get; set; }
     }
 }

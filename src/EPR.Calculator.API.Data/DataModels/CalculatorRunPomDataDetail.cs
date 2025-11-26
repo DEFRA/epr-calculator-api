@@ -27,5 +27,7 @@
         public int CalculatorRunPomDataMasterId { get; set; }
 
         public virtual CalculatorRunPomDataMaster? CalculatorRunPomDataMaster { get; set; }
+
+        public Guid? SubmitterId { get; set; }
     }
 }
