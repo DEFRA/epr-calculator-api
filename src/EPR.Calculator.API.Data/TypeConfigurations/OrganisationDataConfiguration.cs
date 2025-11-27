@@ -42,6 +42,15 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
 
             builder.Property(p => p.SubmitterId)
                      .HasColumnName("submitter_id");
+
+            builder.Property(p => p.StatusCode)
+                     .HasColumnName("status_code");
+
+            builder.Property(p => p.PartialObligationPercentage)
+                     .HasColumnName("partial_obligation_percentage");
+
+            builder.Property(p => p.ErrorCodeDesc)
+                     .HasColumnName("error_code_desc");
         }
     }
 }
