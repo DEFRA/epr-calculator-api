@@ -37,7 +37,8 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
                    .HasColumnName("load_ts");
 
             builder.Property(p => p.ObligationStatus)
-                   .HasColumnName("obligation_status");
+                   .HasColumnName("obligation_status")
+                   .HasMaxLength(10);
 
             builder.Property(p => p.SubmitterId)
                      .HasColumnName("submitter_id");

@@ -58,6 +58,9 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.Property(p => p.SubmitterId)
                    .HasColumnName("submitter_id");
 
+            builder.HasIndex(e => new { e.OrganisationId })
+                   .HasDatabaseName("IX_index_calculator_run_pom_data_detail_OrgId")
+                   .IsClustered(false);
         }
     }
 }

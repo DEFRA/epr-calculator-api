@@ -41,11 +41,15 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
                    .HasColumnName("calculator_run_organization_data_master_id");
 
             builder.Property(p => p.ObligationStatus)
-                   .HasColumnName("obligation_status");
+                   .HasColumnName("obligation_status")
+                   .HasMaxLength(10);
 
             builder.Property(p => p.SubmitterId)
                    .HasColumnName("submitter_id");
 
+            builder.HasIndex(e => new { e.OrganisationId })
+                   .HasDatabaseName("IX_index_calculator_run_organization_data_detail_OrgId")
+                   .IsClustered(false);
         }
     }
 }
