@@ -55,10 +55,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
 
             builder.Property(p => p.ErrorCodeDesc)
                     .HasColumnName("error_code_desc");
-
-            builder.HasIndex(e => new { e.OrganisationId })
-                    .HasDatabaseName("IX_index_calculator_run_organization_data_detail_OrgId")
-                   .IsClustered(false);
         }
     }
 }

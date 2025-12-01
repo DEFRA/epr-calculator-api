@@ -5812,3 +5812,117 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251128105600_AddColumnsToOrgDataAndDetail'
+)
+BEGIN
+    DECLARE @var34 sysname;
+    SELECT @var34 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[organisation_data]') AND [c].[name] = N'obligation_status');
+    IF @var34 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT [' + @var34 + '];');
+    ALTER TABLE [organisation_data] ALTER COLUMN [obligation_status] nvarchar(10) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251128105600_AddColumnsToOrgDataAndDetail'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [error_code_desc] nvarchar(max) NOT NULL DEFAULT N'';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251128105600_AddColumnsToOrgDataAndDetail'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [partial_obligation_percentage] float NOT NULL DEFAULT 0.0E0;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251128105600_AddColumnsToOrgDataAndDetail'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [status_code] int NOT NULL DEFAULT 0;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251128105600_AddColumnsToOrgDataAndDetail'
+)
+BEGIN
+    DECLARE @var35 sysname;
+    SELECT @var35 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organization_data_detail]') AND [c].[name] = N'obligation_status');
+    IF @var35 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT [' + @var35 + '];');
+    ALTER TABLE [calculator_run_organization_data_detail] ALTER COLUMN [obligation_status] nvarchar(10) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251128105600_AddColumnsToOrgDataAndDetail'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [error_code_desc] nvarchar(max) NOT NULL DEFAULT N'';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251128105600_AddColumnsToOrgDataAndDetail'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [partial_obligation_percentage] float NOT NULL DEFAULT 0.0E0;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251128105600_AddColumnsToOrgDataAndDetail'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [status_code] int NOT NULL DEFAULT 0;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251128105600_AddColumnsToOrgDataAndDetail'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'name') AND [object_id] = OBJECT_ID(N'[error_type]'))
+        SET IDENTITY_INSERT [error_type] ON;
+    EXEC(N'INSERT INTO [error_type] ([id], [name])
+    VALUES (11, N''Missing POM data'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'name') AND [object_id] = OBJECT_ID(N'[error_type]'))
+        SET IDENTITY_INSERT [error_type] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251128105600_AddColumnsToOrgDataAndDetail'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251128105600_AddColumnsToOrgDataAndDetail', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
