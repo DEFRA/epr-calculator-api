@@ -326,6 +326,10 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("calculator_run_organization_data_master_id");
 
+                    b.Property<int?>("DaysObligated")
+                        .HasColumnType("int")
+                        .HasColumnName("calendar_year_days_obligated");
+
                     b.Property<string>("ErrorCodeDesc")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
@@ -351,12 +355,8 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("organisation_name");
 
-                    b.Property<double>("PartialObligationPercentage")
-                        .HasColumnType("float")
-                        .HasColumnName("partial_obligation_percentage");
-
-                    b.Property<int>("StatusCode")
-                        .HasColumnType("int")
+                    b.Property<string>("StatusCode")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("status_code");
 
                     b.Property<string>("SubmissionPeriodDesc")
@@ -1595,6 +1595,10 @@ namespace EPR.Calculator.API.Data.Migrations
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.OrganisationData", b =>
                 {
+                    b.Property<int?>("DaysObligated")
+                        .HasColumnType("int")
+                        .HasColumnName("calendar_year_days_obligated");
+
                     b.Property<string>("ErrorCodeDesc")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
@@ -1620,12 +1624,8 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("organisation_name");
 
-                    b.Property<double>("PartialObligationPercentage")
-                        .HasColumnType("float")
-                        .HasColumnName("partial_obligation_percentage");
-
-                    b.Property<int>("StatusCode")
-                        .HasColumnType("int")
+                    b.Property<string>("StatusCode")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("status_code");
 
                     b.Property<string>("SubmissionPeriodDesc")

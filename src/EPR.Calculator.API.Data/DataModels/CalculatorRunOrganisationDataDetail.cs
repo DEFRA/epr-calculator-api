@@ -24,9 +24,9 @@
 
         public Guid? SubmitterId { get; set; }
 
-        public int StatusCode { get; set; }
+        public string? StatusCode { get; set; }
 
-        public double PartialObligationPercentage { get; set; }
+        public int? DaysObligated { get; set; }
 
         public string ErrorCodeDesc { get; set; } = string.Empty;
     }
