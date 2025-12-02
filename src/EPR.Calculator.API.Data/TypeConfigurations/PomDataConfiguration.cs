@@ -49,6 +49,9 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
 
             builder.Property(p => p.LoadTimeStamp)
                    .HasColumnName("load_ts");
+
+            builder.Property(p => p.SubmitterId)
+                   .HasColumnName("submitter_id");
         }
     }
 }

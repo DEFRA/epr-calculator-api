@@ -13,5 +13,9 @@
         public required string SubmissionPeriodDesc { get; set; }
 
         public required DateTime LoadTimestamp { get; set; }
+
+        public string ObligationStatus { get; set; } = string.Empty;
+
+        public Guid? SubmitterId { get; set; }
     }
 }
