@@ -19,7 +19,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.Property(p => p.OrganisationId)
                    .HasColumnName("organisation_id");
 
-            builder.Property(p => p.SubsidaryId)
+            builder.Property(p => p.SubsidiaryId)
                    .HasColumnName("subsidiary_id")
                    .HasMaxLength(400);
 
@@ -30,9 +30,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.Property(p => p.TradingName)
                    .HasColumnName("trading_name")
                    .HasMaxLength(400);
-
-            builder.Property(p => p.SubmissionPeriodDesc)
-                   .HasColumnName("submission_period_desc");
 
             builder.Property(p => p.LoadTimeStamp)
                    .HasColumnName("load_ts");
@@ -51,10 +48,10 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
                    .HasColumnName("status_code");
 
             builder.Property(p => p.DaysObligated)
-                    .HasColumnName("calendar_year_days_obligated");
+                    .HasColumnName("num_days_obligated");
 
-            builder.Property(p => p.ErrorCodeDesc)
-                    .HasColumnName("error_code_desc");
+            builder.Property(p => p.ErrorCode)
+                    .HasColumnName("error_code");
         }
     }
 }

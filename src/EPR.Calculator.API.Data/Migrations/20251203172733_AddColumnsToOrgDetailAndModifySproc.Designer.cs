@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20251201142902_AddColumnsToOrgDetailAndModifySproc")]
+    [Migration("20251203172733_AddColumnsToOrgDetailAndModifySproc")]
     partial class AddColumnsToOrgDetailAndModifySproc
     {
         /// <inheritdoc />
@@ -331,12 +331,11 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.Property<int?>("DaysObligated")
                         .HasColumnType("int")
-                        .HasColumnName("calendar_year_days_obligated");
+                        .HasColumnName("num_days_obligated");
 
-                    b.Property<string>("ErrorCodeDesc")
-                        .IsRequired()
+                    b.Property<string>("ErrorCode")
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("error_code_desc");
+                        .HasColumnName("error_code");
 
                     b.Property<DateTime>("LoadTimeStamp")
                         .HasColumnType("datetime2")
@@ -362,15 +361,11 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("status_code");
 
-                    b.Property<string>("SubmissionPeriodDesc")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("submission_period_desc");
-
                     b.Property<Guid?>("SubmitterId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("submitter_id");
 
-                    b.Property<string>("SubsidaryId")
+                    b.Property<string>("SubsidiaryId")
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("subsidiary_id");
@@ -480,7 +475,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("submitter_id");
 
-                    b.Property<string>("SubsidaryId")
+                    b.Property<string>("SubsidiaryId")
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("subsidiary_id");
@@ -1600,12 +1595,11 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.Property<int?>("DaysObligated")
                         .HasColumnType("int")
-                        .HasColumnName("calendar_year_days_obligated");
+                        .HasColumnName("num_days_obligated");
 
-                    b.Property<string>("ErrorCodeDesc")
-                        .IsRequired()
+                    b.Property<string>("ErrorCode")
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("error_code_desc");
+                        .HasColumnName("error_code");
 
                     b.Property<DateTime>("LoadTimestamp")
                         .HasColumnType("datetime2")
@@ -1631,16 +1625,11 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("status_code");
 
-                    b.Property<string>("SubmissionPeriodDesc")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("submission_period_desc");
-
                     b.Property<Guid?>("SubmitterId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("submitter_id");
 
-                    b.Property<string>("SubsidaryId")
+                    b.Property<string>("SubsidiaryId")
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("subsidiary_id");
@@ -1699,7 +1688,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("submitter_id");
 
-                    b.Property<string>("SubsidaryId")
+                    b.Property<string>("SubsidiaryId")
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("subsidiary_id");

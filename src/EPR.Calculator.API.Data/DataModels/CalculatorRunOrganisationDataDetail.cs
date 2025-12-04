@@ -6,13 +6,11 @@
 
         public int? OrganisationId { get; set; }
 
-        public string? SubsidaryId { get; set; }
+        public string? SubsidiaryId { get; set; }
 
         public required string OrganisationName { get; set; }
 
         public string? TradingName { get; set; }
-
-        public required string? SubmissionPeriodDesc { get; set; }
 
         public DateTime LoadTimeStamp { get; set; }
 
@@ -28,6 +26,6 @@
 
         public int? DaysObligated { get; set; }
 
-        public string ErrorCodeDesc { get; set; } = string.Empty;
+        public string? ErrorCode { get; set; } = string.Empty;
     }
 }

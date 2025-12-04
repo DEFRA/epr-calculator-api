@@ -44,16 +44,16 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         }
 
         [TestMethod]
-        public void CanSetAndGetSubsidaryId()
+        public void CanSetAndGetSubsidiaryId()
         {
             // Arrange
             var testValue = this.Fixture.Create<string>();
 
             // Act
-            this.TestClass.SubsidaryId = testValue;
+            this.TestClass.SubsidiaryId = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, this.TestClass.SubsidaryId);
+            Assert.AreEqual(testValue, this.TestClass.SubsidiaryId);
         }
 
         [TestMethod]
@@ -80,19 +80,6 @@ namespace EPR.Calculator.API.UnitTests.DataModels
 
             // Assert
             Assert.AreEqual(testValue, this.TestClass.TradingName);
-        }
-
-        [TestMethod]
-        public void CanSetAndGetSubmissionPeriodDesc()
-        {
-            // Arrange
-            var testValue = this.Fixture.Create<string>();
-
-            // Act
-            this.TestClass.SubmissionPeriodDesc = testValue;
-
-            // Assert
-            Assert.AreEqual(testValue, this.TestClass.SubmissionPeriodDesc);
         }
 
         [TestMethod]

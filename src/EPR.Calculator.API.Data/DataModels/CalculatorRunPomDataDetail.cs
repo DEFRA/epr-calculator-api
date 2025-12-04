@@ -6,7 +6,7 @@
 
         public int? OrganisationId { get; set; }
 
-        public string? SubsidaryId { get; set; }
+        public string? SubsidiaryId { get; set; }
 
         public required string? SubmissionPeriod { get; set; }
 

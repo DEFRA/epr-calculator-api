@@ -439,7 +439,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 {
                     Id = 1,
                     OrganisationId = 1,
-                    SubsidaryId = "SUBSID1",
+                    SubsidiaryId = "SUBSID1",
                     SubmissionPeriod = "2023-P3",
                     PackagingActivity = null,
                     PackagingType = "CW",
@@ -484,7 +484,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     TradingName = "UPU LTD",
                     LoadTimeStamp = DateTime.UtcNow,
                     CalculatorRunOrganisationDataMasterId = 1,
-                    SubmissionPeriodDesc = "July to December 2023",
                     CalculatorRunOrganisationDataMaster = new CalculatorRunOrganisationDataMaster
                     {
                         Id = 1,
@@ -498,12 +497,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 {
                     Id = 2,
                     OrganisationId = 1,
-                    SubsidaryId = "SUBSID1",
+                    SubsidiaryId = "SUBSID1",
                     OrganisationName = "UPU LIMITED",
                     TradingName = "UPU LTD",
                     LoadTimeStamp = DateTime.UtcNow,
                     CalculatorRunOrganisationDataMasterId = 1,
-                    SubmissionPeriodDesc = "July to December 2023",
                     CalculatorRunOrganisationDataMaster = new CalculatorRunOrganisationDataMaster
                     {
                         Id = 1,

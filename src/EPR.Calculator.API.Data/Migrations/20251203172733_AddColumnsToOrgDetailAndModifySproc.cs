@@ -10,6 +10,15 @@ namespace EPR.Calculator.API.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "submission_period_desc",
+                table: "organisation_data");
+
+            migrationBuilder.RenameColumn(
+                name: "submission_period_desc",
+                table: "calculator_run_organization_data_detail",
+                newName: "status_code");
+
             migrationBuilder.AlterColumn<string>(
                 name: "obligation_status",
                 table: "organisation_data",
@@ -19,18 +28,17 @@ namespace EPR.Calculator.API.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
 
+            migrationBuilder.AddColumn<string>(
+                name: "error_code",
+                table: "organisation_data",
+                type: "nvarchar(max)",
+                nullable: true);
+
             migrationBuilder.AddColumn<int>(
-                name: "calendar_year_days_obligated",
+                name: "num_days_obligated",
                 table: "organisation_data",
                 type: "int",
                 nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "error_code_desc",
-                table: "organisation_data",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
 
             migrationBuilder.AddColumn<string>(
                 name: "status_code",
@@ -47,23 +55,16 @@ namespace EPR.Calculator.API.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
 
-            migrationBuilder.AddColumn<int>(
-                name: "calendar_year_days_obligated",
+            migrationBuilder.AddColumn<string>(
+                name: "error_code",
                 table: "calculator_run_organization_data_detail",
-                type: "int",
+                type: "nvarchar(max)",
                 nullable: true);
 
-            migrationBuilder.AddColumn<string>(
-                name: "error_code_desc",
+            migrationBuilder.AddColumn<int>(
+                name: "num_days_obligated",
                 table: "calculator_run_organization_data_detail",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<string>(
-                name: "status_code",
-                table: "calculator_run_organization_data_detail",
-                type: "nvarchar(max)",
+                type: "int",
                 nullable: true);
 
             migrationBuilder.InsertData(
@@ -95,25 +96,23 @@ namespace EPR.Calculator.API.Data.Migrations
 						load_ts,organisation_id,
 						organisation_name,
 						trading_name,                            
-						submission_period_desc,                            
 						subsidiary_id,
 						obligation_status,
 						submitter_id,
                         status_code,
-                        calendar_year_days_obligated,
-                        error_code_desc)                    
+                        num_days_obligated,
+                        error_code)                    
 					SELECT  @orgDataMasterid,                             
 					load_ts,                            
 					organisation_id,                            
 					organisation_name,                            
 					trading_name,                            
-					submission_period_desc,                            
 					CASE WHEN LTRIM(RTRIM(subsidiary_id)) = '''' THEN NULL ELSE subsidiary_id END as subsidiary_id,
 					obligation_status,
 					submitter_id,
                     status_code,
-                    calendar_year_days_obligated,
-                    error_code_desc
+                    num_days_obligated,
+                    error_code
 					from                             
 						dbo.organisation_data                    
 					Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId                
@@ -121,7 +120,6 @@ namespace EPR.Calculator.API.Data.Migrations
 				EXEC(@Sql)";
 
             migrationBuilder.Sql(createRunOrgSqlString);
-
         }
 
         /// <inheritdoc />
@@ -133,11 +131,11 @@ namespace EPR.Calculator.API.Data.Migrations
                 keyValue: 11);
 
             migrationBuilder.DropColumn(
-                name: "calendar_year_days_obligated",
+                name: "error_code",
                 table: "organisation_data");
 
             migrationBuilder.DropColumn(
-                name: "error_code_desc",
+                name: "num_days_obligated",
                 table: "organisation_data");
 
             migrationBuilder.DropColumn(
@@ -145,16 +143,17 @@ namespace EPR.Calculator.API.Data.Migrations
                 table: "organisation_data");
 
             migrationBuilder.DropColumn(
-                name: "calendar_year_days_obligated",
+                name: "error_code",
                 table: "calculator_run_organization_data_detail");
 
             migrationBuilder.DropColumn(
-                name: "error_code_desc",
+                name: "num_days_obligated",
                 table: "calculator_run_organization_data_detail");
 
-            migrationBuilder.DropColumn(
+            migrationBuilder.RenameColumn(
                 name: "status_code",
-                table: "calculator_run_organization_data_detail");
+                table: "calculator_run_organization_data_detail",
+                newName: "submission_period_desc");
 
             migrationBuilder.AlterColumn<string>(
                 name: "obligation_status",
@@ -164,6 +163,13 @@ namespace EPR.Calculator.API.Data.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(10)",
                 oldMaxLength: 10);
+
+            migrationBuilder.AddColumn<string>(
+                name: "submission_period_desc",
+                table: "organisation_data",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
 
             migrationBuilder.AlterColumn<string>(
                 name: "obligation_status",
@@ -218,7 +224,6 @@ namespace EPR.Calculator.API.Data.Migrations
 				EXEC(@Sql)";
 
             migrationBuilder.Sql(createRunOrgSqlString);
-
         }
     }
 }

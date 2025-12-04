@@ -572,7 +572,7 @@ namespace EPR.Calculator.API.Services
                                        on odm.Id equals run.CalculatorRunOrganisationDataMasterId
                                    where run.Id == runId
                                        && producerIds.Contains(odd.OrganisationId ?? 0)
-                                       && odd.SubsidaryId == null
+                                       && odd.SubsidiaryId == null
                                    orderby odd.Id descending
                                    select new ParentProducer
                                    {
@@ -617,7 +617,7 @@ namespace EPR.Calculator.API.Services
                                             join run in applicationDBContext.CalculatorRuns on odm.Id equals run.CalculatorRunOrganisationDataMasterId
                                             where run.FinancialYearId == financialYear
                                                   && stillMissingIds.Contains(odd.OrganisationId ?? 0)
-                                                  && odd.SubsidaryId == null
+                                                  && odd.SubsidiaryId == null
                                             orderby odd.Id descending
                                             select new ParentProducer
                                             {
