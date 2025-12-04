@@ -34,7 +34,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetOrganisationId()
         {
             // Arrange
-            var testValue = this.Fixture.Create<int?>();
+            var testValue = this.Fixture.Create<int>();
 
             // Act
             this.TestClass.OrganisationId = testValue;

@@ -10,6 +10,10 @@ namespace EPR.Calculator.API.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("UPDATE organisation_data SET organisation_id = 0 WHERE organisation_id IS NULL");
+
+            migrationBuilder.Sql("UPDATE calculator_run_pom_data_detail SET organisation_id = 0 WHERE organisation_id IS NULL");
+
             migrationBuilder.DropColumn(
                 name: "submission_period_desc",
                 table: "organisation_data");
@@ -18,6 +22,16 @@ namespace EPR.Calculator.API.Data.Migrations
                 name: "submission_period_desc",
                 table: "calculator_run_organization_data_detail",
                 newName: "status_code");
+
+            migrationBuilder.AlterColumn<int>(
+                name: "organisation_id",
+                table: "organisation_data",
+                type: "int",
+                nullable: false,
+                defaultValue: 0,
+                oldClrType: typeof(int),
+                oldType: "int",
+                oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
                 name: "obligation_status",
@@ -45,6 +59,16 @@ namespace EPR.Calculator.API.Data.Migrations
                 table: "organisation_data",
                 type: "nvarchar(max)",
                 nullable: true);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "organisation_id",
+                table: "calculator_run_organization_data_detail",
+                type: "int",
+                nullable: false,
+                defaultValue: 0,
+                oldClrType: typeof(int),
+                oldType: "int",
+                oldNullable: true);
 
             migrationBuilder.AlterColumn<string>(
                 name: "obligation_status",
@@ -155,6 +179,14 @@ namespace EPR.Calculator.API.Data.Migrations
                 table: "calculator_run_organization_data_detail",
                 newName: "submission_period_desc");
 
+            migrationBuilder.AlterColumn<int>(
+                name: "organisation_id",
+                table: "organisation_data",
+                type: "int",
+                nullable: true,
+                oldClrType: typeof(int),
+                oldType: "int");
+
             migrationBuilder.AlterColumn<string>(
                 name: "obligation_status",
                 table: "organisation_data",
@@ -170,6 +202,14 @@ namespace EPR.Calculator.API.Data.Migrations
                 type: "nvarchar(max)",
                 nullable: false,
                 defaultValue: "");
+
+            migrationBuilder.AlterColumn<int>(
+                name: "organisation_id",
+                table: "calculator_run_organization_data_detail",
+                type: "int",
+                nullable: true,
+                oldClrType: typeof(int),
+                oldType: "int");
 
             migrationBuilder.AlterColumn<string>(
                 name: "obligation_status",

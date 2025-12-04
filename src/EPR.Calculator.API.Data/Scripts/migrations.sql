@@ -5817,7 +5817,25 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251203172733_AddColumnsToOrgDetailAndModifySproc'
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
+)
+BEGIN
+    UPDATE organisation_data SET organisation_id = 0 WHERE organisation_id IS NULL
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
+)
+BEGIN
+    UPDATE calculator_run_pom_data_detail SET organisation_id = 0 WHERE organisation_id IS NULL
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
     DECLARE @var34 sysname;
@@ -5832,7 +5850,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251203172733_AddColumnsToOrgDetailAndModifySproc'
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
     EXEC sp_rename N'[calculator_run_organization_data_detail].[submission_period_desc]', N'status_code', N'COLUMN';
@@ -5841,22 +5859,39 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251203172733_AddColumnsToOrgDetailAndModifySproc'
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
     DECLARE @var35 sysname;
     SELECT @var35 = [d].[name]
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[organisation_data]') AND [c].[name] = N'obligation_status');
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[organisation_data]') AND [c].[name] = N'organisation_id');
     IF @var35 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT [' + @var35 + '];');
+    EXEC(N'UPDATE [organisation_data] SET [organisation_id] = 0 WHERE [organisation_id] IS NULL');
+    ALTER TABLE [organisation_data] ALTER COLUMN [organisation_id] int NOT NULL;
+    ALTER TABLE [organisation_data] ADD DEFAULT 0 FOR [organisation_id];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
+)
+BEGIN
+    DECLARE @var36 sysname;
+    SELECT @var36 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[organisation_data]') AND [c].[name] = N'obligation_status');
+    IF @var36 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT [' + @var36 + '];');
     ALTER TABLE [organisation_data] ALTER COLUMN [obligation_status] nvarchar(10) NOT NULL;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251203172733_AddColumnsToOrgDetailAndModifySproc'
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
     ALTER TABLE [organisation_data] ADD [error_code] nvarchar(max) NULL;
@@ -5865,7 +5900,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251203172733_AddColumnsToOrgDetailAndModifySproc'
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
     ALTER TABLE [organisation_data] ADD [num_days_obligated] int NULL;
@@ -5874,7 +5909,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251203172733_AddColumnsToOrgDetailAndModifySproc'
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
     ALTER TABLE [organisation_data] ADD [status_code] nvarchar(max) NULL;
@@ -5883,22 +5918,39 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251203172733_AddColumnsToOrgDetailAndModifySproc'
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
-    DECLARE @var36 sysname;
-    SELECT @var36 = [d].[name]
+    DECLARE @var37 sysname;
+    SELECT @var37 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organization_data_detail]') AND [c].[name] = N'organisation_id');
+    IF @var37 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT [' + @var37 + '];');
+    EXEC(N'UPDATE [calculator_run_organization_data_detail] SET [organisation_id] = 0 WHERE [organisation_id] IS NULL');
+    ALTER TABLE [calculator_run_organization_data_detail] ALTER COLUMN [organisation_id] int NOT NULL;
+    ALTER TABLE [calculator_run_organization_data_detail] ADD DEFAULT 0 FOR [organisation_id];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
+)
+BEGIN
+    DECLARE @var38 sysname;
+    SELECT @var38 = [d].[name]
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organization_data_detail]') AND [c].[name] = N'obligation_status');
-    IF @var36 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT [' + @var36 + '];');
+    IF @var38 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT [' + @var38 + '];');
     ALTER TABLE [calculator_run_organization_data_detail] ALTER COLUMN [obligation_status] nvarchar(10) NOT NULL;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251203172733_AddColumnsToOrgDetailAndModifySproc'
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] ADD [error_code] nvarchar(max) NULL;
@@ -5907,7 +5959,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251203172733_AddColumnsToOrgDetailAndModifySproc'
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] ADD [num_days_obligated] int NULL;
@@ -5916,7 +5968,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251203172733_AddColumnsToOrgDetailAndModifySproc'
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'name') AND [object_id] = OBJECT_ID(N'[error_type]'))
@@ -5930,7 +5982,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251203172733_AddColumnsToOrgDetailAndModifySproc'
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
     IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CreateRunOrganization]') AND type = N'P')
@@ -5984,11 +6036,11 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20251203172733_AddColumnsToOrgDetailAndModifySproc'
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251203172733_AddColumnsToOrgDetailAndModifySproc', N'8.0.7');
+    VALUES (N'20251204164331_AddColumnsToOrgDetailAndModifySproc', N'8.0.7');
 END;
 GO
 

@@ -2,7 +2,7 @@
 {
     public class OrganisationData
     {
-        public int? OrganisationId { get; set; }
+        public int OrganisationId { get; set; }
 
         public string? SubsidiaryId { get; set; }
 

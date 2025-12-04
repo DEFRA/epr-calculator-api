@@ -344,7 +344,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(10)")
                         .HasColumnName("obligation_status");
 
-                    b.Property<int?>("OrganisationId")
+                    b.Property<int>("OrganisationId")
                         .HasColumnType("int")
                         .HasColumnName("organisation_id");
 
@@ -1608,7 +1608,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(10)")
                         .HasColumnName("obligation_status");
 
-                    b.Property<int?>("OrganisationId")
+                    b.Property<int>("OrganisationId")
                         .HasColumnType("int")
                         .HasColumnName("organisation_id");
 

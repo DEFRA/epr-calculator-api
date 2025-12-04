@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20251203172733_AddColumnsToOrgDetailAndModifySproc")]
+    [Migration("20251204164331_AddColumnsToOrgDetailAndModifySproc")]
     partial class AddColumnsToOrgDetailAndModifySproc
     {
         /// <inheritdoc />
@@ -347,7 +347,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(10)")
                         .HasColumnName("obligation_status");
 
-                    b.Property<int?>("OrganisationId")
+                    b.Property<int>("OrganisationId")
                         .HasColumnType("int")
                         .HasColumnName("organisation_id");
 
@@ -1611,7 +1611,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(10)")
                         .HasColumnName("obligation_status");
 
-                    b.Property<int?>("OrganisationId")
+                    b.Property<int>("OrganisationId")
                         .HasColumnType("int")
                         .HasColumnName("organisation_id");
 
