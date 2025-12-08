@@ -28,7 +28,6 @@ namespace EPR.Calculator.API.Data.Migrations
                 table: "organisation_data",
                 type: "int",
                 nullable: false,
-                defaultValue: 0,
                 oldClrType: typeof(int),
                 oldType: "int",
                 oldNullable: true);
@@ -65,7 +64,6 @@ namespace EPR.Calculator.API.Data.Migrations
                 table: "calculator_run_organization_data_detail",
                 type: "int",
                 nullable: false,
-                defaultValue: 0,
                 oldClrType: typeof(int),
                 oldType: "int",
                 oldNullable: true);
