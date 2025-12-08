@@ -5868,9 +5868,7 @@ BEGIN
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[organisation_data]') AND [c].[name] = N'organisation_id');
     IF @var35 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT [' + @var35 + '];');
-    EXEC(N'UPDATE [organisation_data] SET [organisation_id] = 0 WHERE [organisation_id] IS NULL');
     ALTER TABLE [organisation_data] ALTER COLUMN [organisation_id] int NOT NULL;
-    ALTER TABLE [organisation_data] ADD DEFAULT 0 FOR [organisation_id];
 END;
 GO
 
@@ -5927,9 +5925,7 @@ BEGIN
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organization_data_detail]') AND [c].[name] = N'organisation_id');
     IF @var37 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT [' + @var37 + '];');
-    EXEC(N'UPDATE [calculator_run_organization_data_detail] SET [organisation_id] = 0 WHERE [organisation_id] IS NULL');
     ALTER TABLE [calculator_run_organization_data_detail] ALTER COLUMN [organisation_id] int NOT NULL;
-    ALTER TABLE [calculator_run_organization_data_detail] ADD DEFAULT 0 FOR [organisation_id];
 END;
 GO
 
