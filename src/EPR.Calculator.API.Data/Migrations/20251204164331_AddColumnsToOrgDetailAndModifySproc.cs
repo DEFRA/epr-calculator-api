@@ -142,6 +142,11 @@ namespace EPR.Calculator.API.Data.Migrations
 				EXEC(@Sql)";
 
             migrationBuilder.Sql(createRunOrgSqlString);
+
+            // Grant EXECUTE on stored procedures to PUBLIC
+            migrationBuilder.Sql(@"GRANT EXEC ON [dbo].[InsertInvoiceDetailsAtProducerLevel] TO PUBLIC;");
+            migrationBuilder.Sql(@"GRANT EXEC ON [dbo].[CreateRunPom] TO PUBLIC;");
+            migrationBuilder.Sql(@"GRANT EXEC ON [dbo].[CreateRunOrganization] TO PUBLIC;");
         }
 
         /// <inheritdoc />
@@ -262,6 +267,11 @@ namespace EPR.Calculator.API.Data.Migrations
 				EXEC(@Sql)";
 
             migrationBuilder.Sql(createRunOrgSqlString);
+
+            // Grant EXECUTE on stored procedures to PUBLIC
+            migrationBuilder.Sql(@"GRANT EXEC ON [dbo].[InsertInvoiceDetailsAtProducerLevel] TO PUBLIC;");
+            migrationBuilder.Sql(@"GRANT EXEC ON [dbo].[CreateRunPom] TO PUBLIC;");
+            migrationBuilder.Sql(@"GRANT EXEC ON [dbo].[CreateRunOrganization] TO PUBLIC;");
         }
     }
 }

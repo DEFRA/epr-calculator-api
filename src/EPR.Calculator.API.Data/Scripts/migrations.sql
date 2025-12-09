@@ -6035,6 +6035,33 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
+    GRANT EXEC ON [dbo].[InsertInvoiceDetailsAtProducerLevel] TO PUBLIC;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
+)
+BEGIN
+    GRANT EXEC ON [dbo].[CreateRunPom] TO PUBLIC;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
+)
+BEGIN
+    GRANT EXEC ON [dbo].[CreateRunOrganization] TO PUBLIC;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
+)
+BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
     VALUES (N'20251204164331_AddColumnsToOrgDetailAndModifySproc', N'8.0.7');
 END;
