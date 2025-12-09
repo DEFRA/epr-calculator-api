@@ -17,13 +17,9 @@ public class ErrorReportConfiguration : IEntityTypeConfiguration<ErrorReport>
         builder.Property(e => e.SubsidiaryId).HasColumnName("subsidiary_id").HasMaxLength(400);
         builder.Property(e => e.CalculatorRunId).HasColumnName("calculator_run_id").IsRequired();
         builder.Property(e => e.LeaverCode).HasColumnName("leaver_code");
-        builder.Property(e => e.ErrorTypeId).HasColumnName("error_type_id").IsRequired();
+        builder.Property(e => e.ErrorCode).HasColumnName("error_code").HasMaxLength(100).IsRequired();
         builder.Property(e => e.CreatedAt).HasColumnName("created_at").IsRequired();
         builder.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(400).IsRequired();
-
-        builder.HasOne(e => e.ErrorType)
-        .WithMany(t => t.ErrorReports)
-        .HasForeignKey(e => e.ErrorTypeId);
 
         builder.HasOne(e => e.CalculatorRun)
         .WithMany(r => r.ErrorReports)

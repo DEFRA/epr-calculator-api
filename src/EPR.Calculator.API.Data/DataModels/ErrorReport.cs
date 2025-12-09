@@ -12,13 +12,11 @@ public class ErrorReport
 
     public string? LeaverCode { get; set; }
 
-    public int ErrorTypeId { get; set; }
+    public required string ErrorCode { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
     public required string CreatedBy { get; set; }
 
     public virtual CalculatorRun? CalculatorRun { get; set; }
-
-    public virtual ErrorType? ErrorType { get; set; }
 }
