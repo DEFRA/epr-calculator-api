@@ -6113,3 +6113,70 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251209164843_AmendErrorReport'
+)
+BEGIN
+    ALTER TABLE [error_report] DROP CONSTRAINT [FK_error_report_error_type_error_type_id];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251209164843_AmendErrorReport'
+)
+BEGIN
+    DROP TABLE [error_type];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251209164843_AmendErrorReport'
+)
+BEGIN
+    DROP INDEX [IX_error_report_error_type_id] ON [error_report];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251209164843_AmendErrorReport'
+)
+BEGIN
+    DECLARE @var39 sysname;
+    SELECT @var39 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[error_report]') AND [c].[name] = N'error_type_id');
+    IF @var39 IS NOT NULL EXEC(N'ALTER TABLE [error_report] DROP CONSTRAINT [' + @var39 + '];');
+    ALTER TABLE [error_report] DROP COLUMN [error_type_id];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251209164843_AmendErrorReport'
+)
+BEGIN
+    ALTER TABLE [error_report] ADD [error_code] nvarchar(100) NOT NULL DEFAULT N'';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251209164843_AmendErrorReport'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251209164843_AmendErrorReport', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+

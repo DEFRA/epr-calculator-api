@@ -70,8 +70,6 @@
 
         public virtual DbSet<CalculatorRunBillingFileMetadata> CalculatorRunBillingFileMetadata { get; set; }
 
-        public virtual DbSet<ErrorType> ErrorTypes { get; set; }
-
         public virtual DbSet<ErrorReport> ErrorReports { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
