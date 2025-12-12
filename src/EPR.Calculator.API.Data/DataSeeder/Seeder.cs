@@ -712,7 +712,8 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 new ErrorType { Id = 7, Name = "Compliance Scheme to Direct Producer" },
                 new ErrorType { Id = 8, Name = "Invalid Leaver Code" },
                 new ErrorType { Id = 9, Name = "Date input issue" },
-                new ErrorType { Id = 10, Name = "Invalid Organisation ID" });
+                new ErrorType { Id = 10, Name = "Invalid Organisation ID" },
+                new ErrorType { Id = 11, Name = "Missing POM data" });
         }
     }
 }

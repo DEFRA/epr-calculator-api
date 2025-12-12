@@ -19,7 +19,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.Property(p => p.OrganisationId)
                    .HasColumnName("organisation_id");
 
-            builder.Property(p => p.SubsidaryId)
+            builder.Property(p => p.SubsidiaryId)
                    .HasColumnName("subsidiary_id")
                    .HasMaxLength(400);
 
@@ -57,7 +57,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
 
             builder.Property(p => p.SubmitterId)
                    .HasColumnName("submitter_id");
-
         }
     }
 }

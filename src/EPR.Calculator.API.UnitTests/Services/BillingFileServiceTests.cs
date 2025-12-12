@@ -815,8 +815,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                     CalculatorRunOrganisationDataMasterId = master.Id,
                     OrganisationId = missingProducerId,
                     OrganisationName = "Fallback Producer Name",
-                    SubsidaryId = null,
-                    SubmissionPeriodDesc = "Q1"
+                    SubsidiaryId = null
                 });
 
             await this.DbContext.SaveChangesAsync();
