@@ -36,6 +36,33 @@ namespace EPR.Calculator.API.Services
                    !run.IsBillingFileGenerating.GetValueOrDefault();
         }
 
+        private static async Task PopulateBillingStatusCountsAsync(
+            IQueryable<ProducerBillingInstructionsStatus> groupedStatus,
+            ProducerBillingInstructionsResponseDto response,
+            CancellationToken cancellationToken)
+        {
+            var groupedStatusResult = await groupedStatus.ToListAsync(cancellationToken);
+
+            response.TotalRecords = groupedStatusResult.Sum(s => s.TotalRecords);
+            response.TotalAcceptedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Accepted.ToString())?.TotalRecords ?? 0;
+            response.TotalRejectedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Rejected.ToString())?.TotalRecords ?? 0;
+            response.TotalPendingRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Pending.ToString())?.TotalRecords ?? 0;
+        }
+
+        private static async Task PopulateBillingInstructionCountsAsync(
+            IQueryable<ProducerBillingInstructionSuggestion> groupedBillingInstruction,
+            ProducerBillingInstructionsResponseDto response,
+            CancellationToken cancellationToken)
+        {
+            var groupedBillingInstructionResult = await groupedBillingInstruction.ToListAsync(cancellationToken);
+
+            response.TotalInitialRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Initial.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalDeltaRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Delta.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalRebillRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Rebill.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalCancelBillRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Cancel.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalNoActionRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+        }
+
         /// <inheritdoc/>
         public async Task<ServiceProcessResponseDto> GenerateBillingFileAsync(
             GenerateBillingFileRequestDto generateBillingFileRequestDto,
@@ -666,33 +693,6 @@ namespace EPR.Calculator.API.Services
 
             response.Records = pagedResult;
             response.AllProducerIds = allProducerIdsExcludingIdsWithSuggestedBillingInstructionNoAction;
-        }
-
-        private static async Task PopulateBillingStatusCountsAsync(
-            IQueryable<ProducerBillingInstructionsStatus> groupedStatus,
-            ProducerBillingInstructionsResponseDto response,
-            CancellationToken cancellationToken)
-        {
-            var groupedStatusResult = await groupedStatus.ToListAsync(cancellationToken);
-
-            response.TotalRecords = groupedStatusResult.Sum(s => s.TotalRecords);
-            response.TotalAcceptedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Accepted.ToString())?.TotalRecords ?? 0;
-            response.TotalRejectedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Rejected.ToString())?.TotalRecords ?? 0;
-            response.TotalPendingRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Pending.ToString())?.TotalRecords ?? 0;
-        }
-
-        private static async Task PopulateBillingInstructionCountsAsync(
-            IQueryable<ProducerBillingInstructionSuggestion> groupedBillingInstruction,
-            ProducerBillingInstructionsResponseDto response,
-            CancellationToken cancellationToken)
-        {
-            var groupedBillingInstructionResult = await groupedBillingInstruction.ToListAsync(cancellationToken);
-
-            response.TotalInitialRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Initial.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
-            response.TotalDeltaRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Delta.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
-            response.TotalRebillRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Rebill.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
-            response.TotalCancelBillRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Cancel.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
-            response.TotalNoActionRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
         }
     }
 }
