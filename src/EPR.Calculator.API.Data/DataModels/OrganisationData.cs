@@ -21,5 +21,9 @@
         public int? DaysObligated { get; set; }
 
         public string? ErrorCode { get; set; } = string.Empty;
+
+        public string? JoinerDate { get; set; }
+
+        public string? LeaverDate { get; set; }
     }
 }
