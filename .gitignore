@@ -26,3 +26,5 @@ api/obj/project.nuget.cache
 *.user
 .idea
 /obj
+.DS_Store
+obj

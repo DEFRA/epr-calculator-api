@@ -50,6 +50,11 @@
 		  <Value>Scripts/*.*,Migrations/*.*,DataSeeder/*.*,DataModels/*.*,TypeConfigurations/*.*</Value>
 	  </SonarQubeSetting>
   </ItemGroup>
+  <ItemGroup>
+    <SonarQubeSetting Include="sonar.exclusions">
+      <Value>**/*.sql</Value>
+    </SonarQubeSetting>
+  </ItemGroup>
 	<ItemGroup>
 		<Compile Update="Migrations\*.cs">
 			<SonarQubeExclude>true</SonarQubeExclude>
