@@ -40,47 +40,47 @@ GO
 IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CreateRunOrganization]') AND type = N'P')
                 DROP PROCEDURE [dbo].[CreateRunOrganization];
                 declare @Sql varchar(max);
-                SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]                
-                (                    @RunId int,                    @calendarYear varchar(400),                    @createdBy varchar(400)                )                
-                AS                
-                BEGIN                    
-                SET NOCOUNT ON                    
-                    declare @DateNow datetime, @orgDataMasterid int                    
-                        SET @DateNow = GETDATE()                    
-                    declare @oldCalcRunOrgMasterId int                    
-                        SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)                    
-                    Update calculator_run_organization_data_master SET effective_to = @DateNow 
-                        WHERE id = @oldCalcRunOrgMasterId                    
-                    INSERT into dbo.calculator_run_organization_data_master                    
-                        (calendar_year, created_at, created_by, effective_from, effective_to)                    
-                    values                    
-                        (@calendarYear, @DateNow, @createdBy, @DateNow, NULL)                    
-                    SET @orgDataMasterid  = CAST(scope_identity() AS int);                    
-                    INSERT  into dbo.calculator_run_organization_data_detail                        
+                SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]
+                (                    @RunId int,                    @calendarYear varchar(400),                    @createdBy varchar(400)                )
+                AS
+                BEGIN
+                SET NOCOUNT ON
+                    declare @DateNow datetime, @orgDataMasterid int
+                        SET @DateNow = GETDATE()
+                    declare @oldCalcRunOrgMasterId int
+                        SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)
+                    Update calculator_run_organization_data_master SET effective_to = @DateNow
+                        WHERE id = @oldCalcRunOrgMasterId
+                    INSERT into dbo.calculator_run_organization_data_master
+                        (calendar_year, created_at, created_by, effective_from, effective_to)
+                    values
+                        (@calendarYear, @DateNow, @createdBy, @DateNow, NULL)
+                    SET @orgDataMasterid  = CAST(scope_identity() AS int);
+                    INSERT  into dbo.calculator_run_organization_data_detail
                         (calculator_run_organization_data_master_id,
                         load_ts,organisation_id,
                         organisation_name,
-                        trading_name,                            
+                        trading_name,
                         subsidiary_id,
                         obligation_status,
                         submitter_id,
                         status_code,
                         num_days_obligated,
-                        error_code)                    
-                    SELECT  @orgDataMasterid,                             
-                    load_ts,                            
-                    organisation_id,                            
-                    organisation_name,                            
-                    trading_name,                            
+                        error_code)
+                    SELECT  @orgDataMasterid,
+                    load_ts,
+                    organisation_id,
+                    organisation_name,
+                    trading_name,
                     CASE WHEN LTRIM(RTRIM(subsidiary_id)) = '''' THEN NULL ELSE subsidiary_id END as subsidiary_id,
                     obligation_status,
                     submitter_id,
                     status_code,
                     num_days_obligated,
                     error_code
-                    from                             
-                        dbo.organisation_data                    
-                    Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId                
+                    from
+                        dbo.organisation_data
+                    Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
                     END'
                 EXEC(@Sql)
 GO
@@ -269,43 +269,43 @@ GO
 IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CreateRunOrganization]') AND type = N'P')
 				DROP PROCEDURE [dbo].[CreateRunOrganization];
                 declare @Sql varchar(max);
-				SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]                
-				(                    @RunId int,                    @calendarYear varchar(400),                    @createdBy varchar(400)                )                
-				AS                
-				BEGIN                    
-				SET NOCOUNT ON                    
-					declare @DateNow datetime, @orgDataMasterid int                    
-						SET @DateNow = GETDATE()                    
-					declare @oldCalcRunOrgMasterId int                    
-						SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)                    
-					Update calculator_run_organization_data_master SET effective_to = @DateNow 
-						WHERE id = @oldCalcRunOrgMasterId                    
-					INSERT into dbo.calculator_run_organization_data_master                    
-						(calendar_year, created_at, created_by, effective_from, effective_to)                    
-					values                    
-						(@calendarYear, @DateNow, @createdBy, @DateNow, NULL)                    
-					SET @orgDataMasterid  = CAST(scope_identity() AS int);                    
-					INSERT  into dbo.calculator_run_organization_data_detail                        
+				SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]
+				(                    @RunId int,                    @calendarYear varchar(400),                    @createdBy varchar(400)                )
+				AS
+				BEGIN
+				SET NOCOUNT ON
+					declare @DateNow datetime, @orgDataMasterid int
+						SET @DateNow = GETDATE()
+					declare @oldCalcRunOrgMasterId int
+						SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)
+					Update calculator_run_organization_data_master SET effective_to = @DateNow
+						WHERE id = @oldCalcRunOrgMasterId
+					INSERT into dbo.calculator_run_organization_data_master
+						(calendar_year, created_at, created_by, effective_from, effective_to)
+					values
+						(@calendarYear, @DateNow, @createdBy, @DateNow, NULL)
+					SET @orgDataMasterid  = CAST(scope_identity() AS int);
+					INSERT  into dbo.calculator_run_organization_data_detail
 						(calculator_run_organization_data_master_id,
 						load_ts,organisation_id,
 						organisation_name,
-						trading_name,                            
-						submission_period_desc,                            
+						trading_name,
+						submission_period_desc,
 						subsidiary_id,
 						obligation_status,
-						submitter_id)                    
-					SELECT  @orgDataMasterid,                             
-					load_ts,                            
-					organisation_id,                            
-					organisation_name,                            
-					trading_name,                            
-					submission_period_desc,                            
+						submitter_id)
+					SELECT  @orgDataMasterid,
+					load_ts,
+					organisation_id,
+					organisation_name,
+					trading_name,
+					submission_period_desc,
 					CASE WHEN LTRIM(RTRIM(subsidiary_id)) = '''' THEN NULL ELSE subsidiary_id END as subsidiary_id,
 					obligation_status,
 					submitter_id
-					from                             
-						dbo.organisation_data                    
-					Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId                
+					from
+						dbo.organisation_data
+					Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
 					END'
 				EXEC(@Sql)
 GO
@@ -332,39 +332,39 @@ GO
 IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CreateRunOrganization]') AND type = N'P')
 				DROP PROCEDURE [dbo].[CreateRunOrganization];
                 declare @Sql varchar(max);
-				SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]                
-				(                    @RunId int,                    @calendarYear varchar(400),                    @createdBy varchar(400)                )                
-				AS                
-				BEGIN                    
-				SET NOCOUNT ON                    
-					declare @DateNow datetime, @orgDataMasterid int                    
-						SET @DateNow = GETDATE()                    
-					declare @oldCalcRunOrgMasterId int                    
-						SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)                    
-					Update calculator_run_organization_data_master SET effective_to = @DateNow 
-						WHERE id = @oldCalcRunOrgMasterId                    
-					INSERT into dbo.calculator_run_organization_data_master                    
-						(calendar_year, created_at, created_by, effective_from, effective_to)                    
-					values                    
-						(@calendarYear, @DateNow, @createdBy, @DateNow, NULL)                    
-					SET @orgDataMasterid  = CAST(scope_identity() AS int);                    
-					INSERT  into dbo.calculator_run_organization_data_detail                        
+				SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]
+				(                    @RunId int,                    @calendarYear varchar(400),                    @createdBy varchar(400)                )
+				AS
+				BEGIN
+				SET NOCOUNT ON
+					declare @DateNow datetime, @orgDataMasterid int
+						SET @DateNow = GETDATE()
+					declare @oldCalcRunOrgMasterId int
+						SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)
+					Update calculator_run_organization_data_master SET effective_to = @DateNow
+						WHERE id = @oldCalcRunOrgMasterId
+					INSERT into dbo.calculator_run_organization_data_master
+						(calendar_year, created_at, created_by, effective_from, effective_to)
+					values
+						(@calendarYear, @DateNow, @createdBy, @DateNow, NULL)
+					SET @orgDataMasterid  = CAST(scope_identity() AS int);
+					INSERT  into dbo.calculator_run_organization_data_detail
 						(calculator_run_organization_data_master_id,
 						load_ts,organisation_id,
 						organisation_name,
-						trading_name,                            
-						submission_period_desc,                            
-						subsidiary_id)                    
-					SELECT  @orgDataMasterid,                             
-					load_ts,                            
-					organisation_id,                            
-					organisation_name,                            
-					trading_name,                            
-					submission_period_desc,                            
-					CASE WHEN LTRIM(RTRIM(subsidiary_id)) = '''' THEN NULL ELSE subsidiary_id END as subsidiary_id                             
-					from                             
-						dbo.organisation_data                    
-					Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId                
+						trading_name,
+						submission_period_desc,
+						subsidiary_id)
+					SELECT  @orgDataMasterid,
+					load_ts,
+					organisation_id,
+					organisation_name,
+					trading_name,
+					submission_period_desc,
+					CASE WHEN LTRIM(RTRIM(subsidiary_id)) = '''' THEN NULL ELSE subsidiary_id END as subsidiary_id
+					from
+						dbo.organisation_data
+					Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
 					END'
 				EXEC(@Sql)
 GO
@@ -399,9 +399,9 @@ IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Create
 
 				SET @pomDataMasterid  = CAST(scope_identity() AS int);
 
-				INSERT into 
+				INSERT into
 					dbo.calculator_run_pom_data_detail
-					(calculator_run_pom_data_master_id, 
+					(calculator_run_pom_data_master_id,
 						load_ts,
 						organisation_id,
 						packaging_activity,
@@ -422,13 +422,13 @@ IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Create
 						packaging_material_weight,
 						submission_period,
 						submission_period_desc,
-						CASE			
+						CASE
 						WHEN LTRIM(RTRIM(subsidiary_id)) = ''''
 						THEN NULL
 						ELSE subsidiary_id
-						END			
+						END
 						as subsidiary_id
-						from 
+						from
 						dbo.pom_data
 
 				 Update dbo.calculator_run Set calculator_run_pom_data_master_id = @pomDataMasterid where id = @RunId
@@ -503,6 +503,154 @@ GO
 
 DELETE FROM [__EFMigrationsHistory]
 WHERE [MigrationId] = N'20251117125358_AddSubmitterIdObligationStatusInPOMandOrg';
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods'
+)
+BEGIN
+    EXEC(N'DELETE FROM [submission_period_lookup]
+    WHERE [submission_period] = N''2025-H1'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods'
+)
+BEGIN
+    EXEC(N'DELETE FROM [submission_period_lookup]
+    WHERE [submission_period] = N''2025-H2'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods'
+)
+BEGIN
+    EXEC(N'DELETE FROM [submission_period_lookup]
+    WHERE [submission_period] = N''2026-H1'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods'
+)
+BEGIN
+    EXEC(N'DELETE FROM [submission_period_lookup]
+    WHERE [submission_period] = N''2026-H2'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods'
+)
+BEGIN
+    EXEC(N'DELETE FROM [submission_period_lookup]
+    WHERE [submission_period] = N''2027-H1'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods'
+)
+BEGIN
+    EXEC(N'DELETE FROM [submission_period_lookup]
+    WHERE [submission_period] = N''2027-H2'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods'
+)
+BEGIN
+    EXEC(N'DELETE FROM [submission_period_lookup]
+    WHERE [submission_period] = N''2028-H1'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods'
+)
+BEGIN
+    EXEC(N'DELETE FROM [submission_period_lookup]
+    WHERE [submission_period] = N''2028-H2'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods'
+)
+BEGIN
+    EXEC(N'DELETE FROM [submission_period_lookup]
+    WHERE [submission_period] = N''2029-H1'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods'
+)
+BEGIN
+    EXEC(N'DELETE FROM [submission_period_lookup]
+    WHERE [submission_period] = N''2029-H2'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods'
+)
+BEGIN
+    EXEC(N'DELETE FROM [submission_period_lookup]
+    WHERE [submission_period] = N''2030-H1'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods'
+)
+BEGIN
+    EXEC(N'DELETE FROM [submission_period_lookup]
+    WHERE [submission_period] = N''2030-H2'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods'
+)
+BEGIN
+    DELETE FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods';
+END;
 GO
 
 COMMIT;
