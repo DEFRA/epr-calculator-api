@@ -46,7 +46,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 values: new object[,]
                 {
                     {
-                        $"{year}-P1",
+                        $"{year}-H1",
                         $"January to June {year}",
                         new DateTime(year, 01, 01, 00, 00, 00, 000, DateTimeKind.Local),
                         new DateTime(year, 06, 30, 23, 59, 59, 000, DateTimeKind.Local),
@@ -55,7 +55,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         1
                     },
                     {
-                        $"{year}-P4",
+                        $"{year}-H2",
                         $"July to December {year}",
                         new DateTime(year, 07, 01, 00, 00, 00, 000, DateTimeKind.Local),
                         new DateTime(year, 12, 31, 23, 59, 59, 000, DateTimeKind.Local),
@@ -71,12 +71,12 @@ namespace EPR.Calculator.API.Data.Migrations
             migrationBuilder.DeleteData(
                 table: "submission_period_lookup",
                 keyColumn: "submission_period",
-                keyValue: $"{year}-P1");
+                keyValue: $"{year}-H1");
             
             migrationBuilder.DeleteData(
                 table: "submission_period_lookup",
                 keyColumn: "submission_period",
-                keyValue: $"{year}-P4");
+                keyValue: $"{year}-H2");
         }
     }
 }
