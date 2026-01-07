@@ -31,6 +31,8 @@ namespace EPR.Calculator.API.Data.Migrations
 
         private static void AddYear(MigrationBuilder migrationBuilder, int year)
         {
+            var daysWithLeapYear = IsLeapYear(year) ? 182 : 181;
+            
             migrationBuilder.InsertData(
                 table: "submission_period_lookup",
                 columns: new[]
@@ -50,8 +52,8 @@ namespace EPR.Calculator.API.Data.Migrations
                         $"January to June {year}",
                         new DateTime(year, 01, 01, 00, 00, 00, 000, DateTimeKind.Local),
                         new DateTime(year, 06, 30, 23, 59, 59, 000, DateTimeKind.Local),
-                        182,
-                        182,
+                        daysWithLeapYear,
+                        daysWithLeapYear,
                         1
                     },
                     {
@@ -77,6 +79,14 @@ namespace EPR.Calculator.API.Data.Migrations
                 table: "submission_period_lookup",
                 keyColumn: "submission_period",
                 keyValue: $"{year}-H2");
+        }
+        
+        private static bool IsLeapYear(int year)
+        {
+            // A year is a leap year if:
+            // - It is divisible by 4 AND
+            // - If it is divisible by 100, then it must also be divisible by 400.
+            return (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0);
         }
     }
 }

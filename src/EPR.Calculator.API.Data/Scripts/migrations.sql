@@ -6310,7 +6310,7 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] ON;
     EXEC(N'INSERT INTO [submission_period_lookup] ([submission_period], [submission_period_desc], [start_date], [end_date], [days_in_submission_period], [days_in_whole_period], [scaleup_factor])
-    VALUES (N''2025-H1'', N''January to June 2025'', ''2025-01-01T00:00:00.0000000+00:00'', ''2025-06-30T23:59:59.0000000+01:00'', 182, 182, 1.0),
+    VALUES (N''2025-H1'', N''January to June 2025'', ''2025-01-01T00:00:00.0000000+00:00'', ''2025-06-30T23:59:59.0000000+01:00'', 181, 181, 1.0),
     (N''2025-H2'', N''July to December 2025'', ''2025-07-01T00:00:00.0000000+01:00'', ''2025-12-31T23:59:59.0000000+00:00'', 184, 184, 1.0)');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] OFF;
@@ -6325,7 +6325,7 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] ON;
     EXEC(N'INSERT INTO [submission_period_lookup] ([submission_period], [submission_period_desc], [start_date], [end_date], [days_in_submission_period], [days_in_whole_period], [scaleup_factor])
-    VALUES (N''2026-H1'', N''January to June 2026'', ''2026-01-01T00:00:00.0000000+00:00'', ''2026-06-30T23:59:59.0000000+01:00'', 182, 182, 1.0),
+    VALUES (N''2026-H1'', N''January to June 2026'', ''2026-01-01T00:00:00.0000000+00:00'', ''2026-06-30T23:59:59.0000000+01:00'', 181, 181, 1.0),
     (N''2026-H2'', N''July to December 2026'', ''2026-07-01T00:00:00.0000000+01:00'', ''2026-12-31T23:59:59.0000000+00:00'', 184, 184, 1.0)');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] OFF;
@@ -6340,7 +6340,7 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] ON;
     EXEC(N'INSERT INTO [submission_period_lookup] ([submission_period], [submission_period_desc], [start_date], [end_date], [days_in_submission_period], [days_in_whole_period], [scaleup_factor])
-    VALUES (N''2027-H1'', N''January to June 2027'', ''2027-01-01T00:00:00.0000000+00:00'', ''2027-06-30T23:59:59.0000000+01:00'', 182, 182, 1.0),
+    VALUES (N''2027-H1'', N''January to June 2027'', ''2027-01-01T00:00:00.0000000+00:00'', ''2027-06-30T23:59:59.0000000+01:00'', 181, 181, 1.0),
     (N''2027-H2'', N''July to December 2027'', ''2027-07-01T00:00:00.0000000+01:00'', ''2027-12-31T23:59:59.0000000+00:00'', 184, 184, 1.0)');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] OFF;
@@ -6370,7 +6370,7 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] ON;
     EXEC(N'INSERT INTO [submission_period_lookup] ([submission_period], [submission_period_desc], [start_date], [end_date], [days_in_submission_period], [days_in_whole_period], [scaleup_factor])
-    VALUES (N''2029-H1'', N''January to June 2029'', ''2029-01-01T00:00:00.0000000+00:00'', ''2029-06-30T23:59:59.0000000+01:00'', 182, 182, 1.0),
+    VALUES (N''2029-H1'', N''January to June 2029'', ''2029-01-01T00:00:00.0000000+00:00'', ''2029-06-30T23:59:59.0000000+01:00'', 181, 181, 1.0),
     (N''2029-H2'', N''July to December 2029'', ''2029-07-01T00:00:00.0000000+01:00'', ''2029-12-31T23:59:59.0000000+00:00'', 184, 184, 1.0)');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] OFF;
@@ -6385,7 +6385,7 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] ON;
     EXEC(N'INSERT INTO [submission_period_lookup] ([submission_period], [submission_period_desc], [start_date], [end_date], [days_in_submission_period], [days_in_whole_period], [scaleup_factor])
-    VALUES (N''2030-H1'', N''January to June 2030'', ''2030-01-01T00:00:00.0000000+00:00'', ''2030-06-30T23:59:59.0000000+01:00'', 182, 182, 1.0),
+    VALUES (N''2030-H1'', N''January to June 2030'', ''2030-01-01T00:00:00.0000000+00:00'', ''2030-06-30T23:59:59.0000000+01:00'', 181, 181, 1.0),
     (N''2030-H2'', N''July to December 2030'', ''2030-07-01T00:00:00.0000000+01:00'', ''2030-12-31T23:59:59.0000000+00:00'', 184, 184, 1.0)');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] OFF;
