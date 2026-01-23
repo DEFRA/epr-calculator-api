@@ -43,7 +43,7 @@ parameters:
     type: string
     default: ''
 
-pool: DEFRA-COMMON-UBUNTU-SSV3
+pool: DEFRA-COMMON-ubuntu2004-SSV3
 
 variables:
 
