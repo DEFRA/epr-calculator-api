@@ -38,10 +38,10 @@ namespace EPR.Calculator.API.UnitTests.DataModels
             var testValue = this.Fixture.Create<string>();
 
             // Act
-            this.TestClass.CalendarYear = testValue;
+            this.TestClass.RelativeYear = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, this.TestClass.CalendarYear);
+            Assert.AreEqual(testValue, this.TestClass.RelativeYear);
         }
 
         [TestMethod]
