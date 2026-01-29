@@ -790,7 +790,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var master = new CalculatorRunOrganisationDataMaster
             {
-                CalendarYear = "2024",
+                RelativeYear = "2024",
                 EffectiveFrom = DateTime.UtcNow.AddDays(-5),
                 EffectiveTo = null,
                 CreatedBy = "testsuperuser.paycal",
