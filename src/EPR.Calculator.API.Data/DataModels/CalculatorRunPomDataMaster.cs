@@ -4,7 +4,7 @@
     {
         public int Id { get; set; }
 
-        public required string CalendarYear { get; set; }
+        public required string RelativeYear { get; set; }
 
         public required DateTime EffectiveFrom { get; set; }
 
