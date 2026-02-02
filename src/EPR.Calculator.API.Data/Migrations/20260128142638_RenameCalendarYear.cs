@@ -148,6 +148,12 @@ namespace EPR.Calculator.API.Data.Migrations
 
             // Grant EXECUTE on stored procedures to PUBLIC
             migrationBuilder.Sql(@"GRANT EXEC ON [dbo].[CreateRunPom] TO PUBLIC;");
+
+            var updatePastOrgRelativeYearSql = @"update dbo.calculator_run_organization_data_master set relative_year = relative_year+1";
+            migrationBuilder.Sql(updatePastOrgRelativeYearSql);
+
+            var updatePastPomRelativeYearSql = @"update dbo.calculator_run_pom_data_master set relative_year = relative_year+1";
+            migrationBuilder.Sql(updatePastPomRelativeYearSql);
         }
 
         /// <inheritdoc />
@@ -291,6 +297,12 @@ namespace EPR.Calculator.API.Data.Migrations
 
             // Grant EXECUTE on stored procedures to PUBLIC
             migrationBuilder.Sql(@"GRANT EXEC ON [dbo].[CreateRunPom] TO PUBLIC;");
+
+            var updatePastRelativeYearSql = @"update dbo.calculator_run_organization_data_master set relative_year = relative_year-1";
+            migrationBuilder.Sql(updatePastRelativeYearSql);
+
+            var updatePastPomRelativeYearSql = @"update dbo.calculator_run_pom_data_master set relative_year = relative_year-1";
+            migrationBuilder.Sql(updatePastPomRelativeYearSql);
         }
     }
 }
