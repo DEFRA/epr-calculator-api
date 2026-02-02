@@ -6583,6 +6583,24 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20260128142638_RenameCalendarYear'
 )
 BEGIN
+    update dbo.calculator_run_organization_data_master set relative_year = relative_year+1
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260128142638_RenameCalendarYear'
+)
+BEGIN
+    update dbo.calculator_run_pom_data_master set relative_year = relative_year+1
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260128142638_RenameCalendarYear'
+)
+BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
     VALUES (N'20260128142638_RenameCalendarYear', N'8.0.7');
 END;
