@@ -6405,3 +6405,126 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260204112114_AddHasH1AndHasH2OrganisationData'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [has_h1] bit NOT NULL DEFAULT CAST(0 AS bit);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260204112114_AddHasH1AndHasH2OrganisationData'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [has_h2] bit NOT NULL DEFAULT CAST(0 AS bit);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260204112114_AddHasH1AndHasH2OrganisationData'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [has_h1] bit NOT NULL DEFAULT CAST(0 AS bit);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260204112114_AddHasH1AndHasH2OrganisationData'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [has_h2] bit NOT NULL DEFAULT CAST(0 AS bit);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260204112114_AddHasH1AndHasH2OrganisationData'
+)
+BEGIN
+    IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CreateRunOrganization]') AND type = N'P')
+                    DROP PROCEDURE [dbo].[CreateRunOrganization];
+                    declare @Sql varchar(max);
+                    SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]
+                    (                    @RunId int,                    @calendarYear varchar(400),                    @createdBy varchar(400)                )
+                    AS
+                    BEGIN
+                    SET NOCOUNT ON
+                        declare @DateNow datetime, @orgDataMasterid int
+                            SET @DateNow = GETDATE()
+                        declare @oldCalcRunOrgMasterId int
+                            SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)
+                        Update calculator_run_organization_data_master SET effective_to = @DateNow
+                            WHERE id = @oldCalcRunOrgMasterId
+                        INSERT into dbo.calculator_run_organization_data_master
+                            (calendar_year, created_at, created_by, effective_from, effective_to)
+                        values
+                            (@calendarYear, @DateNow, @createdBy, @DateNow, NULL)
+                        SET @orgDataMasterid  = CAST(scope_identity() AS int);
+                        INSERT  into dbo.calculator_run_organization_data_detail
+                            (calculator_run_organization_data_master_id,
+                            load_ts,organisation_id,
+                            organisation_name,
+                            trading_name,
+                            subsidiary_id,
+                            obligation_status,
+                            submitter_id,
+                            status_code,
+                            num_days_obligated,
+                            error_code,
+                            joiner_date,
+                            leaver_date,
+                            has_h1,
+                            has_h2)
+                        SELECT  @orgDataMasterid,
+                        load_ts,
+                        organisation_id,
+                        organisation_name,
+                        trading_name,
+                        CASE WHEN LTRIM(RTRIM(subsidiary_id)) = '''' THEN NULL ELSE subsidiary_id END as subsidiary_id,
+                        obligation_status,
+                        submitter_id,
+                        status_code,
+                        num_days_obligated,
+                        error_code,
+                        joiner_date,
+                        leaver_date,
+                        has_h1,
+                        has_h2
+                        from
+                            dbo.organisation_data
+                        Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
+                        END'
+                    EXEC(@Sql)
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260204112114_AddHasH1AndHasH2OrganisationData'
+)
+BEGIN
+    GRANT EXEC ON [dbo].[CreateRunOrganization] TO PUBLIC;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260204112114_AddHasH1AndHasH2OrganisationData'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260204112114_AddHasH1AndHasH2OrganisationData', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
