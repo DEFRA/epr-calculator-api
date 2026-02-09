@@ -63,5 +63,5 @@ extends:
     runNugetTasks: ${{ variables.runNugetTasks }}
     buildMigrationScript: true
     serviceName: $(serviceName)
-    sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
     dotnetVersion: ${{ variables.dotnetVersion }}
+    sonarqubeInstance: ${{ parameters.sonarqubeInstance }}
