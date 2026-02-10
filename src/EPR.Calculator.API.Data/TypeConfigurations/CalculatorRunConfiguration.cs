@@ -26,9 +26,17 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
                    .HasMaxLength(250)
                    .IsRequired();
 
-            builder.Property(p => p.FinancialYearId)
-                   .HasColumnName("financial_year")
+            builder.Property(p => p.RelativeYearValue)
+                   .HasColumnName("relative_year")
                    .IsRequired();
+
+            builder.Ignore(p => p.RelativeYear);
+
+            builder.HasOne<CalculatorRunRelativeYear>()
+                   .WithMany()
+                   .HasForeignKey(e => e.RelativeYearValue)
+                   .HasPrincipalKey(e => e.Value)
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(p => p.CreatedBy)
                    .HasColumnName("created_by")
@@ -60,18 +68,6 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
 
             builder.Property(p => p.IsBillingFileGenerating)
                 .HasColumnName("is_billing_file_generating");
-
-            builder.Property(e => e.CalculatorRunPomDataMasterId)
-                   .IsRequired(false);
-
-            builder.Property(e => e.CalculatorRunOrganisationDataMasterId)
-                   .IsRequired(false);
-
-            builder.Property(e => e.LapcapDataMasterId)
-                   .IsRequired(false);
-
-            builder.Property(e => e.DefaultParameterSettingMasterId)
-                   .IsRequired(false);
 
             builder.HasMany(e => e.CountryApportionments)
                    .WithOne(e => e.CalculatorRun)

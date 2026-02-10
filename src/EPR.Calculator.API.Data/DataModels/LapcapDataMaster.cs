@@ -1,12 +1,20 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using EPR.Calculator.API.Data.Models;
+
+namespace EPR.Calculator.API.Data.DataModels
 {
     public class LapcapDataMaster
     {
         public int Id { get; set; }
 
-        public string ProjectionYearId { get; set; } = null!;
+        public int RelativeYearValue { get; private set; }
 
-        public required CalculatorRunFinancialYear ProjectionYear { get; set; }
+        [NotMapped]
+        public RelativeYear RelativeYear
+        {
+            get => new(RelativeYearValue);
+            set => RelativeYearValue = value.Value;
+        }
 
         public DateTime EffectiveFrom { get; set; }
 

@@ -1,8 +1,8 @@
 ﻿namespace EPR.Calculator.API.Dtos
 {
-    public record FinancialYearDto
+    public record RelativeYearDto
     {
-        public required string Name { get; init; }
+        public required int Value { get; init; }
 
         public string? Description { get; init; }
     }

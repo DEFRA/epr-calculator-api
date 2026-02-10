@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
 using FluentAssertions;
@@ -8,7 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace EPR.Calculator.API.UnitTests.Mappers;
 
 [TestClass]
-public class FinancialYearClassificationsMapperTests
+public class RelativeYearClassificationsMapperTests
 {
     private Fixture Fixture { get; } = new Fixture();
 
@@ -23,11 +24,11 @@ public class FinancialYearClassificationsMapperTests
         ];
 
         // Act
-        var result = FinancialYearClassificationsMapper.Map("2024-25", classifications);
+        var result = RelativeYearClassificationsMapper.Map(new RelativeYear(2024), classifications);
 
         // Assert
-        Assert.IsInstanceOfType<FinancialYearClassificationResponseDto>(result);
-        result.FinancialYear.Should().Be("2024-25");
+        Assert.IsInstanceOfType<RelativeYearClassificationResponseDto>(result);
+        result.RelativeYear.Should().Be(new RelativeYear(2024));
         result.Classifications.Count.Should().Be(classifications.Count);
         result.ClassifiedRuns.Should().BeEmpty();
 
@@ -51,11 +52,11 @@ public class FinancialYearClassificationsMapperTests
         var classifications = this.Fixture.Create<List<CalculatorRunClassification>>();
 
         // Act
-        var result = FinancialYearClassificationsMapper.Map("2024-25", classifications, null);
+        var result = RelativeYearClassificationsMapper.Map(new RelativeYear(2024), classifications, null);
 
         // Assert
-        Assert.IsInstanceOfType<FinancialYearClassificationResponseDto>(result);
-        result.FinancialYear.Should().Be("2024-25");
+        Assert.IsInstanceOfType<RelativeYearClassificationResponseDto>(result);
+        result.RelativeYear.Should().Be(new RelativeYear(2024));
         result.Classifications.Count.Should().Be(classifications.Count);
         result.ClassifiedRuns.Should().BeEmpty();
     }
@@ -68,11 +69,11 @@ public class FinancialYearClassificationsMapperTests
         var runs = this.Fixture.Create<List<ClassifiedCalculatorRunDto>>();
 
         // Act
-        var result = FinancialYearClassificationsMapper.Map("2024-25", classifications, runs);
+        var result = RelativeYearClassificationsMapper.Map(new RelativeYear(2024), classifications, runs);
 
         // Assert
-        Assert.IsInstanceOfType<FinancialYearClassificationResponseDto>(result);
-        result.FinancialYear.Should().Be("2024-25");
+        Assert.IsInstanceOfType<RelativeYearClassificationResponseDto>(result);
+        result.RelativeYear.Should().Be(new RelativeYear(2024));
         result.Classifications.Count.Should().Be(classifications.Count);
         result.ClassifiedRuns.Should().HaveCount(runs.Count);
         result.ClassifiedRuns.Should().BeEquivalentTo(runs);

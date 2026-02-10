@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.UnitTests.Controllers;
 
@@ -13,7 +14,7 @@ namespace EPR.Calculator.API.UnitTests
             var defaultParameterSettingMaster = new DefaultParameterSettingMaster
             {
                 Id = 200,
-                ParameterYear = FinancialYear24_25,
+                RelativeYear = new RelativeYear(2024),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
             };
@@ -60,7 +61,7 @@ namespace EPR.Calculator.API.UnitTests
                 //// Assert
                 var mappedItem = result[0];
                 Assert.AreEqual(detail.Id, mappedItem.Id);
-                Assert.AreEqual(defaultParameterSettingMaster.ParameterYear.Name, mappedItem.ParameterYear);
+                Assert.AreEqual(defaultParameterSettingMaster.RelativeYear, mappedItem.RelativeYear);
                 Assert.AreEqual(defaultParameterSettingMaster.CreatedBy, mappedItem.CreatedBy);
                 Assert.AreEqual(defaultParameterSettingMaster.CreatedAt, mappedItem.CreatedAt);
                 Assert.AreEqual(detail.DefaultParameterSettingMasterId, mappedItem.DefaultParameterSettingMasterId);

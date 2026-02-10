@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +29,7 @@ public class CalculationRunService : ICalculationRunService
         ];
     }
 
-    public async Task<List<ClassifiedCalculatorRunDto>> GetDesignatedRunsByFinanialYear(string financialYear, CancellationToken cancellationToken = default)
+    public async Task<List<ClassifiedCalculatorRunDto>> GetDesignatedRunsByFinanialYear(RelativeYear relativeYear, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -39,7 +40,7 @@ public class CalculationRunService : ICalculationRunService
                  join calculatorRunBillingFileMetadata in this.context.CalculatorRunBillingFileMetadata
                             on run.Id equals calculatorRunBillingFileMetadata.CalculatorRunId into billingFileMetadataGroup
                  from billingFileMetadata in billingFileMetadataGroup.DefaultIfEmpty()
-                 where run.FinancialYearId == financialYear && this.wantedClassificationIds.Contains(run.CalculatorRunClassificationId)
+                 where run.RelativeYearValue == relativeYear.Value && this.wantedClassificationIds.Contains(run.CalculatorRunClassificationId)
                  select new ClassifiedCalculatorRunDto
                  {
                      RunId = run.Id,
@@ -58,7 +59,7 @@ public class CalculationRunService : ICalculationRunService
         }
         catch (Exception exception)
         {
-            this.logger.LogError(exception, "An error occurred whilst attempting to get designated calculator runs for financial year {FinancialYear}.", financialYear);
+            this.logger.LogError(exception, "An error occurred whilst attempting to get designated calculator runs for relative year {RelativeYear}.", relativeYear);
             throw;
         }
     }

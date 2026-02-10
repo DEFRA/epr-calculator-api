@@ -5,6 +5,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     using Azure.Messaging.ServiceBus;
     using EPR.Calculator.API.Controllers;
     using EPR.Calculator.API.Data.DataModels;
+    using EPR.Calculator.API.Data.Models;
     using EPR.Calculator.API.Services;
     using EPR.Calculator.API.Services.Abstractions;
     using EPR.Calculator.API.UnitTests.Helpers;
@@ -42,7 +43,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var mockClient = new Mock<ServiceBusClient>();
             var mockServiceBusSender = new Mock<ServiceBusSender>();
-            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
+            var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             mockServiceBusSender.Setup(msbs => msbs.SendMessageAsync(It.IsAny<ServiceBusMessage>(), default)).Returns(Task.CompletedTask);
             mockClient.Setup(mc => mc.CreateSender(It.IsAny<string>())).Returns(mockServiceBusSender.Object);
 
@@ -422,7 +423,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 new CalculatorRunPomDataMaster
                 {
                     Id = 1,
-                    RelativeYear = "2024",
+                    RelativeYear = new RelativeYear(2024),
                     EffectiveFrom = DateTime.UtcNow,
                     CreatedBy = "Test user",
                     CreatedAt = DateTime.UtcNow,
@@ -462,7 +463,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 new CalculatorRunOrganisationDataMaster
                 {
                     Id = 1,
-                    RelativeYear = "2024",
+                    RelativeYear = new RelativeYear(2024),
                     EffectiveFrom = DateTime.UtcNow,
                     CreatedBy = "Test user",
                     CreatedAt = DateTime.UtcNow,
@@ -487,7 +488,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     CalculatorRunOrganisationDataMaster = new CalculatorRunOrganisationDataMaster
                     {
                         Id = 1,
-                        RelativeYear = "2024",
+                        RelativeYear = new RelativeYear(2024),
                         EffectiveFrom = DateTime.UtcNow,
                         CreatedBy = "Test user",
                         CreatedAt = DateTime.UtcNow,
@@ -505,7 +506,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     CalculatorRunOrganisationDataMaster = new CalculatorRunOrganisationDataMaster
                     {
                         Id = 1,
-                        RelativeYear = "2024",
+                        RelativeYear = new RelativeYear(2024),
                         EffectiveFrom = DateTime.UtcNow,
                         CreatedBy = "Test user",
                         CreatedAt = DateTime.UtcNow,

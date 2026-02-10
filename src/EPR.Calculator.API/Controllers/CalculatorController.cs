@@ -1,5 +1,7 @@
-﻿using EPR.Calculator.API.Data;
+﻿using System.Configuration;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
@@ -9,7 +11,6 @@ using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Configuration;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -20,7 +21,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly IConfiguration configuration;
         private readonly IStorageService storageService;
         private readonly IServiceBusService serviceBusService;
-        private readonly ICalcFinancialYearRequestDtoDataValidator validator;
+        private readonly ICalcRelativeYearRequestDtoDataValidator validator;
         private readonly IAvailableClassificationsService availableClassificationsService;
         private readonly ICalculationRunService calculatorRunService;
         private readonly IBillingFileService billingFileService;
@@ -30,7 +31,7 @@ namespace EPR.Calculator.API.Controllers
             IConfiguration configuration,
             IStorageService storageService,
             IServiceBusService serviceBusService,
-            ICalcFinancialYearRequestDtoDataValidator validator,
+            ICalcRelativeYearRequestDtoDataValidator validator,
             IAvailableClassificationsService availableClassificationsService,
             ICalculationRunService calculationRunService,
             IBillingFileService billingFileService)
@@ -82,18 +83,18 @@ namespace EPR.Calculator.API.Controllers
                     };
                 }
 
-                var financialYear = await this.context.FinancialYears.SingleOrDefaultAsync(
-                    year => year.Name == request.FinancialYear);
-                if (financialYear is null)
+                var relativeYear = await this.context.FindRelativeYearAsync(request.RelativeYear.Value);
+
+                if (relativeYear is null)
                 {
-                    return new ObjectResult(new { Message = CommonResources.InvalidFinancialYear })
+                    return new ObjectResult(new { Message = CommonResources.InvalidRelativeYear })
                     {
                         StatusCode = StatusCodes.Status400BadRequest,
                     };
                 }
 
-                // Return failed dependency error if at least one of the dependent data not available for the financial year
-                var dataPreCheckMessage = this.DataPreChecksBeforeInitialisingCalculatorRun(financialYear);
+                // Return failed dependency error if at least one of the dependent data not available for the relative year
+                var dataPreCheckMessage = this.DataPreChecksBeforeInitialisingCalculatorRun(relativeYear);
                 if (!string.IsNullOrWhiteSpace(dataPreCheckMessage))
                 {
                     return new ObjectResult(dataPreCheckMessage) { StatusCode = StatusCodes.Status424FailedDependency };
@@ -125,17 +126,17 @@ namespace EPR.Calculator.API.Controllers
 
                 // Get active default parameter settings master
                 var activeDefaultParameterSettingsMaster = await this.context.DefaultParameterSettings
-                    .SingleAsync(x => x.EffectiveTo == null && x.ParameterYear == financialYear);
+                    .SingleAsync(x => x.EffectiveTo == null && x.RelativeYearValue == relativeYear.Value);
 
                 // Get active lapcap data master
                 var activeLapcapDataMaster = await this.context.LapcapDataMaster
-                    .SingleAsync(data => data.ProjectionYear == financialYear && data.EffectiveTo == null);
+                    .SingleAsync(data => data.RelativeYearValue == relativeYear.Value && data.EffectiveTo == null);
 
                 // Setup calculator run details
                 var calculatorRun = new CalculatorRun
                 {
                     Name = request.CalculatorRunName,
-                    Financial_Year = financialYear,
+                    RelativeYear = relativeYear,
                     CreatedBy = userName,
                     CreatedAt = DateTime.UtcNow,
                     CalculatorRunClassificationId = (int)RunClassification.RUNNING,
@@ -155,7 +156,7 @@ namespace EPR.Calculator.API.Controllers
                         var calculatorRunMessage = new CalculatorRunMessage
                         {
                             CalculatorRunId = calculatorRun.Id,
-                            FinancialYear = calculatorRun.Financial_Year.Name,
+                            RelativeYear = calculatorRun.RelativeYear,
                             CreatedBy = this.User.Identity?.Name ?? userName,
                             MessageType = CommonResources.ResultMessageType,
                         };
@@ -197,22 +198,17 @@ namespace EPR.Calculator.API.Controllers
                 return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            if (string.IsNullOrWhiteSpace(request.FinancialYear))
-            {
-                return new ObjectResult(CommonResources.InvalidFinancialYearProvided) { StatusCode = StatusCodes.Status400BadRequest };
-            }
-
             try
             {
                 var calculatorRuns = await (from run in this.context.CalculatorRuns
                        join bill in this.context.CalculatorRunBillingFileMetadata on run.Id equals bill.CalculatorRunId
                        into billFile
-                       where run.Financial_Year.Name == request.FinancialYear
+                       where run.RelativeYearValue == request.RelativeYear.Value
                                     select new
                                     {
                                         run.Id,
                                         run.Name,
-                                        Financial_Year = run.FinancialYearId,
+                                        run.RelativeYear,
                                         run.CreatedAt,
                                         run.CreatedBy,
                                         run.CalculatorRunClassificationId,
@@ -400,15 +396,18 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("FinancialYears")]
-        [ProducesResponseType(typeof(IEnumerable<FinancialYearDto>), StatusCodes.Status200OK)]
+        [Route("RelativeYears")]
+        [ProducesResponseType(typeof(IEnumerable<RelativeYearDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> FinancialYears()
+        public async Task<IActionResult> RelativeYears()
         {
             try
             {
-                var financialYears = await this.context.FinancialYears.ToListAsync();
-                return new ObjectResult(financialYears.Select(FinancialYearMapper.Map));
+                var relativeYears = await this.context.CalculatorRunRelativeYears
+                    .Select(y => y.Value)
+                    .ToListAsync();
+
+                return Ok(relativeYears);
             }
             catch (Exception exception)
             {
@@ -417,12 +416,12 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("ClassificationByFinancialYear")]
-        [ProducesResponseType(typeof(FinancialYearClassificationResponseDto), StatusCodes.Status200OK)]
+        [Route("ClassificationByRelativeYear")]
+        [ProducesResponseType(typeof(RelativeYearClassificationResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> ClassificationByFinancialYear([FromQuery] CalcFinancialYearRequestDto request)
+        public async Task<IActionResult> ClassificationByRelativeYear([FromQuery] CalcRelativeYearRequestDto request)
         {
             try
             {
@@ -437,15 +436,16 @@ namespace EPR.Calculator.API.Controllers
                     return this.BadRequest(validationResult.Errors);
                 }
 
-                var classifications = await this.availableClassificationsService.GetAvailableClassificationsForFinancialYearAsync(request);
+                var relativeYear = new RelativeYear(request.RelativeYearValue);
+                var classifications = await this.availableClassificationsService.GetAvailableClassificationsForRelativeYearAsync(request);
                 if (!classifications.Any())
                 {
                     return this.NotFound(CommonResources.NoClassificationsFound);
                 }
 
-                var runs = await this.calculatorRunService.GetDesignatedRunsByFinanialYear(request.FinancialYear);
+                var runs = await this.calculatorRunService.GetDesignatedRunsByFinanialYear(relativeYear);
 
-                var runDto = FinancialYearClassificationsMapper.Map(request.FinancialYear, classifications, runs);
+                var runDto = RelativeYearClassificationsMapper.Map(relativeYear, classifications, runs);
 
                 return this.Ok(runDto);
             }
@@ -455,32 +455,32 @@ namespace EPR.Calculator.API.Controllers
             }
         }
 
-        private string DataPreChecksBeforeInitialisingCalculatorRun(CalculatorRunFinancialYear financialYear)
+        private string DataPreChecksBeforeInitialisingCalculatorRun(RelativeYear relativeYear)
         {
-            // Get active default parameter settings for the given financial year
+            // Get active default parameter settings for the given relative year
             var activeDefaultParameterSettings = this.context.DefaultParameterSettings
-                        .SingleOrDefault(x => x.EffectiveTo == null && x.ParameterYear == financialYear);
+                        .SingleOrDefault(x => x.EffectiveTo == null && x.RelativeYearValue == relativeYear.Value);
 
-            // Get active Lapcap data for the given financial year
+            // Get active Lapcap data for the given relative year
             var activeLapcapData = this.context.LapcapDataMaster
-                .SingleOrDefault(data => data.ProjectionYear == financialYear && data.EffectiveTo == null);
+                .SingleOrDefault(data => data.RelativeYearValue == relativeYear.Value && data.EffectiveTo == null);
 
             // Return no active default paramater settings and lapcap data message
             if (activeDefaultParameterSettings == null && activeLapcapData == null)
             {
-                return string.Format(CommonResources.DataNotAvaialbleForFinancialYear, financialYear);
+                return string.Format(CommonResources.DataNotAvaialbleForRelativeYear, relativeYear);
             }
 
             // Return no active default parameter settings found message
             if (activeDefaultParameterSettings == null)
             {
-                return string.Format(CommonResources.DefaultParameterNotAvailable, financialYear);
+                return string.Format(CommonResources.DefaultParameterNotAvailable, relativeYear);
             }
 
             // Return no active lapcap data found message
             if (activeLapcapData == null)
             {
-                return string.Format(CommonResources.LapcapDataNotAvailable, financialYear);
+                return string.Format(CommonResources.LapcapDataNotAvailable, relativeYear);
             }
 
             // All good, return empty string

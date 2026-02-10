@@ -34,7 +34,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddScoped<ICreateDefaultParameterDataValidator, CreateDefaultParameterDataValidator>();
 builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
-builder.Services.AddScoped<ICalcFinancialYearRequestDtoDataValidator, CalcFinancialYearRequestDtoDataValidator>();
+builder.Services.AddScoped<ICalcRelativeYearRequestDtoDataValidator, CalcRelativeYearRequestDtoDataValidator>();
 builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IInvoiceDetailsService, InvoiceDetailsService>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();

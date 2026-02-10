@@ -1,5 +1,6 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -26,15 +27,15 @@ namespace EPR.Calculator.API.UnitTests
 
             DbContext.Database.EnsureCreated();
 
-            if (!DbContext.FinancialYears.Any())
+            if (!DbContext.CalculatorRunRelativeYears.Any())
             {
-                FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
-                DbContext.FinancialYears.Add(FinancialYear24_25);
+                RelativeYear24_25 = new CalculatorRunRelativeYear { Value = 2024 };
+                DbContext.CalculatorRunRelativeYears.Add(RelativeYear24_25);
                 DbContext.SaveChanges();
             }
             else
             {
-                FinancialYear24_25 = DbContext.FinancialYears.First(x => x.Name == "2024-25");
+                RelativeYear24_25 = DbContext.CalculatorRunRelativeYears.First(x => x.Value == 2024);
             }
 
             if (!DbContext.CalculatorRuns.Any())
@@ -56,9 +57,9 @@ namespace EPR.Calculator.API.UnitTests
         protected ApplicationDBContext DbContext { get; set; }
 
         /// <summary>
-        /// Gets the financial year 2024-2025 used for testing.
+        /// Gets the relative year 2024-2025 used for testing.
         /// </summary>
-        protected CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
+        protected CalculatorRunRelativeYear RelativeYear24_25 { get; init; }
 
         private static List<ProducerResultFileSuggestedBillingInstruction> GetProducerResultFileSuggestedBillingInstruction()
         {
@@ -86,7 +87,7 @@ namespace EPR.Calculator.API.UnitTests
                     {
                         CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
                         Name = "Test Run",
-                        Financial_Year = FinancialYear24_25,
+                        RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
                         CreatedBy = "Test User",
                     },
@@ -94,7 +95,7 @@ namespace EPR.Calculator.API.UnitTests
                     {
                         CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
                         Name = "Test Calculated Result",
-                        Financial_Year = FinancialYear24_25,
+                        RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
                         CreatedBy = "Test User",
                     },
@@ -102,7 +103,7 @@ namespace EPR.Calculator.API.UnitTests
                     {
                         CalculatorRunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN,
                         Name = "Test Run",
-                        Financial_Year = FinancialYear24_25,
+                        RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
                         CreatedBy = "Test User",
                         CalculatorRunOrganisationDataMasterId = 1,
@@ -112,7 +113,7 @@ namespace EPR.Calculator.API.UnitTests
                     {
                         CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
                         Name = "Test 422 error",
-                        Financial_Year = FinancialYear24_25,
+                        RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
                         CreatedBy = "Test User",
                         CalculatorRunOrganisationDataMasterId = 2,
@@ -124,7 +125,7 @@ namespace EPR.Calculator.API.UnitTests
                     {
                         CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
                         Name = "Test Calculated Result",
-                        Financial_Year = FinancialYear24_25,
+                        RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
                         CreatedBy = "Test User",
                         CalculatorRunOrganisationDataMasterId = 2,

@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using System.Security.Principal;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.UnitTests.Controllers;
 using Microsoft.AspNetCore.Http;
@@ -30,19 +31,19 @@ namespace EPR.Calculator.API.UnitTests.Validator
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
-                ParameterYear = string.Empty,
+                RelativeYear = new RelativeYear(2000),
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
                 ParameterFileName = "TestFileName",
             };
 
-            DefaultParameterSettingController.ModelState.AddModelError("ParameterYear", CommonResources.ParameterYearRequired);
+            DefaultParameterSettingController.ModelState.AddModelError("RelativeYear", CommonResources.RelativeYearRequired);
             DefaultParameterSettingController.ModelState.AddModelError("SchemeParameterTemplateValues", string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.DefaultParameterUniqueReferences.Split(',').Length));
             var actionResult = await DefaultParameterSettingController.Create(createDefaultParameterDto) as ObjectResult;
             Assert.AreEqual(400, actionResult?.StatusCode);
 
             var modelErrors = actionResult?.Value as IEnumerable<ModelError>;
             Assert.IsNotNull(modelErrors);
-            Assert.AreEqual(1, modelErrors.Count(x => x.ErrorMessage == CommonResources.ParameterYearRequired));
+            Assert.AreEqual(1, modelErrors.Count(x => x.ErrorMessage == CommonResources.RelativeYearRequired));
             Assert.AreEqual(1, modelErrors.Count(x => x.ErrorMessage == string.Format(CommonResources.LapcapDataTemplateValuesMissing, CommonResources.DefaultParameterUniqueReferences.Split(',').Length)));
         }
 
@@ -66,7 +67,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
-                ParameterYear = string.Empty,
+                RelativeYear = new RelativeYear(2000),
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
                 ParameterFileName = "TestFileName",
             };
@@ -109,7 +110,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             schemeParameterTemplateValues.Single(x => x.ParameterUniqueReferenceId == "BADEBT-P").ParameterUniqueReferenceId = "Somehthing else";
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
-                ParameterYear = string.Empty,
+                RelativeYear = new RelativeYear(2000),
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
                 ParameterFileName = "TestFileName",
             };

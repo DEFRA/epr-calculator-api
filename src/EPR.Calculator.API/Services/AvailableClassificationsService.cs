@@ -10,7 +10,7 @@ public class AvailableClassificationsService(
     ApplicationDBContext context,
     ILogger<AvailableClassificationsService> logger) : IAvailableClassificationsService
 {
-    public async Task<List<CalculatorRunClassification>> GetAvailableClassificationsForFinancialYearAsync(CalcFinancialYearRequestDto request, CancellationToken cancellationToken = default)
+    public async Task<List<CalculatorRunClassification>> GetAvailableClassificationsForRelativeYearAsync(CalcRelativeYearRequestDto request, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -99,7 +99,7 @@ public class AvailableClassificationsService(
     }
 
     private async Task<List<RunClassification>> DetermineAvailableClassificationsAsync(
-        CalcFinancialYearRequestDto request,
+        CalcRelativeYearRequestDto request,
         CancellationToken cancellationToken)
     {
         List<CalculatorRun> allRuns = await this.GetCalculatorRuns(request, cancellationToken);
@@ -166,14 +166,14 @@ public class AvailableClassificationsService(
         return [];
     }
 
-    private async Task<List<CalculatorRun>> GetCalculatorRuns(CalcFinancialYearRequestDto request, CancellationToken cancellationToken)
+    private async Task<List<CalculatorRun>> GetCalculatorRuns(CalcRelativeYearRequestDto request, CancellationToken cancellationToken)
     {
         List<CalculatorRun> currentRuns = await context.CalculatorRuns
-            .Where(run => run.FinancialYearId == request.FinancialYear
-                && (run.CalculatorRunClassificationId != (int)RunClassification.DELETED
-                || run.CalculatorRunClassificationId != (int)RunClassification.ERROR
-                || run.CalculatorRunClassificationId != (int)RunClassification.RUNNING
-                || run.CalculatorRunClassificationId != (int)RunClassification.INTHEQUEUE))
+            .Where(run => run.RelativeYearValue == request.RelativeYearValue
+                && run.CalculatorRunClassificationId != (int)RunClassification.DELETED
+                && run.CalculatorRunClassificationId != (int)RunClassification.ERROR
+                && run.CalculatorRunClassificationId != (int)RunClassification.RUNNING
+                && run.CalculatorRunClassificationId != (int)RunClassification.INTHEQUEUE)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 

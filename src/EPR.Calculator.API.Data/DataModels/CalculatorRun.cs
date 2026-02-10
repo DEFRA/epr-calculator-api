@@ -1,4 +1,7 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using EPR.Calculator.API.Data.Models;
+
+namespace EPR.Calculator.API.Data.DataModels
 {
     public class CalculatorRun
     {
@@ -8,9 +11,14 @@
 
         public required string Name { get; set; }
 
-        public string FinancialYearId { get; set; } = null!;
+        public int RelativeYearValue { get; private set; }
 
-        public required CalculatorRunFinancialYear Financial_Year { get; set; }
+        [NotMapped]
+        public RelativeYear RelativeYear
+        {
+            get => new(RelativeYearValue);
+            set => RelativeYearValue = value.Value;
+        }
 
         public string CreatedBy { get; set; } = string.Empty;
 

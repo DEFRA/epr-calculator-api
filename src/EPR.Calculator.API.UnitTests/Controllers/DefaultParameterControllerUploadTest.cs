@@ -3,6 +3,7 @@ using System.Security.Principal;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
@@ -24,17 +25,18 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void SetUp()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-           .UseInMemoryDatabase(databaseName: "PayCalDefaultParams")
-           .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-           .Options;
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
 
             this.DbContext = new ApplicationDBContext(dbContextOptions);
             this.DbContext.Database.EnsureCreated();
         }
 
         [TestMethod]
-        public void Test_With_Multiple_Financial_Years()
+        public void Test_With_Multiple_RelativeYears()
         {
+            // Arrange user identity
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
             var principal = new ClaimsPrincipal(identity);
@@ -44,77 +46,74 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal,
             };
 
-            var year29 = new CalculatorRunFinancialYear
-            {
-                Name = "2029-30",
-                Description = string.Empty,
-            };
-            DbContext.Add(year29);
+            // Add existing relative years
+            var year29 = new CalculatorRunRelativeYear { Value = 2029, Description = string.Empty };
+            var year30 = new CalculatorRunRelativeYear { Value = 2030, Description = string.Empty };
+            var year31 = new CalculatorRunRelativeYear { Value = 2031, Description = string.Empty };
+            DbContext.AddRange(year29, year30, year31);
+            DbContext.SaveChanges();
 
-            var year30 = new CalculatorRunFinancialYear
+            // Existing default parameter settings
+            var defaultParameterSettingMaster29 = new DefaultParameterSettingMaster
             {
-                Name = "2030-31",
-                Description = string.Empty,
-            };
-            DbContext.Add(year30);
-
-            var defaultParameterSettingMaster25 = new DefaultParameterSettingMaster
-            {
-                ParameterYearId = "2029-30",
                 EffectiveFrom = new DateTime(2025, 4, 1, 0, 0, 0, DateTimeKind.Local),
                 EffectiveTo = null,
-                ParameterYear = year29,
+                RelativeYear = new RelativeYear(2029),
             };
-            var defaultParameterDetail25 = new DefaultParameterSettingDetail
+            var defaultParameterDetail29 = new DefaultParameterSettingDetail
             {
-                DefaultParameterSettingMaster = defaultParameterSettingMaster25,
+                DefaultParameterSettingMaster = defaultParameterSettingMaster29,
                 ParameterUniqueReferenceId = CommonResources.DefaultParameterUniqueReferences.Split(',')[0],
             };
 
-            var defaultParameterSettingMaster26 = new DefaultParameterSettingMaster
+            var defaultParameterSettingMaster30 = new DefaultParameterSettingMaster
             {
-                ParameterYearId = "2030-31",
                 EffectiveFrom = new DateTime(2025, 4, 1, 0, 0, 0, DateTimeKind.Local),
                 EffectiveTo = null,
-                ParameterYear = year30,
+                RelativeYear = new RelativeYear(2030),
             };
-            var defaultParameterDetail26 = new DefaultParameterSettingDetail
+            var defaultParameterDetail30 = new DefaultParameterSettingDetail
             {
-                DefaultParameterSettingMaster = defaultParameterSettingMaster26,
+                DefaultParameterSettingMaster = defaultParameterSettingMaster30,
                 ParameterUniqueReferenceId = CommonResources.DefaultParameterUniqueReferences.Split(',')[0],
             };
-            this.DbContext.DefaultParameterSettings.Add(defaultParameterSettingMaster25);
-            this.DbContext.DefaultParameterSettingDetail.Add(defaultParameterDetail25);
-            this.DbContext.DefaultParameterSettings.Add(defaultParameterSettingMaster26);
-            this.DbContext.DefaultParameterSettingDetail.Add(defaultParameterDetail26);
-            this.DbContext.SaveChanges();
 
+            DbContext.DefaultParameterSettings.AddRange(defaultParameterSettingMaster29, defaultParameterSettingMaster30);
+            DbContext.DefaultParameterSettingDetail.AddRange(defaultParameterDetail29, defaultParameterDetail30);
+            DbContext.SaveChanges();
+
+            // Mock validator
             var defaultParameterValidator = new Mock<ICreateDefaultParameterDataValidator>();
             defaultParameterValidator.Setup(x => x.Validate(It.IsAny<CreateDefaultParameterSettingDto>()))
                 .Returns(new ValidationResultDto<CreateDefaultParameterSettingErrorDto> { IsInvalid = false });
-            this.DefaultParameterController = new DefaultParameterSettingController(this.DbContext, defaultParameterValidator.Object, TelemetryClient)
+
+            // Controller
+            this.DefaultParameterController = new DefaultParameterSettingController(DbContext, defaultParameterValidator.Object, TelemetryClient)
             {
-                ControllerContext = new ControllerContext
-                {
-                    HttpContext = context,
-                },
+                ControllerContext = new ControllerContext { HttpContext = context },
             };
 
+            // Act: create for the new year
             var request = new CreateDefaultParameterSettingDto()
             {
-                ParameterYear = "2029-30",
-                ParameterFileName = "test Name",
+                RelativeYear = new RelativeYear(2031),
+                ParameterFileName = "Test File",
                 SchemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>(),
             };
+
             var task = this.DefaultParameterController.Create(request);
             task.Wait(TestContext.CancellationTokenSource.Token);
             var result = task.Result;
+
+            // Assert
             Assert.IsNotNull(result);
 
             var defaultParameterLatest = DbContext.DefaultParameterSettings.Where(x => x.EffectiveTo == null).ToList();
-            Assert.HasCount(2, defaultParameterLatest);
-            Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.ParameterYearId == "2029-30" && x.EffectiveTo == null));
-            Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.ParameterYearId == "2030-31" && x.EffectiveTo == null));
+            Assert.AreEqual(3, defaultParameterLatest.Count); // 29, 30, 31
+
+            Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.RelativeYearValue == 2029 && x.EffectiveTo == null));
+            Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.RelativeYearValue == 2030 && x.EffectiveTo == null));
+            Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.RelativeYearValue == 2031 && x.EffectiveTo == null));
         }
     }
 }

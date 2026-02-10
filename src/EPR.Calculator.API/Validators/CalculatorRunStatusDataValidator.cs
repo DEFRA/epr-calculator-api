@@ -256,7 +256,7 @@ namespace EPR.Calculator.API.Validators
                     IsInvalid = true,
                     Errors =
                     [
-                       $"Another '{RunClassification.INITIAL_RUN}' already have been completed for '{calculatorRun.FinancialYearId}'.",
+                       $"Another '{RunClassification.INITIAL_RUN}' already have been completed for '{calculatorRun.RelativeYear}'.",
                     ],
                 };
             }
@@ -270,7 +270,7 @@ namespace EPR.Calculator.API.Validators
                     IsInvalid = true,
                     Errors =
                     [
-                       $"Another '{RunClassification.FINAL_RECALCULATION_RUN}' already have been completed for '{calculatorRun.FinancialYearId}'.",
+                       $"Another '{RunClassification.FINAL_RECALCULATION_RUN}' already have been completed for '{calculatorRun.RelativeYear}'.",
                     ],
                 };
             }
@@ -284,7 +284,7 @@ namespace EPR.Calculator.API.Validators
                     IsInvalid = true,
                     Errors =
                     [
-                       $"Another '{RunClassification.FINAL_RUN}' already performed for '{calculatorRun.FinancialYearId}'.",
+                       $"Another '{RunClassification.FINAL_RUN}' already performed for '{calculatorRun.RelativeYear}'.",
                     ],
                 };
             }
@@ -298,7 +298,7 @@ namespace EPR.Calculator.API.Validators
                     IsInvalid = true,
                     Errors =
                     [
-                       $"Another '{RunClassification.FINAL_RUN}' already have been completed for '{calculatorRun.FinancialYearId}'.",
+                       $"Another '{RunClassification.FINAL_RUN}' already have been completed for '{calculatorRun.RelativeYear}'.",
                     ],
                 };
             }
@@ -312,7 +312,7 @@ namespace EPR.Calculator.API.Validators
                     IsInvalid = true,
                     Errors =
                     [
-                       $"To classified this run you first need to perform '{RunClassification.INITIAL_RUN_COMPLETED}' for '{calculatorRun.FinancialYearId}'.",
+                       $"To classified this run you first need to perform '{RunClassification.INITIAL_RUN_COMPLETED}' for '{calculatorRun.RelativeYear}'.",
                     ],
                 };
             }
@@ -327,7 +327,7 @@ namespace EPR.Calculator.API.Validators
                     IsInvalid = true,
                     Errors =
                     [
-                       $"To classified this as '{RunClassification.FINAL_RUN}' you first need to perform '{RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}' or '{RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}' for '{calculatorRun.FinancialYearId}'.",
+                       $"To classified this as '{RunClassification.FINAL_RUN}' you first need to perform '{RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}' or '{RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}' for '{calculatorRun.RelativeYear}'.",
                     ],
                 };
             }
@@ -346,7 +346,7 @@ namespace EPR.Calculator.API.Validators
                     IsInvalid = true,
                     Errors =
                     [
-                       $"You can't classified older run as designated run for '{calculatorRun.FinancialYearId}'.",
+                       $"You can't classified older run as designated run for '{calculatorRun.RelativeYear}'.",
                     ],
                 };
             }

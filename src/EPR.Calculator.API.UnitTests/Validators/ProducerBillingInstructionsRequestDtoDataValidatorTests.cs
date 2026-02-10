@@ -1,5 +1,6 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
 using FluentValidation.TestHelper;
@@ -28,7 +29,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             var calcRun = new CalculatorRun
             {
                 CalculatorRunClassificationId = 8,
-                Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Test",
                 Id = calcRunId,
                 CreatedBy = "Test",

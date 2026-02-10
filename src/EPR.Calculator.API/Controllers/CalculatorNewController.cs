@@ -98,9 +98,8 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                // Perform validation to check other designated runs are not in progress and not already completed for the same financial year
-                List<ClassifiedCalculatorRunDto> designatedRuns = await this.calculationRunService.GetDesignatedRunsByFinanialYear(
-                    calculatorRun.FinancialYearId);
+                // Perform validation to check other designated runs are not in progress and not already completed for the same relative year
+                List<ClassifiedCalculatorRunDto> designatedRuns = await this.calculationRunService.GetDesignatedRunsByFinanialYear(calculatorRun.RelativeYear);
 
                 genericValidationResultDto = this.calculatorRunStatusDataValidator.Validate(designatedRuns, calculatorRun, runStatusUpdateDto);
 
@@ -121,7 +120,18 @@ namespace EPR.Calculator.API.Controllers
             }
             catch (Exception exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                this.telemetryClient.TrackException(exception);
+
+                Console.WriteLine(exception.ToString());
+
+                return this.StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    new
+                    {
+                        message = "An unexpected error occurred.",
+                        detail = exception.Message,
+                        traceId = HttpContext.TraceIdentifier
+                    });
             }
         }
 
@@ -169,7 +179,18 @@ namespace EPR.Calculator.API.Controllers
             }
             catch (Exception exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                this.telemetryClient.TrackException(exception);
+
+                Console.WriteLine(exception.ToString());
+
+                return this.StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    new
+                    {
+                        message = "An unexpected error occurred.",
+                        detail = exception.Message,
+                        traceId = HttpContext.TraceIdentifier
+                    });
             }
         }
 
@@ -237,9 +258,10 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 calculatorRun.CalculatorRunClassificationId = (int)newClassificationValue;
-                var metadata = await this.context.CalculatorRunBillingFileMetadata.
-                    Where(x => x.CalculatorRunId == runId).OrderByDescending(x => x.BillingFileCreatedDate).
-                    FirstOrDefaultAsync(cancellationToken);
+                var metadata = await this.context.CalculatorRunBillingFileMetadata
+                    .Where(x => x.CalculatorRunId == runId)
+                    .OrderByDescending(x => x.BillingFileCreatedDate)
+                    .FirstOrDefaultAsync(cancellationToken);
 
                 if (metadata == null)
                 {
@@ -285,8 +307,16 @@ namespace EPR.Calculator.API.Controllers
                             { "RunId", runId.ToString() },
                         });
 
-                        // Return error status code: Internal Server Error
-                        return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                        Console.WriteLine(exception.ToString());
+
+                        return this.StatusCode(
+                            StatusCodes.Status500InternalServerError,
+                            new
+                            {
+                                message = "An unexpected error occurred.",
+                                detail = exception.Message,
+                                traceId = HttpContext.TraceIdentifier
+                            });
                     }
                 }
 
@@ -295,7 +325,17 @@ namespace EPR.Calculator.API.Controllers
             }
             catch (Exception exception)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                this.telemetryClient.TrackException(exception);
+                Console.WriteLine(exception.ToString());
+
+                return this.StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    new
+                    {
+                        message = "An unexpected error occurred.",
+                        detail = exception.Message,
+                        traceId = HttpContext.TraceIdentifier
+                    });
             }
         }
     }

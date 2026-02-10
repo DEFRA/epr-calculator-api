@@ -9,30 +9,27 @@ namespace EPR.Calculator.API.Mappers
             DefaultParameterSettingMaster defaultParameterSettingMaster,
             IEnumerable<DefaultParameterTemplateMaster> defaultParameterTemplate)
         {
-            var result = new List<DefaultSchemeParametersDto>();
-
-            foreach (var item in defaultParameterSettingMaster.Details)
-            {
-                var selectedTemplate = defaultParameterTemplate.Single(x => x.ParameterUniqueReferenceId == item.ParameterUniqueReferenceId);
-                var data = new DefaultSchemeParametersDto
+            return [.. defaultParameterSettingMaster
+                .Details
+                .Select(item =>
                 {
-                    Id = item.Id,
-                    ParameterYear = defaultParameterSettingMaster.ParameterYear.Name,
-                    EffectiveFrom = defaultParameterSettingMaster.EffectiveFrom,
-                    EffectiveTo = defaultParameterSettingMaster.EffectiveTo,
-                    CreatedBy = defaultParameterSettingMaster.CreatedBy,
-                    CreatedAt = defaultParameterSettingMaster.CreatedAt,
-                    DefaultParameterSettingMasterId = defaultParameterSettingMaster.Id,
-                    ParameterUniqueRef = item.ParameterUniqueReferenceId,
-                    ParameterType = selectedTemplate.ParameterType,
-                    ParameterCategory = selectedTemplate.ParameterCategory,
-                    ParameterValue = item.ParameterValue,
-                };
-
-                result.Add(data);
-            }
-
-            return result;
+                    var selectedTemplate = defaultParameterTemplate
+                        .Single(x => x.ParameterUniqueReferenceId == item.ParameterUniqueReferenceId);
+                    return new DefaultSchemeParametersDto
+                    {
+                        Id = item.Id,
+                        RelativeYear = defaultParameterSettingMaster.RelativeYear,
+                        EffectiveFrom = defaultParameterSettingMaster.EffectiveFrom,
+                        EffectiveTo = defaultParameterSettingMaster.EffectiveTo,
+                        CreatedBy = defaultParameterSettingMaster.CreatedBy,
+                        CreatedAt = defaultParameterSettingMaster.CreatedAt,
+                        DefaultParameterSettingMasterId = defaultParameterSettingMaster.Id,
+                        ParameterUniqueRef = item.ParameterUniqueReferenceId,
+                        ParameterType = selectedTemplate.ParameterType,
+                        ParameterCategory = selectedTemplate.ParameterCategory,
+                        ParameterValue = item.ParameterValue,
+                    };
+                })];
         }
     }
 }

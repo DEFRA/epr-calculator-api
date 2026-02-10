@@ -6410,210 +6410,6 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260128142638_RenameCalendarYear'
-)
-BEGIN
-    EXEC sp_rename N'[calculator_run_pom_data_master].[calendar_year]', N'relative_year', N'COLUMN';
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260128142638_RenameCalendarYear'
-)
-BEGIN
-    EXEC sp_rename N'[calculator_run_organization_data_master].[calendar_year]', N'relative_year', N'COLUMN';
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260128142638_RenameCalendarYear'
-)
-BEGIN
-    IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CreateRunOrganization]') AND type = N'P')
-                    DROP PROCEDURE [dbo].[CreateRunOrganization];
-                    declare @Sql varchar(max);
-                    SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]                
-                    (                    @RunId int,                    @relativeyear varchar(400),                    @createdBy varchar(400)                )                
-                    AS                
-                    BEGIN                    
-                    SET NOCOUNT ON                    
-                        declare @DateNow datetime, @orgDataMasterid int                    
-                            SET @DateNow = GETDATE()                    
-                        declare @oldCalcRunOrgMasterId int                    
-                            SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)                    
-                        Update calculator_run_organization_data_master SET effective_to = @DateNow 
-                            WHERE id = @oldCalcRunOrgMasterId                    
-                        INSERT into dbo.calculator_run_organization_data_master                    
-                            (relative_year, created_at, created_by, effective_from, effective_to)                    
-                        values                    
-                            (@relativeyear, @DateNow, @createdBy, @DateNow, NULL)                    
-                        SET @orgDataMasterid  = CAST(scope_identity() AS int);                    
-                        INSERT  into dbo.calculator_run_organization_data_detail                        
-                            (calculator_run_organization_data_master_id,
-                            load_ts,organisation_id,
-                            organisation_name,
-                            trading_name,                            
-                            subsidiary_id,
-                            obligation_status,
-                            submitter_id,
-                            status_code,
-                            num_days_obligated,
-                            error_code,
-                            joiner_date,
-                            leaver_date)                    
-                        SELECT  @orgDataMasterid,                             
-                        load_ts,                            
-                        organisation_id,                            
-                        organisation_name,                            
-                        trading_name,                            
-                        CASE WHEN LTRIM(RTRIM(subsidiary_id)) = '''' THEN NULL ELSE subsidiary_id END as subsidiary_id,
-                        obligation_status,
-                        submitter_id,
-                        status_code,
-                        num_days_obligated,
-                        error_code,
-                        joiner_date,
-                        leaver_date
-                        from                             
-                            dbo.organisation_data                    
-                        Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId                
-                        END'
-                    EXEC(@Sql)
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260128142638_RenameCalendarYear'
-)
-BEGIN
-    GRANT EXEC ON [dbo].[CreateRunOrganization] TO PUBLIC;
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260128142638_RenameCalendarYear'
-)
-BEGIN
-    IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CreateRunPom]') AND type = N'P')
-    			DROP PROCEDURE [dbo].[CreateRunPom];
-                    declare @Sql varchar(max);
-    				SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunPom]
-    		(
-    			-- Add the parameters for the stored procedure here
-    			@RunId int,
-    			@relativeyear varchar(400),
-    			@createdBy varchar(400)
-    		)
-    		AS
-    		BEGIN
-    			-- SET NOCOUNT ON added to prevent extra result sets from
-    			-- interfering with SELECT statements.
-    			SET NOCOUNT ON
-
-    			declare @DateNow datetime, @pomDataMasterid int
-    			SET @DateNow = GETDATE()
-
-    			declare @oldCalcRunPomMasterId int
-    			SET @oldCalcRunPomMasterId = (select top 1 id from dbo.calculator_run_pom_data_master order by id desc)
-    			Update calculator_run_pom_data_master SET effective_to = @DateNow WHERE id = @oldCalcRunPomMasterId
-
-    			INSERT into dbo.calculator_run_pom_data_master
-    			(relative_year, created_at, created_by, effective_from, effective_to)
-    			values
-    			(@relativeyear, @DateNow, @createdBy, @DateNow, NULL)
-
-    			SET @pomDataMasterid  = CAST(scope_identity() AS int);
-
-    			INSERT into 
-    				dbo.calculator_run_pom_data_detail
-    				(calculator_run_pom_data_master_id, 
-    					load_ts,
-    					organisation_id,
-    					packaging_activity,
-    					packaging_type,
-    					packaging_class,
-    					packaging_material,
-    					packaging_material_weight,
-    					submission_period,
-    					submission_period_desc,
-    					subsidiary_id,
-    					submitter_id)
-    			SELECT  @pomDataMasterid,
-    					load_ts,
-    					organisation_id,
-    					packaging_activity,
-    					packaging_type,
-    					packaging_class,
-    					packaging_material,
-    					packaging_material_weight,
-    					submission_period,
-    					submission_period_desc,
-    					CASE			
-    					WHEN LTRIM(RTRIM(subsidiary_id)) = ''''
-    					THEN NULL
-    					ELSE subsidiary_id
-    					END			
-    					as subsidiary_id,
-    					submitter_id
-    					from 
-    					dbo.pom_data
-
-    			 Update dbo.calculator_run Set calculator_run_pom_data_master_id = @pomDataMasterid where id = @RunId
-
-    		END'
-    		EXEC(@Sql)
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260128142638_RenameCalendarYear'
-)
-BEGIN
-    GRANT EXEC ON [dbo].[CreateRunPom] TO PUBLIC;
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260128142638_RenameCalendarYear'
-)
-BEGIN
-    update dbo.calculator_run_organization_data_master set relative_year = relative_year+1
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260128142638_RenameCalendarYear'
-)
-BEGIN
-    update dbo.calculator_run_pom_data_master set relative_year = relative_year+1
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260128142638_RenameCalendarYear'
-)
-BEGIN
-    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260128142638_RenameCalendarYear', N'8.0.7');
-END;
-GO
-
-COMMIT;
-GO
-
-BEGIN TRANSACTION;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260218155412_UpdateGetCurrentYearInvoicedTotalAfterThisRun'
 )
 BEGIN
@@ -6751,6 +6547,409 @@ IF NOT EXISTS (
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
     VALUES (N'20260220163836_RemoveStoredProcsAndFuncs', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [calculator_run] DROP CONSTRAINT [FK_calculator_run_calculator_run_financial_years_financial_year];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [default_parameter_setting_master] DROP CONSTRAINT [FK_default_parameter_setting_master_calculator_run_financial_years_parameter_year];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [lapcap_data_master] DROP CONSTRAINT [FK_lapcap_data_master_calculator_run_financial_years_projection_year];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [calculator_run_financial_years] DROP CONSTRAINT [PK_calculator_run_financial_years];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    DROP INDEX [IX_lapcap_data_master_projection_year] ON [lapcap_data_master];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    DROP INDEX [IX_default_parameter_setting_master_parameter_year] ON [default_parameter_setting_master];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    DROP INDEX [IX_calculator_run_financial_year] ON [calculator_run];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    DROP INDEX [IX_index_calculator_run] ON [calculator_run];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    EXEC sp_rename N'[calculator_run_financial_years]', N'calculator_run_relative_years';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [lapcap_data_master] ADD [relative_year] int NOT NULL DEFAULT 0;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [default_parameter_setting_master] ADD [relative_year] int NOT NULL DEFAULT 0;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [calculator_run_pom_data_master] ADD [relative_year] int NOT NULL DEFAULT 0;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_master] ADD [relative_year] int NOT NULL DEFAULT 0;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [calculator_run_relative_years] ADD [relative_year] int NOT NULL DEFAULT 0;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD [relative_year] int NOT NULL DEFAULT 0;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    UPDATE lapcap_data_master                      SET relative_year = CAST(LEFT(projection_year, 4) AS INT)
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    UPDATE default_parameter_setting_master        SET relative_year = CAST(LEFT(parameter_year, 4) AS INT)
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    UPDATE calculator_run_pom_data_master          SET relative_year = calendar_year + 1
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    UPDATE calculator_run_organization_data_master SET relative_year = calendar_year + 1
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    UPDATE calculator_run_relative_years           SET relative_year = CAST(LEFT(financial_Year, 4) AS INT)
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    UPDATE calculator_run                          SET relative_year = CAST(LEFT(financial_Year, 4) AS INT)
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    DECLARE @var40 sysname;
+    SELECT @var40 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[lapcap_data_master]') AND [c].[name] = N'projection_year');
+    IF @var40 IS NOT NULL EXEC(N'ALTER TABLE [lapcap_data_master] DROP CONSTRAINT [' + @var40 + '];');
+    ALTER TABLE [lapcap_data_master] DROP COLUMN [projection_year];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    DECLARE @var41 sysname;
+    SELECT @var41 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[default_parameter_setting_master]') AND [c].[name] = N'parameter_year');
+    IF @var41 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_setting_master] DROP CONSTRAINT [' + @var41 + '];');
+    ALTER TABLE [default_parameter_setting_master] DROP COLUMN [parameter_year];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    DECLARE @var42 sysname;
+    SELECT @var42 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_pom_data_master]') AND [c].[name] = N'calendar_year');
+    IF @var42 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_master] DROP CONSTRAINT [' + @var42 + '];');
+    ALTER TABLE [calculator_run_pom_data_master] DROP COLUMN [calendar_year];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    DECLARE @var43 sysname;
+    SELECT @var43 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organization_data_master]') AND [c].[name] = N'calendar_year');
+    IF @var43 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_master] DROP CONSTRAINT [' + @var43 + '];');
+    ALTER TABLE [calculator_run_organization_data_master] DROP COLUMN [calendar_year];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    DECLARE @var44 sysname;
+    SELECT @var44 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_relative_years]') AND [c].[name] = N'financial_Year');
+    IF @var44 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_relative_years] DROP CONSTRAINT [' + @var44 + '];');
+    ALTER TABLE [calculator_run_relative_years] DROP COLUMN [financial_Year];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    DECLARE @var45 sysname;
+    SELECT @var45 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'financial_year');
+    IF @var45 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT [' + @var45 + '];');
+    ALTER TABLE [calculator_run] DROP COLUMN [financial_year];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [calculator_run_relative_years] ADD CONSTRAINT [PK_calculator_run_relative_years] PRIMARY KEY ([relative_year]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    CREATE INDEX [IX_lapcap_data_master_relative_year] ON [lapcap_data_master] ([relative_year]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    CREATE INDEX [IX_default_parameter_setting_master_relative_year] ON [default_parameter_setting_master] ([relative_year]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_pom_data_master_relative_year] ON [calculator_run_pom_data_master] ([relative_year]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_organization_data_master_relative_year] ON [calculator_run_organization_data_master] ([relative_year]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_relative_year] ON [calculator_run] ([relative_year]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_index_calculator_run] ON [calculator_run] ([calculator_run_classification_id], [relative_year], [is_billing_file_generating], [id]) INCLUDE ([name], [created_by], [created_at], [updated_by], [updated_at], [calculator_run_organization_data_master_id], [calculator_run_pom_data_master_id], [default_parameter_setting_master_id], [lapcap_data_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD CONSTRAINT [FK_calculator_run_calculator_run_relative_years_relative_year] FOREIGN KEY ([relative_year]) REFERENCES [calculator_run_relative_years] ([relative_year]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_master] ADD CONSTRAINT [FK_calculator_run_organization_data_master_calculator_run_relative_years_relative_year] FOREIGN KEY ([relative_year]) REFERENCES [calculator_run_relative_years] ([relative_year]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [calculator_run_pom_data_master] ADD CONSTRAINT [FK_calculator_run_pom_data_master_calculator_run_relative_years_relative_year] FOREIGN KEY ([relative_year]) REFERENCES [calculator_run_relative_years] ([relative_year]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [default_parameter_setting_master] ADD CONSTRAINT [FK_default_parameter_setting_master_calculator_run_relative_years_relative_year] FOREIGN KEY ([relative_year]) REFERENCES [calculator_run_relative_years] ([relative_year]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    ALTER TABLE [lapcap_data_master] ADD CONSTRAINT [FK_lapcap_data_master_calculator_run_relative_years_relative_year] FOREIGN KEY ([relative_year]) REFERENCES [calculator_run_relative_years] ([relative_year]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260224105304_UseRelativeYear', N'8.0.7');
 END;
 GO
 

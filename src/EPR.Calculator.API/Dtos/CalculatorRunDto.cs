@@ -1,4 +1,6 @@
-﻿namespace EPR.Calculator.API.Dtos
+﻿using EPR.Calculator.API.Data.Models;
+
+namespace EPR.Calculator.API.Dtos
 {
     public class CalculatorRunDto
     {
@@ -20,7 +22,7 @@
 
         public required string RunClassificationStatus { get; set; }
 
-        public string FinancialYear { get; set; } = null!;
+        public required RelativeYear RelativeYear { get; set; }
 
         public bool? IsBillingFileGenerating { get; set; }
 

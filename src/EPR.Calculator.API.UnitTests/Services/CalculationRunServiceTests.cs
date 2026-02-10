@@ -3,6 +3,7 @@
 using EnumsNET;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using FluentAssertions;
@@ -14,9 +15,6 @@ using Moq;
 [TestClass]
 public class CalculationRunServiceTests
 {
-    private const string FinancialYear = "2024-25";
-    private const string WrongFinancialYear = "1923-24";
-
     private ApplicationDBContext dbContext = null!;
     private CalculationRunService service = null!;
     private Mock<ILogger<CalculationRunService>> loggerMock = null!;
@@ -42,14 +40,9 @@ public class CalculationRunServiceTests
             });
         }
 
-        this.dbContext.FinancialYears.Add(new CalculatorRunFinancialYear
+        this.dbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear
         {
-            Name = FinancialYear,
-        });
-
-        this.dbContext.FinancialYears.Add(new CalculatorRunFinancialYear
-        {
-            Name = WrongFinancialYear,
+            Value = 2024,
         });
 
         this.dbContext.SaveChanges();
@@ -79,13 +72,13 @@ public class CalculationRunServiceTests
     [DataRow(RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED)]
     [DataRow(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
     [DataRow(RunClassification.FINAL_RUN_COMPLETED)]
-    public async Task GetDesignatedRunsByFinanialYear_ExcludesRunsInWrongFinancialYear(RunClassification classification)
+    public async Task GetDesignatedRunsByFinanialYear_ExcludesRunsInWrongRelativeYear(RunClassification classification)
     {
         // Arrange
-        this.AddRunToDb(classification, requestId: 1, WrongFinancialYear);
+        this.AddRunToDb(classification, requestId: 1, 1923);
 
         // Act
-        var result = await this.service.GetDesignatedRunsByFinanialYear(FinancialYear, TestContext.CancellationTokenSource.Token);
+        var result = await this.service.GetDesignatedRunsByFinanialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
 
         // Assert
         result.Should().HaveCount(0);
@@ -111,26 +104,26 @@ public class CalculationRunServiceTests
         int expectedRowCount)
     {
         // Arrange
-        this.AddRunToDb(classification, requestId: 1, FinancialYear);
+        this.AddRunToDb(classification, requestId: 1, 2024);
 
         // Act
-        var result = await this.service.GetDesignatedRunsByFinanialYear(FinancialYear, TestContext.CancellationTokenSource.Token);
+        var result = await this.service.GetDesignatedRunsByFinanialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
 
         // Assert
         result.Should().HaveCount(expectedRowCount);
     }
 
     [TestMethod]
-    public async Task GetDesignatedRunsByFinanialYear_ExcludesRunsInWrongFinancialYearOrClassification()
+    public async Task GetDesignatedRunsByFinanialYear_ExcludesRunsInWrongRelativeYearOrClassification()
     {
         // Arrange
-        this.AddRunToDb(RunClassification.INITIAL_RUN, requestId: 1, WrongFinancialYear);
-        this.AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 2, FinancialYear);
-        this.AddRunToDb(RunClassification.INTERIM_RECALCULATION_RUN, requestId: 3, FinancialYear);
-        this.AddRunToDb(RunClassification.TEST_RUN, requestId: 4, FinancialYear);
+        this.AddRunToDb(RunClassification.INITIAL_RUN, requestId: 1, 1923);
+        this.AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 2, 2024);
+        this.AddRunToDb(RunClassification.INTERIM_RECALCULATION_RUN, requestId: 3, 2024);
+        this.AddRunToDb(RunClassification.TEST_RUN, requestId: 4, 2024);
 
         // Act
-        var result = await this.service.GetDesignatedRunsByFinanialYear(FinancialYear, TestContext.CancellationTokenSource.Token);
+        var result = await this.service.GetDesignatedRunsByFinanialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
 
         // Assert
         result.Should().HaveCount(2);
@@ -148,15 +141,14 @@ public class CalculationRunServiceTests
             });
     }
 
-    private void AddRunToDb(RunClassification classification, int requestId, string financialYearId)
+    private void AddRunToDb(RunClassification classification, int requestId, int relativeYearValue)
     {
         this.dbContext.CalculatorRuns.Add(new CalculatorRun
         {
             Id = requestId,
             CalculatorRunClassificationId = (int)classification,
             Name = "Test",
-            FinancialYearId = financialYearId,
-            Financial_Year = this.dbContext.FinancialYears.First(x => x.Name.Equals(financialYearId)),
+            RelativeYear = new RelativeYear(relativeYearValue),
             CreatedBy = "TestUser",
             CreatedAt = DateTime.UtcNow,
         });

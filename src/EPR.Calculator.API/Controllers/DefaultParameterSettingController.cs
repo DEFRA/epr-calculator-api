@@ -61,11 +61,17 @@ namespace EPR.Calculator.API.Controllers
             {
                 try
                 {
-                    var oldDefaultSettings = await this.context.DefaultParameterSettings.Where(x => x.EffectiveTo == null && x.ParameterYear.Name == request.ParameterYear).ToListAsync();
-                    oldDefaultSettings.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; });
+                    var relativeYear = await this.context.FindRelativeYearAsync(request.RelativeYear.Value);
+                    if (relativeYear == null)
+                    {
+                        return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
+                    }
 
-                    var financialYear = await this.context.FinancialYears.Where(
-                        x => x.Name == request.ParameterYear).SingleAsync();
+                    var oldDefaultSettings = await this.context.DefaultParameterSettings
+                        .Where(x => x.EffectiveTo == null && x.RelativeYearValue == request.RelativeYear.Value)
+                        .ToListAsync();
+
+                    oldDefaultSettings.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // side effecting db update
 
                     var defaultParamSettingMaster = new DefaultParameterSettingMaster
                     {
@@ -73,7 +79,7 @@ namespace EPR.Calculator.API.Controllers
                         CreatedBy = userName,
                         EffectiveFrom = DateTime.UtcNow,
                         EffectiveTo = null,
-                        ParameterYear = financialYear,
+                        RelativeYear = request.RelativeYear,
                         ParameterFileName = request.ParameterFileName,
                     };
                     await this.context.DefaultParameterSettings.AddAsync(defaultParamSettingMaster);
@@ -104,11 +110,11 @@ namespace EPR.Calculator.API.Controllers
         }
 
         [HttpGet]
-        [Route("defaultParameterSetting/{parameterYear}")]
+        [Route("defaultParameterSetting/{relativeYearValue}")]
         [ProducesResponseType(typeof(List<DefaultSchemeParametersDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] string parameterYear)
+        public async Task<IActionResult> Get([FromRoute] int relativeYearValue)
         {
             if (!this.ModelState.IsValid)
             {
@@ -117,23 +123,20 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var financialYear = await this.context.FinancialYears.Where(x => x.Name == parameterYear).SingleOrDefaultAsync();
-                if (financialYear == null)
+                var relativeYear = await this.context.FindRelativeYearAsync(relativeYearValue);
+                if (relativeYear == null)
                 {
                     return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
                 }
 
                 var currentDefaultSetting = await this.context.DefaultParameterSettings
-                    .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.ParameterYear.Name == financialYear.Name);
+                    .Include(x => x.Details)
+                    .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.RelativeYearValue == relativeYearValue);
 
                 if (currentDefaultSetting == null)
                 {
                     return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
                 }
-
-                var pramSettingDetails = await this.context.DefaultParameterSettingDetail
-                    .Where(x => x.DefaultParameterSettingMasterId == currentDefaultSetting.Id)
-                    .ToListAsync();
 
                 var templateDetails = await this.context.DefaultParameterTemplateMasterList.ToListAsync();
 

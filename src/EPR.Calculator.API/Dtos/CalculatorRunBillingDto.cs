@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 
 namespace EPR.Calculator.API.Dtos
 {
@@ -22,7 +23,7 @@ namespace EPR.Calculator.API.Dtos
 
         public required string RunClassificationStatus { get; init; }
 
-        public string FinancialYear { get; init; } = null!;
+        public required RelativeYear RelativeYear { get; init; }
 
         public int? BillingFileId { get; init; }
 

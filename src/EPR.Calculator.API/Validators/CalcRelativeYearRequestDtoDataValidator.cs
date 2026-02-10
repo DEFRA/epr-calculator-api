@@ -5,42 +5,27 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Validators;
 
-public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearRequestDtoDataValidator
+public class CalcRelativeYearRequestDtoDataValidator : ICalcRelativeYearRequestDtoDataValidator
 {
     private readonly ApplicationDBContext context;
 
-    public CalcFinancialYearRequestDtoDataValidator(ApplicationDBContext context)
+    public CalcRelativeYearRequestDtoDataValidator(ApplicationDBContext context)
     {
         this.context = context;
     }
 
-    public async Task<ValidationResultDto<ErrorDto>> Validate(CalcFinancialYearRequestDto request, CancellationToken cancellationToken = default)
+    public async Task<ValidationResultDto<ErrorDto>> Validate(CalcRelativeYearRequestDto request, CancellationToken cancellationToken = default)
     {
         var validationResult = new ValidationResultDto<ErrorDto>();
 
-        // Check if financialYear is empty
-        if (string.IsNullOrWhiteSpace(request.FinancialYear))
-        {
-            validationResult.IsInvalid = true;
-            validationResult.Errors.Add(new ErrorDto
-            {
-                Message = CommonResources.FinancialYearRequired,
-                Description = null,
-            });
-            return validationResult;
-        }
-
-        // Check if financialYear exists in the database
-        var dbYear = await this.context.FinancialYears
-            .AsNoTracking()
-            .SingleOrDefaultAsync(y => y.Name == request.FinancialYear, cancellationToken);
-
+        // Check if relativeYear exists in the database
+        var dbYear = await this.context.FindRelativeYearAsync(request.RelativeYearValue);
         if (dbYear == null)
         {
             validationResult.IsInvalid = true;
             validationResult.Errors.Add(new ErrorDto
             {
-                Message = CommonResources.FinancialYearNotInDatabase,
+                Message = CommonResources.RelativeYearNotInDatabase,
             });
             return validationResult;
         }
@@ -60,7 +45,7 @@ public class CalcFinancialYearRequestDtoDataValidator : ICalcFinancialYearReques
             return validationResult;
         }
 
-        if (currentRun.FinancialYearId != request.FinancialYear)
+        if (currentRun.RelativeYear.Value != request.RelativeYearValue)
         {
             validationResult.IsInvalid = true;
             validationResult.Errors.Add(new ErrorDto

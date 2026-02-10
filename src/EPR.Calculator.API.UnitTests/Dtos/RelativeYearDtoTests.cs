@@ -6,25 +6,25 @@ namespace EPR.Calculator.API.UnitTests.Dtos
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
-    public class FinancialYearDtoTests
+    public class RelativeYearDtoTests
     {
-        public FinancialYearDtoTests()
+        public RelativeYearDtoTests()
         {
             this.Fixture = new Fixture();
-            this.Name = this.Fixture.Create<string>();
+            this.Value = this.Fixture.Create<int>();
             this.Description = this.Fixture.Create<string>();
-            this.TestClass = new FinancialYearDto
+            this.TestClass = new RelativeYearDto
             {
-                Name = this.Name,
+                Value = this.Value,
                 Description = this.Description,
             };
         }
 
-        private FinancialYearDto TestClass { get; init; }
+        private RelativeYearDto TestClass { get; init; }
 
         private IFixture Fixture { get; init; }
 
-        private string Name { get; init; }
+        private int Value { get; init; }
 
         private string Description { get; init; }
 
@@ -32,9 +32,9 @@ namespace EPR.Calculator.API.UnitTests.Dtos
         public void CanInitialize()
         {
             // Act
-            var instance = new FinancialYearDto
+            var instance = new RelativeYearDto
             {
-                Name = this.Name,
+                Value = this.Value,
                 Description = this.Description,
             };
 
@@ -43,15 +43,15 @@ namespace EPR.Calculator.API.UnitTests.Dtos
         }
 
         [TestMethod]
-        public void ImplementsIEquatable_FinancialYearDto()
+        public void ImplementsIEquatable_RelativeYearDto()
         {
             // Arrange
-            var same = new FinancialYearDto
+            var same = new RelativeYearDto
             {
-                Name = this.Name,
+                Value = this.Value,
                 Description = this.Description,
             };
-            var different = this.Fixture.Create<FinancialYearDto>();
+            var different = this.Fixture.Create<RelativeYearDto>();
 
             // Assert
             Assert.IsFalse(this.TestClass.Equals(default(object)));
@@ -71,7 +71,7 @@ namespace EPR.Calculator.API.UnitTests.Dtos
         [TestMethod]
         public void NameIsInitializedCorrectly()
         {
-            Assert.AreEqual(this.Name, this.TestClass.Name);
+            Assert.AreEqual(this.Value, this.TestClass.Value);
         }
 
         [TestMethod]

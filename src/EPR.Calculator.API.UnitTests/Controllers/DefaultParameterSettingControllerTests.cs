@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
@@ -75,7 +76,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var tempdateData = new DefaultSchemeParametersDto()
             {
                 Id = 1,
-                ParameterYear = "2024-25",
+                RelativeYear = new RelativeYear(2024),
                 EffectiveFrom = DateTime.UtcNow,
 
                 EffectiveTo = null,
@@ -91,7 +92,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Act
             var actionResult1 = await this.DefaultParameterSettingController
-                .Get(this.FinancialYear24_25.Name) as ObjectResult;
+                .Get(this.RelativeYear24_25.Value) as ObjectResult;
 
             // Assert
             var okResult = actionResult1 as ObjectResult;
@@ -113,23 +114,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Return 400 error if the year does not exist
             // Act
-            var result = await this.DefaultParameterSettingController.Get("2028-25") as ObjectResult;
+            var result = await this.DefaultParameterSettingController.Get(2028) as ObjectResult;
 
             // Assert
             var okResult = result as ObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(400, okResult.StatusCode);
-        }
-
-        [TestMethod]
-        public void GetSchemeParameter_Return_400_Error_With_No_YearSupplied()
-        {
-            ParameterYearValueValidationValidator validator = new ParameterYearValueValidationValidator();
-            string parameter = string.Empty;
-            var result = validator.Validate(parameter);
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual("Parameter Year is required", result.Errors[0].ErrorMessage);
         }
 
         [TestMethod]
@@ -160,7 +150,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             CreateDefaultParameterSettingDto parameter = new CreateDefaultParameterSettingDto()
             {
                 ParameterFileName = string.Empty,
-                ParameterYear = "2024-25",
+                RelativeYear = new RelativeYear(2024),
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
             };
             var result = validator.Validate(parameter);
@@ -197,7 +187,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             CreateDefaultParameterSettingDto parameter = new CreateDefaultParameterSettingDto()
             {
                 ParameterFileName = new string('A', 257),
-                ParameterYear = "2024-25",
+                RelativeYear = new RelativeYear(2024),
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
             };
             var result = validator.Validate(parameter);
@@ -246,7 +236,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
-                ParameterYear = "2024-25",
+                RelativeYear = new RelativeYear(2024),
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
                 ParameterFileName = "TestFileName",
             };

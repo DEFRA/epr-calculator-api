@@ -7,9 +7,9 @@ namespace EPR.Calculator.API.Validators
     {
         public CreateDefaultParameterSettingValidator()
         {
-            this.RuleFor(x => x.ParameterYear)
+            this.RuleFor(x => x.RelativeYear)
                 .NotEmpty()
-                .WithMessage(CommonResources.ParameterYearRequired);
+                .WithMessage(CommonResources.RelativeYearRequired);
             this.RuleFor(x => x.SchemeParameterTemplateValues)
                 .NotNull()
                 .Must(x => x.Count() == CommonResources.DefaultParameterUniqueReferences.Split(',').Length)
