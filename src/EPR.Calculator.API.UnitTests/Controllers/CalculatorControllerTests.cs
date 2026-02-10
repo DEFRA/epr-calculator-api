@@ -5,6 +5,7 @@ using EnumsNET;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
@@ -39,7 +40,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
         public Fixture Fixture { get; init; }
 
-        private CalculatorRunFinancialYear FinancialYear23_24 { get; } = new CalculatorRunFinancialYear { Name = "2023-24" };
+        private CalculatorRunRelativeYear RelativeYear23_24 { get; } = new CalculatorRunRelativeYear { Value = 2023 };
 
         [TestMethod]
         public async Task Create_Calculator_Run()
@@ -47,13 +48,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                FinancialYear = "2024-25",
+                RelativeYear = new RelativeYear(2024),
             };
 
             DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = FinancialYear24_25,
+                RelativeYear = new RelativeYear(2024),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
@@ -63,7 +64,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = FinancialYear24_25,
+                RelativeYear = new RelativeYear(2024),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
@@ -83,13 +84,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                FinancialYear = "2024-25",
+                RelativeYear = new RelativeYear(2024),
             };
 
             DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = FinancialYear23_24,
+                RelativeYear = new RelativeYear(2023),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
@@ -100,7 +101,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = FinancialYear23_24,
+                RelativeYear = new RelativeYear(2023),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
@@ -113,7 +114,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(424, actionResult.StatusCode);
-            Assert.AreEqual("Default parameter settings and Lapcap data not available for the financial year 2024-25.", actionResult.Value);
+            Assert.AreEqual("Default parameter settings and Lapcap data not available for the relative year 2024.", actionResult.Value);
         }
 
         [TestMethod]
@@ -122,13 +123,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                FinancialYear = "2024-25",
+                RelativeYear = new RelativeYear(2024),
             };
 
             DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = FinancialYear23_24,
+                RelativeYear = new RelativeYear(2023),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
@@ -138,7 +139,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = FinancialYear24_25,
+                RelativeYear = new RelativeYear(2024),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
@@ -149,24 +150,25 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(424, actionResult.StatusCode);
-            Assert.AreEqual("Default parameter settings not available for the financial year 2024-25.", actionResult.Value);
+            Assert.AreEqual("Default parameter settings not available for the relative year 2024.", actionResult.Value);
         }
 
         [TestMethod]
         public async Task Create_Calculator_Run_Return_404_If_No_Lapcap_Data()
         {
-            var financialYear27_28 = new CalculatorRunFinancialYear { Name = "2027-28" };
-
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                FinancialYear = "2027-28",
+                RelativeYear = new RelativeYear(2027),
             };
+
+            DbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear { Value = 2027 });
+            DbContext.SaveChanges();
 
             DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = financialYear27_28,
+                RelativeYear = new RelativeYear(2027),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
@@ -177,7 +179,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = FinancialYear23_24,
+                RelativeYear = new RelativeYear(2023),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
@@ -188,7 +190,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(424, actionResult.StatusCode);
-            Assert.AreEqual("Lapcap data not available for the financial year 2027-28.", actionResult.Value);
+            Assert.AreEqual("Lapcap data not available for the relative year 2027.", actionResult.Value);
         }
 
         [TestMethod]
@@ -197,13 +199,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                FinancialYear = "2024-25",
+                RelativeYear = new RelativeYear(2024),
             };
 
             DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = FinancialYear24_25,
+                RelativeYear = new RelativeYear(2024),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
@@ -214,7 +216,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = FinancialYear24_25,
+                RelativeYear = new RelativeYear(2024),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
@@ -227,7 +229,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var mockServiceBusService = new Mock<IServiceBusService>();
             var mockStorageService = new Mock<IStorageService>();
-            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
+            var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
 
             CalculatorController =
                 new CalculatorController(
@@ -268,13 +270,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                FinancialYear = "2024-25",
+                RelativeYear = new RelativeYear(2024),
             };
 
             DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = FinancialYear24_25,
+                RelativeYear = new RelativeYear(2024),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
@@ -285,7 +287,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = FinancialYear24_25,
+                RelativeYear = new RelativeYear(2024),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
@@ -298,7 +300,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var mockServiceBusService = new Mock<IServiceBusService>();
             var mockStorageService = new Mock<IStorageService>();
-            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
+            var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             CalculatorController =
                 new CalculatorController(
                     DbContext,
@@ -333,12 +335,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task Create_Calculator_Run_Return_400_If_FinancialYear_Invalid()
+        public async Task Create_Calculator_Run_Return_400_If_RelativeYear_Invalid()
         {
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                FinancialYear = Fixture.Create<string>(),
+                RelativeYear = new RelativeYear(Fixture.Create<int>()),
             };
             var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
             Assert.IsNotNull(actionResult);
@@ -350,7 +352,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             var runParams = new CalculatorRunsParamsDto
             {
-                FinancialYear = "2024-25",
+                RelativeYear = new RelativeYear(2024),
             };
             var actionResult = await CalculatorController.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
@@ -362,23 +364,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             var runParams = new CalculatorRunsParamsDto
             {
-                FinancialYear = "2022-23",
+                RelativeYear = new RelativeYear(2022),
             };
             var actionResult = await CalculatorController.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(404, actionResult.StatusCode);
-        }
-
-        [TestMethod]
-        public async Task Get_Calculator_Runs_Return_Bad_Request_Test()
-        {
-            var runParams = new CalculatorRunsParamsDto
-            {
-                FinancialYear = string.Empty,
-            };
-            var actionResult = await CalculatorController.GetCalculatorRuns(runParams) as ObjectResult;
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(400, actionResult.StatusCode);
         }
 
         [TestMethod]
@@ -428,13 +418,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                FinancialYear = "2024-25",
+                RelativeYear = new RelativeYear(2024),
             };
 
             DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
             {
                 Id = 1,
-                ParameterYear = FinancialYear23_24,
+                RelativeYear = new RelativeYear(2024),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
@@ -445,7 +435,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             DbContext.LapcapDataMaster.Add(new LapcapDataMaster
             {
                 Id = 1,
-                ProjectionYear = FinancialYear23_24,
+                RelativeYear = new RelativeYear(2024),
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 EffectiveFrom = DateTime.UtcNow,
@@ -458,7 +448,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
                 CalculatorRunClassificationId = 2,
-                Financial_Year = FinancialYear23_24,
+                RelativeYear = new RelativeYear(2024),
                 Name = "TestOneAtATime",
             });
             DbContext.SaveChanges();
@@ -472,19 +462,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task CanCallFinancialYears()
+        public async Task CanCallRelativeYears()
         {
             // Act
-            var result = await CalculatorController.FinancialYears() as ObjectResult;
-            var resultList = result?.Value as IEnumerable<FinancialYearDto>;
+            var result = await CalculatorController.RelativeYears() as ObjectResult;
+            var resultList = result?.Value as IEnumerable<int>;
 
             // Assert
-            Assert.IsInstanceOfType<IEnumerable<FinancialYearDto>>(resultList);
-            Assert.AreEqual("2024-25", resultList?.Single().Name);
+            Assert.IsInstanceOfType<IEnumerable<int>>(resultList);
+            Assert.AreEqual(2024, resultList?.Single());
         }
 
         [TestMethod]
-        public async Task ClassificationByFinancialYear_Returns_Options_For_Valid_FinancialYear()
+        public async Task ClassificationByRelativeYear_Returns_Options_For_Valid_RelativeYear()
         {
             var initialRun = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description);
             var testRun = RunClassification.TEST_RUN.AsString(EnumFormat.Description);
@@ -495,17 +485,17 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             }
 
             // Arrange
-            var financialYear = "2024-25";
-            var request = new CalcFinancialYearRequestDto { FinancialYear = financialYear };
+            var relativeYear = new RelativeYear(2024);
+            var request = new CalcRelativeYearRequestDto { RelativeYearValue = relativeYear.Value };
 
-            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
+            var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             mockValidator
                 .Setup(v => v.Validate(request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResultDto<ErrorDto> { IsInvalid = false });
 
             var mockAvailableClassificationsService = new Mock<IAvailableClassificationsService>();
             mockAvailableClassificationsService
-                .Setup(s => s.GetAvailableClassificationsForFinancialYearAsync(request, It.IsAny<CancellationToken>()))
+                .Setup(s => s.GetAvailableClassificationsForRelativeYearAsync(request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<CalculatorRunClassification>
                 {
                     new() { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)! },
@@ -531,34 +521,34 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
 
             // Act
-            var actionResult = await individualCalcController.ClassificationByFinancialYear(request) as ObjectResult;
+            var actionResult = await individualCalcController.ClassificationByRelativeYear(request) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(StatusCodes.Status200OK, actionResult.StatusCode);
-            var result = actionResult.Value as FinancialYearClassificationResponseDto;
+            var result = actionResult.Value as RelativeYearClassificationResponseDto;
             Assert.IsNotNull(result);
             var typeToAssert = typeof(CalculatorRunClassificationDto);
             Assert.IsInstanceOfType(expectedClassifications[0], typeToAssert);
             Assert.IsInstanceOfType(result.Classifications[1], typeToAssert);
             result.Classifications.Should().BeEquivalentTo(expectedClassifications);
-            Assert.AreEqual(result.FinancialYear, financialYear);
+            Assert.AreEqual(result.RelativeYear, relativeYear);
         }
 
         [TestMethod]
-        public async Task ClassificationByFinancialYear_Returns_BadRequest_For_Invalid_FinancialYear()
+        public async Task ClassificationByRelativeYear_Returns_BadRequest_For_Invalid_RelativeYear()
         {
             // Arrange
-            var financialYear = "2025-2026"; // Invalid format
-            var request = new CalcFinancialYearRequestDto { FinancialYear = financialYear };
+            var relativeYear = new RelativeYear(2025); // Invalid format
+            var request = new CalcRelativeYearRequestDto { RelativeYearValue = relativeYear.Value };
 
-            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
+            var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             mockValidator
                 .Setup(v => v.Validate(request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResultDto<ErrorDto>
                 {
                     IsInvalid = true,
-                    Errors = new List<ErrorDto> { new ErrorDto { Message = "Invalid financial year format." } },
+                    Errors = new List<ErrorDto> { new ErrorDto { Message = "Invalid relative year format." } },
                 });
 
             var controller = new CalculatorController(
@@ -572,31 +562,31 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IBillingFileService>());
 
             // Act
-            var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
+            var actionResult = await controller.ClassificationByRelativeYear(request) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(StatusCodes.Status400BadRequest, actionResult.StatusCode);
             var errors = actionResult.Value as List<ErrorDto>;
             Assert.IsNotNull(errors);
-            Assert.AreEqual("Invalid financial year format.", errors[0].Message);
+            Assert.AreEqual("Invalid relative year format.", errors[0].Message);
         }
 
         [TestMethod]
-        public async Task ClassificationByFinancialYear_Returns_NotFound_When_No_Classifications()
+        public async Task ClassificationByRelativeYear_Returns_NotFound_When_No_Classifications()
         {
             // Arrange
-            var financialYear = "2024-25";
-            var request = new CalcFinancialYearRequestDto { FinancialYear = financialYear };
+            var relativeYear = new RelativeYear(2024);
+            var request = new CalcRelativeYearRequestDto { RelativeYearValue = relativeYear.Value };
 
-            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
+            var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             mockValidator
                 .Setup(v => v.Validate(request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResultDto<ErrorDto> { IsInvalid = false });
 
             var mockAvailableClassificationsService = new Mock<IAvailableClassificationsService>();
             mockAvailableClassificationsService
-                .Setup(s => s.GetAvailableClassificationsForFinancialYearAsync(request, It.IsAny<CancellationToken>()))
+                .Setup(s => s.GetAvailableClassificationsForRelativeYearAsync(request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<CalculatorRunClassification>());
 
             var controller = new CalculatorController(
@@ -610,7 +600,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IBillingFileService>());
 
             // Act
-            var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
+            var actionResult = await controller.ClassificationByRelativeYear(request) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(actionResult);
@@ -619,13 +609,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task ClassificationByFinancialYear_Returns_InternalServerError_On_Exception()
+        public async Task ClassificationByRelativeYear_Returns_InternalServerError_On_Exception()
         {
             // Arrange
-            var financialYear = "2024-25";
-            var request = new CalcFinancialYearRequestDto { FinancialYear = financialYear };
+            var relativeYear = new RelativeYear(2024);
+            var request = new CalcRelativeYearRequestDto { RelativeYearValue = relativeYear.Value };
 
-            var mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
+            var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             mockValidator
                 .Setup(v => v.Validate(request, It.IsAny<CancellationToken>()))
                 .Throws(new Exception());
@@ -641,7 +631,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IBillingFileService>());
 
             // Act
-            var actionResult = await controller.ClassificationByFinancialYear(request) as ObjectResult;
+            var actionResult = await controller.ClassificationByRelativeYear(request) as ObjectResult;
 
             // Assert
             Assert.IsNotNull(actionResult);

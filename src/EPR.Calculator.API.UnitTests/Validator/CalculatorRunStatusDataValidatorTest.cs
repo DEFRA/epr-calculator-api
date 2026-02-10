@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Validators;
@@ -29,10 +30,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             // Arrange
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)runClassification,
             };
@@ -62,10 +60,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             // Arrange
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
             };
@@ -95,10 +90,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             // Arrange
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)runClassificationFrom,
             };
@@ -127,10 +119,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             // Arrange
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)RunClassification.RUNNING,
             };
@@ -157,10 +146,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             // Arrange
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)runClassification,
             };
@@ -193,10 +179,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             // Arrange
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)runClassification,
             };
@@ -226,10 +209,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             // Arrange
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)runClassification,
             };
@@ -259,10 +239,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             // Arrange
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)runClassification,
             };
@@ -286,10 +263,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             // Arrange
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)RunClassification.RUNNING,
             };
@@ -314,10 +288,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             List<ClassifiedCalculatorRunDto> designatedRuns = [];
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)RunClassification.RUNNING,
             };
@@ -366,10 +337,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             });
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
             };
@@ -409,10 +377,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             });
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
             };
@@ -452,10 +417,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             });
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
             };
@@ -497,10 +459,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             });
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
             };
@@ -540,10 +499,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             });
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
             };
@@ -571,10 +527,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             List<ClassifiedCalculatorRunDto> designatedRuns = [];
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
             };
@@ -663,10 +616,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
             };
@@ -722,10 +672,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
             };
@@ -797,10 +744,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
             };
@@ -889,10 +833,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
             var calculatorRun = new CalculatorRun
             {
-                Financial_Year = new CalculatorRunFinancialYear
-                {
-                    Name = "Name",
-                },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CreatedAt = DateTime.UtcNow.AddDays(-2), // Older run
                 CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,

@@ -59,20 +59,17 @@ namespace EPR.Calculator.API.Controllers
             {
                 try
                 {
-                    var oldLapcapData = await this.context.LapcapDataMaster
-                        .Where(x => x.EffectiveTo == null && x.ProjectionYearId == request.ParameterYear).ToListAsync();
-                    oldLapcapData.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; });
-
-                    var financialYear = await this.context.FinancialYears.Where(
-                        x => x.Name == request.ParameterYear).SingleOrDefaultAsync();
-
-                    if (financialYear == null)
+                    var relativeYear = await this.context.FindRelativeYearAsync(request.RelativeYear.Value);
+                    if (relativeYear == null)
                     {
-                        return new ObjectResult(CommonResources.NoDataForSpecifiedYear)
-                        {
-                            StatusCode = StatusCodes.Status400BadRequest,
-                        };
+                        return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
                     }
+
+                    var oldLapcapData = await this.context.LapcapDataMaster
+                        .Where(x => x.EffectiveTo == null && x.RelativeYearValue == request.RelativeYear.Value)
+                        .ToListAsync();
+
+                    oldLapcapData.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // Side effecting db update
 
                     var lapcapDataMaster = new LapcapDataMaster
                     {
@@ -81,7 +78,7 @@ namespace EPR.Calculator.API.Controllers
                         EffectiveFrom = DateTime.UtcNow,
                         EffectiveTo = null,
                         LapcapFileName = request.LapcapFileName,
-                        ProjectionYear = financialYear
+                        RelativeYear = request.RelativeYear
                     };
                     await this.context.LapcapDataMaster.AddAsync(lapcapDataMaster);
 
@@ -115,7 +112,7 @@ namespace EPR.Calculator.API.Controllers
         /// <summary>
         /// Retrieves LAPCAP data for a specified year.
         /// </summary>
-        /// <param name="parameterYear">The year for which to retrieve LAPCAP data.</param>
+        /// <param name="relativeYearValue">The year for which to retrieve LAPCAP data.</param>
         /// <returns>
         /// An IActionResult containing the LAPCAP data for the specified year, or an appropriate error message:
         /// - 400 Bad Request if the model state is invalid.
@@ -127,23 +124,27 @@ namespace EPR.Calculator.API.Controllers
         /// <response code="404">If no data is available for the specified year.</response>
         /// <response code="500">If an internal server error occurs.</response>
         [HttpGet]
-        [Route("lapcapData/{parameterYear}")]
+        [Route("lapcapData/{relativeYearValue}")]
         [ProducesResponseType(typeof(List<LapCapParameterDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] string parameterYear)
+        public async Task<IActionResult> Get([FromRoute] int relativeYearValue)
         {
             if (!this.ModelState.IsValid)
             {
                 return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            var financialYear = await context.FinancialYears.SingleOrDefaultAsync(x => x.Name == parameterYear);
+            var relativeYear = await this.context.FindRelativeYearAsync(relativeYearValue);
+            if (relativeYear == null)
+            {
+                return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
+            }
 
             var lapcapDataMaster = await context.LapcapDataMaster
               .Include(m => m.Details)
-              .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.ProjectionYear == financialYear);
+              .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.RelativeYearValue == relativeYear.Value);
 
             if (lapcapDataMaster == null)
             {

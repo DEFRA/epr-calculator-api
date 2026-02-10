@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using System.Security.Principal;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +35,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var tempdateData = new LapCapParameterDto()
             {
                 Id = 1,
-                ProjectionYear = "2024-25",
+                RelativeYear = new RelativeYear(2024),
                 LapcapDataMasterId = 1,
 
                 LapcapTempUniqueRef = "ENG-AL",
@@ -48,7 +49,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
 
             // Act
-            var actionResult1 = await this.LapcapDataController.Get("2024-25") as ObjectResult;
+            var actionResult1 = await this.LapcapDataController.Get(2024) as ObjectResult;
 
             // Assert
             var okResult = actionResult1 as ObjectResult;
@@ -66,10 +67,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task Get_InvalidModelState_ReturnsBadRequest()
         {
-            this.LapcapDataController.ModelState.AddModelError("parameterYear", "Invalid year");
+            this.LapcapDataController.ModelState.AddModelError("relativeYear", "Invalid year");
 
             // Act
-            var result = await this.LapcapDataController.Get("2024-25") as ObjectResult;
+            var result = await this.LapcapDataController.Get(2024) as ObjectResult;
 
             // Assert
             var okResult = result as ObjectResult;
@@ -81,7 +82,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public async Task Get_NoDataForYear_ReturnsNotFound()
         {
             // Act
-            var result = await this.LapcapDataController.Get("2028-25") as ObjectResult;
+            var result = await this.LapcapDataController.Get(2000) as ObjectResult;
 
             // Assert
             var okResult = result as ObjectResult;
@@ -134,8 +135,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 HttpContext = context,
             };
             var createDefaultParameterDto = CreateDto();
-            createDefaultParameterDto.ParameterYear = string.Empty;
-            this.LapcapDataController.ModelState.AddModelError("ParameterYear", CommonResources.ParameterYearRequired);
+            createDefaultParameterDto.RelativeYear = new RelativeYear(0);
+            this.LapcapDataController.ModelState.AddModelError("RelativeYEar", CommonResources.RelativeYearRequired);
             var task = this.LapcapDataController.Create(createDefaultParameterDto);
             task.Wait(TestContext.CancellationTokenSource.Token);
             var actionResult = task.Result as ObjectResult;
@@ -222,7 +223,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var createDefaultParameterDto = new CreateLapcapDataDto
             {
-                ParameterYear = "2024-25",
+                RelativeYear = new RelativeYear(2024),
                 LapcapDataTemplateValues = lapcapDataTemplateValues,
                 LapcapFileName = "SomeTestFileName",
             };

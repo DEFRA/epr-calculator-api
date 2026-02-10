@@ -5,6 +5,6 @@ namespace EPR.Calculator.API.Services
 {
     public interface IAvailableClassificationsService
     {
-        Task<List<CalculatorRunClassification>> GetAvailableClassificationsForFinancialYearAsync(CalcFinancialYearRequestDto request, CancellationToken cancellationToken = default);
+        Task<List<CalculatorRunClassification>> GetAvailableClassificationsForRelativeYearAsync(CalcRelativeYearRequestDto request, CancellationToken cancellationToken = default);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
@@ -21,13 +22,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly Mock<IConfiguration> mockConfig;
         private readonly Mock<IStorageService> mockStorageService;
         private readonly Mock<IServiceBusService> mockServiceBusService;
-        private readonly Mock<ICalcFinancialYearRequestDtoDataValidator> mockValidator;
+        private readonly Mock<ICalcRelativeYearRequestDtoDataValidator> mockValidator;
 
         public DownloadResultFileTest()
         {
             this.mockStorageService = new Mock<IStorageService>();
             this.mockServiceBusService = new Mock<IServiceBusService>();
-            this.mockValidator = new Mock<ICalcFinancialYearRequestDtoDataValidator>();
+            this.mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             this.mockConfig = new Mock<IConfiguration>();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
@@ -36,12 +37,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context = new ApplicationDBContext(dbContextOptions);
             context.Database.EnsureCreated();
 
-            this.FinancialYear24_25 = new CalculatorRunFinancialYear { Name = "2024-25" };
-            this.context.FinancialYears.Add(this.FinancialYear24_25);
+            this.RelativeYear24_25 = new CalculatorRunRelativeYear { Value = 2024 };
+            this.context.CalculatorRunRelativeYears.Add(this.RelativeYear24_25);
             this.context.SaveChanges();
         }
 
-        private CalculatorRunFinancialYear FinancialYear24_25 { get; init; }
+        private CalculatorRunRelativeYear RelativeYear24_25 { get; init; }
 
         [TestCleanup]
         public void CleanUp()
@@ -66,7 +67,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CreatedBy = "User23",
                 LapcapDataMasterId = 1,
                 DefaultParameterSettingMasterId = 1,
-                Financial_Year = FinancialYear24_25
+                RelativeYear = new RelativeYear(2024),
             });
 
             this.context.CalculatorRunCsvFileMetadata.Add(new CalculatorRunCsvFileMetadata
@@ -116,7 +117,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 CreatedBy = "User23",
                 LapcapDataMasterId = 1,
                 DefaultParameterSettingMasterId = 1,
-                Financial_Year = FinancialYear24_25,
+                RelativeYear = new RelativeYear(2024)
             });
 
             this.context.CalculatorRunCsvFileMetadata.Add(new CalculatorRunCsvFileMetadata

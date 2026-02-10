@@ -3,6 +3,7 @@ using System.Security.Principal;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
@@ -19,232 +20,205 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public TestContext TestContext { get; set; }
 
         [TestMethod]
-        public void Test_With_Multiple_Financial_Years()
+        public void Test_With_Multiple_RelativeYears()
         {
-            ApplicationDBContext dbContext;
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-                .UseInMemoryDatabase(databaseName: "PayCal")
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // unique DB per test
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
 
-            dbContext = new ApplicationDBContext(dbContextOptions);
+            var dbContext = new ApplicationDBContext(dbContextOptions);
             dbContext.Database.EnsureCreated();
 
+            // Add relative years
+            dbContext.AddRange(
+                new CalculatorRunRelativeYear { Value = 2029 },
+                new CalculatorRunRelativeYear { Value = 2030 });
+
+            dbContext.SaveChanges();
+
+            // Add existing Lapcap data for 2029 and 2030
+            var lapcapMaster29 = new LapcapDataMaster
+            {
+                EffectiveFrom = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                EffectiveTo = null,
+                RelativeYear = new RelativeYear(2029),
+            };
+            var lapcapDetail29 = new LapcapDataDetail
+            {
+                LapcapDataMaster = lapcapMaster29,
+                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',')[0]
+            };
+
+            var lapcapMaster30 = new LapcapDataMaster
+            {
+                EffectiveFrom = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
+                EffectiveTo = null,
+                RelativeYear = new RelativeYear(2030),
+            };
+            var lapcapDetail30 = new LapcapDataDetail
+            {
+                LapcapDataMaster = lapcapMaster30,
+                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',')[0]
+            };
+
+            dbContext.LapcapDataMaster.AddRange(lapcapMaster29, lapcapMaster30);
+            dbContext.LapcapDataDetail.AddRange(lapcapDetail29, lapcapDetail30);
+            dbContext.SaveChanges();
+
+            // -----------------------------
+            // Arrange Controller with Authorized User
+            // -----------------------------
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
+            identity.AddClaim(new Claim(ClaimTypes.Role, "Admin")); // ensure authorization passes
             var principal = new ClaimsPrincipal(identity);
 
-            var context = new DefaultHttpContext()
-            {
-                User = principal,
-            };
-
-            var year24 = new CalculatorRunFinancialYear
-            {
-                Name = "2029-30",
-                Description = string.Empty
-            };
-            dbContext.Add(year24);
-
-            var year25 = new CalculatorRunFinancialYear
-            {
-                Name = "2030-31",
-                Description = string.Empty
-            };
-            dbContext.Add(year25);
-
-            var lapcapMaster25 = new LapcapDataMaster
-            {
-                ProjectionYearId = "2029-30",
-                EffectiveFrom = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
-                EffectiveTo = null,
-                ProjectionYear = year24,
-            };
-            var lapcapDetail25 = new LapcapDataDetail
-            {
-                LapcapDataMaster = lapcapMaster25,
-                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',')[0],
-            };
-
-            var lapcapMaster26 = new LapcapDataMaster
-            {
-                ProjectionYearId = "2030-31",
-                EffectiveFrom = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
-                EffectiveTo = null,
-                ProjectionYear = year25,
-            };
-            var lapcapDetail26 = new LapcapDataDetail
-            {
-                LapcapDataMaster = lapcapMaster26,
-                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',')[0],
-            };
-            dbContext.LapcapDataMaster.Add(lapcapMaster25);
-            dbContext.LapcapDataDetail.Add(lapcapDetail25);
-            dbContext.LapcapDataMaster.Add(lapcapMaster26);
-            dbContext.LapcapDataDetail.Add(lapcapDetail26);
-            dbContext.SaveChanges();
+            var httpContext = new DefaultHttpContext { User = principal };
 
             var lapcapDataValidator = new Mock<ILapcapDataValidator>();
             lapcapDataValidator.Setup(x => x.Validate(It.IsAny<CreateLapcapDataDto>()))
                 .Returns(new ValidationResultDto<CreateLapcapDataErrorDto> { IsInvalid = false });
-            this.LapcapDataController = new LapcapDataController(
-                dbContext,
-                lapcapDataValidator.Object,
-                TelemetryClient)
+
+            var controller = new LapcapDataController(dbContext, lapcapDataValidator.Object, TelemetryClient)
             {
-                ControllerContext = new ControllerContext
-                {
-                    HttpContext = context,
-                },
+                ControllerContext = new ControllerContext { HttpContext = httpContext }
             };
 
+            // -----------------------------
+            // Act: create new Lapcap data for 2029
+            // -----------------------------
             var request = new CreateLapcapDataDto
             {
-                ParameterYear = "2029-30",
-                LapcapFileName = "Some Name",
-                LapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>(),
+                RelativeYear = new RelativeYear(2029),
+                LapcapFileName = "Test File",
+                LapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>()
             };
-            var task = this.LapcapDataController.Create(request);
-            task.Wait(TestContext.CancellationTokenSource.Token);
-            var result = task.Result;
+
+            var result = controller.Create(request).Result;
+
+            // -----------------------------
+            // Assert
+            // -----------------------------
             Assert.IsNotNull(result);
+
             var objectResult = result as ObjectResult;
             Assert.IsNotNull(objectResult);
-            Assert.AreEqual(201, objectResult.StatusCode);
+            Assert.AreEqual(201, objectResult.StatusCode); // success
 
-            var lapcapLatest = dbContext.LapcapDataMaster.Where(x => x.EffectiveTo == null).ToList();
-            Assert.HasCount(2, lapcapLatest);
-            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.ProjectionYearId == "2029-30" && x.EffectiveTo == null));
-            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.ProjectionYearId == "2030-31" && x.EffectiveTo == null));
+            var activeLapcap = dbContext.LapcapDataMaster.Where(x => x.EffectiveTo == null).ToList();
+            Assert.AreEqual(2, activeLapcap.Count); // only 2029 and 2030 active
 
-            var lapcapDataList = dbContext.LapcapDataDetail.ToList();
-            foreach (var lapcapData in lapcapDataList)
-            {
-                dbContext.LapcapDataDetail.Remove(lapcapData);
-            }
-
-            var lapcapDataMasterList = dbContext.LapcapDataMaster.ToList();
-            foreach (var lapcapDataMaster in lapcapDataMasterList)
-            {
-                dbContext.LapcapDataMaster.Remove(lapcapDataMaster);
-            }
-
-            dbContext.SaveChanges();
+            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.RelativeYearValue == 2029 && x.EffectiveTo == null));
+            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.RelativeYearValue == 2030 && x.EffectiveTo == null));
         }
 
         [TestMethod]
-        public void Test_With_Incorrect_Financial_Years()
+        public void Test_With_Incorrect_RelativeYears()
         {
-            ApplicationDBContext dbContext;
+            // Arrange: in-memory DB
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-                .UseInMemoryDatabase(databaseName: "PayCal")
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
 
-            dbContext = new ApplicationDBContext(dbContextOptions);
+            using var dbContext = new ApplicationDBContext(dbContextOptions);
             dbContext.Database.EnsureCreated();
 
+            // Arrange: user identity
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
             var principal = new ClaimsPrincipal(identity);
+            var context = new DefaultHttpContext { User = principal };
 
-            var context = new DefaultHttpContext()
-            {
-                User = principal,
-            };
+            // Seed relative years (realistic values)
+            dbContext.AddRange(
+                new CalculatorRunRelativeYear { Value = 2029 },
+                new CalculatorRunRelativeYear { Value = 2030 });
 
-            var year24 = new CalculatorRunFinancialYear
-            {
-                Name = "202930",
-                Description = string.Empty
-            };
-            dbContext.Add(year24);
-
-            var year25 = new CalculatorRunFinancialYear
-            {
-                Name = "203031",
-                Description = string.Empty
-            };
-            dbContext.Add(year25);
-
-            var lapcapMaster25 = new LapcapDataMaster
-            {
-                ProjectionYearId = "202930",
-                EffectiveFrom = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
-                EffectiveTo = null,
-                ProjectionYear = year24,
-            };
-            var lapcapDetail25 = new LapcapDataDetail
-            {
-                LapcapDataMaster = lapcapMaster25,
-                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',')[0],
-            };
-
-            var lapcapMaster26 = new LapcapDataMaster
-            {
-                ProjectionYearId = "203031",
-                EffectiveFrom = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Local),
-                EffectiveTo = null,
-                ProjectionYear = year25,
-            };
-            var lapcapDetail26 = new LapcapDataDetail
-            {
-                LapcapDataMaster = lapcapMaster26,
-                UniqueReference = CommonResources.LapcapDataUniqueReferences.Split(',')[0],
-            };
-            dbContext.LapcapDataMaster.Add(lapcapMaster25);
-            dbContext.LapcapDataDetail.Add(lapcapDetail25);
-            dbContext.LapcapDataMaster.Add(lapcapMaster26);
-            dbContext.LapcapDataDetail.Add(lapcapDetail26);
             dbContext.SaveChanges();
 
+            // Seed minimal LapcapDataTemplateMaster so controller Single() won't throw
+            dbContext.LapcapDataTemplateMaster.Add(new LapcapDataTemplateMaster
+            {
+                Material = "M1",
+                Country = "C1",
+                UniqueReference = "REF1"
+            });
+            dbContext.SaveChanges();
+
+            // Seed existing LapcapDataMasters
+            var lapcapMaster29 = new LapcapDataMaster
+            {
+                EffectiveFrom = DateTime.UtcNow.AddYears(-1),
+                EffectiveTo = null,
+                RelativeYear = new RelativeYear(2029),
+                LapcapFileName = "Existing29"
+            };
+            var lapcapDetail29 = new LapcapDataDetail
+            {
+                LapcapDataMaster = lapcapMaster29,
+                UniqueReference = "REF1",
+                TotalCost = 100
+            };
+
+            var lapcapMaster30 = new LapcapDataMaster
+            {
+                EffectiveFrom = DateTime.UtcNow.AddYears(-1),
+                EffectiveTo = null,
+                RelativeYear = new RelativeYear(2030),
+                LapcapFileName = "Existing30"
+            };
+            var lapcapDetail30 = new LapcapDataDetail
+            {
+                LapcapDataMaster = lapcapMaster30,
+                UniqueReference = "REF1",
+                TotalCost = 100
+            };
+
+            dbContext.LapcapDataMaster.AddRange(lapcapMaster29, lapcapMaster30);
+            dbContext.LapcapDataDetail.AddRange(lapcapDetail29, lapcapDetail30);
+            dbContext.SaveChanges();
+
+            // Mock validator
             var lapcapDataValidator = new Mock<ILapcapDataValidator>();
             lapcapDataValidator.Setup(x => x.Validate(It.IsAny<CreateLapcapDataDto>()))
                 .Returns(new ValidationResultDto<CreateLapcapDataErrorDto> { IsInvalid = false });
-            this.LapcapDataController = new LapcapDataController(
-                dbContext,
-                lapcapDataValidator.Object,
-                TelemetryClient)
+
+            var controller = new LapcapDataController(dbContext, lapcapDataValidator.Object, TelemetryClient)
             {
-                ControllerContext = new ControllerContext
-                {
-                    HttpContext = context,
-                },
+                ControllerContext = new ControllerContext { HttpContext = context }
             };
 
+            // Act: use a year that doesn't exist in DB
             var request = new CreateLapcapDataDto
             {
-                ParameterYear = "203334",
+                RelativeYear = new RelativeYear(2035), // deliberately missing
                 LapcapFileName = "Some Name",
-                LapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>(),
+                LapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>
+                {
+                    new LapcapDataTemplateValueDto
+                    {
+                        Material = "M1",
+                        CountryName = "C1",
+                        TotalCost = "£1000"
+                    }
+                }
             };
-            var task = this.LapcapDataController.Create(request);
-            task.Wait(TestContext.CancellationTokenSource.Token);
-            var result = task.Result;
-            Assert.IsNotNull(result);
+
+            var result = controller.Create(request).Result;
+
+            // Assert
             var objectResult = result as ObjectResult;
             Assert.IsNotNull(objectResult);
             Assert.AreEqual(400, objectResult.StatusCode);
-            Assert.AreEqual("No data available for the specified year. Please check the year and try again.", objectResult?.Value?.ToString());
+            Assert.AreEqual(CommonResources.NoDataForSpecifiedYear, objectResult.Value);
 
+            // Ensure existing data is untouched
             var lapcapLatest = dbContext.LapcapDataMaster.Where(x => x.EffectiveTo == null).ToList();
             Assert.HasCount(2, lapcapLatest);
-            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.ProjectionYearId == "202930" && x.EffectiveTo == null));
-            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.ProjectionYearId == "203031" && x.EffectiveTo == null));
-
-            var lapcapDataList = dbContext.LapcapDataDetail.ToList();
-            foreach (var lapcapData in lapcapDataList)
-            {
-                dbContext.LapcapDataDetail.Remove(lapcapData);
-            }
-
-            var lapcapDataMasterList = dbContext.LapcapDataMaster.ToList();
-            foreach (var lapcapDataMaster in lapcapDataMasterList)
-            {
-                dbContext.LapcapDataMaster.Remove(lapcapDataMaster);
-            }
-
-            dbContext.SaveChanges();
+            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.RelativeYearValue == 2029 && x.EffectiveTo == null));
+            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.RelativeYearValue == 2030 && x.EffectiveTo == null));
         }
     }
 }

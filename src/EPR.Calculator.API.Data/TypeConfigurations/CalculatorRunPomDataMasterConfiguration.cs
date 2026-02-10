@@ -16,8 +16,17 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.Property(p => p.Id)
                    .HasColumnName("id");
 
-            builder.Property(p => p.RelativeYear)
-                   .HasColumnName("relative_year");
+            builder.Property(p => p.RelativeYearValue)
+                   .HasColumnName("relative_year")
+                   .IsRequired();
+
+            builder.Ignore(p => p.RelativeYear);
+
+            builder.HasOne<CalculatorRunRelativeYear>()
+                   .WithMany()
+                   .HasForeignKey(e => e.RelativeYearValue)
+                   .HasPrincipalKey(e => e.Value)
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(p => p.EffectiveFrom)
                    .HasColumnName("effective_from");

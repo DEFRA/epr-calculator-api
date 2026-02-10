@@ -4,6 +4,8 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     using System.Collections.Generic;
     using AutoFixture;
     using EPR.Calculator.API.Data.DataModels;
+    using EPR.Calculator.API.Data.Models;
+
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -32,10 +34,10 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         }
 
         [TestMethod]
-        public void CanSetAndGetCalendarYear()
+        public void CanSetAndGetRelativeYear()
         {
             // Arrange
-            var testValue = this.Fixture.Create<string>();
+            var testValue = this.Fixture.Create<RelativeYear>();
 
             // Act
             this.TestClass.RelativeYear = testValue;

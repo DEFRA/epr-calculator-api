@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,9 +14,17 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
         {
             builder.ToTable("default_parameter_setting_master");
 
-            builder.Property(p => p.ParameterYearId)
-                   .HasColumnName("parameter_year")
+            builder.Property(p => p.RelativeYearValue)
+                   .HasColumnName("relative_year")
                    .IsRequired();
+
+            builder.Ignore(p => p.RelativeYear);
+
+            builder.HasOne<CalculatorRunRelativeYear>()
+                   .WithMany()
+                   .HasForeignKey(e => e.RelativeYearValue)
+                   .HasPrincipalKey(e => e.Value)
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(p => p.EffectiveFrom)
                    .HasColumnName("effective_from")

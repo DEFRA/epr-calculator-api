@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exceptions;
@@ -595,14 +596,12 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             var runId = 9200;
             var runName = $"{runId} - potato";
-            var financialYear = this.DbContext.FinancialYears.SingleOrDefault(y => y.Name == "2024-25");
-            financialYear = financialYear ?? new CalculatorRunFinancialYear { Name = "2024-25" };
 
             this.DbContext.CalculatorRuns.Add(new CalculatorRun
             {
                 Id = runId,
                 Name = runName,
-                Financial_Year = financialYear,
+                RelativeYear = new RelativeYear(2024),
                 CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
             });
             this.DbContext.ProducerDetail.Add(new ProducerDetail
@@ -754,14 +753,13 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             var runId = 4962;
             var runName = "Run 4962";
-            var financialYearName = "2024-25";
 
-            var financialYear = this.DbContext.FinancialYears.SingleOrDefault(f => f.Name == financialYearName);
+            var calculatorRunRelativeYear = this.DbContext.CalculatorRunRelativeYears.SingleOrDefault(f => f.Value == 2024);
 
-            if (financialYear == null)
+            if (calculatorRunRelativeYear == null)
             {
-                financialYear = new CalculatorRunFinancialYear { Name = financialYearName };
-                this.DbContext.FinancialYears.Add(financialYear);
+                calculatorRunRelativeYear = new CalculatorRunRelativeYear { Value = 2024 };
+                this.DbContext.CalculatorRunRelativeYears.Add(calculatorRunRelativeYear);
 
                 using var cts = new CancellationTokenSource();
                 await this.DbContext.SaveChangesAsync(cts.Token);
@@ -771,8 +769,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             {
                 Id = runId,
                 Name = runName,
-                Financial_Year = financialYear,
-                FinancialYearId = financialYear.Name,
+                RelativeYear = new RelativeYear(2024),
                 CalculatorRunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN
             });
 
@@ -790,7 +787,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             var master = new CalculatorRunOrganisationDataMaster
             {
-                RelativeYear = "2024",
+                RelativeYear = new RelativeYear(2024),
                 EffectiveFrom = DateTime.UtcNow.AddDays(-5),
                 EffectiveTo = null,
                 CreatedBy = "testsuperuser.paycal",
@@ -801,8 +798,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var previousRun = new CalculatorRun
             {
                 Name = "Previous Run Snapshot",
-                Financial_Year = financialYear,
-                FinancialYearId = financialYear.Name,
+                RelativeYear = new RelativeYear(2024),
                 CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
                 CalculatorRunOrganisationDataMasterId = master.Id
             };

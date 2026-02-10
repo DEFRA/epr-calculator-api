@@ -3,6 +3,7 @@
     using System.Reflection;
     using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.Data.DataSeeder;
+    using EPR.Calculator.API.Data.Models;
     using Microsoft.EntityFrameworkCore;
 
     public class ApplicationDBContext : DbContext
@@ -66,11 +67,19 @@
 
         public DbSet<ProducerResultFileSuggestedBillingInstruction> ProducerResultFileSuggestedBillingInstruction { get; set; }
 
-        public virtual DbSet<CalculatorRunFinancialYear> FinancialYears { get; set; }
+        public virtual DbSet<CalculatorRunRelativeYear> CalculatorRunRelativeYears { get; set; }
 
         public virtual DbSet<CalculatorRunBillingFileMetadata> CalculatorRunBillingFileMetadata { get; set; }
 
         public virtual DbSet<ErrorReport> ErrorReports { get; set; }
+
+        public async Task<RelativeYear?> FindRelativeYearAsync(int value, CancellationToken cancellationToken = default)
+        {
+            var entity = await CalculatorRunRelativeYears
+                .SingleOrDefaultAsync(x => x.Value == value, cancellationToken);
+
+            return entity == null ? null : new RelativeYear(entity.Value);
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

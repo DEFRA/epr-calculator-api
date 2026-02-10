@@ -1,7 +1,7 @@
-﻿using Azure.Messaging.ServiceBus;
+﻿using System.Text.Json;
+using Azure.Messaging.ServiceBus;
 using EPR.Calculator.API.Models;
 using Microsoft.Extensions.Azure;
-using Newtonsoft.Json;
 
 namespace EPR.Calculator.API.Services
 {
@@ -16,13 +16,13 @@ namespace EPR.Calculator.API.Services
 
         public async Task SendMessage(string serviceBusQueueName, CalculatorRunMessage calculatorRunMessage)
         {
-            var messageString = JsonConvert.SerializeObject(calculatorRunMessage);
+            var messageString = JsonSerializer.Serialize(calculatorRunMessage);
             await SendMessageAsync(serviceBusQueueName, messageString);
         }
 
         public async Task SendMessage(string serviceBusQueueName, BillingFileGenerationMessage billingFileGenerationMessage)
         {
-            var messageString = JsonConvert.SerializeObject(billingFileGenerationMessage);
+            var messageString = JsonSerializer.Serialize(billingFileGenerationMessage);
             await SendMessageAsync(serviceBusQueueName, messageString);
         }
 

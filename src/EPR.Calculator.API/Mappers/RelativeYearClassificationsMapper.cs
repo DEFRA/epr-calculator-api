@@ -1,17 +1,18 @@
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 
 namespace EPR.Calculator.API.Mappers
 {
-    public static class FinancialYearClassificationsMapper
+    public static class RelativeYearClassificationsMapper
     {
-        public static FinancialYearClassificationResponseDto Map(
-            string financialYear,
+        public static RelativeYearClassificationResponseDto Map(
+            RelativeYear relativeYear,
             IEnumerable<CalculatorRunClassification> classifications)
         {
-            return new FinancialYearClassificationResponseDto
+            return new RelativeYearClassificationResponseDto
             {
-                FinancialYear = financialYear,
+                RelativeYear = relativeYear,
                 Classifications = classifications.Select(c =>
                     new CalculatorRunClassificationDto
                     {
@@ -21,19 +22,19 @@ namespace EPR.Calculator.API.Mappers
             };
         }
 
-        public static FinancialYearClassificationResponseDto Map(
-            string financialYear,
+        public static RelativeYearClassificationResponseDto Map(
+            RelativeYear relativeYear,
             IEnumerable<CalculatorRunClassification> classifications,
             List<ClassifiedCalculatorRunDto>? runs)
         {
             if (runs is null)
             {
-                return Map(financialYear, classifications);
+                return Map(relativeYear, classifications);
             }
 
-            return new FinancialYearClassificationResponseDto
+            return new RelativeYearClassificationResponseDto
             {
-                FinancialYear = financialYear,
+                RelativeYear = relativeYear,
                 Classifications = classifications.Select(c =>
                     new CalculatorRunClassificationDto
                     {

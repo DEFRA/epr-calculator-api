@@ -1,12 +1,20 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using EPR.Calculator.API.Data.Models;
+
+namespace EPR.Calculator.API.Data.DataModels
 {
     public class DefaultParameterSettingMaster
     {
         public int Id { get; set; }
 
-        public string ParameterYearId { get; set; } = null!;
+        public int RelativeYearValue { get; private set; }
 
-        public required CalculatorRunFinancialYear ParameterYear { get; set; }
+        [NotMapped]
+        public RelativeYear RelativeYear
+        {
+            get => new(RelativeYearValue);
+            set => RelativeYearValue = value.Value;
+        }
 
         public DateTime EffectiveFrom { get; set; }
 

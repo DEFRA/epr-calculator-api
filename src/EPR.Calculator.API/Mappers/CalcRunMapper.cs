@@ -19,9 +19,9 @@ namespace EPR.Calculator.API.Mappers
                 CreatedBy = run.CreatedBy,
                 UpdatedAt = run.UpdatedAt,
                 RunClassificationId = run.CalculatorRunClassificationId,
-                RunClassificationStatus = classification.Status,
-                FinancialYear = run.FinancialYearId,
+                RelativeYear = run.RelativeYear,
                 IsBillingFileGenerating = run.IsBillingFileGenerating,
+                RunClassificationStatus = classification.Status,
                 IsBillingFileGeneratedLatest = isBillingFileGeneratedLatest,
             };
         }

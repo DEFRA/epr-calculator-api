@@ -5,15 +5,15 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
-    public class FinancialYearTests
+    public class RelativeYearTests
     {
-        public FinancialYearTests()
+        public RelativeYearTests()
         {
             this.Fixture = new Fixture();
-            this.TestClass = this.Fixture.Create<CalculatorRunFinancialYear>();
+            this.TestClass = this.Fixture.Create<CalculatorRunRelativeYear>();
         }
 
-        private CalculatorRunFinancialYear TestClass { get; init; }
+        private CalculatorRunRelativeYear TestClass { get; init; }
 
         private IFixture Fixture { get; init; }
 
@@ -24,20 +24,20 @@ namespace EPR.Calculator.API.UnitTests.DataModels
             var result = this.TestClass.ToString();
 
             // Assert
-            Assert.AreSame(result, this.TestClass.Name);
+            Assert.AreSame(result, this.TestClass.Value.ToString());
         }
 
         [TestMethod]
         public void CanSetAndGetName()
         {
             // Arrange
-            var testValue = this.Fixture.Create<string>();
+            var testValue = this.Fixture.Create<int>();
 
             // Act
-            this.TestClass.Name = testValue;
+            this.TestClass.Value = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, this.TestClass.Name);
+            Assert.AreEqual(testValue, this.TestClass.Value);
         }
 
         [TestMethod]

@@ -5,6 +5,7 @@ using AutoFixture;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
@@ -62,21 +63,21 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context.CalculatorRuns.Add(new CalculatorRun
             {
                 CalculatorRunClassificationId = 8,
-                Financial_Year = new CalculatorRunFinancialYear { Name = "2024-25" },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 Id = 1,
             });
             context.CalculatorRuns.Add(new CalculatorRun
             {
                 CalculatorRunClassificationId = 3,
-                Financial_Year = new CalculatorRunFinancialYear { Name = "2025-26" },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Second run",
                 Id = 2,
             });
             context.CalculatorRuns.Add(new CalculatorRun
             {
                 CalculatorRunClassificationId = 7,
-                Financial_Year = new CalculatorRunFinancialYear { Name = "2023-24" },
+                RelativeYear = new RelativeYear(2024),
                 Name = "Calc Billing Run Test",
                 Id = 3,
             });

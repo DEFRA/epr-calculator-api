@@ -197,40 +197,6 @@ namespace EPR.Calculator.API.Utils
             };
         }
 
-        /// <summary>
-        /// Extracts the first year from a financial year string in the format "YYYY-YY".
-        /// </summary>
-        /// <param name="value">The financial year string to parse, in the format "YYYY-YY".</param>
-        /// <returns>The first year as a string.</returns>
-        /// <exception cref="FormatException">Thrown when the format is invalid.</exception>
-        public static string GetFinancialYearAsYYYY(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                throw new ArgumentException(CommonResources.FinancialYearEmpty, nameof(value));
-            }
-
-            string pattern = @"^\d{4}-\d{2}$";
-            TimeSpan regexTimeout = TimeSpan.FromSeconds(1);
-            if (!Regex.IsMatch(value, pattern, RegexOptions.None, regexTimeout))
-            {
-                throw new FormatException(CommonResources.InvalidFinancialYearFormat);
-            }
-
-            var years = value.Split('-');
-            return years[0];
-        }
-
-        public static FormattableString GetFormattedSqlString(string procedureName, int runId, string calendarYear, string createdBy)
-        {
-            return $"exec {procedureName} @RunId ={runId}, @calendarYear = {calendarYear}, @createdBy = {createdBy}";
-        }
-
-        public static FormattableString GetFormattedSqlString(string procedureName, string? instructionConfirmedBy, DateTime? instructionConfirmedDate, int runId)
-        {
-            return $"exec {procedureName} @instructionConfirmedBy = {instructionConfirmedBy}, @instructionConfirmedDate = {instructionConfirmedDate}, @calculatorRunID ={runId}";
-        }
-
         public static IEnumerable<int> AcceptableRunStatusForBillingInstructions()
         {
             var validRunClassifications = new List<int>

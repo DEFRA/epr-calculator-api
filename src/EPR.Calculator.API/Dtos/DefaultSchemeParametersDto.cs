@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using EPR.Calculator.API.Data.Models;
 
 namespace EPR.Calculator.API.Dtos
 {
@@ -7,7 +8,7 @@ namespace EPR.Calculator.API.Dtos
     {
         public int Id { get; set; }
 
-        public required string ParameterYear { get; set; }
+        public required RelativeYear RelativeYear { get; set; }
 
         public DateTime EffectiveFrom { get; set; }
 

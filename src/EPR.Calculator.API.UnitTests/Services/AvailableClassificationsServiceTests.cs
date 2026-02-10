@@ -1,6 +1,7 @@
 ﻿using EnumsNET;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
@@ -18,9 +19,6 @@ namespace EPR.Calculator.API.UnitTests.Services
     [TestClass]
     public class AvailableClassificationsServiceTests
     {
-        // Constants first, per SonarQube
-        private const string FinancialYear = "2024-25";
-
         // Fields, no underscores per SonarQube
         private ApplicationDBContext dbContext = null!;
         private AvailableClassificationsService service = null!;
@@ -50,10 +48,10 @@ namespace EPR.Calculator.API.UnitTests.Services
                 });
             }
 
-            // Add dummy FinancialYear for navigation property
-            dbContext.FinancialYears.Add(new CalculatorRunFinancialYear
+            // Add dummy RelativeYear for navigation property
+            dbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear
             {
-                Name = FinancialYear,
+                Value = 2024,
             });
 
             dbContext.SaveChanges();
@@ -72,16 +70,16 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task ReturnsInitialAndTestRun_WhenNoOtherRunsInYear()
         {
             // Arrange
-            var request = new CalcFinancialYearRequestDto
+            var request = new CalcRelativeYearRequestDto
             {
                 RunId = 1,
-                FinancialYear = FinancialYear,
+                RelativeYearValue = 2024,
             };
 
             AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
 
             // Act
-            var result = await service.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
+            var result = await service.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
 
             // Assert
             var statuses = result.Select(c => c.Status).ToList();
@@ -98,17 +96,17 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task ReturnsTestRun_WhenOnlyDesignatedNotComplete()
         {
             // Arrange
-            var request = new CalcFinancialYearRequestDto
+            var request = new CalcRelativeYearRequestDto
             {
                 RunId = 99,
-                FinancialYear = FinancialYear,
+                RelativeYearValue = 2024,
             };
 
             AddRunToDb(RunClassification.INITIAL_RUN, requestId: 10, isComplete: false);
             AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
 
             // Act
-            var result = await service.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
+            var result = await service.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
 
             // Assert
             var statuses = result.Select(c => c.Status).ToList();
@@ -124,10 +122,10 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task ReturnsInterimFinalFinalRecalcTest_WhenHasInitialRunCompleted()
         {
             // Arrange
-            var request = new CalcFinancialYearRequestDto
+            var request = new CalcRelativeYearRequestDto
             {
                 RunId = 999,
-                FinancialYear = FinancialYear,
+                RelativeYearValue = 2024,
             };
 
             AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
@@ -136,7 +134,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
 
             // Act
-            var result = await service.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
+            var result = await service.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
 
             // Assert
             var statuses = result.Select(c => c.Status).ToList();
@@ -155,17 +153,17 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task ReturnsTestRun_WhenHasInitialRunCompletedAndCurrentUnclassifiedRunIsOlder()
         {
             // Arrange
-            var request = new CalcFinancialYearRequestDto
+            var request = new CalcRelativeYearRequestDto
             {
                 RunId = 999,
-                FinancialYear = FinancialYear,
+                RelativeYearValue = 2024,
             };
 
             AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
             AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
 
             // Act
-            var result = await service.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
+            var result = await service.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
 
             // Assert
             var statuses = result.Select(c => c.Status).ToList();
@@ -181,10 +179,10 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task ReturnsTestRun_WhenHasCompletedRunsAndCurrentUnclassifiedRunIsOlder()
         {
             // Arrange
-            var request = new CalcFinancialYearRequestDto
+            var request = new CalcRelativeYearRequestDto
             {
                 RunId = 999,
-                FinancialYear = FinancialYear,
+                RelativeYearValue = 2024,
             };
 
             AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
@@ -194,7 +192,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             AddRunToDb(RunClassification.FINAL_RUN_COMPLETED, requestId: 13, isComplete: true);
 
             // Act
-            var result = await service.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
+            var result = await service.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
 
             // Assert
             var statuses = result.Select(c => c.Status).ToList();
@@ -210,10 +208,10 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task ReturnsInterimFinalTest_WhenHasFinalRecalcButNoFinalRun()
         {
             // Arrange
-            var request = new CalcFinancialYearRequestDto
+            var request = new CalcRelativeYearRequestDto
             {
                 RunId = 888,
-                FinancialYear = FinancialYear,
+                RelativeYearValue = 2024,
             };
 
             AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
@@ -223,7 +221,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
 
             // Act
-            var result = await service.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
+            var result = await service.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
 
             // Assert
             var statuses = result.Select(c => c.Status).ToList();
@@ -241,10 +239,10 @@ namespace EPR.Calculator.API.UnitTests.Services
         public async Task ReturnsInterimTest_WhenHasFinalRun()
         {
             // Arrange
-            var request = new CalcFinancialYearRequestDto
+            var request = new CalcRelativeYearRequestDto
             {
                 RunId = 777,
-                FinancialYear = FinancialYear,
+                RelativeYearValue = 2024,
             };
 
             AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
@@ -254,7 +252,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
 
             // Act
-            var result = await service.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
+            var result = await service.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
 
             // Assert
             var statuses = result.Select(c => c.Status).ToList();
@@ -275,16 +273,16 @@ namespace EPR.Calculator.API.UnitTests.Services
             brokenContext.Setup(x => x.CalculatorRuns).Throws(new Exception("DB fail"));
             var serviceLocal = new AvailableClassificationsService(brokenContext.Object, loggerMock.Object);
 
-            var request = new CalcFinancialYearRequestDto
+            var request = new CalcRelativeYearRequestDto
             {
                 RunId = 1,
-                FinancialYear = FinancialYear,
+                RelativeYearValue = 2024,
             };
 
             // Act & Assert
             await Assert.ThrowsExactlyAsync<Exception>(async () =>
             {
-                await serviceLocal.GetAvailableClassificationsForFinancialYearAsync(request, TestContext.CancellationTokenSource.Token);
+                await serviceLocal.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
             });
         }
 
@@ -304,8 +302,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Id = requestId,
                 CalculatorRunClassificationId = (int)classification,
                 Name = "Test",
-                FinancialYearId = FinancialYear,
-                Financial_Year = dbContext.FinancialYears.First(),
+                RelativeYear = new RelativeYear(2024),
                 CreatedBy = userName,
                 CreatedAt = currentTime,
             });

@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 

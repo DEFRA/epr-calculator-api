@@ -1,5 +1,6 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Validators;
@@ -9,14 +10,13 @@ using Microsoft.EntityFrameworkCore;
 namespace EPR.Calculator.API.UnitTests.Validators
 {
     [TestClass]
-    public class CalcFinancialYearRequestDtoDataValidatorTests
+    public class CalcRelativeYearRequestDtoDataValidatorTests
     {
         private readonly int calcRunId = 85885;
         private readonly int unclassifiedRunId = 85886;
-        private readonly string financialYear = "2024-25";
 
         private ApplicationDBContext dbContext = null!;
-        private CalcFinancialYearRequestDtoDataValidator validator = null!;
+        private CalcRelativeYearRequestDtoDataValidator validator = null!;
 
         [TestInitialize]
         public void Setup()
@@ -28,14 +28,12 @@ namespace EPR.Calculator.API.UnitTests.Validators
                 .Options;
             dbContext = new ApplicationDBContext(options);
 
-            var calculatorRunFinancialYear = new CalculatorRunFinancialYear { Name = financialYear };
-
             var calcRuns = new List<CalculatorRun>()
             {
                 new()
                 {
                     CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-                    Financial_Year = calculatorRunFinancialYear,
+                    RelativeYear = new RelativeYear(2024),
                     Name = "Test",
                     Id = calcRunId,
                     CreatedBy = "Test",
@@ -44,49 +42,28 @@ namespace EPR.Calculator.API.UnitTests.Validators
                 new()
                 {
                     CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
-                    Financial_Year = calculatorRunFinancialYear,
+                    RelativeYear = new RelativeYear(2024),
                     Name = "Test",
                     Id = unclassifiedRunId,
                     CreatedBy = "Test",
                     CreatedAt = DateTime.UtcNow,
                 },
             };
-
             dbContext.CalculatorRuns.AddRange(calcRuns);
+            dbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear { Value = 2024 });
             dbContext.SaveChanges();
-            validator = new CalcFinancialYearRequestDtoDataValidator(dbContext);
-        }
-
-        [TestMethod]
-        [DataRow(null)]
-        [DataRow("")]
-        [DataRow("\t")]
-        public async Task Validate_ReturnsInvalid_WhenFinancialYearNullOrWhiteSpace(string financialYear)
-        {
-            // Arrange
-            var request = new CalcFinancialYearRequestDto
-            {
-                RunId = calcRunId,
-                FinancialYear = financialYear,
-            };
-
-            // Act
-            var result = await validator.Validate(request, CancellationToken.None);
-
-            // Assert
-            result.IsInvalid.Should().BeTrue();
-            result.Errors.Should().ContainSingle(e => e.Message == "Financial year is required.");
+            validator = new CalcRelativeYearRequestDtoDataValidator(dbContext);
         }
 
         [TestMethod]
         [DataRow("1923-24")]
-        public async Task Validate_ReturnsInvalid_WhenFinancialYearNotFoundInDatabase(string financialYear)
+        public async Task Validate_ReturnsInvalid_WhenRelativeYearNotFoundInDatabase(string relativeYear)
         {
             // Arrange
-            var request = new CalcFinancialYearRequestDto
+            var request = new CalcRelativeYearRequestDto
             {
                 RunId = calcRunId,
-                FinancialYear = financialYear,
+                RelativeYearValue = 2000,
             };
 
             // Act
@@ -94,7 +71,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
 
             // Assert
             result.IsInvalid.Should().BeTrue();
-            result.Errors.Should().ContainSingle(e => e.Message == "Financial year not found in the database.");
+            result.Errors.Should().ContainSingle(e => e.Message == "Relative year not found in the database.");
         }
 
         [TestMethod]
@@ -102,10 +79,10 @@ namespace EPR.Calculator.API.UnitTests.Validators
         public async Task Validate_ReturnsInvalid_WhenRunNotFoundInDatabase(int runId)
         {
             // Arrange
-            var request = new CalcFinancialYearRequestDto
+            var request = new CalcRelativeYearRequestDto
             {
                 RunId = runId,
-                FinancialYear = financialYear,
+                RelativeYearValue = 2024,
             };
 
             // Act
@@ -120,10 +97,10 @@ namespace EPR.Calculator.API.UnitTests.Validators
         public async Task Validate_ReturnsInvalid_WhenRunIsAlreadyClassified()
         {
             // Arrange
-            var request = new CalcFinancialYearRequestDto
+            var request = new CalcRelativeYearRequestDto
             {
                 RunId = calcRunId,
-                FinancialYear = financialYear,
+                RelativeYearValue = 2024,
             };
 
             // Act
@@ -138,10 +115,10 @@ namespace EPR.Calculator.API.UnitTests.Validators
         public async Task Validate_ReturnsValid_WhenAllCriteriaMet()
         {
             // Arrange
-            var request = new CalcFinancialYearRequestDto
+            var request = new CalcRelativeYearRequestDto
             {
                 RunId = unclassifiedRunId,
-                FinancialYear = financialYear,
+                RelativeYearValue = 2024,
             };
 
             // Act

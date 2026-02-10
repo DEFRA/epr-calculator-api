@@ -1,10 +1,10 @@
 ﻿using System.Net;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exceptions;
-using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Utils;
@@ -300,7 +300,7 @@ namespace EPR.Calculator.API.Services
                 CalculatorRunId = run.Id,
             };
 
-            await this.PopulatePagedBillingInstructionsAsync(query, requestDto, run.Id, run.FinancialYearId, response, cancellationToken);
+            await this.PopulatePagedBillingInstructionsAsync(query, requestDto, run.Id, run.RelativeYear, response, cancellationToken);
             await this.PopulateBillingStatusCountsAsync(groupedStatus, response, cancellationToken);
             await this.PopulateBillingInstructionCountsAsync(groupedBillingInstruction, response, cancellationToken);
 
@@ -546,13 +546,13 @@ namespace EPR.Calculator.API.Services
         /// Get the producer names for the list of producer ids provided.
         /// </summary>
         /// <param name="runId">Current run id.</param>
-        /// <param name="financialYear">Financial year of the current run.</param>
+        /// <param name="relativeYear">year of the current run.</param>
         /// <param name="producerIds">List of procuder ids requiring producer name.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Task list of parent producers with producer name.</returns>
         private async Task<List<ParentProducer>> GetParentProducersLatestAsync(
             int runId,
-            string financialYear,
+            RelativeYear relativeYear,
             IEnumerable<int> producerIds,
             CancellationToken cancellationToken)
         {
@@ -593,7 +593,7 @@ namespace EPR.Calculator.API.Services
             {
                 var outstandingParentProducers = await (from p in applicationDBContext.ProducerDetail
                                                   join r in applicationDBContext.CalculatorRuns on p.CalculatorRunId equals r.Id
-                                                  where r.FinancialYearId == financialYear
+                                                  where r.RelativeYearValue == relativeYear.Value
                                                          && !runClassificationsToIgnore.Contains(r.CalculatorRunClassificationId)
                                                          && outstandingProducerIds.Contains(p.ProducerId)
                                                          && p.SubsidiaryId == null
@@ -615,7 +615,7 @@ namespace EPR.Calculator.API.Services
                     var previousRunNames = await (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
                                             join odm in applicationDBContext.CalculatorRunOrganisationDataMaster on odd.CalculatorRunOrganisationDataMasterId equals odm.Id
                                             join run in applicationDBContext.CalculatorRuns on odm.Id equals run.CalculatorRunOrganisationDataMasterId
-                                            where run.FinancialYearId == financialYear
+                                            where run.RelativeYearValue == relativeYear.Value
                                                   && stillMissingIds.Contains(odd.OrganisationId)
                                                   && odd.SubsidiaryId == null
                                             orderby odd.Id descending
@@ -640,7 +640,7 @@ namespace EPR.Calculator.API.Services
             IQueryable<ProducerBillingInstructionsDto> query,
             ProducerBillingInstructionsRequestDto requestDto,
             int runId,
-            string financialYear,
+            RelativeYear relativeYear,
             ProducerBillingInstructionsResponseDto response,
             CancellationToken cancellationToken)
         {
@@ -653,7 +653,7 @@ namespace EPR.Calculator.API.Services
             var allProducerIdsExcludingIdsWithSuggestedBillingInstructionNoAction = query.Where(x => x.SuggestedBillingInstruction != NoActionPlaceholder).Select(x => x.ProducerId).Distinct();
 
             var pagedProducerIds = pagedResult.Select(x => x.ProducerId).Distinct();
-            var parentProducers = await this.GetParentProducersLatestAsync(runId, financialYear, pagedProducerIds, cancellationToken);
+            var parentProducers = await this.GetParentProducersLatestAsync(runId, relativeYear, pagedProducerIds, cancellationToken);
 
             foreach (var record in pagedResult)
             {

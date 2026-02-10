@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -17,9 +18,17 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
                    .HasColumnName("id")
                    .IsRequired();
 
-            builder.Property(p => p.ProjectionYearId)
-                   .HasColumnName("projection_year")
+            builder.Property(p => p.RelativeYearValue)
+                   .HasColumnName("relative_year")
                    .IsRequired();
+
+            builder.Ignore(p => p.RelativeYear);
+
+            builder.HasOne<CalculatorRunRelativeYear>()
+                   .WithMany()
+                   .HasForeignKey(e => e.RelativeYearValue)
+                   .HasPrincipalKey(e => e.Value)
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(p => p.EffectiveFrom)
                    .HasColumnName("effective_from")

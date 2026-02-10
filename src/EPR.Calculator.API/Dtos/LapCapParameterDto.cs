@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using EPR.Calculator.API.Data.Models;
 
 namespace EPR.Calculator.API.Dtos
 {
@@ -7,7 +8,7 @@ namespace EPR.Calculator.API.Dtos
     {
         public int Id { get; set; }
 
-        required public string ProjectionYear { get; set; }
+        required public RelativeYear RelativeYear { get; set; }
 
         required public string CreatedBy { get; set; }
 
