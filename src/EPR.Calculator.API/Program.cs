@@ -40,17 +40,8 @@ builder.Services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatu
 builder.Services.AddScoped<IBillingFileService, BillingFileService>();
 builder.Services.AddScoped<IAvailableClassificationsService, AvailableClassificationsService>();
 builder.Services.AddScoped<ICalculationRunService, CalculationRunService>();
-
-if (environmentName.Equals(CommonResources.Local, StringComparison.OrdinalIgnoreCase))
-{
-    builder.Services.AddScoped<IStorageService, LocalFileStorageService>();
-    builder.Services.AddScoped<IBlobStorageService2, LocalFileStorageService2>();
-}
-else
-{
-    builder.Services.AddScoped<IStorageService, BlobStorageService>();
-    builder.Services.AddScoped<IBlobStorageService2, BlobStorageService2>();
-}
+builder.Services.AddScoped<IStorageService, BlobStorageService>();
+builder.Services.AddScoped<IBlobStorageService2, BlobStorageService2>();
 
 builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
 
