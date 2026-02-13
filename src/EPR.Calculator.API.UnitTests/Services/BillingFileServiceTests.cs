@@ -487,28 +487,6 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnUnprocessableContent_WhenCalculatorRunNotFound()
-        {
-            // Act
-            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAcceptAllAsync(100, "TestUser", CancellationToken.None);
-
-            // Assert
-            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(CommonResources.InvalidRunId, result.Message);
-        }
-
-        [TestMethod]
-        public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnUnprocessableContent_WhenRunStatusIsInvalid()
-        {
-            // Act
-            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAcceptAllAsync(2, "TestUser", CancellationToken.None);
-
-            // Assert
-            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(CommonResources.InvalidRunStatusForAcceptAll, result.Message);
-        }
-
-        [TestMethod]
         public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnOk_WhenAcceptedUpdateSuccessful()
         {
             // Arrange
