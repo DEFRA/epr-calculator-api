@@ -40,7 +40,6 @@ namespace EPR.Calculator.API.Controllers
             TelemetryClient telemetryClient,
             ICalculationRunService calculationRunService)
         {
-
             this.context = context;
 
             this.calculatorRunStatusDataValidator = calculatorRunStatusDataValidator;

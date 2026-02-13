@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Data;
+﻿using System.Configuration;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -9,7 +10,6 @@ using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Configuration;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -259,7 +259,7 @@ namespace EPR.Calculator.API.Controllers
                      {
                          Run = run,
                          Classification = classification,
-                     }).SingleOrDefaultAsync();
+                     }).SingleOrDefaultAsync(cancellationToken);
 
                 if (calculatorRunDetail == null)
                 {
@@ -438,7 +438,7 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 var classifications = await this.availableClassificationsService.GetAvailableClassificationsForFinancialYearAsync(request);
-                if (!classifications.Any())
+                if (classifications.Count == 0)
                 {
                     return this.NotFound(CommonResources.NoClassificationsFound);
                 }
