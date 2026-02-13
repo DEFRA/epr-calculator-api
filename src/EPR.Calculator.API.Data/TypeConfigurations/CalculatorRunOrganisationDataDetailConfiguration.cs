@@ -60,6 +60,12 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
                      builder.Property(p => p.LeaverDate)
                             .HasColumnName("leaver_date")
                             .HasMaxLength(50);
+
+                     builder.Property(p => p.HasH1)
+                            .HasColumnName("has_h1");
+
+                     builder.Property(p => p.HasH2)
+                            .HasColumnName("has_h2");
               }
        }
 }
