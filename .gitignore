@@ -28,3 +28,4 @@ api/obj/project.nuget.cache
 /obj
 .DS_Store
 obj
+.vscode/

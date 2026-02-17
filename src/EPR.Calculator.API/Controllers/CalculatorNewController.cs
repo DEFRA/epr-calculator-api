@@ -4,9 +4,8 @@ using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
-using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
-using EPR.Calculator.API.Wrapper;
+using EPR.Calculator.Service.Function.Services;
 using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +21,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly IBillingFileService billingFileService;
         private readonly TelemetryClient telemetryClient;
         private readonly ICalculationRunService calculationRunService;
+        private readonly IInvoiceDetails invoiceDetails;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CalculatorNewController"/> class.
@@ -29,32 +29,30 @@ namespace EPR.Calculator.API.Controllers
         /// <param name="context">Db Context.</param>
         /// <param name="calculatorRunStatusDataValidator">Db Validator.</param>
         /// <param name="billingFileService">Service for handling billing file operations.</param>
-        /// <param name="wrapper">Wrapper for organization and POM data.</param>
+        /// <param name="invoiceDetails">Service for inserting invoice details.</param>
         /// <param name="telemetryClient">Telemetry client for logging and tracking.</param>
         /// <param name="calculationRunService">Service for managing calculation runs.</param>
         public CalculatorNewController(
             ApplicationDBContext context,
             ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
             IBillingFileService billingFileService,
-            IOrgAndPomWrapper wrapper,
+            IInvoiceDetails invoiceDetails,
             TelemetryClient telemetryClient,
             ICalculationRunService calculationRunService)
         {
-
             this.context = context;
 
             this.calculatorRunStatusDataValidator = calculatorRunStatusDataValidator;
 
             this.billingFileService = billingFileService;
 
-            this.Wrapper = wrapper;
+            this.invoiceDetails = invoiceDetails;
 
             this.telemetryClient = telemetryClient;
 
             this.calculationRunService = calculationRunService;
         }
 
-        private IOrgAndPomWrapper Wrapper { get; init; }
 
         [HttpPut]
         [Route("calculatorRuns")]
@@ -256,17 +254,10 @@ namespace EPR.Calculator.API.Controllers
                 {
                     try
                     {
-                        var createRunInvoiceDetailsCommand = Util.GetFormattedSqlString(
-                            CommonResources.InsertInvoiceDetailsAtProducerLevel,
-                            metadata.BillingFileAuthorisedBy,
-                            metadata.BillingFileAuthorisedDate,
-                            runId);
+                        var affectedRows = await this.invoiceDetails.InsertInvoiceDetailsAtProducerLevel(runId, metadata.BillingFileAuthorisedDate.Value, metadata.BillingFileAuthorisedBy, cancellationToken);
 
-                        var affectedRows = await this.Wrapper.ExecuteSqlAsync(createRunInvoiceDetailsCommand, cancellationToken);
-
-                        this.telemetryClient.TrackEvent(CommonResources.InsertInvoiceDetailsAtProducerLevel, new Dictionary<string, string>
+                        this.telemetryClient.TrackEvent("InsertInvoiceDetailsAtProducerLevel", new Dictionary<string, string>
                         {
-                            { "Procedure", CommonResources.InsertInvoiceDetailsAtProducerLevel },
                             { "RunId", runId.ToString() },
                             { "RowsAffected", affectedRows.ToString() },
                         });
