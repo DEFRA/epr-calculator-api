@@ -422,7 +422,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 new CalculatorRunPomDataMaster
                 {
                     Id = 1,
-                    CalendarYear = "2024-25",
+                    RelativeYear = "2024",
                     EffectiveFrom = DateTime.UtcNow,
                     CreatedBy = "Test user",
                     CreatedAt = DateTime.UtcNow,
@@ -462,7 +462,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 new CalculatorRunOrganisationDataMaster
                 {
                     Id = 1,
-                    CalendarYear = "2024-25",
+                    RelativeYear = "2024",
                     EffectiveFrom = DateTime.UtcNow,
                     CreatedBy = "Test user",
                     CreatedAt = DateTime.UtcNow,
@@ -487,7 +487,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     CalculatorRunOrganisationDataMaster = new CalculatorRunOrganisationDataMaster
                     {
                         Id = 1,
-                        CalendarYear = "2024-25",
+                        RelativeYear = "2024",
                         EffectiveFrom = DateTime.UtcNow,
                         CreatedBy = "Test user",
                         CreatedAt = DateTime.UtcNow,
@@ -505,7 +505,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     CalculatorRunOrganisationDataMaster = new CalculatorRunOrganisationDataMaster
                     {
                         Id = 1,
-                        CalendarYear = "2024-25",
+                        RelativeYear = "2024",
                         EffectiveFrom = DateTime.UtcNow,
                         CreatedBy = "Test user",
                         CreatedAt = DateTime.UtcNow,

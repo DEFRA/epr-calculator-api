@@ -16,8 +16,8 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.Property(p => p.Id)
                    .HasColumnName("id");
 
-            builder.Property(p => p.CalendarYear)
-                   .HasColumnName("calendar_year");
+            builder.Property(p => p.RelativeYear)
+                   .HasColumnName("relative_year");
 
             builder.Property(p => p.EffectiveFrom)
                    .HasColumnName("effective_from");
