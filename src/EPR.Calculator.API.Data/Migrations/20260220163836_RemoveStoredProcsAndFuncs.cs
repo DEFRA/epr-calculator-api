@@ -125,11 +125,11 @@ namespace EPR.Calculator.API.Data.Migrations
                         packaging_material_weight,
                         submission_period,
                         submission_period_desc,
-                        CASE			
+                        CASE            
                         WHEN LTRIM(RTRIM(subsidiary_id)) = ''''
                         THEN NULL
                         ELSE subsidiary_id
-                        END			
+                        END         
                         as subsidiary_id,
                         submitter_id
                         from 
@@ -146,14 +146,56 @@ namespace EPR.Calculator.API.Data.Migrations
             migrationBuilder.Sql(createInsertInvoiceSql);
             migrationBuilder.Sql(@"GRANT EXEC ON [dbo].[InsertInvoiceDetailsAtProducerLevel] TO PUBLIC;");
 
-            var createCurrentYearInvoicedTotalAfterThisRunFunctionSql = "IF OBJECT_ID(N'[dbo].[GetCurrentYearInvoicedTotalAfterThisRun]', 'FN') IS NOT NULL  \r\nDROP FUNCTION [dbo].GetCurrentYearInvoicedTotalAfterThisRun\r\nGO\r\nDECLARE @sql NVARCHAR(MAX) \r\nSET @sql = N'CREATE FUNCTION [dbo].[GetCurrentYearInvoicedTotalAfterThisRun] ( \r\n    @billingInstructionAcceptReject      VARCHAR(250),\r\n    @suggestedBillingInstruction         VARCHAR(250),\r\n    @currentYearInvoicedTotalToDate      DECIMAL(18,2),\r\n    @invoiceAmount                       DECIMAL(18,2)\r\n)\r\nRETURNS DECIMAL(18,2)\r\nAS\r\nBEGIN\r\n    -- Rule 1: Cancelled and Rejected instruction always returns last invoiced values\r\n    IF @suggestedBillingInstruction = ''CANCEL'' AND @billingInstructionAcceptReject = ''Rejected''\r\n         RETURN ISNULL(@currentYearInvoicedTotalToDate, 0);\r\n\r\n    -- Rule 2: Cancelled instruction always returns NULL\r\n    IF @suggestedBillingInstruction = ''CANCEL'' AND @billingInstructionAcceptReject = ''Accepted''\r\n        RETURN NULL;\r\n\r\n    -- Rule 3: Rejected INITIAL returns NULL\r\n    IF @billingInstructionAcceptReject = ''Rejected'' AND @suggestedBillingInstruction = ''INITIAL''\r\n        RETURN NULL;\r\n\r\n    -- Rule 4: Rejected (but not INITIAL) returns current total as-is\r\n    IF @billingInstructionAcceptReject = ''Rejected''\r\n        RETURN ISNULL(@currentYearInvoicedTotalToDate, 0);\r\n\r\n    -- Rule 5: Accepted or any other case adds invoice amount\r\n    RETURN ISNULL(@currentYearInvoicedTotalToDate, 0) + ISNULL(@invoiceAmount, 0);\r\nEND'\r\nEXEC(@sql)";
-            migrationBuilder.Sql(createCurrentYearInvoicedTotalAfterThisRunFunctionSql);
+            var createCurrentInvoiceYTDTotalSql = @"
+                IF OBJECT_ID(N'[dbo].[GetCurrentYearInvoicedTotalAfterThisRun]', 'FN') IS NOT NULL
+                    DROP FUNCTION [dbo].GetCurrentYearInvoicedTotalAfterThisRun
+                GO
+                DECLARE @sql NVARCHAR(MAX)
+                SET @sql = N'CREATE FUNCTION [dbo].[GetCurrentYearInvoicedTotalAfterThisRun] (
+                    @billingInstructionAcceptReject      VARCHAR(250),
+                    @suggestedBillingInstruction         VARCHAR(250),
+                    @currentYearInvoicedTotalToDate      DECIMAL(18,2),
+                    @invoiceAmount                       DECIMAL(18,2)
+                )
+                RETURNS DECIMAL(18,2)
+                AS
+                BEGIN
+                    -- Rule 1: Cancelled and Rejected instruction always returns last invoiced values
+                    IF @suggestedBillingInstruction = ''CANCEL'' AND @billingInstructionAcceptReject = ''Rejected''
+                         RETURN ISNULL(@currentYearInvoicedTotalToDate, 0);
+
+                    -- Rule 2: Cancelled instruction always returns NULL
+                    IF @suggestedBillingInstruction = ''CANCEL'' AND @billingInstructionAcceptReject = ''Accepted''
+                        RETURN NULL;
+
+                    -- Rule 3: Rejected INITIAL returns NULL
+                    IF @billingInstructionAcceptReject = ''Rejected'' AND @suggestedBillingInstruction = ''INITIAL''
+                        RETURN NULL;
+
+                    -- Rule 4: Rejected (but not INITIAL) returns current total as-is
+                    IF @billingInstructionAcceptReject = ''Rejected''
+                        RETURN ISNULL(@currentYearInvoicedTotalToDate, 0);
+
+                    -- Rule 5: Rebill replaces total with invoice amount
+                    IF @suggestedBillingInstruction = ''REBILL''
+                        RETURN ISNULL(@invoiceAmount, 0);
+
+                    -- Rule 6: Accepted or any other case adds invoice amount
+                    RETURN ISNULL(@currentYearInvoicedTotalToDate, 0) + ISNULL(@invoiceAmount, 0);
+                END'
+                EXEC(@sql)";
+
+            migrationBuilder.Sql(createCurrentInvoiceYTDTotalSql);
 
             var createInvoiceAmountFunctionSql = "IF OBJECT_ID(N'[dbo].[GetInvoiceAmount]', 'FN') IS NOT NULL\r\n    DROP FUNCTION [dbo].[GetInvoiceAmount]\r\nGO\r\ndeclare @sql nvarchar(max)\r\nSET @sql = N'\r\nCREATE FUNCTION [dbo].[GetInvoiceAmount] ( \r\n    @billingInstructionAcceptReject VARCHAR(250),\r\n    @suggestedBillingInstruction    VARCHAR(250),\r\n    @totalProducerBillWithBadDebtProvision DECIMAL(18,2),\r\n    @LiabilityDifference           DECIMAL(18,2)\r\n)\r\nRETURNS DECIMAL(18,2)\r\nAS\r\nBEGIN\r\n    IF @billingInstructionAcceptReject <> ''Accepted''\r\n        RETURN NULL;\r\n\r\n    RETURN \r\n        CASE \r\n            WHEN @suggestedBillingInstruction IN (''INITIAL'', ''REBILL'') THEN @totalProducerBillWithBadDebtProvision\r\n            WHEN @suggestedBillingInstruction = ''DELTA'' THEN @LiabilityDifference\r\n            ELSE NULL\r\n        END;\r\nEND'\r\n\r\nEXEC(@sql)";
             migrationBuilder.Sql(createInvoiceAmountFunctionSql);
 
             var createOutstandingBalanceFunctionSql = "IF OBJECT_ID(N'[dbo].[GetOutstandingBalance]', 'FN') IS NOT NULL  \r\nDROP FUNCTION [dbo].GetOutstandingBalance\r\nGO\r\nDECLARE @sql NVARCHAR(MAX) \r\nSET @sql = N'CREATE FUNCTION [dbo].[GetOutstandingBalance] (\r\n    @billingInstructionAcceptReject        VARCHAR(250),\r\n    @suggestedBillingInstruction           VARCHAR(250),\r\n    @totalProducerBillWithBadDebtProvision DECIMAL(18,2),\r\n    @LiabilityDifference                   DECIMAL(18,2)\r\n)\r\nRETURNS DECIMAL(18,2)\r\nAS\r\nBEGIN\r\n    RETURN \r\n        CASE \r\n            WHEN @billingInstructionAcceptReject <> ''Accepted'' AND @suggestedBillingInstruction = ''INITIAL''\r\n                THEN @totalProducerBillWithBadDebtProvision\r\n\r\n            WHEN @billingInstructionAcceptReject <> ''Accepted''\r\n                THEN @LiabilityDifference\r\n\r\n            ELSE NULL\r\n        END;\r\nEND'\r\nEXEC(@sql)";
             migrationBuilder.Sql(createOutstandingBalanceFunctionSql);
+
+            migrationBuilder.Sql(@"GRANT EXEC ON [dbo].[GetCurrentYearInvoicedTotalAfterThisRun] TO PUBLIC;");
+            migrationBuilder.Sql(@"GRANT EXEC ON [dbo].[GetInvoiceAmount] TO PUBLIC;");
+            migrationBuilder.Sql(@"GRANT EXEC ON [dbo].[GetOutstandingBalance] TO PUBLIC;");
 
         }
     }

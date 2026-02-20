@@ -6483,3 +6483,73 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260220163836_RemoveStoredProcsAndFuncs'
+)
+BEGIN
+    DROP PROCEDURE IF EXISTS dbo.CreateRunOrganization
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260220163836_RemoveStoredProcsAndFuncs'
+)
+BEGIN
+    DROP PROCEDURE IF EXISTS dbo.CreateRunPom
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260220163836_RemoveStoredProcsAndFuncs'
+)
+BEGIN
+    DROP PROCEDURE IF EXISTS dbo.InsertInvoiceDetailsAtProducerLevel
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260220163836_RemoveStoredProcsAndFuncs'
+)
+BEGIN
+    DROP FUNCTION IF EXISTS dbo.GetCurrentYearInvoicedTotalAfterThisRun
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260220163836_RemoveStoredProcsAndFuncs'
+)
+BEGIN
+    DROP FUNCTION IF EXISTS dbo.GetInvoiceAmount
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260220163836_RemoveStoredProcsAndFuncs'
+)
+BEGIN
+    DROP FUNCTION IF EXISTS dbo.GetOutstandingBalance
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260220163836_RemoveStoredProcsAndFuncs'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260220163836_RemoveStoredProcsAndFuncs', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+

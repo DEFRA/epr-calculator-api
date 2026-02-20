@@ -1,4 +1,5 @@
-namespace EPR.Calculator.Service.Function.Services {
+namespace EPR.Calculator.Service.Function.Services
+{
     using System;
     using System.Linq;
     using System.Threading;
@@ -7,16 +8,11 @@ namespace EPR.Calculator.Service.Function.Services {
     using EPR.Calculator.API.Data.DataModels;
     using Microsoft.EntityFrameworkCore;
 
-    public interface IInvoiceDetails
-    {
-        Task<int> InsertInvoiceDetailsAtProducerLevel(int runId, DateTime instructionConfirmedDate, string instructionConfirmedBy, CancellationToken cancellationToken);
-    }
-
-    public class InvoiceDetails : IInvoiceDetails
+    public class InvoiceDetailsService : IInvoiceDetailsService
     {
         private readonly ApplicationDBContext _context;
 
-        public InvoiceDetails(ApplicationDBContext context)
+        public InvoiceDetailsService(ApplicationDBContext context)
         {
             _context = context;
         }
@@ -28,6 +24,7 @@ namespace EPR.Calculator.Service.Function.Services {
             decimal? invoiceAmount)
         {
             var currentTotalYTD = currentYearInvoicedTotalToDate ?? 0m;
+            var invoiceAmt = invoiceAmount ?? 0m;
 
             return (suggestedBillingInstruction, billingInstructionAcceptReject) switch
             {
@@ -35,7 +32,8 @@ namespace EPR.Calculator.Service.Function.Services {
                 ("CANCEL", "Accepted") => null, // Rule 2: Cancelled instruction always returns NULL
                 ("INITIAL", "Rejected") => null, // Rule 3: Rejected INITIAL returns NULL
                 (_, "Rejected") => currentTotalYTD, // Rule 4: Rejected (but not INITIAL) returns current total as-is
-                _ => currentTotalYTD + (invoiceAmount ?? 0m) // Rule 5: Accepted or any other case adds invoice amount
+                ("REBILL", _) => invoiceAmt, // Rule 5: Rebill replaces total with invoice amount
+                _ => currentTotalYTD + invoiceAmt // Rule 6: Accepted or any other case adds invoice amount
             };
         }
 
@@ -77,7 +75,7 @@ namespace EPR.Calculator.Service.Function.Services {
             var sourceRows = await _context.ProducerResultFileSuggestedBillingInstruction
                                     .Where(x => x.CalculatorRunId == runId)
                                     .AsNoTracking()
-                                    .ToListAsync();
+                                    .ToListAsync(cancellationToken);
 
             var entitiesToInsert = sourceRows.Select(row =>
             {
@@ -98,9 +96,9 @@ namespace EPR.Calculator.Service.Function.Services {
                 };
             }).ToList();
 
-            await _context.ProducerDesignatedRunInvoiceInstruction.AddRangeAsync(entitiesToInsert);
+            await _context.ProducerDesignatedRunInvoiceInstruction.AddRangeAsync(entitiesToInsert, cancellationToken);
 
-            return await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly IBillingFileService billingFileService;
         private readonly TelemetryClient telemetryClient;
         private readonly ICalculationRunService calculationRunService;
-        private readonly IInvoiceDetails invoiceDetails;
+        private readonly IInvoiceDetailsService invoiceDetailsService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CalculatorNewController"/> class.
@@ -29,14 +29,14 @@ namespace EPR.Calculator.API.Controllers
         /// <param name="context">Db Context.</param>
         /// <param name="calculatorRunStatusDataValidator">Db Validator.</param>
         /// <param name="billingFileService">Service for handling billing file operations.</param>
-        /// <param name="invoiceDetails">Service for inserting invoice details.</param>
+        /// <param name="invoiceDetailsService">Service for inserting invoice details.</param>
         /// <param name="telemetryClient">Telemetry client for logging and tracking.</param>
         /// <param name="calculationRunService">Service for managing calculation runs.</param>
         public CalculatorNewController(
             ApplicationDBContext context,
             ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
             IBillingFileService billingFileService,
-            IInvoiceDetails invoiceDetails,
+            IInvoiceDetailsService invoiceDetailsService,
             TelemetryClient telemetryClient,
             ICalculationRunService calculationRunService)
         {
@@ -46,7 +46,7 @@ namespace EPR.Calculator.API.Controllers
 
             this.billingFileService = billingFileService;
 
-            this.invoiceDetails = invoiceDetails;
+            this.invoiceDetailsService = invoiceDetailsService;
 
             this.telemetryClient = telemetryClient;
 
@@ -254,7 +254,7 @@ namespace EPR.Calculator.API.Controllers
                 {
                     try
                     {
-                        var affectedRows = await this.invoiceDetails.InsertInvoiceDetailsAtProducerLevel(runId, metadata.BillingFileAuthorisedDate.Value, metadata.BillingFileAuthorisedBy, cancellationToken);
+                        var affectedRows = await this.invoiceDetailsService.InsertInvoiceDetailsAtProducerLevel(runId, metadata.BillingFileAuthorisedDate.Value, metadata.BillingFileAuthorisedBy, cancellationToken);
 
                         this.telemetryClient.TrackEvent("InsertInvoiceDetailsAtProducerLevel", new Dictionary<string, string>
                         {

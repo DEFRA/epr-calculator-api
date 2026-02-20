@@ -27,7 +27,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         private readonly Mock<IBillingFileService> mockBillingFileService;
         private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
-        private readonly Mock<IInvoiceDetails> mockInvoiceDetails;
+        private readonly Mock<IInvoiceDetailsService> mockInvoiceDetailsService;
         private readonly Mock<ICalculationRunService> mockCalculationRunService;
         private readonly ApplicationDBContext context;
         private readonly CalculatorNewController controller;
@@ -45,7 +45,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             mockBillingFileService = new Mock<IBillingFileService>();
-            mockInvoiceDetails = new Mock<IInvoiceDetails>();
+            mockInvoiceDetailsService = new Mock<IInvoiceDetailsService>();
             mockCalculationRunService = new Mock<ICalculationRunService>();
 
             var config = TelemetryConfiguration.CreateDefault();
@@ -55,7 +55,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 context,
                 mockValidator.Object,
                 mockBillingFileService.Object,
-                mockInvoiceDetails.Object,
+                mockInvoiceDetailsService.Object,
                 telemetryClient,
                 mockCalculationRunService.Object);
 
