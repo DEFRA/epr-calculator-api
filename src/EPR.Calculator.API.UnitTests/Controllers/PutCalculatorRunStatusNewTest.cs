@@ -9,6 +9,7 @@ using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
+using EPR.Calculator.Service.Function.Services;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Http;
@@ -24,7 +25,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
         private readonly Mock<IBillingFileService> mockBillingFileService;
-        private readonly Mock<IOrgAndPomWrapper> mockOrgAndPomWrapper;
+        private readonly Mock<IInvoiceDetailsService> mockInvoiceDetailsService;
         private readonly Mock<ICalculationRunService> mockCalculationRunService;
         private readonly ApplicationDBContext context;
 
@@ -41,7 +42,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             this.mockBillingFileService = new Mock<IBillingFileService>();
-            this.mockOrgAndPomWrapper = new Mock<IOrgAndPomWrapper>();
+            this.mockInvoiceDetailsService = new Mock<IInvoiceDetailsService>();
             this.mockCalculationRunService = new Mock<ICalculationRunService>();
 
             var config = TelemetryConfiguration.CreateDefault();
@@ -51,7 +52,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 this.context,
                 this.mockValidator.Object,
                 this.mockBillingFileService.Object,
-                this.mockOrgAndPomWrapper.Object,
+                this.mockInvoiceDetailsService.Object,
                 telemetryClient,
                 this.mockCalculationRunService.Object);
 
