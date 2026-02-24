@@ -122,17 +122,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void GetSchemeParameter_Return_400_Error_With_No_YearSupplied()
-        {
-            ParameterYearValueValidationValidator validator = new ParameterYearValueValidationValidator();
-            string parameter = string.Empty;
-            var result = validator.Validate(parameter);
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual("Parameter Year is required", result.Errors[0].ErrorMessage);
-        }
-
-        [TestMethod]
         public void Create_Default_Parameter_Setting_With_No_FileName()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();

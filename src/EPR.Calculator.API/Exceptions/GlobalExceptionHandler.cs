@@ -34,7 +34,7 @@ namespace EPR.Calculator.API.Exceptions
             {
                 Status = httpContext.Response.StatusCode,
                 Title = CommonResources.AnErrorProcessingYourRequest,
-                exception.Message,
+                Message = exception.Message,
                 Instance = httpContext.Request.Path,
                 Detail = this.env.IsDevelopment() || (this.env.EnvironmentName?.Equals(CommonResources.Local, StringComparison.OrdinalIgnoreCase) ?? false) ? exception.StackTrace : null,
             };
