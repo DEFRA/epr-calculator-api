@@ -94,8 +94,8 @@ namespace EPR.Calculator.API.Data.Migrations
             // Update relative_year columns
             migrationBuilder.Sql(@"UPDATE lapcap_data_master                      SET relative_year = CAST(LEFT(projection_year, 4) AS INT)");
             migrationBuilder.Sql(@"UPDATE default_parameter_setting_master        SET relative_year = CAST(LEFT(parameter_year, 4) AS INT)");
-            migrationBuilder.Sql(@"UPDATE calculator_run_pom_data_master          SET relative_year = calendar_year + 1");
-            migrationBuilder.Sql(@"UPDATE calculator_run_organization_data_master SET relative_year = calendar_year + 1");
+            migrationBuilder.Sql(@"UPDATE calculator_run_pom_data_master          SET relative_year = COALESCE(TRY_CAST(LEFT(calendar_year, 4) AS INT) + 1, 2025)");
+            migrationBuilder.Sql(@"UPDATE calculator_run_organization_data_master SET relative_year = COALESCE(TRY_CAST(LEFT(calendar_year, 4) AS INT) + 1, 2025)");
             migrationBuilder.Sql(@"UPDATE calculator_run_relative_years           SET relative_year = CAST(LEFT(financial_Year, 4) AS INT)");
             migrationBuilder.Sql(@"UPDATE calculator_run                          SET relative_year = CAST(LEFT(financial_Year, 4) AS INT)");
 

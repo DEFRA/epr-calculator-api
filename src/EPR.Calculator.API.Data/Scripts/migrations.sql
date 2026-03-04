@@ -6714,7 +6714,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    UPDATE calculator_run_pom_data_master          SET relative_year = calendar_year + 1
+    UPDATE calculator_run_pom_data_master          SET relative_year = COALESCE(TRY_CAST(LEFT(calendar_year, 4) AS INT) + 1, 2025)
 END;
 GO
 
@@ -6723,7 +6723,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    UPDATE calculator_run_organization_data_master SET relative_year = calendar_year + 1
+    UPDATE calculator_run_organization_data_master SET relative_year = COALESCE(TRY_CAST(LEFT(calendar_year, 4) AS INT) + 1, 2025)
 END;
 GO
 
