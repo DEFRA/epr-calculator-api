@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -48,6 +49,17 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
 
             builder.Property(p => p.SubmissionPeriodDesc)
                    .HasColumnName("submission_period_desc");
+
+            builder.Property(p => p.RamRagRating)
+                   .HasColumnName("ram_rag_rating")
+                   .HasConversion(
+                     v => v.HasValue ? v.Value.ToDbValue() : null,
+                     v => v != null ? RagRatingExtensions.ParseRag(v) : (RagRating?)null
+                   )
+                   .IsRequired(false);
+
+            builder.Property(p => p.PackagingMaterialSubtype)
+                   .HasColumnName("packaging_material_subtype");
 
             builder.Property(p => p.LoadTimeStamp)
                    .HasColumnName("load_ts");

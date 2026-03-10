@@ -12,6 +12,18 @@
 
         public decimal PackagingTonnage { get; set; }
 
+        public decimal? RedRamRagRating { get; set; }
+
+        public decimal? AmberRamRagRating { get; set; }
+
+        public decimal? GreenRamRagRating { get; set; }
+
+        public decimal? RedMedicalRamRagRating { get; set; }
+
+        public decimal? AmberMedicalRamRagRating { get; set; }
+
+        public decimal? GreenMedicalRamRagRating { get; set; }
+
         public virtual ProducerDetail? ProducerDetail { get; set; }
 
         public virtual Material? Material { get; set; }

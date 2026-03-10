@@ -1,4 +1,6 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿using EPR.Calculator.API.Data.Enums;
+
+namespace EPR.Calculator.API.Data.DataModels
 {
     public class CalculatorRunPomDataDetail
     {
@@ -21,6 +23,10 @@
         public double? PackagingMaterialWeight { get; set; }
 
         public required string? SubmissionPeriodDesc { get; set; }
+
+        public RagRating? RamRagRating { get; set; }
+
+        public string? PackagingMaterialSubtype { get; set; }
 
         public required DateTime LoadTimeStamp { get; set; }
 
