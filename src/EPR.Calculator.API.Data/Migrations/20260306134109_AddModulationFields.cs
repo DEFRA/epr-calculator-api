@@ -11,7 +11,7 @@ namespace EPR.Calculator.API.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<decimal>(
-                name: "packaging_tonnage_amber",
+                name: "amber_medical_ram_rag_rating",
                 table: "producer_reported_material",
                 type: "decimal(18,3)",
                 precision: 18,
@@ -19,7 +19,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<decimal>(
-                name: "packaging_tonnage_amber_medical",
+                name: "amber_ram_rag_rating",
                 table: "producer_reported_material",
                 type: "decimal(18,3)",
                 precision: 18,
@@ -27,7 +27,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<decimal>(
-                name: "packaging_tonnage_green",
+                name: "green_medical_ram_rag_rating",
                 table: "producer_reported_material",
                 type: "decimal(18,3)",
                 precision: 18,
@@ -35,7 +35,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<decimal>(
-                name: "packaging_tonnage_green_medical",
+                name: "green_ram_rag_rating",
                 table: "producer_reported_material",
                 type: "decimal(18,3)",
                 precision: 18,
@@ -43,7 +43,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<decimal>(
-                name: "packaging_tonnage_red",
+                name: "red_medical_ram_rag_rating",
                 table: "producer_reported_material",
                 type: "decimal(18,3)",
                 precision: 18,
@@ -51,7 +51,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<decimal>(
-                name: "packaging_tonnage_red_medical",
+                name: "red_ram_rag_rating",
                 table: "producer_reported_material",
                 type: "decimal(18,3)",
                 precision: 18,
@@ -87,27 +87,27 @@ namespace EPR.Calculator.API.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "packaging_tonnage_amber",
+                name: "amber_medical_ram_rag_rating",
                 table: "producer_reported_material");
 
             migrationBuilder.DropColumn(
-                name: "packaging_tonnage_amber_medical",
+                name: "amber_ram_rag_rating",
                 table: "producer_reported_material");
 
             migrationBuilder.DropColumn(
-                name: "packaging_tonnage_green",
+                name: "green_medical_ram_rag_rating",
                 table: "producer_reported_material");
 
             migrationBuilder.DropColumn(
-                name: "packaging_tonnage_green_medical",
+                name: "green_ram_rag_rating",
                 table: "producer_reported_material");
 
             migrationBuilder.DropColumn(
-                name: "packaging_tonnage_red",
+                name: "red_medical_ram_rag_rating",
                 table: "producer_reported_material");
 
             migrationBuilder.DropColumn(
-                name: "packaging_tonnage_red_medical",
+                name: "red_ram_rag_rating",
                 table: "producer_reported_material");
 
             migrationBuilder.DropColumn(

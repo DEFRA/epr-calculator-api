@@ -12,17 +12,17 @@
 
         public decimal PackagingTonnage { get; set; }
 
-        public decimal? PackagingTonnageRed { get; set; }
+        public decimal? RedRamRagRating { get; set; }
 
-        public decimal? PackagingTonnageAmber { get; set; }
+        public decimal? AmberRamRagRating { get; set; }
 
-        public decimal? PackagingTonnageGreen { get; set; }
+        public decimal? GreenRamRagRating { get; set; }
 
-        public decimal? PackagingTonnageRedMedical { get; set; }
+        public decimal? RedMedicalRamRagRating { get; set; }
 
-        public decimal? PackagingTonnageAmberMedical { get; set; }
+        public decimal? AmberMedicalRamRagRating { get; set; }
 
-        public decimal? PackagingTonnageGreenMedical { get; set; }
+        public decimal? GreenMedicalRamRagRating { get; set; }
 
         public virtual ProducerDetail? ProducerDetail { get; set; }
 

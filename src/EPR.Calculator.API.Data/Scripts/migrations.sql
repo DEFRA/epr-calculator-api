@@ -176,7 +176,7 @@ BEGIN
                         )
                             SET IDENTITY_INSERT [default_parameter_template_master] OFF;
                     END
-                
+
 END;
 GO
 
@@ -189,7 +189,7 @@ BEGIN
                     UPDATE [default_parameter_setting_detail]
                     SET [parameter_unique_ref] = 'TONT-AD'
                     WHERE [parameter_unique_ref] = 'TONT-DI';
-                
+
 END;
 GO
 
@@ -201,7 +201,7 @@ BEGIN
 
                     DELETE FROM [default_parameter_template_master]
                     WHERE [parameter_unique_ref] = 'TONT-DI';
-                
+
 END;
 GO
 
@@ -2876,7 +2876,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20241114200729_UpdateOtherParamLapcap'
 )
 BEGIN
-    update dbo.lapcap_data_template_master 
+    update dbo.lapcap_data_template_master
     set material = 'Other materials'
     where material like 'Other'
 
@@ -3188,9 +3188,9 @@ BEGIN
 
     	SET @pomDataMasterid  = CAST(scope_identity() AS int);
 
-    	INSERT into 
+    	INSERT into
     		dbo.calculator_run_pom_data_detail
-    		(calculator_run_pom_data_master_id, 
+    		(calculator_run_pom_data_master_id,
     			load_ts,
     			organisation_id,
     			packaging_activity,
@@ -3212,7 +3212,7 @@ BEGIN
     			submission_period,
     			submission_period_desc,
     			subsidiary_id
-    			from 
+    			from
     			dbo.pom_data
 
     	 Update dbo.calculator_run Set calculator_run_pom_data_master_id = @pomDataMasterid where id = @RunId
@@ -3256,28 +3256,28 @@ BEGIN
 
         	SET @orgDataMasterid  = CAST(scope_identity() AS int);
 
-        	INSERT 
-        	into 
+        	INSERT
+        	into
         		dbo.calculator_run_organization_data_detail
-        		(calculator_run_organization_data_master_id, 
+        		(calculator_run_organization_data_master_id,
         			load_ts,
         			organisation_id,
         			organisation_name,
         			submission_period_desc,
         			subsidiary_id)
-        	SELECT  @orgDataMasterid, 
+        	SELECT  @orgDataMasterid,
         			load_ts,
         			organisation_id,
         			organisation_name,
         			submission_period_desc,
-        			subsidiary_id  
-        			from 
+        			subsidiary_id
+        			from
         			dbo.organisation_data
 
         	Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
 
         END'
-    EXEC(@Sql) 
+    EXEC(@Sql)
 END;
 GO
 
@@ -3908,24 +3908,24 @@ BEGIN
 
                         SET @orgDataMasterid  = CAST(scope_identity() AS int);
 
-                        INSERT 
-                        into 
+                        INSERT
+                        into
                             dbo.calculator_run_organization_data_detail
-                            (calculator_run_organization_data_master_id, 
+                            (calculator_run_organization_data_master_id,
                                 load_ts,
                                 organisation_id,
                                 organisation_name,
                                 trading_name,
                                 submission_period_desc,
                                 subsidiary_id)
-                        SELECT  @orgDataMasterid, 
+                        SELECT  @orgDataMasterid,
                                 load_ts,
                                 organisation_id,
                                 organisation_name,
                                 trading_name,
                                 submission_period_desc,
-                                subsidiary_id  
-                                from 
+                                subsidiary_id
+                                from
                                 dbo.organisation_data
 
                         Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
@@ -4328,7 +4328,7 @@ IF NOT EXISTS (
 BEGIN
     declare @sql nvarchar(max)
     SET @sql = N'
-    CREATE FUNCTION [dbo].[GetInvoiceAmount] ( 
+    CREATE FUNCTION [dbo].[GetInvoiceAmount] (
         @billingInstructionAcceptReject VARCHAR(250),
         @suggestedBillingInstruction    VARCHAR(250),
         @totalProducerBillWithBadDebtProvision DECIMAL(18,2),
@@ -4340,8 +4340,8 @@ BEGIN
         IF @billingInstructionAcceptReject <> ''Accepted''
             RETURN NULL;
 
-        RETURN 
-            CASE 
+        RETURN
+            CASE
                 WHEN @suggestedBillingInstruction IN (''INITIAL'', ''REBILL'') THEN @totalProducerBillWithBadDebtProvision
                 WHEN @suggestedBillingInstruction = ''DELTA'' THEN @LiabilityDifference
                 ELSE NULL
@@ -4373,7 +4373,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250721161113_GetCurrentYearInvoicedTotalAfterThisRun'
 )
 BEGIN
-    IF OBJECT_ID(N'[dbo].[GetCurrentYearInvoicedTotalAfterThisRun]', 'FN') IS NOT NULL  
+    IF OBJECT_ID(N'[dbo].[GetCurrentYearInvoicedTotalAfterThisRun]', 'FN') IS NOT NULL
     DROP FUNCTION [dbo].GetCurrentYearInvoicedTotalAfterThisRun
 END;
 GO
@@ -4383,8 +4383,8 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250721161113_GetCurrentYearInvoicedTotalAfterThisRun'
 )
 BEGIN
-    DECLARE @sql NVARCHAR(MAX) 
-    SET @sql = N'CREATE FUNCTION [dbo].[GetCurrentYearInvoicedTotalAfterThisRun] ( 
+    DECLARE @sql NVARCHAR(MAX)
+    SET @sql = N'CREATE FUNCTION [dbo].[GetCurrentYearInvoicedTotalAfterThisRun] (
         @billingInstructionAcceptReject      VARCHAR(250),
         @suggestedBillingInstruction         VARCHAR(250),
         @currentYearInvoicedTotalToDate      DECIMAL(18,2),
@@ -4433,7 +4433,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250721161345_GetOutstandingBalance'
 )
 BEGIN
-    IF OBJECT_ID(N'[dbo].[GetOutstandingBalance]', 'FN') IS NOT NULL  
+    IF OBJECT_ID(N'[dbo].[GetOutstandingBalance]', 'FN') IS NOT NULL
     DROP FUNCTION [dbo].GetOutstandingBalance
 END;
 GO
@@ -4443,7 +4443,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250721161345_GetOutstandingBalance'
 )
 BEGIN
-    DECLARE @sql NVARCHAR(MAX) 
+    DECLARE @sql NVARCHAR(MAX)
     SET @sql = N'CREATE FUNCTION [dbo].[GetOutstandingBalance] (
         @billingInstructionAcceptReject        VARCHAR(250),
         @suggestedBillingInstruction           VARCHAR(250),
@@ -4453,8 +4453,8 @@ BEGIN
     RETURNS DECIMAL(18,2)
     AS
     BEGIN
-        RETURN 
-            CASE 
+        RETURN
+            CASE
                 WHEN @billingInstructionAcceptReject <> ''Accepted'' AND @suggestedBillingInstruction = ''INITIAL''
                     THEN @totalProducerBillWithBadDebtProvision
 
@@ -4489,7 +4489,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250721161415_GetInvoiceDetailsAtProducerLevel'
 )
 BEGIN
-    IF OBJECT_ID(N'[dbo].[InsertInvoiceDetailsAtProducerLevel]', 'P') IS NOT NULL  
+    IF OBJECT_ID(N'[dbo].[InsertInvoiceDetailsAtProducerLevel]', 'P') IS NOT NULL
     DROP PROCEDURE [dbo].[InsertInvoiceDetailsAtProducerLevel];
 END;
 GO
@@ -4499,7 +4499,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250721161415_GetInvoiceDetailsAtProducerLevel'
 )
 BEGIN
-    DECLARE @sql NVARCHAR(MAX) 
+    DECLARE @sql NVARCHAR(MAX)
     SET @sql = N'CREATE PROCEDURE [dbo].[InsertInvoiceDetailsAtProducerLevel]
     (
         @instructionConfirmedBy NVARCHAR(4000),
@@ -4526,10 +4526,10 @@ BEGIN
 
         -- Insert into temp table
         INSERT INTO #CalculatedValues
-        SELECT 
+        SELECT
             prsbi.calculator_run_id,
             prsbi.producer_id,
-            prsbi.total_producer_bill_with_bad_debt, 
+            prsbi.total_producer_bill_with_bad_debt,
             prsbi.current_year_invoice_total_to_date,
             prsbi.amount_liability_difference_calc_vs_prev,
             prsbi.suggested_billing_instruction,
@@ -4557,7 +4557,7 @@ BEGIN
     		instruction_confirmed_date,
     		instruction_confirmed_by
     		)
-    			SELECT 
+    			SELECT
     				cv.producer_id,
     				cv.calculator_run_id,
     				dbo.GetCurrentYearInvoicedTotalAfterThisRun(
@@ -4575,7 +4575,7 @@ BEGIN
     				) AS outstanding_balance,
     				cv.billing_instruction_id,
     				cv.instruction_confirmed_date,
-    				cv.instruction_confirmed_by			
+    				cv.instruction_confirmed_by
     			FROM #CalculatedValues AS cv;
 
         DROP TABLE #CalculatedValues;
@@ -4778,7 +4778,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250725133129_AlterInsertInvoiceDetails'
 )
 BEGIN
-    IF OBJECT_ID(N'[dbo].[InsertInvoiceDetailsAtProducerLevel]', 'P') IS NOT NULL  
+    IF OBJECT_ID(N'[dbo].[InsertInvoiceDetailsAtProducerLevel]', 'P') IS NOT NULL
     DROP PROCEDURE [dbo].[InsertInvoiceDetailsAtProducerLevel];
 END;
 GO
@@ -4788,7 +4788,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250725133129_AlterInsertInvoiceDetails'
 )
 BEGIN
-    DECLARE @sql NVARCHAR(MAX) 
+    DECLARE @sql NVARCHAR(MAX)
     SET @sql = N'CREATE PROCEDURE [dbo].[InsertInvoiceDetailsAtProducerLevel]
         (
             @instructionConfirmedBy NVARCHAR(4000),
@@ -4815,10 +4815,10 @@ BEGIN
 
             -- Insert into temp table
             INSERT INTO #CalculatedValues
-            SELECT 
+            SELECT
                 prsbi.calculator_run_id,
                 prsbi.producer_id,
-                prsbi.total_producer_bill_with_bad_debt, 
+                prsbi.total_producer_bill_with_bad_debt,
                 prsbi.current_year_invoice_total_to_date,
                 prsbi.amount_liability_difference_calc_vs_prev,
                 prsbi.suggested_billing_instruction,
@@ -4846,7 +4846,7 @@ BEGIN
         		instruction_confirmed_date,
         		instruction_confirmed_by
         		)
-        			SELECT 
+        			SELECT
         				cv.producer_id,
         				cv.calculator_run_id,
         				dbo.GetCurrentYearInvoicedTotalAfterThisRun(
@@ -4864,7 +4864,7 @@ BEGIN
         				) AS outstanding_balance,
         				cv.billing_instruction_id,
         				cv.instruction_confirmed_date,
-        				cv.instruction_confirmed_by			
+        				cv.instruction_confirmed_by
         			FROM #CalculatedValues AS cv;
 
             DROP TABLE #CalculatedValues;
@@ -4894,7 +4894,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250728083102_UpdateBillingInstructionId'
 )
 BEGIN
-    IF OBJECT_ID(N'[dbo].[InsertInvoiceDetailsAtProducerLevel]', 'P') IS NOT NULL  
+    IF OBJECT_ID(N'[dbo].[InsertInvoiceDetailsAtProducerLevel]', 'P') IS NOT NULL
     DROP PROCEDURE [dbo].[InsertInvoiceDetailsAtProducerLevel];
 END;
 GO
@@ -4904,7 +4904,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20250728083102_UpdateBillingInstructionId'
 )
 BEGIN
-    DECLARE @sql NVARCHAR(MAX) 
+    DECLARE @sql NVARCHAR(MAX)
     SET @sql = N'CREATE PROCEDURE [dbo].[InsertInvoiceDetailsAtProducerLevel]
         (
             @instructionConfirmedBy NVARCHAR(4000),
@@ -4931,10 +4931,10 @@ BEGIN
 
             -- Insert into temp table
             INSERT INTO #CalculatedValues
-            SELECT 
+            SELECT
                 prsbi.calculator_run_id,
                 prsbi.producer_id,
-                prsbi.total_producer_bill_with_bad_debt, 
+                prsbi.total_producer_bill_with_bad_debt,
                 prsbi.current_year_invoice_total_to_date,
                 prsbi.amount_liability_difference_calc_vs_prev,
                 prsbi.suggested_billing_instruction,
@@ -4962,7 +4962,7 @@ BEGIN
         		instruction_confirmed_date,
         		instruction_confirmed_by
         		)
-        			SELECT 
+        			SELECT
         				cv.producer_id,
         				cv.calculator_run_id,
         				dbo.GetCurrentYearInvoicedTotalAfterThisRun(
@@ -4980,7 +4980,7 @@ BEGIN
         				) AS outstanding_balance,
         				cv.billing_instruction_id,
         				cv.instruction_confirmed_date,
-        				cv.instruction_confirmed_by			
+        				cv.instruction_confirmed_by
         			FROM #CalculatedValues AS cv;
 
             DROP TABLE #CalculatedValues;
@@ -5040,9 +5040,9 @@ BEGIN
 
     	SET @pomDataMasterid  = CAST(scope_identity() AS int);
 
-    	INSERT into 
+    	INSERT into
     		dbo.calculator_run_pom_data_detail
-    		(calculator_run_pom_data_master_id, 
+    		(calculator_run_pom_data_master_id,
     			load_ts,
     			organisation_id,
     			packaging_activity,
@@ -5063,13 +5063,13 @@ BEGIN
     			packaging_material_weight,
     			submission_period,
     			submission_period_desc,
-    			CASE			
+    			CASE
     			WHEN LTRIM(RTRIM(subsidiary_id)) = ''''
     			THEN NULL
     			ELSE subsidiary_id
-    			END			
+    			END
     			as subsidiary_id
-    			from 
+    			from
     			dbo.pom_data
 
     	 Update dbo.calculator_run Set calculator_run_pom_data_master_id = @pomDataMasterid where id = @RunId
@@ -5128,35 +5128,35 @@ BEGIN
 
                         SET @orgDataMasterid  = CAST(scope_identity() AS int);
 
-                        INSERT 
-                        into 
+                        INSERT
+                        into
                             dbo.calculator_run_organization_data_detail
-                            (calculator_run_organization_data_master_id, 
+                            (calculator_run_organization_data_master_id,
                                 load_ts,
                                 organisation_id,
                                 organisation_name,
                                 trading_name,
                                 submission_period_desc,
                                 subsidiary_id)
-                        SELECT  @orgDataMasterid, 
+                        SELECT  @orgDataMasterid,
                                 load_ts,
                                 organisation_id,
                                 organisation_name,
                                 trading_name,
                                 submission_period_desc,
-                                CASE			
+                                CASE
     							WHEN LTRIM(RTRIM(subsidiary_id)) = ''''
     							THEN NULL
     							ELSE subsidiary_id
-    							END			
-    							as subsidiary_id 
-                                from 
+    							END
+    							as subsidiary_id
+                                from
                                 dbo.organisation_data
 
                         Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
 
                     END'
-    EXEC(@Sql) 
+    EXEC(@Sql)
 END;
 GO
 
@@ -5277,7 +5277,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20251003125307_AlterGetCurrentYearInvoicedTotalAfterThisRunFunction'
 )
 BEGIN
-    IF OBJECT_ID(N'[dbo].[GetCurrentYearInvoicedTotalAfterThisRun]', 'FN') IS NOT NULL  
+    IF OBJECT_ID(N'[dbo].[GetCurrentYearInvoicedTotalAfterThisRun]', 'FN') IS NOT NULL
     DROP FUNCTION [dbo].GetCurrentYearInvoicedTotalAfterThisRun
 END;
 GO
@@ -5287,8 +5287,8 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20251003125307_AlterGetCurrentYearInvoicedTotalAfterThisRunFunction'
 )
 BEGIN
-    DECLARE @sql NVARCHAR(MAX) 
-    SET @sql = N'CREATE FUNCTION [dbo].[GetCurrentYearInvoicedTotalAfterThisRun] ( 
+    DECLARE @sql NVARCHAR(MAX)
+    SET @sql = N'CREATE FUNCTION [dbo].[GetCurrentYearInvoicedTotalAfterThisRun] (
         @billingInstructionAcceptReject      VARCHAR(250),
         @suggestedBillingInstruction         VARCHAR(250),
         @currentYearInvoicedTotalToDate      DECIMAL(18,2),
@@ -5681,43 +5681,43 @@ BEGIN
     IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CreateRunOrganization]') AND type = N'P')
     				DROP PROCEDURE [dbo].[CreateRunOrganization];
                     declare @Sql varchar(max);
-    				SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]                
-    				(                    @RunId int,                    @calendarYear varchar(400),                    @createdBy varchar(400)                )                
-    				AS                
-    				BEGIN                    
-    				SET NOCOUNT ON                    
-    					declare @DateNow datetime, @orgDataMasterid int                    
-    						SET @DateNow = GETDATE()                    
-    					declare @oldCalcRunOrgMasterId int                    
-    						SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)                    
-    					Update calculator_run_organization_data_master SET effective_to = @DateNow 
-    						WHERE id = @oldCalcRunOrgMasterId                    
-    					INSERT into dbo.calculator_run_organization_data_master                    
-    						(calendar_year, created_at, created_by, effective_from, effective_to)                    
-    					values                    
-    						(@calendarYear, @DateNow, @createdBy, @DateNow, NULL)                    
-    					SET @orgDataMasterid  = CAST(scope_identity() AS int);                    
-    					INSERT  into dbo.calculator_run_organization_data_detail                        
+    				SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]
+    				(                    @RunId int,                    @calendarYear varchar(400),                    @createdBy varchar(400)                )
+    				AS
+    				BEGIN
+    				SET NOCOUNT ON
+    					declare @DateNow datetime, @orgDataMasterid int
+    						SET @DateNow = GETDATE()
+    					declare @oldCalcRunOrgMasterId int
+    						SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)
+    					Update calculator_run_organization_data_master SET effective_to = @DateNow
+    						WHERE id = @oldCalcRunOrgMasterId
+    					INSERT into dbo.calculator_run_organization_data_master
+    						(calendar_year, created_at, created_by, effective_from, effective_to)
+    					values
+    						(@calendarYear, @DateNow, @createdBy, @DateNow, NULL)
+    					SET @orgDataMasterid  = CAST(scope_identity() AS int);
+    					INSERT  into dbo.calculator_run_organization_data_detail
     						(calculator_run_organization_data_master_id,
     						load_ts,organisation_id,
     						organisation_name,
-    						trading_name,                            
-    						submission_period_desc,                            
+    						trading_name,
+    						submission_period_desc,
     						subsidiary_id,
     						obligation_status,
-    						submitter_id)                    
-    					SELECT  @orgDataMasterid,                             
-    					load_ts,                            
-    					organisation_id,                            
-    					organisation_name,                            
-    					trading_name,                            
-    					submission_period_desc,                            
+    						submitter_id)
+    					SELECT  @orgDataMasterid,
+    					load_ts,
+    					organisation_id,
+    					organisation_name,
+    					trading_name,
+    					submission_period_desc,
     					CASE WHEN LTRIM(RTRIM(subsidiary_id)) = '''' THEN NULL ELSE subsidiary_id END as subsidiary_id,
     					obligation_status,
     					submitter_id
-    					from                             
-    						dbo.organisation_data                    
-    					Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId                
+    					from
+    						dbo.organisation_data
+    					Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
     					END'
     				EXEC(@Sql)
 END;
@@ -5758,9 +5758,9 @@ BEGIN
 
     			SET @pomDataMasterid  = CAST(scope_identity() AS int);
 
-    			INSERT into 
+    			INSERT into
     				dbo.calculator_run_pom_data_detail
-    				(calculator_run_pom_data_master_id, 
+    				(calculator_run_pom_data_master_id,
     					load_ts,
     					organisation_id,
     					packaging_activity,
@@ -5782,14 +5782,14 @@ BEGIN
     					packaging_material_weight,
     					submission_period,
     					submission_period_desc,
-    					CASE			
+    					CASE
     					WHEN LTRIM(RTRIM(subsidiary_id)) = ''''
     					THEN NULL
     					ELSE subsidiary_id
-    					END			
+    					END
     					as subsidiary_id,
     					submitter_id
-    					from 
+    					from
     					dbo.pom_data
 
     			 Update dbo.calculator_run Set calculator_run_pom_data_master_id = @pomDataMasterid where id = @RunId
@@ -5984,47 +5984,47 @@ BEGIN
     IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CreateRunOrganization]') AND type = N'P')
     				DROP PROCEDURE [dbo].[CreateRunOrganization];
                     declare @Sql varchar(max);
-    				SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]                
-    				(                    @RunId int,                    @calendarYear varchar(400),                    @createdBy varchar(400)                )                
-    				AS                
-    				BEGIN                    
-    				SET NOCOUNT ON                    
-    					declare @DateNow datetime, @orgDataMasterid int                    
-    						SET @DateNow = GETDATE()                    
-    					declare @oldCalcRunOrgMasterId int                    
-    						SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)                    
-    					Update calculator_run_organization_data_master SET effective_to = @DateNow 
-    						WHERE id = @oldCalcRunOrgMasterId                    
-    					INSERT into dbo.calculator_run_organization_data_master                    
-    						(calendar_year, created_at, created_by, effective_from, effective_to)                    
-    					values                    
-    						(@calendarYear, @DateNow, @createdBy, @DateNow, NULL)                    
-    					SET @orgDataMasterid  = CAST(scope_identity() AS int);                    
-    					INSERT  into dbo.calculator_run_organization_data_detail                        
+    				SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]
+    				(                    @RunId int,                    @calendarYear varchar(400),                    @createdBy varchar(400)                )
+    				AS
+    				BEGIN
+    				SET NOCOUNT ON
+    					declare @DateNow datetime, @orgDataMasterid int
+    						SET @DateNow = GETDATE()
+    					declare @oldCalcRunOrgMasterId int
+    						SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)
+    					Update calculator_run_organization_data_master SET effective_to = @DateNow
+    						WHERE id = @oldCalcRunOrgMasterId
+    					INSERT into dbo.calculator_run_organization_data_master
+    						(calendar_year, created_at, created_by, effective_from, effective_to)
+    					values
+    						(@calendarYear, @DateNow, @createdBy, @DateNow, NULL)
+    					SET @orgDataMasterid  = CAST(scope_identity() AS int);
+    					INSERT  into dbo.calculator_run_organization_data_detail
     						(calculator_run_organization_data_master_id,
     						load_ts,organisation_id,
     						organisation_name,
-    						trading_name,                            
+    						trading_name,
     						subsidiary_id,
     						obligation_status,
     						submitter_id,
                             status_code,
                             num_days_obligated,
-                            error_code)                    
-    					SELECT  @orgDataMasterid,                             
-    					load_ts,                            
-    					organisation_id,                            
-    					organisation_name,                            
-    					trading_name,                            
+                            error_code)
+    					SELECT  @orgDataMasterid,
+    					load_ts,
+    					organisation_id,
+    					organisation_name,
+    					trading_name,
     					CASE WHEN LTRIM(RTRIM(subsidiary_id)) = '''' THEN NULL ELSE subsidiary_id END as subsidiary_id,
     					obligation_status,
     					submitter_id,
                         status_code,
                         num_days_obligated,
                         error_code
-    					from                             
-    						dbo.organisation_data                    
-    					Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId                
+    					from
+    						dbo.organisation_data
+    					Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
     					END'
     				EXEC(@Sql)
 END;
@@ -6227,27 +6227,27 @@ BEGIN
     IF EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[CreateRunOrganization]') AND type = N'P')
                     DROP PROCEDURE [dbo].[CreateRunOrganization];
                     declare @Sql varchar(max);
-                    SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]                
-                    (                    @RunId int,                    @calendarYear varchar(400),                    @createdBy varchar(400)                )                
-                    AS                
-                    BEGIN                    
-                    SET NOCOUNT ON                    
-                        declare @DateNow datetime, @orgDataMasterid int                    
-                            SET @DateNow = GETDATE()                    
-                        declare @oldCalcRunOrgMasterId int                    
-                            SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)                    
-                        Update calculator_run_organization_data_master SET effective_to = @DateNow 
-                            WHERE id = @oldCalcRunOrgMasterId                    
-                        INSERT into dbo.calculator_run_organization_data_master                    
-                            (calendar_year, created_at, created_by, effective_from, effective_to)                    
-                        values                    
-                            (@calendarYear, @DateNow, @createdBy, @DateNow, NULL)                    
-                        SET @orgDataMasterid  = CAST(scope_identity() AS int);                    
-                        INSERT  into dbo.calculator_run_organization_data_detail                        
+                    SET @Sql = N'CREATE PROCEDURE [dbo].[CreateRunOrganization]
+                    (                    @RunId int,                    @calendarYear varchar(400),                    @createdBy varchar(400)                )
+                    AS
+                    BEGIN
+                    SET NOCOUNT ON
+                        declare @DateNow datetime, @orgDataMasterid int
+                            SET @DateNow = GETDATE()
+                        declare @oldCalcRunOrgMasterId int
+                            SET @oldCalcRunOrgMasterId = (select top 1 id from dbo.calculator_run_organization_data_master order by id desc)
+                        Update calculator_run_organization_data_master SET effective_to = @DateNow
+                            WHERE id = @oldCalcRunOrgMasterId
+                        INSERT into dbo.calculator_run_organization_data_master
+                            (calendar_year, created_at, created_by, effective_from, effective_to)
+                        values
+                            (@calendarYear, @DateNow, @createdBy, @DateNow, NULL)
+                        SET @orgDataMasterid  = CAST(scope_identity() AS int);
+                        INSERT  into dbo.calculator_run_organization_data_detail
                             (calculator_run_organization_data_master_id,
                             load_ts,organisation_id,
                             organisation_name,
-                            trading_name,                            
+                            trading_name,
                             subsidiary_id,
                             obligation_status,
                             submitter_id,
@@ -6255,12 +6255,12 @@ BEGIN
                             num_days_obligated,
                             error_code,
                             joiner_date,
-                            leaver_date)                    
-                        SELECT  @orgDataMasterid,                             
-                        load_ts,                            
-                        organisation_id,                            
-                        organisation_name,                            
-                        trading_name,                            
+                            leaver_date)
+                        SELECT  @orgDataMasterid,
+                        load_ts,
+                        organisation_id,
+                        organisation_name,
+                        trading_name,
                         CASE WHEN LTRIM(RTRIM(subsidiary_id)) = '''' THEN NULL ELSE subsidiary_id END as subsidiary_id,
                         obligation_status,
                         submitter_id,
@@ -6269,9 +6269,9 @@ BEGIN
                         error_code,
                         joiner_date,
                         leaver_date
-                        from                             
-                            dbo.organisation_data                    
-                        Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId                
+                        from
+                            dbo.organisation_data
+                        Update dbo.calculator_run Set calculator_run_organization_data_master_id = @orgDataMasterid where id = @RunId
                         END'
                     EXEC(@Sql)
 END;
@@ -6961,15 +6961,16 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260303000000_FixRecreatePomOrgDataTables'
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
 )
 BEGIN
-    DROP TABLE [organisation_data];
+    ALTER TABLE [producer_reported_material] ADD [amber_medical_ram_rag_rating] decimal(18,3) NULL;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
+<<<<<<< HEAD
     WHERE [MigrationId] = N'20260303000000_FixRecreatePomOrgDataTables'
 )
 BEGIN
@@ -6988,280 +6989,55 @@ BEGIN
     	                [joiner_date] [nvarchar](50) NULL,
     	                [leaver_date] [nvarchar](50) NULL
                     ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-                    
-END;
-GO
 
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260303000000_FixRecreatePomOrgDataTables'
+=======
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
 )
 BEGIN
-    DROP TABLE [pom_data];
+    ALTER TABLE [producer_reported_material] ADD [amber_ram_rag_rating] decimal(18,3) NULL;
+>>>>>>> bc8e0c0 (ECV-390 add RAG modulation fields to DB models)
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260303000000_FixRecreatePomOrgDataTables'
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
 )
 BEGIN
-
-                    CREATE TABLE [dbo].[pom_data](
-    	                [organisation_id] [int] NULL,
-    	                [subsidiary_id] [nvarchar](400) NULL,
-    	                [submission_period] [nvarchar](400) NULL,
-    	                [packaging_activity] [nvarchar](400) NULL,
-    	                [packaging_type] [nvarchar](400) NULL,
-    	                [packaging_class] [nvarchar](400) NULL,
-    	                [packaging_material] [nvarchar](max) NULL,
-    	                [packaging_material_weight] [float] NULL,
-    	                [load_ts] [datetime2](7) NOT NULL,
-    	                [submission_period_desc] [nvarchar](max) NULL,
-    	                [submitter_id] [uniqueidentifier] NULL
-                    ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-                    
+    ALTER TABLE [producer_reported_material] ADD [green_medical_ram_rag_rating] decimal(18,3) NULL;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260303000000_FixRecreatePomOrgDataTables'
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
 )
 BEGIN
-    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260303000000_FixRecreatePomOrgDataTables', N'8.0.7');
+    ALTER TABLE [producer_reported_material] ADD [green_ram_rag_rating] decimal(18,3) NULL;
 END;
-GO
-
-COMMIT;
-GO
-
-BEGIN TRANSACTION;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
 )
 BEGIN
-    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Aluminium-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
-    WHERE [parameter_unique_ref] = N''LRET-AL'';
-    SELECT @@ROWCOUNT');
+    ALTER TABLE [producer_reported_material] ADD [red_medical_ram_rag_rating] decimal(18,3) NULL;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
 )
 BEGIN
-    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Fibre composite-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
-    WHERE [parameter_unique_ref] = N''LRET-FC'';
-    SELECT @@ROWCOUNT');
+    ALTER TABLE [producer_reported_material] ADD [red_ram_rag_rating] decimal(18,3) NULL;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
-)
-BEGIN
-    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Glass-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
-    WHERE [parameter_unique_ref] = N''LRET-GL'';
-    SELECT @@ROWCOUNT');
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
-)
-BEGIN
-    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Other materials-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
-    WHERE [parameter_unique_ref] = N''LRET-OT'';
-    SELECT @@ROWCOUNT');
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
-)
-BEGIN
-    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Paper or card-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
-    WHERE [parameter_unique_ref] = N''LRET-PC'';
-    SELECT @@ROWCOUNT');
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
-)
-BEGIN
-    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Plastic-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
-    WHERE [parameter_unique_ref] = N''LRET-PL'';
-    SELECT @@ROWCOUNT');
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
-)
-BEGIN
-    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Steel-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
-    WHERE [parameter_unique_ref] = N''LRET-ST'';
-    SELECT @@ROWCOUNT');
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
-)
-BEGIN
-    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Wood-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
-    WHERE [parameter_unique_ref] = N''LRET-WD'';
-    SELECT @@ROWCOUNT');
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
-)
-BEGIN
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
-        SET IDENTITY_INSERT [default_parameter_template_master] ON;
-    EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])
-    VALUES (N''LRET-AL-G'', N''Aluminium-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-AL-R'', N''Aluminium-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-FC-G'', N''Fibre composite-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-FC-R'', N''Fibre composite-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-GL-G'', N''Glass-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-GL-R'', N''Glass-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-OT-G'', N''Other materials-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-OT-R'', N''Other materials-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-PC-G'', N''Paper or card-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-PC-R'', N''Paper or card-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-PL-G'', N''Plastic-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-PL-R'', N''Plastic-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-ST-G'', N''Steel-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-ST-R'', N''Steel-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-WD-G'', N''Wood-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''LRET-WD-R'', N''Wood-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
-    (N''REDM-RF'', N''Modulation Factor'', N''Red modulation factor'', 1.0, 2.0)');
-    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
-        SET IDENTITY_INSERT [default_parameter_template_master] OFF;
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
-)
-BEGIN
-
-                    INSERT INTO default_parameter_setting_detail (default_parameter_setting_master_id, parameter_unique_ref, parameter_value)
-                    SELECT u.Id, v.paramId, v.paramValue
-                    FROM (SELECT Id FROM default_parameter_setting_master) u
-                    CROSS JOIN (VALUES
-                    ('LRET-AL-G', 0.000),
-                    ('LRET-AL-R', 0.000),
-                    ('LRET-FC-G', 0.000),
-                    ('LRET-FC-R', 0.000),
-                    ('LRET-GL-G', 0.000),
-                    ('LRET-GL-R', 0.000),
-                    ('LRET-OT-G', 0.000),
-                    ('LRET-OT-R', 0.000),
-                    ('LRET-PC-G', 0.000),
-                    ('LRET-PC-R', 0.000),
-                    ('LRET-PL-G', 0.000),
-                    ('LRET-PL-R', 0.000),
-                    ('LRET-ST-G', 0.000),
-                    ('LRET-ST-R', 0.000),
-                    ('LRET-WD-G', 0.000),
-                    ('LRET-WD-R', 0.000),
-                    ('REDM-RF', 1.000)
-                    ) v(paramId, paramValue);
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
-)
-BEGIN
-    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260311141533_AddModulationDefaultParameters', N'8.0.7');
-END;
-GO
-
-COMMIT;
-GO
-
-BEGIN TRANSACTION;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260316112551_AddModulationFields'
-)
-BEGIN
-    ALTER TABLE [producer_reported_material] ADD [packaging_tonnage_amber] decimal(18,3) NULL;
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260316112551_AddModulationFields'
-)
-BEGIN
-    ALTER TABLE [producer_reported_material] ADD [packaging_tonnage_amber_medical] decimal(18,3) NULL;
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260316112551_AddModulationFields'
-)
-BEGIN
-    ALTER TABLE [producer_reported_material] ADD [packaging_tonnage_green] decimal(18,3) NULL;
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260316112551_AddModulationFields'
-)
-BEGIN
-    ALTER TABLE [producer_reported_material] ADD [packaging_tonnage_green_medical] decimal(18,3) NULL;
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260316112551_AddModulationFields'
-)
-BEGIN
-    ALTER TABLE [producer_reported_material] ADD [packaging_tonnage_red] decimal(18,3) NULL;
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260316112551_AddModulationFields'
-)
-BEGIN
-    ALTER TABLE [producer_reported_material] ADD [packaging_tonnage_red_medical] decimal(18,3) NULL;
-END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260316112551_AddModulationFields'
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
 )
 BEGIN
     ALTER TABLE [pom_data] ADD [packaging_material_subtype] nvarchar(max) NULL;
@@ -7270,7 +7046,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260316112551_AddModulationFields'
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
 )
 BEGIN
     ALTER TABLE [pom_data] ADD [ram_rag_rating] nvarchar(max) NULL;
@@ -7279,7 +7055,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260316112551_AddModulationFields'
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
 )
 BEGIN
     ALTER TABLE [calculator_run_pom_data_detail] ADD [packaging_material_subtype] nvarchar(max) NULL;
@@ -7288,7 +7064,7 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260316112551_AddModulationFields'
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
 )
 BEGIN
     ALTER TABLE [calculator_run_pom_data_detail] ADD [ram_rag_rating] nvarchar(max) NULL;
@@ -7297,11 +7073,11 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260316112551_AddModulationFields'
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260316112551_AddModulationFields', N'8.0.7');
+    VALUES (N'20260306134109_AddModulationFields', N'8.0.7');
 END;
 GO
 
