@@ -29,6 +29,30 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
                    .HasColumnName("packaging_type")
                    .HasMaxLength(400);
 
+            builder.Property(p => p.RedRamRagRating)
+                   .HasColumnName("red_ram_rag_rating")
+                   .HasPrecision(18, 3);
+
+            builder.Property(p => p.AmberRamRagRating)
+                   .HasColumnName("amber_ram_rag_rating")
+                   .HasPrecision(18, 3);
+
+            builder.Property(p => p.GreenRamRagRating)
+                   .HasColumnName("green_ram_rag_rating")
+                   .HasPrecision(18, 3);
+
+            builder.Property(p => p.RedMedicalRamRagRating)
+                   .HasColumnName("red_medical_ram_rag_rating")
+                   .HasPrecision(18, 3);
+
+            builder.Property(p => p.AmberMedicalRamRagRating)
+                   .HasColumnName("amber_medical_ram_rag_rating")
+                   .HasPrecision(18, 3);
+
+            builder.Property(p => p.GreenMedicalRamRagRating)
+                   .HasColumnName("green_medical_ram_rag_rating")
+                   .HasPrecision(18, 3);
+
             builder.Property(p => p.PackagingTonnage)
                    .HasColumnName("packaging_tonnage")
                    .HasPrecision(18, 3);
