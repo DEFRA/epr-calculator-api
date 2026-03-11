@@ -6956,3 +6956,109 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
+)
+BEGIN
+    ALTER TABLE [producer_reported_material] ADD [amber_medical_ram_rag_rating] decimal(18,3) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
+)
+BEGIN
+    ALTER TABLE [producer_reported_material] ADD [amber_ram_rag_rating] decimal(18,3) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
+)
+BEGIN
+    ALTER TABLE [producer_reported_material] ADD [green_medical_ram_rag_rating] decimal(18,3) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
+)
+BEGIN
+    ALTER TABLE [producer_reported_material] ADD [green_ram_rag_rating] decimal(18,3) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
+)
+BEGIN
+    ALTER TABLE [producer_reported_material] ADD [red_medical_ram_rag_rating] decimal(18,3) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
+)
+BEGIN
+    ALTER TABLE [producer_reported_material] ADD [red_ram_rag_rating] decimal(18,3) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
+)
+BEGIN
+    ALTER TABLE [pom_data] ADD [packaging_material_subtype] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
+)
+BEGIN
+    ALTER TABLE [pom_data] ADD [ram_rag_rating] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
+)
+BEGIN
+    ALTER TABLE [calculator_run_pom_data_detail] ADD [packaging_material_subtype] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
+)
+BEGIN
+    ALTER TABLE [calculator_run_pom_data_detail] ADD [ram_rag_rating] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260306134109_AddModulationFields'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260306134109_AddModulationFields', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+

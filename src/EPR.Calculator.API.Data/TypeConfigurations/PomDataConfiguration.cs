@@ -47,6 +47,12 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.Property(p => p.SubmissionPeriodDesc)
                    .HasColumnName("submission_period_desc");
 
+            builder.Property(p => p.RamRagRating)
+                   .HasColumnName("ram_rag_rating");
+
+            builder.Property(p => p.PackagingMaterialSubtype)
+                   .HasColumnName("packaging_material_subtype");
+
             builder.Property(p => p.LoadTimeStamp)
                    .HasColumnName("load_ts");
 
