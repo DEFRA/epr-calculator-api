@@ -6956,3 +6956,137 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
+)
+BEGIN
+    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Aluminium-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
+    WHERE [parameter_unique_ref] = N''LRET-AL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
+)
+BEGIN
+    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Fibre composite-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
+    WHERE [parameter_unique_ref] = N''LRET-FC'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
+)
+BEGIN
+    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Glass-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
+    WHERE [parameter_unique_ref] = N''LRET-GL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
+)
+BEGIN
+    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Other materials-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
+    WHERE [parameter_unique_ref] = N''LRET-OT'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
+)
+BEGIN
+    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Paper or card-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
+    WHERE [parameter_unique_ref] = N''LRET-PC'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
+)
+BEGIN
+    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Plastic-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
+    WHERE [parameter_unique_ref] = N''LRET-PL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
+)
+BEGIN
+    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Steel-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
+    WHERE [parameter_unique_ref] = N''LRET-ST'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
+)
+BEGIN
+    EXEC(N'UPDATE [default_parameter_template_master] SET [parameter_category] = N''Wood-A'', [parameter_type] = N''Late reporting tonnage'', [valid_Range_to] = 999999999.999
+    WHERE [parameter_unique_ref] = N''LRET-WD'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
+        SET IDENTITY_INSERT [default_parameter_template_master] ON;
+    EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])
+    VALUES (N''LRET-AL-G'', N''Aluminium-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-AL-R'', N''Aluminium-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-FC-G'', N''Fibre composite-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-FC-R'', N''Fibre composite-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-GL-G'', N''Glass-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-GL-R'', N''Glass-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-OT-G'', N''Other materials-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-OT-R'', N''Other materials-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-PC-G'', N''Paper or card-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-PC-R'', N''Paper or card-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-PL-G'', N''Plastic-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-PL-R'', N''Plastic-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-ST-G'', N''Steel-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-ST-R'', N''Steel-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-WD-G'', N''Wood-G'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''LRET-WD-R'', N''Wood-R'', N''Late reporting tonnage'', 0.0, 999999999.999),
+    (N''REDM-RF'', N''Modulation Factor'', N''Red modulation factor'', 1.0, 2.0)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
+        SET IDENTITY_INSERT [default_parameter_template_master] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260311141533_AddModulationDefaultParameters', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+

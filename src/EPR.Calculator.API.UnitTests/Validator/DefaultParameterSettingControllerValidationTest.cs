@@ -107,6 +107,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 });
             }
 
+            schemeParameterTemplateValues.Single(x => x.ParameterUniqueReferenceId == "REDM-RF").ParameterValue = "1.200";
             schemeParameterTemplateValues.Single(x => x.ParameterUniqueReferenceId == "BADEBT-P").ParameterUniqueReferenceId = "Somehthing else";
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
