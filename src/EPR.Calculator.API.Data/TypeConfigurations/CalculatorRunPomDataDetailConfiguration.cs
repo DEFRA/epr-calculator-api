@@ -9,6 +9,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
     [ExcludeFromCodeCoverage]
     public class CalculatorRunPomDataDetailConfiguration : IEntityTypeConfiguration<CalculatorRunPomDataDetail>
     {
+       // Ensure fields names match PomDataConfiguration for bulk insert https://github.com/DEFRA/epr-calculator-service/blob/main/src/EPR.Calculator.Service.Function/Services/CalculatorRunPomData.cs
         /// <inheritdoc />
         public void Configure(EntityTypeBuilder<CalculatorRunPomDataDetail> builder)
         {
