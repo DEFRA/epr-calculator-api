@@ -1931,26 +1931,6 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal?>("AmberMedicalRamRagRating")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("amber_medical_ram_rag_rating");
-
-                    b.Property<decimal?>("AmberRamRagRating")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("amber_ram_rag_rating");
-
-                    b.Property<decimal?>("GreenMedicalRamRagRating")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("green_medical_ram_rag_rating");
-
-                    b.Property<decimal?>("GreenRamRagRating")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("green_ram_rag_rating");
-
                     b.Property<int>("MaterialId")
                         .HasColumnType("int")
                         .HasColumnName("material_id");
@@ -1999,16 +1979,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<int>("ProducerDetailId")
                         .HasColumnType("int")
                         .HasColumnName("producer_detail_id");
-
-                    b.Property<decimal?>("RedMedicalRamRagRating")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("red_medical_ram_rag_rating");
-
-                    b.Property<decimal?>("RedRamRagRating")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("red_ram_rag_rating");
 
                     b.HasKey("Id");
 
