@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260306134109_AddModulationFields")]
+    [Migration("20260316112551_AddModulationFields")]
     partial class AddModulationFields
     {
         /// <inheritdoc />
@@ -1798,26 +1798,6 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal?>("AmberMedicalRamRagRating")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("amber_medical_ram_rag_rating");
-
-                    b.Property<decimal?>("AmberRamRagRating")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("amber_ram_rag_rating");
-
-                    b.Property<decimal?>("GreenMedicalRamRagRating")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("green_medical_ram_rag_rating");
-
-                    b.Property<decimal?>("GreenRamRagRating")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("green_ram_rag_rating");
-
                     b.Property<int>("MaterialId")
                         .HasColumnType("int")
                         .HasColumnName("material_id");
@@ -1826,6 +1806,36 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasPrecision(18, 3)
                         .HasColumnType("decimal(18,3)")
                         .HasColumnName("packaging_tonnage");
+
+                    b.Property<decimal?>("PackagingTonnageAmber")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("packaging_tonnage_amber");
+
+                    b.Property<decimal?>("PackagingTonnageAmberMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("packaging_tonnage_amber_medical");
+
+                    b.Property<decimal?>("PackagingTonnageGreen")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("packaging_tonnage_green");
+
+                    b.Property<decimal?>("PackagingTonnageGreenMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("packaging_tonnage_green_medical");
+
+                    b.Property<decimal?>("PackagingTonnageRed")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("packaging_tonnage_red");
+
+                    b.Property<decimal?>("PackagingTonnageRedMedical")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)")
+                        .HasColumnName("packaging_tonnage_red_medical");
 
                     b.Property<string>("PackagingType")
                         .IsRequired()
@@ -1836,16 +1846,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<int>("ProducerDetailId")
                         .HasColumnType("int")
                         .HasColumnName("producer_detail_id");
-
-                    b.Property<decimal?>("RedMedicalRamRagRating")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("red_medical_ram_rag_rating");
-
-                    b.Property<decimal?>("RedRamRagRating")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("red_ram_rag_rating");
 
                     b.HasKey("Id");
 

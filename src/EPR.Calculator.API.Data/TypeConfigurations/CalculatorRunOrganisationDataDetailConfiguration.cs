@@ -8,6 +8,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
        [ExcludeFromCodeCoverage]
        public class CalculatorRunOrganisationDataDetailConfiguration : IEntityTypeConfiguration<CalculatorRunOrganisationDataDetail>
        {
+              // Ensure fields names match OrganisationDataConfiguration for bulk insert https://github.com/DEFRA/epr-calculator-service/blob/main/src/EPR.Calculator.Service.Function/Services/CalculatorRunOrgData.cs
               /// <inheritdoc />
               public void Configure(EntityTypeBuilder<CalculatorRunOrganisationDataDetail> builder)
               {
