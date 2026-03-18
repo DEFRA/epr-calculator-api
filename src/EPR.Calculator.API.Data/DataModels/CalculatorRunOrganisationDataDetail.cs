@@ -31,5 +31,9 @@
         public string? JoinerDate { get; set; }
 
         public string? LeaverDate { get; set; }
+
+        public bool HasH1 { get; set; }
+
+        public bool HasH2 { get; set; }
     }
 }
