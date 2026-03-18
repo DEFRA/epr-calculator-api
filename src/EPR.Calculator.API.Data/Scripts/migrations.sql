@@ -7308,3 +7308,55 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260319164244_AddHasH1AndHasH2OrganisationData'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [has_h1] bit NOT NULL DEFAULT CAST(0 AS bit);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260319164244_AddHasH1AndHasH2OrganisationData'
+)
+BEGIN
+    ALTER TABLE [organisation_data] ADD [has_h2] bit NOT NULL DEFAULT CAST(0 AS bit);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260319164244_AddHasH1AndHasH2OrganisationData'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [has_h1] bit NOT NULL DEFAULT CAST(0 AS bit);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260319164244_AddHasH1AndHasH2OrganisationData'
+)
+BEGIN
+    ALTER TABLE [calculator_run_organization_data_detail] ADD [has_h2] bit NOT NULL DEFAULT CAST(0 AS bit);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260319164244_AddHasH1AndHasH2OrganisationData'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260319164244_AddHasH1AndHasH2OrganisationData', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
