@@ -6956,3 +6956,84 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260303000000_FixRecreatePomOrgDataTables'
+)
+BEGIN
+    DROP TABLE [organisation_data];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260303000000_FixRecreatePomOrgDataTables'
+)
+BEGIN
+
+                    CREATE TABLE [dbo].[organisation_data](
+    	                [organisation_id] [int] NOT NULL,
+    	                [subsidiary_id] [nvarchar](400) NULL,
+    	                [organisation_name] [nvarchar](400) NOT NULL,
+    	                [load_ts] [datetime2](7) NOT NULL,
+    	                [trading_name] [nvarchar](400) NULL,
+    	                [obligation_status] [nvarchar](10) NOT NULL,
+    	                [submitter_id] [uniqueidentifier] NULL,
+    	                [error_code] [nvarchar](max) NULL,
+    	                [num_days_obligated] [int] NULL,
+    	                [status_code] [nvarchar](max) NULL,
+    	                [joiner_date] [nvarchar](50) NULL,
+    	                [leaver_date] [nvarchar](50) NULL
+                    ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+                    
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260303000000_FixRecreatePomOrgDataTables'
+)
+BEGIN
+    DROP TABLE [pom_data];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260303000000_FixRecreatePomOrgDataTables'
+)
+BEGIN
+
+                    CREATE TABLE [dbo].[pom_data](
+    	                [organisation_id] [int] NULL,
+    	                [subsidiary_id] [nvarchar](400) NULL,
+    	                [submission_period] [nvarchar](400) NULL,
+    	                [packaging_activity] [nvarchar](400) NULL,
+    	                [packaging_type] [nvarchar](400) NULL,
+    	                [packaging_class] [nvarchar](400) NULL,
+    	                [packaging_material] [nvarchar](max) NULL,
+    	                [packaging_material_weight] [float] NULL,
+    	                [load_ts] [datetime2](7) NOT NULL,
+    	                [submission_period_desc] [nvarchar](max) NULL,
+    	                [submitter_id] [uniqueidentifier] NULL
+                    ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+                    
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260303000000_FixRecreatePomOrgDataTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260303000000_FixRecreatePomOrgDataTables', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
