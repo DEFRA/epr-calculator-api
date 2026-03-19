@@ -224,6 +224,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                         ParameterUniqueReferenceId = item,
                     });
                 }
+                else if (item == "REDM-RF")
+                {
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = "1.200",
+                        ParameterUniqueReferenceId = item,
+                    });
+                }
                 else
                 {
                     schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto

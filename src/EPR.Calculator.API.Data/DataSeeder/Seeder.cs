@@ -181,67 +181,195 @@ namespace EPR.Calculator.API.Data.DataSeeder
                 },
                 new DefaultParameterTemplateMaster
                 {
-                    ParameterUniqueReferenceId = "LRET-AL",
-                    ParameterCategory = "Late reporting tonnage",
-                    ParameterType = "Aluminium",
+                    ParameterUniqueReferenceId = "LRET-AL-R",
+                    ParameterCategory = "Aluminium-R",
+                    ParameterType = "Late reporting tonnage",
                     ValidRangeFrom = 0,
-                    ValidRangeTo = 999999999.99M,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-AL",
+                    ParameterCategory = "Aluminium-A",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-AL-G",
+                    ParameterCategory = "Aluminium-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-FC-R",
+                    ParameterCategory = "Fibre composite-R",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
                 },
                 new DefaultParameterTemplateMaster
                 {
                     ParameterUniqueReferenceId = "LRET-FC",
-                    ParameterCategory = "Late reporting tonnage",
-                    ParameterType = "Aluminium",
+                    ParameterCategory = "Fibre composite-A",
+                    ParameterType = "Late reporting tonnage",
                     ValidRangeFrom = 0,
-                    ValidRangeTo = 999999999.99M,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-FC-G",
+                    ParameterCategory = "Fibre composite-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-GL-R",
+                    ParameterCategory = "Glass-R",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
                 },
                 new DefaultParameterTemplateMaster
                 {
                     ParameterUniqueReferenceId = "LRET-GL",
-                    ParameterCategory = "Late reporting tonnage",
-                    ParameterType = "Aluminium",
+                    ParameterCategory = "Glass-A",
+                    ParameterType = "Late reporting tonnage",
                     ValidRangeFrom = 0,
-                    ValidRangeTo = 999999999.99M,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-GL-G",
+                    ParameterCategory = "Glass-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-PC-R",
+                    ParameterCategory = "Paper or card-R",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
                 },
                 new DefaultParameterTemplateMaster
                 {
                     ParameterUniqueReferenceId = "LRET-PC",
-                    ParameterCategory = "Late reporting tonnage",
-                    ParameterType = "Aluminium",
+                    ParameterCategory = "Paper or card-A",
+                    ParameterType = "Late reporting tonnage",
                     ValidRangeFrom = 0,
-                    ValidRangeTo = 999999999.99M,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-PC-G",
+                    ParameterCategory = "Paper or card-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-PL-R",
+                    ParameterCategory = "Plastic-R",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
                 },
                 new DefaultParameterTemplateMaster
                 {
                     ParameterUniqueReferenceId = "LRET-PL",
-                    ParameterCategory = "Late reporting tonnage",
-                    ParameterType = "Aluminium",
+                    ParameterCategory = "Plastic-A",
+                    ParameterType = "Late reporting tonnage",
                     ValidRangeFrom = 0,
-                    ValidRangeTo = 999999999.99M,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-PL-G",
+                    ParameterCategory = "Plastic-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-ST-R",
+                    ParameterCategory = "Steel-R",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
                 },
                 new DefaultParameterTemplateMaster
                 {
                     ParameterUniqueReferenceId = "LRET-ST",
-                    ParameterCategory = "Late reporting tonnage",
-                    ParameterType = "Aluminium",
+                    ParameterCategory = "Steel-A",
+                    ParameterType = "Late reporting tonnage",
                     ValidRangeFrom = 0,
-                    ValidRangeTo = 999999999.99M,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-ST-G",
+                    ParameterCategory = "Steel-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-WD-R",
+                    ParameterCategory = "Wood-R",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
                 },
                 new DefaultParameterTemplateMaster
                 {
                     ParameterUniqueReferenceId = "LRET-WD",
-                    ParameterCategory = "Late reporting tonnage",
-                    ParameterType = "Aluminium",
+                    ParameterCategory = "Wood-A",
+                    ParameterType = "Late reporting tonnage",
                     ValidRangeFrom = 0,
-                    ValidRangeTo = 999999999.99M,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-WD-G",
+                    ParameterCategory = "Wood-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-OT-R",
+                    ParameterCategory = "Other materials-R",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
                 },
                 new DefaultParameterTemplateMaster
                 {
                     ParameterUniqueReferenceId = "LRET-OT",
-                    ParameterCategory = "Late reporting tonnage",
-                    ParameterType = "Aluminium",
+                    ParameterCategory = "Other materials-A",
+                    ParameterType = "Late reporting tonnage",
                     ValidRangeFrom = 0,
-                    ValidRangeTo = 999999999.99M,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "LRET-OT-G",
+                    ParameterCategory = "Other materials-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
                 },
                 new DefaultParameterTemplateMaster
                 {
@@ -346,6 +474,14 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     ParameterType = "Northern Ireland",
                     ValidRangeFrom = 0,
                     ValidRangeTo = 999999999.99M,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "REDM-RF",
+                    ParameterCategory = "Modulation Factor",
+                    ParameterType = "Red modulation factor",
+                    ValidRangeFrom = 1.000M,
+                    ValidRangeTo = 2.000M,
                 });
         }
 

@@ -106,54 +106,6 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                 },
                 new()
                 {
-                    ParameterUniqueReferenceId = "LRET-FC",
-                    ParameterCategory = "Fibre composite",
-                    ParameterType = "Late reporting tonnage",
-                    ValidRangeFrom = 0m,
-                    ValidRangeTo = 999999999.99m,
-                },
-                new()
-                {
-                    ParameterUniqueReferenceId = "LRET-GL",
-                    ParameterCategory = "Glass",
-                    ParameterType = "Late reporting tonnage",
-                    ValidRangeFrom = 0m,
-                    ValidRangeTo = 999999999.99m,
-                },
-                new()
-                {
-                    ParameterUniqueReferenceId = "LRET-AL",
-                    ParameterCategory = "Aluminium",
-                    ParameterType = "Late reporting tonnage",
-                    ValidRangeFrom = 0m,
-                    ValidRangeTo = 999999999.99m,
-                },
-                new()
-                {
-                    ParameterUniqueReferenceId = "LRET-WD",
-                    ParameterCategory = "Wood",
-                    ParameterType = "Late reporting tonnage",
-                    ValidRangeFrom = 0m,
-                    ValidRangeTo = 999999999.99m,
-                },
-                new()
-                {
-                    ParameterUniqueReferenceId = "LRET-ST",
-                    ParameterCategory = "Steel",
-                    ParameterType = "Late reporting tonnage",
-                    ValidRangeFrom = 0m,
-                    ValidRangeTo = 999999999.99m,
-                },
-                new()
-                {
-                    ParameterUniqueReferenceId = "LRET-PC",
-                    ParameterCategory = "Paper or card",
-                    ParameterType = "Late reporting tonnage",
-                    ValidRangeFrom = 0m,
-                    ValidRangeTo = 999999999.99m,
-                },
-                new()
-                {
                     ParameterUniqueReferenceId = "LAPC-ENG",
                     ParameterCategory = "England",
                     ParameterType = "Local authority data preparation costs",
@@ -226,11 +178,195 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                 },
                 new()
                 {
-                    ParameterUniqueReferenceId = "LRET-OT",
-                    ParameterCategory = "Other materials",
+                    ParameterUniqueReferenceId = "LRET-AL-R",
+                    ParameterCategory = "Aluminium-R",
                     ParameterType = "Late reporting tonnage",
-                    ValidRangeFrom = 0m,
-                    ValidRangeTo = 999999999.99m,
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-AL",
+                    ParameterCategory = "Aluminium-A",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-AL-G",
+                    ParameterCategory = "Aluminium-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-FC-R",
+                    ParameterCategory = "Fibre composite-R",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-FC",
+                    ParameterCategory = "Fibre composite-A",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-FC-G",
+                    ParameterCategory = "Fibre composite-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-GL-R",
+                    ParameterCategory = "Glass-R",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-GL",
+                    ParameterCategory = "Glass-A",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-GL-G",
+                    ParameterCategory = "Glass-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-PC-R",
+                    ParameterCategory = "Paper or card-R",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-PC",
+                    ParameterCategory = "Paper or card-A",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-PC-G",
+                    ParameterCategory = "Paper or card-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-PL-R",
+                    ParameterCategory = "Plastic-R",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-PL",
+                    ParameterCategory = "Plastic-A",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-PL-G",
+                    ParameterCategory = "Plastic-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-ST-R",
+                    ParameterCategory = "Steel-R",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-ST",
+                    ParameterCategory = "Steel-A",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-ST-G",
+                    ParameterCategory = "Steel-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-WD-R",
+                    ParameterCategory = "Wood-R",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-WD",
+                    ParameterCategory = "Wood-A",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-WD-G",
+                    ParameterCategory = "Wood-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-OT-R",
+                    ParameterCategory = "Other materials-R",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-OT",
+                    ParameterCategory = "Other materials-A",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "LRET-OT-G",
+                    ParameterCategory = "Other materials-G",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0,
+                    ValidRangeTo = 999999999.999M,
                 },
                 new()
                 {
@@ -239,14 +375,6 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ParameterType = "Percentage",
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 1000.000m,
-                },
-                new()
-                {
-                    ParameterUniqueReferenceId = "LRET-PL",
-                    ParameterCategory = "Plastic",
-                    ParameterType = "Late reporting tonnage",
-                    ValidRangeFrom = 0m,
-                    ValidRangeTo = 999999999.99m,
                 },
                 new()
                 {
@@ -344,6 +472,14 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999.990m,
                 },
+                new()
+                {
+                    ParameterUniqueReferenceId = "REDM-RF",
+                    ParameterCategory = "Modulation Factor",
+                    ParameterType = "Red modulation factor",
+                    ValidRangeFrom = 1.000M,
+                    ValidRangeTo = 2.000M,
+                }
             };
             return list;
         }
