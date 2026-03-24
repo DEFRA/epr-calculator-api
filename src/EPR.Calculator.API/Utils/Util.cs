@@ -122,6 +122,11 @@ namespace EPR.Calculator.API.Utils
                 sb.Append(string.Format(CommonResources.PercentageDecrease, defaulTemplate.ParameterType));
                 sb.Append(string.Format(CommonResources.MustBeBetweenWithPercentage, Math.Round(defaulTemplate.ValidRangeFrom, 2, MidpointRounding.ToZero), decimal.Truncate(defaulTemplate.ValidRangeTo)));
             }
+            else if (IsFactor(defaulTemplate))
+            {
+                sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
+                sb.Append(string.Format(CommonResources.MustBeBetween, Math.Round(defaulTemplate.ValidRangeFrom, 3, MidpointRounding.ToZero), Math.Round(defaulTemplate.ValidRangeTo, 3, MidpointRounding.ToZero)));
+            }
             else
             {
                 sb.Append($"{defaulTemplate.ParameterType} for {defaulTemplate.ParameterCategory} ");
@@ -148,6 +153,12 @@ namespace EPR.Calculator.API.Utils
         {
             return defaultTemplate.ParameterType.Contains("tonnage", StringComparison.OrdinalIgnoreCase)
                 && defaultTemplate.ParameterCategory.Contains("amount decrease", StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool IsFactor(DefaultParameterTemplateMaster defaultTemplate)
+        {
+            return defaultTemplate.ParameterType.Contains("factor", StringComparison.OrdinalIgnoreCase)
+                && defaultTemplate.ParameterCategory.Contains("factor", StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool IsBadDebt(DefaultParameterTemplateMaster defaultTemplate)
