@@ -82,6 +82,14 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     ValidRangeFrom = 0m,
                     ValidRangeTo = 999999999.99m,
                 },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "REDM-RF",
+                    ParameterCategory = "Modulation Factor",
+                    ParameterType = "Red modulation factor",
+                    ValidRangeFrom = 1.000m,
+                    ValidRangeTo = 2.000m,
+                }
             };
 
         private ApplicationDBContext Context { get; init; }
@@ -163,6 +171,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
             Assert.AreEqual(1, vr.Errors.Count(error => error.Message.Contains("Tonnage change threshold for Amount Increase can only include numbers, commas and decimal points")));
         }
 
+        [TestMethod]
         public void ValidateTest_For_Unique_References_Invalid_Values()
         {
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
@@ -183,13 +192,14 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             var vr = Validator.Validate(dto);
-            Assert.AreEqual(6, vr?.Errors.Count(error => error.Message.Contains("must be between")));
-            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium must be between £0.00 and £999,999,999.99")));
-            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("The Bad debt provision percentage")));
-            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("Materiality threshold for Amount Decrease must be between -£999,999,999.99 and £0.00")));
+            Assert.AreEqual(7, vr?.Errors.Count(error => error.Message.Contains("must be between")));
+            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium must be between £0 and £999999999.99")));
+            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("The Bad debt provision percentage must be between 0% and 999.99%")));
+            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("Materiality threshold for Amount Decrease must be between £-999999999.99 and £0")));
             Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage increase must be between 0% and 999.99%")));
             Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage decrease must be between -999.99% and 0%")));
-            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("Tonnage change threshold for Amount Increase must be between £0.00 and £999,999,999.99")));
+            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("Tonnage change threshold for Amount Increase must be between £0 and £999999999.99")));
+            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("Red modulation factor for Modulation Factor must be between 1.000 and 2.000")));
         }
 
         private static string GetInvalidValueForUniqueRef(string parameterUniqueReferenceId)
@@ -202,6 +212,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 "MATT-PI" => "1000",
                 "MATT-PD" => "-1000",
                 "TONT-AI" => "-1",
+                "REDM-RF" => "2.500",
                 _ => "0",
             };
         }
