@@ -53,6 +53,8 @@
 
         public virtual DbSet<ProducerReportedMaterial> ProducerReportedMaterial { get; set; }
 
+        public virtual DbSet<ProducerReportedMaterialProjected> ProducerReportedMaterialProjected { get; set; }
+
         public DbSet<CostType> CostType { get; set; }
 
         public virtual DbSet<Country> Country { get; set; }

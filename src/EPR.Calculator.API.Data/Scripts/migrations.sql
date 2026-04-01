@@ -7360,3 +7360,71 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260401135019_AddSubmissionPeriodProducerReportedMaterialAndProjectedTable'
+)
+BEGIN
+    ALTER TABLE [producer_reported_material] ADD [submission_period] nvarchar(400) NOT NULL DEFAULT N'';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260401135019_AddSubmissionPeriodProducerReportedMaterialAndProjectedTable'
+)
+BEGIN
+    CREATE TABLE [producer_reported_material_projected] (
+        [id] int NOT NULL IDENTITY,
+        [material_id] int NOT NULL,
+        [producer_detail_id] int NOT NULL,
+        [packaging_type] nvarchar(400) NOT NULL,
+        [packaging_tonnage] decimal(18,3) NOT NULL,
+        [packaging_tonnage_red] decimal(18,3) NULL,
+        [packaging_tonnage_amber] decimal(18,3) NULL,
+        [packaging_tonnage_green] decimal(18,3) NULL,
+        [packaging_tonnage_red_medical] decimal(18,3) NULL,
+        [packaging_tonnage_amber_medical] decimal(18,3) NULL,
+        [packaging_tonnage_green_medical] decimal(18,3) NULL,
+        [submission_period] nvarchar(400) NOT NULL,
+        CONSTRAINT [PK_producer_reported_material_projected] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_producer_reported_material_projected_material_material_id] FOREIGN KEY ([material_id]) REFERENCES [material] ([id]) ON DELETE CASCADE,
+        CONSTRAINT [FK_producer_reported_material_projected_producer_detail_producer_detail_id] FOREIGN KEY ([producer_detail_id]) REFERENCES [producer_detail] ([id]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260401135019_AddSubmissionPeriodProducerReportedMaterialAndProjectedTable'
+)
+BEGIN
+    CREATE INDEX [IX_producer_reported_material_projected_material_id] ON [producer_reported_material_projected] ([material_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260401135019_AddSubmissionPeriodProducerReportedMaterialAndProjectedTable'
+)
+BEGIN
+    CREATE INDEX [IX_producer_reported_material_projected_producer_detail_id] ON [producer_reported_material_projected] ([producer_detail_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260401135019_AddSubmissionPeriodProducerReportedMaterialAndProjectedTable'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260401135019_AddSubmissionPeriodProducerReportedMaterialAndProjectedTable', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+

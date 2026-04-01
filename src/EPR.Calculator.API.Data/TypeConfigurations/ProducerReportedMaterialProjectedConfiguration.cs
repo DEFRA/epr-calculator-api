@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace EPR.Calculator.API.Data.TypeConfigurations
 {
     [ExcludeFromCodeCoverage]
-    public class ProducerReportedMaterialConfiguration : IEntityTypeConfiguration<ProducerReportedMaterial>
+    public class ProducerReportedMaterialProjectedConfiguration : IEntityTypeConfiguration<ProducerReportedMaterialProjected>
     {
         /// <inheritdoc />
-        public void Configure(EntityTypeBuilder<ProducerReportedMaterial> builder)
+        public void Configure(EntityTypeBuilder<ProducerReportedMaterialProjected> builder)
         {
-            builder.ToTable("producer_reported_material");
+            builder.ToTable("producer_reported_material_projected");
 
             builder.Property(p => p.Id)
                    .HasColumnName("id")
