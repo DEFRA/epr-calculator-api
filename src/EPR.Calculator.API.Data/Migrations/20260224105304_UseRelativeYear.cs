@@ -92,12 +92,12 @@ namespace EPR.Calculator.API.Data.Migrations
                 defaultValue: 0);
 
             // Update relative_year columns
-            migrationBuilder.Sql(@"UPDATE lapcap_data_master                      SET relative_year = CAST(LEFT(projection_year, 4) AS INT)");
-            migrationBuilder.Sql(@"UPDATE default_parameter_setting_master        SET relative_year = CAST(LEFT(parameter_year, 4) AS INT)");
-            migrationBuilder.Sql(@"UPDATE calculator_run_pom_data_master          SET relative_year = COALESCE(TRY_CAST(LEFT(calendar_year, 4) AS INT) + 1, 2025)");
-            migrationBuilder.Sql(@"UPDATE calculator_run_organization_data_master SET relative_year = COALESCE(TRY_CAST(LEFT(calendar_year, 4) AS INT) + 1, 2025)");
-            migrationBuilder.Sql(@"UPDATE calculator_run_relative_years           SET relative_year = CAST(LEFT(financial_Year, 4) AS INT)");
-            migrationBuilder.Sql(@"UPDATE calculator_run                          SET relative_year = CAST(LEFT(financial_Year, 4) AS INT)");
+            migrationBuilder.Sql(@"EXEC(N'UPDATE lapcap_data_master                      SET relative_year = CAST(LEFT(projection_year, 4) AS INT)')");
+            migrationBuilder.Sql(@"EXEC(N'UPDATE default_parameter_setting_master        SET relative_year = CAST(LEFT(parameter_year, 4) AS INT)')");
+            migrationBuilder.Sql(@"EXEC(N'UPDATE calculator_run_pom_data_master          SET relative_year = COALESCE(TRY_CAST(LEFT(calendar_year, 4) AS INT) + 1, 2025)')");
+            migrationBuilder.Sql(@"EXEC(N'UPDATE calculator_run_organization_data_master SET relative_year = COALESCE(TRY_CAST(LEFT(calendar_year, 4) AS INT) + 1, 2025)')");
+            migrationBuilder.Sql(@"EXEC(N'UPDATE calculator_run_relative_years           SET relative_year = CAST(LEFT(financial_Year, 4) AS INT)')");
+            migrationBuilder.Sql(@"EXEC(N'UPDATE calculator_run                          SET relative_year = CAST(LEFT(financial_Year, 4) AS INT)')");
 
             // Drop old year columns
             migrationBuilder.DropColumn(
@@ -304,12 +304,12 @@ namespace EPR.Calculator.API.Data.Migrations
                 defaultValue: "");
 
             // Update old columns
-            migrationBuilder.Sql(@"UPDATE lapcap_data_master                        SET projection_year = CAST(relative_year AS VARCHAR(4)) + '-' + RIGHT('0' + CAST((relative_year + 1) % 100 AS VARCHAR(2)), 2)");
-            migrationBuilder.Sql(@"UPDATE default_parameter_setting_master          SET parameter_year  = CAST(relative_year AS VARCHAR(4)) + '-' + RIGHT('0' + CAST((relative_year + 1) % 100 AS VARCHAR(2)), 2)");
-            migrationBuilder.Sql(@"UPDATE calculator_run_pom_data_master            SET calendar_year   = relative_year - 1");
-            migrationBuilder.Sql(@"UPDATE calculator_run_organization_data_master   SET calendar_year   = relative_year - 1");
-            migrationBuilder.Sql(@"UPDATE calculator_run_financial_years            SET financial_Year  = CAST(relative_year AS VARCHAR(4)) + '-' + RIGHT('0' + CAST((relative_year + 1) % 100 AS VARCHAR(2)), 2)");
-            migrationBuilder.Sql(@"UPDATE calculator_run                            SET financial_year  = CAST(relative_year AS VARCHAR(4)) + '-' + RIGHT('0' + CAST((relative_year + 1) % 100 AS VARCHAR(2)), 2)");
+            migrationBuilder.Sql(@"EXEC(N'UPDATE lapcap_data_master                        SET projection_year = CAST(relative_year AS VARCHAR(4)) + ''-'' + RIGHT(''0'' + CAST((relative_year + 1) % 100 AS VARCHAR(2)), 2)')");
+            migrationBuilder.Sql(@"EXEC(N'UPDATE default_parameter_setting_master          SET parameter_year  = CAST(relative_year AS VARCHAR(4)) + ''-'' + RIGHT(''0'' + CAST((relative_year + 1) % 100 AS VARCHAR(2)), 2)')");
+            migrationBuilder.Sql(@"EXEC(N'UPDATE calculator_run_pom_data_master            SET calendar_year   = relative_year - 1')");
+            migrationBuilder.Sql(@"EXEC(N'UPDATE calculator_run_organization_data_master   SET calendar_year   = relative_year - 1')");
+            migrationBuilder.Sql(@"EXEC(N'UPDATE calculator_run_financial_years            SET financial_Year  = CAST(relative_year AS VARCHAR(4)) + ''-'' + RIGHT(''0'' + CAST((relative_year + 1) % 100 AS VARCHAR(2)), 2)')");
+            migrationBuilder.Sql(@"EXEC(N'UPDATE calculator_run                            SET financial_year  = CAST(relative_year AS VARCHAR(4)) + ''-'' + RIGHT(''0'' + CAST((relative_year + 1) % 100 AS VARCHAR(2)), 2)')");
 
             migrationBuilder.DropColumn(
                 name: "relative_year",
