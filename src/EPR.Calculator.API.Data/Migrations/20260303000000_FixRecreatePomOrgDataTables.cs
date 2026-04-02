@@ -49,5 +49,11 @@ namespace EPR.Calculator.API.Data.Migrations
                 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
                 ");
         }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            // rollback not requried -  must be implemented to support reverting migrations.
+        }
     }
 }
