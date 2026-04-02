@@ -6696,7 +6696,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    UPDATE lapcap_data_master                      SET relative_year = CAST(LEFT(projection_year, 4) AS INT)
+    EXEC(N'UPDATE lapcap_data_master                      SET relative_year = CAST(LEFT(projection_year, 4) AS INT)')
 END;
 GO
 
@@ -6705,7 +6705,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    UPDATE default_parameter_setting_master        SET relative_year = CAST(LEFT(parameter_year, 4) AS INT)
+    EXEC(N'UPDATE default_parameter_setting_master        SET relative_year = CAST(LEFT(parameter_year, 4) AS INT)')
 END;
 GO
 
@@ -6714,7 +6714,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    UPDATE calculator_run_pom_data_master          SET relative_year = COALESCE(TRY_CAST(LEFT(calendar_year, 4) AS INT) + 1, 2025)
+    EXEC(N'UPDATE calculator_run_pom_data_master          SET relative_year = COALESCE(TRY_CAST(LEFT(calendar_year, 4) AS INT) + 1, 2025)')
 END;
 GO
 
@@ -6723,7 +6723,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    UPDATE calculator_run_organization_data_master SET relative_year = COALESCE(TRY_CAST(LEFT(calendar_year, 4) AS INT) + 1, 2025)
+    EXEC(N'UPDATE calculator_run_organization_data_master SET relative_year = COALESCE(TRY_CAST(LEFT(calendar_year, 4) AS INT) + 1, 2025)')
 END;
 GO
 
@@ -6732,7 +6732,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    UPDATE calculator_run_relative_years           SET relative_year = CAST(LEFT(financial_Year, 4) AS INT)
+    EXEC(N'UPDATE calculator_run_relative_years           SET relative_year = CAST(LEFT(financial_Year, 4) AS INT)')
 END;
 GO
 
@@ -6741,7 +6741,7 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    UPDATE calculator_run                          SET relative_year = CAST(LEFT(financial_Year, 4) AS INT)
+    EXEC(N'UPDATE calculator_run                          SET relative_year = CAST(LEFT(financial_Year, 4) AS INT)')
 END;
 GO
 
