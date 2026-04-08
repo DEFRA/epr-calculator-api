@@ -211,56 +211,56 @@ namespace EPR.Calculator.API.Data.Migrations
                 keyColumn: "parameter_unique_ref",
                 keyValue: "LRET-AL",
                 columns: new[] { "parameter_category", "parameter_type", "valid_Range_to" },
-                values: new object[] { "Late reporting tonnage", "Aluminium", 999999999.99m });
+                values: new object[] { "Aluminium", "Late reporting tonnage", 999999999.99m });
 
             migrationBuilder.UpdateData(
                 table: "default_parameter_template_master",
                 keyColumn: "parameter_unique_ref",
                 keyValue: "LRET-FC",
                 columns: new[] { "parameter_category", "parameter_type", "valid_Range_to" },
-                values: new object[] { "Late reporting tonnage", "Aluminium", 999999999.99m });
+                values: new object[] { "Fibre composite", "Late reporting tonnage", 999999999.99m });
 
             migrationBuilder.UpdateData(
                 table: "default_parameter_template_master",
                 keyColumn: "parameter_unique_ref",
                 keyValue: "LRET-GL",
                 columns: new[] { "parameter_category", "parameter_type", "valid_Range_to" },
-                values: new object[] { "Late reporting tonnage", "Aluminium", 999999999.99m });
+                values: new object[] { "Glass", "Late reporting tonnage", 999999999.99m });
 
             migrationBuilder.UpdateData(
                 table: "default_parameter_template_master",
                 keyColumn: "parameter_unique_ref",
                 keyValue: "LRET-OT",
                 columns: new[] { "parameter_category", "parameter_type", "valid_Range_to" },
-                values: new object[] { "Late reporting tonnage", "Aluminium", 999999999.99m });
+                values: new object[] { "Other materials", "Late reporting tonnage", 999999999.99m });
 
             migrationBuilder.UpdateData(
                 table: "default_parameter_template_master",
                 keyColumn: "parameter_unique_ref",
                 keyValue: "LRET-PC",
                 columns: new[] { "parameter_category", "parameter_type", "valid_Range_to" },
-                values: new object[] { "Late reporting tonnage", "Aluminium", 999999999.99m });
+                values: new object[] { "Paper or card", "Late reporting tonnage", 999999999.99m });
 
             migrationBuilder.UpdateData(
                 table: "default_parameter_template_master",
                 keyColumn: "parameter_unique_ref",
                 keyValue: "LRET-PL",
                 columns: new[] { "parameter_category", "parameter_type", "valid_Range_to" },
-                values: new object[] { "Late reporting tonnage", "Aluminium", 999999999.99m });
+                values: new object[] { "Plastic", "Late reporting tonnage", 999999999.99m });
 
             migrationBuilder.UpdateData(
                 table: "default_parameter_template_master",
                 keyColumn: "parameter_unique_ref",
                 keyValue: "LRET-ST",
                 columns: new[] { "parameter_category", "parameter_type", "valid_Range_to" },
-                values: new object[] { "Late reporting tonnage", "Aluminium", 999999999.99m });
+                values: new object[] { "Steel", "Late reporting tonnage",  999999999.99m });
 
             migrationBuilder.UpdateData(
                 table: "default_parameter_template_master",
                 keyColumn: "parameter_unique_ref",
                 keyValue: "LRET-WD",
                 columns: new[] { "parameter_category", "parameter_type", "valid_Range_to" },
-                values: new object[] { "Late reporting tonnage", "Aluminium", 999999999.99m });
+                values: new object[] { "Wood", "Late reporting tonnage", 999999999.99m });
         }
     }
 }
