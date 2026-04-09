@@ -249,49 +249,49 @@ SELECT @@ROWCOUNT;
 
 GO
 
-UPDATE [default_parameter_template_master] SET [parameter_category] = N'Late reporting tonnage', [parameter_type] = N'Aluminium', [valid_Range_to] = 999999999.99
+UPDATE [default_parameter_template_master] SET [parameter_type] = N'Late reporting tonnage', [parameter_category] = N'Aluminium', [valid_Range_to] = 999999999.99
 WHERE [parameter_unique_ref] = N'LRET-AL';
 SELECT @@ROWCOUNT;
 
 GO
 
-UPDATE [default_parameter_template_master] SET [parameter_category] = N'Late reporting tonnage', [parameter_type] = N'Aluminium', [valid_Range_to] = 999999999.99
+UPDATE [default_parameter_template_master] SET [parameter_type] = N'Late reporting tonnage', [parameter_category] = N'Fibre composite', [valid_Range_to] = 999999999.99
 WHERE [parameter_unique_ref] = N'LRET-FC';
 SELECT @@ROWCOUNT;
 
 GO
 
-UPDATE [default_parameter_template_master] SET [parameter_category] = N'Late reporting tonnage', [parameter_type] = N'Aluminium', [valid_Range_to] = 999999999.99
+UPDATE [default_parameter_template_master] SET [parameter_type] = N'Late reporting tonnage', [parameter_category] = N'Glass', [valid_Range_to] = 999999999.99
 WHERE [parameter_unique_ref] = N'LRET-GL';
 SELECT @@ROWCOUNT;
 
 GO
 
-UPDATE [default_parameter_template_master] SET [parameter_category] = N'Late reporting tonnage', [parameter_type] = N'Aluminium', [valid_Range_to] = 999999999.99
+UPDATE [default_parameter_template_master] SET [parameter_type] = N'Late reporting tonnage', [parameter_category] = N'Other materials', [valid_Range_to] = 999999999.99
 WHERE [parameter_unique_ref] = N'LRET-OT';
 SELECT @@ROWCOUNT;
 
 GO
 
-UPDATE [default_parameter_template_master] SET [parameter_category] = N'Late reporting tonnage', [parameter_type] = N'Aluminium', [valid_Range_to] = 999999999.99
+UPDATE [default_parameter_template_master] SET [parameter_type] = N'Late reporting tonnage', [parameter_category] = N'Paper or card', [valid_Range_to] = 999999999.99
 WHERE [parameter_unique_ref] = N'LRET-PC';
 SELECT @@ROWCOUNT;
 
 GO
 
-UPDATE [default_parameter_template_master] SET [parameter_category] = N'Late reporting tonnage', [parameter_type] = N'Aluminium', [valid_Range_to] = 999999999.99
+UPDATE [default_parameter_template_master] SET [parameter_type] = N'Late reporting tonnage', [parameter_category] = N'Plastic', [valid_Range_to] = 999999999.99
 WHERE [parameter_unique_ref] = N'LRET-PL';
 SELECT @@ROWCOUNT;
 
 GO
 
-UPDATE [default_parameter_template_master] SET [parameter_category] = N'Late reporting tonnage', [parameter_type] = N'Aluminium', [valid_Range_to] = 999999999.99
+UPDATE [default_parameter_template_master] SET [parameter_type] = N'Late reporting tonnage', [parameter_category] = N'Steel', [valid_Range_to] = 999999999.99
 WHERE [parameter_unique_ref] = N'LRET-ST';
 SELECT @@ROWCOUNT;
 
 GO
 
-UPDATE [default_parameter_template_master] SET [parameter_category] = N'Late reporting tonnage', [parameter_type] = N'Aluminium', [valid_Range_to] = 999999999.99
+UPDATE [default_parameter_template_master] SET [parameter_type] = N'Late reporting tonnage', [parameter_category] = N'Wood', [valid_Range_to] = 999999999.99
 WHERE [parameter_unique_ref] = N'LRET-WD';
 SELECT @@ROWCOUNT;
 
