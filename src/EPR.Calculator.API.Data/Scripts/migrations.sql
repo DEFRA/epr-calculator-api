@@ -7428,3 +7428,195 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from calculator_run_billing_file_metadata where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from calculator_run_csvfile_metadata where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from country_apportionment where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from error_report where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from producer_designated_run_invoice_instruction where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from producer_detail where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from producer_invoiced_material_net_tonnage where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from producer_resultfile_suggested_billing_instruction where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    DELETE FROM calculator_run WHERE relative_year IN (2023, 2024);
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from calculator_run_organization_data_master where relative_year in (2023, 2024);
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from calculator_run_pom_data_master where relative_year in (2023, 2024);
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from lapcap_data_detail where lapcap_data_master_id in (select id from lapcap_data_master where relative_year in (2023, 2024));
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from lapcap_data_master where relative_year in (2023, 2024);
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from default_parameter_setting_detail where default_parameter_setting_master_id in (select id from default_parameter_setting_master where relative_year in (2023, 2024));
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from default_parameter_setting_master where relative_year in (2023, 2024);
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+
+                    delete from calculator_run_relative_years where relative_year in (2023, 2024);
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260416083412_RemoveUnsupportedRelativeYears', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
