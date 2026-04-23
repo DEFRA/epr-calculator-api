@@ -29,3 +29,6 @@ api/obj/project.nuget.cache
 .DS_Store
 obj
 .vscode/
+
+# SonarScanner folder
+**/.sonarqube/*

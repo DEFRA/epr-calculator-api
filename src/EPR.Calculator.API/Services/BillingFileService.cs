@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Models;
@@ -23,6 +23,7 @@ namespace EPR.Calculator.API.Services
     public class BillingFileService(ApplicationDBContext applicationDBContext, IStorageService storageService, IBlobStorageService2 blobStorageService2, IConfiguration configuration) : IBillingFileService
     {
         private const string NoActionPlaceholder = "-";
+
         /// <summary>
         /// Validates the run ID for accepting all billing instructions.
         /// </summary>

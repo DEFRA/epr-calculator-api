@@ -1,4 +1,7 @@
-﻿[*.cs]
+﻿[**/Migrations/*.cs]
+generated_code = true
+
+[*.cs]
 
 # SA1411: Attribute constructor should not use unnecessary parenthesis
 dotnet_diagnostic.SA1411.severity = silent
