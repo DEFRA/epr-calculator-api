@@ -273,7 +273,7 @@ namespace EPR.Calculator.API.Services
             {
                 var billingInstructionList = searchQuery.BillingInstruction.Select(b => b?.Trim()).Where(b => !string.IsNullOrWhiteSpace(b)).ToList();
 
-                bool includeNoAction = billingInstructionList.Any(b => string.Equals(b, BillingInstruction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase));
+                bool includeNoAction = billingInstructionList.Exists(b => string.Equals(b, BillingInstruction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase));
 
                 if (includeNoAction)
                 {
@@ -608,7 +608,7 @@ namespace EPR.Calculator.API.Services
 
                 parentProducers.AddRange(outstandingParentProducers);
 
-                var stillMissingIds = outstandingProducerIds.Where(id => !parentProducers.Any(p => p.ProducerId == id)).ToList();
+                var stillMissingIds = outstandingProducerIds.Where(id => !parentProducers.Exists(p => p.ProducerId == id)).ToList();
 
                 // fallback option -- lookup organisation snapshot from previous runs as it was deleted in the pom data and not exists in the producer details
                 if (stillMissingIds.Count > 0)
@@ -676,9 +676,9 @@ namespace EPR.Calculator.API.Services
             var groupedStatusResult = await groupedStatus.ToListAsync(cancellationToken);
 
             response.TotalRecords = groupedStatusResult.Sum(s => s.TotalRecords);
-            response.TotalAcceptedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Accepted.ToString())?.TotalRecords ?? 0;
-            response.TotalRejectedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Rejected.ToString())?.TotalRecords ?? 0;
-            response.TotalPendingRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Pending.ToString())?.TotalRecords ?? 0;
+            response.TotalAcceptedRecords = groupedStatusResult.Find(s => s.Status == BillingStatus.Accepted.ToString())?.TotalRecords ?? 0;
+            response.TotalRejectedRecords = groupedStatusResult.Find(s => s.Status == BillingStatus.Rejected.ToString())?.TotalRecords ?? 0;
+            response.TotalPendingRecords = groupedStatusResult.Find(s => s.Status == BillingStatus.Pending.ToString())?.TotalRecords ?? 0;
         }
 
         private async Task PopulateBillingInstructionCountsAsync(
@@ -688,11 +688,11 @@ namespace EPR.Calculator.API.Services
         {
             var groupedBillingInstructionResult = await groupedBillingInstruction.ToListAsync(cancellationToken);
 
-            response.TotalInitialRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Initial.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
-            response.TotalDeltaRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Delta.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
-            response.TotalRebillRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Rebill.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
-            response.TotalCancelBillRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Cancel.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
-            response.TotalNoActionRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalInitialRecords = groupedBillingInstructionResult.Find(s => string.Equals(s.Suggestion, BillingInstruction.Initial.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalDeltaRecords = groupedBillingInstructionResult.Find(s => string.Equals(s.Suggestion, BillingInstruction.Delta.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalRebillRecords = groupedBillingInstructionResult.Find(s => string.Equals(s.Suggestion, BillingInstruction.Rebill.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalCancelBillRecords = groupedBillingInstructionResult.Find(s => string.Equals(s.Suggestion, BillingInstruction.Cancel.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalNoActionRecords = groupedBillingInstructionResult.Find(s => string.Equals(s.Suggestion, BillingInstruction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
         }
     }
 }

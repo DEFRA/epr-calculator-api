@@ -227,7 +227,7 @@ namespace EPR.Calculator.API.Validators
                 };
             }
 
-            if (designatedRuns.Any(x => x.RunId != runStatusUpdateDto.RunId
+            if (designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
                 && (x.RunClassificationId == (int)RunClassification.INITIAL_RUN
                 || x.RunClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN
                 || x.RunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
@@ -246,7 +246,7 @@ namespace EPR.Calculator.API.Validators
                     ],
                 };
             }
-            else if (designatedRuns.Any(x => x.RunId != runStatusUpdateDto.RunId
+            else if (designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
                 && x.RunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED)
                 && (runStatusUpdateDto.ClassificationId == (int)RunClassification.INITIAL_RUN
                 || runStatusUpdateDto.ClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED))
@@ -260,7 +260,7 @@ namespace EPR.Calculator.API.Validators
                     ],
                 };
             }
-            else if (designatedRuns.Any(x => x.RunId != runStatusUpdateDto.RunId
+            else if (designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
                 && x.RunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)
                 && (runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
                 || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED))
@@ -274,7 +274,7 @@ namespace EPR.Calculator.API.Validators
                     ],
                 };
             }
-            else if (designatedRuns.Any(x => x.RunId != runStatusUpdateDto.RunId
+            else if (designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
                 && (x.RunClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED))
                 && (runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
                 || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED))
@@ -288,7 +288,7 @@ namespace EPR.Calculator.API.Validators
                     ],
                 };
             }
-            else if (designatedRuns.Any(x => x.RunId != runStatusUpdateDto.RunId
+            else if (designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
                && x.RunClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED)
                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RUN
                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED))
@@ -302,7 +302,7 @@ namespace EPR.Calculator.API.Validators
                     ],
                 };
             }
-            else if (!designatedRuns.Any(x => x.RunId != runStatusUpdateDto.RunId
+            else if (!designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
                && x.RunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED)
                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN
                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN))
@@ -316,7 +316,7 @@ namespace EPR.Calculator.API.Validators
                     ],
                 };
             }
-            else if (!designatedRuns.Any(x => x.RunId != runStatusUpdateDto.RunId
+            else if (!designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
                && (x.RunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED
                || x.RunClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED
                || x.RunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED))
