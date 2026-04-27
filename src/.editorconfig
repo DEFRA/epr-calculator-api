@@ -1,4 +1,4 @@
-root = true
+﻿root = true
 
 [**/Migrations/*.cs]
 generated_code = true
@@ -37,13 +37,6 @@ dotnet_diagnostic.CA2016.severity = warning
 
 # MSTEST0037: Use proper 'Assert' methods
 dotnet_diagnostic.MSTEST0037.severity = warning
-
-[*.{cs,vb}]
-#### Naming styles ####
-
-# Naming rules
-
-dotnet_naming_rule.interface_should_be_begins_with_i.severity = suggestion
 
 # Naming: interfaces must start with I
 dotnet_naming_rule.interface_should_be_begins_with_i.severity = warning
