@@ -828,7 +828,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(1, result.Records.Count);
+            Assert.HasCount(1, result.Records);
             Assert.AreEqual("Fallback Producer Name", result.Records[0].ProducerName);
         }
     }

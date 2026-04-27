@@ -79,7 +79,7 @@ namespace EPR.Calculator.API.UnitTests
         /// Creates a list of predefined <see cref="CalculatorRun"/> objects for testing purposes.
         /// </summary>
         /// <returns>A list of <see cref="CalculatorRun"/> objects.</returns>
-        private List<CalculatorRun> GetCalculatorRuns()
+        private static List<CalculatorRun> GetCalculatorRuns()
         {
             var calculatorRuns = new List<CalculatorRun>
                 {

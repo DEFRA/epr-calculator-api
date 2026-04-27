@@ -109,7 +109,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(result);
 
             var defaultParameterLatest = DbContext.DefaultParameterSettings.Where(x => x.EffectiveTo == null).ToList();
-            Assert.AreEqual(3, defaultParameterLatest.Count); // 29, 30, 31
+            Assert.HasCount(3, defaultParameterLatest); // 29, 30, 31
 
             Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.RelativeYearValue == 2029 && x.EffectiveTo == null));
             Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.RelativeYearValue == 2030 && x.EffectiveTo == null));
