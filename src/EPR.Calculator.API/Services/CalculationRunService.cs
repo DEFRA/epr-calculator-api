@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services;
@@ -60,7 +61,7 @@ public class CalculationRunService : ICalculationRunService
         catch (Exception exception)
         {
             this.logger.LogError(exception, "An error occurred whilst attempting to get designated calculator runs for relative year {RelativeYear}.", relativeYear);
-            throw;
+            throw new DataRetrievalException($"An error occurred whilst attempting to get designated calculator runs for relative year {relativeYear}.", exception);
         }
     }
 }

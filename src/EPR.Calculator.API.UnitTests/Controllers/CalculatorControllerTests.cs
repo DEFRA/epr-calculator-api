@@ -486,7 +486,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Arrange
             var relativeYear = new RelativeYear(2024);
-            var request = new CalcRelativeYearRequestDto { RelativeYearValue = relativeYear.Value };
+            var request = new CalcRelativeYearRequestDto { RunId = Random.Shared.Next(), RelativeYearValue = relativeYear.Value };
 
             var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             mockValidator
@@ -540,7 +540,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Arrange
             var relativeYear = new RelativeYear(2025); // Invalid format
-            var request = new CalcRelativeYearRequestDto { RelativeYearValue = relativeYear.Value };
+            var request = new CalcRelativeYearRequestDto { RunId = Random.Shared.Next(), RelativeYearValue = relativeYear.Value };
 
             var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             mockValidator
@@ -577,7 +577,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Arrange
             var relativeYear = new RelativeYear(2024);
-            var request = new CalcRelativeYearRequestDto { RelativeYearValue = relativeYear.Value };
+            var request = new CalcRelativeYearRequestDto { RunId = Random.Shared.Next(),RelativeYearValue = relativeYear.Value };
 
             var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             mockValidator
@@ -613,7 +613,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Arrange
             var relativeYear = new RelativeYear(2024);
-            var request = new CalcRelativeYearRequestDto { RelativeYearValue = relativeYear.Value };
+            var request = new CalcRelativeYearRequestDto { RunId = Random.Shared.Next(),RelativeYearValue = relativeYear.Value };
 
             var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             mockValidator

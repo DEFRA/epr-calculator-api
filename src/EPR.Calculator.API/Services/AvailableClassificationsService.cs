@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services;
@@ -36,7 +37,7 @@ public class AvailableClassificationsService(
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred whilst attempting to determine available classifications. Error :-{Message}", ex.Message);
-            throw;
+            throw new DataRetrievalException("An error occurred whilst attempting to determine available classifications.", ex);
         }
     }
 

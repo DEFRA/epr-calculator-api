@@ -15,7 +15,7 @@ namespace EPR.Calculator.API.Services
 
         public void SetCommandTimeout(DatabaseFacade database, string key)
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(key, nameof(key));
+            ArgumentException.ThrowIfNullOrWhiteSpace(key);
 
             var commandTimeout = this.Configuration
                 .GetSection("Timeouts")
