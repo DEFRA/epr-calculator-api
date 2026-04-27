@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Net;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -212,30 +213,34 @@ namespace EPR.Calculator.API.Services
 
             var searchQuery = requestDto.SearchQuery;
 
-            var query = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                        where prsi.CalculatorRunId == runId
+            var baseQuery = applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                .Where(prsi => prsi.CalculatorRunId == runId)
+                .Select(prsi => new
+                {
+                    prsi,
+                    PendingStatus = (string.IsNullOrWhiteSpace(prsi.SuggestedBillingInstruction) || prsi.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
+                        ? BillingInstruction.Noaction.ToString()
+                        : BillingStatus.Pending.ToString()
+                });
+
+            var query = from x in baseQuery
                         select new ProducerBillingInstructionsDto()
                         {
-                            ProducerId = prsi.ProducerId,
+                            ProducerId = x.prsi.ProducerId,
                             BillingInstructionAcceptReject =
-                                string.IsNullOrWhiteSpace(prsi.BillingInstructionAcceptReject)
-                                    ? ((string.IsNullOrWhiteSpace(prsi.SuggestedBillingInstruction) || prsi.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
-                                        ? BillingInstruction.Noaction.ToString()
-                                        : BillingStatus.Pending.ToString())
-                                    : prsi.BillingInstructionAcceptReject.Trim(),
-                            SuggestedBillingInstruction = prsi.SuggestedBillingInstruction,
-                            SuggestedInvoiceAmount = (prsi.SuggestedBillingInstruction ?? string.Empty).Equals("cancel", StringComparison.CurrentCultureIgnoreCase) ? prsi.CurrentYearInvoiceTotalToDate : prsi.SuggestedInvoiceAmount,
+                                string.IsNullOrWhiteSpace(x.prsi.BillingInstructionAcceptReject)
+                                    ? x.PendingStatus
+                                    : x.prsi.BillingInstructionAcceptReject.Trim(),
+                            SuggestedBillingInstruction = x.prsi.SuggestedBillingInstruction,
+                            SuggestedInvoiceAmount = (x.prsi.SuggestedBillingInstruction ?? string.Empty).Equals("cancel", StringComparison.CurrentCultureIgnoreCase) ? x.prsi.CurrentYearInvoiceTotalToDate : x.prsi.SuggestedInvoiceAmount,
                         };
 
             // Group by on BillingInstructionAcceptReject before filtering
-            var groupedStatus = applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                .Where(prsi => prsi.CalculatorRunId == runId)
+            var groupedStatus = baseQuery
                 .AsNoTracking()
-                .GroupBy(prsi => string.IsNullOrWhiteSpace(prsi.BillingInstructionAcceptReject)
-                    ? ((string.IsNullOrWhiteSpace(prsi.SuggestedBillingInstruction) || prsi.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
-                        ? BillingInstruction.Noaction.ToString()
-                        : BillingStatus.Pending.ToString())
-                    : prsi.BillingInstructionAcceptReject.Trim())
+                .GroupBy(x => string.IsNullOrWhiteSpace(x.prsi.BillingInstructionAcceptReject)
+                    ? x.PendingStatus
+                    : x.prsi.BillingInstructionAcceptReject.Trim())
                 .Select(g => new ProducerBillingInstructionsStatus
                 {
                     Status = g.Key,

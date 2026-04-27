@@ -831,5 +831,295 @@ namespace EPR.Calculator.API.UnitTests.Services
             Assert.HasCount(1, result.Records);
             Assert.AreEqual("Fallback Producer Name", result.Records[0].ProducerName);
         }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructionsAsync_UsesPendingStatus_WhenBillingInstructionAcceptRejectIsNull()
+        {
+            // Arrange
+            var runId = 9300;
+            var runName = $"{runId} - test run";
+
+            this.DbContext.CalculatorRuns.Add(new CalculatorRun
+            {
+                Id = runId,
+                Name = runName,
+                RelativeYear = new RelativeYear(2024),
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+            });
+            this.DbContext.ProducerDetail.Add(new ProducerDetail
+            {
+                ProducerId = 2,
+                CalculatorRunId = runId,
+                ProducerName = "Producer2",
+            });
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
+            {
+                ProducerId = 2,
+                CalculatorRunId = runId,
+                SuggestedBillingInstruction = "Invoice", // Should result in PendingStatus = "Pending"
+                SuggestedInvoiceAmount = 200,
+                BillingInstructionAcceptReject = null, // Null to trigger PendingStatus usage
+            });
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
+
+            var requestDto = new ProducerBillingInstructionsRequestDto
+            {
+                PageNumber = 1,
+                PageSize = 10,
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.HasCount(1, result.Records);
+            Assert.AreEqual("Pending", result.Records[0].BillingInstructionAcceptReject); // Should use PendingStatus
+            Assert.AreEqual(1, result.TotalPendingRecords); // Verify totals
+            Assert.AreEqual(0, result.TotalAcceptedRecords);
+        }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructionsAsync_UsesNoActionStatus_WhenSuggestedBillingInstructionIsNoActionPlaceholder()
+        {
+            var runId = 9400;
+            var runName = $"{runId} - test run";
+
+            this.DbContext.CalculatorRuns.Add(new CalculatorRun
+            {
+                Id = runId,
+                Name = runName,
+                RelativeYear = new RelativeYear(2024),
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+            });
+            this.DbContext.ProducerDetail.Add(new ProducerDetail
+            {
+                ProducerId = 3,
+                CalculatorRunId = runId,
+                ProducerName = "Producer3",
+            });
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
+            {
+                ProducerId = 3,
+                CalculatorRunId = runId,
+                SuggestedBillingInstruction = "-", // NoActionPlaceholder, should result in PendingStatus = "Noaction"
+                SuggestedInvoiceAmount = 300,
+                BillingInstructionAcceptReject = null, // Null to trigger PendingStatus usage
+            });
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
+
+            var requestDto = new ProducerBillingInstructionsRequestDto
+            {
+                PageNumber = 1,
+                PageSize = 10,
+            };
+
+            // Act
+            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.HasCount(1, result.Records);
+            Assert.AreEqual("Noaction", result.Records[0].BillingInstructionAcceptReject); // Should use PendingStatus
+            Assert.AreEqual(1, result.TotalNoActionRecords); // Verify totals
+        }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructionsAsync_CalculatesSuggestedInvoiceAmount_WhenCancelInstruction()
+        {
+            var runId = 9500;
+            var runName = $"{runId} - test run";
+
+            this.DbContext.CalculatorRuns.Add(new CalculatorRun
+            {
+                Id = runId,
+                Name = runName,
+                RelativeYear = new RelativeYear(2024),
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+            });
+            this.DbContext.ProducerDetail.Add(new ProducerDetail
+            {
+                ProducerId = 4,
+                CalculatorRunId = runId,
+                ProducerName = "Producer4",
+            });
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
+            {
+                ProducerId = 4,
+                CalculatorRunId = runId,
+                SuggestedBillingInstruction = "cancel", // Should use CurrentYearInvoiceTotalToDate
+                SuggestedInvoiceAmount = 400,
+                CurrentYearInvoiceTotalToDate = 500, // Expected value
+                BillingInstructionAcceptReject = "Accepted",
+            });
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
+
+            var requestDto = new ProducerBillingInstructionsRequestDto
+            {
+                PageNumber = 1,
+                PageSize = 10,
+            };
+
+            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
+
+            Assert.IsNotNull(result);
+            Assert.HasCount(1, result.Records);
+            Assert.AreEqual(500, result.Records[0].SuggestedInvoiceAmount); // Should use CurrentYearInvoiceTotalToDate
+        }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructionsAsync_FiltersByOrganisationId()
+        {
+            var runId = 9600;
+            var runName = $"{runId} - test run";
+
+            this.DbContext.CalculatorRuns.Add(new CalculatorRun
+            {
+                Id = runId,
+                Name = runName,
+                RelativeYear = new RelativeYear(2024),
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+            });
+            this.DbContext.ProducerDetail.AddRange(
+                new ProducerDetail { ProducerId = 5, CalculatorRunId = runId, ProducerName = "Producer5" },
+                new ProducerDetail { ProducerId = 6, CalculatorRunId = runId, ProducerName = "Producer6" }
+            );
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.AddRange(
+                new ProducerResultFileSuggestedBillingInstruction
+                {
+                    ProducerId = 5,
+                    CalculatorRunId = runId,
+                    SuggestedBillingInstruction = "Initial",
+                    SuggestedInvoiceAmount = 100,
+                    BillingInstructionAcceptReject = "Accepted",
+                },
+                new ProducerResultFileSuggestedBillingInstruction
+                {
+                    ProducerId = 6,
+                    CalculatorRunId = runId,
+                    SuggestedBillingInstruction = "Delta",
+                    SuggestedInvoiceAmount = 200,
+                    BillingInstructionAcceptReject = "Pending",
+                }
+            );
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
+
+            var requestDto = new ProducerBillingInstructionsRequestDto
+            {
+                PageNumber = 1,
+                PageSize = 10,
+                SearchQuery = new ProducerBillingInstructionsSearchQueryDto { OrganisationId = 5 }
+            };
+
+            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
+
+            Assert.IsNotNull(result);
+            Assert.HasCount(1, result.Records);
+            Assert.AreEqual(5, result.Records[0].ProducerId); // Only ProducerId 5 should be returned
+        }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructionsAsync_FiltersByStatus()
+        {
+            var runId = 9700;
+            var runName = $"{runId} - test run";
+
+            this.DbContext.CalculatorRuns.Add(new CalculatorRun
+            {
+                Id = runId,
+                Name = runName,
+                RelativeYear = new RelativeYear(2024),
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+            });
+            this.DbContext.ProducerDetail.AddRange(
+                new ProducerDetail { ProducerId = 7, CalculatorRunId = runId, ProducerName = "Producer7" },
+                new ProducerDetail { ProducerId = 8, CalculatorRunId = runId, ProducerName = "Producer8" }
+            );
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.AddRange(
+                new ProducerResultFileSuggestedBillingInstruction
+                {
+                    ProducerId = 7,
+                    CalculatorRunId = runId,
+                    SuggestedBillingInstruction = "Initial",
+                    SuggestedInvoiceAmount = 100,
+                    BillingInstructionAcceptReject = "Accepted",
+                },
+                new ProducerResultFileSuggestedBillingInstruction
+                {
+                    ProducerId = 8,
+                    CalculatorRunId = runId,
+                    SuggestedBillingInstruction = "Delta",
+                    SuggestedInvoiceAmount = 200,
+                    BillingInstructionAcceptReject = "Pending",
+                }
+            );
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
+
+            var requestDto = new ProducerBillingInstructionsRequestDto
+            {
+                PageNumber = 1,
+                PageSize = 10,
+                SearchQuery = new ProducerBillingInstructionsSearchQueryDto { Status = new List<string> { "Accepted" } }
+            };
+
+            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.HasCount(1, result.Records);
+            Assert.AreEqual("Accepted", result.Records[0].BillingInstructionAcceptReject); // Only Accepted should be returned
+        }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructionsAsync_FiltersByBillingInstruction_IncludingNoAction()
+        {
+            // Arrange
+            var runId = 9800;
+            var runName = $"{runId} - test run";
+
+            this.DbContext.CalculatorRuns.Add(new CalculatorRun
+            {
+                Id = runId,
+                Name = runName,
+                RelativeYear = new RelativeYear(2024),
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+            });
+            this.DbContext.ProducerDetail.AddRange(
+                new ProducerDetail { ProducerId = 9, CalculatorRunId = runId, ProducerName = "Producer9" },
+                new ProducerDetail { ProducerId = 10, CalculatorRunId = runId, ProducerName = "Producer10" }
+            );
+            this.DbContext.ProducerResultFileSuggestedBillingInstruction.AddRange(
+                new ProducerResultFileSuggestedBillingInstruction
+                {
+                    ProducerId = 9,
+                    CalculatorRunId = runId,
+                    SuggestedBillingInstruction = "-", // NoActionPlaceholder
+                    SuggestedInvoiceAmount = 100,
+                    BillingInstructionAcceptReject = "Accepted",
+                },
+                new ProducerResultFileSuggestedBillingInstruction
+                {
+                    ProducerId = 10,
+                    CalculatorRunId = runId,
+                    SuggestedBillingInstruction = "Initial",
+                    SuggestedInvoiceAmount = 200,
+                    BillingInstructionAcceptReject = "Pending",
+                }
+            );
+            await this.DbContext.SaveChangesAsync(CancellationToken.None);
+
+            var requestDto = new ProducerBillingInstructionsRequestDto
+            {
+                PageNumber = 1,
+                PageSize = 10,
+                SearchQuery = new ProducerBillingInstructionsSearchQueryDto { BillingInstruction = new List<string> { "Noaction" } }
+            };
+
+            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
+
+            Assert.IsNotNull(result);
+            Assert.HasCount(1, result.Records);
+            Assert.AreEqual("-", result.Records[0].SuggestedBillingInstruction);
+        }
     }
 }
