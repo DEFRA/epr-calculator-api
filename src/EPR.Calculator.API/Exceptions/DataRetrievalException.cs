@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace EPR.Calculator.API.Exceptions;
 
+[ExcludeFromCodeCoverage]
 public class DataRetrievalException : Exception
 {
     public DataRetrievalException() : base()
