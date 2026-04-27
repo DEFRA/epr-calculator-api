@@ -255,7 +255,7 @@ namespace EPR.Calculator.API.Controllers
                      {
                          Run = run,
                          Classification = classification,
-                     }).SingleOrDefaultAsync();
+                     }).SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
                 if (calculatorRunDetail == null)
                 {
@@ -438,7 +438,7 @@ namespace EPR.Calculator.API.Controllers
 
                 var relativeYear = new RelativeYear(request.RelativeYearValue);
                 var classifications = await this.availableClassificationsService.GetAvailableClassificationsForRelativeYearAsync(request);
-                if (!classifications.Any())
+                if (classifications.Count == 0)
                 {
                     return this.NotFound(CommonResources.NoClassificationsFound);
                 }

@@ -224,7 +224,7 @@ namespace EPR.Calculator.API.Services
                                         : BillingStatus.Pending.ToString())
                                     : prsi.BillingInstructionAcceptReject.Trim(),
                             SuggestedBillingInstruction = prsi.SuggestedBillingInstruction,
-                            SuggestedInvoiceAmount = (prsi.SuggestedBillingInstruction ?? string.Empty).ToLower() == "cancel" ? prsi.CurrentYearInvoiceTotalToDate : prsi.SuggestedInvoiceAmount,
+                            SuggestedInvoiceAmount = (prsi.SuggestedBillingInstruction ?? string.Empty).Equals("cancel", StringComparison.CurrentCultureIgnoreCase) ? prsi.CurrentYearInvoiceTotalToDate : prsi.SuggestedInvoiceAmount,
                         };
 
             // Group by on BillingInstructionAcceptReject before filtering
@@ -302,8 +302,8 @@ namespace EPR.Calculator.API.Services
             };
 
             await this.PopulatePagedBillingInstructionsAsync(query, requestDto, run.Id, run.RelativeYear, response, cancellationToken);
-            await this.PopulateBillingStatusCountsAsync(groupedStatus, response, cancellationToken);
-            await this.PopulateBillingInstructionCountsAsync(groupedBillingInstruction, response, cancellationToken);
+            await PopulateBillingStatusCountsAsync(groupedStatus, response, cancellationToken);
+            await PopulateBillingInstructionCountsAsync(groupedBillingInstruction, response, cancellationToken);
 
             return response;
         }
@@ -590,7 +590,7 @@ namespace EPR.Calculator.API.Services
 
             // If the list contains any value that means the previous query was not able to identify the producer name
             // This is because for these parent producers, there are no producer detail records because of no pom data submissions
-            if (outstandingProducerIds.Any())
+            if (outstandingProducerIds.Count > 0)
             {
                 var outstandingParentProducers = await (from p in applicationDBContext.ProducerDetail
                                                   join r in applicationDBContext.CalculatorRuns on p.CalculatorRunId equals r.Id
@@ -668,7 +668,7 @@ namespace EPR.Calculator.API.Services
             response.AllProducerIds = allProducerIdsExcludingIdsWithSuggestedBillingInstructionNoAction;
         }
 
-        private async Task PopulateBillingStatusCountsAsync(
+        private static async Task PopulateBillingStatusCountsAsync(
             IQueryable<ProducerBillingInstructionsStatus> groupedStatus,
             ProducerBillingInstructionsResponseDto response,
             CancellationToken cancellationToken)
@@ -681,7 +681,7 @@ namespace EPR.Calculator.API.Services
             response.TotalPendingRecords = groupedStatusResult.Find(s => s.Status == BillingStatus.Pending.ToString())?.TotalRecords ?? 0;
         }
 
-        private async Task PopulateBillingInstructionCountsAsync(
+        private static async Task PopulateBillingInstructionCountsAsync(
             IQueryable<ProducerBillingInstructionSuggestion> groupedBillingInstruction,
             ProducerBillingInstructionsResponseDto response,
             CancellationToken cancellationToken)
