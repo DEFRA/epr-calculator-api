@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using System.Net;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -260,43 +259,18 @@ namespace EPR.Calculator.API.Services
                         });
 
             // Apply OrganisationId filter if provided
-            if (searchQuery?.OrganisationId.HasValue == true)
-            {
-                var orgId = searchQuery.OrganisationId.Value;
-                query = query.Where(x => x.ProducerId == orgId).AsQueryable();
-            }
+            query = query.ApplyOrganisationIdFilter(searchQuery);
 
             // Apply Status filter if provided and not empty
-            if (searchQuery?.Status != null && searchQuery.Status.Any())
-            {
-                var statusList = searchQuery.Status.ToList();
-                query = query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject)).AsQueryable();
-            }
+            query = query.ApplyStatusFilter(searchQuery);
 
             // Apply BillingInstruction filter if provided and not empty
-            if (searchQuery?.BillingInstruction != null && searchQuery.BillingInstruction.Any())
-            {
-                var billingInstructionList = searchQuery.BillingInstruction.Select(b => b?.Trim()).Where(b => !string.IsNullOrWhiteSpace(b)).ToList();
-
-                bool includeNoAction = billingInstructionList.Exists(b => string.Equals(b, BillingInstruction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase));
-
-                if (includeNoAction)
-                {
-                    query = query.Where(x =>
-                        (string.IsNullOrWhiteSpace(x.SuggestedBillingInstruction) || x.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
-                        || (x.SuggestedBillingInstruction != null && billingInstructionList.Contains(x.SuggestedBillingInstruction.Trim())))
-                        .AsQueryable();
-                }
-                else
-                {
-                    query = query.Where(x => x.SuggestedBillingInstruction != null && billingInstructionList.Contains(x.SuggestedBillingInstruction.Trim())).AsQueryable();
-                }
-            }
+            query = query.ApplyBillingInstructionFilter(searchQuery);
 
             query = query.Distinct().OrderBy(x => x.ProducerId).AsQueryable();
 
-            requestDto.PageNumber ??= int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageNumber, out int pageNumber) ? pageNumber : 1;
-            requestDto.PageSize ??= int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageSize, out int pageSize) ? pageSize : 10;
+            requestDto.PageNumber ??= DetermineProducerBillingInstructionsPageNumber();
+            requestDto.PageSize ??= DetermineProducerBillingInstructionsPageSize();
 
             var response = new ProducerBillingInstructionsResponseDto
             {
@@ -311,6 +285,16 @@ namespace EPR.Calculator.API.Services
             await PopulateBillingInstructionCountsAsync(groupedBillingInstruction, response, cancellationToken);
 
             return response;
+        }
+
+        private static int DetermineProducerBillingInstructionsPageSize()
+        {
+            return int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageSize, out int pageSize) ? pageSize : 10;
+        }
+
+        private static int DetermineProducerBillingInstructionsPageNumber()
+        {
+            return int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageNumber, out int pageNumber) ? pageNumber : 1;
         }
 
         public async Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAcceptAllAsync(
