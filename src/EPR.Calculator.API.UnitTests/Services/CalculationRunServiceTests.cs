@@ -5,6 +5,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -139,6 +140,19 @@ public class CalculationRunServiceTests
                 second.RunId.Should().Be(3);
                 second.RunClassificationId.Should().Be((int)RunClassification.INTERIM_RECALCULATION_RUN);
             });
+    }
+
+    [TestMethod]
+    public async Task GetDesignatedRunsByFinanialYear_LogsErrorAndThrows_WhenDbThrows()
+    {
+        var brokenContext = new Mock<ApplicationDBContext>();
+        brokenContext.Setup(x => x.CalculatorRuns).Throws(new Exception("DB fail"));
+        var serviceLocal = new CalculationRunService(brokenContext.Object, loggerMock.Object);
+
+        await Assert.ThrowsExactlyAsync<DataRetrievalException>(async () =>
+        {
+            await serviceLocal.GetDesignatedRunsByFinanialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
+        });
     }
 
     private void AddRunToDb(RunClassification classification, int requestId, int relativeYearValue)
