@@ -227,15 +227,7 @@ namespace EPR.Calculator.API.Validators
                 };
             }
 
-            if (designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
-                && (x.RunClassificationId == (int)RunClassification.INITIAL_RUN
-                || x.RunClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN
-                || x.RunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
-                || x.RunClassificationId == (int)RunClassification.FINAL_RUN))
-                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.INITIAL_RUN
-                || runStatusUpdateDto.ClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN
-                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
-                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RUN))
+            if (IsRunAlreadyClassified(designatedRuns, runStatusUpdateDto))
             {
                 return new GenericValidationResultDto
                 {
@@ -246,10 +238,7 @@ namespace EPR.Calculator.API.Validators
                     ],
                 };
             }
-            else if (designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
-                && x.RunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED)
-                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.INITIAL_RUN
-                || runStatusUpdateDto.ClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED))
+            else if (IsInitialRunRequestedButCompleted(designatedRuns, runStatusUpdateDto))
             {
                 return new GenericValidationResultDto
                 {
@@ -260,10 +249,7 @@ namespace EPR.Calculator.API.Validators
                     ],
                 };
             }
-            else if (designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
-                && x.RunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)
-                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
-                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED))
+            else if (IsFinalRecalculationRunRequestedButCompleted(designatedRuns, runStatusUpdateDto))
             {
                 return new GenericValidationResultDto
                 {
@@ -274,10 +260,7 @@ namespace EPR.Calculator.API.Validators
                     ],
                 };
             }
-            else if (designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
-                && (x.RunClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED))
-                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
-                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED))
+            else if (IsFinalRecalculationRunRequestedButFinalRunCompleted(designatedRuns, runStatusUpdateDto))
             {
                 return new GenericValidationResultDto
                 {
@@ -288,10 +271,7 @@ namespace EPR.Calculator.API.Validators
                     ],
                 };
             }
-            else if (designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
-               && x.RunClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED)
-               && (runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RUN
-               || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED))
+            else if (IsFinalRunRequestedButCompleted(designatedRuns, runStatusUpdateDto))
             {
                 return new GenericValidationResultDto
                 {
@@ -356,6 +336,52 @@ namespace EPR.Calculator.API.Validators
                 IsInvalid = false,
             };
         }
+
+        private static bool IsRunAlreadyClassified(List<ClassifiedCalculatorRunDto> designatedRuns, CalculatorRunStatusUpdateDto runStatusUpdateDto)
+        {
+            return designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
+                && (x.RunClassificationId == (int)RunClassification.INITIAL_RUN
+                || x.RunClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN
+                || x.RunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
+                || x.RunClassificationId == (int)RunClassification.FINAL_RUN))
+                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.INITIAL_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RUN);
+        }
+
+        private static bool IsInitialRunRequestedButCompleted(List<ClassifiedCalculatorRunDto> designatedRuns, CalculatorRunStatusUpdateDto runStatusUpdateDto)
+        {
+            return designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
+                && x.RunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED)
+                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.INITIAL_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED);
+        }
+
+        private static bool IsFinalRecalculationRunRequestedButCompleted(List<ClassifiedCalculatorRunDto> designatedRuns, CalculatorRunStatusUpdateDto runStatusUpdateDto)
+        {
+            return designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
+                && x.RunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)
+                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED);
+        }
+
+        private static bool IsFinalRecalculationRunRequestedButFinalRunCompleted(List<ClassifiedCalculatorRunDto> designatedRuns, CalculatorRunStatusUpdateDto runStatusUpdateDto)
+        {
+            return designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
+                && (x.RunClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED))
+                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED);
+        }
+
+        private static bool IsFinalRunRequestedButCompleted(List<ClassifiedCalculatorRunDto> designatedRuns, CalculatorRunStatusUpdateDto runStatusUpdateDto)
+        {
+            return designatedRuns.Exists(x => x.RunId != runStatusUpdateDto.RunId
+                && x.RunClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED)
+                && (runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RUN
+                || runStatusUpdateDto.ClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED);
+        }
+
 
         private static bool IsCurrentRunOlderThanOtherCompletedRuns(
             List<ClassifiedCalculatorRunDto> designatedRuns,
