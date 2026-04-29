@@ -3,6 +3,7 @@
 namespace EPR.Calculator.API.Enums
 {
     [Flags]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S4070:Non-flags enums should not be marked with \"FlagsAttribute\"", Justification = "To be addressed in separate PR")]
     internal enum RunClassificationStatus
     {
         /// <summary>

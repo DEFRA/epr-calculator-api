@@ -33,6 +33,7 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Info Code Smell", "S1133:Deprecated code should be removed", Justification = "Suppressed to avoid repeated Sonar warnings")]
         [Obsolete(ObsoleteError)]
         public async Task<IActionResult> GenerateBillingFile(
             [FromBody][Required] GenerateBillingFileRequestDto generateBillingFileRequestDto,
