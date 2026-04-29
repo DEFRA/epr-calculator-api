@@ -6,6 +6,24 @@ namespace EPR.Calculator.API.Validators
 {
     public class CalculatorRunStatusDataValidator : ICalculatorRunStatusDataValidator
     {
+        private static readonly Dictionary<RunClassification, RunClassification> ValidTransitions = new()
+        {
+            [RunClassification.INITIAL_RUN]                         = RunClassification.UNCLASSIFIED,
+            [RunClassification.INTERIM_RECALCULATION_RUN]           = RunClassification.UNCLASSIFIED,
+            [RunClassification.FINAL_RECALCULATION_RUN]             = RunClassification.UNCLASSIFIED,
+            [RunClassification.FINAL_RUN]                           = RunClassification.UNCLASSIFIED,
+            [RunClassification.INITIAL_RUN_COMPLETED]               = RunClassification.INITIAL_RUN,
+            [RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED] = RunClassification.INTERIM_RECALCULATION_RUN,
+            [RunClassification.FINAL_RECALCULATION_RUN_COMPLETED]   = RunClassification.FINAL_RECALCULATION_RUN,
+            [RunClassification.FINAL_RUN_COMPLETED]                 = RunClassification.FINAL_RUN,
+        };
+
+        private static readonly Dictionary<RunClassification, RunClassification[]> InvalidFromStates = new()
+        {
+            [RunClassification.DELETED]  = [RunClassification.DELETED, RunClassification.INTHEQUEUE],
+            [RunClassification.TEST_RUN] = [RunClassification.TEST_RUN, RunClassification.INTHEQUEUE, RunClassification.RUNNING, RunClassification.ERROR, RunClassification.DELETED],
+        };
+
         public GenericValidationResultDto Validate(
             CalculatorRun calculatorRun,
             CalculatorRunStatusUpdateDto runStatusUpdateDto)
@@ -25,193 +43,7 @@ namespace EPR.Calculator.API.Validators
                 };
             }
 
-            switch (runStatusUpdateDto.ClassificationId)
-            {
-                case (int)RunClassification.INITIAL_RUN:
-                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.UNCLASSIFIED)
-                    {
-                        return new GenericValidationResultDto
-                        {
-                            IsInvalid = false,
-                        };
-                    }
-
-                    return new GenericValidationResultDto
-                    {
-                        IsInvalid = true,
-                        Errors =
-                        [
-                            string.Format(CommonResources.InvalidClassification, RunClassification.INITIAL_RUN),
-                        ],
-                    };
-                case (int)RunClassification.INITIAL_RUN_COMPLETED:
-                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN)
-                    {
-                        return new GenericValidationResultDto
-                        {
-                            IsInvalid = false,
-                        };
-                    }
-
-                    return new GenericValidationResultDto
-                    {
-                        IsInvalid = true,
-                        Errors =
-                        [
-                            string.Format(CommonResources.InvalidClassification, RunClassification.INITIAL_RUN_COMPLETED),
-                        ],
-                    };
-                case (int)RunClassification.INTERIM_RECALCULATION_RUN:
-                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.UNCLASSIFIED)
-                    {
-                        return new GenericValidationResultDto
-                        {
-                            IsInvalid = false,
-                        };
-                    }
-
-                    return new GenericValidationResultDto
-                    {
-                        IsInvalid = true,
-                        Errors =
-                        [
-                            string.Format(CommonResources.InvalidClassification, RunClassification.INTERIM_RECALCULATION_RUN),
-                        ],
-                    };
-                case (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED:
-                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN)
-                    {
-                        return new GenericValidationResultDto
-                        {
-                            IsInvalid = false,
-                        };
-                    }
-
-                    return new GenericValidationResultDto
-                    {
-                        IsInvalid = true,
-                        Errors =
-                        [
-                            string.Format(CommonResources.InvalidClassification, RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED),
-                        ],
-                    };
-                case (int)RunClassification.FINAL_RECALCULATION_RUN:
-                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.UNCLASSIFIED)
-                    {
-                        return new GenericValidationResultDto
-                        {
-                            IsInvalid = false,
-                        };
-                    }
-
-                    return new GenericValidationResultDto
-                    {
-                        IsInvalid = true,
-                        Errors =
-                        [
-                            string.Format(CommonResources.InvalidClassification, RunClassification.FINAL_RECALCULATION_RUN),
-                        ],
-                    };
-                case (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED:
-                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN)
-                    {
-                        return new GenericValidationResultDto
-                        {
-                            IsInvalid = false,
-                        };
-                    }
-
-                    return new GenericValidationResultDto
-                    {
-                        IsInvalid = true,
-                        Errors =
-                        [
-                            string.Format(CommonResources.InvalidClassification, RunClassification.FINAL_RECALCULATION_RUN_COMPLETED),
-                        ],
-                    };
-                case (int)RunClassification.FINAL_RUN:
-                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.UNCLASSIFIED)
-                    {
-                        return new GenericValidationResultDto
-                        {
-                            IsInvalid = false,
-                        };
-                    }
-
-                    return new GenericValidationResultDto
-                    {
-                        IsInvalid = true,
-                        Errors =
-                        [
-                            string.Format(CommonResources.InvalidClassification, RunClassification.FINAL_RUN),
-                        ],
-                    };
-                case (int)RunClassification.FINAL_RUN_COMPLETED:
-                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.FINAL_RUN)
-                    {
-                        return new GenericValidationResultDto
-                        {
-                            IsInvalid = false,
-                        };
-                    }
-
-                    return new GenericValidationResultDto
-                    {
-                        IsInvalid = true,
-                        Errors =
-                        [
-                            string.Format(CommonResources.InvalidClassification, RunClassification.FINAL_RUN_COMPLETED),
-                        ],
-                    };
-                case (int)RunClassification.DELETED:
-                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.DELETED
-                        || calculatorRun.CalculatorRunClassificationId == (int)RunClassification.INTHEQUEUE)
-                    {
-                        return new GenericValidationResultDto
-                        {
-                            IsInvalid = true,
-                            Errors =
-                            [
-                                string.Format(CommonResources.InvalidClassification, RunClassification.DELETED),
-                            ],
-                        };
-                    }
-
-                    return new GenericValidationResultDto
-                    {
-                        IsInvalid = false,
-                    };
-                case (int)RunClassification.TEST_RUN:
-                    if (calculatorRun.CalculatorRunClassificationId == (int)RunClassification.TEST_RUN
-                        || calculatorRun.CalculatorRunClassificationId == (int)RunClassification.INTHEQUEUE
-                        || calculatorRun.CalculatorRunClassificationId == (int)RunClassification.RUNNING
-                        || calculatorRun.CalculatorRunClassificationId == (int)RunClassification.ERROR
-                        || calculatorRun.CalculatorRunClassificationId == (int)RunClassification.DELETED)
-                    {
-                        return new GenericValidationResultDto
-                        {
-                            IsInvalid = true,
-                            Errors =
-                            [
-                                string.Format(CommonResources.InvalidClassification, RunClassification.TEST_RUN),
-                            ],
-                        };
-                    }
-
-                    return new GenericValidationResultDto
-                    {
-                        IsInvalid = false,
-                    };
-                default:
-                    return new GenericValidationResultDto
-                    {
-                        IsInvalid = true,
-                        Errors =
-                        [
-                            "Invalid Classification",
-                        ],
-                    };
-            }
+            return ValidateClassificationTransition(calculatorRun, runStatusUpdateDto);
         }
 
         public GenericValidationResultDto Validate(
@@ -321,6 +153,40 @@ namespace EPR.Calculator.API.Validators
                 IsInvalid = false,
             };
         }
+
+        private static GenericValidationResultDto ValidateClassificationTransition(CalculatorRun calculatorRun, CalculatorRunStatusUpdateDto runStatusUpdateDto)
+        {
+            var requested = (RunClassification)runStatusUpdateDto.ClassificationId;
+            var current = (RunClassification)calculatorRun.CalculatorRunClassificationId;
+
+            if (ValidTransitions.TryGetValue(requested, out var requiredCurrent))
+            {
+                return current == requiredCurrent
+                    ? ValidResultDto()
+                    : InvalidResultDto(requested);
+            }
+
+            if (InvalidFromStates.TryGetValue(requested, out var invalidStates))
+            {
+                return invalidStates.Contains(current)
+                    ? InvalidResultDto(requested)
+                    : ValidResultDto();
+            }
+
+            return new GenericValidationResultDto
+            {
+                IsInvalid = true,
+                Errors = ["Invalid Classification"],
+            };
+        }
+
+        private static GenericValidationResultDto ValidResultDto() => new() { IsInvalid = false };
+
+        private static GenericValidationResultDto InvalidResultDto(RunClassification classification) => new()
+        {
+            IsInvalid = true,
+            Errors = [string.Format(CommonResources.InvalidClassification, classification)],
+        };
 
         private static bool IsRunAlreadyClassified(List<ClassifiedCalculatorRunDto> designatedRuns, CalculatorRunStatusUpdateDto runStatusUpdateDto)
         {

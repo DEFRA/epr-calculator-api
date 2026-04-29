@@ -41,6 +41,9 @@ dotnet_diagnostic.MSTEST0037.severity = warning
 # S107: Methods should not have too many parameters
 dotnet_diagnostic.S107.severity = warning
 
+# S3776: Cognitive Complexity of methods should not be too high
+dotnet_diagnostic.S3776.severity = warning
+
 # Naming: interfaces must start with I
 dotnet_naming_rule.interface_should_be_begins_with_i.severity = warning
 
