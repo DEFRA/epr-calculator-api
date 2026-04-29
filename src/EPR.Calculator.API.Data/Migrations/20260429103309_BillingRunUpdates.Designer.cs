@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260429103309_BillingRunUpdates")]
+    partial class BillingRunUpdates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,6 +44,10 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("billing_run_status");
 
+                    b.Property<int>("CalculatorRunClassificationId")
+                        .HasColumnType("int")
+                        .HasColumnName("calculator_run_classification_id");
+
                     b.Property<int?>("CalculatorRunOrganisationDataMasterId")
                         .HasColumnType("int")
                         .HasColumnName("calculator_run_organization_data_master_id");
@@ -48,12 +55,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<int?>("CalculatorRunPomDataMasterId")
                         .HasColumnType("int")
                         .HasColumnName("calculator_run_pom_data_master_id");
-
-                    b.Property<string>("Classification")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("classification");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2")
@@ -94,6 +95,8 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CalculatorRunClassificationId");
+
                     b.HasIndex("CalculatorRunOrganisationDataMasterId");
 
                     b.HasIndex("CalculatorRunPomDataMasterId");
@@ -102,11 +105,11 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasIndex("LapcapDataMasterId");
 
-                    b.HasIndex("RelativeYearValue", "Classification", "BillingRunStatus", "Id")
+                    b.HasIndex("RelativeYearValue", "CalculatorRunClassificationId", "BillingRunStatus", "Id")
                         .HasDatabaseName("IX_index_calculator_run");
 
-                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("RelativeYearValue", "Classification", "BillingRunStatus", "Id"), false);
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("RelativeYearValue", "Classification", "BillingRunStatus", "Id"), new[] { "Name", "CreatedBy", "CreatedAt", "UpdatedBy", "UpdatedAt", "CalculatorRunOrganisationDataMasterId", "CalculatorRunPomDataMasterId", "DefaultParameterSettingMasterId", "LapcapDataMasterId" });
+                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("RelativeYearValue", "CalculatorRunClassificationId", "BillingRunStatus", "Id"), false);
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("RelativeYearValue", "CalculatorRunClassificationId", "BillingRunStatus", "Id"), new[] { "Name", "CreatedBy", "CreatedAt", "UpdatedBy", "UpdatedAt", "CalculatorRunOrganisationDataMasterId", "CalculatorRunPomDataMasterId", "DefaultParameterSettingMasterId", "LapcapDataMasterId" });
 
                     b.ToTable("calculator_run", (string)null);
                 });
@@ -161,6 +164,118 @@ namespace EPR.Calculator.API.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("calculator_run_billing_file_metadata", (string)null);
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("calculator_run_classification", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedBy = "Test User",
+                            Status = "IN THE QUEUE"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedBy = "Test User",
+                            Status = "RUNNING"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedBy = "Test User",
+                            Status = "UNCLASSIFIED"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedBy = "Test User",
+                            Status = "TEST RUN"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CreatedBy = "Test User",
+                            Status = "ERROR"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CreatedBy = "System User",
+                            Status = "DELETED"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CreatedBy = "System User",
+                            Status = "INITIAL RUN COMPLETED"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            CreatedBy = "Test user",
+                            Status = "INITIAL RUN"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            CreatedBy = "Test user",
+                            Status = "INTERIM RE-CALCULATION RUN"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            CreatedBy = "Test user",
+                            Status = "FINAL RUN"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            CreatedBy = "Test user",
+                            Status = "FINAL RE-CALCULATION RUN"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            CreatedBy = "System User",
+                            Status = "INTERIM RE-CALCULATION RUN COMPLETED"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            CreatedBy = "System User",
+                            Status = "FINAL RE-CALCULATION RUN COMPLETED"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            CreatedBy = "System User",
+                            Status = "FINAL RUN COMPLETED"
+                        });
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunCsvFileMetadata", b =>
@@ -2121,6 +2236,12 @@ namespace EPR.Calculator.API.Data.Migrations
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
                 {
+                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", null)
+                        .WithMany("CalculatorRunDetails")
+                        .HasForeignKey("CalculatorRunClassificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataMaster", "CalculatorRunOrganisationDataMaster")
                         .WithMany("RunDetails")
                         .HasForeignKey("CalculatorRunOrganisationDataMasterId");
@@ -2405,6 +2526,11 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("ProducerInvoicedMaterialNetTonnage");
 
                     b.Navigation("ProducerResultFileSuggestedBillingInstruction");
+                });
+
+            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", b =>
+                {
+                    b.Navigation("CalculatorRunDetails");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataMaster", b =>

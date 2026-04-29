@@ -7620,3 +7620,376 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    DROP INDEX [IX_calculator_run_billing_file_metadata_calculator_run_id] ON [calculator_run_billing_file_metadata];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    DROP INDEX [IX_calculator_run_relative_year] ON [calculator_run];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    DROP INDEX [IX_index_calculator_run] ON [calculator_run];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD [billing_run_started_at] datetime2 NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD [billing_run_status] nvarchar(50) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    DELETE FROM
+    	dbo.calculator_run_billing_file_metadata
+    WHERE
+    	billing_csv_filename IS NULL OR billing_json_filename IS NULL
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    WITH ranked AS (
+        SELECT
+            *,
+            ROW_NUMBER() OVER (
+                PARTITION BY calculator_run_id
+                ORDER BY id DESC
+            ) AS rn
+        FROM dbo.calculator_run_billing_file_metadata
+    )
+    DELETE FROM ranked
+    WHERE rn > 1
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    UPDATE
+        run
+    SET
+        run.billing_run_status = 'Completed',
+        run.billing_run_started_at = DATEADD(HOUR, -1, metadata.billing_file_created_date)
+    FROM
+        dbo.calculator_run AS run
+    INNER JOIN
+        dbo.calculator_run_billing_file_metadata AS metadata
+        ON metadata.calculator_run_id = run.id
+    WHERE
+        run.billing_run_status IS NULL
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    UPDATE
+        run
+    SET
+        run.billing_run_status = 'Errored',
+        run.billing_run_started_at = DATEADD(HOUR, -1, run.updated_at)
+    FROM
+        dbo.calculator_run AS run
+    WHERE
+        run.billing_run_status IS NULL AND
+        run.is_billing_file_generating = 1
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    UPDATE
+        run
+    SET
+        run.billing_run_status = 'None'
+    FROM
+        dbo.calculator_run AS run
+    WHERE
+        run.billing_run_status IS NULL AND
+        run.calculator_run_classification_id in (1,2,3,4,5,6)
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    UPDATE
+        run
+    SET
+        run.billing_run_status = 'Unknown'
+    FROM
+        dbo.calculator_run AS run
+    WHERE
+        run.billing_run_status IS NULL
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    DECLARE @var46 sysname;
+    SELECT @var46 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'billing_run_status');
+    IF @var46 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT [' + @var46 + '];');
+    ALTER TABLE [calculator_run] ALTER COLUMN [billing_run_status] nvarchar(50) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    DECLARE @var47 sysname;
+    SELECT @var47 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_billing_file_metadata]') AND [c].[name] = N'billing_json_filename');
+    IF @var47 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_billing_file_metadata] DROP CONSTRAINT [' + @var47 + '];');
+    ALTER TABLE [calculator_run_billing_file_metadata] ALTER COLUMN [billing_json_filename] nvarchar(400) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    DECLARE @var48 sysname;
+    SELECT @var48 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_billing_file_metadata]') AND [c].[name] = N'billing_csv_filename');
+    IF @var48 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_billing_file_metadata] DROP CONSTRAINT [' + @var48 + '];');
+    ALTER TABLE [calculator_run_billing_file_metadata] ALTER COLUMN [billing_csv_filename] nvarchar(400) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    DECLARE @var49 sysname;
+    SELECT @var49 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'is_billing_file_generating');
+    IF @var49 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT [' + @var49 + '];');
+    ALTER TABLE [calculator_run] DROP COLUMN [is_billing_file_generating];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    CREATE UNIQUE INDEX [IX_calculator_run_billing_file_metadata_calculator_run_id] ON [calculator_run_billing_file_metadata] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_calculator_run_classification_id] ON [calculator_run] ([calculator_run_classification_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_index_calculator_run] ON [calculator_run] ([relative_year], [calculator_run_classification_id], [billing_run_status], [id]) INCLUDE ([name], [created_by], [created_at], [updated_by], [updated_at], [calculator_run_organization_data_master_id], [calculator_run_pom_data_master_id], [default_parameter_setting_master_id], [lapcap_data_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429103309_BillingRunUpdates'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260429103309_BillingRunUpdates', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429105037_RunClassificationUpdates'
+)
+BEGIN
+    ALTER TABLE [calculator_run] DROP CONSTRAINT [FK_calculator_run_calculator_run_classification_calculator_run_classification_id];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429105037_RunClassificationUpdates'
+)
+BEGIN
+    DROP TABLE [calculator_run_classification];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429105037_RunClassificationUpdates'
+)
+BEGIN
+    DROP INDEX [IX_calculator_run_calculator_run_classification_id] ON [calculator_run];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429105037_RunClassificationUpdates'
+)
+BEGIN
+    DROP INDEX [IX_index_calculator_run] ON [calculator_run];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429105037_RunClassificationUpdates'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD [classification] nvarchar(50) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429105037_RunClassificationUpdates'
+)
+BEGIN
+    UPDATE calculator_run SET classification = 'None'                             WHERE calculator_run_classification_id = 1
+    UPDATE calculator_run SET classification = 'Running'                          WHERE calculator_run_classification_id = 2
+    UPDATE calculator_run SET classification = 'Unclassified'                     WHERE calculator_run_classification_id = 3
+    UPDATE calculator_run SET classification = 'TestRun'                          WHERE calculator_run_classification_id = 4
+    UPDATE calculator_run SET classification = 'Errored'                          WHERE calculator_run_classification_id = 5
+    UPDATE calculator_run SET classification = 'Deleted'                          WHERE calculator_run_classification_id = 6
+    UPDATE calculator_run SET classification = 'InitialRunCompleted'              WHERE calculator_run_classification_id = 7
+    UPDATE calculator_run SET classification = 'InitialRun'                       WHERE calculator_run_classification_id = 8
+    UPDATE calculator_run SET classification = 'InterimRecalculationRun'          WHERE calculator_run_classification_id = 9
+    UPDATE calculator_run SET classification = 'FinalRun'                         WHERE calculator_run_classification_id = 10
+    UPDATE calculator_run SET classification = 'FinalRecalculationRun'            WHERE calculator_run_classification_id = 11
+    UPDATE calculator_run SET classification = 'InterimRecalculationRunCompleted' WHERE calculator_run_classification_id = 12
+    UPDATE calculator_run SET classification = 'FinalRecalculationRunCompleted'   WHERE calculator_run_classification_id = 13
+    UPDATE calculator_run SET classification = 'FinalRunCompleted'                WHERE calculator_run_classification_id = 14
+    UPDATE calculator_run SET classification = 'Unknown'                          WHERE classification is null
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429105037_RunClassificationUpdates'
+)
+BEGIN
+    DECLARE @var50 sysname;
+    SELECT @var50 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'classification');
+    IF @var50 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT [' + @var50 + '];');
+    ALTER TABLE [calculator_run] ALTER COLUMN [classification] nvarchar(50) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429105037_RunClassificationUpdates'
+)
+BEGIN
+    DECLARE @var51 sysname;
+    SELECT @var51 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'calculator_run_classification_id');
+    IF @var51 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT [' + @var51 + '];');
+    ALTER TABLE [calculator_run] DROP COLUMN [calculator_run_classification_id];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429105037_RunClassificationUpdates'
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_index_calculator_run] ON [calculator_run] ([relative_year], [classification], [billing_run_status], [id]) INCLUDE ([name], [created_by], [created_at], [updated_by], [updated_at], [calculator_run_organization_data_master_id], [calculator_run_pom_data_master_id], [default_parameter_setting_master_id], [lapcap_data_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260429105037_RunClassificationUpdates'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260429105037_RunClassificationUpdates', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
