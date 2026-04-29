@@ -1,4 +1,6 @@
-﻿namespace EPR.Calculator.API.Dtos
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EPR.Calculator.API.Dtos
 {
     /// <summary>
     /// Represents a request to generate a billing file.
@@ -11,6 +13,6 @@
         /// <value>
         /// The unique identifier of the calculator run associated with the billing file generation.
         /// </value>
-        public int CalculatorRunId { get; set; }
+        public required int CalculatorRunId { get; set; }
     }
 }

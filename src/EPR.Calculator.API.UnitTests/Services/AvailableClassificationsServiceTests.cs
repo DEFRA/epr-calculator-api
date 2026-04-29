@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using Microsoft.EntityFrameworkCore;
@@ -280,7 +281,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             };
 
             // Act & Assert
-            await Assert.ThrowsExactlyAsync<Exception>(async () =>
+            await Assert.ThrowsExactlyAsync<DataRetrievalException>(async () =>
             {
                 await serviceLocal.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
             });

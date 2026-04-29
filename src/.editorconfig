@@ -1,5 +1,10 @@
 ﻿root = true
 
+[**/Migrations/*.cs]
+generated_code = true
+dotnet_diagnostic.S101.severity = none
+dotnet_diagnostic.S1186.severity = none
+
 [*]
 charset = utf-8
 end_of_line = lf
@@ -18,8 +23,24 @@ csharp_style_namespace_declarations = file_scoped:suggestion
 
 dotnet_naming_style.pascal_case.capitalization = pascal_case
 
+# CA1822: Mark members as static
+dotnet_diagnostic.CA1822.severity = warning
+
+# CA1862: Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
+dotnet_diagnostic.CA1862.severity = warning
+
+# CA1860: Avoid using 'Enumerable.Any()' extension method
+dotnet_diagnostic.CA1860.severity = warning
+
+# CA2016: Forward the 'CancellationToken' parameter to methods
+dotnet_diagnostic.CA2016.severity = warning
+
+# MSTEST0037: Use proper 'Assert' methods
+dotnet_diagnostic.MSTEST0037.severity = warning
+
 # Naming: interfaces must start with I
 dotnet_naming_rule.interface_should_be_begins_with_i.severity = warning
+
 dotnet_naming_rule.interface_should_be_begins_with_i.symbols = interface
 dotnet_naming_rule.interface_should_be_begins_with_i.style = begins_with_i
 

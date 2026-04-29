@@ -19,7 +19,7 @@ public class CalcRelativeYearRequestDtoDataValidator : ICalcRelativeYearRequestD
         var validationResult = new ValidationResultDto<ErrorDto>();
 
         // Check if relativeYear exists in the database
-        var dbYear = await this.context.FindRelativeYearAsync(request.RelativeYearValue);
+        var dbYear = await this.context.FindRelativeYearAsync(request.RelativeYearValue, cancellationToken);
         if (dbYear == null)
         {
             validationResult.IsInvalid = true;

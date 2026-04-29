@@ -107,7 +107,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(201, objectResult.StatusCode); // success
 
             var activeLapcap = dbContext.LapcapDataMaster.Where(x => x.EffectiveTo == null).ToList();
-            Assert.AreEqual(2, activeLapcap.Count); // only 2029 and 2030 active
+            Assert.HasCount(2, activeLapcap); // only 2029 and 2030 active
 
             Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.RelativeYearValue == 2029 && x.EffectiveTo == null));
             Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.RelativeYearValue == 2030 && x.EffectiveTo == null));

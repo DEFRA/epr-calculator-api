@@ -252,7 +252,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual($"RunId {runId} cannot be changed to classification {classificationId}", result.Value);
         }
 
-        private List<CalculatorRun> GetCalculatorRuns()
+        private static List<CalculatorRun> GetCalculatorRuns()
         {
             return
             [

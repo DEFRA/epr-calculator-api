@@ -53,7 +53,6 @@ namespace EPR.Calculator.API.Controllers
             this.calculationRunService = calculationRunService;
         }
 
-
         [HttpPut]
         [Route("calculatorRuns")]
         [ProducesResponseType(StatusCodes.Status201Created)]

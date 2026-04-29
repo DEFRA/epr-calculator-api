@@ -19,8 +19,7 @@ namespace EPR.Calculator.API.Services
 
             settings.ExtractAccountDetails();
 
-            this.sharedKeyCredential = new StorageSharedKeyCredential(settings.AccountName, settings.AccountKey) ??
-                throw new ConfigurationErrorsException(CommonResources.AccountNameMissingError);
+            this.sharedKeyCredential = new StorageSharedKeyCredential(settings.AccountName, settings.AccountKey);
 
             this.containerClient = blobServiceClient.GetBlobContainerClient(settings.ResultFileCSVContainerName ??
                 throw new ConfigurationErrorsException(CommonResources.ContainerNameMissingError));
@@ -71,12 +70,12 @@ namespace EPR.Calculator.API.Services
                 catch (UriFormatException exception)
                 {
                     this.logger.LogError(exception, "Blob Uri is not in correct format.");
-                    blobClient ??= this.containerClient.GetBlobClient(fileName);
+                    blobClient = this.containerClient.GetBlobClient(fileName);
                 }
             }
             else
             {
-                blobClient ??= this.containerClient.GetBlobClient(fileName);
+                blobClient = this.containerClient.GetBlobClient(fileName);
             }
 
             return blobClient;

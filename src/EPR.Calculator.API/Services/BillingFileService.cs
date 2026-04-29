@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Models;
@@ -23,6 +23,7 @@ namespace EPR.Calculator.API.Services
     public class BillingFileService(ApplicationDBContext applicationDBContext, IStorageService storageService, IBlobStorageService2 blobStorageService2, IConfiguration configuration) : IBillingFileService
     {
         private const string NoActionPlaceholder = "-";
+
         /// <summary>
         /// Validates the run ID for accepting all billing instructions.
         /// </summary>
@@ -211,30 +212,34 @@ namespace EPR.Calculator.API.Services
 
             var searchQuery = requestDto.SearchQuery;
 
-            var query = from prsi in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                        where prsi.CalculatorRunId == runId
+            var baseQuery = applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                .Where(prsi => prsi.CalculatorRunId == runId)
+                .Select(prsi => new
+                {
+                    prsi,
+                    PendingStatus = (string.IsNullOrWhiteSpace(prsi.SuggestedBillingInstruction) || prsi.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
+                        ? BillingInstruction.Noaction.ToString()
+                        : BillingStatus.Pending.ToString()
+                });
+
+            var query = from x in baseQuery
                         select new ProducerBillingInstructionsDto()
                         {
-                            ProducerId = prsi.ProducerId,
+                            ProducerId = x.prsi.ProducerId,
                             BillingInstructionAcceptReject =
-                                string.IsNullOrWhiteSpace(prsi.BillingInstructionAcceptReject)
-                                    ? ((string.IsNullOrWhiteSpace(prsi.SuggestedBillingInstruction) || prsi.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
-                                        ? BillingInstruction.Noaction.ToString()
-                                        : BillingStatus.Pending.ToString())
-                                    : prsi.BillingInstructionAcceptReject.Trim(),
-                            SuggestedBillingInstruction = prsi.SuggestedBillingInstruction,
-                            SuggestedInvoiceAmount = (prsi.SuggestedBillingInstruction ?? string.Empty).ToLower() == "cancel" ? prsi.CurrentYearInvoiceTotalToDate : prsi.SuggestedInvoiceAmount,
+                                string.IsNullOrWhiteSpace(x.prsi.BillingInstructionAcceptReject)
+                                    ? x.PendingStatus
+                                    : x.prsi.BillingInstructionAcceptReject.Trim(),
+                            SuggestedBillingInstruction = x.prsi.SuggestedBillingInstruction,
+                            SuggestedInvoiceAmount = (x.prsi.SuggestedBillingInstruction ?? string.Empty).Equals("cancel", StringComparison.CurrentCultureIgnoreCase) ? x.prsi.CurrentYearInvoiceTotalToDate : x.prsi.SuggestedInvoiceAmount,
                         };
 
             // Group by on BillingInstructionAcceptReject before filtering
-            var groupedStatus = applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                .Where(prsi => prsi.CalculatorRunId == runId)
+            var groupedStatus = baseQuery
                 .AsNoTracking()
-                .GroupBy(prsi => string.IsNullOrWhiteSpace(prsi.BillingInstructionAcceptReject)
-                    ? ((string.IsNullOrWhiteSpace(prsi.SuggestedBillingInstruction) || prsi.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
-                        ? BillingInstruction.Noaction.ToString()
-                        : BillingStatus.Pending.ToString())
-                    : prsi.BillingInstructionAcceptReject.Trim())
+                .GroupBy(x => string.IsNullOrWhiteSpace(x.prsi.BillingInstructionAcceptReject)
+                    ? x.PendingStatus
+                    : x.prsi.BillingInstructionAcceptReject.Trim())
                 .Select(g => new ProducerBillingInstructionsStatus
                 {
                     Status = g.Key,
@@ -254,43 +259,18 @@ namespace EPR.Calculator.API.Services
                         });
 
             // Apply OrganisationId filter if provided
-            if (searchQuery?.OrganisationId.HasValue == true)
-            {
-                var orgId = searchQuery.OrganisationId.Value;
-                query = query.Where(x => x.ProducerId == orgId).AsQueryable();
-            }
+            query = query.ApplyOrganisationIdFilter(searchQuery);
 
             // Apply Status filter if provided and not empty
-            if (searchQuery?.Status != null && searchQuery.Status.Any())
-            {
-                var statusList = searchQuery.Status.ToList();
-                query = query.Where(x => x.BillingInstructionAcceptReject != null && statusList.Contains(x.BillingInstructionAcceptReject)).AsQueryable();
-            }
+            query = query.ApplyStatusFilter(searchQuery);
 
             // Apply BillingInstruction filter if provided and not empty
-            if (searchQuery?.BillingInstruction != null && searchQuery.BillingInstruction.Any())
-            {
-                var billingInstructionList = searchQuery.BillingInstruction.Select(b => b?.Trim()).Where(b => !string.IsNullOrWhiteSpace(b)).ToList();
-
-                bool includeNoAction = billingInstructionList.Any(b => string.Equals(b, BillingInstruction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase));
-
-                if (includeNoAction)
-                {
-                    query = query.Where(x =>
-                        (string.IsNullOrWhiteSpace(x.SuggestedBillingInstruction) || x.SuggestedBillingInstruction.Trim() == NoActionPlaceholder)
-                        || (x.SuggestedBillingInstruction != null && billingInstructionList.Contains(x.SuggestedBillingInstruction.Trim())))
-                        .AsQueryable();
-                }
-                else
-                {
-                    query = query.Where(x => x.SuggestedBillingInstruction != null && billingInstructionList.Contains(x.SuggestedBillingInstruction.Trim())).AsQueryable();
-                }
-            }
+            query = query.ApplyBillingInstructionFilter(searchQuery);
 
             query = query.Distinct().OrderBy(x => x.ProducerId).AsQueryable();
 
-            requestDto.PageNumber ??= int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageNumber, out int pageNumber) ? pageNumber : 1;
-            requestDto.PageSize ??= int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageSize, out int pageSize) ? pageSize : 10;
+            requestDto.PageNumber ??= DetermineProducerBillingInstructionsPageNumber();
+            requestDto.PageSize ??= DetermineProducerBillingInstructionsPageSize();
 
             var response = new ProducerBillingInstructionsResponseDto
             {
@@ -301,10 +281,20 @@ namespace EPR.Calculator.API.Services
             };
 
             await this.PopulatePagedBillingInstructionsAsync(query, requestDto, run.Id, run.RelativeYear, response, cancellationToken);
-            await this.PopulateBillingStatusCountsAsync(groupedStatus, response, cancellationToken);
-            await this.PopulateBillingInstructionCountsAsync(groupedBillingInstruction, response, cancellationToken);
+            await PopulateBillingStatusCountsAsync(groupedStatus, response, cancellationToken);
+            await PopulateBillingInstructionCountsAsync(groupedBillingInstruction, response, cancellationToken);
 
             return response;
+        }
+
+        private static int DetermineProducerBillingInstructionsPageSize()
+        {
+            return int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageSize, out int pageSize) ? pageSize : 10;
+        }
+
+        private static int DetermineProducerBillingInstructionsPageNumber()
+        {
+            return int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageNumber, out int pageNumber) ? pageNumber : 1;
         }
 
         public async Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAcceptAllAsync(
@@ -589,7 +579,7 @@ namespace EPR.Calculator.API.Services
 
             // If the list contains any value that means the previous query was not able to identify the producer name
             // This is because for these parent producers, there are no producer detail records because of no pom data submissions
-            if (outstandingProducerIds.Any())
+            if (outstandingProducerIds.Count > 0)
             {
                 var outstandingParentProducers = await (from p in applicationDBContext.ProducerDetail
                                                   join r in applicationDBContext.CalculatorRuns on p.CalculatorRunId equals r.Id
@@ -607,7 +597,7 @@ namespace EPR.Calculator.API.Services
 
                 parentProducers.AddRange(outstandingParentProducers);
 
-                var stillMissingIds = outstandingProducerIds.Where(id => !parentProducers.Any(p => p.ProducerId == id)).ToList();
+                var stillMissingIds = outstandingProducerIds.Where(id => !parentProducers.Exists(p => p.ProducerId == id)).ToList();
 
                 // fallback option -- lookup organisation snapshot from previous runs as it was deleted in the pom data and not exists in the producer details
                 if (stillMissingIds.Count > 0)
@@ -667,7 +657,7 @@ namespace EPR.Calculator.API.Services
             response.AllProducerIds = allProducerIdsExcludingIdsWithSuggestedBillingInstructionNoAction;
         }
 
-        private async Task PopulateBillingStatusCountsAsync(
+        private static async Task PopulateBillingStatusCountsAsync(
             IQueryable<ProducerBillingInstructionsStatus> groupedStatus,
             ProducerBillingInstructionsResponseDto response,
             CancellationToken cancellationToken)
@@ -675,23 +665,23 @@ namespace EPR.Calculator.API.Services
             var groupedStatusResult = await groupedStatus.ToListAsync(cancellationToken);
 
             response.TotalRecords = groupedStatusResult.Sum(s => s.TotalRecords);
-            response.TotalAcceptedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Accepted.ToString())?.TotalRecords ?? 0;
-            response.TotalRejectedRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Rejected.ToString())?.TotalRecords ?? 0;
-            response.TotalPendingRecords = groupedStatusResult.FirstOrDefault(s => s.Status == BillingStatus.Pending.ToString())?.TotalRecords ?? 0;
+            response.TotalAcceptedRecords = groupedStatusResult.Find(s => s.Status == BillingStatus.Accepted.ToString())?.TotalRecords ?? 0;
+            response.TotalRejectedRecords = groupedStatusResult.Find(s => s.Status == BillingStatus.Rejected.ToString())?.TotalRecords ?? 0;
+            response.TotalPendingRecords = groupedStatusResult.Find(s => s.Status == BillingStatus.Pending.ToString())?.TotalRecords ?? 0;
         }
 
-        private async Task PopulateBillingInstructionCountsAsync(
+        private static async Task PopulateBillingInstructionCountsAsync(
             IQueryable<ProducerBillingInstructionSuggestion> groupedBillingInstruction,
             ProducerBillingInstructionsResponseDto response,
             CancellationToken cancellationToken)
         {
             var groupedBillingInstructionResult = await groupedBillingInstruction.ToListAsync(cancellationToken);
 
-            response.TotalInitialRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Initial.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
-            response.TotalDeltaRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Delta.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
-            response.TotalRebillRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Rebill.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
-            response.TotalCancelBillRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Cancel.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
-            response.TotalNoActionRecords = groupedBillingInstructionResult.FirstOrDefault(s => string.Equals(s.Suggestion, BillingInstruction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalInitialRecords = groupedBillingInstructionResult.Find(s => string.Equals(s.Suggestion, BillingInstruction.Initial.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalDeltaRecords = groupedBillingInstructionResult.Find(s => string.Equals(s.Suggestion, BillingInstruction.Delta.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalRebillRecords = groupedBillingInstructionResult.Find(s => string.Equals(s.Suggestion, BillingInstruction.Rebill.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalCancelBillRecords = groupedBillingInstructionResult.Find(s => string.Equals(s.Suggestion, BillingInstruction.Cancel.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
+            response.TotalNoActionRecords = groupedBillingInstructionResult.Find(s => string.Equals(s.Suggestion, BillingInstruction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
         }
     }
 }

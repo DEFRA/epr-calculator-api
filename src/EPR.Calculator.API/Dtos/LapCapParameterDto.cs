@@ -8,22 +8,22 @@ namespace EPR.Calculator.API.Dtos
     {
         public int Id { get; set; }
 
-        required public RelativeYear RelativeYear { get; set; }
+        public required RelativeYear RelativeYear { get; set; }
 
-        required public string CreatedBy { get; set; }
+        public required string CreatedBy { get; set; }
 
-        required public DateTime CreatedAt { get; set; }
+        public required DateTime CreatedAt { get; set; }
 
-        required public DateTime EffectiveFrom { get; set; }
+        public required DateTime EffectiveFrom { get; set; }
 
-        required public int LapcapDataMasterId { get; set; }
+        public required int LapcapDataMasterId { get; set; }
 
-        required public string LapcapTempUniqueRef { get; set; }
+        public required string LapcapTempUniqueRef { get; set; }
 
-        required public string Country { get; set; }
+        public required string Country { get; set; }
 
-        required public string Material { get; set; }
+        public required string Material { get; set; }
 
-        required public decimal TotalCost { get; set; }
+        public required decimal TotalCost { get; set; }
     }
 }

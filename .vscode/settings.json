@@ -1,0 +1,6 @@
+{
+    "sonarlint.connectedMode.project": {
+        "connectionId": "https-vss-sonarqube-azure-defra-cloud-",
+        "projectKey": "epr-calculator-api"
+    }
+}

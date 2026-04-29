@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services;
@@ -36,37 +37,37 @@ public class AvailableClassificationsService(
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred whilst attempting to determine available classifications. Error :-{Message}", ex.Message);
-            throw;
+            throw new DataRetrievalException("An error occurred whilst attempting to determine available classifications.", ex);
         }
     }
 
     private static bool IsPreInitialRun(List<RunClassificationStatus> currentClassifications)
     {
-        return currentClassifications.All(c => !c.HasFlag(RunClassificationStatus.Designated));
+        return currentClassifications.TrueForAll(c => !c.HasFlag(RunClassificationStatus.Designated));
     }
 
     private static bool IsDesignatedButIncomplete(List<RunClassificationStatus> currentClassifications)
     {
-        return currentClassifications.Any(c => c.HasFlag(RunClassificationStatus.Designated) && !c.HasFlag(RunClassificationStatus.Complete));
+        return currentClassifications.Exists(c => c.HasFlag(RunClassificationStatus.Designated) && !c.HasFlag(RunClassificationStatus.Complete));
     }
 
     private static bool HasNeitherFinalRunNorFinalRecalculationRun(List<RunClassificationStatus> currentClassifications)
     {
-        return currentClassifications.Any(c => c == RunClassificationStatus.INITIAL_RUN_COMPLETED)
-            && currentClassifications.All(c => c != RunClassificationStatus.FINAL_RECALCULATION_RUN_COMPLETED && c != RunClassificationStatus.FINAL_RUN_COMPLETED);
+        return currentClassifications.Exists(c => c == RunClassificationStatus.INITIAL_RUN_COMPLETED)
+            && currentClassifications.TrueForAll(c => c != RunClassificationStatus.FINAL_RECALCULATION_RUN_COMPLETED && c != RunClassificationStatus.FINAL_RUN_COMPLETED);
     }
 
     private static bool HasFinalRecalculationButNoFinalRun(List<RunClassificationStatus> currentClassifications)
     {
-        return currentClassifications.Any(c => c == RunClassificationStatus.INITIAL_RUN_COMPLETED)
-            && currentClassifications.Any(c => c == RunClassificationStatus.FINAL_RECALCULATION_RUN_COMPLETED)
-            && currentClassifications.All(c => c != RunClassificationStatus.FINAL_RUN_COMPLETED);
+        return currentClassifications.Exists(c => c == RunClassificationStatus.INITIAL_RUN_COMPLETED)
+            && currentClassifications.Exists(c => c == RunClassificationStatus.FINAL_RECALCULATION_RUN_COMPLETED)
+            && currentClassifications.TrueForAll(c => c != RunClassificationStatus.FINAL_RUN_COMPLETED);
     }
 
     private static bool HasFinalRun(List<RunClassificationStatus> currentClassifications)
     {
-        return currentClassifications.Any(c => c == RunClassificationStatus.INITIAL_RUN_COMPLETED)
-            && currentClassifications.Any(c => c == RunClassificationStatus.FINAL_RUN_COMPLETED);
+        return currentClassifications.Exists(c => c == RunClassificationStatus.INITIAL_RUN_COMPLETED)
+            && currentClassifications.Exists(c => c == RunClassificationStatus.FINAL_RUN_COMPLETED);
     }
 
     private async Task<bool> IsCurrentRunOlderThanOtherCompletedRuns(
