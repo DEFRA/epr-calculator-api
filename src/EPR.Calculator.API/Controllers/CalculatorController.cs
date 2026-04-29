@@ -27,6 +27,10 @@ namespace EPR.Calculator.API.Controllers
         private readonly ICalculationRunService calculatorRunService;
         private readonly IBillingFileService billingFileService;
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Major Code Smell",
+            "S107:Methods should not have too many parameters",
+            Justification = "Accepted because it's injected dependencies.  However, if the controller's responsibilities were split as per S6960 this would be resolved.")]
         public CalculatorController(
             ApplicationDBContext context,
             IConfiguration configuration,
