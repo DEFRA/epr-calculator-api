@@ -41,25 +41,7 @@ namespace EPR.Calculator.API.Validators
                 }
                 else
                 {
-                    decimal totalCostValue;
-                    var data = matchingLapcapData.Single();
-                    var totalCostStr = data.TotalCost;
-                    if (string.IsNullOrEmpty(totalCostStr))
-                    {
-                        errorMessage = string.Format(CommonResources.EnterTotalCosts, material, country);
-                    }
-                    else if (decimal.TryParse(totalCostStr, out totalCostValue))
-                    {
-                        if (totalCostValue < lapcapTemplate.TotalCostFrom ||
-                            totalCostValue > lapcapTemplate.TotalCostTo)
-                        {
-                            errorMessage = string.Format(CommonResources.TotalCostsRange, material, country, Convert.ToInt16(totalCostFrom), totalCostTo.ToString("#,##0.00"));
-                        }
-                    }
-                    else
-                    {
-                        errorMessage = string.Format(CommonResources.TotalCostsForMaterial, material);
-                    }
+                    errorMessage = ValidateTotalCosts(lapcapTemplate, matchingLapcapData, country, material, totalCostFrom, totalCostTo);
                 }
 
                 if (!string.IsNullOrEmpty(errorMessage))
@@ -71,6 +53,37 @@ namespace EPR.Calculator.API.Validators
 
             validationResult.IsInvalid = validationResult.Errors.Count > 0;
             return validationResult;
+        }
+
+        private static string ValidateTotalCosts(
+            Data.DataModels.LapcapDataTemplateMaster lapcapTemplate,
+            IEnumerable<LapcapDataTemplateValueDto> matchingLapcapData,
+            string country,
+            string material,
+            decimal totalCostFrom,
+            decimal totalCostTo)
+        {
+            string errorMessage = string.Empty;
+            var data = matchingLapcapData.Single();
+            var totalCostStr = data.TotalCost;
+            if (string.IsNullOrEmpty(totalCostStr))
+            {
+                errorMessage = string.Format(CommonResources.EnterTotalCosts, material, country);
+            }
+            else if (decimal.TryParse(totalCostStr, out decimal totalCostValue))
+            {
+                if (totalCostValue < lapcapTemplate.TotalCostFrom ||
+                    totalCostValue > lapcapTemplate.TotalCostTo)
+                {
+                    errorMessage = string.Format(CommonResources.TotalCostsRange, material, country, Convert.ToInt16(totalCostFrom), totalCostTo.ToString("#,##0.00"));
+                }
+            }
+            else
+            {
+                errorMessage = string.Format(CommonResources.TotalCostsForMaterial, material);
+            }
+
+            return errorMessage;
         }
     }
 }
