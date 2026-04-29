@@ -11,11 +11,23 @@ public class ProducerBillingInstructionsSearchQueryDtoValidator : AbstractValida
 
     public ProducerBillingInstructionsSearchQueryDtoValidator()
     {
+        RuleForOrganisationId();
+
+        RuleForStatus();
+
+        RuleForBillingInstruction();
+    }
+
+    private void RuleForOrganisationId()
+    {
         this.RuleFor(x => x.OrganisationId)
             .Must(id => !id.HasValue || id > 0)
             .WithMessage(CommonResources.OrganisationIdGreaterThan0)
             .When(x => x != null && x.OrganisationId.HasValue);
+    }
 
+    private void RuleForStatus()
+    {
         this.RuleFor(x => x.Status)
             .Custom((statusList, context) =>
             {
@@ -38,7 +50,10 @@ public class ProducerBillingInstructionsSearchQueryDtoValidator : AbstractValida
                 }
             })
             .When(x => x != null && x.Status != null && x.Status.Any());
+    }
 
+    private void RuleForBillingInstruction()
+    {
         this.RuleFor(x => x.BillingInstruction)
             .Custom((instructionList, context) =>
             {
