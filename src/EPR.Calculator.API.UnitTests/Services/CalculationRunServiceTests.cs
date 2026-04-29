@@ -49,7 +49,7 @@ public class CalculationRunServiceTests
         this.dbContext.SaveChanges();
 
         this.loggerMock = new Mock<ILogger<CalculationRunService>>();
-        this.service = new CalculationRunService(this.dbContext, this.loggerMock.Object);
+        this.service = new CalculationRunService(this.dbContext);
     }
 
     [TestCleanup]
@@ -133,26 +133,13 @@ public class CalculationRunServiceTests
             first =>
             {
                 first.RunId.Should().Be(2);
-                first.RunClassificationId.Should().Be((int)RunClassification.INITIAL_RUN_COMPLETED);
+                first.RunClassification.Should().Be(RunClassification.INITIAL_RUN_COMPLETED);
             },
             second =>
             {
                 second.RunId.Should().Be(3);
-                second.RunClassificationId.Should().Be((int)RunClassification.INTERIM_RECALCULATION_RUN);
+                second.RunClassification.Should().Be(RunClassification.INTERIM_RECALCULATION_RUN);
             });
-    }
-
-    [TestMethod]
-    public async Task GetDesignatedRunsByFinanialYear_LogsErrorAndThrows_WhenDbThrows()
-    {
-        var brokenContext = new Mock<ApplicationDBContext>();
-        brokenContext.Setup(x => x.CalculatorRuns).Throws(new Exception("DB fail"));
-        var serviceLocal = new CalculationRunService(brokenContext.Object, loggerMock.Object);
-
-        await Assert.ThrowsExactlyAsync<DataRetrievalException>(async () =>
-        {
-            await serviceLocal.GetDesignatedRunsByFinanialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
-        });
     }
 
     private void AddRunToDb(RunClassification classification, int requestId, int relativeYearValue)

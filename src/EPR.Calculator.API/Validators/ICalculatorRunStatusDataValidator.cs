@@ -10,7 +10,7 @@ namespace EPR.Calculator.API.Validators
             CalculatorRunStatusUpdateDto runStatusUpdateDto);
 
         GenericValidationResultDto Validate(
-            List<ClassifiedCalculatorRunDto> designatedRuns,
+            List<CalculatorRunDto> designatedRuns,
             CalculatorRun calculatorRun,
             CalculatorRunStatusUpdateDto runStatusUpdateDto);
     }

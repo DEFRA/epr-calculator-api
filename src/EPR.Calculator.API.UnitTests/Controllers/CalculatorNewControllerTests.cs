@@ -5,6 +5,7 @@ using AutoFixture;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -62,23 +63,25 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             context.CalculatorRuns.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = 8,
+                CalculatorRunClassificationId = RunClassificationStatusIds.INITIALRUNID,
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 Id = 1,
             });
             context.CalculatorRuns.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = 3,
+                CalculatorRunClassificationId = RunClassificationStatusIds.UNCLASSIFIEDID,
                 RelativeYear = new RelativeYear(2024),
                 Name = "Second run",
                 Id = 2,
             });
             context.CalculatorRuns.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = 7,
+                CalculatorRunClassificationId = RunClassificationStatusIds.INITIALRUNID,
                 RelativeYear = new RelativeYear(2024),
                 Name = "Calc Billing Run Test",
+                BillingRunStatus = BillingRunStatus.Completed,
+                BillingRunStartedAt = DateTime.UtcNow,
                 Id = 3,
             });
             context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
@@ -112,67 +115,20 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Set up the mock to return a value
             mockBillingFileService
-                .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
+                .Setup(x => x.WasBillingGeneratedAfterLatestInstructions(3, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             mockBillingFileService
-               .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
-               .ReturnsAsync(true);
+                .Setup(x => x.MoveBillingJsonFile(3, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
 
-            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                BillingCsvFileName = "test2.csv",
-                BillingJsonFileName = "test2.json",
-                BillingFileCreatedBy = "testUser",
-                BillingFileCreatedDate = DateTime.UtcNow,
-                CalculatorRunId = 1,
-            });
-            context.SaveChanges();
-            var task = controller.PrepareBillingFileSendToFSS(1, CancellationToken.None);
+            var task = controller.PrepareBillingFileSendToFSS(3, CancellationToken.None);
             task.Wait(TestContext.CancellationTokenSource.Token);
 
             var result = task.Result as StatusCodeResult;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(202, result.StatusCode);
-        }
-
-        [TestMethod]
-        public void PrepareBillingFileSendToFSS_SendFile_BillingFileOutdated()
-        {
-            ControllerContext();
-
-            // Set up the mock to return a value
-            mockBillingFileService
-                .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(true);
-
-            mockBillingFileService
-                .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(false);
-
-            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                BillingCsvFileName = "test2.csv",
-                BillingJsonFileName = "test2.json",
-                BillingFileCreatedBy = "testUser",
-                BillingFileCreatedDate = DateTime.UtcNow,
-                CalculatorRunId = 1,
-            });
-            context.SaveChanges();
-
-            using var cancellationTokenSource = new CancellationTokenSource();
-            var cancellationToken = cancellationTokenSource.Token;
-
-            var task = controller.PrepareBillingFileSendToFSS(1, cancellationToken);
-            task.Wait(cancellationToken);
-
-            var result = task.Result as ObjectResult;
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual(422, result.StatusCode);
-            Assert.IsNotNull(result.Value);
-            Assert.AreEqual("Billing file is not the latest one.", result.Value);
         }
 
         [TestMethod]
@@ -197,15 +153,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var response = await controller.GetCalculatorRun(3) as ObjectResult;
 
             Assert.IsNotNull(response);
-            var run = response.Value as CalculatorRunBillingDto;
+            var run = response.Value as CalculatorRunDto;
             Assert.IsNotNull(run);
             Assert.AreEqual(3, run.RunId);
-            Assert.AreEqual("INITIAL RUN COMPLETED", run.RunClassificationStatus);
-            Assert.AreEqual(7, run.RunClassificationId);
+            Assert.AreEqual(RunClassification.INITIAL_RUN, run.RunClassification);
             Assert.IsNull(run.UpdatedAt);
             Assert.IsNull(run.UpdatedBy);
-            Assert.AreEqual("test.json", run.BillingJsonFileName);
-            Assert.AreEqual("test.csv", run.BillingCsvFileName);
+            Assert.IsNotNull(run.CompletedBillingRun);
+            Assert.AreEqual("test.json", run.CompletedBillingRun.JsonFileName);
+            Assert.AreEqual("test.csv", run.CompletedBillingRun.CsvFileName);
         }
 
         [TestMethod]
@@ -235,33 +191,22 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Arrange: runId 1 is valid and meets preconditions
             mockBillingFileService
-                .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(false);
+                .Setup(x => x.WasBillingGeneratedAfterLatestInstructions(3, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
 
             mockBillingFileService
-               .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
-               .ReturnsAsync(true);
-
-            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                BillingCsvFileName = "test2.csv",
-                BillingJsonFileName = "test2.json",
-                BillingFileCreatedBy = "testUser",
-                BillingFileCreatedDate = DateTime.UtcNow,
-                CalculatorRunId = 1,
-            });
-
-            context.SaveChanges();
+                .Setup(x => x.MoveBillingJsonFile(3, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(false);
 
             // Act
-            var task = controller.PrepareBillingFileSendToFSS(1, CancellationToken.None);
+            var task = controller.PrepareBillingFileSendToFSS(3, CancellationToken.None);
             task.Wait(TestContext.CancellationTokenSource.Token);
 
             // Assert
             var result = task.Result as ObjectResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(422, result.StatusCode);
-            Assert.AreEqual("Unable to move billing json file for Run Id 1", result.Value);
+            Assert.AreEqual("Unable to move billing json file for Run Id 3", result.Value);
 
             context.CalculatorRunBillingFileMetadata.RemoveRange(context.CalculatorRunBillingFileMetadata);
             context.SaveChanges();
@@ -291,6 +236,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Single(run => run.Id == calculatorRunId);
 
             calculatorRun.CalculatorRunClassificationId = (int)initialValue;
+            calculatorRun.BillingRunStatus = BillingRunStatus.Completed;
+            calculatorRun.BillingFileMetadata = new CalculatorRunBillingFileMetadata
+            {
+                CalculatorRunId = 1,
+                BillingFileCreatedDate = DateTime.UtcNow,
+                BillingFileCreatedBy = "ignored",
+                BillingCsvFileName = "ignored",
+                BillingJsonFileName = "ignored"
+            };
 
             // Set up the billings service to report that the file was successfully transfered.
             mockBillingFileService
@@ -298,19 +252,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .ReturnsAsync(true);
 
             mockBillingFileService
-               .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
-               .ReturnsAsync(true);
-
-            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                BillingCsvFileName = "test2.csv",
-                BillingJsonFileName = "test2.json",
-                BillingFileCreatedBy = "testUser",
-                BillingFileCreatedDate = DateTime.UtcNow,
-                CalculatorRunId = calculatorRunId,
-            });
-
-            context.SaveChanges();
+                .Setup(x => x.WasBillingGeneratedAfterLatestInstructions(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
 
             // Act
             var result = (StatusCodeResult)await controller.PrepareBillingFileSendToFSS(calculatorRunId, CancellationToken.None);
@@ -323,7 +266,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(expectedNewValue, newClassification);
 
             context.CalculatorRunBillingFileMetadata.RemoveRange(context.CalculatorRunBillingFileMetadata);
-            context.SaveChanges();
         }
 
         /// <summary>
@@ -346,10 +288,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Single(run => run.Id == calculatorRunId);
 
             calculatorRun.CalculatorRunClassificationId = (int)initialValue;
+            calculatorRun.BillingRunStatus = BillingRunStatus.Completed;
+            calculatorRun.BillingFileMetadata = new CalculatorRunBillingFileMetadata
+            {
+                CalculatorRunId = 1,
+                BillingFileCreatedDate = DateTime.UtcNow,
+                BillingFileCreatedBy = "ignored",
+                BillingCsvFileName = "ignored",
+                BillingJsonFileName = "ignored"
+            };
 
             mockBillingFileService
-               .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
-               .ReturnsAsync(true);
+                .Setup(x => x.WasBillingGeneratedAfterLatestInstructions(1, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
 
             // Act
             var result = (ObjectResult)await controller.PrepareBillingFileSendToFSS(1, CancellationToken.None);

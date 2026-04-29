@@ -8,6 +8,6 @@ namespace EPR.Calculator.API.Dtos
 
         public List<CalculatorRunClassificationDto> Classifications { get; set; } = [];
 
-        public List<ClassifiedCalculatorRunDto> ClassifiedRuns { get; set; } = [];
+        public List<CalculatorRunDto> ClassifiedRuns { get; set; } = [];
     }
 }

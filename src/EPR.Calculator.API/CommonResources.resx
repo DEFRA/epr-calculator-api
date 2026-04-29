@@ -144,8 +144,8 @@
   <data name="InvalidRunId" xml:space="preserve">
     <value>RunId is invalid.</value>
   </data>
-  <data name="InvalidRunStatusForAcceptAll" xml:space="preserve">
-    <value>Run is not having the right status or Is Billing File Generating is already set to true</value>
+  <data name="InvalidRunStatusForBillingFileGeneration" xml:space="preserve">
+    <value>Run is not in a valid state to start generating a Billing File.</value>
   </data>
   <data name="LapcapDataTemplateValuesMissing" xml:space="preserve">
     <value>Uploaded Lapcap parameter template should have a count of {0}</value>
@@ -318,6 +318,9 @@
   <data name="UnableToMoveBillingFile" xml:space="preserve">
     <value>Unable to move billing json file for Run Id {0}</value>
   </data>
+  <data name="BillingRunStatusInvalidForSend" xml:space="preserve">
+    <value>Run Id {0} does not have the correct billing status to send the file. Should be 'Completed', was: '{1}'.</value>
+  </data>
   <data name="ParameterFileName" xml:space="preserve">
     <value>Parameter File Name in API :{0}</value>
   </data>
@@ -436,6 +439,6 @@
     <value>Classification {0} is not valid to be completed.</value>
   </data>
   <data name="BillingFileOutdated" xml:space="preserve">
-    <value>Billing file is not the latest one.</value>
+    <value>Billing file was generated prior to the latest Accept/Reject instructions.</value>
   </data>
 </root>

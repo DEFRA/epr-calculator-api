@@ -44,6 +44,7 @@ builder.Services.AddScoped<IAvailableClassificationsService, AvailableClassifica
 builder.Services.AddScoped<ICalculationRunService, CalculationRunService>();
 builder.Services.AddScoped<IStorageService, BlobStorageService>();
 builder.Services.AddScoped<IBlobStorageService2, BlobStorageService2>();
+builder.Services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
 
 builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
 

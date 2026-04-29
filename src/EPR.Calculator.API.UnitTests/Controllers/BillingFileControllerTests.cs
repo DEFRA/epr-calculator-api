@@ -217,13 +217,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Arrange
             int runId = 123;
-            var billingMeta = new CalculatorRunBillingFileMetadata()
+            var billingMeta = new CalculatorRunBillingFileMetadata
             {
                 CalculatorRunId = runId,
                 BillingCsvFileName = "csvfile.json",
                 BillingJsonFileName = "jsonfile.json",
                 BillingFileCreatedBy = "user",
-                BillingFileCreatedDate = DateTime.UtcNow,
+                BillingFileCreatedDate = DateTime.UtcNow
             };
 
             var csvMeta = new CalculatorRunCsvFileMetadata()
@@ -263,7 +263,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 BillingCsvFileName = "csvfile.json",
                 BillingJsonFileName = "file2.json",
                 BillingFileCreatedBy = "user",
-                BillingFileCreatedDate = DateTime.UtcNow,
+                BillingFileCreatedDate = DateTime.UtcNow
             };
             var csvMeta = new CalculatorRunCsvFileMetadata
             {

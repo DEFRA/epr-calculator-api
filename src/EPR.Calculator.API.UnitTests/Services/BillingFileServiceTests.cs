@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -9,6 +10,7 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Time.Testing;
 using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Services
@@ -34,7 +36,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                 this.DbContext,
                 this.mockIStorageService.Object,
                 this.mockBlobStorageService2.Object,
-                this.mockConfiguration.Object);
+                this.mockConfiguration.Object,
+                new FakeTimeProvider());
         }
 
         public TestContext TestContext { get; set; }
@@ -488,34 +491,11 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnUnprocessableContent_WhenCalculatorRunNotFound()
-        {
-            // Act
-            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAcceptAllAsync(100, "TestUser", CancellationToken.None);
-
-            // Assert
-            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(CommonResources.InvalidRunId, result.Message);
-        }
-
-        [TestMethod]
-        public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnUnprocessableContent_WhenRunStatusIsInvalid()
-        {
-            // Act
-            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAcceptAllAsync(2, "TestUser", CancellationToken.None);
-
-            // Assert
-            Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
-            Assert.AreEqual(CommonResources.InvalidRunStatusForAcceptAll, result.Message);
-        }
-
-        [TestMethod]
         public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnOk_WhenAcceptedUpdateSuccessful()
         {
             // Arrange
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            calculatorRun.IsBillingFileGenerating = false;
+            calculatorRun.BillingRunStatus = BillingRunStatus.None;
             await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Act
@@ -559,6 +539,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 BillingJsonFileName = billingJsonFileName,
                 BillingFileCreatedDate = DateTime.UtcNow,
                 BillingFileCreatedBy = "test",
+                BillingCsvFileName = "ignored"
             });
             await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
@@ -684,67 +665,6 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.IsNull(result);
-        }
-
-        [TestMethod]
-        public async Task IsBillingFileGeneratedLatest_ShouldReturnFalse_WhenModifiedAfterBillGenerated()
-        {
-            // Arrange
-            int runId = 516;
-            using var cancellationTokenSource = new CancellationTokenSource();
-            var cancellationToken = cancellationTokenSource.Token;
-
-            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
-            {
-                CalculatorRunId = runId,
-                SuggestedBillingInstruction = "Invoice",
-                LastModifiedAcceptReject = DateTime.UtcNow.AddMinutes(-1),
-            });
-
-            this.DbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                CalculatorRunId = runId,
-                BillingFileCreatedDate = DateTime.UtcNow.AddDays(-1),
-                BillingFileCreatedBy = "test",
-            });
-
-            await this.DbContext.SaveChangesAsync(cancellationToken);
-
-            // Act
-            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationToken);
-
-            // Assert
-            result.Should().BeFalse();
-        }
-
-        [TestMethod]
-        public async Task IsBillingFileGeneratedLatest_ShouldReturnTrue_WhenBillingFileGeneratedLatest()
-        {
-            // Arrange
-            int runId = 516;
-            using var cancellationTokenSource = new CancellationTokenSource();
-            var cancellationToken = cancellationTokenSource.Token;
-
-            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
-            {
-                CalculatorRunId = runId,
-                SuggestedBillingInstruction = "Invoice",
-                LastModifiedAcceptReject = DateTime.UtcNow.AddDays(-1),
-            });
-
-            this.DbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                CalculatorRunId = runId,
-                BillingFileCreatedDate = DateTime.UtcNow.AddMinutes(-1),
-                BillingFileCreatedBy = "test",
-            });
-            await this.DbContext.SaveChangesAsync(cancellationToken);
-
-            // Act
-            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationToken);
-
-            // Assert
-            result.Should().BeTrue();
         }
 
         [TestMethod]

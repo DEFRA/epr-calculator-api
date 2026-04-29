@@ -1,4 +1,4 @@
-﻿using EnumsNET;
+using EnumsNET;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Models;
@@ -317,6 +317,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                     BillingFileCreatedDate = currentTime.AddMicroseconds(1),
                     BillingFileAuthorisedBy = userName,
                     BillingFileAuthorisedDate = currentTime.AddMicroseconds(2), // ensure it's after CreatedAt
+                    BillingCsvFileName = "ignored",
+                    BillingJsonFileName = "ignored"
                 });
             }
 

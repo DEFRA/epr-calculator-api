@@ -1,6 +1,7 @@
 using System.Net;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -15,26 +16,15 @@ namespace EPR.Calculator.API.Services
     /// <summary>
     /// Service responsible for handling billing file operations <seealso cref="IBillingFileService"/>.
     /// </summary>
-    /// <remarks>
-    /// Initializes a new instance of the <see cref="BillingFileService"/> class.
-    /// </remarks>
-    /// <param name="applicationDBContext">The database context <seealso cref="ApplicationDBContext"/>.</param>
-    /// <param name="storageService">The storage service <seealso cref="IStorageService"/>.</param>
-    public class BillingFileService(ApplicationDBContext applicationDBContext, IStorageService storageService, IBlobStorageService2 blobStorageService2, IConfiguration configuration) : IBillingFileService
+    public class BillingFileService(
+        ApplicationDBContext applicationDBContext,
+        IStorageService storageService,
+        IBlobStorageService2 blobStorageService2,
+        IConfiguration configuration,
+        TimeProvider timeProvider)
+        : IBillingFileService
     {
         private const string NoActionPlaceholder = "-";
-
-        /// <summary>
-        /// Validates the run ID for accepting all billing instructions.
-        /// </summary>
-        /// <param name="run">calculation Run</param>
-        /// <returns>bool</returns>
-        public static bool ValidateRunForAcceptAllBillingInstructions(CalculatorRun run)
-        {
-            return Util.AcceptableRunStatusForBillingInstructions().Contains(run.CalculatorRunClassificationId)
-                   &&
-                   !run.IsBillingFileGenerating.GetValueOrDefault();
-        }
 
         /// <inheritdoc/>
         public async Task<ServiceProcessResponseDto> GenerateBillingFileAsync(
@@ -287,6 +277,23 @@ namespace EPR.Calculator.API.Services
             return response;
         }
 
+        public async Task<bool> WasBillingGeneratedAfterLatestInstructions(int runId, CancellationToken cancellationToken)
+        {
+            var latestInstructionDate = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                .Where(i => i.CalculatorRunId == runId)
+                .OrderByDescending(i => i.LastModifiedAcceptReject)
+                .Select(i => i.LastModifiedAcceptReject)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            var billingGeneratedDate = await applicationDBContext.CalculatorRunBillingFileMetadata
+                .Where(m => m.CalculatorRunId == runId)
+                .OrderByDescending(m => m.BillingFileCreatedDate)
+                .Select(m => (DateTime?) m.BillingFileCreatedDate)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return billingGeneratedDate >= latestInstructionDate;
+        }
+
         private static int DetermineProducerBillingInstructionsPageSize()
         {
             return int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageSize, out int pageSize) ? pageSize : 10;
@@ -297,75 +304,6 @@ namespace EPR.Calculator.API.Services
             return int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageNumber, out int pageNumber) ? pageNumber : 1;
         }
 
-        public async Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAcceptAllAsync(
-            int runId,
-            string userName,
-            CancellationToken cancellationToken)
-        {
-            try
-            {
-                var calculatorRun = await applicationDBContext.CalculatorRuns
-                            .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken)
-                            .ConfigureAwait(false);
-
-                if (calculatorRun is null)
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = CommonResources.InvalidRunId,
-                    };
-                }
-
-                if (!ValidateRunForAcceptAllBillingInstructions(calculatorRun))
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = CommonResources.InvalidRunStatusForAcceptAll,
-                    };
-                }
-
-                var rows = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                            .Where(x => x.CalculatorRunId == runId)
-                            .ToListAsync(cancellationToken)
-                            .ConfigureAwait(false);
-
-                if (rows.Count <= 0)
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = CommonResources.InvalidOrganisationId,
-                    };
-                }
-
-                rows.ForEach(x =>
-                {
-                    x.BillingInstructionAcceptReject = BillingStatus.Accepted.ToString();
-                    x.LastModifiedAcceptReject = DateTime.UtcNow;
-                    x.LastModifiedAcceptRejectBy = userName;
-                });
-
-                calculatorRun.IsBillingFileGenerating = true;
-
-                await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                return new ServiceProcessResponseDto
-                {
-                    StatusCode = HttpStatusCode.OK,
-                };
-            }
-            catch (Exception exception)
-            {
-                return new ServiceProcessResponseDto
-                {
-                    StatusCode = HttpStatusCode.InternalServerError,
-                    Message = exception.Message,
-                };
-            }
-        }
-
         public async Task<ServiceProcessResponseDto> StartGeneratingBillingFileAsync(
             int runId,
             string userName,
@@ -374,8 +312,7 @@ namespace EPR.Calculator.API.Services
             try
             {
                 var calculatorRun = await applicationDBContext.CalculatorRuns
-                            .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken)
-                            .ConfigureAwait(false);
+                    .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
                 if (calculatorRun is null)
                 {
@@ -386,17 +323,21 @@ namespace EPR.Calculator.API.Services
                     };
                 }
 
-                if (!ValidateRunForAcceptAllBillingInstructions(calculatorRun))
+                var hasValidBillingRunStatus = calculatorRun.BillingRunStatus is BillingRunStatus.None or BillingRunStatus.Errored
+                                               || (calculatorRun.BillingRunStatus is BillingRunStatus.Running && timeProvider.GetUtcNow() - calculatorRun.BillingRunStartedAt >= TimeSpan.FromHours(1));
+
+
+                if (!Util.AcceptableRunStatusForBillingInstructions().Contains(calculatorRun.CalculatorRunClassificationId) || !hasValidBillingRunStatus)
                 {
                     return new ServiceProcessResponseDto
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = CommonResources.InvalidRunStatusForAcceptAll,
+                        Message = CommonResources.InvalidRunStatusForBillingFileGeneration,
                     };
                 }
 
-                calculatorRun.IsBillingFileGenerating = true;
-
+                calculatorRun.BillingRunStatus = BillingRunStatus.Starting;
+                calculatorRun.BillingRunStartedAt = timeProvider.GetUtcNow().UtcDateTime;
                 await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 return new ServiceProcessResponseDto
@@ -412,36 +353,6 @@ namespace EPR.Calculator.API.Services
                     Message = exception.Message,
                 };
             }
-        }
-
-        public async Task<bool?> IsBillingFileGeneratedLatest(int runId, CancellationToken cancellationToken)
-        {
-            if (!await applicationDBContext.ProducerResultFileSuggestedBillingInstruction.AnyAsync(
-                    x => x.CalculatorRunId == runId, cancellationToken).ConfigureAwait(false)
-                ||
-                !await applicationDBContext.CalculatorRunBillingFileMetadata.AnyAsync(
-                    x => x.CalculatorRunId == runId, cancellationToken).ConfigureAwait(false))
-            {
-                return null;
-            }
-
-            var lastModifiedAcceptReject = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                .Where(x => x.CalculatorRunId == runId)
-                .OrderByDescending(x => x.LastModifiedAcceptReject)
-                .AsNoTracking()
-                .Select(x => x.LastModifiedAcceptReject)
-                .FirstOrDefaultAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-            var billingGeneratedDate = await applicationDBContext.CalculatorRunBillingFileMetadata
-                .Where(x => x.CalculatorRunId == runId)
-                .OrderByDescending(x => x.BillingFileCreatedDate)
-                .AsNoTracking()
-                .Select(x => x.BillingFileCreatedDate)
-                .FirstOrDefaultAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-            return lastModifiedAcceptReject.HasValue && billingGeneratedDate > lastModifiedAcceptReject.Value;
         }
 
         private static ProducersInstructionSummary GenerateInstructionSummary(List<ProducersInstructionDetail> details)

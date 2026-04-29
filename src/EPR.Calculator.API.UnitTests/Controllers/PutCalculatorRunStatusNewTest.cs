@@ -3,6 +3,7 @@ using System.Security.Principal;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -95,7 +96,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal,
             };
 
-            List<ClassifiedCalculatorRunDto> designatedRuns = [];
+            List<CalculatorRunDto> designatedRuns = [];
 
             this.calculatorNewControllerUnderTest.ControllerContext = new ControllerContext
             {
@@ -211,7 +212,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Times.Never());
             this.mockValidator.Verify(
                 x => x.Validate(
-                    It.IsAny<List<ClassifiedCalculatorRunDto>>(),
+                    It.IsAny<List<CalculatorRunDto>>(),
                     It.IsAny<CalculatorRun>(),
                     It.IsAny<CalculatorRunStatusUpdateDto>()),
                 Times.Never());
@@ -236,15 +237,20 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal,
             };
 
-            List<ClassifiedCalculatorRunDto> designatedRuns = [];
-            designatedRuns.Add(new ClassifiedCalculatorRunDto
+            List<CalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(new CalculatorRunDto
             {
                 RunId = 2,
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
                 RunName = "Run 2",
-                RunClassificationId = (int)RunClassification.INITIAL_RUN,
-                RunClassificationStatus = "INITIAL RUN",
+                RunClassification = RunClassification.INITIAL_RUN,
                 UpdatedAt = DateTime.UtcNow.AddMinutes(-1),
+                RelativeYear = new RelativeYear(2024),
+                CreatedBy = "Test User",
+                UpdatedBy = "Test User",
+                BillingRunStatus = BillingRunStatus.None,
+                BillingRunStartedAt = null,
+                CompletedBillingRun = null
             });
 
             this.calculatorNewControllerUnderTest.ControllerContext = new ControllerContext

@@ -1,4 +1,4 @@
-﻿using System.Configuration;
+using System.Configuration;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Models;
@@ -25,7 +25,6 @@ namespace EPR.Calculator.API.Controllers
         private readonly ICalcRelativeYearRequestDtoDataValidator validator;
         private readonly IAvailableClassificationsService availableClassificationsService;
         private readonly ICalculationRunService calculatorRunService;
-        private readonly IBillingFileService billingFileService;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Major Code Smell",
@@ -38,8 +37,7 @@ namespace EPR.Calculator.API.Controllers
             IServiceBusService serviceBusService,
             ICalcRelativeYearRequestDtoDataValidator validator,
             IAvailableClassificationsService availableClassificationsService,
-            ICalculationRunService calculationRunService,
-            IBillingFileService billingFileService)
+            ICalculationRunService calculationRunService)
         {
             this.context = context;
             this.configuration = configuration;
@@ -48,7 +46,6 @@ namespace EPR.Calculator.API.Controllers
             this.validator = validator;
             this.availableClassificationsService = availableClassificationsService;
             this.calculatorRunService = calculationRunService;
-            this.billingFileService = billingFileService;
         }
 
         [HttpPost]
@@ -196,7 +193,7 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request)
+        public async Task<IActionResult> GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request, CancellationToken cancellationToken = default)
         {
             if (!this.ModelState.IsValid)
             {
@@ -205,23 +202,11 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRuns = await (from run in this.context.CalculatorRuns
-                       join bill in this.context.CalculatorRunBillingFileMetadata on run.Id equals bill.CalculatorRunId
-                       into billFile
-                       where run.RelativeYearValue == request.RelativeYear.Value
-                                    select new
-                                    {
-                                        run.Id,
-                                        run.Name,
-                                        run.RelativeYear,
-                                        run.CreatedAt,
-                                        run.CreatedBy,
-                                        run.CalculatorRunClassificationId,
-                                        HasBillingFileGenerated = billFile.Any(),
-                                        run.IsBillingFileGenerating,
-                                    })
-                       .OrderByDescending(run => run.CreatedAt)
-                       .ToListAsync();
+                var calculatorRuns = await context.CalculatorRuns
+                    .Where(run => run.RelativeYearValue == request.RelativeYear.Value)
+                    .Select(CalcRunMapper.ToDto)
+                    .OrderByDescending(run => run.CreatedAt)
+                    .ToListAsync(cancellationToken);
 
                 if (calculatorRuns.Count == 0)
                 {
@@ -229,110 +214,6 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 return new ObjectResult(calculatorRuns) { StatusCode = StatusCodes.Status200OK };
-            }
-            catch (Exception exception)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
-            }
-        }
-
-        [HttpGet]
-        [Route("calculatorRuns/{runId}")]
-        [ProducesResponseType(typeof(CalculatorRunDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetCalculatorRun(int runId, CancellationToken cancellationToken = default)
-        {
-            if (!this.ModelState.IsValid)
-            {
-                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
-            }
-
-            try
-            {
-                var calculatorRunDetail =
-                    await (from run in this.context.CalculatorRuns
-                     join classification in this.context.CalculatorRunClassifications
-                         on run.CalculatorRunClassificationId equals classification.Id
-                     where run.Id == runId
-                     select new
-                     {
-                         Run = run,
-                         Classification = classification,
-                     }).SingleOrDefaultAsync(cancellationToken: cancellationToken);
-
-                if (calculatorRunDetail == null)
-                {
-                    return new NotFoundObjectResult(string.Format(CommonResources.UnableToFindRunId, runId));
-                }
-
-                var calcRun = calculatorRunDetail.Run;
-                var runClassification = calculatorRunDetail.Classification;
-                var isBillingFileGeneratedLatest = await this.billingFileService.IsBillingFileGeneratedLatest(runId, cancellationToken);
-                var runDto = CalcRunMapper.Map(calcRun, runClassification, isBillingFileGeneratedLatest);
-                return new ObjectResult(runDto);
-            }
-            catch (Exception exception)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
-            }
-        }
-
-        [HttpPut]
-        [Route("calculatorRuns")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutCalculatorRunStatus([FromBody] CalculatorRunStatusUpdateDto runStatusUpdateDto)
-        {
-            var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
-            if (claim == null)
-            {
-                return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
-            }
-
-            var userName = claim.Value;
-            if (!this.ModelState.IsValid)
-            {
-                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
-            }
-
-            try
-            {
-                var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runStatusUpdateDto.RunId);
-                if (calculatorRun == null)
-                {
-                    return new ObjectResult(string.Format(CommonResources.UnableToFindRunId, runStatusUpdateDto.RunId))
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
-                }
-
-                var classification =
-                    await this.context.CalculatorRunClassifications.SingleOrDefaultAsync(x =>
-                        x.Id == runStatusUpdateDto.ClassificationId);
-
-                if (classification == null)
-                {
-                    return new ObjectResult(string.Format(CommonResources.UnableToFindClassificationId, runStatusUpdateDto.ClassificationId))
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
-                }
-
-                if (runStatusUpdateDto.ClassificationId == calculatorRun.CalculatorRunClassificationId)
-                {
-                    return new ObjectResult(string.Format(CommonResources.RunIdCannotBeChangedToClassification, runStatusUpdateDto.RunId, runStatusUpdateDto.ClassificationId))
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
-                }
-
-                calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
-                calculatorRun.UpdatedAt = DateTime.UtcNow;
-                calculatorRun.UpdatedBy = userName;
-
-                this.context.CalculatorRuns.Update(calculatorRun);
-                await this.context.SaveChangesAsync();
-
-                return this.StatusCode(201);
             }
             catch (Exception exception)
             {

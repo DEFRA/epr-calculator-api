@@ -25,7 +25,7 @@ namespace EPR.Calculator.API.Mappers
         public static RelativeYearClassificationResponseDto Map(
             RelativeYear relativeYear,
             IEnumerable<CalculatorRunClassification> classifications,
-            List<ClassifiedCalculatorRunDto>? runs)
+            List<CalculatorRunDto>? runs)
         {
             if (runs is null)
             {

@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
@@ -98,7 +99,7 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 // Perform validation to check other designated runs are not in progress and not already completed for the same relative year
-                List<ClassifiedCalculatorRunDto> designatedRuns = await this.calculationRunService.GetDesignatedRunsByFinanialYear(calculatorRun.RelativeYear);
+                List<CalculatorRunDto> designatedRuns = await this.calculationRunService.GetDesignatedRunsByFinanialYear(calculatorRun.RelativeYear);
 
                 genericValidationResultDto = this.calculatorRunStatusDataValidator.Validate(designatedRuns, calculatorRun, runStatusUpdateDto);
 
@@ -136,7 +137,7 @@ namespace EPR.Calculator.API.Controllers
 
         [HttpGet]
         [Route("calculatorRuns/{runId}")]
-        [ProducesResponseType(typeof(CalculatorRunBillingDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(CalculatorRunDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -149,31 +150,16 @@ namespace EPR.Calculator.API.Controllers
 
             try
             {
-                var calculatorRunDetail =
-                    await (from run in this.context.CalculatorRuns
-                           join classification in this.context.CalculatorRunClassifications
-                               on run.CalculatorRunClassificationId equals classification.Id
-                           join billingfilemetadata in this.context.CalculatorRunBillingFileMetadata
-                               on run.Id equals billingfilemetadata.CalculatorRunId into calculatorrunbillingFile
-                           from billingfilemetadata in calculatorrunbillingFile.DefaultIfEmpty()
-                           where run.Id == runId
-                           select new
-                           {
-                               Run = run,
-                               Classification = classification,
-                               BillingFileMetadata = billingfilemetadata,
-                           }).OrderByDescending(x => x.BillingFileMetadata.BillingFileCreatedDate)
-                           .FirstOrDefaultAsync();
+                var runDto = await this.context.CalculatorRuns
+                    .Where(x => x.Id == runId)
+                    .Select(CalcRunMapper.ToDto)
+                    .SingleOrDefaultAsync();
 
-                if (calculatorRunDetail == null)
+                if (runDto == null)
                 {
                     return new NotFoundObjectResult(string.Format(CommonResources.UnableToFindRunId, runId));
                 }
 
-                var calcRun = calculatorRunDetail.Run;
-                var runClassification = calculatorRunDetail.Classification;
-                var calculatorRunbillingFile = calculatorRunDetail.BillingFileMetadata;
-                var runDto = CalcRunBillingFileMapper.Map(calcRun, runClassification, calculatorRunbillingFile);
                 return new ObjectResult(runDto);
             }
             catch (Exception exception)
@@ -217,10 +203,31 @@ namespace EPR.Calculator.API.Controllers
                     return this.StatusCode(StatusCodes.Status400BadRequest, string.Format(CommonResources.InvalidForRunId, runId));
                 }
 
-                var isBillingFileLatest = await this.billingFileService.IsBillingFileGeneratedLatest(
-                    runId, cancellationToken).ConfigureAwait(false);
+                var calculatorRun = await this.context.CalculatorRuns
+                    .Include(cr => cr.BillingFileMetadata)
+                    .SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
-                if (isBillingFileLatest.HasValue && !isBillingFileLatest.Value)
+                if (calculatorRun == null)
+                {
+                    return new ObjectResult(string.Format(CommonResources.UnableToFindRunId, runId))
+                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
+
+                if (calculatorRun.BillingRunStatus is not BillingRunStatus.Completed)
+                {
+                    return new ObjectResult(string.Format(CommonResources.BillingRunStatusInvalidForSend, runId, calculatorRun.BillingRunStatus))
+                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
+
+                if (calculatorRun.BillingFileMetadata is null)
+                {
+                    return new ObjectResult(string.Format(CommonResources.UnableToFindBillingFileMetadata, runId))
+                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                }
+
+                var wasBillingGeneratedAfterLatestInstructions = await billingFileService.WasBillingGeneratedAfterLatestInstructions(runId, cancellationToken);
+
+                if (!wasBillingGeneratedAfterLatestInstructions)
                 {
                     return new ObjectResult(string.Format(CommonResources.BillingFileOutdated, runId))
                     {
@@ -228,12 +235,9 @@ namespace EPR.Calculator.API.Controllers
                     };
                 }
 
-                var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
-                if (calculatorRun == null)
-                {
-                    return new ObjectResult(string.Format(CommonResources.UnableToFindRunId, runId))
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
-                }
+                var metadata = calculatorRun.BillingFileMetadata!;
+                metadata.BillingFileAuthorisedBy = userName;
+                metadata.BillingFileAuthorisedDate = DateTime.UtcNow;
 
                 RunClassification newClassificationValue;
                 try
@@ -250,26 +254,11 @@ namespace EPR.Calculator.API.Controllers
                 }
                 catch (InvalidOperationException)
                 {
-                    return new ObjectResult(string.Format(
-                        CommonResources.UnableToChangeStatusToCompleted,
-                        (RunClassification)calculatorRun.CalculatorRunClassificationId))
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
+                    return new ObjectResult(string.Format(CommonResources.UnableToChangeStatusToCompleted, (RunClassification)calculatorRun.CalculatorRunClassificationId))
+                        { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
                 calculatorRun.CalculatorRunClassificationId = (int)newClassificationValue;
-                var metadata = await this.context.CalculatorRunBillingFileMetadata
-                    .Where(x => x.CalculatorRunId == runId)
-                    .OrderByDescending(x => x.BillingFileCreatedDate)
-                    .FirstOrDefaultAsync(cancellationToken);
-
-                if (metadata == null)
-                {
-                    return new ObjectResult(string.Format(CommonResources.UnableToFindBillingFileMetadata, runId))
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
-                }
-
-                metadata.BillingFileAuthorisedBy = userName;
-                metadata.BillingFileAuthorisedDate = DateTime.UtcNow;
 
                 using (var transaction = await this.context.Database.BeginTransactionAsync(cancellationToken))
                 {
