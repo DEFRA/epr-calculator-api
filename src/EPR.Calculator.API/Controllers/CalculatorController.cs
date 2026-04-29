@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EPR.Calculator.API.Controllers
 {
     [Route("v1")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S6960:Controllers should not have mixed responsibilities", Justification = "It's all calculator run related")]
     public class CalculatorController : ControllerBase
     {
         private readonly ApplicationDBContext context;
