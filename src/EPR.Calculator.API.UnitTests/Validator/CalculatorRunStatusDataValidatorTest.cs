@@ -258,6 +258,32 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
+        [DataRow(RunClassification.RUNNING)]
+        [DataRow(RunClassification.INTHEQUEUE)]
+        [DataRow(RunClassification.ERROR)]
+        [DataRow(RunClassification.UNCLASSIFIED)]
+        public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenClassificationIdIsNotARecognisedTransitionTarget(
+            RunClassification runClassification)
+        {
+            var calculatorRun = new CalculatorRun
+            {
+                RelativeYear = new RelativeYear(2024),
+                Name = "Name",
+                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+            };
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            {
+                ClassificationId = (int)runClassification,
+                RunId = 1,
+            };
+
+            GenericValidationResultDto genericValidationResultDto = calculatorRunStatusDataValidatorUnderTest.Validate(calculatorRun, runStatusUpdateDto);
+
+            Assert.IsNotNull(genericValidationResultDto);
+            Assert.IsTrue(genericValidationResultDto.IsInvalid);
+        }
+
+        [TestMethod]
         public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsUnsupportedStatus()
         {
             // Arrange
