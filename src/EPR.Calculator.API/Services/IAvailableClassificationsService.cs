@@ -1,10 +1,10 @@
-﻿using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Enums;
 
-namespace EPR.Calculator.API.Services
+namespace EPR.Calculator.API.Services;
+
+public interface IAvailableClassificationsService
 {
-    public interface IAvailableClassificationsService
-    {
-        Task<List<CalculatorRunClassification>> GetAvailableClassificationsForRelativeYearAsync(CalcRelativeYearRequestDto request, CancellationToken cancellationToken = default);
-    }
+    Task<List<RunClassification>> GetAvailableClassificationsForRelativeYearAsync(CalcRelativeYearRequestDto request, CancellationToken cancellationToken = default);
 }

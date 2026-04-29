@@ -1,4 +1,6 @@
-﻿namespace EPR.Calculator.API.UnitTests.Services;
+﻿using EPR.Calculator.API.Data.Enums;
+
+namespace EPR.Calculator.API.UnitTests.Services;
 
 using EnumsNET;
 using EPR.Calculator.API.Data;
@@ -31,16 +33,6 @@ public class CalculationRunServiceTests
 
         this.dbContext = new ApplicationDBContext(options);
 
-        // Add all possible classifications
-        foreach (RunClassification value in Enum.GetValues(typeof(RunClassification)))
-        {
-            this.dbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification
-            {
-                Id = (int)value,
-                Status = value.AsString(EnumFormat.Description)!, // not null by contract
-            });
-        }
-
         this.dbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear
         {
             Value = 2024,
@@ -59,20 +51,20 @@ public class CalculationRunServiceTests
     }
 
     [TestMethod]
-    [DataRow(RunClassification.INTHEQUEUE)]
-    [DataRow(RunClassification.RUNNING)]
-    [DataRow(RunClassification.UNCLASSIFIED)]
-    [DataRow(RunClassification.TEST_RUN)]
-    [DataRow(RunClassification.ERROR)]
-    [DataRow(RunClassification.DELETED)]
-    [DataRow(RunClassification.INITIAL_RUN_COMPLETED)]
-    [DataRow(RunClassification.INITIAL_RUN)]
-    [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
-    [DataRow(RunClassification.FINAL_RUN)]
-    [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
-    [DataRow(RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED)]
-    [DataRow(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
-    [DataRow(RunClassification.FINAL_RUN_COMPLETED)]
+    [DataRow(RunClassification.None)]
+    [DataRow(RunClassification.Running)]
+    [DataRow(RunClassification.Unclassified)]
+    [DataRow(RunClassification.TestRun)]
+    [DataRow(RunClassification.Errored)]
+    [DataRow(RunClassification.Deleted)]
+    [DataRow(RunClassification.InitialRunCompleted)]
+    [DataRow(RunClassification.InitialRun)]
+    [DataRow(RunClassification.InterimRecalculationRun)]
+    [DataRow(RunClassification.FinalRun)]
+    [DataRow(RunClassification.FinalRecalculationRun)]
+    [DataRow(RunClassification.InterimRecalculationRunCompleted)]
+    [DataRow(RunClassification.FinalRecalculationRunCompleted)]
+    [DataRow(RunClassification.FinalRunCompleted)]
     public async Task GetDesignatedRunsByFinanialYear_ExcludesRunsInWrongRelativeYear(RunClassification classification)
     {
         // Arrange
@@ -86,20 +78,20 @@ public class CalculationRunServiceTests
     }
 
     [TestMethod]
-    [DataRow(RunClassification.INTHEQUEUE, 0)]
-    [DataRow(RunClassification.RUNNING, 0)]
-    [DataRow(RunClassification.UNCLASSIFIED, 0)]
-    [DataRow(RunClassification.TEST_RUN, 0)]
-    [DataRow(RunClassification.ERROR, 0)]
-    [DataRow(RunClassification.DELETED, 0)]
-    [DataRow(RunClassification.INITIAL_RUN_COMPLETED, 1)]
-    [DataRow(RunClassification.INITIAL_RUN, 1)]
-    [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, 1)]
-    [DataRow(RunClassification.FINAL_RUN, 1)]
-    [DataRow(RunClassification.FINAL_RECALCULATION_RUN, 1)]
-    [DataRow(RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED, 1)]
-    [DataRow(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED, 1)]
-    [DataRow(RunClassification.FINAL_RUN_COMPLETED, 1)]
+    [DataRow(RunClassification.None, 0)]
+    [DataRow(RunClassification.Running, 0)]
+    [DataRow(RunClassification.Unclassified, 0)]
+    [DataRow(RunClassification.TestRun, 0)]
+    [DataRow(RunClassification.Errored, 0)]
+    [DataRow(RunClassification.Deleted, 0)]
+    [DataRow(RunClassification.InitialRunCompleted, 1)]
+    [DataRow(RunClassification.InitialRun, 1)]
+    [DataRow(RunClassification.InterimRecalculationRun, 1)]
+    [DataRow(RunClassification.FinalRun, 1)]
+    [DataRow(RunClassification.FinalRecalculationRun, 1)]
+    [DataRow(RunClassification.InterimRecalculationRunCompleted, 1)]
+    [DataRow(RunClassification.FinalRecalculationRunCompleted, 1)]
+    [DataRow(RunClassification.FinalRunCompleted, 1)]
     public async Task GetDesignatedRunsByFinanialYear_ReturnsRunsWithValidClassifications(
         RunClassification classification,
         int expectedRowCount)
@@ -118,10 +110,10 @@ public class CalculationRunServiceTests
     public async Task GetDesignatedRunsByFinanialYear_ExcludesRunsInWrongRelativeYearOrClassification()
     {
         // Arrange
-        this.AddRunToDb(RunClassification.INITIAL_RUN, requestId: 1, 1923);
-        this.AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 2, 2024);
-        this.AddRunToDb(RunClassification.INTERIM_RECALCULATION_RUN, requestId: 3, 2024);
-        this.AddRunToDb(RunClassification.TEST_RUN, requestId: 4, 2024);
+        this.AddRunToDb(RunClassification.InitialRun, requestId: 1, 1923);
+        this.AddRunToDb(RunClassification.InitialRunCompleted, requestId: 2, 2024);
+        this.AddRunToDb(RunClassification.InterimRecalculationRun, requestId: 3, 2024);
+        this.AddRunToDb(RunClassification.TestRun, requestId: 4, 2024);
 
         // Act
         var result = await this.service.GetDesignatedRunsByFinanialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
@@ -133,12 +125,12 @@ public class CalculationRunServiceTests
             first =>
             {
                 first.RunId.Should().Be(2);
-                first.RunClassification.Should().Be(RunClassification.INITIAL_RUN_COMPLETED);
+                first.RunClassification.Should().Be(RunClassification.InitialRunCompleted);
             },
             second =>
             {
                 second.RunId.Should().Be(3);
-                second.RunClassification.Should().Be(RunClassification.INTERIM_RECALCULATION_RUN);
+                second.RunClassification.Should().Be(RunClassification.InterimRecalculationRun);
             });
     }
 
@@ -147,7 +139,7 @@ public class CalculationRunServiceTests
         this.dbContext.CalculatorRuns.Add(new CalculatorRun
         {
             Id = requestId,
-            CalculatorRunClassificationId = (int)classification,
+            Classification = classification,
             Name = "Test",
             RelativeYear = new RelativeYear(relativeYearValue),
             CreatedBy = "TestUser",

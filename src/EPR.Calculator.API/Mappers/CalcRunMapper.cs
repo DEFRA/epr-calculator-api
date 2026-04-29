@@ -17,7 +17,7 @@ public static class CalcRunMapper
             CreatedBy = run.CreatedBy,
             UpdatedAt = run.UpdatedAt,
             UpdatedBy = run.UpdatedBy,
-            RunClassification = (RunClassification) run.CalculatorRunClassificationId,
+            RunClassification = run.Classification,
             BillingRunStatus = run.BillingRunStatus,
             BillingRunStartedAt = run.BillingRunStartedAt,
             CompletedBillingRun = run.BillingFileMetadata != null

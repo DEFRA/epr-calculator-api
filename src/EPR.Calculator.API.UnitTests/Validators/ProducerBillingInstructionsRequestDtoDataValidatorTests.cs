@@ -1,5 +1,6 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
@@ -28,7 +29,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             calcRunId = 85885;
             var calcRun = new CalculatorRun
             {
-                CalculatorRunClassificationId = 8,
+                Classification = RunClassification.InitialRun,
                 RelativeYear = new RelativeYear(2024),
                 Name = "Test",
                 Id = calcRunId,

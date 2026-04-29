@@ -1,6 +1,7 @@
 using System.Configuration;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -76,7 +77,7 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 bool isCalcAlreadyRunning = await this.context.CalculatorRuns.AnyAsync(
-                    run => run.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
+                    run => run.Classification == RunClassification.Running);
                 if (isCalcAlreadyRunning)
                 {
                     return new ObjectResult(new { Message = CommonResources.CalculationAlreadyRunning })
@@ -141,7 +142,7 @@ namespace EPR.Calculator.API.Controllers
                     RelativeYear = relativeYear,
                     CreatedBy = userName,
                     CreatedAt = DateTime.UtcNow,
-                    CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                    Classification = RunClassification.Running,
                     DefaultParameterSettingMasterId = activeDefaultParameterSettingsMaster.Id,
                     LapcapDataMasterId = activeLapcapDataMaster.Id,
                 };

@@ -79,7 +79,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         {
             // Arrange
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
+            calculatorRun.Classification = RunClassification.Unclassified;
             await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
@@ -115,7 +115,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         {
             // Arrange
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.Last();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            calculatorRun.Classification = RunClassification.InitialRun;
             await this.DbContext.SaveChangesAsync(TestContext.CancellationTokenSource.Token);
 
             GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
@@ -151,7 +151,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         {
             // Arrange
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            calculatorRun.Classification = RunClassification.InitialRun;
             var fileName = "1-Calc RunName_Results File_20241111.csv";
             var blobUri = $"https://example.com/{fileName}";
 
@@ -207,7 +207,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         {
             // Arrange
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            calculatorRun.Classification = RunClassification.InitialRun;
 
             var fileName = "1-Calc RunName_Results File_20241111.csv";
             var blobUri = $"https://example.com/{fileName}";
@@ -340,7 +340,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 OrganisationIds = new List<int> { 1, 2, 3 },
             };
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            calculatorRun.Classification = RunClassification.InitialRun;
             await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Act
@@ -361,7 +361,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 OrganisationIds = new List<int> { 1, 2, 3 },
             };
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
+            calculatorRun.Classification = RunClassification.Unclassified;
             await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Act
@@ -382,7 +382,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 OrganisationIds = new List<int> { 1, 2 },
             };
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            calculatorRun.Classification = RunClassification.InitialRun;
             await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Act
@@ -403,7 +403,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 OrganisationIds = new List<int> { 1 },
             };
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            calculatorRun.Classification = RunClassification.InitialRun;
             await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Act
@@ -428,7 +428,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 ReasonForRejection = "Test",
             };
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            calculatorRun.Classification = RunClassification.InitialRun;
             await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Act
@@ -453,7 +453,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Ensure a CalculatorRun exists and is in the correct state
             var calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
+            calculatorRun.Classification = RunClassification.InitialRun;
             await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // First, reject the record with a reason
@@ -583,7 +583,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Id = runId,
                 Name = runName,
                 RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                Classification = RunClassification.InitialRun,
             });
             this.DbContext.ProducerDetail.Add(new ProducerDetail
             {
@@ -690,7 +690,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Id = runId,
                 Name = runName,
                 RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN
+                Classification = RunClassification.InterimRecalculationRun
             });
 
             int missingProducerId = 999; // does NOT exist in current ProducerDetail
@@ -719,7 +719,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             {
                 Name = "Previous Run Snapshot",
                 RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                Classification = RunClassification.InitialRun,
                 CalculatorRunOrganisationDataMasterId = master.Id
             };
             this.DbContext.CalculatorRuns.Add(previousRun);
@@ -764,7 +764,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Id = runId,
                 Name = runName,
                 RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                Classification = RunClassification.InitialRun
             });
             this.DbContext.ProducerDetail.Add(new ProducerDetail
             {
@@ -810,7 +810,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Id = runId,
                 Name = runName,
                 RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                Classification = RunClassification.InitialRun
             });
             this.DbContext.ProducerDetail.Add(new ProducerDetail
             {
@@ -855,7 +855,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Id = runId,
                 Name = runName,
                 RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                Classification = RunClassification.InitialRun
             });
             this.DbContext.ProducerDetail.Add(new ProducerDetail
             {
@@ -898,7 +898,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Id = runId,
                 Name = runName,
                 RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                Classification = RunClassification.InitialRun
             });
             this.DbContext.ProducerDetail.AddRange(
                 new ProducerDetail { ProducerId = 5, CalculatorRunId = runId, ProducerName = "Producer5" },
@@ -949,7 +949,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Id = runId,
                 Name = runName,
                 RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                Classification = RunClassification.InitialRun
             });
             this.DbContext.ProducerDetail.AddRange(
                 new ProducerDetail { ProducerId = 7, CalculatorRunId = runId, ProducerName = "Producer7" },
@@ -1002,7 +1002,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 Id = runId,
                 Name = runName,
                 RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                Classification = RunClassification.InitialRun
             });
             this.DbContext.ProducerDetail.AddRange(
                 new ProducerDetail { ProducerId = 9, CalculatorRunId = runId, ProducerName = "Producer9" },

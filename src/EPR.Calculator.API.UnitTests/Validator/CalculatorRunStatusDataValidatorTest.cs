@@ -3,7 +3,6 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Validators;
 
 namespace EPR.Calculator.API.UnitTests.Validator
@@ -21,10 +20,10 @@ namespace EPR.Calculator.API.UnitTests.Validator
         private Fixture Fixture { get; init; }
 
         [TestMethod]
-        [DataRow(RunClassification.INITIAL_RUN)]
-        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RUN)]
+        [DataRow(RunClassification.InitialRun)]
+        [DataRow(RunClassification.InterimRecalculationRun)]
+        [DataRow(RunClassification.FinalRecalculationRun)]
+        [DataRow(RunClassification.FinalRun)]
         public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenRunIsAlreadyCompleted(
           RunClassification runClassification)
         {
@@ -33,11 +32,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) runClassification,
+                Classification = runClassification,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.INITIAL_RUN,
+                Classification = RunClassification.InitialRun,
                 RunId = 1,
             };
 
@@ -50,11 +49,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        [DataRow(RunClassification.INITIAL_RUN)]
-        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RUN)]
-        [DataRow(RunClassification.TEST_RUN)]
+        [DataRow(RunClassification.InitialRun)]
+        [DataRow(RunClassification.InterimRecalculationRun)]
+        [DataRow(RunClassification.FinalRecalculationRun)]
+        [DataRow(RunClassification.FinalRun)]
+        [DataRow(RunClassification.TestRun)]
         public void ValidateMethod_ShouldReturnIsInvalidAsFalse_WhenItsValidDesignatedRunAndExistingRunIsUnClassified(
             RunClassification runClassification)
         {
@@ -63,11 +62,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) RunClassification.UNCLASSIFIED,
+                Classification = RunClassification.Unclassified,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)runClassification,
+                Classification = runClassification,
                 RunId = 1,
             };
 
@@ -80,10 +79,10 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        [DataRow(RunClassification.INITIAL_RUN, RunClassification.INITIAL_RUN_COMPLETED)]
-        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED)]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
-        [DataRow(RunClassification.FINAL_RUN, RunClassification.FINAL_RUN_COMPLETED)]
+        [DataRow(RunClassification.InitialRun, RunClassification.InitialRunCompleted)]
+        [DataRow(RunClassification.InterimRecalculationRun, RunClassification.InterimRecalculationRunCompleted)]
+        [DataRow(RunClassification.FinalRecalculationRun, RunClassification.FinalRecalculationRunCompleted)]
+        [DataRow(RunClassification.FinalRun, RunClassification.FinalRunCompleted)]
         public void ValidateMethod_ShouldReturnIsInvalidAsFalse_WhenItsValidDesignatedCompletedRunAndExistingRunIsCorrectUnCompletedRun(
           RunClassification runClassificationFrom,
           RunClassification runClassificationTo)
@@ -93,11 +92,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) runClassificationFrom,
+                Classification = runClassificationFrom,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)runClassificationTo,
+                Classification = runClassificationTo,
                 RunId = 1,
             };
 
@@ -110,10 +109,10 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        [DataRow(RunClassification.INITIAL_RUN)]
-        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RUN)]
+        [DataRow(RunClassification.InitialRun)]
+        [DataRow(RunClassification.InterimRecalculationRun)]
+        [DataRow(RunClassification.FinalRecalculationRun)]
+        [DataRow(RunClassification.FinalRun)]
         public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsInValidDesignatedRunAndAndExistingRunIsRunning(
             RunClassification runClassification)
         {
@@ -122,11 +121,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) RunClassification.RUNNING,
+                Classification =  RunClassification.Running,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)runClassification,
+                Classification = runClassification,
                 RunId = 1,
             };
 
@@ -139,8 +138,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        [DataRow(RunClassification.INTHEQUEUE)]
-        [DataRow(RunClassification.DELETED)]
+        [DataRow(RunClassification.None)]
+        [DataRow(RunClassification.Deleted)]
         public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsDeletedRunAndExistingRunStatusIsNotToMarkAsDeleted(
             RunClassification runClassification)
         {
@@ -149,11 +148,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) runClassification,
+                Classification =  runClassification,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.DELETED,
+                Classification = RunClassification.Deleted,
                 RunId = 1,
             };
 
@@ -166,14 +165,14 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        [DataRow(RunClassification.UNCLASSIFIED)]
-        [DataRow(RunClassification.ERROR)]
-        [DataRow(RunClassification.INITIAL_RUN)]
-        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RUN)]
-        [DataRow(RunClassification.TEST_RUN)]
-        [DataRow(RunClassification.RUNNING)]
+        [DataRow(RunClassification.Unclassified)]
+        [DataRow(RunClassification.Errored)]
+        [DataRow(RunClassification.InitialRun)]
+        [DataRow(RunClassification.InterimRecalculationRun)]
+        [DataRow(RunClassification.FinalRecalculationRun)]
+        [DataRow(RunClassification.FinalRun)]
+        [DataRow(RunClassification.TestRun)]
+        [DataRow(RunClassification.Running)]
         public void ValidateMethod_ShouldReturnIsInvalidAsFalse_WhenItsDeletedRunAndExistingRunStatusIsValidToMarkAsDeleted(
             RunClassification runClassification)
         {
@@ -182,11 +181,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) runClassification,
+                Classification =  runClassification,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.DELETED,
+                Classification = RunClassification.Deleted,
                 RunId = 1,
             };
 
@@ -199,11 +198,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        [DataRow(RunClassification.TEST_RUN)]
-        [DataRow(RunClassification.INTHEQUEUE)]
-        [DataRow(RunClassification.RUNNING)]
-        [DataRow(RunClassification.ERROR)]
-        [DataRow(RunClassification.DELETED)]
+        [DataRow(RunClassification.TestRun)]
+        [DataRow(RunClassification.None)]
+        [DataRow(RunClassification.Running)]
+        [DataRow(RunClassification.Errored)]
+        [DataRow(RunClassification.Deleted)]
         public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenItsTestRunAndExistingRunIsAlreadyMarkedAsTestOrOthers(
             RunClassification runClassification)
         {
@@ -212,11 +211,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) runClassification,
+                Classification =  runClassification,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.TEST_RUN,
+                Classification = RunClassification.TestRun,
                 RunId = 1,
             };
 
@@ -229,11 +228,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        [DataRow(RunClassification.UNCLASSIFIED)]
-        [DataRow(RunClassification.INITIAL_RUN)]
-        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RUN)]
+        [DataRow(RunClassification.Unclassified)]
+        [DataRow(RunClassification.InitialRun)]
+        [DataRow(RunClassification.InterimRecalculationRun)]
+        [DataRow(RunClassification.FinalRecalculationRun)]
+        [DataRow(RunClassification.FinalRun)]
         public void ValidateMethod_ShouldReturnIsInvalidAsFalse_WhenItsTestRunExistingRunStatusIsValidToMarkAsTestRun(
             RunClassification runClassification)
         {
@@ -242,11 +241,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) runClassification,
+                Classification =  runClassification,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.TEST_RUN,
+                Classification = RunClassification.TestRun,
                 RunId = 1,
             };
 
@@ -259,10 +258,10 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        [DataRow(RunClassification.RUNNING)]
-        [DataRow(RunClassification.INTHEQUEUE)]
-        [DataRow(RunClassification.ERROR)]
-        [DataRow(RunClassification.UNCLASSIFIED)]
+        [DataRow(RunClassification.None)]
+        [DataRow(RunClassification.Running)]
+        [DataRow(RunClassification.Unclassified)]
+        [DataRow(RunClassification.Errored)]
         public void ValidateMethod_ShouldReturnIsInvalidAsTrue_WhenClassificationIdIsNotARecognisedTransitionTarget(
             RunClassification runClassification)
         {
@@ -270,11 +269,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+                Classification = RunClassification.Unclassified,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)runClassification,
+                Classification = runClassification,
                 RunId = 1,
             };
 
@@ -292,11 +291,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) RunClassification.RUNNING,
+                Classification =  RunClassification.Running,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN,
+                Classification = RunClassification.InterimRecalculationRun,
                 RunId = 1,
             };
 
@@ -317,11 +316,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) RunClassification.RUNNING,
+                Classification =  RunClassification.Running,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.INITIAL_RUN,
+                Classification = RunClassification.InitialRun,
                 RunId = 1,
             };
 
@@ -337,16 +336,16 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        [DataRow(RunClassification.INITIAL_RUN, RunClassification.INITIAL_RUN)]
-        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.INTERIM_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.INTERIM_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RUN, RunClassification.INTERIM_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.FINAL_RECALCULATION_RUN)]
-        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.FINAL_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RUN, RunClassification.FINAL_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RUN, RunClassification.FINAL_RUN)]
-        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.FINAL_RUN)]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.FINAL_RUN)]
+        [DataRow(RunClassification.InitialRun, RunClassification.InitialRun)]
+        [DataRow(RunClassification.InterimRecalculationRun, RunClassification.InterimRecalculationRun)]
+        [DataRow(RunClassification.FinalRecalculationRun, RunClassification.InterimRecalculationRun)]
+        [DataRow(RunClassification.FinalRun, RunClassification.InterimRecalculationRun)]
+        [DataRow(RunClassification.FinalRecalculationRun, RunClassification.FinalRecalculationRun)]
+        [DataRow(RunClassification.InterimRecalculationRun, RunClassification.FinalRecalculationRun)]
+        [DataRow(RunClassification.FinalRun, RunClassification.FinalRecalculationRun)]
+        [DataRow(RunClassification.FinalRun, RunClassification.FinalRun)]
+        [DataRow(RunClassification.InterimRecalculationRun, RunClassification.FinalRun)]
+        [DataRow(RunClassification.FinalRecalculationRun, RunClassification.FinalRun)]
         public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenAnotherRunIsMarkedAsDesignatedRunButNotCompleted(
             RunClassification existingRunClassification,
             RunClassification requestRunClassification)
@@ -371,11 +370,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) RunClassification.UNCLASSIFIED,
+                Classification =  RunClassification.Unclassified,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)requestRunClassification,
+                Classification = requestRunClassification,
                 RunId = 1,
             };
 
@@ -391,8 +390,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        [DataRow(RunClassification.INITIAL_RUN)]
-        [DataRow(RunClassification.INITIAL_RUN_COMPLETED)]
+        [DataRow(RunClassification.InitialRun)]
+        [DataRow(RunClassification.InitialRunCompleted)]
         public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenAnotherRunIsMarkedAsInitialRunCompleted(
             RunClassification requestRunClassification)
         {
@@ -401,8 +400,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
             designatedRuns.Add(new CalculatorRunDto
             {
                 RunId = 101,
-                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
-                RunClassification = RunClassification.INITIAL_RUN_COMPLETED,
+                RunName = $"My - {RunClassification.InitialRunCompleted}",
+                RunClassification = RunClassification.InitialRunCompleted,
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
                 UpdatedAt = DateTime.UtcNow.AddDays(-1),
                 RelativeYear = new RelativeYear(2024),
@@ -416,11 +415,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) RunClassification.UNCLASSIFIED,
+                Classification =  RunClassification.Unclassified,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)requestRunClassification,
+                Classification = requestRunClassification,
                 RunId = 1,
             };
 
@@ -436,8 +435,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
+        [DataRow(RunClassification.FinalRecalculationRun)]
+        [DataRow(RunClassification.FinalRecalculationRunCompleted)]
         public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenAnotherRunIsMarkedAsFinalRecalculationRunCompleted(
            RunClassification requestRunClassification)
         {
@@ -446,8 +445,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
             designatedRuns.Add(new CalculatorRunDto
             {
                 RunId = 101,
-                RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
-                RunClassification = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
+                RunName = $"My - {RunClassification.FinalRecalculationRunCompleted}",
+                RunClassification = RunClassification.FinalRecalculationRunCompleted,
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
                 UpdatedAt = DateTime.UtcNow.AddDays(-1),
                 RelativeYear = new RelativeYear(2024),
@@ -461,11 +460,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) RunClassification.UNCLASSIFIED,
+                Classification =  RunClassification.Unclassified,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)requestRunClassification,
+                Classification = requestRunClassification,
                 RunId = 1,
             };
 
@@ -481,10 +480,10 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
-        [DataRow(RunClassification.FINAL_RUN)]
-        [DataRow(RunClassification.FINAL_RUN_COMPLETED)]
+        [DataRow(RunClassification.FinalRecalculationRun)]
+        [DataRow(RunClassification.FinalRecalculationRunCompleted)]
+        [DataRow(RunClassification.FinalRun)]
+        [DataRow(RunClassification.FinalRunCompleted)]
         public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenAnotherRunIsMarkedAsFinalRunCompleted(
           RunClassification requestRunClassification)
         {
@@ -493,8 +492,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
             designatedRuns.Add(new CalculatorRunDto
             {
                 RunId = 101,
-                RunName = $"My - {RunClassification.FINAL_RUN_COMPLETED}",
-                RunClassification = RunClassification.FINAL_RUN_COMPLETED,
+                RunName = $"My - {RunClassification.FinalRunCompleted}",
+                RunClassification = RunClassification.FinalRunCompleted,
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
                 UpdatedAt = DateTime.UtcNow.AddDays(-1),
                 RelativeYear = new RelativeYear(2024),
@@ -508,11 +507,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) RunClassification.UNCLASSIFIED,
+                Classification =  RunClassification.Unclassified,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)requestRunClassification,
+                Classification = requestRunClassification,
                 RunId = 1,
             };
 
@@ -528,8 +527,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
         }
 
         [TestMethod]
-        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
+        [DataRow(RunClassification.InterimRecalculationRun)]
+        [DataRow(RunClassification.FinalRecalculationRun)]
         public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenSystemDontHaveInitialRunCompleted(
           RunClassification requestRunClassification)
         {
@@ -538,8 +537,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
             designatedRuns.Add(new CalculatorRunDto
             {
                 RunId = 101,
-                RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
-                RunClassification = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
+                RunName = $"My - {RunClassification.InterimRecalculationRunCompleted}",
+                RunClassification = RunClassification.InterimRecalculationRunCompleted,
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
                 UpdatedAt = DateTime.UtcNow.AddDays(-1),
                 RelativeYear = new RelativeYear(2024),
@@ -553,11 +552,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) RunClassification.UNCLASSIFIED,
+                Classification =  RunClassification.Unclassified,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)requestRunClassification,
+                Classification = requestRunClassification,
                 RunId = 1,
             };
 
@@ -581,11 +580,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) RunClassification.UNCLASSIFIED,
+                Classification =  RunClassification.Unclassified,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.FINAL_RUN,
+                Classification = RunClassification.FinalRun,
                 RunId = 1,
             };
 
@@ -626,8 +625,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
             designatedRuns.Add(new CalculatorRunDto
             {
                 RunId = 101,
-                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
-                RunClassification = RunClassification.INITIAL_RUN_COMPLETED,
+                RunName = $"My - {RunClassification.InitialRunCompleted}",
+                RunClassification = RunClassification.InitialRunCompleted,
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
                 UpdatedAt = DateTime.UtcNow.AddDays(-1),
                 RelativeYear = new RelativeYear(2024),
@@ -643,8 +642,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 designatedRuns.Add(new CalculatorRunDto
                 {
                     RunId = 102,
-                    RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
-                    RunClassification = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
+                    RunName = $"My - {RunClassification.InterimRecalculationRunCompleted}",
+                    RunClassification = RunClassification.InterimRecalculationRunCompleted,
                     CreatedAt = DateTime.UtcNow.AddDays(-1),
                     UpdatedAt = DateTime.UtcNow.AddDays(-1),
                     RelativeYear = new RelativeYear(2024),
@@ -661,8 +660,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 designatedRuns.Add(new CalculatorRunDto
                 {
                     RunId = 102,
-                    RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
-                    RunClassification = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
+                    RunName = $"My - {RunClassification.FinalRecalculationRunCompleted}",
+                    RunClassification = RunClassification.FinalRecalculationRunCompleted,
                     CreatedAt = DateTime.UtcNow.AddDays(-1),
                     UpdatedAt = DateTime.UtcNow.AddDays(-1),
                     RelativeYear = new RelativeYear(2024),
@@ -679,8 +678,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 designatedRuns.Add(new CalculatorRunDto
                 {
                     RunId = 102,
-                    RunName = $"My - {RunClassification.FINAL_RUN_COMPLETED}",
-                    RunClassification = RunClassification.FINAL_RUN_COMPLETED,
+                    RunName = $"My - {RunClassification.FinalRunCompleted}",
+                    RunClassification = RunClassification.FinalRunCompleted,
                     CreatedAt = DateTime.UtcNow.AddDays(-1),
                     UpdatedAt = DateTime.UtcNow.AddDays(-1),
                     RelativeYear = new RelativeYear(2024),
@@ -696,11 +695,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) RunClassification.UNCLASSIFIED,
+                Classification =  RunClassification.Unclassified,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN,
+                Classification = RunClassification.InterimRecalculationRun,
                 RunId = 1,
             };
 
@@ -736,8 +735,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
             designatedRuns.Add(new CalculatorRunDto
             {
                 RunId = 101,
-                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
-                RunClassification = RunClassification.INITIAL_RUN_COMPLETED,
+                RunName = $"My - {RunClassification.InitialRunCompleted}",
+                RunClassification = RunClassification.InitialRunCompleted,
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
                 UpdatedAt = DateTime.UtcNow.AddDays(-1),
                 RelativeYear = new RelativeYear(2024),
@@ -753,8 +752,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 designatedRuns.Add(new CalculatorRunDto
                 {
                     RunId = 102,
-                    RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
-                    RunClassification = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
+                    RunName = $"My - {RunClassification.InterimRecalculationRunCompleted}",
+                    RunClassification = RunClassification.InterimRecalculationRunCompleted,
                     CreatedAt = DateTime.UtcNow.AddDays(-1),
                     UpdatedAt = DateTime.UtcNow.AddDays(-1),
                     RelativeYear = new RelativeYear(2024),
@@ -770,11 +769,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) RunClassification.UNCLASSIFIED,
+                Classification =  RunClassification.Unclassified,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.FINAL_RECALCULATION_RUN,
+                Classification = RunClassification.FinalRecalculationRun,
                 RunId = 1,
             };
 
@@ -812,8 +811,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
             designatedRuns.Add(new CalculatorRunDto
             {
                 RunId = 101,
-                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
-                RunClassification = RunClassification.INITIAL_RUN_COMPLETED,
+                RunName = $"My - {RunClassification.InitialRunCompleted}",
+                RunClassification = RunClassification.InitialRunCompleted,
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
                 UpdatedAt = DateTime.UtcNow.AddDays(-1),
                 RelativeYear = new RelativeYear(2024),
@@ -829,8 +828,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 designatedRuns.Add(new CalculatorRunDto
                 {
                     RunId = 102,
-                    RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
-                    RunClassification = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
+                    RunName = $"My - {RunClassification.InterimRecalculationRunCompleted}",
+                    RunClassification = RunClassification.InterimRecalculationRunCompleted,
                     CreatedAt = DateTime.UtcNow.AddDays(-1),
                     UpdatedAt = DateTime.UtcNow.AddDays(-1),
                     RelativeYear = new RelativeYear(2024),
@@ -847,8 +846,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 designatedRuns.Add(new CalculatorRunDto
                 {
                     RunId = 103,
-                    RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
-                    RunClassification = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
+                    RunName = $"My - {RunClassification.FinalRecalculationRunCompleted}",
+                    RunClassification = RunClassification.FinalRecalculationRunCompleted,
                     CreatedAt = DateTime.UtcNow.AddDays(-1),
                     UpdatedAt = DateTime.UtcNow.AddDays(-1),
                     RelativeYear = new RelativeYear(2024),
@@ -864,11 +863,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             {
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
-                CalculatorRunClassificationId = (int) RunClassification.UNCLASSIFIED,
+                Classification =  RunClassification.Unclassified,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.FINAL_RUN,
+                Classification = RunClassification.FinalRun,
                 RunId = 1,
             };
 
@@ -899,8 +898,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
             designatedRuns.Add(new CalculatorRunDto
             {
                 RunId = 101,
-                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
-                RunClassification = RunClassification.INITIAL_RUN_COMPLETED,
+                RunName = $"My - {RunClassification.InitialRunCompleted}",
+                RunClassification = RunClassification.InitialRunCompleted,
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
                 UpdatedAt = DateTime.UtcNow.AddDays(-1),
                 RelativeYear = new RelativeYear(2024),
@@ -916,8 +915,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 designatedRuns.Add(new CalculatorRunDto
                 {
                     RunId = 102,
-                    RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
-                    RunClassification = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
+                    RunName = $"My - {RunClassification.InterimRecalculationRunCompleted}",
+                    RunClassification = RunClassification.InterimRecalculationRunCompleted,
                     CreatedAt = DateTime.UtcNow.AddDays(-1),
                     UpdatedAt = DateTime.UtcNow.AddDays(-1),
                     RelativeYear = new RelativeYear(2024),
@@ -934,8 +933,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 designatedRuns.Add(new CalculatorRunDto
                 {
                     RunId = 102,
-                    RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
-                    RunClassification = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
+                    RunName = $"My - {RunClassification.FinalRecalculationRunCompleted}",
+                    RunClassification = RunClassification.FinalRecalculationRunCompleted,
                     CreatedAt = DateTime.UtcNow.AddDays(-1),
                     UpdatedAt = DateTime.UtcNow.AddDays(-1),
                     RelativeYear = new RelativeYear(2024),
@@ -952,8 +951,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 designatedRuns.Add(new CalculatorRunDto
                 {
                     RunId = 102,
-                    RunName = $"My - {RunClassification.FINAL_RUN_COMPLETED}",
-                    RunClassification = RunClassification.FINAL_RUN_COMPLETED,
+                    RunName = $"My - {RunClassification.FinalRunCompleted}",
+                    RunClassification = RunClassification.FinalRunCompleted,
                     CreatedAt = DateTime.UtcNow.AddDays(-1),
                     UpdatedAt = DateTime.UtcNow.AddDays(-1),
                     RelativeYear = new RelativeYear(2024),
@@ -970,11 +969,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 CreatedAt = DateTime.UtcNow.AddDays(-2), // Older run
-                CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED,
+                Classification = RunClassification.Unclassified,
             };
             var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN,
+                Classification = RunClassification.InterimRecalculationRun,
                 RunId = 1,
             };
 

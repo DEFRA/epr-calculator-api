@@ -1,4 +1,5 @@
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -55,7 +56,7 @@ public class CalcRelativeYearRequestDtoDataValidator : ICalcRelativeYearRequestD
         }
 
         // Check that the run is unclassified
-        if (currentRun.CalculatorRunClassificationId != (int)RunClassification.UNCLASSIFIED)
+        if (currentRun.Classification != RunClassification.Unclassified)
         {
             validationResult.IsInvalid = true;
             validationResult.Errors.Add(new ErrorDto

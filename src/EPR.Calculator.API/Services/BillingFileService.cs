@@ -43,7 +43,7 @@ namespace EPR.Calculator.API.Services
                     Message = CommonResources.ResourceNotFoundErrorMessage,
                 };
             }
-            else if (calculatorRun.CalculatorRunClassificationId != (int)RunClassification.INITIAL_RUN)
+            else if (calculatorRun.Classification != RunClassification.InitialRun)
             {
                 return new ServiceProcessResponseDto
                 {
@@ -96,7 +96,7 @@ namespace EPR.Calculator.API.Services
             try
             {
                 var calculatorRun = await applicationDBContext.CalculatorRuns
-                            .SingleOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatusForBillingInstructions().Contains(x.CalculatorRunClassificationId), cancellationToken)
+                            .SingleOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatusForBillingInstructions.Contains(x.Classification), cancellationToken)
                             .ConfigureAwait(false);
 
                 if (calculatorRun is null)
@@ -326,8 +326,7 @@ namespace EPR.Calculator.API.Services
                 var hasValidBillingRunStatus = calculatorRun.BillingRunStatus is BillingRunStatus.None or BillingRunStatus.Errored
                                                || (calculatorRun.BillingRunStatus is BillingRunStatus.Running && timeProvider.GetUtcNow() - calculatorRun.BillingRunStartedAt >= TimeSpan.FromHours(1));
 
-
-                if (!Util.AcceptableRunStatusForBillingInstructions().Contains(calculatorRun.CalculatorRunClassificationId) || !hasValidBillingRunStatus)
+                if (!Util.AcceptableRunStatusForBillingInstructions.Contains(calculatorRun.Classification) || !hasValidBillingRunStatus)
                 {
                     return new ServiceProcessResponseDto
                     {
@@ -381,15 +380,15 @@ namespace EPR.Calculator.API.Services
                 throw new KeyNotFoundException(string.Format(CommonResources.RunINotFound, runId));
             }
 
-            var validRunClassifications = new HashSet<int>
+            var validRunClassifications = new HashSet<RunClassification>
             {
-                (int)RunClassification.INITIAL_RUN,
-                (int)RunClassification.INTERIM_RECALCULATION_RUN,
-                (int)RunClassification.FINAL_RUN,
-                (int)RunClassification.FINAL_RECALCULATION_RUN,
+                RunClassification.InitialRun,
+                RunClassification.InterimRecalculationRun,
+                RunClassification.FinalRun,
+                RunClassification.FinalRecalculationRun,
             };
 
-            if (!validRunClassifications.Contains(runStatus.CalculatorRunClassificationId))
+            if (!validRunClassifications.Contains(runStatus.Classification))
             {
                 throw new UnprocessableEntityException(string.Format(CommonResources.NotAValidClassificationStatus, runId));
             }
@@ -457,13 +456,13 @@ namespace EPR.Calculator.API.Services
             IEnumerable<int> producerIds,
             CancellationToken cancellationToken)
         {
-            var runClassificationsToIgnore = new List<int>
+            var runClassificationsToIgnore = new HashSet<RunClassification>
             {
-                (int)RunClassification.INTHEQUEUE,
-                (int)RunClassification.RUNNING,
-                (int)RunClassification.TEST_RUN,
-                (int)RunClassification.ERROR,
-                (int)RunClassification.DELETED,
+                RunClassification.None,
+                RunClassification.Running,
+                RunClassification.TestRun,
+                RunClassification.Errored,
+                RunClassification.Deleted,
             };
 
             var parentProducers = await (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
@@ -495,7 +494,7 @@ namespace EPR.Calculator.API.Services
                 var outstandingParentProducers = await (from p in applicationDBContext.ProducerDetail
                                                   join r in applicationDBContext.CalculatorRuns on p.CalculatorRunId equals r.Id
                                                   where r.RelativeYearValue == relativeYear.Value
-                                                         && !runClassificationsToIgnore.Contains(r.CalculatorRunClassificationId)
+                                                         && !runClassificationsToIgnore.Contains(r.Classification)
                                                          && outstandingProducerIds.Contains(p.ProducerId)
                                                          && p.SubsidiaryId == null
                                                   orderby p.Id descending

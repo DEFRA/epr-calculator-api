@@ -63,21 +63,21 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             context.CalculatorRuns.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = RunClassificationStatusIds.INITIALRUNID,
+                Classification = RunClassification.InitialRun,
                 RelativeYear = new RelativeYear(2024),
                 Name = "Name",
                 Id = 1,
             });
             context.CalculatorRuns.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = RunClassificationStatusIds.UNCLASSIFIEDID,
+                Classification = RunClassification.Unclassified,
                 RelativeYear = new RelativeYear(2024),
                 Name = "Second run",
                 Id = 2,
             });
             context.CalculatorRuns.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = RunClassificationStatusIds.INITIALRUNID,
+                Classification = RunClassification.InitialRun,
                 RelativeYear = new RelativeYear(2024),
                 Name = "Calc Billing Run Test",
                 BillingRunStatus = BillingRunStatus.Completed,
@@ -156,7 +156,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var run = response.Value as CalculatorRunDto;
             Assert.IsNotNull(run);
             Assert.AreEqual(3, run.RunId);
-            Assert.AreEqual(RunClassification.INITIAL_RUN, run.RunClassification);
+            Assert.AreEqual(RunClassification.InitialRun, run.RunClassification);
             Assert.IsNull(run.UpdatedAt);
             Assert.IsNull(run.UpdatedBy);
             Assert.IsNotNull(run.CompletedBillingRun);
@@ -220,10 +220,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         /// <param name="expectedNewValue">The value the status should have after the method is run.</param>
         /// <returns>A <see cref="Task"/>.</returns>
         [TestMethod]
-        [DataRow(RunClassification.INITIAL_RUN, RunClassification.INITIAL_RUN_COMPLETED)]
-        [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED)]
-        [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
-        [DataRow(RunClassification.FINAL_RUN, RunClassification.FINAL_RUN_COMPLETED)]
+        [DataRow(RunClassification.InitialRun, RunClassification.InitialRunCompleted)]
+        [DataRow(RunClassification.InterimRecalculationRun, RunClassification.InterimRecalculationRunCompleted)]
+        [DataRow(RunClassification.FinalRecalculationRun, RunClassification.FinalRecalculationRunCompleted)]
+        [DataRow(RunClassification.FinalRun, RunClassification.FinalRunCompleted)]
         public async Task PrepareBillingFileSendToFSS_UpdateToCompleted(
             RunClassification initialValue,
             RunClassification expectedNewValue)
@@ -235,11 +235,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var calculatorRun = context.CalculatorRuns
                 .Single(run => run.Id == calculatorRunId);
 
-            calculatorRun.CalculatorRunClassificationId = (int)initialValue;
+            calculatorRun.Classification = initialValue;
             calculatorRun.BillingRunStatus = BillingRunStatus.Completed;
             calculatorRun.BillingFileMetadata = new CalculatorRunBillingFileMetadata
             {
-                CalculatorRunId = 1,
                 BillingFileCreatedDate = DateTime.UtcNow,
                 BillingFileCreatedBy = "ignored",
                 BillingCsvFileName = "ignored",
@@ -257,8 +256,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Act
             var result = (StatusCodeResult)await controller.PrepareBillingFileSendToFSS(calculatorRunId, CancellationToken.None);
-            var newClassification = (RunClassification)context.CalculatorRuns
-                .Single(run => run.Id == calculatorRunId).CalculatorRunClassificationId;
+            var newClassification = context.CalculatorRuns
+                .Single(run => run.Id == calculatorRunId).Classification;
 
             // Assert
             Assert.IsNotNull(result);
@@ -275,10 +274,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         /// <param name="initialValue">The initial value of the run status.</param>
         /// <returns>A <see cref="Task"/>.</returns>
         [TestMethod]
-        [DataRow(RunClassification.RUNNING)]
-        [DataRow(RunClassification.TEST_RUN)]
-        [DataRow(RunClassification.DELETED)]
-        [DataRow(RunClassification.INTHEQUEUE)]
+        [DataRow(RunClassification.Running)]
+        [DataRow(RunClassification.TestRun)]
+        [DataRow(RunClassification.Deleted)]
+        [DataRow(RunClassification.None)]
         public async Task PrepareBillingFileSendToFSS_FailWhenInvalidClassification(RunClassification initialValue)
         {
             ControllerContext();
@@ -287,11 +286,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var calculatorRun = context.CalculatorRuns
                 .Single(run => run.Id == calculatorRunId);
 
-            calculatorRun.CalculatorRunClassificationId = (int)initialValue;
+            calculatorRun.Classification = initialValue;
             calculatorRun.BillingRunStatus = BillingRunStatus.Completed;
             calculatorRun.BillingFileMetadata = new CalculatorRunBillingFileMetadata
             {
-                CalculatorRunId = 1,
                 BillingFileCreatedDate = DateTime.UtcNow,
                 BillingFileCreatedBy = "ignored",
                 BillingCsvFileName = "ignored",
@@ -304,13 +302,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Act
             var result = (ObjectResult)await controller.PrepareBillingFileSendToFSS(1, CancellationToken.None);
-            var newClassification = (RunClassification)context.CalculatorRuns
-                    .Single(run => run.Id == calculatorRunId).CalculatorRunClassificationId;
+            var newClassification = context.CalculatorRuns
+                    .Single(run => run.Id == calculatorRunId).Classification;
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, (HttpStatusCode)result.StatusCode!);
             Assert.AreEqual(initialValue, newClassification);
-            var expectedMessage = $"Classification {(RunClassification)calculatorRun.CalculatorRunClassificationId} is not valid to be completed.";
+            var expectedMessage = $"Classification {calculatorRun.Classification} is not valid to be completed.";
             Assert.AreEqual(expectedMessage, result.Value);
 
             context.CalculatorRunBillingFileMetadata.RemoveRange(context.CalculatorRunBillingFileMetadata);

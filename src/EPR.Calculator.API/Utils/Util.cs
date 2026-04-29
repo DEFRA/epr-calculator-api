@@ -1,11 +1,8 @@
-﻿using System;
+﻿using System.Collections.Immutable;
 using System.Text;
-using System.Text.RegularExpressions;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Enums;
-using Microsoft.Extensions.Primitives;
-using Microsoft.OpenApi.Models;
 
 namespace EPR.Calculator.API.Utils
 {
@@ -208,17 +205,12 @@ namespace EPR.Calculator.API.Utils
             };
         }
 
-        public static IEnumerable<int> AcceptableRunStatusForBillingInstructions()
-        {
-            var validRunClassifications = new List<int>
-                {
-                    (int)RunClassification.INITIAL_RUN,
-                    (int)RunClassification.INTERIM_RECALCULATION_RUN,
-                    (int)RunClassification.FINAL_RUN,
-                    (int)RunClassification.FINAL_RECALCULATION_RUN,
-                };
-
-            return validRunClassifications;
-        }
+        public static readonly ImmutableArray<RunClassification> AcceptableRunStatusForBillingInstructions =
+        [
+            RunClassification.InitialRun,
+            RunClassification.InterimRecalculationRun,
+            RunClassification.FinalRun,
+            RunClassification.FinalRecalculationRun,
+        ];
     }
 }

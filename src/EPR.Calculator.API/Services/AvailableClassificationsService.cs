@@ -1,183 +1,158 @@
-﻿using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services;
 
-public class AvailableClassificationsService(
-    ApplicationDBContext context,
-    ILogger<AvailableClassificationsService> logger) : IAvailableClassificationsService
+public class AvailableClassificationsService(ApplicationDBContext context)
+    : IAvailableClassificationsService
 {
-    public async Task<List<CalculatorRunClassification>> GetAvailableClassificationsForRelativeYearAsync(CalcRelativeYearRequestDto request, CancellationToken cancellationToken = default)
+    public async Task<List<RunClassification>> GetAvailableClassificationsForRelativeYearAsync(CalcRelativeYearRequestDto request, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            List<RunClassification> validStatuses = await this.DetermineAvailableClassificationsAsync(request, cancellationToken);
+        var targetRun = await context.CalculatorRuns
+            .SingleAsync(run => run.Id == request.RunId, cancellationToken);
 
-            if (validStatuses.Count == 0)
+        var otherRunsForYear = await context.CalculatorRuns
+            .Where(run =>
+                run.Id != request.RunId &&
+                run.RelativeYearValue == request.RelativeYearValue &&
+                run.Classification != RunClassification.Deleted &&
+                run.Classification != RunClassification.Errored &&
+                run.Classification != RunClassification.Running &&
+                run.Classification != RunClassification.None
+            )
+            .Select(cr => new RunInfo
             {
-                return [];
-            }
+                RunId = cr.Id,
+                RunClassification = cr.Classification,
+                BillingRunStatus = cr.BillingRunStatus,
+                BillingRunAuthorisedAt = cr.BillingFileMetadata != null
+                    ? cr.BillingFileMetadata.BillingFileAuthorisedDate
+                    : null
+            })
+            .ToListAsync(cancellationToken);
 
-            var allClassifications = await context.CalculatorRunClassifications
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
-
-            return validStatuses
-                .Join(
-                    allClassifications,
-                    status => (int)status,
-                    classification => classification.Id,
-                    (status, classification) => classification)
-                .ToList();
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "An error occurred whilst attempting to determine available classifications. Error :-{Message}", ex.Message);
-            throw new DataRetrievalException("An error occurred whilst attempting to determine available classifications.", ex);
-        }
-    }
-
-    private static bool IsPreInitialRun(List<RunClassificationStatus> currentClassifications)
-    {
-        return currentClassifications.TrueForAll(c => !c.HasFlag(RunClassificationStatus.Designated));
-    }
-
-    private static bool IsDesignatedButIncomplete(List<RunClassificationStatus> currentClassifications)
-    {
-        return currentClassifications.Exists(c => c.HasFlag(RunClassificationStatus.Designated) && !c.HasFlag(RunClassificationStatus.Complete));
-    }
-
-    private static bool HasNeitherFinalRunNorFinalRecalculationRun(List<RunClassificationStatus> currentClassifications)
-    {
-        return currentClassifications.Exists(c => c == RunClassificationStatus.INITIAL_RUN_COMPLETED)
-            && currentClassifications.TrueForAll(c => c != RunClassificationStatus.FINAL_RECALCULATION_RUN_COMPLETED && c != RunClassificationStatus.FINAL_RUN_COMPLETED);
-    }
-
-    private static bool HasFinalRecalculationButNoFinalRun(List<RunClassificationStatus> currentClassifications)
-    {
-        return currentClassifications.Exists(c => c == RunClassificationStatus.INITIAL_RUN_COMPLETED)
-            && currentClassifications.Exists(c => c == RunClassificationStatus.FINAL_RECALCULATION_RUN_COMPLETED)
-            && currentClassifications.TrueForAll(c => c != RunClassificationStatus.FINAL_RUN_COMPLETED);
-    }
-
-    private static bool HasFinalRun(List<RunClassificationStatus> currentClassifications)
-    {
-        return currentClassifications.Exists(c => c == RunClassificationStatus.INITIAL_RUN_COMPLETED)
-            && currentClassifications.Exists(c => c == RunClassificationStatus.FINAL_RUN_COMPLETED);
-    }
-
-    private async Task<bool> IsCurrentRunOlderThanOtherCompletedRuns(
-       CalculatorRun currentRun,
-       List<CalculatorRun> filteredRuns,
-       CancellationToken cancellationToken)
-    {
-        List<int> compledRunIds = filteredRuns.Where(run => run.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED
-                                                   || run.CalculatorRunClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED
-                                                   || run.CalculatorRunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED
-                                                   || run.CalculatorRunClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED)
-                                               .Select(run => run.Id)
-                                               .ToList();
-
-        var runs = await
-                (from run in context.CalculatorRuns
-                 join calculatorRunBillingFileMetadata in context.CalculatorRunBillingFileMetadata
-                            on run.Id equals calculatorRunBillingFileMetadata.CalculatorRunId
-                 where compledRunIds.Contains(run.Id)
-                 select new
-                 {
-                     RunId = run.Id,
-                     calculatorRunBillingFileMetadata.BillingFileAuthorisedDate,
-                 })
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
-
-        return runs.Where(run => run.BillingFileAuthorisedDate.HasValue)
-                   .Any(run => (run.BillingFileAuthorisedDate!.Value >= currentRun.CreatedAt));
-    }
-
-    private async Task<List<RunClassification>> DetermineAvailableClassificationsAsync(
-        CalcRelativeYearRequestDto request,
-        CancellationToken cancellationToken)
-    {
-        List<CalculatorRun> allRuns = await this.GetCalculatorRuns(request, cancellationToken);
-        List<CalculatorRun> filteredRuns = [.. allRuns.Where(run => run.Id != request.RunId)];
-        List<RunClassificationStatus> currentClassifications = [.. filteredRuns.Select(run => (RunClassification)run.CalculatorRunClassificationId).Select(classification => (RunClassificationStatus)Enum.Parse(typeof(RunClassificationStatus), classification.ToString()))];
-
-        if (IsPreInitialRun(currentClassifications))
+        if (HasAllUndesignated(otherRunsForYear))
         {
             return
             [
-                RunClassification.INITIAL_RUN,
-                RunClassification.TEST_RUN,
+                RunClassification.InitialRun,
+                RunClassification.TestRun
             ];
         }
 
-        if (IsDesignatedButIncomplete(currentClassifications))
+        if (HasAnyDesignatedButIncomplete(otherRunsForYear))
         {
             return
             [
-                RunClassification.TEST_RUN,
+                RunClassification.TestRun
             ];
         }
 
-        CalculatorRun currentRun = allRuns.Single(run => run.Id == request.RunId);
-
-        if (await IsCurrentRunOlderThanOtherCompletedRuns(currentRun, filteredRuns, cancellationToken))
+        if (HasAnyCompletedAfter(otherRunsForYear, targetRun.CreatedAt))
         {
             return
             [
-                RunClassification.TEST_RUN,
+                RunClassification.TestRun
             ];
         }
 
-        if (HasNeitherFinalRunNorFinalRecalculationRun(currentClassifications))
+        if (HasNeitherFinalRunNorFinalRecalculationRun(otherRunsForYear))
         {
             return
             [
-                RunClassification.INTERIM_RECALCULATION_RUN,
-                RunClassification.FINAL_RECALCULATION_RUN,
-                RunClassification.FINAL_RUN,
-                RunClassification.TEST_RUN,
+                RunClassification.InterimRecalculationRun,
+                RunClassification.FinalRecalculationRun,
+                RunClassification.FinalRun,
+                RunClassification.TestRun
             ];
         }
 
-        if (HasFinalRecalculationButNoFinalRun(currentClassifications))
+        if (HasFinalRecalculationButNoFinalRun(otherRunsForYear))
         {
             return
             [
-                RunClassification.INTERIM_RECALCULATION_RUN,
-                RunClassification.FINAL_RUN,
-                RunClassification.TEST_RUN,
+                RunClassification.InterimRecalculationRun,
+                RunClassification.FinalRun,
+                RunClassification.TestRun
             ];
         }
 
-        if (HasFinalRun(currentClassifications))
+        if (HasFinalRun(otherRunsForYear))
         {
             return
             [
-                RunClassification.INTERIM_RECALCULATION_RUN,
-                RunClassification.TEST_RUN,
+                RunClassification.InterimRecalculationRun,
+                RunClassification.TestRun
             ];
         }
 
         return [];
     }
 
-    private async Task<List<CalculatorRun>> GetCalculatorRuns(CalcRelativeYearRequestDto request, CancellationToken cancellationToken)
+    private static bool HasAllUndesignated(IReadOnlyCollection<RunInfo> runs)
     {
-        List<CalculatorRun> currentRuns = await context.CalculatorRuns
-            .Where(run => run.RelativeYearValue == request.RelativeYearValue
-                && run.CalculatorRunClassificationId != (int)RunClassification.DELETED
-                && run.CalculatorRunClassificationId != (int)RunClassification.ERROR
-                && run.CalculatorRunClassificationId != (int)RunClassification.RUNNING
-                && run.CalculatorRunClassificationId != (int)RunClassification.INTHEQUEUE)
-            .AsNoTracking()
-            .ToListAsync(cancellationToken);
+        return runs.All(r => r.RunClassification is not (
+            RunClassification.InitialRun or
+            RunClassification.InitialRunCompleted or
+            RunClassification.InterimRecalculationRun or
+            RunClassification.InterimRecalculationRunCompleted or
+            RunClassification.FinalRecalculationRun or
+            RunClassification.FinalRecalculationRunCompleted or
+            RunClassification.FinalRun or
+            RunClassification.FinalRunCompleted
+            ));
+    }
 
-        return currentRuns;
+    private static bool HasAnyDesignatedButIncomplete(IReadOnlyCollection<RunInfo> runs)
+    {
+        return runs.Any(r => r.RunClassification is
+            RunClassification.InitialRun or
+            RunClassification.InterimRecalculationRun or
+            RunClassification.FinalRecalculationRun or
+            RunClassification.FinalRun);
+    }
+
+    private static bool HasAnyCompletedAfter(IReadOnlyCollection<RunInfo> runs, DateTime cutOff)
+    {
+        return runs
+            .Any(r => r.BillingRunStatus == BillingRunStatus.Completed &&
+                      r.BillingRunAuthorisedAt >= cutOff &&
+                      r.RunClassification is
+                          RunClassification.InitialRunCompleted or
+                          RunClassification.InterimRecalculationRunCompleted or
+                          RunClassification.FinalRecalculationRunCompleted or
+                          RunClassification.FinalRunCompleted);
+    }
+
+    private static bool HasNeitherFinalRunNorFinalRecalculationRun(IReadOnlyCollection<RunInfo> runs)
+    {
+        return runs.Any(r => r.RunClassification is RunClassification.InitialRunCompleted)
+               && runs.All(r => r.RunClassification is not (
+                   RunClassification.FinalRecalculationRunCompleted or
+                   RunClassification.FinalRunCompleted
+                   ));
+    }
+
+    private static bool HasFinalRecalculationButNoFinalRun(IReadOnlyCollection<RunInfo> runs)
+    {
+        return runs.Any(r => r.RunClassification is RunClassification.InitialRunCompleted)
+               && runs.Any(r => r.RunClassification is RunClassification.FinalRecalculationRunCompleted)
+               && runs.All(r => r.RunClassification is not RunClassification.FinalRunCompleted);
+    }
+
+    private static bool HasFinalRun(IReadOnlyCollection<RunInfo> runs)
+    {
+        return runs.Any(r => r.RunClassification is RunClassification.InitialRunCompleted)
+               && runs.Any(r => r.RunClassification is RunClassification.FinalRunCompleted);
+    }
+
+    private sealed record RunInfo
+    {
+        public required int RunId { get; init; }
+        public required RunClassification RunClassification { get; init; }
+        public required BillingRunStatus BillingRunStatus { get; init; }
+        public required DateTime? BillingRunAuthorisedAt { get; init; }
     }
 }

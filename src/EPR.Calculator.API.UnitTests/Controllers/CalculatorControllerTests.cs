@@ -5,6 +5,7 @@ using EnumsNET;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -445,7 +446,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 CreatedBy = "Testuser",
                 CreatedAt = DateTime.UtcNow,
-                CalculatorRunClassificationId = 2,
+                Classification = RunClassification.Running,
                 RelativeYear = new RelativeYear(2024),
                 Name = "TestOneAtATime",
             });
@@ -474,14 +475,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task ClassificationByRelativeYear_Returns_Options_For_Valid_RelativeYear()
         {
-            var initialRun = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description);
-            var testRun = RunClassification.TEST_RUN.AsString(EnumFormat.Description);
-
-            if (initialRun == null || testRun == null)
-            {
-                Assert.Fail("Run classifications Enums not loaded");
-            }
-
             // Arrange
             var relativeYear = new RelativeYear(2024);
             var request = new CalcRelativeYearRequestDto { RunId = Random.Shared.Next(), RelativeYearValue = relativeYear.Value };
@@ -494,16 +487,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var mockAvailableClassificationsService = new Mock<IAvailableClassificationsService>();
             mockAvailableClassificationsService
                 .Setup(s => s.GetAvailableClassificationsForRelativeYearAsync(request, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<CalculatorRunClassification>
-                {
-                    new() { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)! },
-                    new() { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)! },
-                });
+                .ReturnsAsync([
+                    RunClassification.InitialRun,
+                    RunClassification.TestRun
+                ]);
 
-            var mockDbContext = MockDbContextForCalculatorRunClassifications();
 
             var individualCalcController = new CalculatorController(
-                mockDbContext.Object,
+                DbContext,
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
@@ -511,11 +502,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 mockAvailableClassificationsService.Object,
                 Mock.Of<ICalculationRunService>());
 
-            var expectedClassifications = new List<CalculatorRunClassificationDto>
-            {
-                new CalculatorRunClassificationDto { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)! },
-                new() { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)! },
-            };
+            List<RunClassification> expectedClassifications =
+            [
+                RunClassification.InitialRun,
+                RunClassification.TestRun
+            ];
 
             // Act
             var actionResult = await individualCalcController.ClassificationByRelativeYear(request) as ObjectResult;
@@ -525,9 +516,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(StatusCodes.Status200OK, actionResult.StatusCode);
             var result = actionResult.Value as RelativeYearClassificationResponseDto;
             Assert.IsNotNull(result);
-            var typeToAssert = typeof(CalculatorRunClassificationDto);
-            Assert.IsInstanceOfType(expectedClassifications[0], typeToAssert);
-            Assert.IsInstanceOfType(result.Classifications[1], typeToAssert);
             result.Classifications.Should().BeEquivalentTo(expectedClassifications);
             Assert.AreEqual(result.RelativeYear, relativeYear);
         }
@@ -583,7 +571,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var mockAvailableClassificationsService = new Mock<IAvailableClassificationsService>();
             mockAvailableClassificationsService
                 .Setup(s => s.GetAvailableClassificationsForRelativeYearAsync(request, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new List<CalculatorRunClassification>());
+                .ReturnsAsync([]);
 
             var controller = new CalculatorController(
                 DbContext,
@@ -631,35 +619,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(StatusCodes.Status500InternalServerError, actionResult.StatusCode);
             Assert.AreEqual("An unexpected error occurred.", actionResult.Value);
-        }
-
-        private static Mock<ApplicationDBContext> MockDbContextForCalculatorRunClassifications()
-        {
-            var mockClassifications = new List<CalculatorRunClassification>
-            {
-                new() { Id = 1, Status = "IN THE QUEUE", CreatedBy = "Test user" },
-                new() { Id = 2, Status = "RUNNING", CreatedBy = "Test user" },
-                new() { Id = 3, Status = "UNCLASSIFIED", CreatedBy = "Test user" },
-                new() { Id = 4, Status = "TEST RUN", CreatedBy = "Test user" },
-                new() { Id = 5, Status = "ERROR", CreatedBy = "Test user" },
-                new() { Id = 6, Status = "DELETED", CreatedBy = "Test user" },
-                new() { Id = 7, Status = "INITIAL RUN COMPLETED", CreatedBy = "Test user" },
-                new() { Id = 8, Status = "INITIAL RUN", CreatedBy = "Test user" },
-                new() { Id = 9, Status = "INTERIM RE-CALCULATION RUN", CreatedBy = "Test user" },
-                new() { Id = 10, Status = "FINAL RUN", CreatedBy = "Test user" },
-                new() { Id = 11, Status = "FINAL RE-CALCULATION RUN", CreatedBy = "Test user" },
-            }.AsQueryable();
-
-            var mockDbContext = new Mock<ApplicationDBContext>();
-            var mockClassificationsDbSet = new Mock<DbSet<CalculatorRunClassification>>();
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.Provider).Returns(new TestAsyncQueryProvider<CalculatorRunClassification>(mockClassifications.Provider));
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.Expression).Returns(mockClassifications.Expression);
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.ElementType).Returns(mockClassifications.ElementType);
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.GetEnumerator()).Returns(mockClassifications.GetEnumerator());
-            mockClassificationsDbSet.As<IAsyncEnumerable<CalculatorRunClassification>>().Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>())).Returns(new TestAsyncEnumerator<CalculatorRunClassification>(mockClassifications.GetEnumerator()));
-
-            mockDbContext.Setup(c => c.CalculatorRunClassifications).Returns(mockClassificationsDbSet.Object);
-            return mockDbContext;
         }
     }
 }

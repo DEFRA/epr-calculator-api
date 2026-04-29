@@ -83,7 +83,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // Act
             var runStatusUpdateDto = new API.Dtos.CalculatorRunStatusUpdateDto
             {
-                ClassificationId = 6,
+                Classification = RunClassification.Deleted,
                 RunId = 1,
             };
 
@@ -154,7 +154,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // Arrange
             var runStatusUpdateDto = new API.Dtos.CalculatorRunStatusUpdateDto
             {
-                ClassificationId = 6,
+                Classification = RunClassification.Deleted,
                 RunId = 1,
             };
 
@@ -224,7 +224,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // Arrange
             var runStatusUpdateDto = new API.Dtos.CalculatorRunStatusUpdateDto
             {
-                ClassificationId = (int)RunClassification.INITIAL_RUN,
+                Classification = RunClassification.InitialRun,
                 RunId = 1,
             };
 
@@ -243,7 +243,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 RunId = 2,
                 CreatedAt = DateTime.UtcNow.AddDays(-1),
                 RunName = "Run 2",
-                RunClassification = RunClassification.INITIAL_RUN,
+                RunClassification = RunClassification.InitialRun,
                 UpdatedAt = DateTime.UtcNow.AddMinutes(-1),
                 RelativeYear = new RelativeYear(2024),
                 CreatedBy = "Test User",

@@ -1,4 +1,4 @@
-using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -72,15 +72,6 @@ namespace EPR.Calculator.API.Controllers
 
                 var userName = claim.Value;
 
-                var classification = await this.context.CalculatorRunClassifications.SingleOrDefaultAsync(x =>
-                    x.Id == runStatusUpdateDto.ClassificationId);
-
-                if (classification == null)
-                {
-                    return new ObjectResult(string.Format(CommonResources.UnableToFindClassificationId, runStatusUpdateDto.ClassificationId))
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
-                }
-
                 var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(
                             x => x.Id == runStatusUpdateDto.RunId);
                 if (calculatorRun == null)
@@ -109,7 +100,7 @@ namespace EPR.Calculator.API.Controllers
                     { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
+                calculatorRun.Classification = runStatusUpdateDto.Classification;
                 calculatorRun.UpdatedAt = DateTime.UtcNow;
                 calculatorRun.UpdatedBy = userName;
 
@@ -243,22 +234,22 @@ namespace EPR.Calculator.API.Controllers
                 try
                 {
                     // Update calculation run classification status: Initial run completed
-                    newClassificationValue = calculatorRun.CalculatorRunClassificationId switch
+                    newClassificationValue = calculatorRun.Classification switch
                     {
-                        (int)RunClassification.INITIAL_RUN => RunClassification.INITIAL_RUN_COMPLETED,
-                        (int)RunClassification.INTERIM_RECALCULATION_RUN => RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
-                        (int)RunClassification.FINAL_RECALCULATION_RUN => RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
-                        (int)RunClassification.FINAL_RUN => RunClassification.FINAL_RUN_COMPLETED,
+                        RunClassification.InitialRun => RunClassification.InitialRunCompleted,
+                        RunClassification.InterimRecalculationRun => RunClassification.InterimRecalculationRunCompleted,
+                        RunClassification.FinalRecalculationRun => RunClassification.FinalRecalculationRunCompleted,
+                        RunClassification.FinalRun => RunClassification.FinalRunCompleted,
                         _ => throw new InvalidOperationException(),
                     };
                 }
                 catch (InvalidOperationException)
                 {
-                    return new ObjectResult(string.Format(CommonResources.UnableToChangeStatusToCompleted, (RunClassification)calculatorRun.CalculatorRunClassificationId))
+                    return new ObjectResult(string.Format(CommonResources.UnableToChangeStatusToCompleted, calculatorRun.Classification))
                         { StatusCode = StatusCodes.Status422UnprocessableEntity };
                 }
 
-                calculatorRun.CalculatorRunClassificationId = (int)newClassificationValue;
+                calculatorRun.Classification = newClassificationValue;
 
                 using (var transaction = await this.context.Database.BeginTransactionAsync(cancellationToken))
                 {

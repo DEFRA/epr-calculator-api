@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
@@ -62,7 +63,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
                 Name = "Calc RunName",
-                CalculatorRunClassificationId = 2,
+                Classification = RunClassification.Running,
                 CreatedAt = date,
                 CreatedBy = "User23",
                 LapcapDataMasterId = 1,
@@ -111,7 +112,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 Id = runId,
                 Name = "Calc RunName",
-                CalculatorRunClassificationId = 2,
+                Classification = RunClassification.Running,
                 CreatedAt = new DateTime(2024, 11, 11, 0, 0, 0, DateTimeKind.Unspecified),
                 CreatedBy = "User23",
                 LapcapDataMasterId = 1,
