@@ -3,11 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace EPR.Calculator.API.Data.Migrations
 {
-    [ExcludeFromCodeCoverage]
     /// <inheritdoc />
     public partial class AddInitialMigration : Migration
     {

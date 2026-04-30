@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace EPR.Calculator.API.Data.Migrations
 {
-    [ExcludeFromCodeCoverage]
     /// <inheritdoc />
     public partial class _202407311501_UpdateTemplateMasterType : Migration
     {
