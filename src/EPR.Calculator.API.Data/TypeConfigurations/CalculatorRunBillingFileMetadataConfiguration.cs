@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using EPR.Calculator.API.Data.Converters;
 using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -26,6 +27,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
 
             builder.Property(p => p.BillingFileCreatedDate)
                 .HasColumnName("billing_file_created_date")
+                .HasConversion<UtcDateTimeConverter>()
                 .IsRequired();
 
             builder.Property(p => p.BillingFileCreatedBy)
@@ -34,7 +36,8 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
                 .IsRequired();
 
             builder.Property(p => p.BillingFileAuthorisedDate)
-                .HasColumnName("billing_file_authorised_date");
+                .HasColumnName("billing_file_authorised_date")
+                .HasConversion<UtcDateTimeConverter>();
 
             builder.Property(p => p.BillingFileAuthorisedBy)
                 .HasColumnName("billing_file_authorised_by")

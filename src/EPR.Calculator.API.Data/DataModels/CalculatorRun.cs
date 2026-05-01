@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Models;
 
 namespace EPR.Calculator.API.Data.DataModels
@@ -6,8 +7,14 @@ namespace EPR.Calculator.API.Data.DataModels
     public class CalculatorRun
     {
         public int Id { get; set; }
-
         public int CalculatorRunClassificationId { get; set; }
+        public BillingRunStatus BillingRunStatus { get; set; } = BillingRunStatus.None;
+
+        /// <summary>
+        ///     Gets or sets the UTC timestamp of when the billing run started.
+        ///     Null if the billing run has never been started.
+        /// </summary>
+        public DateTime? BillingRunStartedAt { get; set; }
 
         public required string Name { get; set; }
 
@@ -36,8 +43,6 @@ namespace EPR.Calculator.API.Data.DataModels
 
         public int? DefaultParameterSettingMasterId { get; set; }
 
-        public bool? IsBillingFileGenerating { get; set; } = null;
-
         public CalculatorRunPomDataMaster? CalculatorRunPomDataMaster { get; set; }
 
         public CalculatorRunOrganisationDataMaster? CalculatorRunOrganisationDataMaster { get; set; }
@@ -50,7 +55,7 @@ namespace EPR.Calculator.API.Data.DataModels
 
         public ICollection<CountryApportionment> CountryApportionments { get; } = new List<CountryApportionment>();
 
-        public ICollection<CalculatorRunBillingFileMetadata> CalculatorRunBillingFileMetadata { get; } = new List<CalculatorRunBillingFileMetadata>();
+        public CalculatorRunBillingFileMetadata? BillingFileMetadata { get; set; }
 
         public ICollection<ProducerInvoicedMaterialNetTonnage> ProducerInvoicedMaterialNetTonnage { get; } = [];
 

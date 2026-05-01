@@ -1,4 +1,9 @@
-﻿namespace EPR.Calculator.API.Data
+using EPR.Calculator.API.Data.Comparers;
+using EPR.Calculator.API.Data.Converters;
+using EPR.Calculator.API.Data.Enums;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+
+namespace EPR.Calculator.API.Data
 {
     using System.Reflection;
     using EPR.Calculator.API.Data.DataModels;
@@ -98,6 +103,13 @@
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
             Seeder.Initialize(modelBuilder);
+        }
+
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+        {
+            // Allow conversion of enum properties to string for database storage. The comparer is required for EF's change tracking.
+            configurationBuilder.Properties<BillingRunStatus>()
+                .HaveConversion<EnumStringConverter<BillingRunStatus>, EnumComparer<BillingRunStatus>>();
         }
     }
 }
