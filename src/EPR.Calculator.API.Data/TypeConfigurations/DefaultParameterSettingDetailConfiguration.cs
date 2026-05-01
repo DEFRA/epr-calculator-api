@@ -23,6 +23,10 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.Property(p => p.ParameterValue)
                    .HasColumnName("parameter_value")
                    .HasPrecision(18, 3);
+
+            builder.HasOne(d => d.ParameterUniqueReference)
+                   .WithMany()
+                   .HasForeignKey(d => d.ParameterUniqueReferenceId);
         }
     }
 }

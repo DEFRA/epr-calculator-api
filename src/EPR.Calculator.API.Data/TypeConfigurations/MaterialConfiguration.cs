@@ -32,6 +32,14 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
             builder.HasMany(e => e.ProducerReportedMaterials)
                    .WithOne(e => e.Material)
                    .HasForeignKey(e => e.MaterialId);
+
+            builder.HasMany(e => e.ProducerReportedMaterialProjecteds)
+                   .WithOne(e => e.Material)
+                   .HasForeignKey(e => e.MaterialId);
+
+            builder.HasMany(e => e.ProducerInvoicedMaterialNetTonnage)
+                   .WithOne(e => e.Material)
+                   .HasForeignKey(e => e.MaterialId);
         }
     }
 }

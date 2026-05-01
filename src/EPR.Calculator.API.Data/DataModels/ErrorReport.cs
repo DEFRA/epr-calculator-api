@@ -18,5 +18,9 @@ public class ErrorReport
 
     public required string CreatedBy { get; set; }
 
+    #region EF navigational properties
+
     public virtual CalculatorRun? CalculatorRun { get; set; }
+
+    #endregion
 }

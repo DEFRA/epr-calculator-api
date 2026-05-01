@@ -90,5 +90,21 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
             .WithOne(m => m.CalculatorRun)
             .HasForeignKey<CalculatorRunBillingFileMetadata>(m => m.CalculatorRunId)
             .IsRequired();
+
+        builder.HasMany(e => e.CsvFileMetadata)
+            .WithOne(e => e.CalculatorRun)
+            .HasForeignKey(e => e.CalculatorRunId);
+
+        builder.HasMany(e => e.ProducerInvoicedMaterialNetTonnage)
+            .WithOne(e => e.CalculatorRun)
+            .HasForeignKey(e => e.CalculatorRunId);
+
+        builder.HasMany(e => e.ProducerDesignatedRunInvoiceInstruction)
+            .WithOne(e => e.CalculatorRun)
+            .HasForeignKey(e => e.CalculatorRunId);
+
+        builder.HasMany(e => e.ProducerResultFileSuggestedBillingInstruction)
+            .WithOne(e => e.CalculatorRun)
+            .HasForeignKey(e => e.CalculatorRunId);
     }
 }
