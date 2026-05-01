@@ -12,7 +12,6 @@ namespace EPR.Calculator.API.Data.DataSeeder
         public static void Initialize(ModelBuilder modelBuilder)
         {
             InitializeDefaultParameterTemplateMaster(modelBuilder);
-            InitializeCalculatorRunClassification(modelBuilder);
             InitializeLapcapData(modelBuilder);
         }
 
@@ -482,95 +481,6 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     ParameterType = "Red modulation factor",
                     ValidRangeFrom = 1.000M,
                     ValidRangeTo = 2.000M,
-                });
-        }
-
-        public static void InitializeCalculatorRunClassification(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<CalculatorRunClassification>().HasData(
-                new CalculatorRunClassification
-                {
-                    Id = RunClassificationStatusIds.INTHEQUEUEID,
-                    Status = RunClassificationDescStatus.INTHEQUEUE,
-                    CreatedBy = "Test User",
-                },
-                new CalculatorRunClassification
-                {
-                    Id = RunClassificationStatusIds.RUNNINGID,
-                    Status = RunClassificationDescStatus.RUNNING,
-                    CreatedBy = "Test User",
-                },
-                new CalculatorRunClassification
-                {
-                    Id = RunClassificationStatusIds.UNCLASSIFIEDID,
-                    Status = RunClassificationDescStatus.UNCLASSIFIED,
-                    CreatedBy = "Test User",
-                },
-                new CalculatorRunClassification
-                {
-                    Id = RunClassificationStatusIds.TESTRUNID,
-                    Status = RunClassificationDescStatus.TESTRUN,
-                    CreatedBy = "Test User",
-                },
-                new CalculatorRunClassification
-                {
-                    Id = RunClassificationStatusIds.ERRORID,
-                    Status = RunClassificationDescStatus.ERROR,
-                    CreatedBy = "Test User",
-                },
-                new CalculatorRunClassification
-                {
-                    Id = RunClassificationStatusIds.DELETEDID,
-                    Status = RunClassificationDescStatus.DELETED,
-                    CreatedBy = CreatedBy,
-                },
-                new CalculatorRunClassification
-                {
-                    Id = RunClassificationStatusIds.INITIALRUNCOMPLETEDID,
-                    Status = RunClassificationDescStatus.INITIALRUNCOMPLETED,
-                    CreatedBy = CreatedBy,
-                },
-                new CalculatorRunClassification
-                {
-                    Id = RunClassificationStatusIds.INITIALRUNID,
-                    Status = RunClassificationDescStatus.INITIALRUN,
-                    CreatedBy = "Test user",
-                },
-                new CalculatorRunClassification
-                {
-                    Id = RunClassificationStatusIds.INTERIMRECALCULATIONRUNID,
-                    Status = RunClassificationDescStatus.INTERIMRECALCULATIONRUN,
-                    CreatedBy = "Test user",
-                },
-                new CalculatorRunClassification
-                {
-                    Id = RunClassificationStatusIds.FINALRUNID,
-                    Status = RunClassificationDescStatus.FINALRUN,
-                    CreatedBy = "Test user",
-                },
-                new CalculatorRunClassification
-                {
-                    Id = RunClassificationStatusIds.FINALRECALCULATIONRUNID,
-                    Status = RunClassificationDescStatus.FINALRECALCULATIONRUN,
-                    CreatedBy = "Test user",
-                },
-                new CalculatorRunClassification
-                {
-                    Id = RunClassificationStatusIds.INTERMRECALCULATIONRUNCOMPID,
-                    Status = RunClassificationDescStatus.INTERMRECALCULATIONRUNCOMP,
-                    CreatedBy = CreatedBy,
-                },
-                new CalculatorRunClassification
-                {
-                    Id = RunClassificationStatusIds.FINALRECALCULATIONRUNCOMPID,
-                    Status = RunClassificationDescStatus.FINALRECALCULATIONRUNCOMP,
-                    CreatedBy = CreatedBy,
-                },
-                new CalculatorRunClassification
-                {
-                    Id = RunClassificationStatusIds.FINALRUNCOMPLETEDID,
-                    Status = RunClassificationDescStatus.FINALRUNCOMPLETED,
-                    CreatedBy = CreatedBy,
                 });
         }
 

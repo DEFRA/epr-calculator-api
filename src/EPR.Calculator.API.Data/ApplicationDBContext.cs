@@ -28,8 +28,6 @@ namespace EPR.Calculator.API.Data
 
         public DbSet<DefaultParameterTemplateMaster> DefaultParameterTemplateMasterList { get; set; }
 
-        public virtual DbSet<CalculatorRunClassification> CalculatorRunClassifications { get; set; }
-
         public virtual DbSet<CalculatorRun> CalculatorRuns { get; set; }
 
         public DbSet<LapcapDataTemplateMaster> LapcapDataTemplateMaster { get; set; }
@@ -110,6 +108,9 @@ namespace EPR.Calculator.API.Data
             // Allow conversion of enum properties to string for database storage. The comparer is required for EF's change tracking.
             configurationBuilder.Properties<BillingRunStatus>()
                 .HaveConversion<EnumStringConverter<BillingRunStatus>, EnumComparer<BillingRunStatus>>();
+            
+            configurationBuilder.Properties<RunClassification>()
+                .HaveConversion<EnumStringConverter<RunClassification>, EnumComparer<RunClassification>>();
         }
     }
 }

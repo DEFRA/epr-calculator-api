@@ -19,8 +19,9 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
             .HasColumnName("id")
             .IsRequired();
 
-        builder.Property(p => p.CalculatorRunClassificationId)
-            .HasColumnName("calculator_run_classification_id")
+        builder.Property(p => p.Classification)
+            .HasColumnName("classification")
+            .HasMaxLength(50)
             .IsRequired();
 
         builder.Property(o => o.BillingRunStatus)

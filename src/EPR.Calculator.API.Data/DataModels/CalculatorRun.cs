@@ -7,7 +7,7 @@ namespace EPR.Calculator.API.Data.DataModels
     public class CalculatorRun
     {
         public int Id { get; set; }
-        public int CalculatorRunClassificationId { get; set; }
+        public RunClassification Classification { get; set; } = RunClassification.None;
         public BillingRunStatus BillingRunStatus { get; set; } = BillingRunStatus.None;
 
         /// <summary>
