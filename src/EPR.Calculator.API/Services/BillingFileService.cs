@@ -267,7 +267,7 @@ namespace EPR.Calculator.API.Services
             // Apply BillingInstruction filter if provided and not empty
             query = query.ApplyBillingInstructionFilter(searchQuery);
 
-            query = query.Distinct().OrderBy(x => x.ProducerId).AsQueryable();
+            query = query.OrderBy(x => x.ProducerId).AsQueryable();
 
             requestDto.PageNumber ??= DetermineProducerBillingInstructionsPageNumber();
             requestDto.PageSize ??= DetermineProducerBillingInstructionsPageSize();
@@ -640,7 +640,13 @@ namespace EPR.Calculator.API.Services
                           .AsNoTracking()
                           .ToListAsync(cancellationToken);
 
-            var allProducerIdsExcludingIdsWithSuggestedBillingInstructionNoAction = query.Where(x => x.SuggestedBillingInstruction != NoActionPlaceholder).Select(x => x.ProducerId).Distinct();
+            var allProducerIdsExcludingIdsWithSuggestedBillingInstructionNoAction =
+                await query
+                    .Where(x => x.SuggestedBillingInstruction != NoActionPlaceholder)
+                    .Select(x => x.ProducerId)
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToListAsync(cancellationToken);
 
             var pagedProducerIds = pagedResult.Select(x => x.ProducerId).Distinct();
             var parentProducers = await this.GetParentProducersLatestAsync(runId, relativeYear, pagedProducerIds, cancellationToken);
