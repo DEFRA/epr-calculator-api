@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.Services
 {
@@ -22,5 +23,7 @@ namespace EPR.Calculator.API.Services
         /// The message providing details about the service process.
         /// </value>
         public string? Message { get; set; }
+
+        public CalculatorRun? CalculatorRun {get; set;}
     }
 }

@@ -9,6 +9,7 @@ using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
+using EPR.Calculator.Service.Function.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +22,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly ApplicationDBContext context;
         private readonly IConfiguration configuration;
         private readonly IStorageService storageService;
-        private readonly IServiceBusService serviceBusService;
+        private readonly IBackgroundTaskQueue backgroundTaskQueue;
         private readonly ICalcRelativeYearRequestDtoDataValidator validator;
         private readonly IAvailableClassificationsService availableClassificationsService;
         private readonly ICalculationRunService calculatorRunService;
@@ -35,16 +36,17 @@ namespace EPR.Calculator.API.Controllers
             ApplicationDBContext context,
             IConfiguration configuration,
             IStorageService storageService,
-            IServiceBusService serviceBusService,
+            IBackgroundTaskQueue backgroundTaskQueue,
             ICalcRelativeYearRequestDtoDataValidator validator,
             IAvailableClassificationsService availableClassificationsService,
             ICalculationRunService calculationRunService,
-            IBillingFileService billingFileService)
+            IBillingFileService billingFileService
+        )
         {
             this.context = context;
             this.configuration = configuration;
             this.storageService = storageService;
-            this.serviceBusService = serviceBusService;
+            this.backgroundTaskQueue = backgroundTaskQueue;
             this.validator = validator;
             this.availableClassificationsService = availableClassificationsService;
             this.calculatorRunService = calculationRunService;
@@ -115,20 +117,6 @@ namespace EPR.Calculator.API.Controllers
                     };
                 }
 
-                // Read configuration items: service bus connection string and queue name
-                var serviceBusConnectionString = this.configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
-                var serviceBusQueueName = this.configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
-
-                if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
-                {
-                    throw new ConfigurationErrorsException(CommonResources.ServiceBusConnectionStringMissing);
-                }
-
-                if (string.IsNullOrWhiteSpace(serviceBusQueueName))
-                {
-                    throw new ConfigurationErrorsException(CommonResources.ServiceBusQueueNameMissing);
-                }
-
                 // Get active default parameter settings master
                 var activeDefaultParameterSettingsMaster = await this.context.DefaultParameterSettings
                     .SingleAsync(x => x.EffectiveTo == null && x.RelativeYearValue == relativeYear.Value);
@@ -157,18 +145,6 @@ namespace EPR.Calculator.API.Controllers
                         await this.context.CalculatorRuns.AddAsync(calculatorRun);
                         await this.context.SaveChangesAsync();
 
-                        // Setup message
-                        var calculatorRunMessage = new CalculatorRunMessage
-                        {
-                            CalculatorRunId = calculatorRun.Id,
-                            RelativeYear = calculatorRun.RelativeYear,
-                            CreatedBy = this.User.Identity?.Name ?? userName,
-                            MessageType = CommonResources.ResultMessageType,
-                        };
-
-                        // Send message
-                        await this.serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
-
                         // All good, commit transaction
                         await transaction.CommitAsync();
                     }
@@ -181,6 +157,18 @@ namespace EPR.Calculator.API.Controllers
                         return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
                     }
                 }
+
+                // Setup message
+                var message = new CalculatorRunMessage
+                {
+                    CalculatorRunId = calculatorRun.Id,
+                    RelativeYear    = calculatorRun.RelativeYear,
+                    RunName         = calculatorRun.Name,
+                    CreatedBy       = this.User.Identity?.Name ?? userName,
+                    MessageType     = CommonResources.ResultMessageType,
+                };
+
+                await backgroundTaskQueue.QueueAsync(message);
 
                 // Return accepted status code: Accepted
                 return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };

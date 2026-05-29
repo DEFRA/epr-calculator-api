@@ -323,6 +323,7 @@ namespace EPR.Calculator.API.Services
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
                         Message = CommonResources.InvalidRunStatusForAcceptAll,
+                        CalculatorRun = calculatorRun
                     };
                 }
 
@@ -337,6 +338,7 @@ namespace EPR.Calculator.API.Services
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
                         Message = CommonResources.InvalidOrganisationId,
+                        CalculatorRun = calculatorRun
                     };
                 }
 
@@ -354,6 +356,7 @@ namespace EPR.Calculator.API.Services
                 return new ServiceProcessResponseDto
                 {
                     StatusCode = HttpStatusCode.OK,
+                    CalculatorRun = calculatorRun
                 };
             }
             catch (Exception exception)
@@ -392,6 +395,7 @@ namespace EPR.Calculator.API.Services
                     {
                         StatusCode = HttpStatusCode.UnprocessableContent,
                         Message = CommonResources.InvalidRunStatusForAcceptAll,
+                        CalculatorRun = calculatorRun
                     };
                 }
 
@@ -402,6 +406,7 @@ namespace EPR.Calculator.API.Services
                 return new ServiceProcessResponseDto
                 {
                     StatusCode = HttpStatusCode.OK,
+                    CalculatorRun = calculatorRun
                 };
             }
             catch (Exception exception)

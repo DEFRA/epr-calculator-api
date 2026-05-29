@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
+using EPR.Calculator.Service.Function.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EPR.Calculator.API.Controllers
@@ -10,7 +11,7 @@ namespace EPR.Calculator.API.Controllers
     /// Controller responsible for handling billing file-related operations.
     /// </summary>
     [Route("v1")]
-    public class ProducerBillingFileController(IBillingFileService billingFileService, IServiceBusService serviceBusService, IConfiguration configuration) : BaseControllerBase
+    public class ProducerBillingFileController(IBillingFileService billingFileService, IBackgroundTaskQueue backgroundTaskQueue) : BaseControllerBase
     {
         /// <summary>
         /// Accept or Reject billing for the matching list of organisation id and run id.
@@ -36,10 +37,18 @@ namespace EPR.Calculator.API.Controllers
                 userName,
                 cancellationToken).ConfigureAwait(false);
 
-            if (serviceProcessResponseDto.StatusCode == HttpStatusCode.OK)
+            if (serviceProcessResponseDto.StatusCode == HttpStatusCode.OK && serviceProcessResponseDto.CalculatorRun is not null)
             {
-                var serviceBusQueueName = configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
-                await serviceBusService.SendMessage(serviceBusQueueName ?? throw new ArgumentNullException(serviceBusQueueName), new BillingFileGenerationMessage() { ApprovedBy = userName, CalculatorRunId = runId, MessageType = CommonResources.BillingMessageType });
+
+                var message = new CalculatorRunMessage
+                {
+                    CalculatorRunId = runId,
+                    RelativeYear    = serviceProcessResponseDto.CalculatorRun.RelativeYear,
+                    RunName         = serviceProcessResponseDto.CalculatorRun.Name,
+                    CreatedBy       = userName,
+                    MessageType     = CommonResources.BillingMessageType,
+                };
+                await backgroundTaskQueue.QueueAsync(message, cancellationToken);
             }
 
             return new ObjectResult(serviceProcessResponseDto.Message)
