@@ -14,9 +14,9 @@ namespace EPR.Calculator.Service.Function.Services
     {
         private readonly ApplicationDBContext context;
 
-        public MaterialService(IDbContextFactory<ApplicationDBContext> context)
+        public MaterialService(ApplicationDBContext context)
         {
-            this.context = context.CreateDbContext();
+            this.context = context;
         }
 
         public async Task<IImmutableList<MaterialDetail>> GetMaterials()

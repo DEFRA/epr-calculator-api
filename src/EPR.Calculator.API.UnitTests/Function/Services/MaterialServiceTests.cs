@@ -12,7 +12,6 @@ namespace EPR.Calculator.Service.Function.UnitTests.Services
     [TestClass]
     public class MaterialServiceTests
     {
-        private Mock<IDbContextFactory<ApplicationDBContext>> dbContextFactory;
         private ApplicationDBContext dbContext;
         private MaterialService materialService;
 
@@ -22,10 +21,8 @@ namespace EPR.Calculator.Service.Function.UnitTests.Services
                 .UseInMemoryDatabase(databaseName: "TestDatabase")
                 .Options;
 
-            dbContextFactory = new Mock<IDbContextFactory<ApplicationDBContext>>();
             dbContext = new ApplicationDBContext(options);
-            dbContextFactory.Setup(factory => factory.CreateDbContext()).Returns(dbContext);
-            materialService = new MaterialService(dbContextFactory.Object);
+            materialService = new MaterialService(dbContext);
         }
 
         [TestCleanup]

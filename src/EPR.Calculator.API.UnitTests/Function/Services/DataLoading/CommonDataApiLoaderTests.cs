@@ -8,6 +8,7 @@ using EPR.Calculator.Service.Function.Services.DataLoading;
 using EPR.Calculator.Service.Function.Telemetry;
 using EPR.Calculator.Service.Function.UnitTests.TestHelpers.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -31,7 +32,7 @@ public class CommonDataApiLoaderTests
 {
     private static readonly DateTimeOffset FixedTime = new(2024, 6, 15, 12, 0, 0, TimeSpan.Zero);
 
-    private Mock<IDbContextFactory<ApplicationDBContext>> mockDbFactory = null!;
+    private Mock<IServiceScopeFactory> mockServiceScopeFactory = null!;
     private TestTelemetryClient mockTelemetry = null!;
     private Mock<ILogger<CommonDataApiLoader>> mockLogger = null!;
     private Mock<TimeProvider> mockTimeProvider = null!;
@@ -39,7 +40,7 @@ public class CommonDataApiLoaderTests
     [TestInitialize]
     public void SetUp()
     {
-        mockDbFactory = new Mock<IDbContextFactory<ApplicationDBContext>>();
+        mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
         mockTelemetry = new TestTelemetryClient();
         mockLogger = new Mock<ILogger<CommonDataApiLoader>>();
         mockTimeProvider = new Mock<TimeProvider>();
@@ -69,7 +70,7 @@ public class CommonDataApiLoaderTests
         // Assert
         VerifyLogContains(LogLevel.Information, "Disabled", Times.Once(), "Logger should record it is disabled.");
         Assert.AreEqual(0, httpCallCount, "HTTP client should not be called when disabled.");
-        mockDbFactory.Verify(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()), Times.Never, "DB Context should not be created when disabled.");
+        mockServiceScopeFactory.Verify(f => f.CreateScope(), Times.Never, "DB Context should not be created when disabled.");
     }
 
     // ─────────────────────────── LoadData – enabled path, HTTP stream failures ───────────────────────────
@@ -158,9 +159,9 @@ public class CommonDataApiLoaderTests
     {
         // Arrange – both HTTP streams return empty bodies so GetStreams succeeds.
         // The DB factory then throws, causing UpdateDatabase to fail.
-        mockDbFactory
-            .Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new InvalidOperationException("DB unavailable"));
+        mockServiceScopeFactory
+            .Setup(f => f.CreateScope())
+            .Throws(new InvalidOperationException("something bad"));
 
         var loader = CreateLoader(true, new UrlDispatchHandler(_ => OkNdJson(string.Empty)));
 
@@ -190,7 +191,7 @@ public class CommonDataApiLoaderTests
 
         return new CommonDataApiLoader(
             loaderOptions,
-            mockDbFactory.Object,
+            mockServiceScopeFactory.Object,
             httpClient,
             mockTimeProvider.Object,
             mockTelemetry,

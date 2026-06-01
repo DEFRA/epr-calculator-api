@@ -18,9 +18,9 @@ namespace EPR.Calculator.Service.Function.Services
     {
         private readonly ApplicationDBContext dbContext;
 
-        public ReportedProducerService(IDbContextFactory<ApplicationDBContext> context)
+        public ReportedProducerService(ApplicationDBContext context)
         {
-            this.dbContext = context.CreateDbContext();
+            this.dbContext = context;
         }
 
         public async Task<List<L1Producer>> GetProducers(int runId)

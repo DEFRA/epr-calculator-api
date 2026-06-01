@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using EPR.Calculator.Service.Function.Messaging;
+using EPR.Calculator.API.Models;
 using Microsoft.ApplicationInsights.DataContracts;
 
 namespace EPR.Calculator.Service.Function.Telemetry.Helpers;

@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Validators;
 using EPR.Calculator.Service.Function.Builder;
 using EPR.Calculator.Service.Function.Enums;
 using EPR.Calculator.Service.Function.Exporter.CsvExporter;
@@ -48,7 +49,7 @@ namespace EPR.Calculator.Service.Function.Services
         ApplicationDBContext dbContext,
         IMaterialService materialService,
         ICalcResultBuilder builder,
-        IStorageService storageService,
+        IStorageUploadService storageService,
         CalculatorRunValidator validator,
         ICalcResultsExporter csvResultsExporter,
         IBillingFileExporter csvBillingExporter,
@@ -94,7 +95,7 @@ namespace EPR.Calculator.Service.Function.Services
                     results.CalcResultDetail.RunName,
                     results.CalcResultDetail.RunDate);
 
-                string containerName = blobStorageOptions.Value.ResultFileCsvContainer;
+                string containerName = blobStorageOptions.Value.ResultFileCsvContainerName;
 
                 var blobUri = await storageService.UploadFileContentAsync(
                     (FileName: fileName,
@@ -147,7 +148,7 @@ namespace EPR.Calculator.Service.Function.Services
                  FileName: csvName,
                  Content: csvContent,
                  RunName: runName,
-                 ContainerName: blobStorageOptions.Value.BillingFileCsvContainer,
+                 ContainerName: blobStorageOptions.Value.BillingFileCsvContainerName,
                  Overwrite: OverwriteCsvFile));
 
             var csvFileMetaData = new CalculatorRunCsvFileMetadata
@@ -168,7 +169,7 @@ namespace EPR.Calculator.Service.Function.Services
                 FileName: jsonName,
                 Content: jsonContent,
                 RunName: runName,
-                ContainerName: blobStorageOptions.Value.BillingFileJsonContainer,
+                ContainerName: blobStorageOptions.Value.BillingFileJsonContainerName,
                 Overwrite: OverwriteJsonFile));
 
             var billingFileMetadata = new CalculatorRunBillingFileMetadata

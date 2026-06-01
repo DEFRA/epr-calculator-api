@@ -12,7 +12,7 @@ public class BlobStorageServiceTests
 {
     private IFixture fixture = null!;
     private Mock<BlobClient> mockBlobClient = null!;
-    private BlobStorageService sut = null!;
+    private BlobStorageUploadService sut = null!;
 
     [TestInitialize]
     public void Init()
@@ -31,7 +31,7 @@ public class BlobStorageServiceTests
 
         fixture.Inject(mockBlobServiceClient.Object);
 
-        sut = fixture.Create<BlobStorageService>();
+        sut = fixture.Create<BlobStorageUploadService>();
     }
 
     [TestMethod]

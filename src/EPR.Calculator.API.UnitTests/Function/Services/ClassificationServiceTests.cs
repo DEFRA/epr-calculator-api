@@ -13,7 +13,6 @@ namespace EPR.Calculator.Service.Function.UnitTests.Services
     [TestClass]
     public class ClassificationServiceTests
     {
-        private Mock<IDbContextFactory<ApplicationDBContext>> dbContextFactory;
         private ApplicationDBContext dbContext;
         private ClassificationService classificationService;
 
@@ -23,10 +22,8 @@ namespace EPR.Calculator.Service.Function.UnitTests.Services
                 .UseInMemoryDatabase(databaseName: "TestDatabase")
                 .Options;
 
-            dbContextFactory = new Mock<IDbContextFactory<ApplicationDBContext>>();
             dbContext = new ApplicationDBContext(options);
-            dbContextFactory.Setup(factory => factory.CreateDbContext()).Returns(dbContext);
-            classificationService = new ClassificationService(dbContextFactory.Object);
+            classificationService = new ClassificationService(dbContext);
         }
 
         [TestCleanup]
