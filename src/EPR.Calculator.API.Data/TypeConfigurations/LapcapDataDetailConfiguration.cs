@@ -25,7 +25,8 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
                    .HasMaxLength(400);
 
             builder.Property(p => p.TotalCost)
-                   .HasColumnName("total_cost");
+                   .HasColumnName("total_cost")
+                   .HasPrecision(18, 3);
         }
     }
 }
