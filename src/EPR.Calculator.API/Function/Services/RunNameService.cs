@@ -22,9 +22,9 @@ namespace EPR.Calculator.Service.Function.Services
         /// Initializes a new instance of the <see cref="RunNameService"/> class.
         /// </summary>
         /// <param name="context">The context object.</param>
-        public RunNameService(IDbContextFactory<ApplicationDBContext> context)
+        public RunNameService(ApplicationDBContext context)
         {
-            Context = context.CreateDbContext();
+            Context = context;
         }
 
         private ApplicationDBContext Context { get; init; }

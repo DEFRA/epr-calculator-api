@@ -1,6 +1,6 @@
 using EPR.Calculator.Service.Function.Services;
 
-public class FakeBlobStorageService : IStorageService
+public class FakeBlobStorageService : IStorageUploadService
 {
     private readonly Dictionary<string, string> store = new();
 

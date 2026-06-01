@@ -8,7 +8,6 @@ namespace EPR.Calculator.Service.Function.UnitTests.Services
     [TestClass]
     public class ReportedProducerServiceTests
     {
-        private Mock<IDbContextFactory<ApplicationDBContext>> dbContextFactory;
         private ApplicationDBContext dbContext;
         private ReportedProducerService reportedProducerService;
 
@@ -18,14 +17,9 @@ namespace EPR.Calculator.Service.Function.UnitTests.Services
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
 
-            dbContextFactory = new Mock<IDbContextFactory<ApplicationDBContext>>();
             dbContext = new ApplicationDBContext(options);
 
-            dbContextFactory
-                .Setup(factory => factory.CreateDbContext())
-                .Returns(dbContext);
-
-            reportedProducerService = new ReportedProducerService(dbContextFactory.Object);
+            reportedProducerService = new ReportedProducerService(dbContext);
         }
 
         [TestCleanup]

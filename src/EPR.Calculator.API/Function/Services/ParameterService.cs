@@ -7,9 +7,9 @@ namespace EPR.Calculator.Service.Function.Services
     {
         private readonly ApplicationDBContext dbContext;
 
-        public ParameterService(IDbContextFactory<ApplicationDBContext> context)
+        public ParameterService(ApplicationDBContext context)
         {
-            this.dbContext = context.CreateDbContext();
+            this.dbContext = context;
         }
 
         public async Task<IReadOnlyDictionary<string, decimal>> GetDefaultParameters(int runId)

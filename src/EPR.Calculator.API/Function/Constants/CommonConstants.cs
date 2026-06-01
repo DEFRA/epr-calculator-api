@@ -25,7 +25,6 @@
         public const string DisposalCostPricePerTonne = "Disposal Cost Price Per Tonne";
         public const string LADisposalCostData = "LA Disposal Cost Data";
         public const string PolicyName = "AllowAllOrigins";
-        public const string ServiceBusClientName = "calculator";
         public const string CsvFileDelimiter = ",";
         public const string TabSpace = "\t";
         public const string DoubleQuote = "\"";

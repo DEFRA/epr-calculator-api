@@ -21,7 +21,7 @@ public class PrepareCalcServiceTests
     private Mock<ICalcResultsExporter> csvResultsExporter = null!;
     private Mock<IBillingFileExporter> csvBillingExporter = null!;
     private Mock<ICalcBillingJsonExporter> jsonBillingExporter = null!;
-    private Mock<IStorageService> storageService = null!;
+    private Mock<IStorageUploadService> storageService = null!;
     private PrepareCalcService sut = null!;
 
     [TestInitialize]
@@ -36,7 +36,7 @@ public class PrepareCalcServiceTests
             .Setup(x => x.Export(It.IsAny<CalcResult>(), It.IsAny<IImmutableList<MaterialDetail>>()))
             .Returns("Some value");
 
-        storageService = fixture.Freeze<Mock<IStorageService>>();
+        storageService = fixture.Freeze<Mock<IStorageUploadService>>();
         storageService
             .Setup(x => x.UploadFileContentAsync(It.IsAny<(string, string, string, string, bool)>()))
             .ReturnsAsync("http://testuri");

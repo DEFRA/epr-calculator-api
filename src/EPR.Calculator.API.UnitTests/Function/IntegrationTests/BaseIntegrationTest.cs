@@ -7,7 +7,7 @@ using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using Testcontainers.MsSql;
 using EPR.Calculator.API.Data;
-using EPR.Calculator.Service.Function;
+using EPR.Calculator.API.Extensions;
 using EPR.Calculator.Service.Function.Services.CommonDataApi;
 using EPR.Calculator.Service.Function.Services;
 
@@ -43,7 +43,7 @@ public abstract class BaseIntegrationTest
     {
         var configuration = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("IntegrationTests/appsettings.integration.json")
+            .AddJsonFile("Function/IntegrationTests/appsettings.integration.json")
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Database:ConnectionString"] = SqlContainer.GetConnectionString()
@@ -65,7 +65,7 @@ public abstract class BaseIntegrationTest
                     x.ClearProviders();
                     x.AddSerilog(Log.Logger, dispose: true);
                 })
-            .AddAppDependencies()
+            .AddAppDependencies(configuration)
             .AddDbContextFactory<ApplicationDBContext>(options =>
                 {
                     options.UseSqlServer(SqlContainer.GetConnectionString());
@@ -73,19 +73,17 @@ public abstract class BaseIntegrationTest
             .RemoveAll<CommonDataApiHttpClient>()
             .AddSingleton<FakeCommonDataApiClient>()
             .AddSingleton<ICommonDataApiClient>(sp => sp.GetRequiredService<FakeCommonDataApiClient>())
-            .RemoveAll<IStorageService>()
+            .RemoveAll<IStorageUploadService>()
             .AddSingleton<FakeBlobStorageService>()
-            .AddSingleton<IStorageService>(sp => sp.GetRequiredService<FakeBlobStorageService>());
+            .AddSingleton<IStorageUploadService>(sp => sp.GetRequiredService<FakeBlobStorageService>());
     }
 
     private async Task CreateDatabase()
     {
         using var scope = Provider.CreateScope();
 
-        var factory = scope.ServiceProvider
-            .GetRequiredService<IDbContextFactory<ApplicationDBContext>>();
-
-        await using var db = await factory.CreateDbContextAsync();
+        var db = scope.ServiceProvider
+            .GetRequiredService<ApplicationDBContext>();
 
         await db.Database.MigrateAsync();
     }

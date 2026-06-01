@@ -9,9 +9,9 @@ namespace EPR.Calculator.Service.Function.Services
         private readonly ApplicationDBContext Context;
 
         public ClassificationService(
-            IDbContextFactory<ApplicationDBContext> context)
+            ApplicationDBContext context)
         {
-            Context = context.CreateDbContext();
+            Context = context;
         }
 
         public async Task UpdateRunClassification(int runId, RunClassification runClassification)

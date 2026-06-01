@@ -3,7 +3,7 @@ using EPR.Calculator.Service.Function.Logging;
 
 namespace EPR.Calculator.Service.Function.Services;
 
-public interface IStorageService
+public interface IStorageUploadService
 {
     Task<string> UploadFileContentAsync(
         (string FileName, string Content, string RunName, string ContainerName, bool Overwrite) args);
@@ -12,10 +12,10 @@ public interface IStorageService
 /// <summary>
 ///     Service for handling blob storage operations.
 /// </summary>
-public class BlobStorageService(
+public class BlobStorageUploadService(
     BlobServiceClient blobService,
-    ILogger<BlobStorageService> logger)
-    : IStorageService
+    ILogger<BlobStorageUploadService> logger)
+    : IStorageUploadService
 {
     /// <inheritdoc />
     public Task<string> UploadFileContentAsync(

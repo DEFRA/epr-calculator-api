@@ -19,7 +19,7 @@ namespace EPR.Calculator.Service.Function.Exporter.CsvExporter
 {
     public interface IBillingFileExporter
     {
-        string Export(CalcResult results, IImmutableList<MaterialDetail> materials, ImmutableHashSet<int> acceptedProducerIds);
+        string Export(CalcResult calcResult, IImmutableList<MaterialDetail> materials, ImmutableHashSet<int> acceptedProducerIds);
     }
 
     public class BillingFileExporter : IBillingFileExporter

@@ -4,9 +4,8 @@ using CsvHelper.Configuration;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Models;
 using EPR.Calculator.Service.Function.Enums;
-using EPR.Calculator.Service.Function.Exporter.CsvExporter;
-using EPR.Calculator.Service.Function.Messaging;
 using EPR.Calculator.Service.Function.Services;
 using EPR.Calculator.Service.Function.Services.CommonDataApi;
 using EPR.Calculator.Service.Function.Utils;
@@ -33,27 +32,28 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
             .GetRequiredService<IDbContextFactory<ApplicationDBContext>>()
             .CreateDbContextAsync();
 
-        var calculatorRunId = await SeedCalculatorRun(db, name, relativeYear, "IntegrationTests/TestData/defaultParams.csv", "IntegrationTests/TestData/lapcap.csv");
+        var calculatorRunId = await SeedCalculatorRun(db, name, relativeYear, "Function/IntegrationTests/TestData/defaultParams.csv", "Function/IntegrationTests/TestData/lapcap.csv");
 
         var fakeCommonDataApi                   = Provider.GetRequiredService<FakeCommonDataApiClient>();
-        fakeCommonDataApi.OrganisationResponses = OrganisationResponses($"IntegrationTests/TestData/{relativeYear.Value}-organisation-data.csv");
-        fakeCommonDataApi.PomResponses          = PomResponses($"IntegrationTests/TestData/{relativeYear.Value}-pom-data.csv");
+        fakeCommonDataApi.OrganisationResponses = OrganisationResponses($"Function/IntegrationTests/TestData/{relativeYear.Value}-organisation-data.csv");
+        fakeCommonDataApi.PomResponses          = PomResponses($"Function/IntegrationTests/TestData/{relativeYear.Value}-pom-data.csv");
 
         var fakeBlobStorage = Provider.GetRequiredService<FakeBlobStorageService>();
 
         var calculatorRunResult = await Provider.GetRequiredService<ICalculatorRunService>().PrepareResultsFileAsync(
-            new CreateResultFileMessage
+            new CalculatorRunMessage
             {
                 CalculatorRunId = calculatorRunId,
+                RunName         = name,
                 RelativeYear    = relativeYear,
                 CreatedBy       = rundBy,
                 MessageType     = "some-message-type"
-            }, name);
+            });
         calculatorRunResult.IsSuccess.ShouldBeTrue();
         {
             var contents      = fakeBlobStorage.Get(calculatorRunResult.Value);
-            var actualLines   = string.Join(Environment.NewLine, contents.Split(Environment.NewLine, StringSplitOptions.None                                   )).Trim().Split(Environment.NewLine);
-            var expectedLines = string.Join(Environment.NewLine, await File.ReadAllLinesAsync($"IntegrationTests/ExpectedData/{relativeYear.Value}-results.csv")).Trim().Split(Environment.NewLine);
+            var actualLines   = string.Join(Environment.NewLine, contents.Split(Environment.NewLine, StringSplitOptions.None                                            )).Trim().Split(Environment.NewLine);
+            var expectedLines = string.Join(Environment.NewLine, await File.ReadAllLinesAsync($"Function/IntegrationTests/ExpectedData/{relativeYear.Value}-results.csv")).Trim().Split(Environment.NewLine);
 
             actualLines.Length.ShouldBe(expectedLines.Length, $"Results CSV mismatch: {DisplayFullContents(contents)}");
 
@@ -64,13 +64,13 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
             }
         }
 
-        await SeedAcceptOrRejectProducers(db, calculatorRunId, rundBy, $"IntegrationTests/TestData/{relativeYear.Value}-accept-or-reject-producers.csv");
+        await SeedAcceptOrRejectProducers(db, calculatorRunId, rundBy, $"Function/IntegrationTests/TestData/{relativeYear.Value}-accept-or-reject-producers.csv");
         var billingRunResult = await Provider.GetRequiredService<IPrepareBillingFileService>().PrepareBillingFileAsync(calculatorRunId, name, rundBy);
         billingRunResult.IsSuccess.ShouldBeTrue();
         {
             var contents      = fakeBlobStorage.Get(billingRunResult.Value.CsvFileName);
-            var actualLines   = string.Join(Environment.NewLine, contents.Split(Environment.NewLine, StringSplitOptions.None                                     )).Trim().Split(Environment.NewLine);
-            var expectedLines = string.Join(Environment.NewLine, await File.ReadAllLinesAsync($"IntegrationTests/ExpectedData/{relativeYear.Value}-billing.csv")).Trim().Split(Environment.NewLine);
+            var actualLines   = string.Join(Environment.NewLine, contents.Split(Environment.NewLine, StringSplitOptions.None                                            )).Trim().Split(Environment.NewLine);
+            var expectedLines = string.Join(Environment.NewLine, await File.ReadAllLinesAsync($"Function/IntegrationTests/ExpectedData/{relativeYear.Value}-billing.csv")).Trim().Split(Environment.NewLine);
 
             actualLines.Length.ShouldBe(expectedLines.Length, $"Billing CSV mismatch: {DisplayFullContents(contents)}");
 
@@ -82,8 +82,8 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         }
         {   // TODO sort json fields before comparison?
             var contents      = fakeBlobStorage.Get(billingRunResult.Value.JsonFileName);
-            var actualLines   = string.Join(Environment.NewLine, contents.Split(Environment.NewLine, StringSplitOptions.None                                    )).Trim().Split(Environment.NewLine);
-            var expectedLines = string.Join(Environment.NewLine, await File.ReadAllLinesAsync($"IntegrationTests/ExpectedData/{relativeYear.Value}-billing.json")).Trim().Split(Environment.NewLine);
+            var actualLines   = string.Join(Environment.NewLine, contents.Split(Environment.NewLine, StringSplitOptions.None                                             )).Trim().Split(Environment.NewLine);
+            var expectedLines = string.Join(Environment.NewLine, await File.ReadAllLinesAsync($"Function/IntegrationTests/ExpectedData/{relativeYear.Value}-billing.json")).Trim().Split(Environment.NewLine);
 
             actualLines.Length.ShouldBe(expectedLines.Length, $"Billing JSON mismatch: {DisplayFullContents(contents)}");
 

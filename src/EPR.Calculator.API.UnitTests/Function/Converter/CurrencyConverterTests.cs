@@ -75,7 +75,7 @@ namespace EPR.Calculator.Service.Function.UnitTests.Converter
         {
             // Arrange
             var stream = new MemoryStream();
-            var writer = new Utf8JsonWriter(stream, new JsonWriterOptions 
+            var writer = new Utf8JsonWriter(stream, new JsonWriterOptions
             {
                 Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
             });

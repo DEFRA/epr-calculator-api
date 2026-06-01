@@ -1,8 +1,8 @@
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
+using EPR.Calculator.API.Models;
 using EPR.Calculator.Service.Function.Enums;
-using EPR.Calculator.Service.Function.Messaging;
 using EPR.Calculator.Service.Function.Misc;
 using EPR.Calculator.Service.Function.Services.DataLoading;
 
@@ -19,7 +19,7 @@ namespace EPR.Calculator.Service.Function.Services
         /// <param name="calculatorRunParameter">The parameters required to run the calculator.</param>
         /// <param name="runName">The name of the calculator run.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating success or failure.</returns>
-        Task<PreparedResult<string>> PrepareResultsFileAsync(CreateResultFileMessage calculatorRunParameter, string runName);
+        Task<PreparedResult<string>> PrepareResultsFileAsync(CalculatorRunMessage calculatorRunParameter);
     }
 
     public class CalculatorRunService(
@@ -27,15 +27,16 @@ namespace EPR.Calculator.Service.Function.Services
         IProducerDataTransposer producerDataTransposer,
         IPrepareCalcService prepareCalcService,
         IRpdStatusService statusService,
+        IClassificationService classificationService,
         ILogger<CalculatorRunService> logger)
         : ICalculatorRunService
     {
-        public async Task<PreparedResult<string>> PrepareResultsFileAsync(CreateResultFileMessage calculatorRunParameter, string runName)
+        public async Task<PreparedResult<string>> PrepareResultsFileAsync(CalculatorRunMessage calculatorRunParameter)
         {
             try
             {
                 await dataLoader.LoadData(calculatorRunParameter.RelativeYear);
-                return await RunResultsFileCalculationAsync(calculatorRunParameter, runName);
+                return await RunResultsFileCalculationAsync(calculatorRunParameter);
             }
             catch (OperationCanceledException ex)
             {
@@ -44,13 +45,13 @@ namespace EPR.Calculator.Service.Function.Services
             }
             catch (Exception ex)
             {
+                await classificationService.UpdateRunClassification(calculatorRunParameter.CalculatorRunId, RunClassification.ERROR);
                 logger.LogError(ex, "Prepare results file failed");
                 return PreparedResult.Failure<string>();
             }
         }
 
-        private async Task<PreparedResult<string>> RunResultsFileCalculationAsync(CreateResultFileMessage calculatorRunParameter,
-            string runName)
+        private async Task<PreparedResult<string>> RunResultsFileCalculationAsync(CalculatorRunMessage calculatorRunParameter)
         {
             var statusUpdateResponse = await statusService.UpdateRpdStatus(
                 calculatorRunParameter.CalculatorRunId,
@@ -63,7 +64,7 @@ namespace EPR.Calculator.Service.Function.Services
 
                 return await prepareCalcService.PrepareCalcResultsAsync(
                     new CalcResultsRequestDto { RunId = calculatorRunParameter.CalculatorRunId, RelativeYear = calculatorRunParameter.RelativeYear },
-                    runName,
+                    calculatorRunParameter.RunName,
                     CancellationToken.None);
             }
 
