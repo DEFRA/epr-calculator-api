@@ -2,7 +2,6 @@
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
-    using Azure.Messaging.ServiceBus;
     using EPR.Calculator.API.Controllers;
     using EPR.Calculator.API.Data.DataModels;
     using EPR.Calculator.API.Data.Models;
@@ -39,21 +38,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             this.Wrapper = new Mock<IOrgAndPomWrapper>().Object;
             var mockStorageService = new Mock<IStorageService>();
-            var mockServiceBusService = new Mock<IServiceBusService>();
-            var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
-            var mockClient = new Mock<ServiceBusClient>();
-            var mockServiceBusSender = new Mock<ServiceBusSender>();
+            var mockBackgroundTaskQueue = new Mock<IBackgroundTaskQueue>();
             var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
-            mockServiceBusSender.Setup(msbs => msbs.SendMessageAsync(It.IsAny<ServiceBusMessage>(), default)).Returns(Task.CompletedTask);
-            mockClient.Setup(mc => mc.CreateSender(It.IsAny<string>())).Returns(mockServiceBusSender.Object);
-
-            mockFactory.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(mockClient.Object);
 
             this.CalculatorController = new CalculatorController(
                 this.DbContext,
                 ConfigurationItems.GetConfigurationValues(),
                 mockStorageService.Object,
-                mockServiceBusService.Object,
+                mockBackgroundTaskQueue.Object,
                 mockValidator.Object,
                 Mock.Of<IAvailableClassificationsService>(),
                 Mock.Of<ICalculationRunService>(),
