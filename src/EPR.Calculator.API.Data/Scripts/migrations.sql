@@ -7620,3 +7620,297 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260601121205_AddTransformTables'
+)
+BEGIN
+    DECLARE @var46 sysname;
+    SELECT @var46 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[lapcap_data_detail]') AND [c].[name] = N'total_cost');
+    IF @var46 IS NOT NULL EXEC(N'ALTER TABLE [lapcap_data_detail] DROP CONSTRAINT [' + @var46 + '];');
+    ALTER TABLE [lapcap_data_detail] ALTER COLUMN [total_cost] decimal(18,3) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260601121205_AddTransformTables'
+)
+BEGIN
+    CREATE TABLE [transform_partial] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [producer_id] int NOT NULL,
+        [subsidiary_id] nvarchar(100) NULL,
+        [producer_name] nvarchar(400) NULL,
+        [trading_name] nvarchar(400) NULL,
+        [level] nvarchar(5) NOT NULL,
+        [submission_year] int NOT NULL,
+        [days_in_submission_year] int NOT NULL,
+        [joining_date] nvarchar(50) NULL,
+        [days_obligated] int NULL,
+        [obligated_factor] decimal(18,6) NOT NULL,
+        [material_code] nvarchar(50) NOT NULL,
+        [household_tonnage] decimal(18,3) NOT NULL,
+        [household_tonnage_red] decimal(18,3) NULL,
+        [household_tonnage_amber] decimal(18,3) NULL,
+        [household_tonnage_green] decimal(18,3) NULL,
+        [household_tonnage_red_medical] decimal(18,3) NULL,
+        [household_tonnage_amber_medical] decimal(18,3) NULL,
+        [household_tonnage_green_medical] decimal(18,3) NULL,
+        [public_bin_tonnage] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_red] decimal(18,3) NULL,
+        [public_bin_tonnage_amber] decimal(18,3) NULL,
+        [public_bin_tonnage_green] decimal(18,3) NULL,
+        [public_bin_tonnage_red_medical] decimal(18,3) NULL,
+        [public_bin_tonnage_amber_medical] decimal(18,3) NULL,
+        [public_bin_tonnage_green_medical] decimal(18,3) NULL,
+        [hdc_tonnage] decimal(18,3) NULL,
+        [hdc_tonnage_red] decimal(18,3) NULL,
+        [hdc_tonnage_amber] decimal(18,3) NULL,
+        [hdc_tonnage_green] decimal(18,3) NULL,
+        [hdc_tonnage_red_medical] decimal(18,3) NULL,
+        [hdc_tonnage_amber_medical] decimal(18,3) NULL,
+        [hdc_tonnage_green_medical] decimal(18,3) NULL,
+        [smcw_tonnage] decimal(18,3) NOT NULL,
+        [partial_household_tonnage] decimal(18,3) NOT NULL,
+        [partial_household_tonnage_red] decimal(18,3) NULL,
+        [partial_household_tonnage_amber] decimal(18,3) NULL,
+        [partial_household_tonnage_green] decimal(18,3) NULL,
+        [partial_household_tonnage_red_medical] decimal(18,3) NULL,
+        [partial_household_tonnage_amber_medical] decimal(18,3) NULL,
+        [partial_household_tonnage_green_medical] decimal(18,3) NULL,
+        [partial_public_bin_tonnage] decimal(18,3) NOT NULL,
+        [partial_public_bin_tonnage_red] decimal(18,3) NULL,
+        [partial_public_bin_tonnage_amber] decimal(18,3) NULL,
+        [partial_public_bin_tonnage_green] decimal(18,3) NULL,
+        [partial_public_bin_tonnage_red_medical] decimal(18,3) NULL,
+        [partial_public_bin_tonnage_amber_medical] decimal(18,3) NULL,
+        [partial_public_bin_tonnage_green_medical] decimal(18,3) NULL,
+        [partial_hdc_tonnage] decimal(18,3) NULL,
+        [partial_hdc_tonnage_red] decimal(18,3) NULL,
+        [partial_hdc_tonnage_amber] decimal(18,3) NULL,
+        [partial_hdc_tonnage_green] decimal(18,3) NULL,
+        [partial_hdc_tonnage_red_medical] decimal(18,3) NULL,
+        [partial_hdc_tonnage_amber_medical] decimal(18,3) NULL,
+        [partial_hdc_tonnage_green_medical] decimal(18,3) NULL,
+        [partial_smcw_tonnage] decimal(18,3) NOT NULL,
+        CONSTRAINT [PK_transform_partial] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260601121205_AddTransformTables'
+)
+BEGIN
+    CREATE TABLE [transform_projected_h1] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [producer_id] int NOT NULL,
+        [subsidiary_id] nvarchar(100) NULL,
+        [material_code] nvarchar(50) NOT NULL,
+        [submission_period] nvarchar(50) NOT NULL,
+        [level] nvarchar(5) NOT NULL,
+        [household_tonnage] decimal(18,3) NOT NULL,
+        [household_tonnage_red] decimal(18,3) NOT NULL,
+        [household_tonnage_amber] decimal(18,3) NOT NULL,
+        [household_tonnage_green] decimal(18,3) NOT NULL,
+        [household_tonnage_red_medical] decimal(18,3) NOT NULL,
+        [household_tonnage_amber_medical] decimal(18,3) NOT NULL,
+        [household_tonnage_green_medical] decimal(18,3) NOT NULL,
+        [public_bin_tonnage] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_red] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_amber] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_green] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_red_medical] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_amber_medical] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_green_medical] decimal(18,3) NOT NULL,
+        [hdc_tonnage] decimal(18,3) NULL,
+        [hdc_tonnage_red] decimal(18,3) NULL,
+        [hdc_tonnage_amber] decimal(18,3) NULL,
+        [hdc_tonnage_green] decimal(18,3) NULL,
+        [hdc_tonnage_red_medical] decimal(18,3) NULL,
+        [hdc_tonnage_amber_medical] decimal(18,3) NULL,
+        [hdc_tonnage_green_medical] decimal(18,3) NULL,
+        [household_tonnage_without_ram] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_without_ram] decimal(18,3) NOT NULL,
+        [hdc_tonnage_without_ram] decimal(18,3) NULL,
+        [projected_household_tonnage] decimal(18,3) NOT NULL,
+        [projected_household_tonnage_red] decimal(18,3) NOT NULL,
+        [projected_household_tonnage_amber] decimal(18,3) NOT NULL,
+        [projected_household_tonnage_green] decimal(18,3) NOT NULL,
+        [projected_household_tonnage_red_medical] decimal(18,3) NOT NULL,
+        [projected_household_tonnage_amber_medical] decimal(18,3) NOT NULL,
+        [projected_household_tonnage_green_medical] decimal(18,3) NOT NULL,
+        [projected_public_bin_tonnage] decimal(18,3) NOT NULL,
+        [projected_public_bin_tonnage_red] decimal(18,3) NOT NULL,
+        [projected_public_bin_tonnage_amber] decimal(18,3) NOT NULL,
+        [projected_public_bin_tonnage_green] decimal(18,3) NOT NULL,
+        [projected_public_bin_tonnage_red_medical] decimal(18,3) NOT NULL,
+        [projected_public_bin_tonnage_amber_medical] decimal(18,3) NOT NULL,
+        [projected_public_bin_tonnage_green_medical] decimal(18,3) NOT NULL,
+        [projected_hdc_tonnage] decimal(18,3) NULL,
+        [projected_hdc_tonnage_red] decimal(18,3) NULL,
+        [projected_hdc_tonnage_amber] decimal(18,3) NULL,
+        [projected_hdc_tonnage_green] decimal(18,3) NULL,
+        [projected_hdc_tonnage_red_medical] decimal(18,3) NULL,
+        [projected_hdc_tonnage_amber_medical] decimal(18,3) NULL,
+        [projected_hdc_tonnage_green_medical] decimal(18,3) NULL,
+        [h2_ram_proportions_red] decimal(18,3) NOT NULL,
+        [h2_ram_proportions_amber] decimal(18,3) NOT NULL,
+        [h2_ram_proportions_green] decimal(18,3) NOT NULL,
+        [h2_ram_proportions_red_medical] decimal(18,3) NOT NULL,
+        [h2_ram_proportions_amber_medical] decimal(18,3) NOT NULL,
+        [h2_ram_proportions_green_medical] decimal(18,3) NOT NULL,
+        CONSTRAINT [PK_transform_projected_h1] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260601121205_AddTransformTables'
+)
+BEGIN
+    CREATE TABLE [transform_projected_h2] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [producer_id] int NOT NULL,
+        [subsidiary_id] nvarchar(100) NULL,
+        [material_code] nvarchar(50) NOT NULL,
+        [submission_period] nvarchar(50) NOT NULL,
+        [level] nvarchar(5) NOT NULL,
+        [household_tonnage] decimal(18,3) NOT NULL,
+        [household_tonnage_red] decimal(18,3) NOT NULL,
+        [household_tonnage_amber] decimal(18,3) NOT NULL,
+        [household_tonnage_green] decimal(18,3) NOT NULL,
+        [household_tonnage_red_medical] decimal(18,3) NOT NULL,
+        [household_tonnage_amber_medical] decimal(18,3) NOT NULL,
+        [household_tonnage_green_medical] decimal(18,3) NOT NULL,
+        [public_bin_tonnage] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_red] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_amber] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_green] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_red_medical] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_amber_medical] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_green_medical] decimal(18,3) NOT NULL,
+        [hdc_tonnage] decimal(18,3) NULL,
+        [hdc_tonnage_red] decimal(18,3) NULL,
+        [hdc_tonnage_amber] decimal(18,3) NULL,
+        [hdc_tonnage_green] decimal(18,3) NULL,
+        [hdc_tonnage_red_medical] decimal(18,3) NULL,
+        [hdc_tonnage_amber_medical] decimal(18,3) NULL,
+        [hdc_tonnage_green_medical] decimal(18,3) NULL,
+        [household_tonnage_without_ram] decimal(18,3) NOT NULL,
+        [public_bin_tonnage_without_ram] decimal(18,3) NOT NULL,
+        [hdc_tonnage_without_ram] decimal(18,3) NULL,
+        [projected_household_tonnage] decimal(18,3) NOT NULL,
+        [projected_household_tonnage_red] decimal(18,3) NOT NULL,
+        [projected_household_tonnage_amber] decimal(18,3) NOT NULL,
+        [projected_household_tonnage_green] decimal(18,3) NOT NULL,
+        [projected_household_tonnage_red_medical] decimal(18,3) NOT NULL,
+        [projected_household_tonnage_amber_medical] decimal(18,3) NOT NULL,
+        [projected_household_tonnage_green_medical] decimal(18,3) NOT NULL,
+        [projected_public_bin_tonnage] decimal(18,3) NOT NULL,
+        [projected_public_bin_tonnage_red] decimal(18,3) NOT NULL,
+        [projected_public_bin_tonnage_amber] decimal(18,3) NOT NULL,
+        [projected_public_bin_tonnage_green] decimal(18,3) NOT NULL,
+        [projected_public_bin_tonnage_red_medical] decimal(18,3) NOT NULL,
+        [projected_public_bin_tonnage_amber_medical] decimal(18,3) NOT NULL,
+        [projected_public_bin_tonnage_green_medical] decimal(18,3) NOT NULL,
+        [projected_hdc_tonnage] decimal(18,3) NULL,
+        [projected_hdc_tonnage_red] decimal(18,3) NULL,
+        [projected_hdc_tonnage_amber] decimal(18,3) NULL,
+        [projected_hdc_tonnage_green] decimal(18,3) NULL,
+        [projected_hdc_tonnage_red_medical] decimal(18,3) NULL,
+        [projected_hdc_tonnage_amber_medical] decimal(18,3) NULL,
+        [projected_hdc_tonnage_green_medical] decimal(18,3) NULL,
+        CONSTRAINT [PK_transform_projected_h2] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260601121205_AddTransformTables'
+)
+BEGIN
+    CREATE TABLE [transform_scaled] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [producer_id] int NOT NULL,
+        [subsidiary_id] nvarchar(100) NULL,
+        [producer_name] nvarchar(400) NULL,
+        [trading_name] nvarchar(400) NULL,
+        [submission_period] nvarchar(50) NOT NULL,
+        [level] nvarchar(5) NOT NULL,
+        [is_subtotal] bit NOT NULL,
+        [days_in_submission_period] int NOT NULL,
+        [days_in_whole_period] int NOT NULL,
+        [scaled_factor] decimal(16,12) NOT NULL,
+        [material_id] int NOT NULL,
+        [packaging_type] nvarchar(50) NOT NULL,
+        [tonnage] decimal(18,3) NOT NULL,
+        [scaled_tonnage] decimal(18,3) NOT NULL,
+        CONSTRAINT [PK_transform_scaled] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260601121205_AddTransformTables'
+)
+BEGIN
+    CREATE INDEX [IX_transform_partial_calculator_run_id] ON [transform_partial] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260601121205_AddTransformTables'
+)
+BEGIN
+    CREATE INDEX [IX_transform_projected_h1_calculator_run_id] ON [transform_projected_h1] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260601121205_AddTransformTables'
+)
+BEGIN
+    CREATE INDEX [IX_transform_projected_h2_calculator_run_id] ON [transform_projected_h2] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260601121205_AddTransformTables'
+)
+BEGIN
+    CREATE INDEX [IX_transform_scaled_calculator_run_id] ON [transform_scaled] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260601121205_AddTransformTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260601121205_AddTransformTables', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
