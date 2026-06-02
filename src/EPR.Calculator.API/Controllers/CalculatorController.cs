@@ -1,4 +1,4 @@
-using System.Configuration;
+﻿using System.Configuration;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
@@ -161,9 +161,7 @@ namespace EPR.Calculator.API.Controllers
                         var calculatorRunMessage = new CalculatorRunMessage
                         {
                             CalculatorRunId = calculatorRun.Id,
-                            RelativeYear = calculatorRun.RelativeYear,
-                            CreatedBy = this.User.Identity?.Name ?? userName,
-                            MessageType = CommonResources.ResultMessageType,
+                            CreatedBy = this.User.Identity?.Name ?? userName
                         };
 
                         // Send message

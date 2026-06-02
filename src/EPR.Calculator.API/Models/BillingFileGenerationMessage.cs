@@ -1,11 +1,8 @@
-﻿namespace EPR.Calculator.API.Models
+﻿namespace EPR.Calculator.API.Models;
+
+public record BillingFileGenerationMessage
 {
-    public class BillingFileGenerationMessage
-    {
-        public int CalculatorRunId { get; set; }
-
-        public string ApprovedBy { get; set; } = null!;
-
-        public string MessageType { get; set; } = null!;
-    }
+    public string MessageType { get; } = "Billing";
+    public required int CalculatorRunId { get; init; }
+    public required string ApprovedBy { get; init; }
 }
