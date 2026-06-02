@@ -1,14 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EPR.Calculator.API.Data.TypeConfigurations;
 
-[ExcludeFromCodeCoverage]
 public class CostTypeConfiguration : IEntityTypeConfiguration<CostType>
 {
-    /// <inheritdoc />
     public void Configure(EntityTypeBuilder<CostType> builder)
     {
         builder.ToTable("cost_type");

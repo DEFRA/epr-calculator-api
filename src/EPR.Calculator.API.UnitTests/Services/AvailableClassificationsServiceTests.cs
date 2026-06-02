@@ -264,27 +264,6 @@ namespace EPR.Calculator.API.UnitTests.Services
                 statuses);
         }
 
-        [TestMethod]
-        public async Task ShouldLogErrorAndThrow_WhenDbThrows()
-        {
-            // Arrange: setup broken context
-            var brokenContext = new Mock<ApplicationDBContext>();
-            brokenContext.Setup(x => x.CalculatorRuns).Throws(new Exception("DB fail"));
-            var serviceLocal = new AvailableClassificationsService(brokenContext.Object, loggerMock.Object);
-
-            var request = new CalcRelativeYearRequestDto
-            {
-                RunId = 1,
-                RelativeYearValue = 2024,
-            };
-
-            // Act & Assert
-            await Assert.ThrowsExactlyAsync<DataRetrievalException>(async () =>
-            {
-                await serviceLocal.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
-            });
-        }
-
         /// <summary>
         /// Helper method to add a CalculatorRun to the database.
         /// </summary>

@@ -1,14 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EPR.Calculator.API.Data.TypeConfigurations;
 
-[ExcludeFromCodeCoverage]
 public class DefaultParameterSettingDetailConfiguration : IEntityTypeConfiguration<DefaultParameterSettingDetail>
 {
-    /// <inheritdoc />
     public void Configure(EntityTypeBuilder<DefaultParameterSettingDetail> builder)
     {
         builder.ToTable("default_parameter_setting_detail");
@@ -23,5 +20,9 @@ public class DefaultParameterSettingDetailConfiguration : IEntityTypeConfigurati
         builder.Property(p => p.ParameterValue)
             .HasColumnName("parameter_value")
             .HasPrecision(18, 3);
+
+        builder.HasOne(d => d.ParameterUniqueReference)
+            .WithMany()
+            .HasForeignKey(d => d.ParameterUniqueReferenceId);
     }
 }

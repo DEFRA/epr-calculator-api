@@ -1,14 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EPR.Calculator.API.Data.TypeConfigurations;
 
-[ExcludeFromCodeCoverage]
 public class ProducerDetailConfiguration : IEntityTypeConfiguration<ProducerDetail>
 {
-    /// <inheritdoc />
     public void Configure(EntityTypeBuilder<ProducerDetail> builder)
     {
         builder.ToTable("producer_detail");
@@ -37,6 +34,10 @@ public class ProducerDetailConfiguration : IEntityTypeConfiguration<ProducerDeta
             .HasColumnName("calculator_run_id");
 
         builder.HasMany(e => e.ProducerReportedMaterials)
+            .WithOne(e => e.ProducerDetail)
+            .HasForeignKey(e => e.ProducerDetailId);
+
+        builder.HasMany(e => e.ProducerReportedMaterialProjecteds)
             .WithOne(e => e.ProducerDetail)
             .HasForeignKey(e => e.ProducerDetailId);
     }

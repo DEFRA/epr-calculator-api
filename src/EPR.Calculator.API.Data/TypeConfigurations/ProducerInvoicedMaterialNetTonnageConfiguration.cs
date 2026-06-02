@@ -1,11 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EPR.Calculator.API.Data.TypeConfigurations;
 
-[ExcludeFromCodeCoverage]
 public class ProducerInvoicedMaterialNetTonnageConfiguration : IEntityTypeConfiguration<ProducerInvoicedMaterialNetTonnage>
 {
     public void Configure(EntityTypeBuilder<ProducerInvoicedMaterialNetTonnage> builder)

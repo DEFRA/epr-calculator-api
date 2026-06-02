@@ -5,34 +5,24 @@ namespace EPR.Calculator.API.Data.DataModels;
 public class CalculatorRunPomDataDetail
 {
     public int Id { get; set; }
-
-    public int? OrganisationId { get; set; }
-
-    public string? SubsidiaryId { get; set; }
-
-    public required string? SubmissionPeriod { get; set; }
-
-    public string? PackagingActivity { get; set; }
-
-    public string? PackagingType { get; set; }
-
-    public string? PackagingClass { get; set; }
-
-    public string? PackagingMaterial { get; set; }
-
-    public double? PackagingMaterialWeight { get; set; }
-
-    public required string? SubmissionPeriodDesc { get; set; }
-
-    public RagRating? RamRagRating { get; set; }
-
-    public string? PackagingMaterialSubtype { get; set; }
-
-    public required DateTime LoadTimeStamp { get; set; }
-
     public int CalculatorRunPomDataMasterId { get; set; }
-
-    public virtual CalculatorRunPomDataMaster? CalculatorRunPomDataMaster { get; set; }
-
+    public int? OrganisationId { get; set; }
+    public string? SubsidiaryId { get; set; }
+    public required string? SubmissionPeriod { get; set; }
+    public string? PackagingActivity { get; set; }
+    public string? PackagingType { get; set; }
+    public string? PackagingClass { get; set; }
+    public string? PackagingMaterial { get; set; }
+    public double? PackagingMaterialWeight { get; set; }
+    public required string? SubmissionPeriodDesc { get; set; }
+    public RagRating? RamRagRating { get; set; }
+    public string? PackagingMaterialSubtype { get; set; }
+    public required DateTime LoadTimeStamp { get; set; }
     public Guid? SubmitterId { get; set; }
+
+    #region EF navigational properties
+
+    public virtual CalculatorRunPomDataMaster CalculatorRunPomDataMaster { get; set; } = null!;
+
+    #endregion
 }

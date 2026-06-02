@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using EPR.Calculator.API.Data.Models;
 
 namespace EPR.Calculator.API.Data.DataModels;
@@ -6,7 +6,6 @@ namespace EPR.Calculator.API.Data.DataModels;
 public class LapcapDataMaster
 {
     public int Id { get; set; }
-
     public int RelativeYearValue { get; private set; }
 
     [NotMapped]
@@ -17,16 +16,15 @@ public class LapcapDataMaster
     }
 
     public DateTime EffectiveFrom { get; set; }
-
     public DateTime? EffectiveTo { get; set; }
-
     public string CreatedBy { get; set; } = string.Empty;
-
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
     public string LapcapFileName { get; set; } = string.Empty;
 
-    public ICollection<LapcapDataDetail> Details { get; } = new List<LapcapDataDetail>();
+    #region EF navigational properties
 
-    public ICollection<CalculatorRun>? RunDetails { get; }
+    public virtual ICollection<LapcapDataDetail> Details { get; } = [];
+    public virtual ICollection<CalculatorRun> RunDetails { get; } = [];
+
+    #endregion
 }

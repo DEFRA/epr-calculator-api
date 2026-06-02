@@ -1,4 +1,4 @@
-﻿namespace EPR.Calculator.API.Data.DataModels;
+namespace EPR.Calculator.API.Data.DataModels;
 
 public class LapcapDataTemplateMaster
 {
@@ -12,5 +12,9 @@ public class LapcapDataTemplateMaster
 
     public decimal TotalCostTo { get; set; }
 
-    public ICollection<LapcapDataDetail> Details { get; } = new List<LapcapDataDetail>();
+    #region EF navigational properties
+
+    public virtual ICollection<LapcapDataDetail> Details { get; } = [];
+
+    #endregion
 }

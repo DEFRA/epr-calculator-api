@@ -1,11 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EPR.Calculator.API.Data.TypeConfigurations;
 
-[ExcludeFromCodeCoverage]
 public class ErrorReportConfiguration : IEntityTypeConfiguration<ErrorReport>
 {
     public void Configure(EntityTypeBuilder<ErrorReport> builder)

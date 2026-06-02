@@ -3,18 +3,18 @@
 public class ProducerDetail
 {
     public int Id { get; set; }
-
     public int ProducerId { get; set; }
-
+    public int CalculatorRunId { get; set; }
     public string? TradingName { get; set; }
-
     public string? SubsidiaryId { get; set; }
-
     public string? ProducerName { get; set; }
 
-    public int CalculatorRunId { get; set; }
 
-    public ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = new List<ProducerReportedMaterial>();
+    #region EF navigational properties
 
-    public virtual CalculatorRun? CalculatorRun { get; set; }
+    public virtual ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = [];
+    public virtual ICollection<ProducerReportedMaterialProjected> ProducerReportedMaterialProjecteds { get; } = [];
+    public virtual CalculatorRun CalculatorRun { get; set; } = null!;
+
+    #endregion
 }

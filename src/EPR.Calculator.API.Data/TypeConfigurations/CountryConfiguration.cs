@@ -1,14 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EPR.Calculator.API.Data.TypeConfigurations;
 
-[ExcludeFromCodeCoverage]
 public class CountryConfiguration : IEntityTypeConfiguration<Country>
 {
-    /// <inheritdoc />
     public void Configure(EntityTypeBuilder<Country> builder)
     {
         builder.ToTable("country");

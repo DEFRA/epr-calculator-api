@@ -1,14 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EPR.Calculator.API.Data.TypeConfigurations;
 
-[ExcludeFromCodeCoverage]
 public class DefaultParameterTemplateMasterConfiguration : IEntityTypeConfiguration<DefaultParameterTemplateMaster>
 {
-    /// <inheritdoc />
     public void Configure(EntityTypeBuilder<DefaultParameterTemplateMaster> builder)
     {
         builder.ToTable("default_parameter_template_master");

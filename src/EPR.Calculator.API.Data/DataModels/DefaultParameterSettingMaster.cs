@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using EPR.Calculator.API.Data.Models;
 
 namespace EPR.Calculator.API.Data.DataModels;
@@ -6,7 +6,6 @@ namespace EPR.Calculator.API.Data.DataModels;
 public class DefaultParameterSettingMaster
 {
     public int Id { get; set; }
-
     public int RelativeYearValue { get; private set; }
 
     [NotMapped]
@@ -17,16 +16,15 @@ public class DefaultParameterSettingMaster
     }
 
     public DateTime EffectiveFrom { get; set; }
-
     public DateTime? EffectiveTo { get; set; }
-
     public string CreatedBy { get; set; } = string.Empty;
-
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
     public string ParameterFileName { get; set; } = string.Empty;
 
-    public virtual ICollection<DefaultParameterSettingDetail> Details { get; } = new List<DefaultParameterSettingDetail>();
+    #region EF navigational properties
 
-    public ICollection<CalculatorRun>? RunDetails { get; }
+    public virtual ICollection<DefaultParameterSettingDetail> Details { get; } = [];
+    public virtual ICollection<CalculatorRun> RunDetails { get; } = [];
+
+    #endregion
 }

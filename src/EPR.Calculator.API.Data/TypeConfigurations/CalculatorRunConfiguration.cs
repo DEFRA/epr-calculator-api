@@ -1,14 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EPR.Calculator.API.Data.TypeConfigurations;
 
-[ExcludeFromCodeCoverage]
 public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun>
 {
-    /// <inheritdoc />
     public void Configure(EntityTypeBuilder<CalculatorRun> builder)
     {
         builder.ToTable("calculator_run");
@@ -69,6 +66,10 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
         builder.Property(p => p.IsBillingFileGenerating)
             .HasColumnName("is_billing_file_generating");
 
+        builder.HasOne<CalculatorRunClassification>()
+            .WithMany()
+            .HasForeignKey(e => e.CalculatorRunClassificationId);
+
         builder.HasMany(e => e.CountryApportionments)
             .WithOne(e => e.CalculatorRun)
             .HasForeignKey(e => e.CalculatorRunId);
@@ -78,6 +79,22 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
             .HasForeignKey(e => e.CalculatorRunId);
 
         builder.HasMany(e => e.CalculatorRunBillingFileMetadata)
+            .WithOne(e => e.CalculatorRun)
+            .HasForeignKey(e => e.CalculatorRunId);
+
+        builder.HasMany(e => e.CsvFileMetadata)
+            .WithOne(e => e.CalculatorRun)
+            .HasForeignKey(e => e.CalculatorRunId);
+
+        builder.HasMany(e => e.ProducerInvoicedMaterialNetTonnage)
+            .WithOne(e => e.CalculatorRun)
+            .HasForeignKey(e => e.CalculatorRunId);
+
+        builder.HasMany(e => e.ProducerDesignatedRunInvoiceInstruction)
+            .WithOne(e => e.CalculatorRun)
+            .HasForeignKey(e => e.CalculatorRunId);
+
+        builder.HasMany(e => e.ProducerResultFileSuggestedBillingInstruction)
             .WithOne(e => e.CalculatorRun)
             .HasForeignKey(e => e.CalculatorRunId);
     }

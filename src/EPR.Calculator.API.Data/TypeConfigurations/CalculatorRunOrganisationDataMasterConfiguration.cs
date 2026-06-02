@@ -1,14 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EPR.Calculator.API.Data.TypeConfigurations;
 
-[ExcludeFromCodeCoverage]
 public class CalculatorRunOrganisationDataMasterConfiguration : IEntityTypeConfiguration<CalculatorRunOrganisationDataMaster>
 {
-    /// <inheritdoc />
     public void Configure(EntityTypeBuilder<CalculatorRunOrganisationDataMaster> builder)
     {
         builder.ToTable("calculator_run_organization_data_master");
@@ -45,7 +42,7 @@ public class CalculatorRunOrganisationDataMasterConfiguration : IEntityTypeConfi
             .HasForeignKey(e => e.CalculatorRunOrganisationDataMasterId)
             .IsRequired();
 
-        builder.HasMany(e => e.RunDetails)
+        builder.HasMany(e => e.Runs)
             .WithOne(e => e.CalculatorRunOrganisationDataMaster)
             .HasForeignKey(e => e.CalculatorRunOrganisationDataMasterId);
     }

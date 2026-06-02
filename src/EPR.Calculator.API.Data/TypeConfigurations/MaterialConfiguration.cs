@@ -1,14 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EPR.Calculator.API.Data.TypeConfigurations;
 
-[ExcludeFromCodeCoverage]
 public class MaterialConfiguration : IEntityTypeConfiguration<Material>
 {
-    /// <inheritdoc />
     public void Configure(EntityTypeBuilder<Material> builder)
     {
         builder.ToTable("material");
@@ -30,6 +27,14 @@ public class MaterialConfiguration : IEntityTypeConfiguration<Material>
             .HasMaxLength(2000);
 
         builder.HasMany(e => e.ProducerReportedMaterials)
+            .WithOne(e => e.Material)
+            .HasForeignKey(e => e.MaterialId);
+
+        builder.HasMany(e => e.ProducerReportedMaterialProjecteds)
+            .WithOne(e => e.Material)
+            .HasForeignKey(e => e.MaterialId);
+
+        builder.HasMany(e => e.ProducerInvoicedMaterialNetTonnage)
             .WithOne(e => e.Material)
             .HasForeignKey(e => e.MaterialId);
     }

@@ -501,10 +501,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     new() { Id = (int)RunClassification.TEST_RUN, Status = nameof(RunClassification.TEST_RUN) },
                 });
 
-            var mockDbContext = MockDbContextForCalculatorRunClassifications();
+            var dbContext = GetDbContextForCalculatorRunClassifications();
 
             var individualCalcController = new CalculatorController(
-                mockDbContext.Object,
+                dbContext,
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
@@ -638,10 +638,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual("An unexpected error occurred.", actionResult.Value);
         }
 
-        private static Mock<ApplicationDBContext> MockDbContextForCalculatorRunClassifications()
+        private ApplicationDBContext GetDbContextForCalculatorRunClassifications()
         {
-            var mockClassifications = new List<CalculatorRunClassification>
-            {
+            var dbContext = Fixture.Create<ApplicationDBContext>();
+            dbContext.CalculatorRunClassifications.RemoveRange(dbContext.CalculatorRunClassifications);
+            List<CalculatorRunClassification> classifications =
+            [
                 new() { Id = 1, Status = "IN THE QUEUE", CreatedBy = "Test user" },
                 new() { Id = 2, Status = "RUNNING", CreatedBy = "Test user" },
                 new() { Id = 3, Status = "UNCLASSIFIED", CreatedBy = "Test user" },
@@ -653,18 +655,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 new() { Id = 9, Status = "INTERIM RE-CALCULATION RUN", CreatedBy = "Test user" },
                 new() { Id = 10, Status = "FINAL RUN", CreatedBy = "Test user" },
                 new() { Id = 11, Status = "FINAL RE-CALCULATION RUN", CreatedBy = "Test user" },
-            }.AsQueryable();
+            ];
+            dbContext.CalculatorRunClassifications.AddRange(classifications);
 
-            var mockDbContext = new Mock<ApplicationDBContext>();
-            var mockClassificationsDbSet = new Mock<DbSet<CalculatorRunClassification>>();
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.Provider).Returns(new TestAsyncQueryProvider<CalculatorRunClassification>(mockClassifications.Provider));
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.Expression).Returns(mockClassifications.Expression);
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.ElementType).Returns(mockClassifications.ElementType);
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.GetEnumerator()).Returns(mockClassifications.GetEnumerator());
-            mockClassificationsDbSet.As<IAsyncEnumerable<CalculatorRunClassification>>().Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>())).Returns(new TestAsyncEnumerator<CalculatorRunClassification>(mockClassifications.GetEnumerator()));
-
-            mockDbContext.Setup(c => c.CalculatorRunClassifications).Returns(mockClassificationsDbSet.Object);
-            return mockDbContext;
+            return dbContext;
         }
     }
 }

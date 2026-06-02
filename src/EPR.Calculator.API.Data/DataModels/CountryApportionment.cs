@@ -3,18 +3,16 @@
 public class CountryApportionment
 {
     public int Id { get; set; }
-
+    public int CalculatorRunId { get; set; }
     public decimal Apportionment { get; set; }
+    public int CountryId { get; set; }
+    public int CostTypeId { get; set; }
 
-    public required int CountryId { get; set; }
+    #region EF navigational properties
 
-    public required int CostTypeId { get; set; }
+    public virtual Country Country { get; set; } = null!;
+    public virtual CostType CostType { get; set; } = null!;
+    public virtual CalculatorRun CalculatorRun { get; set; } = null!;
 
-    public required int CalculatorRunId { get; set; }
-
-    public virtual Country? Country { get; set; }
-
-    public virtual CostType? CostType { get; set; }
-
-    public virtual CalculatorRun? CalculatorRun { get; set; }
+    #endregion
 }

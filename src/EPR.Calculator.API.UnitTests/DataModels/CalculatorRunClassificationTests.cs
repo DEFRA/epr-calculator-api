@@ -62,12 +62,5 @@ namespace EPR.Calculator.API.UnitTests.DataModels
             // Assert
             Assert.AreEqual(testValue, this.TestClass.CreatedBy);
         }
-
-        [TestMethod]
-        public void CanGetCalculatorRunDetails()
-        {
-            // Assert
-            Assert.IsInstanceOfType(this.TestClass.CalculatorRunDetails, typeof(ICollection<CalculatorRun>));
-        }
     }
 }
