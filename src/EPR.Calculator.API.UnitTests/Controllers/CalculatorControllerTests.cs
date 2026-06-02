@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using System.Security.Principal;
 using AutoFixture;
-using EnumsNET;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -476,8 +475,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task ClassificationByRelativeYear_Returns_Options_For_Valid_RelativeYear()
         {
-            var initialRun = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description);
-            var testRun = RunClassification.TEST_RUN.AsString(EnumFormat.Description);
+            var initialRun = nameof(RunClassification.INITIAL_RUN);
+            var testRun = nameof(RunClassification.TEST_RUN);
 
             if (initialRun == null || testRun == null)
             {
@@ -498,8 +497,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Setup(s => s.GetAvailableClassificationsForRelativeYearAsync(request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<CalculatorRunClassification>
                 {
-                    new() { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)! },
-                    new() { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)! },
+                    new() { Id = (int)RunClassification.INITIAL_RUN, Status = nameof(RunClassification.INITIAL_RUN) },
+                    new() { Id = (int)RunClassification.TEST_RUN, Status = nameof(RunClassification.TEST_RUN) },
                 });
 
             var mockDbContext = MockDbContextForCalculatorRunClassifications();
@@ -516,8 +515,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var expectedClassifications = new List<CalculatorRunClassificationDto>
             {
-                new CalculatorRunClassificationDto { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)! },
-                new() { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)! },
+                new CalculatorRunClassificationDto { Id = (int)RunClassification.INITIAL_RUN, Status = nameof(RunClassification.INITIAL_RUN) },
+                new() { Id = (int)RunClassification.TEST_RUN, Status = nameof(RunClassification.TEST_RUN) },
             };
 
             // Act

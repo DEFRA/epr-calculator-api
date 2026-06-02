@@ -1,5 +1,4 @@
-﻿using EnumsNET;
-using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
@@ -45,7 +44,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 dbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification
                 {
                     Id = (int)value,
-                    Status = value.AsString(EnumFormat.Description)!, // not null by contract
+                    Status = value.ToString(), // not null by contract
                 });
             }
 
@@ -87,8 +86,8 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)!,
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    nameof(RunClassification.INITIAL_RUN),
+                    nameof(RunClassification.TEST_RUN)
                 },
                 statuses);
         }
@@ -114,7 +113,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    nameof(RunClassification.TEST_RUN)
                 },
                 statuses);
         }
@@ -142,10 +141,10 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    RunClassification.INTERIM_RECALCULATION_RUN.AsString(EnumFormat.Description)!,
-                    RunClassification.FINAL_RECALCULATION_RUN.AsString(EnumFormat.Description)!,
-                    RunClassification.FINAL_RUN.AsString(EnumFormat.Description)!,
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    nameof(RunClassification.INTERIM_RECALCULATION_RUN),
+                    nameof(RunClassification.FINAL_RECALCULATION_RUN),
+                    nameof(RunClassification.FINAL_RUN),
+                    nameof(RunClassification.TEST_RUN)
                 },
                 statuses);
         }
@@ -171,7 +170,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    nameof(RunClassification.TEST_RUN)
                 },
                 statuses);
         }
@@ -200,7 +199,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    nameof(RunClassification.TEST_RUN)
                 },
                 statuses);
         }
@@ -229,9 +228,9 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    RunClassification.INTERIM_RECALCULATION_RUN.AsString(EnumFormat.Description)!,
-                    RunClassification.FINAL_RUN.AsString(EnumFormat.Description)!,
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    nameof(RunClassification.INTERIM_RECALCULATION_RUN),
+                    nameof(RunClassification.FINAL_RUN),
+                    nameof(RunClassification.TEST_RUN)
                 },
                 statuses);
         }
@@ -260,8 +259,8 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    RunClassification.INTERIM_RECALCULATION_RUN.AsString(EnumFormat.Description)!,
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    nameof(RunClassification.INTERIM_RECALCULATION_RUN),
+                    nameof(RunClassification.TEST_RUN)
                 },
                 statuses);
         }

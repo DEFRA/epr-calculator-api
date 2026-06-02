@@ -21,14 +21,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.7"/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.7"/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.7">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Azure" Version="1.13.0"/>
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1"/>
     <PackageReference Include="Microsoft.Identity.Web" Version="3.14.1"/>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1"/>
     <PackageReference Include="SonarAnalyzer.CSharp" Version="10.15.0.120848">
@@ -36,10 +29,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4"/>
-    <PackageReference Include="System.Formats.Asn1" Version="8.0.2"/>
-    <PackageReference Include="System.Text.Json" Version="8.0.5"/>
-    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1"/>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
   </ItemGroup>
 
   <ItemGroup>

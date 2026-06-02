@@ -1,6 +1,5 @@
 ﻿namespace EPR.Calculator.API.UnitTests.Services;
 
-using EnumsNET;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Models;
@@ -37,7 +36,7 @@ public class CalculationRunServiceTests
             this.dbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
                 Id = (int)value,
-                Status = value.AsString(EnumFormat.Description)!, // not null by contract
+                Status = value.ToString()
             });
         }
 
