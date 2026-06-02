@@ -1,5 +1,5 @@
 ﻿using AutoFixture.Kernel;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 
 namespace EPR.Calculator.API.UnitTests.TestHelpers.Fixtures.Customizations;
 

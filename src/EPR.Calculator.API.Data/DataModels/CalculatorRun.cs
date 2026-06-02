@@ -1,5 +1,4 @@
-using System.ComponentModel.DataAnnotations.Schema;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 
 namespace EPR.Calculator.API.Data.DataModels;
 
@@ -8,15 +7,7 @@ public class CalculatorRun
     public int Id { get; set; }
     public int CalculatorRunClassificationId { get; set; }
     public required string Name { get; set; }
-    public int RelativeYearValue { get; private set; }
-
-    [NotMapped]
-    public RelativeYear RelativeYear
-    {
-        get => new(RelativeYearValue);
-        set => RelativeYearValue = value.Value;
-    }
-
+    public RelativeYear RelativeYear { get; set; }
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public string? UpdatedBy { get; set; }

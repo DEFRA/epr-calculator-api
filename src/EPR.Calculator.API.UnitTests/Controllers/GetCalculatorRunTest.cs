@@ -1,7 +1,7 @@
 ﻿using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
@@ -36,7 +36,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context = new ApplicationDBContext(dbContextOptions);
             context.Database.EnsureCreated();
 
-            this.RelativeYear24_25 = new CalculatorRunRelativeYear { Value = 2024 };
+            this.RelativeYear24_25 = new CalculatorRunRelativeYear { Value = new RelativeYear(2024) };
             this.context.CalculatorRunRelativeYears.Add(this.RelativeYear24_25);
             this.context.SaveChanges();
         }

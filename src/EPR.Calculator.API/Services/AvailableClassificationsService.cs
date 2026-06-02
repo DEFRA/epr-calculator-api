@@ -170,7 +170,7 @@ public class AvailableClassificationsService(
     private async Task<List<CalculatorRun>> GetCalculatorRuns(CalcRelativeYearRequestDto request, CancellationToken cancellationToken)
     {
         List<CalculatorRun> currentRuns = await context.CalculatorRuns
-            .Where(run => run.RelativeYearValue == request.RelativeYearValue
+            .Where(run => run.RelativeYear == request.RelativeYearValue
                 && run.CalculatorRunClassificationId != (int)RunClassification.DELETED
                 && run.CalculatorRunClassificationId != (int)RunClassification.ERROR
                 && run.CalculatorRunClassificationId != (int)RunClassification.RUNNING

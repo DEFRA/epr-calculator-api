@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exceptions;
@@ -744,7 +744,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             if (calculatorRunRelativeYear == null)
             {
-                calculatorRunRelativeYear = new CalculatorRunRelativeYear { Value = 2024 };
+                calculatorRunRelativeYear = new CalculatorRunRelativeYear { Value = new RelativeYear(2024) };
                 this.DbContext.CalculatorRunRelativeYears.Add(calculatorRunRelativeYear);
 
                 using var cts = new CancellationTokenSource();

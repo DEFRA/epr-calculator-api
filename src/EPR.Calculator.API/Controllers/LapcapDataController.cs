@@ -66,7 +66,7 @@ namespace EPR.Calculator.API.Controllers
                     }
 
                     var oldLapcapData = await this.context.LapcapDataMaster
-                        .Where(x => x.EffectiveTo == null && x.RelativeYearValue == request.RelativeYear.Value)
+                        .Where(x => x.EffectiveTo == null && x.RelativeYear == request.RelativeYear)
                         .ToListAsync();
 
                     oldLapcapData.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // Side effecting db update
@@ -144,7 +144,7 @@ namespace EPR.Calculator.API.Controllers
 
             var lapcapDataMaster = await context.LapcapDataMaster
               .Include(m => m.Details)
-              .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.RelativeYearValue == relativeYear.Value);
+              .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.RelativeYear == relativeYear);
 
             if (lapcapDataMaster == null)
             {

@@ -1,7 +1,7 @@
 using System.Reflection;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataSeeder;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Data;
@@ -72,5 +72,12 @@ public class ApplicationDBContext : DbContext
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         Seeder.Initialize(modelBuilder);
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        // Configures global conversion for RelativeYear struct to underlying database int type.
+        configurationBuilder.Properties<RelativeYear>()
+            .HaveConversion<RelativeYearValueConverter, RelativeYearValueComparer>();
     }
 }

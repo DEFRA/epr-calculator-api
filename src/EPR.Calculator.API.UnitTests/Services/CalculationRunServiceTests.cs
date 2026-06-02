@@ -2,7 +2,7 @@ namespace EPR.Calculator.API.UnitTests.Services;
 
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services;
@@ -41,7 +41,7 @@ public class CalculationRunServiceTests
 
         this.dbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear
         {
-            Value = 2024,
+            Value = new RelativeYear(2024)
         });
 
         this.dbContext.SaveChanges();

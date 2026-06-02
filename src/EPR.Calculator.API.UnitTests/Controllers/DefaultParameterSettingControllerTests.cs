@@ -2,7 +2,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;

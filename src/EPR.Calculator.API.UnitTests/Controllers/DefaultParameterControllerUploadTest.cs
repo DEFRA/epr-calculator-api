@@ -3,7 +3,7 @@ using System.Security.Principal;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
@@ -47,9 +47,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
 
             // Add existing relative years
-            var year29 = new CalculatorRunRelativeYear { Value = 2029, Description = string.Empty };
-            var year30 = new CalculatorRunRelativeYear { Value = 2030, Description = string.Empty };
-            var year31 = new CalculatorRunRelativeYear { Value = 2031, Description = string.Empty };
+            var year29 = new CalculatorRunRelativeYear { Value = new RelativeYear(2029), Description = string.Empty };
+            var year30 = new CalculatorRunRelativeYear { Value = new RelativeYear(2030), Description = string.Empty };
+            var year31 = new CalculatorRunRelativeYear { Value = new RelativeYear(2031), Description = string.Empty };
             DbContext.AddRange(year29, year30, year31);
             DbContext.SaveChanges();
 
@@ -111,9 +111,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var defaultParameterLatest = DbContext.DefaultParameterSettings.Where(x => x.EffectiveTo == null).ToList();
             Assert.HasCount(3, defaultParameterLatest); // 29, 30, 31
 
-            Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.RelativeYearValue == 2029 && x.EffectiveTo == null));
-            Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.RelativeYearValue == 2030 && x.EffectiveTo == null));
-            Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.RelativeYearValue == 2031 && x.EffectiveTo == null));
+            Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.RelativeYear == 2029 && x.EffectiveTo == null));
+            Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.RelativeYear == 2030 && x.EffectiveTo == null));
+            Assert.IsNotNull(DbContext.DefaultParameterSettings.Single(x => x.RelativeYear == 2031 && x.EffectiveTo == null));
         }
     }
 }

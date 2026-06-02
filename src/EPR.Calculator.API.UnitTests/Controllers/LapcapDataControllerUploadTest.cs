@@ -3,7 +3,7 @@ using System.Security.Principal;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
@@ -32,8 +32,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Add relative years
             dbContext.AddRange(
-                new CalculatorRunRelativeYear { Value = 2029 },
-                new CalculatorRunRelativeYear { Value = 2030 });
+                new CalculatorRunRelativeYear { Value = new RelativeYear(2029) },
+                new CalculatorRunRelativeYear { Value = new RelativeYear(2030) });
 
             dbContext.SaveChanges();
 
@@ -109,8 +109,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var activeLapcap = dbContext.LapcapDataMaster.Where(x => x.EffectiveTo == null).ToList();
             Assert.HasCount(2, activeLapcap); // only 2029 and 2030 active
 
-            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.RelativeYearValue == 2029 && x.EffectiveTo == null));
-            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.RelativeYearValue == 2030 && x.EffectiveTo == null));
+            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.RelativeYear == 2029 && x.EffectiveTo == null));
+            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.RelativeYear == 2030 && x.EffectiveTo == null));
         }
 
         [TestMethod]
@@ -133,8 +133,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Seed relative years (realistic values)
             dbContext.AddRange(
-                new CalculatorRunRelativeYear { Value = 2029 },
-                new CalculatorRunRelativeYear { Value = 2030 });
+                new CalculatorRunRelativeYear { Value = new RelativeYear(2029) },
+                new CalculatorRunRelativeYear { Value = new RelativeYear(2030) });
 
             dbContext.SaveChanges();
 
@@ -217,8 +217,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // Ensure existing data is untouched
             var lapcapLatest = dbContext.LapcapDataMaster.Where(x => x.EffectiveTo == null).ToList();
             Assert.HasCount(2, lapcapLatest);
-            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.RelativeYearValue == 2029 && x.EffectiveTo == null));
-            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.RelativeYearValue == 2030 && x.EffectiveTo == null));
+            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.RelativeYear == 2029 && x.EffectiveTo == null));
+            Assert.IsNotNull(dbContext.LapcapDataMaster.Single(x => x.RelativeYear == 2030 && x.EffectiveTo == null));
         }
     }
 }

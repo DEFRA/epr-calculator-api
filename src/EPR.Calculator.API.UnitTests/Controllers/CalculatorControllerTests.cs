@@ -4,7 +4,7 @@ using AutoFixture;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
@@ -39,7 +39,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
         public IFixture Fixture { get; init; }
 
-        private CalculatorRunRelativeYear RelativeYear23_24 { get; } = new CalculatorRunRelativeYear { Value = 2023 };
+        private CalculatorRunRelativeYear RelativeYear23_24 { get; } = new CalculatorRunRelativeYear { Value = new RelativeYear(2023) };
 
         [TestMethod]
         public async Task Create_Calculator_Run()
@@ -161,7 +161,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 RelativeYear = new RelativeYear(2027),
             };
 
-            DbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear { Value = 2027 });
+            DbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear { Value = new RelativeYear(2027) });
             DbContext.SaveChanges();
 
             DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
@@ -339,7 +339,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                RelativeYear = new RelativeYear(Fixture.Create<int>()),
+                RelativeYear = new RelativeYear(-1),
             };
             var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
             Assert.IsNotNull(actionResult);
@@ -465,11 +465,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Act
             var result = await CalculatorController.RelativeYears() as ObjectResult;
-            var resultList = result?.Value as IEnumerable<int>;
+            var resultList = (result?.Value as IEnumerable<RelativeYear>)?.ToList();
 
             // Assert
-            Assert.IsInstanceOfType<IEnumerable<int>>(resultList);
-            Assert.AreEqual(2024, resultList?.Single());
+            resultList.ShouldNotBeNull();
+            resultList.ShouldNotBeEmpty();
+            resultList.ShouldContain(new RelativeYear(2024));
         }
 
         [TestMethod]

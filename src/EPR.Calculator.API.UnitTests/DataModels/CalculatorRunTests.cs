@@ -1,3 +1,5 @@
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
 
 namespace EPR.Calculator.API.UnitTests.DataModels
@@ -6,7 +8,6 @@ namespace EPR.Calculator.API.UnitTests.DataModels
     using System.Collections.Generic;
     using AutoFixture;
     using EPR.Calculator.API.Data.DataModels;
-    using EPR.Calculator.API.Data.Models;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]

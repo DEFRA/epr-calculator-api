@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 using System.Security.Principal;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.UnitTests.Controllers;
 using Microsoft.AspNetCore.Http;

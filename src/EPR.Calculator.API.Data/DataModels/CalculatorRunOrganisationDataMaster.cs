@@ -1,20 +1,11 @@
-using System.ComponentModel.DataAnnotations.Schema;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 
 namespace EPR.Calculator.API.Data.DataModels;
 
 public class CalculatorRunOrganisationDataMaster
 {
     public int Id { get; set; }
-    public int RelativeYearValue { get; private set; }
-
-    [NotMapped]
-    public RelativeYear RelativeYear
-    {
-        get => new(RelativeYearValue);
-        set => RelativeYearValue = value.Value;
-    }
-
+    public RelativeYear RelativeYear { get; set; }
     public required DateTime EffectiveFrom { get; set; }
     public DateTime? EffectiveTo { get; set; }
     public required string CreatedBy { get; set; }

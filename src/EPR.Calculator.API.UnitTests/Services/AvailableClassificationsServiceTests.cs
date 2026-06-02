@@ -1,6 +1,6 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exceptions;
@@ -50,7 +50,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Add dummy RelativeYear for navigation property
             dbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear
             {
-                Value = 2024,
+                Value = new RelativeYear(2024)
             });
 
             dbContext.SaveChanges();

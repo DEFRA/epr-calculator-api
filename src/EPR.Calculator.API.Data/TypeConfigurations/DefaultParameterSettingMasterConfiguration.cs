@@ -1,4 +1,4 @@
-﻿using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,15 +10,13 @@ public class DefaultParameterSettingMasterConfiguration : IEntityTypeConfigurati
     {
         builder.ToTable("default_parameter_setting_master");
 
-        builder.Property(p => p.RelativeYearValue)
+        builder.Property(p => p.RelativeYear)
             .HasColumnName("relative_year")
             .IsRequired();
 
-        builder.Ignore(p => p.RelativeYear);
-
         builder.HasOne<CalculatorRunRelativeYear>()
             .WithMany()
-            .HasForeignKey(e => e.RelativeYearValue)
+            .HasForeignKey(e => e.RelativeYear)
             .HasPrincipalKey(e => e.Value)
             .OnDelete(DeleteBehavior.Restrict);
 
