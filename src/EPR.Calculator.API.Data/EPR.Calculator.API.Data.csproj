@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Version>2.5.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <SonarQubeExclude>true</SonarQubeExclude>
   </PropertyGroup>
 
   <Target Name="GenerateSqlScript" AfterTargets="AfterBuild" Condition="$(AzureBuild) != true">
@@ -29,29 +31,6 @@
     </PackageReference>
     <PackageReference Include="System.Formats.Asn1" Version="8.0.2"/>
     <PackageReference Include="System.Text.Json" Version="8.0.5"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <SonarQubeSetting Include="sonar.coverage.exclusions">
-      <value>Scripts/*.*,Migrations/*.*,DataSeeder/*.*,DataModels/*.*,TypeConfigurations/*.*</value>
-    </SonarQubeSetting>
-
-    <SonarQubeSetting Include="sonar.cpd.exclusions">
-      <Value>Scripts/*.*,Migrations/*.*,DataSeeder/*.*,DataModels/*.*,TypeConfigurations/*.*</Value>
-    </SonarQubeSetting>
-
-    <SonarQubeSetting Include="sonar.exclusions">
-      <Value>**/*.sql</Value>
-    </SonarQubeSetting>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Migrations\*.cs">
-      <SonarQubeExclude>true</SonarQubeExclude>
-    </Compile>
-    <None Update="Scripts\**\*">
-      <SonarQubeExclude>true</SonarQubeExclude>
-    </None>
   </ItemGroup>
 
 </Project>

@@ -2,8 +2,6 @@
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace EPR.Calculator.API.Data.Migrations
 {
     /// <inheritdoc />
