@@ -1,17 +1,16 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿namespace EPR.Calculator.API.Data.DataModels;
+
+public class Material
 {
-    public class Material
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        public required string Code { get; set; }
+    public required string Code { get; set; }
 
-        public required string Name { get; set; }
+    public required string Name { get; set; }
 
-        public string? Description { get; set; }
+    public string? Description { get; set; }
 
-        public virtual ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = new List<ProducerReportedMaterial>();
+    public virtual ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = new List<ProducerReportedMaterial>();
 
-        public ICollection<ProducerInvoicedMaterialNetTonnage> ProducerInvoicedMaterialNetTonnage { get; } = [];
-    }
+    public ICollection<ProducerInvoicedMaterialNetTonnage> ProducerInvoicedMaterialNetTonnage { get; } = [];
 }

@@ -22,7 +22,7 @@ public class ErrorReportConfiguration : IEntityTypeConfiguration<ErrorReport>
         builder.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(400).IsRequired();
 
         builder.HasOne(e => e.CalculatorRun)
-        .WithMany(r => r.ErrorReports)
-        .HasForeignKey(e => e.CalculatorRunId);
+            .WithMany(r => r.ErrorReports)
+            .HasForeignKey(e => e.CalculatorRunId);
     }
 }

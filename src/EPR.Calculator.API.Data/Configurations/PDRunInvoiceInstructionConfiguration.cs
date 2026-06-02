@@ -9,16 +9,16 @@ public class PDRunInvoiceInstructionConfiguration : IEntityTypeConfiguration<Pro
     public void Configure(EntityTypeBuilder<ProducerDesignatedRunInvoiceInstruction> builder)
     {
         builder.HasIndex(e => new { e.CalculatorRunId, e.ProducerId, e.Id })
-                    .HasDatabaseName("IX_index_producer_designated_run_invoice")
-                    .IncludeProperties(e => new
-                    {
-                        e.CurrentYearInvoicedTotalAfterThisRun,
-                        e.InvoiceAmount,
-                        e.OutstandingBalance,
-                        e.BillingInstructionId,
-                        e.InstructionConfirmedDate,
-                        e.InstructionConfirmedBy
-                    })
-                    .IsClustered(false);
+            .HasDatabaseName("IX_index_producer_designated_run_invoice")
+            .IncludeProperties(e => new
+            {
+                e.CurrentYearInvoicedTotalAfterThisRun,
+                e.InvoiceAmount,
+                e.OutstandingBalance,
+                e.BillingInstructionId,
+                e.InstructionConfirmedDate,
+                e.InstructionConfirmedBy
+            })
+            .IsClustered(false);
     }
 }
