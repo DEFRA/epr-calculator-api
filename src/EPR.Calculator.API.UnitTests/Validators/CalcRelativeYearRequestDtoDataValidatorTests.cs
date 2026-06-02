@@ -4,7 +4,6 @@ using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Validators;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.UnitTests.Validators
@@ -70,8 +69,8 @@ namespace EPR.Calculator.API.UnitTests.Validators
             var result = await validator.Validate(request, CancellationToken.None);
 
             // Assert
-            result.IsInvalid.Should().BeTrue();
-            result.Errors.Should().ContainSingle(e => e.Message == "Relative year not found in the database.");
+            result.IsInvalid.ShouldBeTrue();
+            result.Errors.Where(e => e.Message == "Relative year not found in the database.").ShouldHaveSingleItem();
         }
 
         [TestMethod]
@@ -89,8 +88,8 @@ namespace EPR.Calculator.API.UnitTests.Validators
             var result = await validator.Validate(request, CancellationToken.None);
 
             // Assert
-            result.IsInvalid.Should().BeTrue();
-            result.Errors.Should().ContainSingle(e => e.Message == "Run not found in the database.");
+            result.IsInvalid.ShouldBeTrue();
+            result.Errors.Where(e => e.Message == "Run not found in the database.").ShouldHaveSingleItem();
         }
 
         [TestMethod]
@@ -107,8 +106,8 @@ namespace EPR.Calculator.API.UnitTests.Validators
             var result = await validator.Validate(request, CancellationToken.None);
 
             // Assert
-            result.IsInvalid.Should().BeTrue();
-            result.Errors.Should().ContainSingle(e => e.Message == "Run is already classified.");
+            result.IsInvalid.ShouldBeTrue();
+            result.Errors.Where(e => e.Message == "Run is already classified.").ShouldHaveSingleItem();
         }
 
         [TestMethod]
@@ -125,7 +124,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             var result = await validator.Validate(request, CancellationToken.None);
 
             // Assert
-            result.IsInvalid.Should().BeFalse();
+            result.IsInvalid.ShouldBeFalse();
         }
     }
 }

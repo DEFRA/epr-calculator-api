@@ -1,3 +1,5 @@
+using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
+
 namespace EPR.Calculator.API.UnitTests.Services
 {
     using System;
@@ -15,7 +17,7 @@ namespace EPR.Calculator.API.UnitTests.Services
     {
         public CommandTimeoutServiceTests()
         {
-            this.Fixture = new Fixture();
+            this.Fixture = TestFixtures.New();
             this.Configuration = new Mock<IConfiguration>();
             this.TestClass = new CommandTimeoutService(this.Configuration.Object);
             this.Database = new DatabaseFacade(new ApplicationDBContext());

@@ -10,8 +10,8 @@ using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.UnitTests.Helpers;
+using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
 using EPR.Calculator.API.Validators;
-using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +27,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         /// </summary>
         public CalculatorControllerTests()
         {
-            Fixture = new Fixture();
+            Fixture = TestFixtures.New();
 
             // Set up authorisation.
             var identity = new GenericIdentity("TestUser");
@@ -37,7 +37,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             CalculatorController.ControllerContext = new ControllerContext { HttpContext = context };
         }
 
-        public Fixture Fixture { get; init; }
+        public IFixture Fixture { get; init; }
 
         private CalculatorRunRelativeYear RelativeYear23_24 { get; } = new CalculatorRunRelativeYear { Value = 2023 };
 
@@ -530,7 +530,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var typeToAssert = typeof(CalculatorRunClassificationDto);
             Assert.IsInstanceOfType(expectedClassifications[0], typeToAssert);
             Assert.IsInstanceOfType(result.Classifications[1], typeToAssert);
-            result.Classifications.Should().BeEquivalentTo(expectedClassifications);
+            result.Classifications.ShouldBeEquivalentTo(expectedClassifications);
             Assert.AreEqual(result.RelativeYear, relativeYear);
         }
 

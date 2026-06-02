@@ -1,11 +1,10 @@
-﻿using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services;
-using EPR.Calculator.API.Services.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -14,7 +13,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 {
     /// <summary>
     /// Unit tests for <see cref="AvailableClassificationsService"/>.
-    /// Note: .AsString(EnumFormat.Description)! is safe here because all enum values are decorated with Description.
+    /// Note: .ToString()! is safe here because all enum values are decorated with Description.
     /// </summary>
     [TestClass]
     public class AvailableClassificationsServiceTests
@@ -44,7 +43,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 dbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification
                 {
                     Id = (int)value,
-                    Status = value.ToString(), // not null by contract
+                    Status = value.ToString()
                 });
             }
 
@@ -312,6 +311,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                 dbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
                 {
                     CalculatorRunId = requestId,
+                    BillingJsonFileName = "ignored",
+                    BillingCsvFileName = "ignored",
                     BillingFileCreatedBy = userName,
                     BillingFileCreatedDate = currentTime.AddMicroseconds(1),
                     BillingFileAuthorisedBy = userName,

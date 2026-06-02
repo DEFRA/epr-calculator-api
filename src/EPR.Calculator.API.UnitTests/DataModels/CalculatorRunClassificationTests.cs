@@ -1,3 +1,5 @@
+using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
+
 namespace EPR.Calculator.API.UnitTests.DataModels
 {
     using System;
@@ -14,7 +16,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
             this.TestClass = this.Fixture.Create<CalculatorRunClassification>();
         }
 
-        private Fixture Fixture { get; } = new Fixture();
+        private IFixture Fixture { get; } = TestFixtures.New();
 
         private CalculatorRunClassification TestClass { get; init; }
 
@@ -35,7 +37,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetStatus()
         {
             // Arrange
-            var fixture = new Fixture();
+            var fixture = TestFixtures.New();
 
             var testValue = fixture.Create<string>();
 
@@ -50,7 +52,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetCreatedBy()
         {
             // Arrange
-            var fixture = new Fixture();
+            var fixture = TestFixtures.New();
 
             var testValue = fixture.Create<string>();
 

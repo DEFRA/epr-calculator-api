@@ -1,3 +1,5 @@
+using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
+
 namespace EPR.Calculator.API.UnitTests.DataModels
 {
     using System;
@@ -17,7 +19,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
 
         private CalculatorRun TestClass { get; init; }
 
-        private Fixture Fixture { get; } = new Fixture();
+        private IFixture Fixture { get; } = TestFixtures.New();
 
         [TestMethod]
         public void CanSetAndGetCalculatorRunClassificationId()

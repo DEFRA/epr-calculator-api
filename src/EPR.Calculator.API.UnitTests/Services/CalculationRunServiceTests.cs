@@ -1,4 +1,4 @@
-﻿namespace EPR.Calculator.API.UnitTests.Services;
+namespace EPR.Calculator.API.UnitTests.Services;
 
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -6,7 +6,6 @@ using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -81,7 +80,7 @@ public class CalculationRunServiceTests
         var result = await this.service.GetDesignatedRunsByFinanialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
 
         // Assert
-        result.Should().HaveCount(0);
+        result.Count.ShouldBe(0);
     }
 
     [TestMethod]
@@ -110,7 +109,7 @@ public class CalculationRunServiceTests
         var result = await this.service.GetDesignatedRunsByFinanialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
 
         // Assert
-        result.Should().HaveCount(expectedRowCount);
+        result.Count.ShouldBe(expectedRowCount);
     }
 
     [TestMethod]
@@ -126,19 +125,11 @@ public class CalculationRunServiceTests
         var result = await this.service.GetDesignatedRunsByFinanialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
 
         // Assert
-        result.Should().HaveCount(2);
-
-        result.Should().SatisfyRespectively(
-            first =>
-            {
-                first.RunId.Should().Be(2);
-                first.RunClassificationId.Should().Be((int)RunClassification.INITIAL_RUN_COMPLETED);
-            },
-            second =>
-            {
-                second.RunId.Should().Be(3);
-                second.RunClassificationId.Should().Be((int)RunClassification.INTERIM_RECALCULATION_RUN);
-            });
+        result.Count.ShouldBe(2);
+        result[0].RunId.ShouldBe(2);
+        result[0].RunClassificationId.ShouldBe((int)RunClassification.INITIAL_RUN_COMPLETED);
+        result[1].RunId.ShouldBe(3);
+        result[1].RunClassificationId.ShouldBe((int)RunClassification.INTERIM_RECALCULATION_RUN);
     }
 
     [TestMethod]

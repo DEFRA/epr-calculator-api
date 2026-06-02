@@ -1,17 +1,15 @@
-﻿using AutoFixture;
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
-using FluentAssertions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
 
 namespace EPR.Calculator.API.UnitTests.Mappers;
 
 [TestClass]
 public class RelativeYearClassificationsMapperTests
 {
-    private Fixture Fixture { get; } = new Fixture();
+    private IFixture Fixture { get; } = TestFixtures.New();
 
     [TestMethod]
     public void Map_WhenNotGivenCalculatorRuns_ReturnsExpectedClassifications()
@@ -28,21 +26,14 @@ public class RelativeYearClassificationsMapperTests
 
         // Assert
         Assert.IsInstanceOfType<RelativeYearClassificationResponseDto>(result);
-        result.RelativeYear.Should().Be(new RelativeYear(2024));
-        result.Classifications.Count.Should().Be(classifications.Count);
-        result.ClassifiedRuns.Should().BeEmpty();
+        result.RelativeYear.ShouldBe(new RelativeYear(2024));
+        result.Classifications.Count.ShouldBe(classifications.Count);
+        result.ClassifiedRuns.ShouldBeEmpty();
 
-        result.Classifications.Should().SatisfyRespectively(
-            first =>
-            {
-                first.Id.Should().Be(1);
-                first.Status.Should().Be("RUNNING");
-            },
-            second =>
-            {
-                second.Id.Should().Be(2);
-                second.Status.Should().Be("UNCLASSIFIED");
-            });
+        result.Classifications[0].Id.ShouldBe(1);
+        result.Classifications[0].Status.ShouldBe("RUNNING");
+        result.Classifications[1].Id.ShouldBe(2);
+        result.Classifications[1].Status.ShouldBe("UNCLASSIFIED");
     }
 
     [TestMethod]
@@ -56,9 +47,9 @@ public class RelativeYearClassificationsMapperTests
 
         // Assert
         Assert.IsInstanceOfType<RelativeYearClassificationResponseDto>(result);
-        result.RelativeYear.Should().Be(new RelativeYear(2024));
-        result.Classifications.Count.Should().Be(classifications.Count);
-        result.ClassifiedRuns.Should().BeEmpty();
+        result.RelativeYear.ShouldBe(new RelativeYear(2024));
+        result.Classifications.Count.ShouldBe(classifications.Count);
+        result.ClassifiedRuns.ShouldBeEmpty();
     }
 
     [TestMethod]
@@ -73,9 +64,9 @@ public class RelativeYearClassificationsMapperTests
 
         // Assert
         Assert.IsInstanceOfType<RelativeYearClassificationResponseDto>(result);
-        result.RelativeYear.Should().Be(new RelativeYear(2024));
-        result.Classifications.Count.Should().Be(classifications.Count);
-        result.ClassifiedRuns.Should().HaveCount(runs.Count);
-        result.ClassifiedRuns.Should().BeEquivalentTo(runs);
+        result.RelativeYear.ShouldBe(new RelativeYear(2024));
+        result.Classifications.Count.ShouldBe(classifications.Count);
+        result.ClassifiedRuns.Count.ShouldBe(runs.Count);
+        result.ClassifiedRuns.ShouldBeEquivalentTo(runs);
     }
 }

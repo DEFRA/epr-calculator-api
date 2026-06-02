@@ -1,3 +1,5 @@
+using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
+
 namespace EPR.Calculator.API.UnitTests.Dtos
 {
     using System;
@@ -10,7 +12,7 @@ namespace EPR.Calculator.API.UnitTests.Dtos
     {
         public RelativeYearDtoTests()
         {
-            this.Fixture = new Fixture();
+            this.Fixture = TestFixtures.New();
             this.Value = this.Fixture.Create<int>();
             this.Description = this.Fixture.Create<string>();
             this.TestClass = new RelativeYearDto

@@ -10,6 +10,7 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
+using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.API.Wrapper;
 using EPR.Calculator.Service.Function.Services;
@@ -35,7 +36,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
         public CalculatorNewControllerTests()
         {
-            Fixture = new Fixture();
+            Fixture = TestFixtures.New();
 
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
@@ -97,7 +98,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
         public TestContext TestContext { get; set; }
 
-        private Fixture Fixture { get; init; }
+        private IFixture Fixture { get; init; }
 
         [TestCleanup]
         public void CleanUp()
