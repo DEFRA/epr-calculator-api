@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace EPR.Calculator.API.Dtos
+﻿namespace EPR.Calculator.API.Dtos
 {
     /// <summary>
     /// Represents a request to generate a billing file.

@@ -1,6 +1,7 @@
+using System.Configuration;
 using System.Security.Claims;
 using System.Security.Principal;
-using AutoFixture;
+using System.Text.Json;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -14,8 +15,6 @@ using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -256,7 +255,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
 
             var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
-            var actionResultValue = actionResult?.Value as System.Configuration.ConfigurationErrorsException;
+            var actionResultValue = actionResult?.Value as ConfigurationErrorsException;
 
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(500, actionResult.StatusCode);
@@ -326,7 +325,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
 
             var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
-            var actionResultValue = actionResult?.Value as System.Configuration.ConfigurationErrorsException;
+            var actionResultValue = actionResult?.Value as ConfigurationErrorsException;
 
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(500, actionResult.StatusCode);
@@ -456,7 +455,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(422, actionResult.StatusCode);
             var expectedJson = "{\"Message\":\"The calculator is currently running. You will be able to run another calculation once the current one has finished.\"}";
-            var actualJson = System.Text.Json.JsonSerializer.Serialize(actionResult?.Value);
+            var actualJson = JsonSerializer.Serialize(actionResult?.Value);
             Assert.AreEqual(expectedJson, actualJson);
         }
 

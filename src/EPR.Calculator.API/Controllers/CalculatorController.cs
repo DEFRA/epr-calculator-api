@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
@@ -15,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EPR.Calculator.API.Controllers
 {
     [Route("v1")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S6960:Controllers should not have mixed responsibilities", Justification = "It's all calculator run related")]
+    [SuppressMessage("Major Code Smell", "S6960:Controllers should not have mixed responsibilities", Justification = "It's all calculator run related")]
     public class CalculatorController : ControllerBase
     {
         private readonly ApplicationDBContext context;
@@ -27,7 +28,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly ICalculationRunService calculatorRunService;
         private readonly IBillingFileService billingFileService;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        [SuppressMessage(
             "Major Code Smell",
             "S107:Methods should not have too many parameters",
             Justification = "Accepted because it's injected dependencies.  However, if the controller's responsibilities were split as per S6960 this would be resolved.")]

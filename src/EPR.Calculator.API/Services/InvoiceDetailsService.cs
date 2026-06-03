@@ -1,13 +1,9 @@
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
+using Microsoft.EntityFrameworkCore;
+
 namespace EPR.Calculator.Service.Function.Services
 {
-    using System;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using EPR.Calculator.API.Data;
-    using EPR.Calculator.API.Data.DataModels;
-    using Microsoft.EntityFrameworkCore;
-
     public class InvoiceDetailsService : IInvoiceDetailsService
     {
         private readonly ApplicationDBContext _context;

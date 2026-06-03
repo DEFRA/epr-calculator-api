@@ -33,7 +33,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
                 Name = "Test",
                 Id = calcRunId,
                 CreatedBy = "Test",
-                CreatedAt = System.DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
             };
 
             dbContext.CalculatorRuns.Add(calcRun);

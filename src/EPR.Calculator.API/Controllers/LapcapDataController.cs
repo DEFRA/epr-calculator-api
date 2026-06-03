@@ -4,10 +4,8 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Validators;
 using Microsoft.ApplicationInsights;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Abstractions;
 
 namespace EPR.Calculator.API.Controllers
 {

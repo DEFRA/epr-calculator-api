@@ -1,15 +1,12 @@
-namespace EPR.Calculator.API.UnitTests.Services;
-
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
+
+namespace EPR.Calculator.API.UnitTests.Services;
 
 [TestClass]
 public class CalculationRunServiceTests
