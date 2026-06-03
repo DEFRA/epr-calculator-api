@@ -71,7 +71,7 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(250)")
                         .HasColumnName("name");
 
-                    b.Property<int>("RelativeYearValue")
+                    b.Property<int>("RelativeYear")
                         .HasColumnType("int")
                         .HasColumnName("relative_year");
 
@@ -94,13 +94,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasIndex("LapcapDataMasterId");
 
-                    b.HasIndex("RelativeYearValue");
+                    b.HasIndex("RelativeYear");
 
-                    b.HasIndex("CalculatorRunClassificationId", "RelativeYearValue", "IsBillingFileGenerating", "Id")
+                    b.HasIndex("CalculatorRunClassificationId", "RelativeYear", "IsBillingFileGenerating", "Id")
                         .HasDatabaseName("IX_index_calculator_run");
 
-                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("CalculatorRunClassificationId", "RelativeYearValue", "IsBillingFileGenerating", "Id"), false);
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CalculatorRunClassificationId", "RelativeYearValue", "IsBillingFileGenerating", "Id"), new[] { "Name", "CreatedBy", "CreatedAt", "UpdatedBy", "UpdatedAt", "CalculatorRunOrganisationDataMasterId", "CalculatorRunPomDataMasterId", "DefaultParameterSettingMasterId", "LapcapDataMasterId" });
+                    SqlServerIndexBuilderExtensions.IsClustered(b.HasIndex("CalculatorRunClassificationId", "RelativeYear", "IsBillingFileGenerating", "Id"), false);
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CalculatorRunClassificationId", "RelativeYear", "IsBillingFileGenerating", "Id"), new[] { "Name", "CreatedBy", "CreatedAt", "UpdatedBy", "UpdatedAt", "CalculatorRunOrganisationDataMasterId", "CalculatorRunPomDataMasterId", "DefaultParameterSettingMasterId", "LapcapDataMasterId" });
 
                     b.ToTable("calculator_run", (string)null);
                 });
@@ -407,13 +407,13 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("effective_to");
 
-                    b.Property<int>("RelativeYearValue")
+                    b.Property<int>("RelativeYear")
                         .HasColumnType("int")
                         .HasColumnName("relative_year");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RelativeYearValue");
+                    b.HasIndex("RelativeYear");
 
                     b.ToTable("calculator_run_organization_data_master", (string)null);
                 });
@@ -521,13 +521,13 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("effective_to");
 
-                    b.Property<int>("RelativeYearValue")
+                    b.Property<int>("RelativeYear")
                         .HasColumnType("int")
                         .HasColumnName("relative_year");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RelativeYearValue");
+                    b.HasIndex("RelativeYear");
 
                     b.ToTable("calculator_run_pom_data_master", (string)null);
                 });
@@ -710,13 +710,13 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(256)")
                         .HasColumnName("parameter_filename");
 
-                    b.Property<int>("RelativeYearValue")
+                    b.Property<int>("RelativeYear")
                         .HasColumnType("int")
                         .HasColumnName("relative_year");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RelativeYearValue");
+                    b.HasIndex("RelativeYear");
 
                     b.ToTable("default_parameter_setting_master", (string)null);
                 });
@@ -1336,13 +1336,13 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(256)")
                         .HasColumnName("lapcap_filename");
 
-                    b.Property<int>("RelativeYearValue")
+                    b.Property<int>("RelativeYear")
                         .HasColumnType("int")
                         .HasColumnName("relative_year");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RelativeYearValue");
+                    b.HasIndex("RelativeYear");
 
                     b.ToTable("lapcap_data_master", (string)null);
                 });
@@ -3071,17 +3071,17 @@ namespace EPR.Calculator.API.Data.Migrations
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", null)
-                        .WithMany("CalculatorRunDetails")
+                        .WithMany()
                         .HasForeignKey("CalculatorRunClassificationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataMaster", "CalculatorRunOrganisationDataMaster")
-                        .WithMany("RunDetails")
+                        .WithMany("Runs")
                         .HasForeignKey("CalculatorRunOrganisationDataMasterId");
 
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunPomDataMaster", "CalculatorRunPomDataMaster")
-                        .WithMany("RunDetails")
+                        .WithMany("Runs")
                         .HasForeignKey("CalculatorRunPomDataMasterId");
 
                     b.HasOne("EPR.Calculator.API.Data.DataModels.DefaultParameterSettingMaster", "DefaultParameterSettingMaster")
@@ -3094,7 +3094,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunRelativeYear", null)
                         .WithMany()
-                        .HasForeignKey("RelativeYearValue")
+                        .HasForeignKey("RelativeYear")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -3121,7 +3121,7 @@ namespace EPR.Calculator.API.Data.Migrations
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunCsvFileMetadata", b =>
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
-                        .WithMany()
+                        .WithMany("CsvFileMetadata")
                         .HasForeignKey("CalculatorRunId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -3144,7 +3144,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunRelativeYear", null)
                         .WithMany()
-                        .HasForeignKey("RelativeYearValue")
+                        .HasForeignKey("RelativeYear")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -3164,7 +3164,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunRelativeYear", null)
                         .WithMany()
-                        .HasForeignKey("RelativeYearValue")
+                        .HasForeignKey("RelativeYear")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -3219,7 +3219,7 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunRelativeYear", null)
                         .WithMany()
-                        .HasForeignKey("RelativeYearValue")
+                        .HasForeignKey("RelativeYear")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
@@ -3258,18 +3258,20 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRunRelativeYear", null)
                         .WithMany()
-                        .HasForeignKey("RelativeYearValue")
+                        .HasForeignKey("RelativeYear")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDesignatedRunInvoiceInstruction", b =>
                 {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", null)
+                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
                         .WithMany("ProducerDesignatedRunInvoiceInstruction")
                         .HasForeignKey("CalculatorRunId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CalculatorRun");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDetail", b =>
@@ -3285,17 +3287,21 @@ namespace EPR.Calculator.API.Data.Migrations
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerInvoicedMaterialNetTonnage", b =>
                 {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", null)
+                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
                         .WithMany("ProducerInvoicedMaterialNetTonnage")
                         .HasForeignKey("CalculatorRunId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.Material", null)
+                    b.HasOne("EPR.Calculator.API.Data.DataModels.Material", "Material")
                         .WithMany("ProducerInvoicedMaterialNetTonnage")
                         .HasForeignKey("MaterialId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CalculatorRun");
+
+                    b.Navigation("Material");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerReportedMaterial", b =>
@@ -3320,13 +3326,13 @@ namespace EPR.Calculator.API.Data.Migrations
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerReportedMaterialProjected", b =>
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.Material", "Material")
-                        .WithMany()
+                        .WithMany("ProducerReportedMaterialProjecteds")
                         .HasForeignKey("MaterialId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("EPR.Calculator.API.Data.DataModels.ProducerDetail", "ProducerDetail")
-                        .WithMany()
+                        .WithMany("ProducerReportedMaterialProjecteds")
                         .HasForeignKey("ProducerDetailId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -3338,11 +3344,13 @@ namespace EPR.Calculator.API.Data.Migrations
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerResultFileSuggestedBillingInstruction", b =>
                 {
-                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", null)
+                    b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
                         .WithMany("ProducerResultFileSuggestedBillingInstruction")
                         .HasForeignKey("CalculatorRunId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CalculatorRun");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
@@ -3350,6 +3358,8 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("CalculatorRunBillingFileMetadata");
 
                     b.Navigation("CountryApportionments");
+
+                    b.Navigation("CsvFileMetadata");
 
                     b.Navigation("ErrorReports");
 
@@ -3362,23 +3372,18 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("ProducerResultFileSuggestedBillingInstruction");
                 });
 
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunClassification", b =>
-                {
-                    b.Navigation("CalculatorRunDetails");
-                });
-
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataMaster", b =>
                 {
                     b.Navigation("Details");
 
-                    b.Navigation("RunDetails");
+                    b.Navigation("Runs");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunPomDataMaster", b =>
                 {
                     b.Navigation("Details");
 
-                    b.Navigation("RunDetails");
+                    b.Navigation("Runs");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CostType", b =>
@@ -3414,11 +3419,15 @@ namespace EPR.Calculator.API.Data.Migrations
                 {
                     b.Navigation("ProducerInvoicedMaterialNetTonnage");
 
+                    b.Navigation("ProducerReportedMaterialProjecteds");
+
                     b.Navigation("ProducerReportedMaterials");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.ProducerDetail", b =>
                 {
+                    b.Navigation("ProducerReportedMaterialProjecteds");
+
                     b.Navigation("ProducerReportedMaterials");
                 });
 #pragma warning restore 612, 618
