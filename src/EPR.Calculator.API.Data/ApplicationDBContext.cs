@@ -55,6 +55,14 @@
 
         public virtual DbSet<ProducerReportedMaterialProjected> ProducerReportedMaterialProjected { get; set; }
 
+        public virtual DbSet<TransformProjectedH1> TransformProjectedH1 { get; set; }
+
+        public virtual DbSet<TransformProjectedH2> TransformProjectedH2 { get; set; }
+
+        public virtual DbSet<TransformScaled> TransformScaled { get; set; }
+
+        public virtual DbSet<TransformPartial> TransformPartial { get; set; }
+
         public DbSet<CostType> CostType { get; set; }
 
         public virtual DbSet<Country> Country { get; set; }
