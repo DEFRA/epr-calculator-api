@@ -189,22 +189,22 @@ namespace EPR.Calculator.API.Data.TypeConfigurations
                      .IsRequired(false);
               builder.Property(p => p.H2RamProportionsRed)
                      .HasColumnName("h2_ram_proportions_red")
-                     .HasPrecision(18, 3);
+                     .HasPrecision(8, 6);
               builder.Property(p => p.H2RamProportionsAmber)
                      .HasColumnName("h2_ram_proportions_amber")
-                     .HasPrecision(18, 3);
+                     .HasPrecision(8, 6);
               builder.Property(p => p.H2RamProportionsGreen)
                      .HasColumnName("h2_ram_proportions_green")
-                     .HasPrecision(18, 3);
+                     .HasPrecision(8, 6);
               builder.Property(p => p.H2RamProportionsRedMedical)
                      .HasColumnName("h2_ram_proportions_red_medical")
-                     .HasPrecision(18, 3);
+                     .HasPrecision(8, 6);
               builder.Property(p => p.H2RamProportionsAmberMedical)
                      .HasColumnName("h2_ram_proportions_amber_medical")
-                     .HasPrecision(18, 3);
+                     .HasPrecision(8, 6);
               builder.Property(p => p.H2RamProportionsGreenMedical)
                      .HasColumnName("h2_ram_proportions_green_medical")
-                     .HasPrecision(18, 3);
+                     .HasPrecision(8, 6);
         }
     }
 }

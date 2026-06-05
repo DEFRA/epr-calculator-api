@@ -7892,3 +7892,109 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+)
+BEGIN
+    DECLARE @var47 sysname;
+    SELECT @var47 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_red_medical');
+    IF @var47 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var47 + '];');
+    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_red_medical] decimal(8,6) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+)
+BEGIN
+    DECLARE @var48 sysname;
+    SELECT @var48 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_red');
+    IF @var48 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var48 + '];');
+    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_red] decimal(8,6) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+)
+BEGIN
+    DECLARE @var49 sysname;
+    SELECT @var49 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_green_medical');
+    IF @var49 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var49 + '];');
+    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_green_medical] decimal(8,6) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+)
+BEGIN
+    DECLARE @var50 sysname;
+    SELECT @var50 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_green');
+    IF @var50 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var50 + '];');
+    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_green] decimal(8,6) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+)
+BEGIN
+    DECLARE @var51 sysname;
+    SELECT @var51 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_amber_medical');
+    IF @var51 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var51 + '];');
+    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_amber_medical] decimal(8,6) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+)
+BEGIN
+    DECLARE @var52 sysname;
+    SELECT @var52 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_amber');
+    IF @var52 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var52 + '];');
+    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_amber] decimal(8,6) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260604163323_AmendTransformProjectedH1', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
