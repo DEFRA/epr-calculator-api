@@ -24,14 +24,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private readonly ApplicationDBContext context;
         private readonly Mock<IConfiguration> mockConfig;
         private readonly Mock<IStorageService> mockStorageService;
-        private readonly Mock<IServiceBusService> mockServiceBusService;
+        private readonly Mock<IBackgroundTaskQueue> mockBackgroundTaskQueue;
         private readonly Mock<ICalcRelativeYearRequestDtoDataValidator> mockValidator;
 
         public PutCalculatorRunStatusTest()
         {
             this.mockStorageService = new Mock<IStorageService>();
             this.mockConfig = new Mock<IConfiguration>();
-            this.mockServiceBusService = new Mock<IServiceBusService>();
+            this.mockBackgroundTaskQueue = new Mock<IBackgroundTaskQueue>();
             this.mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
@@ -73,7 +73,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.context,
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
-                    this.mockServiceBusService.Object,
+                    this.mockBackgroundTaskQueue.Object,
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
                     Mock.Of<ICalculationRunService>(),
@@ -116,7 +116,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.context,
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
-                    this.mockServiceBusService.Object,
+                    this.mockBackgroundTaskQueue.Object,
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
                     Mock.Of<ICalculationRunService>(),
@@ -168,7 +168,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.context,
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
-                    this.mockServiceBusService.Object,
+                    this.mockBackgroundTaskQueue.Object,
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
                     Mock.Of<ICalculationRunService>(),
@@ -223,7 +223,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.context,
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
-                    this.mockServiceBusService.Object,
+                    this.mockBackgroundTaskQueue.Object,
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
                     Mock.Of<ICalculationRunService>(),

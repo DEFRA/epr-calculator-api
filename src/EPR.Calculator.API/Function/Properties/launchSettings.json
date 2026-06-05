@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "EPR.Calculator.Service.AzureFuntions": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7115",
+      "launchBrowser": false
+    }
+  }
+}

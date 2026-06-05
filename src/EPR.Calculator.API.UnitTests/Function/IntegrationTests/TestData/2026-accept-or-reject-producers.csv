@@ -1,0 +1,10 @@
+﻿producer_id,billing_status,rejected_reason
+100001,Accepted,NULL
+200001,Accepted,NULL
+200003,Accepted,NULL
+200004,Accepted,NULL
+200006,Accepted,NULL
+300001,Accepted,NULL
+300003,Accepted,NULL
+300004,Accepted,NULL
+300006,Accepted,NULL

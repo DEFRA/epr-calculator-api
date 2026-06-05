@@ -1,130 +1,155 @@
-using System.Configuration;
 using System.Reflection;
-using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Exceptions;
+using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.HealthCheck;
-using EPR.Calculator.API.Services;
-using EPR.Calculator.API.Services.Abstractions;
-using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
-using EPR.Calculator.API.Wrapper;
-using EPR.Calculator.Service.Function.Services;
+using EPR.Calculator.Service.Function.Logging;
+using EPR.Calculator.Service.Function.Options;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Azure;
+using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
+using Serilog;
+using Serilog.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var environmentName = builder.Environment.EnvironmentName?.ToLower() ?? string.Empty;
+var IsRunningLocally = environmentName.Equals(CommonResources.Local, StringComparison.OrdinalIgnoreCase);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddApplicationInsightsTelemetry();
-builder.Services.AddHealthChecks();
-builder.Services.AddSwaggerGen();
+//
+// Configuration
+//
+builder.Configuration
+    .AddUserSecrets(Assembly.GetExecutingAssembly(), optional: true)
+    .AddEnvironmentVariables();
+
+builder.Host.UseSerilog((ctx, services, lc) =>
+{
+    var telemetrySource = Matching.FromSource(typeof(LoggerTelemetryClient).FullName!);
+
+    lc.ReadFrom.Configuration(ctx.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext();
+
+    if (IsRunningLocally) {
+        lc
+        .WriteTo.Logger(lc => lc.Filter.ByExcluding(telemetrySource).WriteTo.Console(DevConsole.Logger()))
+        .WriteTo.Logger(lc => lc.Filter.ByIncludingOnly(telemetrySource).MinimumLevel.Verbose().WriteTo.Console(DevConsole.Telemetry()));
+    } else {
+        lc.WriteTo.ApplicationInsights(services.GetRequiredService<Microsoft.ApplicationInsights.TelemetryClient>(), TelemetryConverter.Traces);
+    }
+});
+
+//
+// Core ASP.NET
+//
 builder.Services.AddControllers();
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddFluentValidationClientsideAdapters();
-builder.Services.AddScoped<ICreateDefaultParameterDataValidator, CreateDefaultParameterDataValidator>();
-builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
-builder.Services.AddScoped<ICalcRelativeYearRequestDtoDataValidator, CalcRelativeYearRequestDtoDataValidator>();
-builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
-builder.Services.AddScoped<IInvoiceDetailsService, InvoiceDetailsService>();
-builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
-builder.Services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatusDataValidator>();
-builder.Services.AddScoped<IBillingFileService, BillingFileService>();
-builder.Services.AddScoped<IAvailableClassificationsService, AvailableClassificationsService>();
-builder.Services.AddScoped<ICalculationRunService, CalculationRunService>();
-builder.Services.AddScoped<IStorageService, BlobStorageService>();
-builder.Services.AddScoped<IBlobStorageService2, BlobStorageService2>();
 
-builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-// Add services to the container.
+builder.Services.AddHealthChecks();
+
+builder.Services.AddApplicationInsightsTelemetry();
+
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+//
+// Authentication / Authorization
+//
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
-// Adding Authorization with Global Policy.
 builder.Services.AddAuthorizationBuilder()
-        .SetFallbackPolicy(new AuthorizationPolicyBuilder()
+    .SetFallbackPolicy(new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .RequireRole(CommonResources.SASuperUserRole)
         .Build());
 
-builder.Services.AddControllers();
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//
+// FluentValidation
+//
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateDefaultParameterSettingValidator>();
 
-// Configure the database context.
-builder.Services.AddDbContext<ApplicationDBContext>(options =>
+//
+// Database
+//
+builder.Services.AddDbContext<ApplicationDBContext>((provider, options) =>
 {
+    var dbOptions = provider
+        .GetRequiredService<IOptions<DatabaseOptions>>()
+        .Value;
+
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"));
+        dbOptions.ConnectionString,
+        sqlOptions =>
+        {
+            sqlOptions.CommandTimeout(
+                (int)dbOptions.CommandTimeout.TotalSeconds);
+        });
 });
 
-builder.Services.Configure<BlobStorageSettings>(
-    builder.Configuration.GetSection("BlobStorage"));
-
+//
+// Blob Storage
+//
 builder.Services.AddSingleton<BlobServiceClient>(provider =>
 {
-    var configuration = provider.GetRequiredService<IConfiguration>();
-    var connectionString = configuration.GetSection("BlobStorage:ConnectionString").Value;
-    if (string.IsNullOrEmpty(connectionString))
-    {
-        throw new ConfigurationErrorsException("Blob Storage connection string is not configured.");
-    }
+    var options = provider
+        .GetRequiredService<IOptions<BlobStorageOptions>>()
+        .Value;
 
-    return new BlobServiceClient(connectionString);
+    return new BlobServiceClient(options.ConnectionString);
 });
 
-var serviceBusConnectionString = builder.Configuration.GetSection("ServiceBus").GetSection("ConnectionString");
-var serviceBusQueueName = builder.Configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
-#pragma warning disable CS8604 // Possible null reference argument.
-var retryPeriod = double.Parse(builder.Configuration.GetSection("ServiceBus").GetSection("PostMessageRetryPeriod").Value);
-var retryCount = int.Parse(builder.Configuration.GetSection("ServiceBus").GetSection("PostMessageRetryCount").Value);
-#pragma warning restore CS8604 // Possible null reference argument.
 
-builder.Services.AddAzureClients(builder =>
+builder.Services.AddAppDependencies(builder.Configuration);
+
+//
+// Options
+//
+builder.Services
+    .AddOptions<DatabaseOptions>()
+    .BindConfiguration(DatabaseOptions.SectionKey)
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services
+    .AddOptions<BlobStorageOptions>()
+    .BindConfiguration(BlobStorageOptions.SectionKey)
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services
+    .AddOptions<CommonDataApiHttpClientOptions>()
+    .BindConfiguration(CommonDataApiHttpClientOptions.SectionKey)
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services
+    .AddOptions<CommonDataApiLoaderOptions>()
+    .BindConfiguration(CommonDataApiLoaderOptions.SectionKey)
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+//
+// Timeout Policies
+//
+foreach (var policy in CommonResources.TimeoutPolicies.Split(','))
 {
-    builder
-        .AddServiceBusClient(serviceBusConnectionString)
-        .WithName("calculator")
-        .ConfigureOptions(options =>
-        {
-            options.RetryOptions.Delay = TimeSpan.FromSeconds(retryPeriod);
-            options.RetryOptions.MaxDelay = TimeSpan.FromSeconds(retryPeriod);
-            options.RetryOptions.MaxRetries = retryCount;
-        });
+    var timeout = builder.Configuration
+        .GetSection("Timeouts")
+        .GetValue<double>(policy);
 
-    // Register a sender for the "calculator" client.
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-    builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) =>
-        provider
-            .GetService<IAzureClientFactory<ServiceBusClient>>()
-            .CreateClient("calculator")
-            .CreateSender(serviceBusQueueName))
-    .WithName($"calculator-{serviceBusQueueName}");
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-});
-
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-builder.Services.AddProblemDetails();
-builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
-
-// Configure endpoint timeout policies.
-foreach (string policy in CommonResources.TimeoutPolicies.Split(','))
-{
-    var timeout = builder.Configuration.GetSection("Timeouts").GetValue<double>(policy);
     builder.Services.AddRequestTimeouts(options =>
     {
         options.AddPolicy(policy, TimeSpan.FromMinutes(timeout));
@@ -133,20 +158,27 @@ foreach (string policy in CommonResources.TimeoutPolicies.Split(','))
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || environmentName.Equals(CommonResources.Local, StringComparison.OrdinalIgnoreCase))
+//
+// Middleware
+//
+if (IsRunningLocally)
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
 app.UseExceptionHandler();
+
 app.UseHttpsRedirection();
-app.MapControllers();
-app.UseCors(CommonResources.PolicyName);
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.UseRequestTimeouts();
-app.MapHealthChecks("/admin/health", HealthCheckOptionsBuilder.Build()).AllowAnonymous();
+
+app.MapControllers();
+
+app.MapHealthChecks("/admin/health", HealthCheckOptionsBuilder.Build())
+    .AllowAnonymous();
 
 await app.RunAsync();
