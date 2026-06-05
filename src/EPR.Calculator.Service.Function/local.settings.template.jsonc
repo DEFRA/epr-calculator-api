@@ -1,0 +1,53 @@
+﻿// Template and recommendations for local.settings.json
+{
+  "IsEncrypted": false,
+  "Values": {
+    // Function app settings
+    // Although this is an in-process app, "dotnet-isolated" is required so the functions host uses .NET 8.
+    // Otherwise it will default to .NET 6 and cause assembly binding failures.
+    // FUNCTION_INPROC_NET8_ENABLED ensures it still actually runs in-process.
+    "FUNCTIONS_WORKER_RUNTIME"    : "dotnet-isolated",
+    "FUNCTIONS_EXTENSION_VERSION" : "~4",
+    "FUNCTION_INPROC_NET8_ENABLED": "1",
+    "AzureWebJobsStorage"         : "UseDevelopmentStorage=true", // Use Azurite for local storage emulation.
+
+    // Recommended but optional - include these to use Serilog for nicer console logging.
+    "Serilog__MinimumLevel"                                    : "Error",
+    "Serilog__MinimumLevel__Override__EPR.Calculator"          : "Debug", // Use "Verbose" for additional traces.
+    "Serilog__MinimumLevel__Override__Host.Aggregator"         : "Error",
+    "Serilog__MinimumLevel__Override__Host.Results"            : "Information",
+    "Serilog__MinimumLevel__Override__Function"                : "Error",
+
+    // Only if using Serilog - set everything declared in host.json to 'None' to prevent duplicate logs.
+    "AzureFunctionsJobHost__logging__logLevel__default"        : "None",
+    "AzureFunctionsJobHost__logging__logLevel__EPR.Calculator" : "None",
+    "AzureFunctionsJobHost__logging__logLevel__Host.Aggregator": "None",
+    "AzureFunctionsJobHost__logging__logLevel__Host.Results"   : "None",
+    "AzureFunctionsJobHost__logging__logLevel__Function"       : "None",
+
+    // Recommend using Azure ServiceBusEmulator for local queues.
+    "ServiceBusConnectionString" : "",
+    "ServiceBusQueueName"        : "paycal-queue",
+
+    // BlobStorage settings - again, use Azurite.
+    "BlobStorage:ConnectionString"        : "UseDevelopmentStorage=true",
+    "BlobStorage:ResultFileCsvContainer"  : "paycal-results",
+    "BlobStorage:BillingFileCsvContainer" : "paycal-billing",
+    "BlobStorage:BillingFileJsonContainer": "paycal-billing",
+
+    // CommonDataApi loader settings
+    // You will need to connect to a epr-common-data-api instance if enabled.
+    // If your local database already has Pom/Org data, this can be disabled (and will be much faster).
+    "CommonDataApi:DataLoader:Enabled"              : true,
+    "CommonDataApi:DataLoader:PomBatchSize"         : 10000,
+    "CommonDataApi:DataLoader:OrganisationBatchSize": 10000,
+
+    "CommonDataApi:HttpClient:BaseUrl"           : "https://localhost:5001",
+    "CommonDataApi:HttpClient:CompressionEnabled": true,
+    "CommonDataApi:HttpClient:StreamStartTimeout": "00:15:00",
+
+    // For local DBs use the migration scripts in epr-calculator-api to define the schema
+    "Database:ConnectionString": "",
+    "Database:CommandTimeout"  : "00:15:00"
+  }
+}
