@@ -582,7 +582,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "ENG-AL",
                     Country = "England",
                     Material = "Aluminium",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -590,7 +590,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "ENG-FC",
                     Country = "England",
                     Material = "Fibre composite",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -598,7 +598,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "ENG-GL",
                     Country = "England",
                     Material = "Glass",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -606,7 +606,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "ENG-PC",
                     Country = "England",
                     Material = "Paper or card",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -614,7 +614,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "ENG-PL",
                     Country = "England",
                     Material = "Plastic",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -622,7 +622,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "ENG-ST",
                     Country = "England",
                     Material = "Steel",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -630,7 +630,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "ENG-WD",
                     Country = "England",
                     Material = "Wood",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -638,7 +638,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "ENG-OT",
                     Country = "England",
                     Material = "Other",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -646,7 +646,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "NI-AL",
                     Country = "Northern Ireland",
                     Material = "Aluminium",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -654,7 +654,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "NI-FC",
                     Country = "Northern Ireland",
                     Material = "Fibre composite",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -662,7 +662,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "NI-GL",
                     Country = "Northern Ireland",
                     Material = "Glass",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -670,7 +670,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "NI-PC",
                     Country = "Northern Ireland",
                     Material = "Paper or card",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -678,7 +678,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "NI-PL",
                     Country = "Northern Ireland",
                     Material = "Plastic",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -686,7 +686,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "NI-ST",
                     Country = "Northern Ireland",
                     Material = "Steel",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -694,7 +694,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "NI-WD",
                     Country = "Northern Ireland",
                     Material = "Wood",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -702,7 +702,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "NI-OT",
                     Country = "Northern Ireland",
                     Material = "Other",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -710,7 +710,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "SCT-AL",
                     Country = "Scotland",
                     Material = "Aluminium",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -718,7 +718,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "SCT-FC",
                     Country = "Scotland",
                     Material = "Fibre composite",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -726,7 +726,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "SCT-GL",
                     Country = "Scotland",
                     Material = "Glass",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -734,7 +734,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "SCT-PC",
                     Country = "Scotland",
                     Material = "Paper or card",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -742,7 +742,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "SCT-PL",
                     Country = "Scotland",
                     Material = "Plastic",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -750,7 +750,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "SCT-ST",
                     Country = "Scotland",
                     Material = "Steel",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -758,7 +758,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "SCT-WD",
                     Country = "Scotland",
                     Material = "Wood",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -766,7 +766,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "SCT-OT",
                     Country = "Scotland",
                     Material = "Other",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -774,7 +774,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "WLS-AL",
                     Country = "Wales",
                     Material = "Aluminium",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -782,7 +782,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "WLS-FC",
                     Country = "Wales",
                     Material = "Fibre composite",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -790,7 +790,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "WLS-GL",
                     Country = "Wales",
                     Material = "Glass",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -798,7 +798,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "WLS-PC",
                     Country = "Wales",
                     Material = "Paper or card",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -806,7 +806,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "WLS-PL",
                     Country = "Wales",
                     Material = "Plastic",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -814,7 +814,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "WLS-ST",
                     Country = "Wales",
                     Material = "Steel",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -822,7 +822,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "WLS-WD",
                     Country = "Wales",
                     Material = "Wood",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 },
                 new LapcapDataTemplateMaster
@@ -830,7 +830,7 @@ namespace EPR.Calculator.API.Data.DataSeeder
                     UniqueReference = "WLS-OT",
                     Country = "Wales",
                     Material = "Other",
-                    TotalCostFrom = 0M,
+                    TotalCostFrom = -999999999.99M,
                     TotalCostTo = 999999999.99M,
                 });
         }
