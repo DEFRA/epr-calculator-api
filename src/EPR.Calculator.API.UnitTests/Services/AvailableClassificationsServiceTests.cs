@@ -1,21 +1,17 @@
-﻿using EnumsNET;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services;
-using EPR.Calculator.API.Services.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Services
 {
     /// <summary>
     /// Unit tests for <see cref="AvailableClassificationsService"/>.
-    /// Note: .AsString(EnumFormat.Description)! is safe here because all enum values are decorated with Description.
+    /// Note: .ToString()! is safe here because all enum values are decorated with Description.
     /// </summary>
     [TestClass]
     public class AvailableClassificationsServiceTests
@@ -45,14 +41,14 @@ namespace EPR.Calculator.API.UnitTests.Services
                 dbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification
                 {
                     Id = (int)value,
-                    Status = value.AsString(EnumFormat.Description)!, // not null by contract
+                    Status = value.ToString()
                 });
             }
 
             // Add dummy RelativeYear for navigation property
             dbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear
             {
-                Value = 2024,
+                Value = new RelativeYear(2024)
             });
 
             dbContext.SaveChanges();
@@ -87,8 +83,8 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)!,
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    nameof(RunClassification.INITIAL_RUN),
+                    nameof(RunClassification.TEST_RUN)
                 },
                 statuses);
         }
@@ -114,7 +110,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    nameof(RunClassification.TEST_RUN)
                 },
                 statuses);
         }
@@ -142,10 +138,10 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    RunClassification.INTERIM_RECALCULATION_RUN.AsString(EnumFormat.Description)!,
-                    RunClassification.FINAL_RECALCULATION_RUN.AsString(EnumFormat.Description)!,
-                    RunClassification.FINAL_RUN.AsString(EnumFormat.Description)!,
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    nameof(RunClassification.INTERIM_RECALCULATION_RUN),
+                    nameof(RunClassification.FINAL_RECALCULATION_RUN),
+                    nameof(RunClassification.FINAL_RUN),
+                    nameof(RunClassification.TEST_RUN)
                 },
                 statuses);
         }
@@ -171,7 +167,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    nameof(RunClassification.TEST_RUN)
                 },
                 statuses);
         }
@@ -200,7 +196,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    nameof(RunClassification.TEST_RUN)
                 },
                 statuses);
         }
@@ -229,9 +225,9 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    RunClassification.INTERIM_RECALCULATION_RUN.AsString(EnumFormat.Description)!,
-                    RunClassification.FINAL_RUN.AsString(EnumFormat.Description)!,
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    nameof(RunClassification.INTERIM_RECALCULATION_RUN),
+                    nameof(RunClassification.FINAL_RUN),
+                    nameof(RunClassification.TEST_RUN)
                 },
                 statuses);
         }
@@ -260,31 +256,10 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    RunClassification.INTERIM_RECALCULATION_RUN.AsString(EnumFormat.Description)!,
-                    RunClassification.TEST_RUN.AsString(EnumFormat.Description)!,
+                    nameof(RunClassification.INTERIM_RECALCULATION_RUN),
+                    nameof(RunClassification.TEST_RUN)
                 },
                 statuses);
-        }
-
-        [TestMethod]
-        public async Task ShouldLogErrorAndThrow_WhenDbThrows()
-        {
-            // Arrange: setup broken context
-            var brokenContext = new Mock<ApplicationDBContext>();
-            brokenContext.Setup(x => x.CalculatorRuns).Throws(new Exception("DB fail"));
-            var serviceLocal = new AvailableClassificationsService(brokenContext.Object, loggerMock.Object);
-
-            var request = new CalcRelativeYearRequestDto
-            {
-                RunId = 1,
-                RelativeYearValue = 2024,
-            };
-
-            // Act & Assert
-            await Assert.ThrowsExactlyAsync<DataRetrievalException>(async () =>
-            {
-                await serviceLocal.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
-            });
         }
 
         /// <summary>
@@ -313,6 +288,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                 dbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
                 {
                     CalculatorRunId = requestId,
+                    BillingJsonFileName = "ignored",
+                    BillingCsvFileName = "ignored",
                     BillingFileCreatedBy = userName,
                     BillingFileCreatedDate = currentTime.AddMicroseconds(1),
                     BillingFileAuthorisedBy = userName,

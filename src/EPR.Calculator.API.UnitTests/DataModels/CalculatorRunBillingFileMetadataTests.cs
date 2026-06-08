@@ -1,16 +1,14 @@
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
+
 namespace EPR.Calculator.API.UnitTests.DataModels
 {
-    using System;
-    using AutoFixture;
-    using EPR.Calculator.API.Data.DataModels;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     [TestClass]
     public class CalculatorRunBillingFileMetadataTests
     {
         public CalculatorRunBillingFileMetadataTests()
         {
-            this.Fixture = new Fixture();
+            this.Fixture = TestFixtures.New();
             this.TestClass = this.Fixture.Create<CalculatorRunBillingFileMetadata>();
         }
 
@@ -22,7 +20,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetId()
         {
             // Arrange
-            var fixture = new Fixture();
+            var fixture = TestFixtures.New();
 
             var testValue = fixture.Create<int>();
 
@@ -37,7 +35,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetBillingCsvFileName()
         {
             // Arrange
-            var fixture = new Fixture();
+            var fixture = TestFixtures.New();
 
             var testValue = fixture.Create<string>();
 
@@ -52,7 +50,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetBillingJsonFileName()
         {
             // Arrange
-            var fixture = new Fixture();
+            var fixture = TestFixtures.New();
 
             var testValue = fixture.Create<string>();
 
@@ -67,7 +65,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetBillingFileCreatedDate()
         {
             // Arrange
-            var fixture = new Fixture();
+            var fixture = TestFixtures.New();
 
             var testValue = fixture.Create<DateTime>();
 
@@ -82,7 +80,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetBillingFileCreatedBy()
         {
             // Arrange
-            var fixture = new Fixture();
+            var fixture = TestFixtures.New();
 
             var testValue = fixture.Create<string>();
 
@@ -97,7 +95,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetBillingFileAuthorisedDate()
         {
             // Arrange
-            var fixture = new Fixture();
+            var fixture = TestFixtures.New();
 
             var testValue = fixture.Create<DateTime?>();
 
@@ -112,7 +110,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetBillingFileAuthorisedBy()
         {
             // Arrange
-            var fixture = new Fixture();
+            var fixture = TestFixtures.New();
 
             var testValue = fixture.Create<string>();
 
@@ -127,7 +125,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetCalculatorRunId()
         {
             // Arrange
-            var fixture = new Fixture();
+            var fixture = TestFixtures.New();
 
             var testValue = fixture.Create<int>();
 
@@ -142,7 +140,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         public void CanSetAndGetCalculatorRun()
         {
             // Arrange
-            var fixture = new Fixture();
+            var fixture = TestFixtures.New();
 
             var testValue = fixture.Create<CalculatorRun>();
 

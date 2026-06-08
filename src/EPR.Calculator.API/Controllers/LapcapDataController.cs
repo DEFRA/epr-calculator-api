@@ -4,10 +4,8 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Validators;
 using Microsoft.ApplicationInsights;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Abstractions;
 
 namespace EPR.Calculator.API.Controllers
 {
@@ -66,7 +64,7 @@ namespace EPR.Calculator.API.Controllers
                     }
 
                     var oldLapcapData = await this.context.LapcapDataMaster
-                        .Where(x => x.EffectiveTo == null && x.RelativeYearValue == request.RelativeYear.Value)
+                        .Where(x => x.EffectiveTo == null && x.RelativeYear == request.RelativeYear)
                         .ToListAsync();
 
                     oldLapcapData.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // Side effecting db update
@@ -144,7 +142,7 @@ namespace EPR.Calculator.API.Controllers
 
             var lapcapDataMaster = await context.LapcapDataMaster
               .Include(m => m.Details)
-              .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.RelativeYearValue == relativeYear.Value);
+              .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.RelativeYear == relativeYear);
 
             if (lapcapDataMaster == null)
             {

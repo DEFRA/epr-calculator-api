@@ -1,21 +1,20 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿namespace EPR.Calculator.API.Data.DataModels;
+
+public class ProducerDetail
 {
-    public class ProducerDetail
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
+    public int ProducerId { get; set; }
+    public int CalculatorRunId { get; set; }
+    public string? TradingName { get; set; }
+    public string? SubsidiaryId { get; set; }
+    public string? ProducerName { get; set; }
 
-        public int ProducerId { get; set; }
 
-        public string? TradingName { get; set; }
+    #region EF navigational properties
 
-        public string? SubsidiaryId { get; set; }
+    public virtual ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = [];
+    public virtual ICollection<ProducerReportedMaterialProjected> ProducerReportedMaterialProjecteds { get; } = [];
+    public virtual CalculatorRun CalculatorRun { get; set; } = null!;
 
-        public string? ProducerName { get; set; }
-
-        public int CalculatorRunId { get; set; }
-
-        public ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = new List<ProducerReportedMaterial>();
-
-        public virtual CalculatorRun? CalculatorRun { get; set; }
-    }
+    #endregion
 }

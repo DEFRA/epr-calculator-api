@@ -43,7 +43,7 @@ public class ProducerBillingInstructionsSearchQueryDtoValidator : AbstractValida
                     }
 
                     // No duplicates (case-insensitive)
-                    if (list.Count != list.Distinct(System.StringComparer.OrdinalIgnoreCase).Count())
+                    if (list.Count != list.Distinct(StringComparer.OrdinalIgnoreCase).Count())
                     {
                         context.AddFailure(CommonResources.StatusDuplicateValues);
                     }
@@ -69,7 +69,7 @@ public class ProducerBillingInstructionsSearchQueryDtoValidator : AbstractValida
                     }
 
                     // No duplicates (case-insensitive)
-                    if (list.Count != list.Distinct(System.StringComparer.OrdinalIgnoreCase).Count())
+                    if (list.Count != list.Distinct(StringComparer.OrdinalIgnoreCase).Count())
                     {
                         context.AddFailure(CommonResources.BillingInstructionDuplicateValues);
                     }

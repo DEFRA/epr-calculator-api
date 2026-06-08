@@ -1,23 +1,19 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿namespace EPR.Calculator.API.Data.DataModels;
+
+public class CalculatorRunBillingFileMetadata
 {
-    public class CalculatorRunBillingFileMetadata
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
+    public int CalculatorRunId { get; set; }
+    public string? BillingCsvFileName { get; set; }
+    public string? BillingJsonFileName { get; set; }
+    public required DateTime BillingFileCreatedDate { get; set; } = DateTime.UtcNow;
+    public required string BillingFileCreatedBy { get; set; }
+    public DateTime? BillingFileAuthorisedDate { get; set; }
+    public string? BillingFileAuthorisedBy { get; set; }
 
-        public string? BillingCsvFileName { get; set; }
+    #region EF navigational properties
 
-        public string? BillingJsonFileName { get; set; }
+    public virtual CalculatorRun CalculatorRun { get; set; } = null!;
 
-        public required DateTime BillingFileCreatedDate { get; set; } = DateTime.UtcNow;
-
-        public required string BillingFileCreatedBy { get; set; }
-
-        public DateTime? BillingFileAuthorisedDate { get; set; }
-
-        public string? BillingFileAuthorisedBy { get; set; }
-
-        public required int CalculatorRunId { get; set; }
-
-        public virtual CalculatorRun? CalculatorRun { get; set; }
-    }
+    #endregion
 }

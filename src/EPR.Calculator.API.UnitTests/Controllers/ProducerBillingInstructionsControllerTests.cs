@@ -4,8 +4,6 @@ using EPR.Calculator.API.Services.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {

@@ -1,11 +1,7 @@
-﻿using System;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Text;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
-using Microsoft.Extensions.Primitives;
-using Microsoft.OpenApi.Models;
 
 namespace EPR.Calculator.API.Utils
 {

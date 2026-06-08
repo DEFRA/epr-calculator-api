@@ -1,53 +1,47 @@
-﻿using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace EPR.Calculator.API.Data.TypeConfigurations
+namespace EPR.Calculator.API.Data.TypeConfigurations;
+
+public class CalculatorRunOrganisationDataMasterConfiguration : IEntityTypeConfiguration<CalculatorRunOrganisationDataMaster>
 {
-    [ExcludeFromCodeCoverage]
-    public class CalculatorRunOrganisationDataMasterConfiguration : IEntityTypeConfiguration<CalculatorRunOrganisationDataMaster>
+    public void Configure(EntityTypeBuilder<CalculatorRunOrganisationDataMaster> builder)
     {
-        /// <inheritdoc />
-        public void Configure(EntityTypeBuilder<CalculatorRunOrganisationDataMaster> builder)
-        {
-            builder.ToTable("calculator_run_organization_data_master");
+        builder.ToTable("calculator_run_organization_data_master");
 
-            builder.Property(p => p.Id)
-                   .HasColumnName("id");
+        builder.Property(p => p.Id)
+            .HasColumnName("id");
 
-            builder.Property(p => p.RelativeYearValue)
-                   .HasColumnName("relative_year")
-                   .IsRequired();
+        builder.Property(p => p.RelativeYear)
+            .HasColumnName("relative_year")
+            .IsRequired();
 
-            builder.Ignore(p => p.RelativeYear);
+        builder.HasOne<CalculatorRunRelativeYear>()
+            .WithMany()
+            .HasForeignKey(e => e.RelativeYear)
+            .HasPrincipalKey(e => e.Value)
+            .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne<CalculatorRunRelativeYear>()
-                   .WithMany()
-                   .HasForeignKey(e => e.RelativeYearValue)
-                   .HasPrincipalKey(e => e.Value)
-                   .OnDelete(DeleteBehavior.Restrict);
+        builder.Property(p => p.EffectiveFrom)
+            .HasColumnName("effective_from");
 
-            builder.Property(p => p.EffectiveFrom)
-                   .HasColumnName("effective_from");
+        builder.Property(p => p.EffectiveTo)
+            .HasColumnName("effective_to");
 
-            builder.Property(p => p.EffectiveTo)
-                   .HasColumnName("effective_to");
+        builder.Property(p => p.CreatedBy)
+            .HasColumnName("created_by");
 
-            builder.Property(p => p.CreatedBy)
-                   .HasColumnName("created_by");
+        builder.Property(p => p.CreatedAt)
+            .HasColumnName("created_at");
 
-            builder.Property(p => p.CreatedAt)
-                   .HasColumnName("created_at");
+        builder.HasMany(e => e.Details)
+            .WithOne(e => e.CalculatorRunOrganisationDataMaster)
+            .HasForeignKey(e => e.CalculatorRunOrganisationDataMasterId)
+            .IsRequired();
 
-            builder.HasMany(e => e.Details)
-                   .WithOne(e => e.CalculatorRunOrganisationDataMaster)
-                   .HasForeignKey(e => e.CalculatorRunOrganisationDataMasterId)
-                   .IsRequired(true);
-
-            builder.HasMany(e => e.RunDetails)
-                   .WithOne(e => e.CalculatorRunOrganisationDataMaster)
-                   .HasForeignKey(e => e.CalculatorRunOrganisationDataMasterId);
-        }
+        builder.HasMany(e => e.Runs)
+            .WithOne(e => e.CalculatorRunOrganisationDataMaster)
+            .HasForeignKey(e => e.CalculatorRunOrganisationDataMasterId);
     }
 }

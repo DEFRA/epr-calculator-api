@@ -1,22 +1,19 @@
-﻿using Microsoft.ApplicationInsights.Extensibility;
+﻿using Azure.Messaging.ServiceBus;
+using EPR.Calculator.API.Controllers;
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Services.Abstractions;
+using EPR.Calculator.API.UnitTests.Helpers;
+using EPR.Calculator.API.Validators;
+using EPR.Calculator.API.Wrapper;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
-    using Azure.Messaging.ServiceBus;
-    using EPR.Calculator.API.Controllers;
-    using EPR.Calculator.API.Data.DataModels;
-    using EPR.Calculator.API.Data.Models;
-    using EPR.Calculator.API.Services;
-    using EPR.Calculator.API.Services.Abstractions;
-    using EPR.Calculator.API.UnitTests.Helpers;
-    using EPR.Calculator.API.Validators;
-    using EPR.Calculator.API.Wrapper;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Azure;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Moq;
-
     [TestClass]
     public class BaseControllerTest : InMemoryApplicationDbContext
     {

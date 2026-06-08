@@ -3,7 +3,7 @@ using System.Security.Principal;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -80,7 +79,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void CallingPutCalculatorRunStatusMethod_ShouldReturn201SuccessCode_WhenAllValidationPassed()
         {
             // Act
-            var runStatusUpdateDto = new API.Dtos.CalculatorRunStatusUpdateDto
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
                 ClassificationId = 6,
                 RunId = 1,
@@ -151,7 +150,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void CallingPutCalculatorRunStatusMethod_ShouldReturn422FailureCode_WhenClassificationRunValidationFailed()
         {
             // Arrange
-            var runStatusUpdateDto = new API.Dtos.CalculatorRunStatusUpdateDto
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
                 ClassificationId = 6,
                 RunId = 1,
@@ -221,7 +220,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void CallingPutCalculatorRunStatusMethod_ShouldReturn422FailureCode_WhenOtherRunsClassificationsStatusValidationFailed()
         {
             // Arrange
-            var runStatusUpdateDto = new API.Dtos.CalculatorRunStatusUpdateDto
+            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
             {
                 ClassificationId = (int)RunClassification.INITIAL_RUN,
                 RunId = 1,

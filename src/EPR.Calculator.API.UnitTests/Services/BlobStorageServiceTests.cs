@@ -8,7 +8,6 @@ using EPR.Calculator.API.Utils;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Services
 {

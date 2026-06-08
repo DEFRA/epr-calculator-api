@@ -1,17 +1,16 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿namespace EPR.Calculator.API.Data.DataModels;
+
+public class LapcapDataDetail
 {
-    public class LapcapDataDetail
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
+    public int LapcapDataMasterId { get; set; }
+    public string UniqueReference { get; set; } = null!;
+    public decimal TotalCost { get; set; }
 
-        public int LapcapDataMasterId { get; set; }
+    #region EF navigational properties
 
-        public required string UniqueReference { get; set; }
+    public virtual LapcapDataMaster LapcapDataMaster { get; set; } = null!;
+    public virtual LapcapDataTemplateMaster LapcapDataTemplateMaster { get; set; } = null!;
 
-        public decimal TotalCost { get; set; }
-
-        public required LapcapDataMaster LapcapDataMaster { get; set; }
-
-        public virtual LapcapDataTemplateMaster? LapcapDataTemplateMaster { get; set; }
-    }
+    #endregion
 }

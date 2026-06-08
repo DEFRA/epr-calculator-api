@@ -5,16 +5,12 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -58,29 +54,24 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             using CancellationTokenSource cancellationTokenSource = new();
 
             // Act
-#pragma warning disable CS0618 // 'Type or member is obsolete'
             IActionResult result = await billingFileControllerUnderTest.GenerateBillingFile(
                 generateBillingFileRequestDto,
                 cancellationTokenSource.Token);
-#pragma warning restore CS0618
 
             // Assert
-            using (new AssertionScope())
-            {
-                result.Should().NotBeNull();
-                result.Should().BeOfType<NotFoundObjectResult>();
-                var notFoundResult = result as NotFoundObjectResult;
-                notFoundResult.Should().NotBeNull();
-                notFoundResult.StatusCode.Should().Be((int)HttpStatusCode.NotFound);
-                notFoundResult.Value.Should().NotBeNull();
+            result.ShouldNotBeNull();
+            result.ShouldBeOfType<NotFoundObjectResult>();
+            var notFoundResult = result as NotFoundObjectResult;
+            notFoundResult.ShouldNotBeNull();
+            notFoundResult.StatusCode.ShouldBe((int)HttpStatusCode.NotFound);
+            notFoundResult.Value.ShouldNotBeNull();
 
-                // Verify
-                billingFileServiceMock.Verify(
-                    x => x.GenerateBillingFileAsync(
-                        generateBillingFileRequestDto,
-                        cancellationTokenSource.Token),
-                    Times.Never());
-            }
+            // Verify
+            billingFileServiceMock.Verify(
+                x => x.GenerateBillingFileAsync(
+                    generateBillingFileRequestDto,
+                    cancellationTokenSource.Token),
+                Times.Never());
         }
 
         [TestMethod]
@@ -111,23 +102,18 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .ReturnsAsync(serviceProcessResponseDto);
 
             // Act
-#pragma warning disable CS0618 // 'Type or member is obsolete'
             IActionResult result = await billingFileControllerUnderTest.GenerateBillingFile(
                 generateBillingFileRequestDto,
                 cancellationTokenSource.Token);
-#pragma warning restore CS0618
 
             // Assert
-            using (new AssertionScope())
-            {
-                result.Should().NotBeNull();
-                result.Should().BeOfType<ObjectResult>();
-                var objectResult = result as ObjectResult;
-                objectResult.Should().NotBeNull();
-                objectResult.StatusCode.Should().Be((int)httpStatusCode);
-                objectResult.Value.Should().NotBeNull();
-                objectResult.Value.Should().Be(message);
-            }
+            result.ShouldNotBeNull();
+            result.ShouldBeOfType<ObjectResult>();
+            var objectResult = result as ObjectResult;
+            objectResult.ShouldNotBeNull();
+            objectResult.StatusCode.ShouldBe((int)httpStatusCode);
+            objectResult.Value.ShouldNotBeNull();
+            objectResult.Value.ShouldBe(message);
         }
 
         [TestMethod]
@@ -196,7 +182,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(1);
 
             // Assert
-            result.Should().BeOfType<BadRequest<IEnumerable<ModelError>>>();
+            result.ShouldBeOfType<BadRequest<IEnumerable<ModelError>>>();
         }
 
         [TestMethod]
@@ -209,7 +195,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
 
             // Assert
-            result.Should().BeOfType<NotFound<string>>();
+            result.ShouldBeOfType<NotFound<string>>();
         }
 
         [TestMethod]
@@ -244,7 +230,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
 
             // Assert
-            result.Should().BeOfType<ProblemHttpResult>();
+            result.ShouldBeOfType<ProblemHttpResult>();
 
             // Tidy Up
             context.CalculatorRunBillingFileMetadata.Remove(billingMeta);
@@ -284,7 +270,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
 
             // Assert
-            result.Should().BeSameAs(expectedResult);
+            result.ShouldBeSameAs(expectedResult);
 
             // Tidy Up
             context.CalculatorRunBillingFileMetadata.Remove(billingMeta);

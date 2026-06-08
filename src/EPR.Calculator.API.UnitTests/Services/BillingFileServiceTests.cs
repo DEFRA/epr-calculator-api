@@ -1,15 +1,11 @@
 ﻿using System.Net;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services;
-using FluentAssertions;
-using FluentAssertions.Execution;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Services
 {
@@ -55,20 +51,17 @@ namespace EPR.Calculator.API.UnitTests.Services
                 cancellationTokenSource.Token);
 
             // Assert
-            using (new AssertionScope())
-            {
-                result.Should().NotBeNull();
-                result.StatusCode.Should().Be(HttpStatusCode.NotFound);
-                result.Message.Should().Be(CommonResources.ResourceNotFoundErrorMessage);
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+            result.Message.ShouldBe(CommonResources.ResourceNotFoundErrorMessage);
 
-                // Verify
-                this.mockIStorageService.Verify(
-                    x => x.IsBlobExistsAsync(
-                        It.IsAny<string>(),
-                        It.IsAny<string>(),
-                        cancellationTokenSource.Token),
-                    Times.Never());
-            }
+            // Verify
+            this.mockIStorageService.Verify(
+                x => x.IsBlobExistsAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    cancellationTokenSource.Token),
+                Times.Never());
         }
 
         [TestMethod]
@@ -91,20 +84,17 @@ namespace EPR.Calculator.API.UnitTests.Services
                 cancellationTokenSource.Token);
 
             // Assert
-            using (new AssertionScope())
-            {
-                result.Should().NotBeNull();
-                result.StatusCode.Should().Be(HttpStatusCode.UnprocessableContent);
-                result.Message.Should().Be(string.Format(CommonResources.NotAValidClassificationStatus, generateBillingFileRequestDto.CalculatorRunId));
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(HttpStatusCode.UnprocessableContent);
+            result.Message.ShouldBe(string.Format(CommonResources.NotAValidClassificationStatus, generateBillingFileRequestDto.CalculatorRunId));
 
-                // Verify
-                this.mockIStorageService.Verify(
-                    x => x.IsBlobExistsAsync(
-                        It.IsAny<string>(),
-                        It.IsAny<string>(),
-                        cancellationTokenSource.Token),
-                    Times.Never());
-            }
+            // Verify
+            this.mockIStorageService.Verify(
+                x => x.IsBlobExistsAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    cancellationTokenSource.Token),
+                Times.Never());
         }
 
         [TestMethod]
@@ -127,20 +117,17 @@ namespace EPR.Calculator.API.UnitTests.Services
                 cancellationTokenSource.Token);
 
             // Assert
-            using (new AssertionScope())
-            {
-                result.Should().NotBeNull();
-                result.StatusCode.Should().Be(HttpStatusCode.UnprocessableContent);
-                result.Message.Should().Be(string.Format(CommonResources.CsvFileMetadataNotFoundErrorMessage, generateBillingFileRequestDto.CalculatorRunId));
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(HttpStatusCode.UnprocessableContent);
+            result.Message.ShouldBe(string.Format(CommonResources.CsvFileMetadataNotFoundErrorMessage, generateBillingFileRequestDto.CalculatorRunId));
 
-                // Verify
-                this.mockIStorageService.Verify(
-                    x => x.IsBlobExistsAsync(
-                        It.IsAny<string>(),
-                        It.IsAny<string>(),
-                        cancellationTokenSource.Token),
-                    Times.Never());
-            }
+            // Verify
+            this.mockIStorageService.Verify(
+                x => x.IsBlobExistsAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    cancellationTokenSource.Token),
+                Times.Never());
         }
 
         [TestMethod]
@@ -183,20 +170,17 @@ namespace EPR.Calculator.API.UnitTests.Services
                 cancellationTokenSource.Token);
 
             // Assert
-            using (new AssertionScope())
-            {
-                result.Should().NotBeNull();
-                result.StatusCode.Should().Be(HttpStatusCode.UnprocessableContent);
-                result.Message.Should().Be(string.Format(CommonResources.BlobNotFoundErrorMessage, generateBillingFileRequestDto.CalculatorRunId));
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(HttpStatusCode.UnprocessableContent);
+            result.Message.ShouldBe(string.Format(CommonResources.BlobNotFoundErrorMessage, generateBillingFileRequestDto.CalculatorRunId));
 
-                // Verify
-                this.mockIStorageService.Verify(
-                    x => x.IsBlobExistsAsync(
-                        fileName,
-                        blobUri,
-                        cancellationTokenSource.Token),
-                    Times.Once());
-            }
+            // Verify
+            this.mockIStorageService.Verify(
+                x => x.IsBlobExistsAsync(
+                    fileName,
+                    blobUri,
+                    cancellationTokenSource.Token),
+                Times.Once());
         }
 
         [TestMethod]
@@ -239,20 +223,17 @@ namespace EPR.Calculator.API.UnitTests.Services
                 cancellationTokenSource.Token);
 
             // Assert
-            using (new AssertionScope())
-            {
-                result.Should().NotBeNull();
-                result.StatusCode.Should().Be(HttpStatusCode.Accepted);
-                result.Message.Should().Be(CommonResources.RequestAcceptedMessage);
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(HttpStatusCode.Accepted);
+            result.Message.ShouldBe(CommonResources.RequestAcceptedMessage);
 
-                // Verify
-                this.mockIStorageService.Verify(
-                    x => x.IsBlobExistsAsync(
-                        fileName,
-                        blobUri,
-                        cancellationTokenSource.Token),
-                    Times.Once());
-            }
+            // Verify
+            this.mockIStorageService.Verify(
+                x => x.IsBlobExistsAsync(
+                    fileName,
+                    blobUri,
+                    cancellationTokenSource.Token),
+                Times.Once());
         }
 
         [TestMethod]
@@ -536,7 +517,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var result = await this.billingFileServiceUnderTest.MoveBillingJsonFile(runId, cancellationTokenSource.Token);
 
             // Assert
-            result.Should().BeFalse();
+            result.ShouldBeFalse();
             this.mockBlobStorageService2.Verify(
                 x => x.MoveBlobAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
                 Times.Never());
@@ -556,6 +537,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             this.DbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
             {
                 CalculatorRunId = runId,
+                BillingCsvFileName = "ignored",
                 BillingJsonFileName = billingJsonFileName,
                 BillingFileCreatedDate = DateTime.UtcNow,
                 BillingFileCreatedBy = "test",
@@ -584,7 +566,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var result = await this.billingFileServiceUnderTest.MoveBillingJsonFile(runId, cancellationTokenSource.Token);
 
             // Assert
-            result.Should().BeTrue();
+            result.ShouldBeTrue();
             this.mockBlobStorageService2.Verify(
                 x => x.MoveBlobAsync(sourceContainer, targetContainer, billingJsonFileName),
                 Times.Once());
@@ -704,6 +686,8 @@ namespace EPR.Calculator.API.UnitTests.Services
             this.DbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
             {
                 CalculatorRunId = runId,
+                BillingJsonFileName = "ignored",
+                BillingCsvFileName = "ignored",
                 BillingFileCreatedDate = DateTime.UtcNow.AddDays(-1),
                 BillingFileCreatedBy = "test",
             });
@@ -714,7 +698,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationToken);
 
             // Assert
-            result.Should().BeFalse();
+            result.ShouldBe(false);
         }
 
         [TestMethod]
@@ -735,6 +719,8 @@ namespace EPR.Calculator.API.UnitTests.Services
             this.DbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
             {
                 CalculatorRunId = runId,
+                BillingJsonFileName = "ignored",
+                BillingCsvFileName = "ignored",
                 BillingFileCreatedDate = DateTime.UtcNow.AddMinutes(-1),
                 BillingFileCreatedBy = "test",
             });
@@ -744,7 +730,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationToken);
 
             // Assert
-            result.Should().BeTrue();
+            result.ShouldBe(true);
         }
 
         [TestMethod]
@@ -758,7 +744,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             if (calculatorRunRelativeYear == null)
             {
-                calculatorRunRelativeYear = new CalculatorRunRelativeYear { Value = 2024 };
+                calculatorRunRelativeYear = new CalculatorRunRelativeYear { Value = new RelativeYear(2024) };
                 this.DbContext.CalculatorRunRelativeYears.Add(calculatorRunRelativeYear);
 
                 using var cts = new CancellationTokenSource();

@@ -1,8 +1,8 @@
-﻿using AutoFixture;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+﻿using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
 using EPR.Calculator.API.Validators;
 
 namespace EPR.Calculator.API.UnitTests.Validator
@@ -14,10 +14,10 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
         public CalculatorRunStatusDataValidatorTest()
         {
-            Fixture = new Fixture();
+            Fixture = TestFixtures.New();
         }
 
-        private Fixture Fixture { get; init; }
+        private IFixture Fixture { get; init; }
 
         [TestMethod]
         [DataRow(RunClassification.INITIAL_RUN)]

@@ -1,12 +1,9 @@
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
+
 namespace EPR.Calculator.API.UnitTests.DataModels
 {
-    using System;
-    using System.Collections.Generic;
-    using AutoFixture;
-    using EPR.Calculator.API.Data.DataModels;
-    using EPR.Calculator.API.Data.Models;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     [TestClass]
     public class CalculatorRunTests
     {
@@ -17,7 +14,7 @@ namespace EPR.Calculator.API.UnitTests.DataModels
 
         private CalculatorRun TestClass { get; init; }
 
-        private Fixture Fixture { get; } = new Fixture();
+        private IFixture Fixture { get; } = TestFixtures.New();
 
         [TestMethod]
         public void CanSetAndGetCalculatorRunClassificationId()

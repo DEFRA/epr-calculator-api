@@ -1,6 +1,4 @@
-﻿using EPR.Calculator.API.Enums;
-
-namespace EPR.Calculator.API.Dtos
+﻿namespace EPR.Calculator.API.Dtos
 {
     /// <summary>
     /// Represents a request to Produce billing instruction.

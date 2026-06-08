@@ -1,7 +1,7 @@
 using System.Net;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exceptions;
@@ -583,7 +583,7 @@ namespace EPR.Calculator.API.Services
             {
                 var outstandingParentProducers = await (from p in applicationDBContext.ProducerDetail
                                                   join r in applicationDBContext.CalculatorRuns on p.CalculatorRunId equals r.Id
-                                                  where r.RelativeYearValue == relativeYear.Value
+                                                  where r.RelativeYear == relativeYear
                                                          && !runClassificationsToIgnore.Contains(r.CalculatorRunClassificationId)
                                                          && outstandingProducerIds.Contains(p.ProducerId)
                                                          && p.SubsidiaryId == null
@@ -605,7 +605,7 @@ namespace EPR.Calculator.API.Services
                     var previousRunNames = await (from odd in applicationDBContext.CalculatorRunOrganisationDataDetails
                                             join odm in applicationDBContext.CalculatorRunOrganisationDataMaster on odd.CalculatorRunOrganisationDataMasterId equals odm.Id
                                             join run in applicationDBContext.CalculatorRuns on odm.Id equals run.CalculatorRunOrganisationDataMasterId
-                                            where run.RelativeYearValue == relativeYear.Value
+                                            where run.RelativeYear == relativeYear.Value
                                                   && stillMissingIds.Contains(odd.OrganisationId)
                                                   && odd.SubsidiaryId == null
                                             orderby odd.Id descending
