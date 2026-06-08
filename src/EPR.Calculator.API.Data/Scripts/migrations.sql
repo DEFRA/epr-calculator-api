@@ -7620,3 +7620,371 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''ENG-AL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''ENG-FC'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''ENG-GL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''ENG-OT'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''ENG-PC'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''ENG-PL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''ENG-ST'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''ENG-WD'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''NI-AL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''NI-FC'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''NI-GL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''NI-OT'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''NI-PC'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''NI-PL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''NI-ST'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''NI-WD'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''SCT-AL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''SCT-FC'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''SCT-GL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''SCT-OT'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''SCT-PC'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''SCT-PL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''SCT-ST'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''SCT-WD'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''WLS-AL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''WLS-FC'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''WLS-GL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''WLS-OT'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''WLS-PC'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''WLS-PL'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''WLS-ST'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    EXEC(N'UPDATE [lapcap_data_template_master] SET [total_cost_from] = -999999999.99
+    WHERE [unique_ref] = N''WLS-WD'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260608135126_AllowNegativeLapCap', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
