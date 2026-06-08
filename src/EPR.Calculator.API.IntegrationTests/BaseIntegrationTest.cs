@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Extensions;
 using EPR.Calculator.Service.Function.Logging;
 using EPR.Calculator.Service.Function.Services;
 using EPR.Calculator.Service.Function.Services.CommonDataApi;
@@ -48,7 +49,7 @@ public abstract class BaseIntegrationTest
     {
         var configuration = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("IntegrationTests/appsettings.integration.json")
+            .AddJsonFile("appsettings.integration.json")
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Database:ConnectionString"] = SqlContainer.GetConnectionString()
@@ -78,9 +79,9 @@ public abstract class BaseIntegrationTest
             .RemoveAll<CommonDataApiHttpClient>()
             .AddSingleton<FakeCommonDataApiClient>()
             .AddSingleton<ICommonDataApiClient>(sp => sp.GetRequiredService<FakeCommonDataApiClient>())
-            .RemoveAll<IStorageService>()
-            .AddSingleton<FakeBlobStorageService>()
-            .AddSingleton<IStorageService>(sp => sp.GetRequiredService<FakeBlobStorageService>());
+            .RemoveAll<IStorageUploadService>()
+            .AddSingleton<FakeBlobStorageUploadService>()
+            .AddSingleton<IStorageUploadService>(sp => sp.GetRequiredService<FakeBlobStorageUploadService>());
     }
 }
 

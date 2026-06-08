@@ -17,14 +17,14 @@ public class CalculatorFileGeneratorTests : TestsFor<CalculatorFileGenerator>
     private CalcResult calcResult = null!;
     private Mock<ICalcResultsExporter> csvWriter = null!;
     private CalculatorRunContext runContext = null!;
-    private Mock<IStorageService> storageService = null!;
+    private Mock<IStorageUploadService> storageUploadService = null!;
 
     protected override void TestInitialize()
     {
         blobOptions = fixture.Freeze<Mock<IOptions<BlobStorageOptions>>>();
         blobOptions.Setup(m => m.Value).Returns(new BlobStorageOptions
         {
-            ResultFileCsvContainer = "results-container"
+            ResultFileCsvContainerName = "results-container"
         });
 
         csvWriter = fixture.Freeze<Mock<ICalcResultsExporter>>();
@@ -33,8 +33,8 @@ public class CalculatorFileGeneratorTests : TestsFor<CalculatorFileGenerator>
                 It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>()))
             .ReturnsAsync("results-content");
 
-        storageService = fixture.Freeze<Mock<IStorageService>>();
-        storageService.Setup(m => m.UploadFileContentAsync(
+        storageUploadService = fixture.Freeze<Mock<IStorageUploadService>>();
+        storageUploadService.Setup(m => m.UploadFileContentAsync(
                 It.Is<(string, string, string, string, bool)>(a => a.Item4 == "results-container"),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync("https://results.uri");
@@ -50,7 +50,7 @@ public class CalculatorFileGeneratorTests : TestsFor<CalculatorFileGenerator>
         await testSubject.SerializeAndExport(runContext, calcResult, CancellationToken.None);
 
         // Assert
-        storageService.Verify(x => x.UploadFileContentAsync(
+        storageUploadService.Verify(x => x.UploadFileContentAsync(
             It.Is<(string FileName, string Content, string RunName, string ContainerName, bool Overwrite)>(args =>
                 args.Content == "results-content"
                 && args.RunName == runContext.RunName

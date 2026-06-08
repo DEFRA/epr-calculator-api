@@ -1,11 +1,9 @@
-﻿using System.Configuration;
-using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Models;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
-using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
@@ -19,9 +17,8 @@ namespace EPR.Calculator.API.Controllers
     public class CalculatorController : ControllerBase
     {
         private readonly ApplicationDBContext context;
-        private readonly IConfiguration configuration;
         private readonly IStorageService storageService;
-        private readonly IServiceBusService serviceBusService;
+        private readonly IBackgroundTaskQueue backgroundTaskQueue;
         private readonly ICalcRelativeYearRequestDtoDataValidator validator;
         private readonly IAvailableClassificationsService availableClassificationsService;
         private readonly ICalculationRunService calculatorRunService;
@@ -33,18 +30,17 @@ namespace EPR.Calculator.API.Controllers
             Justification = "Accepted because it's injected dependencies.  However, if the controller's responsibilities were split as per S6960 this would be resolved.")]
         public CalculatorController(
             ApplicationDBContext context,
-            IConfiguration configuration,
             IStorageService storageService,
-            IServiceBusService serviceBusService,
+            IBackgroundTaskQueue backgroundTaskQueue,
             ICalcRelativeYearRequestDtoDataValidator validator,
             IAvailableClassificationsService availableClassificationsService,
             ICalculationRunService calculationRunService,
-            IBillingFileService billingFileService)
+            IBillingFileService billingFileService
+        )
         {
             this.context = context;
-            this.configuration = configuration;
             this.storageService = storageService;
-            this.serviceBusService = serviceBusService;
+            this.backgroundTaskQueue = backgroundTaskQueue;
             this.validator = validator;
             this.availableClassificationsService = availableClassificationsService;
             this.calculatorRunService = calculationRunService;
@@ -115,20 +111,6 @@ namespace EPR.Calculator.API.Controllers
                     };
                 }
 
-                // Read configuration items: service bus connection string and queue name
-                var serviceBusConnectionString = this.configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
-                var serviceBusQueueName = this.configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
-
-                if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
-                {
-                    throw new ConfigurationErrorsException(CommonResources.ServiceBusConnectionStringMissing);
-                }
-
-                if (string.IsNullOrWhiteSpace(serviceBusQueueName))
-                {
-                    throw new ConfigurationErrorsException(CommonResources.ServiceBusQueueNameMissing);
-                }
-
                 // Get active default parameter settings master
                 var activeDefaultParameterSettingsMaster = await this.context.DefaultParameterSettings
                     .SingleAsync(x => x.EffectiveTo == null && x.RelativeYearValue == relativeYear.Value);
@@ -157,18 +139,6 @@ namespace EPR.Calculator.API.Controllers
                         await this.context.CalculatorRuns.AddAsync(calculatorRun);
                         await this.context.SaveChangesAsync();
 
-                        // Setup message
-                        var calculatorRunMessage = new CalculatorRunMessage
-                        {
-                            CalculatorRunId = calculatorRun.Id,
-                            RelativeYear = calculatorRun.RelativeYear,
-                            CreatedBy = this.User.Identity?.Name ?? userName,
-                            MessageType = CommonResources.ResultMessageType,
-                        };
-
-                        // Send message
-                        await this.serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
-
                         // All good, commit transaction
                         await transaction.CommitAsync();
                     }
@@ -181,6 +151,17 @@ namespace EPR.Calculator.API.Controllers
                         return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
                     }
                 }
+
+                // Setup message
+                var message = new BackgroundServiceMessage
+                {
+                    MessageType     = "Result",
+                    CalculatorRunId = calculatorRun.Id,
+                    ApprovedBy      = null,
+                    CreatedBy       = userName,
+                };
+
+                await backgroundTaskQueue.QueueAsync(message);
 
                 // Return accepted status code: Accepted
                 return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };

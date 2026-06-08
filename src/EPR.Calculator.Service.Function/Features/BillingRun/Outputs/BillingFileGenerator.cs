@@ -21,7 +21,7 @@ public class BillingFileGenerator(
     IOptions<BlobStorageOptions> blobStorageOptions,
     IBillingFileExporter exporter,
     IBillingFileJsonWriter jsonWriter,
-    IStorageService storageService,
+    IStorageUploadService storageUploadService,
     ILogger<BillingFileGenerator> logger)
     : IBillingFileGenerator
 {
@@ -48,11 +48,11 @@ public class BillingFileGenerator(
         var csvFilename = new CalcResultsAndBillingFileName(runContext.RunId, runContext.RunName, runContext.ProcessingStartedAt.UtcDateTime, true);
         var csvContent = await exporter.Export(runContext, calcResults);
 
-        var csvBlobUri = await storageService.UploadFileContentAsync((
+        var csvBlobUri = await storageUploadService.UploadFileContentAsync((
             FileName: csvFilename,
             Content: csvContent,
             runContext.RunName,
-            ContainerName: blobStorageOptions.Value.BillingFileCsvContainer,
+            ContainerName: blobStorageOptions.Value.BillingFileCsvContainerName,
             Overwrite: true), ct);
 
         return new CalculatorRunCsvFileMetadata
@@ -72,11 +72,11 @@ public class BillingFileGenerator(
         var jsonFilename = new CalcResultsAndBillingFileName(runContext.RunId);
         var jsonContent = await jsonWriter.WriteToString(runContext, calcResults);
 
-        await storageService.UploadFileContentAsync((
+        await storageUploadService.UploadFileContentAsync((
             FileName: jsonFilename,
             Content: jsonContent,
             runContext.RunName,
-            ContainerName: blobStorageOptions.Value.BillingFileJsonContainer,
+            ContainerName: blobStorageOptions.Value.BillingFileJsonContainerName,
             Overwrite: true), ct);
 
         return new CalculatorRunBillingFileMetadata

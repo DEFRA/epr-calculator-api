@@ -6,5 +6,4 @@ public static class TestCategories
     public const string BillingRuns = "Billing Runs";
     public const string CalculatorRuns = "Calculator Runs";
     public const string ResultBuilder = "Result Builder";
-    public const string IntegrationTests = "Integration Tests";
 }

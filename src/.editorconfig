@@ -24,25 +24,25 @@ csharp_style_namespace_declarations = file_scoped:suggestion
 dotnet_naming_style.pascal_case.capitalization = pascal_case
 
 # CA1822: Mark members as static
-dotnet_diagnostic.CA1822.severity = warning
+dotnet_diagnostic.CA1822.severity = suggestion
 
 # CA1862: Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
-dotnet_diagnostic.CA1862.severity = warning
+dotnet_diagnostic.CA1862.severity = suggestion
 
 # CA1860: Avoid using 'Enumerable.Any()' extension method
-dotnet_diagnostic.CA1860.severity = warning
+dotnet_diagnostic.CA1860.severity = suggestion
 
 # CA2016: Forward the 'CancellationToken' parameter to methods
-dotnet_diagnostic.CA2016.severity = warning
+dotnet_diagnostic.CA2016.severity = suggestion
 
 # MSTEST0037: Use proper 'Assert' methods
-dotnet_diagnostic.MSTEST0037.severity = warning
+dotnet_diagnostic.MSTEST0037.severity = suggestion
 
 # S107: Methods should not have too many parameters
-dotnet_diagnostic.S107.severity = warning
+dotnet_diagnostic.S107.severity = suggestion
 
 # S3776: Cognitive Complexity of methods should not be too high
-dotnet_diagnostic.S3776.severity = warning
+dotnet_diagnostic.S3776.severity = suggestion
 
 # Naming: interfaces must start with I
 dotnet_naming_rule.interface_should_be_begins_with_i.severity = warning

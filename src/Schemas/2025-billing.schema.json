@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "currency2dp": {
+      "type": "string",
+      "pattern": "^£[0-9]+\\.[0-9]{2}$",
+      "description": "GBP: £ prefix, 2 decimal places, no comma grouping (e.g. £1234.56)"
+    },
+    "currency2pOrHyphen": {
+      "type": "string",
+      "pattern": "^(£[0-9]+\\.[0-9]{2}|-)$",
+      "description": "GBP (£ prefix, 2 decimal places, no comma grouping) or '-' when not applicable"
+    },
+    "currency2dpOrNull": {
+      "type": ["string", "null"],
+      "pattern": "^£[0-9]+\\.[0-9]{2}$",
+      "description": "GBP (£ prefix, 2 decimal places, no comma grouping) or null when not applicable"
+    },
+    "currency4dp": {
+      "type": "string",
+      "pattern": "^£[0-9]+\\.[0-9]{4}$",
+      "description": "GBP price per tonne: £ prefix, 4 decimal places, no comma grouping (e.g. £0.2105)"
+    },
+    "badDebtPercent": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]{2}%$",
+      "description": "Percentage with 2 decimal places and % suffix (e.g. 6.00%)"
+    }
+  },
+  "type": "object",
+  "required": ["calcResultDetail", "parametersOther", "calculationResults"],
+  "properties": {
+    "calcResultDetail": {
+      "type": "object",
+      "required": ["runId", "financialYear"],
+      "properties": {
+        "runId": { "type": "integer" },
+        "financialYear": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}$",
+          "description": "Financial year in YYYY-YY format (e.g. 2026-27)"
+        }
+      }
+    },
+    "parametersOther": {
+      "type": "object",
+      "required": ["sixBadDebtProvision"],
+      "properties": {
+        "sixBadDebtProvision": {
+          "type": "object",
+          "required": ["percentage"],
+          "properties": {
+            "percentage": { "$ref": "#/$defs/badDebtPercent" }
+          }
+        }
+      }
+    },
+    "modulationResults": { "type": "null" },
+    "calculationResults": {
+      "type": "object",
+      "required": ["producerCalculationResults"],
+      "properties": {
+        "producerCalculationResults": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "producerName",
+              "producerID",
+              "subsidiaryID",
+              "level",
+              "producerDisposalFeesWithBadDebtProvision1",
+              "disposalFeeSummary1",
+              "totalProducerBillWithBadDebtProvision",
+              "calculationOfSuggestedBillingInstructionsAndInvoiceAmounts",
+              "feeForLADisposalCosts1",
+              "feeForCommsCostsWithBadDebtProvision_2a",
+              "feeForCommsCostsWithBadDebtProvision_2b",
+              "feeForCommsCostsWithBadDebtProvision_2c",
+              "feeForSAOperatingCostsWithBadDebtProvision_3",
+              "feeForLADataPrepCostsWithBadDebtProvision_4",
+              "feeForSASetUpCostsWithBadDebtProvision_5",
+              "commsCostsByMaterialFeesSummary2a"
+            ],
+            "properties": {
+              "producerName": { "type": "string" },
+              "producerID": { "type": "string" },
+              "subsidiaryID": { "type": "string" },
+              "level": { "type": "integer" },
+              "producerDisposalFeesWithoutBadDebtProvision": { "$ref": "#/$defs/currency2dpOrNull" },
+              "producerDisposalFeesWithBadDebtProvision1": {
+                "type": "object",
+                "required": ["materialBreakdown"],
+                "properties": {
+                  "materialBreakdown": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "materialName",
+                        "totalTonnage",
+                        "selfManagedConsumerWasteTonnage",
+                        "netTonnage",
+                        "pricePerTonne",
+                        "producerDisposalFeeWithoutBadDebtProvision"
+                      ],
+                      "properties": {
+                        "materialName": { "type": "string" },
+                        "totalTonnage": { "type": "number" },
+                        "selfManagedConsumerWasteTonnage": { "type": "number" },
+                        "netTonnage": { "type": "number" },
+                        "pricePerTonne": { "$ref": "#/$defs/currency4dp" },
+                        "producerDisposalFeeWithoutBadDebtProvision": { "$ref": "#/$defs/currency2dp" },
+                        "actionedSelfManagedConsumerWasteTonnage": { "type": "null" }
+                      }
+                    }
+                  }
+                }
+              },
+              "disposalFeeSummary1": {
+                "type": "object",
+                "required": [
+                  "totalProducerDisposalFeeWithoutBadDebtProvision",
+                  "totalProducerDisposalFeeWithBadDebtProvision",
+                  "englandTotal",
+                  "walesTotal",
+                  "scotlandTotal",
+                  "northernIrelandTotal"
+                ],
+                "properties": {
+                  "totalProducerDisposalFeeWithoutBadDebtProvision": { "$ref": "#/$defs/currency2dp" },
+                  "totalProducerDisposalFeeWithBadDebtProvision": { "$ref": "#/$defs/currency2dp" },
+                  "englandTotal": { "$ref": "#/$defs/currency2dp" },
+                  "walesTotal": { "$ref": "#/$defs/currency2dp" },
+                  "scotlandTotal": { "$ref": "#/$defs/currency2dp" },
+                  "northernIrelandTotal": { "$ref": "#/$defs/currency2dp" }
+                }
+              },
+              "totalProducerBillWithBadDebtProvision": {
+                "type": "object",
+                "required": ["totalProducerBillWithBadDebtProvision"],
+                "properties": {
+                  "totalProducerBillWithBadDebtProvision": { "$ref": "#/$defs/currency2dp" }
+                }
+              },
+              "calculationOfSuggestedBillingInstructionsAndInvoiceAmounts": {
+                "type": "object",
+                "required": [
+                  "suggestedBillingInstruction",
+                  "suggestedInvoiceAmount",
+                  "currentYearInvoicedTotalToDate"
+                ],
+                "properties": {
+                  "suggestedBillingInstruction": { "type": "string", "enum": ["", "-", "INITIAL", "DELTA", "REBILL"] },
+                  "suggestedInvoiceAmount": { "$ref": "#/$defs/currency2pOrHyphen" },
+                  "currentYearInvoicedTotalToDate": { "$ref": "#/$defs/currency2pOrHyphen" }
+                }
+              },
+              "feeForLADisposalCosts1": {
+                "type": "object",
+                "required": [
+                  "totalProducerFeeForLADisposalCostsWithoutBadDebtProvision",
+                  "badDebtProvisionForLADisposalCosts"
+                ],
+                "properties": {
+                  "totalProducerFeeForLADisposalCostsWithoutBadDebtProvision": { "$ref": "#/$defs/currency2dp" },
+                  "badDebtProvisionForLADisposalCosts": { "$ref": "#/$defs/currency2dp" }
+                }
+              },
+              "feeForCommsCostsWithBadDebtProvision_2a": {
+                "type": "object",
+                "required": ["badDebtProvisionFor2a"],
+                "properties": {
+                  "badDebtProvisionFor2a": { "$ref": "#/$defs/currency2dp" }
+                }
+              },
+              "feeForCommsCostsWithBadDebtProvision_2b": {
+                "type": "object",
+                "required": [
+                  "totalProducerFeeForCommsCostsUKWideWithoutBadDebtProvision",
+                  "badDebtProvisionFor2b"
+                ],
+                "properties": {
+                  "totalProducerFeeForCommsCostsUKWideWithoutBadDebtProvision": { "$ref": "#/$defs/currency2dp" },
+                  "badDebtProvisionFor2b": { "$ref": "#/$defs/currency2dp" }
+                }
+              },
+              "feeForCommsCostsWithBadDebtProvision_2c": {
+                "type": "object",
+                "required": [
+                  "totalProducerFeeForCommsCostsByCountryWithoutBadDebtProvision",
+                  "badDebProvisionFor2c"
+                ],
+                "properties": {
+                  "totalProducerFeeForCommsCostsByCountryWithoutBadDebtProvision": { "$ref": "#/$defs/currency2dp" },
+                  "badDebProvisionFor2c": { "$ref": "#/$defs/currency2dp" }
+                }
+              },
+              "feeForSAOperatingCostsWithBadDebtProvision_3": {
+                "type": "object",
+                "required": [
+                  "totalProducerFeeForSAOperatingCosts_1_2a_2b_2c_WithoutBadDebtProvision",
+                  "badDebProvisionFor3"
+                ],
+                "properties": {
+                  "totalProducerFeeForSAOperatingCosts_1_2a_2b_2c_WithoutBadDebtProvision": { "$ref": "#/$defs/currency2dp" },
+                  "badDebProvisionFor3": { "$ref": "#/$defs/currency2dp" }
+                }
+              },
+              "feeForLADataPrepCostsWithBadDebtProvision_4": {
+                "type": "object",
+                "required": [
+                  "totalProducerFeeForLADataPrepCostsWithoutBadDebtProvision",
+                  "badDebtProvisionFor4"
+                ],
+                "properties": {
+                  "totalProducerFeeForLADataPrepCostsWithoutBadDebtProvision": { "$ref": "#/$defs/currency2dp" },
+                  "badDebtProvisionFor4": { "$ref": "#/$defs/currency2dp" }
+                }
+              },
+              "feeForSASetUpCostsWithBadDebtProvision_5": {
+                "type": "object",
+                "required": [
+                  "totalProducerOneOffFeeForSASetUpCostsWithoutBadDebtProvision",
+                  "badDebtProvisionFor5"
+                ],
+                "properties": {
+                  "totalProducerOneOffFeeForSASetUpCostsWithoutBadDebtProvision": { "$ref": "#/$defs/currency2dp" },
+                  "badDebtProvisionFor5": { "$ref": "#/$defs/currency2dp" }
+                }
+              },
+              "commsCostsByMaterialFeesSummary2a": {
+                "type": "object",
+                "required": ["totalProducerFeeForCommsCostsWithoutBadDebtProvision2a"],
+                "properties": {
+                  "totalProducerFeeForCommsCostsWithoutBadDebtProvision2a": { "$ref": "#/$defs/currency2dp" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

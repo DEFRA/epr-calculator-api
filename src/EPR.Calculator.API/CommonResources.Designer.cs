@@ -870,32 +870,6 @@ namespace EPR.Calculator.API {
             }
         }
 
-        /// <summary>
-        ///   Looks up a localized string similar to calculator.
-        /// </summary>
-        public static string ServiceBusClientName {
-            get {
-                return ResourceManager.GetString("ServiceBusClientName", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Configuration item not found: ServiceBus__ConnectionString.
-        /// </summary>
-        public static string ServiceBusConnectionStringMissing {
-            get {
-                return ResourceManager.GetString("ServiceBusConnectionStringMissing", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Configuration item not found: ServiceBus__QueueName.
-        /// </summary>
-        public static string ServiceBusQueueNameMissing {
-            get {
-                return ResourceManager.GetString("ServiceBusQueueNameMissing", resourceCulture);
-            }
-        }
 
         /// <summary>
         ///   Looks up a localized string similar to Status can only contain: {0}..

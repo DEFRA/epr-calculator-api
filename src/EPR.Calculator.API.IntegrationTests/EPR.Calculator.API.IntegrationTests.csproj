@@ -18,12 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EPR.Calculator.Service.Function\EPR.Calculator.Service.Function.csproj" />
+    <ProjectReference Include="..\EPR.Calculator.API\EPR.Calculator.API.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoFixture" Version="4.18.1"/>
-    <PackageReference Include="Azure.Identity" Version="1.16.0"/>
     <PackageReference Include="coverlet.collector" Version="6.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -32,31 +31,28 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Enums.NET" Version="5.0.0"/>
-    <PackageReference Include="FluentAssertions" Version="7.2.0"/>
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1"/>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
     <PackageReference Include="Moq" Version="4.20.72"/>
-    <PackageReference Include="Moq.EntityFrameworkCore" Version="8.0.1.2"/>
     <PackageReference Include="MSTest.TestAdapter" Version="3.10.5"/>
     <PackageReference Include="MSTest.TestFramework" Version="3.10.5"/>
-    <PackageReference Include="System.Formats.Asn1" Version="8.0.2"/>
-    <PackageReference Include="System.Net.Http" Version="4.3.4"/>
-    <PackageReference Include="System.Text.Json" Version="8.0.5"/>
-    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1"/>
     <PackageReference Include="AutoFixture.AutoMoq" Version="4.18.1"/>
     <PackageReference Include="AutoFixture.Community.ImmutableCollections" Version="1.0.0"/>
-    <PackageReference Include="EntityFrameworkCore.AutoFixture" Version="2.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.13"/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.13"/>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.13"/>
-    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.6.0"/>
+    <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="Shouldly" Version="4.3.0"/>
-    <PackageReference Include="JsonSchema.Net" Version="9.2.1" />
+    <PackageReference Include="Testcontainers.MsSql" Version="4.12.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\Schemas\**\*.schema.json" Link="Schemas\%(Filename)%(Extension)">
+    <None Update="appsettings.integration.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="ExpectedData\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

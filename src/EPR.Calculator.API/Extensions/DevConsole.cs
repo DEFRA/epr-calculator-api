@@ -4,7 +4,7 @@ using Serilog.Formatting;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
 
-namespace EPR.Calculator.Service.Function.Logging;
+namespace EPR.Calculator.API.Extensions;
 
 [ExcludeFromCodeCoverage]
 public static class DevConsole

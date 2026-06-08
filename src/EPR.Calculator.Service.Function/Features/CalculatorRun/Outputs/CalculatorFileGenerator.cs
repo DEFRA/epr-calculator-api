@@ -19,7 +19,7 @@ public interface ICalculatorFileGenerator
 public class CalculatorFileGenerator(
     IOptions<BlobStorageOptions> blobStorageOptions,
     ICalcResultsExporter csvWriter,
-    IStorageService storageService,
+    IStorageUploadService storageUploadService,
     ILogger<CalculatorFileGenerator> logger)
     : ICalculatorFileGenerator
 {
@@ -43,11 +43,11 @@ public class CalculatorFileGenerator(
             calcResult.CalcResultDetail.RunName,
             calcResult.CalcResultDetail.RunDate);
 
-        var csvBlobUri = await storageService.UploadFileContentAsync(
+        var csvBlobUri = await storageUploadService.UploadFileContentAsync(
             (FileName: csvFilename,
                 Content: content,
                 runContext.RunName,
-                ContainerName: blobStorageOptions.Value.ResultFileCsvContainer,
+                ContainerName: blobStorageOptions.Value.ResultFileCsvContainerName,
                 Overwrite: false), cancellationToken);
 
         return new CalculatorRunCsvFileMetadata

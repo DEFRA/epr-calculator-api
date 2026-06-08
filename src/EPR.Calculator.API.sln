@@ -9,6 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPR.Calculator.API", "EPR.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPR.Calculator.API.Data", "EPR.Calculator.API.Data\EPR.Calculator.API.Data.csproj", "{AAA2DE3D-7FB5-4E77-A808-5026051D98E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPR.Calculator.Service.Function", "EPR.Calculator.Service.Function\EPR.Calculator.Service.Function.csproj", "{631B4D04-D42D-4FC9-A0DF-94F292E3832B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPR.Calculator.Service.Function.UnitTests", "EPR.Calculator.Service.Function.UnitTests\EPR.Calculator.Service.Function.UnitTests.csproj", "{EBFC03EA-96D1-4D4F-B75C-4CA549DDE0B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPR.Calculator.API.IntegrationTests", "EPR.Calculator.API.IntegrationTests\EPR.Calculator.API.IntegrationTests.csproj", "{B3E005E0-34FD-4976-96EE-0BF1CA9D39C3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +36,17 @@ Global
 		{AAA2DE3D-7FB5-4E77-A808-5026051D98E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AAA2DE3D-7FB5-4E77-A808-5026051D98E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AAA2DE3D-7FB5-4E77-A808-5026051D98E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{631B4D04-D42D-4FC9-A0DF-94F292E3832B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{631B4D04-D42D-4FC9-A0DF-94F292E3832B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{631B4D04-D42D-4FC9-A0DF-94F292E3832B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{631B4D04-D42D-4FC9-A0DF-94F292E3832B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBFC03EA-96D1-4D4F-B75C-4CA549DDE0B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBFC03EA-96D1-4D4F-B75C-4CA549DDE0B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBFC03EA-96D1-4D4F-B75C-4CA549DDE0B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBFC03EA-96D1-4D4F-B75C-4CA549DDE0B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3E005E0-34FD-4976-96EE-0BF1CA9D39C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3E005E0-34FD-4976-96EE-0BF1CA9D39C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3E005E0-34FD-4976-96EE-0BF1CA9D39C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3E005E0-34FD-4976-96EE-0BF1CA9D39C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -194,147 +194,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task Create_Calculator_Run_Return_500_If_ConnectionString_Configuration_Is_Empty()
-        {
-            var createCalculatorRunDto = new CreateCalculatorRunDto
-            {
-                CalculatorRunName = "Test calculator run",
-                RelativeYear = new RelativeYear(2024),
-            };
-
-            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2024),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
-
-            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2024),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
-
-            var configs = ConfigurationItems.GetConfigurationValues();
-            configs.GetSection("ServiceBus").GetSection("ConnectionString").Value = string.Empty;
-
-            var mockServiceBusService = new Mock<IServiceBusService>();
-            var mockStorageService = new Mock<IStorageService>();
-            var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
-
-            CalculatorController =
-                new CalculatorController(
-                    DbContext,
-                    configs,
-                    mockStorageService.Object,
-                    mockServiceBusService.Object,
-                    mockValidator.Object,
-                    Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>(),
-                    Mock.Of<IBillingFileService>());
-
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal,
-            };
-
-            CalculatorController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context,
-            };
-
-            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
-            var actionResultValue = actionResult?.Value as System.Configuration.ConfigurationErrorsException;
-
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(500, actionResult.StatusCode);
-            Assert.AreEqual("Configuration item not found: ServiceBus__ConnectionString", actionResultValue?.Message);
-        }
-
-        [TestMethod]
-        public async Task Create_Calculator_Run_Return_500_If_QueueName_Configuration_Is_Empty()
-        {
-            var createCalculatorRunDto = new CreateCalculatorRunDto
-            {
-                CalculatorRunName = "Test calculator run",
-                RelativeYear = new RelativeYear(2024),
-            };
-
-            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2024),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
-
-            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2024),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
-
-            var configs = ConfigurationItems.GetConfigurationValues();
-            configs.GetSection("ServiceBus").GetSection("QueueName").Value = string.Empty;
-
-            var mockServiceBusService = new Mock<IServiceBusService>();
-            var mockStorageService = new Mock<IStorageService>();
-            var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
-            CalculatorController =
-                new CalculatorController(
-                    DbContext,
-                    configs,
-                    mockStorageService.Object,
-                    mockServiceBusService.Object,
-                    mockValidator.Object,
-                    Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>(),
-                    Mock.Of<IBillingFileService>());
-
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal,
-            };
-
-            CalculatorController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context,
-            };
-
-            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
-            var actionResultValue = actionResult?.Value as System.Configuration.ConfigurationErrorsException;
-
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(500, actionResult.StatusCode);
-            Assert.AreEqual("Configuration item not found: ServiceBus__QueueName", actionResultValue?.Message);
-        }
-
-        [TestMethod]
         public async Task Create_Calculator_Run_Return_400_If_RelativeYear_Invalid()
         {
             var createCalculatorRunDto = new CreateCalculatorRunDto
@@ -369,17 +228,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var actionResult = await CalculatorController.GetCalculatorRuns(runParams) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(404, actionResult.StatusCode);
-        }
-
-        [TestMethod]
-        public void Get_Calculator_Run_Return_400_Error_With_No_NameSupplied()
-        {
-            CalculatorRunValidator validator = new CalculatorRunValidator();
-            string name = string.Empty;
-            var result = validator.Validate(name);
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual("Calculator Run Name is Required", result.Errors[0].ErrorMessage);
         }
 
         [TestMethod]
@@ -506,9 +354,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var individualCalcController = new CalculatorController(
                 mockDbContext.Object,
-                ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
-                Mock.Of<IServiceBusService>(),
+                Mock.Of<IBackgroundTaskQueue>(),
                 mockValidator.Object,
                 mockAvailableClassificationsService.Object,
                 Mock.Of<ICalculationRunService>(),
@@ -553,9 +400,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var controller = new CalculatorController(
                 DbContext,
-                ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
-                Mock.Of<IServiceBusService>(),
+                Mock.Of<IBackgroundTaskQueue>(),
                 mockValidator.Object,
                 Mock.Of<IAvailableClassificationsService>(),
                 Mock.Of<ICalculationRunService>(),
@@ -591,9 +437,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var controller = new CalculatorController(
                 DbContext,
-                ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
-                Mock.Of<IServiceBusService>(),
+                Mock.Of<IBackgroundTaskQueue>(),
                 mockValidator.Object,
                 mockAvailableClassificationsService.Object,
                 Mock.Of<ICalculationRunService>(),
@@ -622,9 +467,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var controller = new CalculatorController(
                 DbContext,
-                ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
-                Mock.Of<IServiceBusService>(),
+                Mock.Of<IBackgroundTaskQueue>(),
                 mockValidator.Object,
                 Mock.Of<IAvailableClassificationsService>(),
                 Mock.Of<ICalculationRunService>(),

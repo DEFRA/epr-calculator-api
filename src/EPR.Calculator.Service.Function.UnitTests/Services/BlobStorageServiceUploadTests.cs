@@ -8,11 +8,11 @@ using EPR.Calculator.Service.Function.UnitTests.TestHelpers.Fixtures;
 namespace EPR.Calculator.Service.Function.UnitTests.Services;
 
 [TestClass]
-public class BlobStorageServiceTests
+public class BlobStorageServiceUploadTests
 {
     private IFixture fixture = null!;
     private Mock<BlobClient> mockBlobClient = null!;
-    private BlobStorageService sut = null!;
+    private BlobStorageUploadService sut = null!;
 
     [TestInitialize]
     public void Init()
@@ -31,7 +31,7 @@ public class BlobStorageServiceTests
 
         fixture.Inject(mockBlobServiceClient.Object);
 
-        sut = fixture.Create<BlobStorageService>();
+        sut = fixture.Create<BlobStorageUploadService>();
     }
 
     [TestMethod]

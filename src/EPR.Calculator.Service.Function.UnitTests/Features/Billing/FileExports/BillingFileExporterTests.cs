@@ -19,15 +19,15 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
     private Mock<IBillingFileExporter> csvWriter = null!;
     private Mock<IBillingFileJsonWriter> jsonWriter = null!;
     private BillingRunContext runContext = null!;
-    private Mock<IStorageService> storageService = null!;
+    private Mock<IStorageUploadService> storageUploadService = null!;
 
     protected override void TestInitialize()
     {
         blobOptions = fixture.Freeze<Mock<IOptions<BlobStorageOptions>>>();
         blobOptions.Setup(m => m.Value).Returns(new BlobStorageOptions
         {
-            BillingFileCsvContainer = "csv-container",
-            BillingFileJsonContainer = "json-container"
+            BillingFileCsvContainerName = "csv-container",
+            BillingFileJsonContainerName = "json-container"
         });
 
         csvWriter = fixture.Freeze<Mock<IBillingFileExporter>>();
@@ -40,12 +40,12 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
                 It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>()))
             .ReturnsAsync("json-content");
 
-        storageService = fixture.Freeze<Mock<IStorageService>>();
-        storageService.Setup(m => m.UploadFileContentAsync(
+        storageUploadService = fixture.Freeze<Mock<IStorageUploadService>>();
+        storageUploadService.Setup(m => m.UploadFileContentAsync(
                 It.Is<(string, string, string, string, bool)>(a => a.Item4 == "csv-container"),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync("https://csv.uri");
-        storageService.Setup(m => m.UploadFileContentAsync(
+        storageUploadService.Setup(m => m.UploadFileContentAsync(
                 It.Is<(string, string, string, string, bool)>(a => a.Item4 == "json-container"),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync("https://json.uri");
@@ -61,7 +61,7 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
         await testSubject.SerializeAndExport(runContext, calcResult, CancellationToken.None);
 
         // Assert
-        storageService.Verify(x => x.UploadFileContentAsync(
+        storageUploadService.Verify(x => x.UploadFileContentAsync(
             It.Is<(string FileName, string Content, string RunName, string ContainerName, bool Overwrite)>(args =>
                 args.Content == "csv-content"
                 && args.RunName == runContext.RunName
@@ -77,7 +77,7 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
         await testSubject.SerializeAndExport(runContext, calcResult, CancellationToken.None);
 
         // Assert
-        storageService.Verify(x => x.UploadFileContentAsync(
+        storageUploadService.Verify(x => x.UploadFileContentAsync(
             It.Is<(string FileName, string Content, string RunName, string ContainerName, bool Overwrite)>(args =>
                 args.Content == "json-content"
                 && args.RunName == runContext.RunName

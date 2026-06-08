@@ -10,6 +10,7 @@ using EPR.Calculator.Service.Function.Options;
 using EPR.Calculator.Service.Function.Services.CommonDataApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.Service.Function.Services.DataLoading;
@@ -35,7 +36,7 @@ public interface IDataLoader
     "The bulk insert/transaction behaviour here is not compatible with SQLite or InMemory databases.")]
 public class CommonDataApiLoader(
     IOptions<CommonDataApiLoaderOptions> options,
-    IDbContextFactory<ApplicationDBContext> dbContextFactory,
+    IServiceScopeFactory scopeFactory,
     ICommonDataApiClient httpClient,
     TimeProvider timeProvider,
     ITelemetryClient telemetry,
@@ -119,8 +120,8 @@ public class CommonDataApiLoader(
         InitialisedStream<OrganisationData> orgStream, CancellationToken linkedCt)
     {
         // Each stream needs its own DbContext as it is not thread-safe.
-        await using var pomDb = await dbContextFactory.CreateDbContextAsync(linkedCt);
-        await using var orgDb = await dbContextFactory.CreateDbContextAsync(linkedCt);
+        using var pomDb = scopeFactory.CreateScope();
+        using var orgDb = scopeFactory.CreateScope();
 
         var pomsInserted = BulkInsert(pomDb, pomStream, linkedCt);
         var orgsInserted = BulkInsert(orgDb, orgStream, linkedCt);
@@ -148,11 +149,12 @@ public class CommonDataApiLoader(
     }
 
     private async Task<(IDbContextTransaction transaction, long total)> BulkInsert<TEntity>(
-        ApplicationDBContext dbContext,
+        IServiceScope serviceScope,
         InitialisedStream<TEntity> stream,
         CancellationToken ct)
         where TEntity : class
     {
+        var dbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         return await logger.LogDuration(async () =>
         {
             var txn = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, ct);

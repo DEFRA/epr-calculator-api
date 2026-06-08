@@ -13,7 +13,7 @@ public class ParameterService : IParameterService
 {
     private readonly ApplicationDBContext dbContext;
 
-    public ParameterService(IDbContextFactory<ApplicationDBContext> context) => dbContext = context.CreateDbContext();
+    public ParameterService(ApplicationDBContext context) => dbContext = context;
 
     public async Task<IReadOnlyDictionary<string, decimal>> GetDefaultParameters(RunContext runContext)
     {

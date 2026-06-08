@@ -12,7 +12,6 @@ namespace EPR.Calculator.Service.Function.UnitTests.Services
     [TestClass]
     public class ParameterServiceTests
     {
-        private Mock<IDbContextFactory<ApplicationDBContext>> dbContextFactory;
         private ApplicationDBContext dbContext;
         private ParameterService parameterService;
 
@@ -22,14 +21,9 @@ namespace EPR.Calculator.Service.Function.UnitTests.Services
                 .UseInMemoryDatabase(databaseName: "ParameterTestDatabase")
                 .Options;
 
-            dbContextFactory = new Mock<IDbContextFactory<ApplicationDBContext>>();
             dbContext = new ApplicationDBContext(options);
 
-            dbContextFactory
-                .Setup(factory => factory.CreateDbContext())
-                .Returns(dbContext);
-
-            parameterService = new ParameterService(dbContextFactory.Object);
+            parameterService = new ParameterService(dbContext);
         }
 
         [TestCleanup]

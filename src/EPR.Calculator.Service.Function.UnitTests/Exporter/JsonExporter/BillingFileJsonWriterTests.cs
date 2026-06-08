@@ -14,7 +14,7 @@ namespace EPR.Calculator.Service.Function.UnitTests.Exporter.JsonExporter
         [TestMethod]
         public async Task WriteToString_2025_ConformsToSchema()
         {
-            var schema = JsonSchema.FromText(await File.ReadAllTextAsync("Schemas/2025-billing.schema.json", TestContext.CancellationToken));
+            var schema = JsonSchema.FromText(await File.ReadAllTextAsync("Schemas/2025-billing.schema.json"));
 
             var writer = CreateWriter();
             var json = await writer.WriteToString(
@@ -31,7 +31,7 @@ namespace EPR.Calculator.Service.Function.UnitTests.Exporter.JsonExporter
         [TestMethod]
         public async Task WriteToString_2026_ConformsToSchema()
         {
-            var schema = JsonSchema.FromText(await File.ReadAllTextAsync("Schemas/2026-billing.schema.json", TestContext.CancellationToken));
+            var schema = JsonSchema.FromText(await File.ReadAllTextAsync("Schemas/2026-billing.schema.json"));
 
             var writer = CreateWriter();
             var json = await writer.WriteToString(

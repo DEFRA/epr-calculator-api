@@ -22,16 +22,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
         private readonly Mock<IBillingFileService> billingFileServiceMock;
 
-        private readonly Mock<IServiceBusService> serviceBusServiceMock;
+        private readonly Mock<IBackgroundTaskQueue> backgroundTaskQueueMock;
 
-        private readonly Mock<IConfiguration> configMock;
 
         public ProducerBillingFileControllerTests()
         {
             this.billingFileServiceMock = new Mock<IBillingFileService>();
-            this.serviceBusServiceMock = new Mock<IServiceBusService>();
-            this.configMock = new Mock<IConfiguration>();
-            this.producerFileControllerTest = new ProducerBillingFileController(this.billingFileServiceMock.Object, this.serviceBusServiceMock.Object, this.configMock.Object);
+            this.backgroundTaskQueueMock = new Mock<IBackgroundTaskQueue>();
+            this.producerFileControllerTest = new ProducerBillingFileController(this.billingFileServiceMock.Object, this.backgroundTaskQueueMock.Object);
 
             // Mock User Claims
             // Set up authorisation.
@@ -54,8 +52,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.billingFileServiceMock.Setup(s => s.StartGeneratingBillingFileAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ServiceProcessResponseDto { StatusCode = (HttpStatusCode)httpStatusCode });
 
-            this.serviceBusServiceMock.Setup(s => s.SendMessage(It.IsAny<string>(), It.IsAny<BillingFileGenerationMessage>()));
-            this.configMock.Setup(s => s.GetSection(It.IsAny<string>()).GetSection(It.IsAny<string>()).Value).Returns("test");
+            this.backgroundTaskQueueMock.Setup(s => s.QueueAsync(It.IsAny<BackgroundServiceMessage>(), It.IsAny<CancellationToken>()));
 
             // Act
             var result = await this.producerFileControllerTest.ProducerBillingInstructions(1, CancellationToken.None) as ObjectResult;

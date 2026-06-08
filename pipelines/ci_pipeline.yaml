@@ -5,7 +5,7 @@ trigger:
   paths:
     include:
       - 'src/*'
-      
+
 parameters:
 
   - name: sonarqubeInstance
@@ -36,6 +36,8 @@ variables:
     value: false
   - name: runTests
     value: true
+  - name: runIntegrationTests
+    value: true
   - name: dotnetVersion
     value: dotnetVersion8
 
@@ -57,6 +59,7 @@ extends:
     sonarQubeProjectKey: ${{ variables.sonarQubeProjectKey }}
     sonarQubeProjectName: ${{ variables.sonarQubeProjectName }}
     runTests: ${{ variables.runTests }}
+    runIntegrationTests: ${{ variables.runIntegrationTests }}
     azureSubscription: $(azureSubscription)
     acrAzureContainerRegistryName: $(acr.azureContainerRegistryName)
     acrRepositoryName: $(acr.repositoryName)

@@ -2,7 +2,7 @@ using EPR.Calculator.Service.Function.Services;
 
 namespace EPR.Calculator.Service.Function.UnitTests.IntegrationTests;
 
-public class FakeBlobStorageService : IStorageService
+public class FakeBlobStorageUploadService : IStorageUploadService
 {
     private readonly Dictionary<string, string> store = new();
 
