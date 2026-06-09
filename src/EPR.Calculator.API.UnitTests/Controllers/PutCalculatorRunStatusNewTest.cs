@@ -9,7 +9,6 @@ using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
-using EPR.Calculator.API.Wrapper;
 using EPR.Calculator.Service.Function.Services;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -66,8 +65,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         public TestContext TestContext { get; set; }
-
-        private Mock<IOrgAndPomWrapper> MockWrapper { get; init; } = null!;
 
         [TestCleanup]
         public void CleanUp()

@@ -817,15 +817,6 @@ namespace EPR.Calculator.API {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to RunId {0} cannot be changed to classification {1}.
-        /// </summary>
-        public static string RunIdCannotBeChangedToClassification {
-            get {
-                return ResourceManager.GetString("RunIdCannotBeChangedToClassification", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to RunId should have a value greater than 0.
         /// </summary>
         public static string RunIdGreaterThan0 {

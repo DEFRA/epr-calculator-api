@@ -10,7 +10,6 @@ using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Utils;
 using EPR.Calculator.API.Validators;
-using EPR.Calculator.API.Wrapper;
 using EPR.Calculator.Service.Function.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -35,7 +34,6 @@ builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddScoped<ICreateDefaultParameterDataValidator, CreateDefaultParameterDataValidator>();
 builder.Services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
 builder.Services.AddScoped<ICalcRelativeYearRequestDtoDataValidator, CalcRelativeYearRequestDtoDataValidator>();
-builder.Services.AddScoped<IOrgAndPomWrapper, OrgAndPomWrapper>();
 builder.Services.AddScoped<IInvoiceDetailsService, InvoiceDetailsService>();
 builder.Services.AddScoped<IServiceBusService, ServiceBusService>();
 builder.Services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatusDataValidator>();
@@ -45,7 +43,6 @@ builder.Services.AddScoped<ICalculationRunService, CalculationRunService>();
 builder.Services.AddScoped<IStorageService, BlobStorageService>();
 builder.Services.AddScoped<IBlobStorageService2, BlobStorageService2>();
 
-builder.Services.AddScoped<ICommandTimeoutService, CommandTimeoutService>();
 
 // Add services to the container.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -49,14 +49,6 @@ namespace EPR.Calculator.API.Services
             }
         }
 
-        /// <inheritdoc/>
-        public async Task<bool> IsBlobExistsAsync(string fileName, string blobUri, CancellationToken cancellationToken)
-        {
-            BlobClient blobClient = this.GetBlobClient(fileName, blobUri);
-
-            return await blobClient.ExistsAsync(cancellationToken);
-        }
-
         private BlobClient GetBlobClient(string fileName, string blobUri)
         {
             BlobClient? blobClient = null;
