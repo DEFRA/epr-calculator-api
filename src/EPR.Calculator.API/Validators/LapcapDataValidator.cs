@@ -118,7 +118,7 @@ namespace EPR.Calculator.API.Validators
                 if (totalCostValue < lapcapTemplate.TotalCostFrom ||
                     totalCostValue > lapcapTemplate.TotalCostTo)
                 {
-                    errorMessage = string.Format(CommonResources.TotalCostsRange, material, country, Convert.ToInt16(totalCostFrom), totalCostTo.ToString("#,##0.00"));
+                    errorMessage = string.Format(CommonResources.TotalCostsRange, material, country, totalCostFrom.ToString("#,##0.00"), totalCostTo.ToString("#,##0.00"));
                 }
             }
             else
