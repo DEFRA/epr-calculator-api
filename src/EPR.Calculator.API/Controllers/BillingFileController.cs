@@ -60,14 +60,7 @@ namespace EPR.Calculator.API.Controllers
                 return Results.NotFound(string.Format(CommonResources.NoBillingFileMetadataForRunId, runId));
             }
 
-            try
-            {
-                return await storageService.DownloadFile(csvFileMetaData.FileName, csvFileMetaData.BlobUri);
-            }
-            catch (Exception e)
-            {
-                return Results.Problem(e.Message);
-            }
+            return await storageService.DownloadFile(csvFileMetaData.FileName, csvFileMetaData.BlobUri);
         }
     }
 }

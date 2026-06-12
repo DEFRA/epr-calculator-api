@@ -69,127 +69,120 @@ namespace EPR.Calculator.API.Controllers
             }
 
             var userName = claim.Value;
-            try
+            
+            // Return bad request if the model is invalid
+            if (!this.ModelState.IsValid)
             {
-                // Return bad request if the model is invalid
-                if (!this.ModelState.IsValid)
+                return this.StatusCode(
+                    StatusCodes.Status400BadRequest,
+                    this.ModelState.Values.SelectMany(x => x.Errors));
+            }
+
+            bool isCalcAlreadyRunning = await this.context.CalculatorRuns.AnyAsync(
+                run => run.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
+            if (isCalcAlreadyRunning)
+            {
+                return new ObjectResult(new { Message = CommonResources.CalculationAlreadyRunning })
                 {
-                    return this.StatusCode(
-                        StatusCodes.Status400BadRequest,
-                        this.ModelState.Values.SelectMany(x => x.Errors));
-                }
-
-                bool isCalcAlreadyRunning = await this.context.CalculatorRuns.AnyAsync(
-                    run => run.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
-                if (isCalcAlreadyRunning)
-                {
-                    return new ObjectResult(new { Message = CommonResources.CalculationAlreadyRunning })
-                    {
-                        StatusCode = StatusCodes.Status422UnprocessableEntity,
-                    };
-                }
-
-                var relativeYear = await this.context.FindRelativeYearAsync(request.RelativeYear.Value);
-
-                if (relativeYear is null)
-                {
-                    return new ObjectResult(new { Message = CommonResources.InvalidRelativeYear })
-                    {
-                        StatusCode = StatusCodes.Status400BadRequest,
-                    };
-                }
-
-                // Return failed dependency error if at least one of the dependent data not available for the relative year
-                var dataPreCheckMessage = this.DataPreChecksBeforeInitialisingCalculatorRun(relativeYear.Value);
-                if (!string.IsNullOrWhiteSpace(dataPreCheckMessage))
-                {
-                    return new ObjectResult(dataPreCheckMessage) { StatusCode = StatusCodes.Status424FailedDependency };
-                }
-
-                // Return bad gateway error if the calculator run name provided already exists
-                var calculatorRunNameExistsMessage = this.CalculatorRunNameExists(request.CalculatorRunName);
-                if (!string.IsNullOrWhiteSpace(calculatorRunNameExistsMessage))
-                {
-                    return new ObjectResult(calculatorRunNameExistsMessage)
-                    {
-                        StatusCode = StatusCodes.Status400BadRequest,
-                    };
-                }
-
-                // Read configuration items: service bus connection string and queue name
-                var serviceBusConnectionString = this.configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
-                var serviceBusQueueName = this.configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
-
-                if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
-                {
-                    throw new ConfigurationErrorsException(CommonResources.ServiceBusConnectionStringMissing);
-                }
-
-                if (string.IsNullOrWhiteSpace(serviceBusQueueName))
-                {
-                    throw new ConfigurationErrorsException(CommonResources.ServiceBusQueueNameMissing);
-                }
-
-                // Get active default parameter settings master
-                var activeDefaultParameterSettingsMaster = await this.context.DefaultParameterSettings
-                    .SingleAsync(x => x.EffectiveTo == null && x.RelativeYear == relativeYear.Value);
-
-                // Get active lapcap data master
-                var activeLapcapDataMaster = await this.context.LapcapDataMaster
-                    .SingleAsync(data => data.RelativeYear == relativeYear.Value && data.EffectiveTo == null);
-
-                // Setup calculator run details
-                var calculatorRun = new CalculatorRun
-                {
-                    Name = request.CalculatorRunName,
-                    RelativeYear = relativeYear.Value,
-                    CreatedBy = userName,
-                    CreatedAt = DateTime.UtcNow,
-                    CalculatorRunClassificationId = (int)RunClassification.RUNNING,
-                    DefaultParameterSettingMasterId = activeDefaultParameterSettingsMaster.Id,
-                    LapcapDataMasterId = activeLapcapDataMaster.Id,
+                    StatusCode = StatusCodes.Status422UnprocessableEntity,
                 };
-
-                using (var transaction = await this.context.Database.BeginTransactionAsync())
-                {
-                    try
-                    {
-                        // Save calculator run details to the database
-                        await this.context.CalculatorRuns.AddAsync(calculatorRun);
-                        await this.context.SaveChangesAsync();
-
-                        // Setup message
-                        var calculatorRunMessage = new CalculatorRunMessage
-                        {
-                            CalculatorRunId = calculatorRun.Id,
-                            CreatedBy = this.User.Identity?.Name ?? userName
-                        };
-
-                        // Send message
-                        await this.serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
-
-                        // All good, commit transaction
-                        await transaction.CommitAsync();
-                    }
-                    catch (Exception exception)
-                    {
-                        // Error, rollback transaction
-                        await transaction.RollbackAsync();
-
-                        // Return error status code: Internal Server Error
-                        return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
-                    }
-                }
-
-                // Return accepted status code: Accepted
-                return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
             }
-            catch (Exception exception)
+
+            var relativeYear = await this.context.FindRelativeYearAsync(request.RelativeYear.Value);
+
+            if (relativeYear is null)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                return new ObjectResult(new { Message = CommonResources.InvalidRelativeYear })
+                {
+                    StatusCode = StatusCodes.Status400BadRequest,
+                };
             }
-        }
 
+            // Return failed dependency error if at least one of the dependent data not available for the relative year
+            var dataPreCheckMessage = this.DataPreChecksBeforeInitialisingCalculatorRun(relativeYear.Value);
+            if (!string.IsNullOrWhiteSpace(dataPreCheckMessage))
+            {
+                return new ObjectResult(dataPreCheckMessage) { StatusCode = StatusCodes.Status424FailedDependency };
+            }
+
+            // Return bad gateway error if the calculator run name provided already exists
+            var calculatorRunNameExistsMessage = this.CalculatorRunNameExists(request.CalculatorRunName);
+            if (!string.IsNullOrWhiteSpace(calculatorRunNameExistsMessage))
+            {
+                return new ObjectResult(calculatorRunNameExistsMessage)
+                {
+                    StatusCode = StatusCodes.Status400BadRequest,
+                };
+            }
+
+            // Read configuration items: service bus connection string and queue name
+            var serviceBusConnectionString = this.configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
+            var serviceBusQueueName = this.configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
+
+            if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
+            {
+                throw new ConfigurationErrorsException(CommonResources.ServiceBusConnectionStringMissing);
+            }
+
+            if (string.IsNullOrWhiteSpace(serviceBusQueueName))
+            {
+                throw new ConfigurationErrorsException(CommonResources.ServiceBusQueueNameMissing);
+            }
+
+            // Get active default parameter settings master
+            var activeDefaultParameterSettingsMaster = await this.context.DefaultParameterSettings
+                .SingleAsync(x => x.EffectiveTo == null && x.RelativeYear == relativeYear.Value);
+
+            // Get active lapcap data master
+            var activeLapcapDataMaster = await this.context.LapcapDataMaster
+                .SingleAsync(data => data.RelativeYear == relativeYear.Value && data.EffectiveTo == null);
+
+            // Setup calculator run details
+            var calculatorRun = new CalculatorRun
+            {
+                Name = request.CalculatorRunName,
+                RelativeYear = relativeYear.Value,
+                CreatedBy = userName,
+                CreatedAt = DateTime.UtcNow,
+                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                DefaultParameterSettingMasterId = activeDefaultParameterSettingsMaster.Id,
+                LapcapDataMasterId = activeLapcapDataMaster.Id,
+            };
+
+            using (var transaction = await this.context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    // Save calculator run details to the database
+                    await this.context.CalculatorRuns.AddAsync(calculatorRun);
+                    await this.context.SaveChangesAsync();
+
+                    // Setup message
+                    var calculatorRunMessage = new CalculatorRunMessage
+                    {
+                        CalculatorRunId = calculatorRun.Id,
+                        CreatedBy = this.User.Identity?.Name ?? userName
+                    };
+
+                    // Send message
+                    await this.serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
+
+                    // All good, commit transaction
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    // Error, rollback transaction
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
+
+            // Return accepted status code: Accepted
+            return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
+            
+        }
+    
         [HttpPost]
         [Route("calculatorRuns")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -202,37 +195,30 @@ namespace EPR.Calculator.API.Controllers
                 return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            try
-            {
-                var calculatorRuns = await (from run in this.context.CalculatorRuns
-                       join bill in this.context.CalculatorRunBillingFileMetadata on run.Id equals bill.CalculatorRunId
-                       into billFile
-                       where run.RelativeYear == request.RelativeYear
-                                    select new
-                                    {
-                                        run.Id,
-                                        run.Name,
-                                        run.RelativeYear,
-                                        run.CreatedAt,
-                                        run.CreatedBy,
-                                        run.CalculatorRunClassificationId,
-                                        HasBillingFileGenerated = billFile.Any(),
-                                        run.IsBillingFileGenerating,
-                                    })
-                       .OrderByDescending(run => run.CreatedAt)
-                       .ToListAsync();
+            var calculatorRuns = await (from run in this.context.CalculatorRuns
+                    join bill in this.context.CalculatorRunBillingFileMetadata on run.Id equals bill.CalculatorRunId
+                    into billFile
+                    where run.RelativeYear == request.RelativeYear
+                                select new
+                                {
+                                    run.Id,
+                                    run.Name,
+                                    run.RelativeYear,
+                                    run.CreatedAt,
+                                    run.CreatedBy,
+                                    run.CalculatorRunClassificationId,
+                                    HasBillingFileGenerated = billFile.Any(),
+                                    run.IsBillingFileGenerating,
+                                })
+                    .OrderByDescending(run => run.CreatedAt)
+                    .ToListAsync();
 
-                if (calculatorRuns.Count == 0)
-                {
-                    return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
-                }
-
-                return new ObjectResult(calculatorRuns) { StatusCode = StatusCodes.Status200OK };
-            }
-            catch (Exception exception)
+            if (calculatorRuns.Count == 0)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
             }
+
+            return new ObjectResult(calculatorRuns) { StatusCode = StatusCodes.Status200OK };
         }
 
         [HttpGet]
@@ -248,34 +234,27 @@ namespace EPR.Calculator.API.Controllers
                 return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            try
-            {
-                var calculatorRunDetail =
-                    await (from run in this.context.CalculatorRuns
-                     join classification in this.context.CalculatorRunClassifications
-                         on run.CalculatorRunClassificationId equals classification.Id
-                     where run.Id == runId
-                     select new
-                     {
-                         Run = run,
-                         Classification = classification,
-                     }).SingleOrDefaultAsync(cancellationToken: cancellationToken);
+            var calculatorRunDetail =
+                await (from run in this.context.CalculatorRuns
+                    join classification in this.context.CalculatorRunClassifications
+                        on run.CalculatorRunClassificationId equals classification.Id
+                    where run.Id == runId
+                    select new
+                    {
+                        Run = run,
+                        Classification = classification,
+                    }).SingleOrDefaultAsync(cancellationToken: cancellationToken);
 
-                if (calculatorRunDetail == null)
-                {
-                    return new NotFoundObjectResult(string.Format(CommonResources.UnableToFindRunId, runId));
-                }
-
-                var calcRun = calculatorRunDetail.Run;
-                var runClassification = calculatorRunDetail.Classification;
-                var isBillingFileGeneratedLatest = await this.billingFileService.IsBillingFileGeneratedLatest(runId, cancellationToken);
-                var runDto = CalcRunMapper.Map(calcRun, runClassification, isBillingFileGeneratedLatest);
-                return new ObjectResult(runDto);
-            }
-            catch (Exception exception)
+            if (calculatorRunDetail == null)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                return new NotFoundObjectResult(string.Format(CommonResources.UnableToFindRunId, runId));
             }
+
+            var calcRun = calculatorRunDetail.Run;
+            var runClassification = calculatorRunDetail.Classification;
+            var isBillingFileGeneratedLatest = await this.billingFileService.IsBillingFileGeneratedLatest(runId, cancellationToken);
+            var runDto = CalcRunMapper.Map(calcRun, runClassification, isBillingFileGeneratedLatest);
+            return new ObjectResult(runDto);
         }
 
         [HttpGet]
@@ -291,21 +270,15 @@ namespace EPR.Calculator.API.Controllers
                 return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            try
-            {
-                var calculatorRun = await this.context.CalculatorRuns.CountAsync(run => EF.Functions.Like(run.Name, name));
+            var calculatorRun = await this.context.CalculatorRuns.CountAsync(run => EF.Functions.Like(run.Name, name));
 
-                if (calculatorRun <= 0)
-                {
-                    return new ObjectResult(CommonResources.NoDataForCalcualtorName) { StatusCode = StatusCodes.Status404NotFound };
-                }
-
-                return new ObjectResult(StatusCodes.Status200OK);
-            }
-            catch (Exception exception)
+            if (calculatorRun <= 0)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                return new ObjectResult(CommonResources.NoDataForCalcualtorName) { StatusCode = StatusCodes.Status404NotFound };
             }
+
+            return new ObjectResult(StatusCodes.Status200OK);
+            
         }
 
         [HttpGet]
@@ -328,14 +301,7 @@ namespace EPR.Calculator.API.Controllers
                 return Results.NotFound(string.Format(CommonResources.NoCSVFileFound, runId));
             }
 
-            try
-            {
-                return await this.storageService.DownloadFile(csvFileMetadata.FileName, csvFileMetadata.BlobUri);
-            }
-            catch (Exception e)
-            {
-                return Results.Problem(e.Message);
-            }
+            return await this.storageService.DownloadFile(csvFileMetadata.FileName, csvFileMetadata.BlobUri);
         }
 
         [HttpGet]
@@ -344,18 +310,11 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> RelativeYears()
         {
-            try
-            {
-                var relativeYears = await this.context.CalculatorRunRelativeYears
-                    .Select(y => y.Value)
-                    .ToListAsync();
+            var relativeYears = await this.context.CalculatorRunRelativeYears
+                .Select(y => y.Value)
+                .ToListAsync();
 
-                return Ok(relativeYears);
-            }
-            catch (Exception exception)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
-            }
+            return Ok(relativeYears);
         }
 
         [HttpGet]
@@ -366,36 +325,29 @@ namespace EPR.Calculator.API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ClassificationByRelativeYear([FromQuery] CalcRelativeYearRequestDto request)
         {
-            try
+            if (!this.ModelState.IsValid)
             {
-                if (!this.ModelState.IsValid)
-                {
-                    return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
-                }
-
-                var validationResult = await this.validator.Validate(request);
-                if (validationResult.IsInvalid)
-                {
-                    return this.BadRequest(validationResult.Errors);
-                }
-
-                var relativeYear = new RelativeYear(request.RelativeYearValue);
-                var classifications = await this.availableClassificationsService.GetAvailableClassificationsForRelativeYearAsync(request);
-                if (classifications.Count == 0)
-                {
-                    return this.NotFound(CommonResources.NoClassificationsFound);
-                }
-
-                var runs = await this.calculatorRunService.GetDesignatedRunsByFinanialYear(relativeYear);
-
-                var runDto = RelativeYearClassificationsMapper.Map(relativeYear, classifications, runs);
-
-                return this.Ok(runDto);
+                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
-            catch (Exception)
+
+            var validationResult = await this.validator.Validate(request);
+            if (validationResult.IsInvalid)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, CommonResources.AnUnexpectedErrorOccurred);
+                return this.BadRequest(validationResult.Errors);
             }
+
+            var relativeYear = new RelativeYear(request.RelativeYearValue);
+            var classifications = await this.availableClassificationsService.GetAvailableClassificationsForRelativeYearAsync(request);
+            if (classifications.Count == 0)
+            {
+                return this.NotFound(CommonResources.NoClassificationsFound);
+            }
+
+            var runs = await this.calculatorRunService.GetDesignatedRunsByFinanialYear(relativeYear);
+
+            var runDto = RelativeYearClassificationsMapper.Map(relativeYear, classifications, runs);
+
+            return this.Ok(runDto);
         }
 
         private string DataPreChecksBeforeInitialisingCalculatorRun(RelativeYear relativeYear)

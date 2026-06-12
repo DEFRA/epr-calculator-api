@@ -13,32 +13,24 @@ public class AvailableClassificationsService(
 {
     public async Task<List<CalculatorRunClassification>> GetAvailableClassificationsForRelativeYearAsync(CalcRelativeYearRequestDto request, CancellationToken cancellationToken = default)
     {
-        try
+        List<RunClassification> validStatuses = await this.DetermineAvailableClassificationsAsync(request, cancellationToken);
+
+        if (validStatuses.Count == 0)
         {
-            List<RunClassification> validStatuses = await this.DetermineAvailableClassificationsAsync(request, cancellationToken);
-
-            if (validStatuses.Count == 0)
-            {
-                return [];
-            }
-
-            var allClassifications = await context.CalculatorRunClassifications
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
-
-            return validStatuses
-                .Join(
-                    allClassifications,
-                    status => (int)status,
-                    classification => classification.Id,
-                    (status, classification) => classification)
-                .ToList();
+            return [];
         }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "An error occurred whilst attempting to determine available classifications. Error :-{Message}", ex.Message);
-            throw new DataRetrievalException("An error occurred whilst attempting to determine available classifications.", ex);
-        }
+
+        var allClassifications = await context.CalculatorRunClassifications
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return validStatuses
+            .Join(
+                allClassifications,
+                status => (int)status,
+                classification => classification.Id,
+                (status, classification) => classification)
+            .ToList();
     }
 
     private static bool IsPreInitialRun(List<RunClassificationStatus> currentClassifications)

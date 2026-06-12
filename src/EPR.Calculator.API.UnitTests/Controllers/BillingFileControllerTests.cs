@@ -64,7 +64,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task DownloadBillingFile_ReturnsProblem_WhenStorageThrows()
+        public async Task DownloadBillingFile_ThrowsException_WhenStorageThrows()
         {
             // Arrange
             int runId = 123;
@@ -92,10 +92,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .ThrowsAsync(new Exception("fail"));
 
             // Act
-            var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
-
-            // Assert
-            result.ShouldBeOfType<ProblemHttpResult>();
+            await Should.ThrowAsync<Exception>(async () => await billingFileControllerUnderTest.DownloadCsvBillingFile(runId));
 
             // Tidy Up
             context.CalculatorRunBillingFileMetadata.Remove(billingMeta);
