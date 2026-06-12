@@ -20,7 +20,7 @@ namespace EPR.Calculator.API.Services
     /// </remarks>
     /// <param name="applicationDBContext">The database context <seealso cref="ApplicationDBContext"/>.</param>
     /// <param name="storageService">The storage service <seealso cref="IStorageService"/>.</param>
-    public class BillingFileService(ApplicationDBContext applicationDBContext, IStorageService storageService, IBlobStorageService2 blobStorageService2, IConfiguration configuration) : IBillingFileService
+    public class BillingFileService(ApplicationDBContext applicationDBContext, IBlobStorageService2 blobStorageService2, IConfiguration configuration) : IBillingFileService
     {
         private const string NoActionPlaceholder = "-";
 
@@ -29,72 +29,11 @@ namespace EPR.Calculator.API.Services
         /// </summary>
         /// <param name="run">calculation Run</param>
         /// <returns>bool</returns>
-        public static bool ValidateRunForAcceptAllBillingInstructions(CalculatorRun run)
+        private static bool ValidateRunForAcceptAllBillingInstructions(CalculatorRun run)
         {
             return Util.AcceptableRunStatusForBillingInstructions().Contains(run.CalculatorRunClassificationId)
                    &&
                    !run.IsBillingFileGenerating.GetValueOrDefault();
-        }
-
-        /// <inheritdoc/>
-        public async Task<ServiceProcessResponseDto> GenerateBillingFileAsync(
-            GenerateBillingFileRequestDto generateBillingFileRequestDto,
-            CancellationToken cancellationToken)
-        {
-            CalculatorRun? calculatorRun = await applicationDBContext.CalculatorRuns
-                                                                     .FirstOrDefaultAsync(x => x.Id == generateBillingFileRequestDto.CalculatorRunId, cancellationToken)
-                                                                     .ConfigureAwait(false);
-
-            if (calculatorRun is null)
-            {
-                return new ServiceProcessResponseDto
-                {
-                    StatusCode = HttpStatusCode.NotFound,
-                    Message = CommonResources.ResourceNotFoundErrorMessage,
-                };
-            }
-            else if (calculatorRun.CalculatorRunClassificationId != (int)RunClassification.INITIAL_RUN)
-            {
-                return new ServiceProcessResponseDto
-                {
-                    StatusCode = HttpStatusCode.UnprocessableContent,
-                    Message = string.Format(CommonResources.NotAValidClassificationStatus, generateBillingFileRequestDto.CalculatorRunId),
-                };
-            }
-            else
-            {
-                CalculatorRunCsvFileMetadata? calculatorRunCsvFileMetadata = await applicationDBContext.CalculatorRunCsvFileMetadata
-                                                                     .FirstOrDefaultAsync(x => x.CalculatorRunId == generateBillingFileRequestDto.CalculatorRunId, cancellationToken)
-                                                                     .ConfigureAwait(false);
-
-                if (calculatorRunCsvFileMetadata is null)
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = string.Format(CommonResources.CsvFileMetadataNotFoundErrorMessage, generateBillingFileRequestDto.CalculatorRunId),
-                    };
-                }
-                else if (!await storageService.IsBlobExistsAsync(
-                    calculatorRunCsvFileMetadata.FileName,
-                    calculatorRunCsvFileMetadata.BlobUri,
-                    cancellationToken).ConfigureAwait(false))
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = string.Format(CommonResources.BlobNotFoundErrorMessage, generateBillingFileRequestDto.CalculatorRunId),
-                    };
-                }
-                else
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.Accepted,
-                        Message = CommonResources.RequestAcceptedMessage,
-                    };
-                }
-            }
         }
 
         public async Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAsync(
@@ -152,26 +91,6 @@ namespace EPR.Calculator.API.Services
                     Message = exception.Message,
                 };
             }
-        }
-
-        public async Task<ProducersInstructionResponse?> GetProducersInstructionResponseAsync(int runId, CancellationToken cancellationToken)
-        {
-            ValidateRunClassification(await this.GetRunStatusAsync(runId, cancellationToken), runId);
-
-            var details = await this.GetInstructionDetailsAsync(runId, cancellationToken);
-
-            if (details.Count == 0)
-            {
-                return null;
-            }
-
-            var summary = GenerateInstructionSummary(details);
-
-            return new ProducersInstructionResponse
-            {
-                ProducersInstructionDetails = details,
-                ProducersInstructionSummary = summary,
-            };
         }
 
         public async Task<bool> MoveBillingJsonFile(int runId, CancellationToken cancellationToken)
@@ -297,75 +216,6 @@ namespace EPR.Calculator.API.Services
             return int.TryParse(CommonResources.ProducerBillingInstructionsDefaultPageNumber, out int pageNumber) ? pageNumber : 1;
         }
 
-        public async Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAcceptAllAsync(
-            int runId,
-            string userName,
-            CancellationToken cancellationToken)
-        {
-            try
-            {
-                var calculatorRun = await applicationDBContext.CalculatorRuns
-                            .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken)
-                            .ConfigureAwait(false);
-
-                if (calculatorRun is null)
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = CommonResources.InvalidRunId,
-                    };
-                }
-
-                if (!ValidateRunForAcceptAllBillingInstructions(calculatorRun))
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = CommonResources.InvalidRunStatusForAcceptAll,
-                    };
-                }
-
-                var rows = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                            .Where(x => x.CalculatorRunId == runId)
-                            .ToListAsync(cancellationToken)
-                            .ConfigureAwait(false);
-
-                if (rows.Count <= 0)
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = CommonResources.InvalidOrganisationId,
-                    };
-                }
-
-                rows.ForEach(x =>
-                {
-                    x.BillingInstructionAcceptReject = BillingStatus.Accepted.ToString();
-                    x.LastModifiedAcceptReject = DateTime.UtcNow;
-                    x.LastModifiedAcceptRejectBy = userName;
-                });
-
-                calculatorRun.IsBillingFileGenerating = true;
-
-                await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                return new ServiceProcessResponseDto
-                {
-                    StatusCode = HttpStatusCode.OK,
-                };
-            }
-            catch (Exception exception)
-            {
-                return new ServiceProcessResponseDto
-                {
-                    StatusCode = HttpStatusCode.InternalServerError,
-                    Message = exception.Message,
-                };
-            }
-        }
-
         public async Task<ServiceProcessResponseDto> StartGeneratingBillingFileAsync(
             int runId,
             string userName,
@@ -444,46 +294,6 @@ namespace EPR.Calculator.API.Services
             return lastModifiedAcceptReject.HasValue && billingGeneratedDate > lastModifiedAcceptReject.Value;
         }
 
-        private static ProducersInstructionSummary GenerateInstructionSummary(List<ProducersInstructionDetail> details)
-        {
-            var statusGroups = details
-                .GroupBy(d => string.IsNullOrWhiteSpace(d.Status) ? string.Empty : d.Status)
-                .ToDictionary(g => g.Key, g => g.Count());
-
-            var orderedStatuses = new Dictionary<string, int> { { "All", details.Count }, };
-
-            foreach (var kvp in statusGroups)
-            {
-                orderedStatuses[kvp.Key] = kvp.Value;
-            }
-
-            return new ProducersInstructionSummary
-            {
-                Statuses = orderedStatuses,
-            };
-        }
-
-        private static void ValidateRunClassification(CalculatorRun? runStatus, int runId)
-        {
-            if (runStatus == null)
-            {
-                throw new KeyNotFoundException(string.Format(CommonResources.RunINotFound, runId));
-            }
-
-            var validRunClassifications = new HashSet<int>
-            {
-                (int)RunClassification.INITIAL_RUN,
-                (int)RunClassification.INTERIM_RECALCULATION_RUN,
-                (int)RunClassification.FINAL_RUN,
-                (int)RunClassification.FINAL_RECALCULATION_RUN,
-            };
-
-            if (!validRunClassifications.Contains(runStatus.CalculatorRunClassificationId))
-            {
-                throw new UnprocessableEntityException(string.Format(CommonResources.NotAValidClassificationStatus, runId));
-            }
-        }
-
         private static void UpdateBillingInstruction(
             string userName,
             ProduceBillingInstuctionRequestDto produceBillingInstuctionRequestDto,
@@ -504,29 +314,6 @@ namespace EPR.Calculator.API.Services
             row.LastModifiedAcceptRejectBy = userName;
         }
 
-        private async Task<CalculatorRun?> GetRunStatusAsync(int runId, CancellationToken cancellationToken)
-        {
-            return await applicationDBContext.CalculatorRuns
-                .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken);
-        }
-
-        private async Task<List<ProducersInstructionDetail>> GetInstructionDetailsAsync(int runId, CancellationToken cancellationToken)
-        {
-            return await (
-                from billing in applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                join producer in applicationDBContext.ProducerDetail
-                    on new { billing.ProducerId, billing.CalculatorRunId }
-                    equals new { producer.ProducerId, producer.CalculatorRunId }
-                where billing.CalculatorRunId == runId && producer.SubsidiaryId == null
-                select new ProducersInstructionDetail
-                {
-                    OrganisationId = producer.ProducerId,
-                    OrganisationName = producer.ProducerName,
-                    BillingInstruction = billing.SuggestedBillingInstruction,
-                    InvoiceAmount = $"£{billing.SuggestedInvoiceAmount:N2}",
-                    Status = string.IsNullOrWhiteSpace(billing.BillingInstructionAcceptReject) ? string.Empty : billing.BillingInstructionAcceptReject,
-                }).Distinct().ToListAsync(cancellationToken);
-        }
 
         private Task<CalculatorRun?> GetRunAsync(int runId, CancellationToken cancellationToken) =>
             applicationDBContext.CalculatorRuns
