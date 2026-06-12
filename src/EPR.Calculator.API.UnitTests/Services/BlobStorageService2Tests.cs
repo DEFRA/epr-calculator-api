@@ -1,12 +1,11 @@
-﻿using Azure;
+﻿using System.Reflection;
+using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using EPR.Calculator.API.Services;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Services
 {
@@ -46,7 +45,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             this.blobStorageService2 = new BlobStorageService2(configs, telemetryClient);
 
             // Patch the private blobServiceClient field to use the mock
-            var field = typeof(BlobStorageService2).GetField("blobServiceClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var field = typeof(BlobStorageService2).GetField("blobServiceClient", BindingFlags.NonPublic | BindingFlags.Instance);
             if (field is null)
             {
                 throw new InvalidOperationException("Could not find the 'blobServiceClient' field on BlobStorageService2. Check the field name and its accessibility.");

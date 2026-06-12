@@ -1,41 +1,29 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿namespace EPR.Calculator.API.Data.DataModels;
+
+public class ProducerResultFileSuggestedBillingInstruction
 {
-    public class ProducerResultFileSuggestedBillingInstruction
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
+    public int CalculatorRunId { get; set; }
+    public int ProducerId { get; set; }
+    public decimal? TotalProducerBillWithBadDebt { get; set; }
+    public decimal? CurrentYearInvoiceTotalToDate { get; set; }
+    public string? TonnageChangeSinceLastInvoice { get; set; }
+    public decimal? AmountLiabilityDifferenceCalcVsPrev { get; set; }
+    public string? MaterialPoundThresholdBreached { get; set; }
+    public string? TonnagePoundThresholdBreached { get; set; }
+    public decimal? PercentageLiabilityDifferenceCalcVsPrev { get; set; }
+    public string? MaterialPercentageThresholdBreached { get; set; }
+    public string? TonnagePercentageThresholdBreached { get; set; }
+    public string SuggestedBillingInstruction { get; set; } = null!;
+    public decimal? SuggestedInvoiceAmount { get; set; }
+    public string? BillingInstructionAcceptReject { get; set; }
+    public string? ReasonForRejection { get; set; }
+    public string? LastModifiedAcceptRejectBy { get; set; }
+    public DateTime? LastModifiedAcceptReject { get; set; }
 
-        public int CalculatorRunId { get; set; }
+    #region EF navigational properties
 
-        public int ProducerId { get; set; }
+    public virtual CalculatorRun CalculatorRun { get; set; } = null!;
 
-        public decimal? TotalProducerBillWithBadDebt { get; set; }
-
-        public decimal? CurrentYearInvoiceTotalToDate { get; set; }
-
-        public string? TonnageChangeSinceLastInvoice { get; set; }
-
-        public decimal? AmountLiabilityDifferenceCalcVsPrev { get; set; }
-
-        public string? MaterialPoundThresholdBreached { get; set; }
-
-        public string? TonnagePoundThresholdBreached { get; set; }
-
-        public decimal? PercentageLiabilityDifferenceCalcVsPrev { get; set; }
-
-        public string? MaterialPercentageThresholdBreached { get; set; }
-
-        public string? TonnagePercentageThresholdBreached { get; set; }
-
-        public string SuggestedBillingInstruction { get; set; } = null!;
-
-        public decimal? SuggestedInvoiceAmount { get; set; }
-
-        public string? BillingInstructionAcceptReject { get; set; }
-
-        public string? ReasonForRejection { get; set; }
-
-        public string? LastModifiedAcceptRejectBy { get; set; }
-
-        public DateTime? LastModifiedAcceptReject { get; set; }
-    }
+    #endregion
 }

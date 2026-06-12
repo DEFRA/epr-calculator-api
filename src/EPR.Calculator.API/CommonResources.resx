@@ -288,9 +288,6 @@
   <data name="InvalidForRunId" xml:space="preserve">
     <value>Invalid Run Id {0}</value>
   </data>
-  <data name="RunIdCannotBeChangedToClassification" xml:space="preserve">
-    <value>RunId {0} cannot be changed to classification {1}</value>
-  </data>
   <data name="CalculatorRunNameExists" xml:space="preserve">
     <value>Calculator run name already exists: {0}</value>
   </data>

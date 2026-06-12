@@ -1,33 +1,21 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 
-namespace EPR.Calculator.API.Data.DataModels
+namespace EPR.Calculator.API.Data.DataModels;
+
+public class DefaultParameterSettingMaster
 {
-    public class DefaultParameterSettingMaster
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
+    public RelativeYear RelativeYear { get; set; }
+    public DateTime EffectiveFrom { get; set; }
+    public DateTime? EffectiveTo { get; set; }
+    public string CreatedBy { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public string ParameterFileName { get; set; } = string.Empty;
 
-        public int RelativeYearValue { get; private set; }
+    #region EF navigational properties
 
-        [NotMapped]
-        public RelativeYear RelativeYear
-        {
-            get => new(RelativeYearValue);
-            set => RelativeYearValue = value.Value;
-        }
+    public virtual ICollection<DefaultParameterSettingDetail> Details { get; } = [];
+    public virtual ICollection<CalculatorRun> RunDetails { get; } = [];
 
-        public DateTime EffectiveFrom { get; set; }
-
-        public DateTime? EffectiveTo { get; set; }
-
-        public string CreatedBy { get; set; } = string.Empty;
-
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public string ParameterFileName { get; set; } = string.Empty;
-
-        public virtual ICollection<DefaultParameterSettingDetail> Details { get; } = new List<DefaultParameterSettingDetail>();
-
-        public ICollection<CalculatorRun>? RunDetails { get; }
-    }
+    #endregion
 }

@@ -1,15 +1,17 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿namespace EPR.Calculator.API.Data.DataModels;
+
+public class ProducerInvoicedMaterialNetTonnage
 {
-    public class ProducerInvoicedMaterialNetTonnage
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
+    public int CalculatorRunId { get; set; }
+    public int MaterialId { get; set; }
+    public int ProducerId { get; set; }
+    public decimal? InvoicedNetTonnage { get; set; }
 
-        public int CalculatorRunId { get; set; }
+    #region EF navigational properties
 
-        public int MaterialId { get; set; }
+    public virtual CalculatorRun CalculatorRun { get; set; } = null!;
+    public virtual Material Material { get; set; } = null!;
 
-        public int ProducerId { get; set; }
-
-        public decimal? InvoicedNetTonnage { get; set; }
-    }
+    #endregion
 }

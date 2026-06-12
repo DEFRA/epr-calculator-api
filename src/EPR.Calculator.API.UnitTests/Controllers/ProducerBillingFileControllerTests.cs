@@ -2,16 +2,12 @@
 using System.Security.Claims;
 using System.Security.Principal;
 using EPR.Calculator.API.Controllers;
-using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {

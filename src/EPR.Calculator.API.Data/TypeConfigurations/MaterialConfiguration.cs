@@ -1,37 +1,41 @@
-﻿using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace EPR.Calculator.API.Data.TypeConfigurations
+namespace EPR.Calculator.API.Data.TypeConfigurations;
+
+public class MaterialConfiguration : IEntityTypeConfiguration<Material>
 {
-    [ExcludeFromCodeCoverage]
-    public class MaterialConfiguration : IEntityTypeConfiguration<Material>
+    public void Configure(EntityTypeBuilder<Material> builder)
     {
-        /// <inheritdoc />
-        public void Configure(EntityTypeBuilder<Material> builder)
-        {
-            builder.ToTable("material");
+        builder.ToTable("material");
 
-            builder.Property(p => p.Id)
-                   .HasColumnName("id")
-                   .IsRequired();
+        builder.Property(p => p.Id)
+            .HasColumnName("id")
+            .IsRequired();
 
-            builder.Property(p => p.Code)
-                   .HasColumnName("code")
-                   .HasMaxLength(400);
+        builder.Property(p => p.Code)
+            .HasColumnName("code")
+            .HasMaxLength(400);
 
-            builder.Property(p => p.Name)
-                   .HasColumnName("name")
-                   .HasMaxLength(400);
+        builder.Property(p => p.Name)
+            .HasColumnName("name")
+            .HasMaxLength(400);
 
-            builder.Property(p => p.Description)
-                   .HasColumnName("description")
-                   .HasMaxLength(2000);
+        builder.Property(p => p.Description)
+            .HasColumnName("description")
+            .HasMaxLength(2000);
 
-            builder.HasMany(e => e.ProducerReportedMaterials)
-                   .WithOne(e => e.Material)
-                   .HasForeignKey(e => e.MaterialId);
-        }
+        builder.HasMany(e => e.ProducerReportedMaterials)
+            .WithOne(e => e.Material)
+            .HasForeignKey(e => e.MaterialId);
+
+        builder.HasMany(e => e.ProducerReportedMaterialProjecteds)
+            .WithOne(e => e.Material)
+            .HasForeignKey(e => e.MaterialId);
+
+        builder.HasMany(e => e.ProducerInvoicedMaterialNetTonnage)
+            .WithOne(e => e.Material)
+            .HasForeignKey(e => e.MaterialId);
     }
 }

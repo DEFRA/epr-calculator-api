@@ -3,7 +3,6 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Validators;
-using FluentValidation;
 using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -68,7 +67,7 @@ namespace EPR.Calculator.API.Controllers
                     }
 
                     var oldDefaultSettings = await this.context.DefaultParameterSettings
-                        .Where(x => x.EffectiveTo == null && x.RelativeYearValue == request.RelativeYear.Value)
+                        .Where(x => x.EffectiveTo == null && x.RelativeYear == request.RelativeYear)
                         .ToListAsync();
 
                     oldDefaultSettings.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // side effecting db update
@@ -131,7 +130,7 @@ namespace EPR.Calculator.API.Controllers
 
                 var currentDefaultSetting = await this.context.DefaultParameterSettings
                     .Include(x => x.Details)
-                    .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.RelativeYearValue == relativeYearValue);
+                    .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.RelativeYear == relativeYearValue);
 
                 if (currentDefaultSetting == null)
                 {

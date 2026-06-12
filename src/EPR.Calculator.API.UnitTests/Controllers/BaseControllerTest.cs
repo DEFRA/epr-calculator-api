@@ -1,22 +1,18 @@
-﻿using Microsoft.ApplicationInsights.Extensibility;
+﻿using Azure.Messaging.ServiceBus;
+using EPR.Calculator.API.Controllers;
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Services;
+using EPR.Calculator.API.Services.Abstractions;
+using EPR.Calculator.API.UnitTests.Helpers;
+using EPR.Calculator.API.Validators;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
-    using Azure.Messaging.ServiceBus;
-    using EPR.Calculator.API.Controllers;
-    using EPR.Calculator.API.Data.DataModels;
-    using EPR.Calculator.API.Data.Models;
-    using EPR.Calculator.API.Services;
-    using EPR.Calculator.API.Services.Abstractions;
-    using EPR.Calculator.API.UnitTests.Helpers;
-    using EPR.Calculator.API.Validators;
-    using EPR.Calculator.API.Wrapper;
-    using Microsoft.ApplicationInsights;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Azure;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Moq;
-
     [TestClass]
     public class BaseControllerTest : InMemoryApplicationDbContext
     {
@@ -37,7 +33,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(this.DbContext);
             this.LapcapDataController = new LapcapDataController(this.DbContext, lapcapDataValidator, TelemetryClient);
 
-            this.Wrapper = new Mock<IOrgAndPomWrapper>().Object;
             var mockStorageService = new Mock<IStorageService>();
             var mockServiceBusService = new Mock<IServiceBusService>();
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
@@ -70,8 +65,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         protected LapcapDataController LapcapDataController { get; set; }
 
         protected CalculatorController CalculatorController { get; set; }
-
-        protected IOrgAndPomWrapper Wrapper { get; set; }
 
         protected TelemetryClient TelemetryClient { get; set; }
 

@@ -9,12 +9,12 @@ public class PIMaterialNetTonnageConfiguration : IEntityTypeConfiguration<Produc
     public void Configure(EntityTypeBuilder<ProducerInvoicedMaterialNetTonnage> builder)
     {
         builder.HasIndex(e => new { e.ProducerId, e.CalculatorRunId, e.Id })
-                    .HasDatabaseName("IX_index_producer_invoiced_material_net_tonnage")
-                    .IncludeProperties(e => new
-                    {
-                        e.MaterialId,
-                        e.InvoicedNetTonnage
-                    })
-                    .IsClustered(false);
+            .HasDatabaseName("IX_index_producer_invoiced_material_net_tonnage")
+            .IncludeProperties(e => new
+            {
+                e.MaterialId,
+                e.InvoicedNetTonnage
+            })
+            .IsClustered(false);
     }
 }

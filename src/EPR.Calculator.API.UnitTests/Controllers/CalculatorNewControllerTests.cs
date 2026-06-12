@@ -1,17 +1,16 @@
 ﻿using System.Net;
 using System.Security.Claims;
 using System.Security.Principal;
-using AutoFixture;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
+using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
 using EPR.Calculator.API.Validators;
-using EPR.Calculator.API.Wrapper;
 using EPR.Calculator.Service.Function.Services;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -19,7 +18,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -35,7 +33,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
         public CalculatorNewControllerTests()
         {
-            Fixture = new Fixture();
+            Fixture = TestFixtures.New();
 
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
@@ -97,7 +95,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
         public TestContext TestContext { get; set; }
 
-        private Fixture Fixture { get; init; }
+        private IFixture Fixture { get; init; }
 
         [TestCleanup]
         public void CleanUp()

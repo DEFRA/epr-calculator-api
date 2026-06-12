@@ -1,4 +1,4 @@
-﻿using EPR.Calculator.API.Data.Models;
+﻿using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 
 namespace EPR.Calculator.API.Services;

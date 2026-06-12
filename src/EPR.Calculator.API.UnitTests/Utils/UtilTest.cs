@@ -1,6 +1,5 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Utils;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace EPR.Calculator.API.UnitTests.Utils
 {

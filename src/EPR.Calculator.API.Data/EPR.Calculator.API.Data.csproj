@@ -1,11 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>2.4.0</Version>
+    <Version>2.6.0</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <SonarQubeExclude>true</SonarQubeExclude>
   </PropertyGroup>
 
   <Target Name="GenerateSqlScript" AfterTargets="AfterBuild" Condition="$(AzureBuild) != true">
@@ -23,38 +25,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1"/>
     <PackageReference Include="SonarAnalyzer.CSharp" Version="10.15.0.120848">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Formats.Asn1" Version="8.0.2"/>
     <PackageReference Include="System.Text.Json" Version="8.0.5"/>
-    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1"/>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <SonarQubeSetting Include="sonar.coverage.exclusions">
-      <value>Scripts/*.*,Migrations/*.*,DataSeeder/*.*,DataModels/*.*,TypeConfigurations/*.*</value>
-    </SonarQubeSetting>
-
-    <SonarQubeSetting Include="sonar.cpd.exclusions">
-      <Value>Scripts/*.*,Migrations/*.*,DataSeeder/*.*,DataModels/*.*,TypeConfigurations/*.*</Value>
-    </SonarQubeSetting>
-
-    <SonarQubeSetting Include="sonar.exclusions">
-      <Value>**/*.sql</Value>
-    </SonarQubeSetting>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Migrations\*.cs">
-      <SonarQubeExclude>true</SonarQubeExclude>
-    </Compile>
-    <None Update="Scripts\**\*">
-      <SonarQubeExclude>true</SonarQubeExclude>
-    </None>
   </ItemGroup>
 
 </Project>

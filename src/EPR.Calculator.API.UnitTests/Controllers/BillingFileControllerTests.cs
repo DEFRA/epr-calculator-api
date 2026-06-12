@@ -5,16 +5,12 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -23,15 +19,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         private readonly BillingFileController billingFileControllerUnderTest;
 
-        private readonly Mock<IBillingFileService> billingFileServiceMock;
-
         private readonly Mock<IStorageService> storageServiceMock;
 
         private readonly ApplicationDBContext context;
 
         public BillingFileControllerTests()
         {
-            billingFileServiceMock = new Mock<IBillingFileService>();
             storageServiceMock = new Mock<IStorageService>();
 
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
@@ -41,149 +34,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context = new ApplicationDBContext(dbContextOptions);
             context.Database.EnsureCreated();
 
-            billingFileControllerUnderTest = new BillingFileController(billingFileServiceMock.Object, storageServiceMock.Object, context);
-        }
-
-        [TestMethod]
-        [DataRow(-1)]
-        [DataRow(0)]
-        public async Task GenerateBillingFileMethod_ShouldReturnNotFound_AndNotMakeCallToService_WhenCalculatorRunIdIsInValid(
-            int calculatorRunId)
-        {
-            // Arrange
-            GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
-            {
-                CalculatorRunId = calculatorRunId,
-            };
-            using CancellationTokenSource cancellationTokenSource = new();
-
-            // Act
-#pragma warning disable CS0618 // 'Type or member is obsolete'
-            IActionResult result = await billingFileControllerUnderTest.GenerateBillingFile(
-                generateBillingFileRequestDto,
-                cancellationTokenSource.Token);
-#pragma warning restore CS0618
-
-            // Assert
-            using (new AssertionScope())
-            {
-                result.Should().NotBeNull();
-                result.Should().BeOfType<NotFoundObjectResult>();
-                var notFoundResult = result as NotFoundObjectResult;
-                notFoundResult.Should().NotBeNull();
-                notFoundResult.StatusCode.Should().Be((int)HttpStatusCode.NotFound);
-                notFoundResult.Value.Should().NotBeNull();
-
-                // Verify
-                billingFileServiceMock.Verify(
-                    x => x.GenerateBillingFileAsync(
-                        generateBillingFileRequestDto,
-                        cancellationTokenSource.Token),
-                    Times.Never());
-            }
-        }
-
-        [TestMethod]
-        [DataRow(HttpStatusCode.Accepted, "Request accepted for processing.")]
-        [DataRow(HttpStatusCode.NotFound, "The requested resource could not be found.")]
-        [DataRow(HttpStatusCode.UnprocessableContent, "The billing file generation alreeady requested for requested run id.")]
-        public async Task GenerateBillingFileMethod_ShouldReturnObjectResult_AndMakeCallToService_WhenCalculatorRunIdIsValid(
-            HttpStatusCode httpStatusCode,
-            string message)
-        {
-            // Arrange
-            GenerateBillingFileRequestDto generateBillingFileRequestDto = new()
-            {
-                CalculatorRunId = 101,
-            };
-            using CancellationTokenSource cancellationTokenSource = new();
-            ServiceProcessResponseDto serviceProcessResponseDto = new()
-            {
-                StatusCode = httpStatusCode,
-                Message = message,
-            };
-
-            // Setup
-            billingFileServiceMock.Setup(
-                    x => x.GenerateBillingFileAsync(
-                        generateBillingFileRequestDto,
-                        cancellationTokenSource.Token))
-                .ReturnsAsync(serviceProcessResponseDto);
-
-            // Act
-#pragma warning disable CS0618 // 'Type or member is obsolete'
-            IActionResult result = await billingFileControllerUnderTest.GenerateBillingFile(
-                generateBillingFileRequestDto,
-                cancellationTokenSource.Token);
-#pragma warning restore CS0618
-
-            // Assert
-            using (new AssertionScope())
-            {
-                result.Should().NotBeNull();
-                result.Should().BeOfType<ObjectResult>();
-                var objectResult = result as ObjectResult;
-                objectResult.Should().NotBeNull();
-                objectResult.StatusCode.Should().Be((int)httpStatusCode);
-                objectResult.Value.Should().NotBeNull();
-                objectResult.Value.Should().Be(message);
-            }
-        }
-
-        [TestMethod]
-        public async Task ProducerBillingInstructions_ReturnsBadRequest_WhenRunIdIsInvalid()
-        {
-            // Arrange
-            int invalidRunId = 0;
-
-            // Act
-            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(invalidRunId, CancellationToken.None) as ObjectResult;
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(StatusCodes.Status400BadRequest, result.StatusCode);
-        }
-
-        [TestMethod]
-        public async Task ProducerBillingInstructions_ReturnsNotFound_WhenResponseIsNull()
-        {
-            // Arrange
-            int validRunId = 10;
-            billingFileServiceMock
-                .Setup(s => s.GetProducersInstructionResponseAsync(validRunId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new ProducersInstructionResponse());
-
-            // Act
-            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(validRunId, CancellationToken.None) as ObjectResult;
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(StatusCodes.Status404NotFound, result.StatusCode);
-        }
-
-        [TestMethod]
-        public async Task ProducerBillingInstructions_ReturnsOk_WithValidResponse()
-        {
-            // Arrange
-            int validRunId = 20;
-            var expectedResponse = new ProducersInstructionResponse
-            {
-                ProducersInstructionDetails = new List<ProducersInstructionDetail>(),
-                ProducersInstructionSummary = new ProducersInstructionSummary(),
-            };
-
-            billingFileServiceMock
-                .Setup(s => s.GetProducersInstructionResponseAsync(validRunId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(expectedResponse);
-
-            // Act
-            var result = await billingFileControllerUnderTest.ProducerBillingInstructions(validRunId, CancellationToken.None);
-
-            // Assert
-            var okResult = result as OkObjectResult;
-            Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult.StatusCode);
-            Assert.AreEqual(expectedResponse, okResult.Value);
+            billingFileControllerUnderTest = new BillingFileController(storageServiceMock.Object, context);
         }
 
         [TestMethod]
@@ -196,7 +47,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(1);
 
             // Assert
-            result.Should().BeOfType<BadRequest<IEnumerable<ModelError>>>();
+            result.ShouldBeOfType<BadRequest<IEnumerable<ModelError>>>();
         }
 
         [TestMethod]
@@ -209,7 +60,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
 
             // Assert
-            result.Should().BeOfType<NotFound<string>>();
+            result.ShouldBeOfType<NotFound<string>>();
         }
 
         [TestMethod]
@@ -244,7 +95,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
 
             // Assert
-            result.Should().BeOfType<ProblemHttpResult>();
+            result.ShouldBeOfType<ProblemHttpResult>();
 
             // Tidy Up
             context.CalculatorRunBillingFileMetadata.Remove(billingMeta);
@@ -284,7 +135,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
 
             // Assert
-            result.Should().BeSameAs(expectedResult);
+            result.ShouldBeSameAs(expectedResult);
 
             // Tidy Up
             context.CalculatorRunBillingFileMetadata.Remove(billingMeta);

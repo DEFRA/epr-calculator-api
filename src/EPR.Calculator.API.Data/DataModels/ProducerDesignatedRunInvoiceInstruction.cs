@@ -1,23 +1,20 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+namespace EPR.Calculator.API.Data.DataModels;
+
+public class ProducerDesignatedRunInvoiceInstruction
 {
-    public class ProducerDesignatedRunInvoiceInstruction
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
+    public int ProducerId { get; set; }
+    public int CalculatorRunId { get; set; }
+    public decimal? CurrentYearInvoicedTotalAfterThisRun { get; set; }
+    public decimal? InvoiceAmount { get; set; }
+    public decimal? OutstandingBalance { get; set; }
+    public string? BillingInstructionId { get; set; }
+    public DateTime? InstructionConfirmedDate { get; set; }
+    public string? InstructionConfirmedBy { get; set; }
 
-        public int ProducerId { get; set; }
+    #region EF navigational properties
 
-        public int CalculatorRunId { get; set; }
+    public virtual CalculatorRun CalculatorRun { get; set; } = null!;
 
-        public decimal? CurrentYearInvoicedTotalAfterThisRun { get; set; }
-
-        public decimal? InvoiceAmount { get; set; }
-
-        public decimal? OutstandingBalance { get; set; }
-
-        public string? BillingInstructionId { get; set; }
-
-        public DateTime? InstructionConfirmedDate { get; set; }
-
-        public string? InstructionConfirmedBy { get; set; }
-    }
+    #endregion
 }

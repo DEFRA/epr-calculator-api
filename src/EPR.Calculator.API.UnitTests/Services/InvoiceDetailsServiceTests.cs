@@ -1,6 +1,5 @@
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.Service.Function.Services;
-using FluentAssertions;
 
 namespace EPR.Calculator.API.UnitTests.Services
 {
@@ -26,17 +25,17 @@ namespace EPR.Calculator.API.UnitTests.Services
             const decimal currentYearInvoicedToDate = 100m;
             const decimal invoiceAmount = 50m;
 
-            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Rejected", "CANCEL", currentYearInvoicedToDate, invoiceAmount).Should().Be(currentYearInvoicedToDate);
-            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Accepted", "CANCEL", currentYearInvoicedToDate, invoiceAmount).Should().BeNull();
-            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Rejected", "INITIAL", currentYearInvoicedToDate, invoiceAmount).Should().BeNull();
-            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Rejected", "REBILL", currentYearInvoicedToDate, invoiceAmount).Should().Be(currentYearInvoicedToDate);
-            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Rejected", "REBILL", null, invoiceAmount).Should().Be(0m);
-            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Accepted", "INITIAL", currentYearInvoicedToDate, invoiceAmount).Should().Be(currentYearInvoicedToDate + invoiceAmount);
-            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Accepted", "INITIAL", null, invoiceAmount).Should().Be(invoiceAmount);
-            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Accepted", "INITIAL", currentYearInvoicedToDate, null).Should().Be(currentYearInvoicedToDate);
-            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Accepted", "REBILL", currentYearInvoicedToDate, invoiceAmount).Should().Be(invoiceAmount);
-            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Accepted", "REBILL", currentYearInvoicedToDate, null).Should().Be(0m);
-            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Accepted", "REBILL", null, null).Should().Be(0m);
+            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Rejected", "CANCEL", currentYearInvoicedToDate, invoiceAmount).ShouldBe(currentYearInvoicedToDate);
+            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Accepted", "CANCEL", currentYearInvoicedToDate, invoiceAmount).ShouldBeNull();
+            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Rejected", "INITIAL", currentYearInvoicedToDate, invoiceAmount).ShouldBeNull();
+            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Rejected", "REBILL", currentYearInvoicedToDate, invoiceAmount).ShouldBe(currentYearInvoicedToDate);
+            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Rejected", "REBILL", null, invoiceAmount).ShouldBe(0m);
+            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Accepted", "INITIAL", currentYearInvoicedToDate, invoiceAmount).ShouldBe(currentYearInvoicedToDate + invoiceAmount);
+            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Accepted", "INITIAL", null, invoiceAmount).ShouldBe(invoiceAmount);
+            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Accepted", "INITIAL", currentYearInvoicedToDate, null).ShouldBe(currentYearInvoicedToDate);
+            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Accepted", "REBILL", currentYearInvoicedToDate, invoiceAmount).ShouldBe(invoiceAmount);
+            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Accepted", "REBILL", currentYearInvoicedToDate, null).ShouldBe(0m);
+            InvoiceDetailsService.GetCurrentYearInvoicedTotalAfterThisRun("Accepted", "REBILL", null, null).ShouldBe(0m);
         }
 
         [TestMethod]
@@ -45,12 +44,12 @@ namespace EPR.Calculator.API.UnitTests.Services
             const decimal totalProducerBill = 1000m;
             const decimal liabilityDifference = 500m;
 
-            InvoiceDetailsService.GetInvoiceAmount("Rejected", "INITIAL", totalProducerBill, null).Should().BeNull();
-            InvoiceDetailsService.GetInvoiceAmount("Accepted", "INITIAL", totalProducerBill, null).Should().Be(totalProducerBill);
-            InvoiceDetailsService.GetInvoiceAmount("Accepted", "REBILL", totalProducerBill, null).Should().Be(totalProducerBill);
-            InvoiceDetailsService.GetInvoiceAmount("Accepted", "DELTA", totalProducerBill, liabilityDifference).Should().Be(liabilityDifference);
-            InvoiceDetailsService.GetInvoiceAmount("Accepted", "UNKNOWN", totalProducerBill, null).Should().BeNull();
-            InvoiceDetailsService.GetInvoiceAmount(null, "UNKNOWN", totalProducerBill, null).Should().BeNull();
+            InvoiceDetailsService.GetInvoiceAmount("Rejected", "INITIAL", totalProducerBill, null).ShouldBeNull();
+            InvoiceDetailsService.GetInvoiceAmount("Accepted", "INITIAL", totalProducerBill, null).ShouldBe(totalProducerBill);
+            InvoiceDetailsService.GetInvoiceAmount("Accepted", "REBILL", totalProducerBill, null).ShouldBe(totalProducerBill);
+            InvoiceDetailsService.GetInvoiceAmount("Accepted", "DELTA", totalProducerBill, liabilityDifference).ShouldBe(liabilityDifference);
+            InvoiceDetailsService.GetInvoiceAmount("Accepted", "UNKNOWN", totalProducerBill, null).ShouldBeNull();
+            InvoiceDetailsService.GetInvoiceAmount(null, "UNKNOWN", totalProducerBill, null).ShouldBeNull();
         }
 
         [TestMethod]
@@ -59,9 +58,9 @@ namespace EPR.Calculator.API.UnitTests.Services
             const decimal totalProducerBill = 1000m;
             const decimal liabilityDifference = 500m;
 
-            InvoiceDetailsService.GetOutstandingBalance("Rejected", "INITIAL", totalProducerBill, null).Should().Be(totalProducerBill);
-            InvoiceDetailsService.GetOutstandingBalance("Rejected", "REBILL", totalProducerBill, liabilityDifference).Should().Be(liabilityDifference);
-            InvoiceDetailsService.GetOutstandingBalance("Accepted", "INITIAL", totalProducerBill, liabilityDifference).Should().BeNull();
+            InvoiceDetailsService.GetOutstandingBalance("Rejected", "INITIAL", totalProducerBill, null).ShouldBe(totalProducerBill);
+            InvoiceDetailsService.GetOutstandingBalance("Rejected", "REBILL", totalProducerBill, liabilityDifference).ShouldBe(liabilityDifference);
+            InvoiceDetailsService.GetOutstandingBalance("Accepted", "INITIAL", totalProducerBill, liabilityDifference).ShouldBeNull();
         }
 
         [TestMethod]
@@ -116,24 +115,24 @@ namespace EPR.Calculator.API.UnitTests.Services
                 instructionConfirmedBy,
                 TestContext.CancellationTokenSource.Token);
 
-            result.Should().Be(2);
-            this.DbContext.ProducerDesignatedRunInvoiceInstruction.Should().HaveCount(2);
+            result.ShouldBe(2);
+            this.DbContext.ProducerDesignatedRunInvoiceInstruction.Count().ShouldBe(2);
 
             var insertedInstruction1 = this.DbContext.ProducerDesignatedRunInvoiceInstruction.Where(x => x.ProducerId == instruction1).FirstOrDefault();
-            insertedInstruction1.Should().NotBeNull();
-            insertedInstruction1.CalculatorRunId.Should().Be(runId);
-            insertedInstruction1.InvoiceAmount.Should().Be(1000m);
-            insertedInstruction1.CurrentYearInvoicedTotalAfterThisRun.Should().Be(1500m);
-            insertedInstruction1.OutstandingBalance.Should().BeNull();
-            insertedInstruction1.BillingInstructionId.Should().Be($"{runId}_{instruction1}");
+            insertedInstruction1.ShouldNotBeNull();
+            insertedInstruction1.CalculatorRunId.ShouldBe(runId);
+            insertedInstruction1.InvoiceAmount.ShouldBe(1000m);
+            insertedInstruction1.CurrentYearInvoicedTotalAfterThisRun.ShouldBe(1500m);
+            insertedInstruction1.OutstandingBalance.ShouldBeNull();
+            insertedInstruction1.BillingInstructionId.ShouldBe($"{runId}_{instruction1}");
 
             var insertedInstruction2 = this.DbContext.ProducerDesignatedRunInvoiceInstruction.Where(x => x.ProducerId == instruction2).FirstOrDefault();
-            insertedInstruction2.Should().NotBeNull();
-            insertedInstruction2.CalculatorRunId.Should().Be(runId);
-            insertedInstruction2.InvoiceAmount.Should().Be(2000m);
-            insertedInstruction2.CurrentYearInvoicedTotalAfterThisRun.Should().Be(2000m);
-            insertedInstruction2.OutstandingBalance.Should().BeNull();
-            insertedInstruction2.BillingInstructionId.Should().Be($"{runId}_{instruction2}");
+            insertedInstruction2.ShouldNotBeNull();
+            insertedInstruction2.CalculatorRunId.ShouldBe(runId);
+            insertedInstruction2.InvoiceAmount.ShouldBe(2000m);
+            insertedInstruction2.CurrentYearInvoicedTotalAfterThisRun.ShouldBe(2000m);
+            insertedInstruction2.OutstandingBalance.ShouldBeNull();
+            insertedInstruction2.BillingInstructionId.ShouldBe($"{runId}_{instruction2}");
         }
 
         [TestMethod]
@@ -149,8 +148,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                 instructionConfirmedBy,
                 TestContext.CancellationTokenSource.Token);
 
-            result.Should().Be(0);
-            this.DbContext.ProducerDesignatedRunInvoiceInstruction.Should().HaveCount(0);
+            result.ShouldBe(0);
+            this.DbContext.ProducerDesignatedRunInvoiceInstruction.Count().ShouldBe(0);
         }
     }
 }

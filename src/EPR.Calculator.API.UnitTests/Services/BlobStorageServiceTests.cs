@@ -8,7 +8,6 @@ using EPR.Calculator.API.Utils;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Services
 {
@@ -109,46 +108,6 @@ namespace EPR.Calculator.API.UnitTests.Services
             var notFoundResult = result as NotFound<string>;
             Assert.IsNotNull(notFoundResult);
             Assert.AreEqual(fileName, notFoundResult.Value);
-        }
-
-        [TestMethod]
-        public async Task IsBlobExistsAsync_ShouldReturnTrue_WhenFileExists()
-        {
-            // Arrange
-            var fileName = "test.txt";
-            var blobUri = "https://example.com/test.txt";
-            using CancellationTokenSource cancellationTokenSource = new();
-
-            // Setup
-            this.mockBlobClient.Setup(x => x.ExistsAsync(cancellationTokenSource.Token)).ReturnsAsync(Response.FromValue(true, null!));
-            this.mockBlobClient.Setup(x => x.Uri).Returns(new Uri(blobUri));
-            blobUri = string.Empty;
-
-            // Act
-            bool result = await this.blobStorageService.IsBlobExistsAsync(fileName, blobUri, cancellationTokenSource.Token);
-
-            // Assert
-            Assert.IsTrue(result);
-        }
-
-        [TestMethod]
-        public async Task IsBlobExistsAsync_ShouldReturnFalse_WhenFileDoesNotExist()
-        {
-            // Arrange
-            var fileName = "test.txt";
-            var blobUri = "https://example.com/test.txt";
-            using CancellationTokenSource cancellationTokenSource = new();
-
-            // Setup
-            this.mockBlobClient.Setup(x => x.ExistsAsync(cancellationTokenSource.Token)).ReturnsAsync(Response.FromValue(false, null!));
-            this.mockBlobClient.Setup(x => x.Uri).Returns(new Uri(blobUri));
-            blobUri = string.Empty;
-
-            // Act
-            bool result = await this.blobStorageService.IsBlobExistsAsync(fileName, blobUri, cancellationTokenSource.Token);
-
-            // Assert
-            Assert.IsFalse(result);
         }
     }
 }

@@ -1,15 +1,15 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿namespace EPR.Calculator.API.Data.DataModels;
+
+public class CalculatorRunCsvFileMetadata
 {
-    public class CalculatorRunCsvFileMetadata
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
+    public int CalculatorRunId { get; set; }
+    public required string FileName { get; set; }
+    public required string BlobUri { get; set; }
 
-        public required string FileName { get; set; }
+    #region EF navigational properties
 
-        public required string BlobUri { get; set; }
+    public virtual CalculatorRun CalculatorRun { get; set; } = null!;
 
-        public required int CalculatorRunId { get; set; }
-
-        public virtual CalculatorRun? CalculatorRun { get; set; }
-    }
+    #endregion
 }

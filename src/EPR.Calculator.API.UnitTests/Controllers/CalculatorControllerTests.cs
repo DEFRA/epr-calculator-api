@@ -1,22 +1,20 @@
+using System.Configuration;
 using System.Security.Claims;
 using System.Security.Principal;
-using AutoFixture;
-using EnumsNET;
+using System.Text.Json;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.UnitTests.Helpers;
+using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
 using EPR.Calculator.API.Validators;
-using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -28,7 +26,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         /// </summary>
         public CalculatorControllerTests()
         {
-            Fixture = new Fixture();
+            Fixture = TestFixtures.New();
 
             // Set up authorisation.
             var identity = new GenericIdentity("TestUser");
@@ -38,9 +36,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             CalculatorController.ControllerContext = new ControllerContext { HttpContext = context };
         }
 
-        public Fixture Fixture { get; init; }
+        public IFixture Fixture { get; init; }
 
-        private CalculatorRunRelativeYear RelativeYear23_24 { get; } = new CalculatorRunRelativeYear { Value = 2023 };
+        private CalculatorRunRelativeYear RelativeYear23_24 { get; } = new CalculatorRunRelativeYear { Value = new RelativeYear(2023) };
 
         [TestMethod]
         public async Task Create_Calculator_Run()
@@ -162,7 +160,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 RelativeYear = new RelativeYear(2027),
             };
 
-            DbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear { Value = 2027 });
+            DbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear { Value = new RelativeYear(2027) });
             DbContext.SaveChanges();
 
             DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
@@ -257,7 +255,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
 
             var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
-            var actionResultValue = actionResult?.Value as System.Configuration.ConfigurationErrorsException;
+            var actionResultValue = actionResult?.Value as ConfigurationErrorsException;
 
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(500, actionResult.StatusCode);
@@ -327,7 +325,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
 
             var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
-            var actionResultValue = actionResult?.Value as System.Configuration.ConfigurationErrorsException;
+            var actionResultValue = actionResult?.Value as ConfigurationErrorsException;
 
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(500, actionResult.StatusCode);
@@ -340,7 +338,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                RelativeYear = new RelativeYear(Fixture.Create<int>()),
+                RelativeYear = new RelativeYear(-1),
             };
             var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
             Assert.IsNotNull(actionResult);
@@ -457,7 +455,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(422, actionResult.StatusCode);
             var expectedJson = "{\"Message\":\"The calculator is currently running. You will be able to run another calculation once the current one has finished.\"}";
-            var actualJson = System.Text.Json.JsonSerializer.Serialize(actionResult?.Value);
+            var actualJson = JsonSerializer.Serialize(actionResult?.Value);
             Assert.AreEqual(expectedJson, actualJson);
         }
 
@@ -466,18 +464,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Act
             var result = await CalculatorController.RelativeYears() as ObjectResult;
-            var resultList = result?.Value as IEnumerable<int>;
+            var resultList = (result?.Value as IEnumerable<RelativeYear>)?.ToList();
 
             // Assert
-            Assert.IsInstanceOfType<IEnumerable<int>>(resultList);
-            Assert.AreEqual(2024, resultList?.Single());
+            resultList.ShouldNotBeNull();
+            resultList.ShouldNotBeEmpty();
+            resultList.ShouldContain(new RelativeYear(2024));
         }
 
         [TestMethod]
         public async Task ClassificationByRelativeYear_Returns_Options_For_Valid_RelativeYear()
         {
-            var initialRun = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description);
-            var testRun = RunClassification.TEST_RUN.AsString(EnumFormat.Description);
+            var initialRun = nameof(RunClassification.INITIAL_RUN);
+            var testRun = nameof(RunClassification.TEST_RUN);
 
             if (initialRun == null || testRun == null)
             {
@@ -498,14 +497,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Setup(s => s.GetAvailableClassificationsForRelativeYearAsync(request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<CalculatorRunClassification>
                 {
-                    new() { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)! },
-                    new() { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)! },
+                    new() { Id = (int)RunClassification.INITIAL_RUN, Status = nameof(RunClassification.INITIAL_RUN) },
+                    new() { Id = (int)RunClassification.TEST_RUN, Status = nameof(RunClassification.TEST_RUN) },
                 });
 
-            var mockDbContext = MockDbContextForCalculatorRunClassifications();
+            var dbContext = GetDbContextForCalculatorRunClassifications();
 
             var individualCalcController = new CalculatorController(
-                mockDbContext.Object,
+                dbContext,
                 ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
@@ -516,8 +515,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var expectedClassifications = new List<CalculatorRunClassificationDto>
             {
-                new CalculatorRunClassificationDto { Id = (int)RunClassification.INITIAL_RUN, Status = RunClassification.INITIAL_RUN.AsString(EnumFormat.Description)! },
-                new() { Id = (int)RunClassification.TEST_RUN, Status = RunClassification.TEST_RUN.AsString(EnumFormat.Description)! },
+                new CalculatorRunClassificationDto { Id = (int)RunClassification.INITIAL_RUN, Status = nameof(RunClassification.INITIAL_RUN) },
+                new() { Id = (int)RunClassification.TEST_RUN, Status = nameof(RunClassification.TEST_RUN) },
             };
 
             // Act
@@ -531,7 +530,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var typeToAssert = typeof(CalculatorRunClassificationDto);
             Assert.IsInstanceOfType(expectedClassifications[0], typeToAssert);
             Assert.IsInstanceOfType(result.Classifications[1], typeToAssert);
-            result.Classifications.Should().BeEquivalentTo(expectedClassifications);
+            result.Classifications.ShouldBeEquivalentTo(expectedClassifications);
             Assert.AreEqual(result.RelativeYear, relativeYear);
         }
 
@@ -639,10 +638,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual("An unexpected error occurred.", actionResult.Value);
         }
 
-        private static Mock<ApplicationDBContext> MockDbContextForCalculatorRunClassifications()
+        private ApplicationDBContext GetDbContextForCalculatorRunClassifications()
         {
-            var mockClassifications = new List<CalculatorRunClassification>
-            {
+            var dbContext = Fixture.Create<ApplicationDBContext>();
+            dbContext.CalculatorRunClassifications.RemoveRange(dbContext.CalculatorRunClassifications);
+            List<CalculatorRunClassification> classifications =
+            [
                 new() { Id = 1, Status = "IN THE QUEUE", CreatedBy = "Test user" },
                 new() { Id = 2, Status = "RUNNING", CreatedBy = "Test user" },
                 new() { Id = 3, Status = "UNCLASSIFIED", CreatedBy = "Test user" },
@@ -654,18 +655,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 new() { Id = 9, Status = "INTERIM RE-CALCULATION RUN", CreatedBy = "Test user" },
                 new() { Id = 10, Status = "FINAL RUN", CreatedBy = "Test user" },
                 new() { Id = 11, Status = "FINAL RE-CALCULATION RUN", CreatedBy = "Test user" },
-            }.AsQueryable();
+            ];
+            dbContext.CalculatorRunClassifications.AddRange(classifications);
 
-            var mockDbContext = new Mock<ApplicationDBContext>();
-            var mockClassificationsDbSet = new Mock<DbSet<CalculatorRunClassification>>();
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.Provider).Returns(new TestAsyncQueryProvider<CalculatorRunClassification>(mockClassifications.Provider));
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.Expression).Returns(mockClassifications.Expression);
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.ElementType).Returns(mockClassifications.ElementType);
-            mockClassificationsDbSet.As<IQueryable<CalculatorRunClassification>>().Setup(m => m.GetEnumerator()).Returns(mockClassifications.GetEnumerator());
-            mockClassificationsDbSet.As<IAsyncEnumerable<CalculatorRunClassification>>().Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>())).Returns(new TestAsyncEnumerator<CalculatorRunClassification>(mockClassifications.GetEnumerator()));
-
-            mockDbContext.Setup(c => c.CalculatorRunClassifications).Returns(mockClassificationsDbSet.Object);
-            return mockDbContext;
+            return dbContext;
         }
     }
 }

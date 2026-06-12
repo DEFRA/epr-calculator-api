@@ -1,6 +1,6 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Validators;
 using FluentValidation.TestHelper;
@@ -33,7 +33,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
                 Name = "Test",
                 Id = calcRunId,
                 CreatedBy = "Test",
-                CreatedAt = System.DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
             };
 
             dbContext.CalculatorRuns.Add(calcRun);

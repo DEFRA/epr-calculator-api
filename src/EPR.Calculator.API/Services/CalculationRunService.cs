@@ -1,5 +1,5 @@
 ﻿using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Exceptions;
@@ -41,7 +41,7 @@ public class CalculationRunService : ICalculationRunService
                  join calculatorRunBillingFileMetadata in this.context.CalculatorRunBillingFileMetadata
                             on run.Id equals calculatorRunBillingFileMetadata.CalculatorRunId into billingFileMetadataGroup
                  from billingFileMetadata in billingFileMetadataGroup.DefaultIfEmpty()
-                 where run.RelativeYearValue == relativeYear.Value && this.wantedClassificationIds.Contains(run.CalculatorRunClassificationId)
+                 where run.RelativeYear == relativeYear && this.wantedClassificationIds.Contains(run.CalculatorRunClassificationId)
                  select new ClassifiedCalculatorRunDto
                  {
                      RunId = run.Id,

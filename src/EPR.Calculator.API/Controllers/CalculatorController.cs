@@ -1,7 +1,8 @@
 ﻿using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Models;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Mappers;
@@ -15,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EPR.Calculator.API.Controllers
 {
     [Route("v1")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S6960:Controllers should not have mixed responsibilities", Justification = "It's all calculator run related")]
+    [SuppressMessage("Major Code Smell", "S6960:Controllers should not have mixed responsibilities", Justification = "It's all calculator run related")]
     public class CalculatorController : ControllerBase
     {
         private readonly ApplicationDBContext context;
@@ -27,7 +28,7 @@ namespace EPR.Calculator.API.Controllers
         private readonly ICalculationRunService calculatorRunService;
         private readonly IBillingFileService billingFileService;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        [SuppressMessage(
             "Major Code Smell",
             "S107:Methods should not have too many parameters",
             Justification = "Accepted because it's injected dependencies.  However, if the controller's responsibilities were split as per S6960 this would be resolved.")]
@@ -99,7 +100,7 @@ namespace EPR.Calculator.API.Controllers
                 }
 
                 // Return failed dependency error if at least one of the dependent data not available for the relative year
-                var dataPreCheckMessage = this.DataPreChecksBeforeInitialisingCalculatorRun(relativeYear);
+                var dataPreCheckMessage = this.DataPreChecksBeforeInitialisingCalculatorRun(relativeYear.Value);
                 if (!string.IsNullOrWhiteSpace(dataPreCheckMessage))
                 {
                     return new ObjectResult(dataPreCheckMessage) { StatusCode = StatusCodes.Status424FailedDependency };
@@ -131,17 +132,17 @@ namespace EPR.Calculator.API.Controllers
 
                 // Get active default parameter settings master
                 var activeDefaultParameterSettingsMaster = await this.context.DefaultParameterSettings
-                    .SingleAsync(x => x.EffectiveTo == null && x.RelativeYearValue == relativeYear.Value);
+                    .SingleAsync(x => x.EffectiveTo == null && x.RelativeYear == relativeYear.Value);
 
                 // Get active lapcap data master
                 var activeLapcapDataMaster = await this.context.LapcapDataMaster
-                    .SingleAsync(data => data.RelativeYearValue == relativeYear.Value && data.EffectiveTo == null);
+                    .SingleAsync(data => data.RelativeYear == relativeYear.Value && data.EffectiveTo == null);
 
                 // Setup calculator run details
                 var calculatorRun = new CalculatorRun
                 {
                     Name = request.CalculatorRunName,
-                    RelativeYear = relativeYear,
+                    RelativeYear = relativeYear.Value,
                     CreatedBy = userName,
                     CreatedAt = DateTime.UtcNow,
                     CalculatorRunClassificationId = (int)RunClassification.RUNNING,
@@ -161,9 +162,7 @@ namespace EPR.Calculator.API.Controllers
                         var calculatorRunMessage = new CalculatorRunMessage
                         {
                             CalculatorRunId = calculatorRun.Id,
-                            RelativeYear = calculatorRun.RelativeYear,
-                            CreatedBy = this.User.Identity?.Name ?? userName,
-                            MessageType = CommonResources.ResultMessageType,
+                            CreatedBy = this.User.Identity?.Name ?? userName
                         };
 
                         // Send message
@@ -208,7 +207,7 @@ namespace EPR.Calculator.API.Controllers
                 var calculatorRuns = await (from run in this.context.CalculatorRuns
                        join bill in this.context.CalculatorRunBillingFileMetadata on run.Id equals bill.CalculatorRunId
                        into billFile
-                       where run.RelativeYearValue == request.RelativeYear.Value
+                       where run.RelativeYear == request.RelativeYear
                                     select new
                                     {
                                         run.Id,
@@ -272,67 +271,6 @@ namespace EPR.Calculator.API.Controllers
                 var isBillingFileGeneratedLatest = await this.billingFileService.IsBillingFileGeneratedLatest(runId, cancellationToken);
                 var runDto = CalcRunMapper.Map(calcRun, runClassification, isBillingFileGeneratedLatest);
                 return new ObjectResult(runDto);
-            }
-            catch (Exception exception)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
-            }
-        }
-
-        [HttpPut]
-        [Route("calculatorRuns")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutCalculatorRunStatus([FromBody] CalculatorRunStatusUpdateDto runStatusUpdateDto)
-        {
-            var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
-            if (claim == null)
-            {
-                return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
-            }
-
-            var userName = claim.Value;
-            if (!this.ModelState.IsValid)
-            {
-                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
-            }
-
-            try
-            {
-                var calculatorRun = await this.context.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runStatusUpdateDto.RunId);
-                if (calculatorRun == null)
-                {
-                    return new ObjectResult(string.Format(CommonResources.UnableToFindRunId, runStatusUpdateDto.RunId))
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
-                }
-
-                var classification =
-                    await this.context.CalculatorRunClassifications.SingleOrDefaultAsync(x =>
-                        x.Id == runStatusUpdateDto.ClassificationId);
-
-                if (classification == null)
-                {
-                    return new ObjectResult(string.Format(CommonResources.UnableToFindClassificationId, runStatusUpdateDto.ClassificationId))
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
-                }
-
-                if (runStatusUpdateDto.ClassificationId == calculatorRun.CalculatorRunClassificationId)
-                {
-                    return new ObjectResult(string.Format(CommonResources.RunIdCannotBeChangedToClassification, runStatusUpdateDto.RunId, runStatusUpdateDto.ClassificationId))
-                    { StatusCode = StatusCodes.Status422UnprocessableEntity };
-                }
-
-                calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
-                calculatorRun.UpdatedAt = DateTime.UtcNow;
-                calculatorRun.UpdatedBy = userName;
-
-                this.context.CalculatorRuns.Update(calculatorRun);
-                await this.context.SaveChangesAsync();
-
-                return this.StatusCode(201);
             }
             catch (Exception exception)
             {
@@ -464,11 +402,11 @@ namespace EPR.Calculator.API.Controllers
         {
             // Get active default parameter settings for the given relative year
             var activeDefaultParameterSettings = this.context.DefaultParameterSettings
-                        .SingleOrDefault(x => x.EffectiveTo == null && x.RelativeYearValue == relativeYear.Value);
+                        .SingleOrDefault(x => x.EffectiveTo == null && x.RelativeYear == relativeYear);
 
             // Get active Lapcap data for the given relative year
             var activeLapcapData = this.context.LapcapDataMaster
-                .SingleOrDefault(data => data.RelativeYearValue == relativeYear.Value && data.EffectiveTo == null);
+                .SingleOrDefault(data => data.RelativeYear == relativeYear && data.EffectiveTo == null);
 
             // Return no active default paramater settings and lapcap data message
             if (activeDefaultParameterSettings == null && activeLapcapData == null)

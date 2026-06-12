@@ -4,7 +4,6 @@ using EPR.Calculator.API.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace EPR.Calculator.API.UnitTests.Global
 {

@@ -1,15 +1,15 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿namespace EPR.Calculator.API.Data.DataModels;
+
+public class Country
 {
-    public class Country
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
+    public required string Code { get; set; }
+    public required string Name { get; set; }
+    public string? Description { get; set; }
 
-        public required string Code { get; set; }
+    #region EF navigational properties
 
-        public required string Name { get; set; }
+    public virtual ICollection<CountryApportionment> CountryApportionments { get; } = [];
 
-        public string? Description { get; set; }
-
-        public ICollection<CountryApportionment> CountryApportionments { get; } = new List<CountryApportionment>();
-    }
+    #endregion
 }

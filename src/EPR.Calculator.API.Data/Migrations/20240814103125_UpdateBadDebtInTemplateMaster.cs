@@ -23,7 +23,7 @@ namespace EPR.Calculator.API.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
+            // Rollback not required
         }
     }
 }

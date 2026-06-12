@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Configuration;
+using System.Net;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
@@ -38,8 +39,16 @@ namespace EPR.Calculator.API.Controllers
 
             if (serviceProcessResponseDto.StatusCode == HttpStatusCode.OK)
             {
-                var serviceBusQueueName = configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
-                await serviceBusService.SendMessage(serviceBusQueueName ?? throw new ArgumentNullException(serviceBusQueueName), new BillingFileGenerationMessage() { ApprovedBy = userName, CalculatorRunId = runId, MessageType = CommonResources.BillingMessageType });
+                var serviceBusQueueName = configuration.GetSection("ServiceBus").GetSection("QueueName").Value
+                                          ?? throw new ConfigurationErrorsException("Service Bus Queue Name is not set.");
+
+                var serviceBusMessage = new BillingFileGenerationMessage
+                {
+                    CalculatorRunId = runId,
+                    ApprovedBy = userName
+                };
+
+                await serviceBusService.SendMessage(serviceBusQueueName, serviceBusMessage);
             }
 
             return new ObjectResult(serviceProcessResponseDto.Message)

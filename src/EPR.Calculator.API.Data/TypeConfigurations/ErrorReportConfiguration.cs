@@ -1,11 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EPR.Calculator.API.Data.TypeConfigurations;
 
-[ExcludeFromCodeCoverage]
 public class ErrorReportConfiguration : IEntityTypeConfiguration<ErrorReport>
 {
     public void Configure(EntityTypeBuilder<ErrorReport> builder)
@@ -22,7 +20,7 @@ public class ErrorReportConfiguration : IEntityTypeConfiguration<ErrorReport>
         builder.Property(e => e.CreatedBy).HasColumnName("created_by").HasMaxLength(400).IsRequired();
 
         builder.HasOne(e => e.CalculatorRun)
-        .WithMany(r => r.ErrorReports)
-        .HasForeignKey(e => e.CalculatorRunId);
+            .WithMany(r => r.ErrorReports)
+            .HasForeignKey(e => e.CalculatorRunId);
     }
 }

@@ -1,17 +1,16 @@
-﻿namespace EPR.Calculator.API.Data.DataModels
+﻿namespace EPR.Calculator.API.Data.DataModels;
+
+public class DefaultParameterSettingDetail
 {
-    public class DefaultParameterSettingDetail
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
+    public int DefaultParameterSettingMasterId { get; set; }
+    public required string ParameterUniqueReferenceId { get; set; }
+    public decimal ParameterValue { get; set; }
 
-        public int DefaultParameterSettingMasterId { get; set; }
+    #region EF navigational properties
 
-        public DefaultParameterSettingMaster? DefaultParameterSettingMaster { get; set; }
+    public virtual DefaultParameterSettingMaster DefaultParameterSettingMaster { get; set; } = null!;
+    public virtual DefaultParameterTemplateMaster ParameterUniqueReference { get; set; } = null!;
 
-        public required string ParameterUniqueReferenceId { get; set; }
-
-        public DefaultParameterTemplateMaster? ParameterUniqueReference { get; set; }
-
-        public decimal ParameterValue { get; set; }
-    }
+    #endregion
 }

@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using EPR.Calculator.API.Data.Models;
 
 namespace EPR.Calculator.API.Dtos
 {

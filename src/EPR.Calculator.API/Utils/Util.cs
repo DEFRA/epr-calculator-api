@@ -1,11 +1,7 @@
-﻿using System;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Text;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
-using Microsoft.Extensions.Primitives;
-using Microsoft.OpenApi.Models;
 
 namespace EPR.Calculator.API.Utils
 {
@@ -136,37 +132,25 @@ namespace EPR.Calculator.API.Utils
             return sb.ToString();
         }
 
-        public static bool IsTonnage(DefaultParameterTemplateMaster defaultTemplate)
+        private static bool IsTonnage(DefaultParameterTemplateMaster defaultTemplate)
         {
             return defaultTemplate.ParameterType.Contains("tonnage", StringComparison.OrdinalIgnoreCase)
                 && !defaultTemplate.ParameterCategory.Contains("amount", StringComparison.OrdinalIgnoreCase)
                 && !defaultTemplate.ParameterCategory.Contains("percent", StringComparison.OrdinalIgnoreCase);
         }
 
-        public static bool IsTonnageAmountIncrease(DefaultParameterTemplateMaster defaultTemplate)
-        {
-            return defaultTemplate.ParameterType.Contains("tonnage", StringComparison.OrdinalIgnoreCase)
-                && defaultTemplate.ParameterCategory.Contains("amount increase", StringComparison.OrdinalIgnoreCase);
-        }
-
-        public static bool IsTonnageAmountDecrease(DefaultParameterTemplateMaster defaultTemplate)
-        {
-            return defaultTemplate.ParameterType.Contains("tonnage", StringComparison.OrdinalIgnoreCase)
-                && defaultTemplate.ParameterCategory.Contains("amount decrease", StringComparison.OrdinalIgnoreCase);
-        }
-
-        public static bool IsFactor(DefaultParameterTemplateMaster defaultTemplate)
+        private static bool IsFactor(DefaultParameterTemplateMaster defaultTemplate)
         {
             return defaultTemplate.ParameterType.Contains("factor", StringComparison.OrdinalIgnoreCase)
                 && defaultTemplate.ParameterCategory.Contains("factor", StringComparison.OrdinalIgnoreCase);
         }
 
-        public static bool IsBadDebt(DefaultParameterTemplateMaster defaultTemplate)
+        private static bool IsBadDebt(DefaultParameterTemplateMaster defaultTemplate)
         {
             return defaultTemplate.ParameterType.Contains("bad debt", StringComparison.OrdinalIgnoreCase);
         }
 
-        public static bool IsPercentageIncrease(DefaultParameterTemplateMaster defaultTemplate)
+        private static bool IsPercentageIncrease(DefaultParameterTemplateMaster defaultTemplate)
         {
             return ((!string.IsNullOrEmpty(defaultTemplate.ParameterCategory)
                 && defaultTemplate.ParameterCategory.Contains("percent", StringComparison.OrdinalIgnoreCase)) ||
@@ -175,7 +159,7 @@ namespace EPR.Calculator.API.Utils
                 defaultTemplate.ValidRangeFrom >= 0;
         }
 
-        public static bool IsPercentageDecrease(DefaultParameterTemplateMaster defaultTemplate)
+        private static bool IsPercentageDecrease(DefaultParameterTemplateMaster defaultTemplate)
         {
             return ((!string.IsNullOrEmpty(defaultTemplate.ParameterCategory)
                 && defaultTemplate.ParameterCategory.Contains("percent", StringComparison.OrdinalIgnoreCase)) ||
@@ -184,7 +168,7 @@ namespace EPR.Calculator.API.Utils
                 defaultTemplate.ValidRangeFrom < 0;
         }
 
-        public static bool IsNotPercentage(DefaultParameterTemplateMaster defaultTemplate)
+        private static bool IsNotPercentage(DefaultParameterTemplateMaster defaultTemplate)
         {
             return !string.IsNullOrEmpty(defaultTemplate.ParameterCategory)
                 && !defaultTemplate.ParameterCategory.Contains("percent", StringComparison.OrdinalIgnoreCase)

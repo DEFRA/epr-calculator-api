@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Utils;
 
@@ -99,7 +100,7 @@ namespace EPR.Calculator.API.Validators
         }
 
         private static string ValidateTotalCosts(
-            Data.DataModels.LapcapDataTemplateMaster lapcapTemplate,
+            LapcapDataTemplateMaster lapcapTemplate,
             IEnumerable<LapcapDataTemplateValueDto> matchingLapcapData,
             string country,
             string material,

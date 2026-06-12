@@ -1,16 +1,14 @@
+using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
+
 namespace EPR.Calculator.API.UnitTests.Dtos
 {
-    using System;
-    using AutoFixture;
-    using EPR.Calculator.API.Dtos;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     [TestClass]
     public class RelativeYearDtoTests
     {
         public RelativeYearDtoTests()
         {
-            this.Fixture = new Fixture();
+            this.Fixture = TestFixtures.New();
             this.Value = this.Fixture.Create<int>();
             this.Description = this.Fixture.Create<string>();
             this.TestClass = new RelativeYearDto
