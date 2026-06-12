@@ -8,7 +8,7 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
 {
     public void Configure(EntityTypeBuilder<CalculatorRun> builder)
     {
-        builder.HasIndex(e => new { e.CalculatorRunClassificationId, e.RelativeYear, e.IsBillingFileGenerating, e.Id })
+        builder.HasIndex(e => new { e.CalculatorRunClassificationId, e.RelativeYear, e.BillingRunStatus, e.Id })
             .HasDatabaseName("IX_index_calculator_run")
             .IncludeProperties(e => new
             {
