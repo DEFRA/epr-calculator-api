@@ -61,7 +61,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 LapcapDataMasterId = 1,
                 DefaultParameterSettingMasterId = 1,
                 RelativeYear = new RelativeYear(2024),
-                IsBillingFileGenerating = true,
+                BillingRunStatus = BillingRunStatus.Running
             });
             this.context.SaveChanges();
 
