@@ -49,5 +49,10 @@ public class DefaultParameterSettingMasterConfiguration : IEntityTypeConfigurati
         builder.HasMany(e => e.RunDetails)
             .WithOne(e => e.DefaultParameterSettingMaster)
             .HasForeignKey(e => e.DefaultParameterSettingMasterId);
+
+        builder.HasIndex(x => x.RelativeYear)
+            .IsUnique()
+            .HasFilter("effective_to IS NULL")
+            .HasDatabaseName("UX_default_parameter_setting_master_active_relative_year");
     }
 }
