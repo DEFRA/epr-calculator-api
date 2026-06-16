@@ -13,12 +13,10 @@ namespace EPR.Calculator.API.Exceptions
         };
 
         private readonly ILogger<GlobalExceptionHandler> logger;
-        private readonly IHostEnvironment env;
 
-        public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IHostEnvironment env)
+        public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
         {
             this.logger = logger;
-            this.env = env;
         }
 
         public async ValueTask<bool> TryHandleAsync(
@@ -26,17 +24,16 @@ namespace EPR.Calculator.API.Exceptions
             Exception exception,
             CancellationToken cancellationToken)
         {
-            this.logger.LogError(exception, "An unexpected error occurred.");
+            var errorMessage = "An unexpected error occurred.";
+            logger.LogError(exception, errorMessage);
             httpContext.Response.ContentType = "application/json";
             httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
             var errorResponse = new
             {
                 Status = httpContext.Response.StatusCode,
-                Title = CommonResources.AnErrorProcessingYourRequest,
-                exception.Message,
-                Instance = httpContext.Request.Path,
-                Detail = this.env.IsDevelopment() || (this.env.EnvironmentName?.Equals(CommonResources.Local, StringComparison.OrdinalIgnoreCase) ?? false) ? exception.StackTrace : null,
+                Message = errorMessage,
+                Instance = httpContext.Request.Path
             };
 
             var errorJson = JsonSerializer.Serialize(errorResponse, Options);

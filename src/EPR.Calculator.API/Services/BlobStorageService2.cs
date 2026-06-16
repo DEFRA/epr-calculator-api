@@ -46,34 +46,17 @@ namespace EPR.Calculator.API.Services
             var sourceBlob = sourceContainerClient.GetBlobClient(blobName);
             var destBlob = destContainerClient.GetBlobClient(blobName);
 
-            try
-            {
-                var copyOperation = await destBlob.StartCopyFromUriAsync(sourceBlob.Uri);
-                await copyOperation.WaitForCompletionAsync();
+            var copyOperation = await destBlob.StartCopyFromUriAsync(sourceBlob.Uri);
+            await copyOperation.WaitForCompletionAsync();
 
-                return copyOperation.HasCompleted;
-            }
-            catch (Exception e)
-            {
-                this.telemetryClient.TrackTrace(string.Format(CommonResources.ExceptionCopyingBlob, blobName, e.Message));
-                return false;
-            }
+            return copyOperation.HasCompleted;
         }
 
         public async Task<bool> DeleteBlobAsync(string container, string blobName)
         {
             var containerClient = this.blobServiceClient.GetBlobContainerClient(container);
             var blobClient = containerClient.GetBlobClient(blobName);
-
-            try
-            {
-                return await blobClient.DeleteIfExistsAsync();
-            }
-            catch (Exception e)
-            {
-                this.telemetryClient.TrackTrace(string.Format(CommonResources.ExceptionCopyingBlob, blobName, e.Message));
-                return false;
-            }
+            return await blobClient.DeleteIfExistsAsync();
         }
     }
 }

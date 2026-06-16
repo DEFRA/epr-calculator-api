@@ -33,28 +33,21 @@ namespace EPR.Calculator.API.Controllers
                 return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            try
-            {
-                var serviceProcessResponseDto = await billingFileService.GetProducerBillingInstructionsAsync(
-                    runId,
-                    requestDto,
-                    cancellationToken).ConfigureAwait(false);
+            var serviceProcessResponseDto = await billingFileService.GetProducerBillingInstructionsAsync(
+                runId,
+                requestDto,
+                cancellationToken).ConfigureAwait(false);
 
-                if (serviceProcessResponseDto == null)
+            if (serviceProcessResponseDto == null)
+            {
+                return this.NotFound(new ErrorDto
                 {
-                    return this.NotFound(new ErrorDto
-                    {
-                        Message = CommonResources.RunNotFound,
-                        Description = CommonResources.RunNotFound,
-                    });
-                }
+                    Message = CommonResources.RunNotFound,
+                    Description = CommonResources.RunNotFound,
+                });
+            }
 
-                return this.Ok(serviceProcessResponseDto);
-            }
-            catch (Exception)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            return this.Ok(serviceProcessResponseDto); 
         }
     }
 }

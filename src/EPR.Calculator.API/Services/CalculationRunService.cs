@@ -32,36 +32,28 @@ public class CalculationRunService : ICalculationRunService
 
     public async Task<List<ClassifiedCalculatorRunDto>> GetDesignatedRunsByFinanialYear(RelativeYear relativeYear, CancellationToken cancellationToken = default)
     {
-        try
-        {
-            var runs = await
-                (from run in this.context.CalculatorRuns
-                 join classification in this.context.CalculatorRunClassifications
-                     on run.CalculatorRunClassificationId equals classification.Id
-                 join calculatorRunBillingFileMetadata in this.context.CalculatorRunBillingFileMetadata
-                            on run.Id equals calculatorRunBillingFileMetadata.CalculatorRunId into billingFileMetadataGroup
-                 from billingFileMetadata in billingFileMetadataGroup.DefaultIfEmpty()
-                 where run.RelativeYear == relativeYear && this.wantedClassificationIds.Contains(run.CalculatorRunClassificationId)
-                 select new ClassifiedCalculatorRunDto
-                 {
-                     RunId = run.Id,
-                     CreatedAt = run.CreatedAt,
-                     RunName = run.Name,
-                     RunClassificationId = run.CalculatorRunClassificationId,
-                     RunClassificationStatus = classification.Status,
-                     UpdatedAt = run.UpdatedAt,
-                     BillingFileAuthorisedBy = billingFileMetadata != null ? billingFileMetadata.BillingFileAuthorisedBy : string.Empty,
-                     BillingFileAuthorisedDate = billingFileMetadata != null ? billingFileMetadata.BillingFileAuthorisedDate : null,
-                 })
-                .AsNoTracking()
-                .ToListAsync(cancellationToken);
+        var runs = await
+            (from run in this.context.CalculatorRuns
+                join classification in this.context.CalculatorRunClassifications
+                    on run.CalculatorRunClassificationId equals classification.Id
+                join calculatorRunBillingFileMetadata in this.context.CalculatorRunBillingFileMetadata
+                        on run.Id equals calculatorRunBillingFileMetadata.CalculatorRunId into billingFileMetadataGroup
+                from billingFileMetadata in billingFileMetadataGroup.DefaultIfEmpty()
+                where run.RelativeYear == relativeYear && this.wantedClassificationIds.Contains(run.CalculatorRunClassificationId)
+                select new ClassifiedCalculatorRunDto
+                {
+                    RunId = run.Id,
+                    CreatedAt = run.CreatedAt,
+                    RunName = run.Name,
+                    RunClassificationId = run.CalculatorRunClassificationId,
+                    RunClassificationStatus = classification.Status,
+                    UpdatedAt = run.UpdatedAt,
+                    BillingFileAuthorisedBy = billingFileMetadata != null ? billingFileMetadata.BillingFileAuthorisedBy : string.Empty,
+                    BillingFileAuthorisedDate = billingFileMetadata != null ? billingFileMetadata.BillingFileAuthorisedDate : null,
+                })
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
 
-            return runs;
-        }
-        catch (Exception exception)
-        {
-            this.logger.LogError(exception, "An error occurred whilst attempting to get designated calculator runs for relative year {RelativeYear}.", relativeYear);
-            throw new DataRetrievalException($"An error occurred whilst attempting to get designated calculator runs for relative year {relativeYear}.", exception);
-        }
+        return runs;
     }
 }

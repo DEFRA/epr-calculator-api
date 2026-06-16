@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
@@ -42,55 +42,44 @@ namespace EPR.Calculator.API.Services
             ProduceBillingInstuctionRequestDto produceBillingInstuctionRequestDto,
             CancellationToken cancellationToken)
         {
-            try
-            {
-                var calculatorRun = await applicationDBContext.CalculatorRuns
-                            .SingleOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatusForBillingInstructions().Contains(x.CalculatorRunClassificationId), cancellationToken)
-                            .ConfigureAwait(false);
+            var calculatorRun = await applicationDBContext.CalculatorRuns
+                        .SingleOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatusForBillingInstructions().Contains(x.CalculatorRunClassificationId), cancellationToken)
+                        .ConfigureAwait(false);
 
-                if (calculatorRun is null)
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = CommonResources.InvalidRunId,
-                    };
-                }
-
-                var rows = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                            .Where(x => produceBillingInstuctionRequestDto.OrganisationIds.Contains(x.ProducerId) && x.CalculatorRunId == runId)
-                            .ToListAsync(cancellationToken)
-                            .ConfigureAwait(false);
-
-                if (rows.Count < produceBillingInstuctionRequestDto.OrganisationIds.Count())
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = CommonResources.InvalidOrganisationId,
-                    };
-                }
-
-                foreach (var row in rows)
-                {
-                    UpdateBillingInstruction(userName, produceBillingInstuctionRequestDto, row);
-                }
-
-                await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                return new ServiceProcessResponseDto
-                {
-                    StatusCode = HttpStatusCode.NoContent,
-                };
-            }
-            catch (Exception exception)
+            if (calculatorRun is null)
             {
                 return new ServiceProcessResponseDto
                 {
-                    StatusCode = HttpStatusCode.InternalServerError,
-                    Message = exception.Message,
+                    StatusCode = HttpStatusCode.UnprocessableContent,
+                    Message = CommonResources.InvalidRunId,
                 };
             }
+
+            var rows = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
+                        .Where(x => produceBillingInstuctionRequestDto.OrganisationIds.Contains(x.ProducerId) && x.CalculatorRunId == runId)
+                        .ToListAsync(cancellationToken)
+                        .ConfigureAwait(false);
+
+            if (rows.Count < produceBillingInstuctionRequestDto.OrganisationIds.Count())
+            {
+                return new ServiceProcessResponseDto
+                {
+                    StatusCode = HttpStatusCode.UnprocessableContent,
+                    Message = CommonResources.InvalidOrganisationId,
+                };
+            }
+
+            foreach (var row in rows)
+            {
+                UpdateBillingInstruction(userName, produceBillingInstuctionRequestDto, row);
+            }
+
+            await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            return new ServiceProcessResponseDto
+            {
+                StatusCode = HttpStatusCode.NoContent,
+            };
         }
 
         public async Task<bool> MoveBillingJsonFile(int runId, CancellationToken cancellationToken)
@@ -221,47 +210,36 @@ namespace EPR.Calculator.API.Services
             string userName,
             CancellationToken cancellationToken)
         {
-            try
-            {
-                var calculatorRun = await applicationDBContext.CalculatorRuns
-                            .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken)
-                            .ConfigureAwait(false);
+            var calculatorRun = await applicationDBContext.CalculatorRuns
+                        .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken)
+                        .ConfigureAwait(false);
 
-                if (calculatorRun is null)
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = CommonResources.InvalidRunId,
-                    };
-                }
-
-                if (!ValidateRunForAcceptAllBillingInstructions(calculatorRun))
-                {
-                    return new ServiceProcessResponseDto
-                    {
-                        StatusCode = HttpStatusCode.UnprocessableContent,
-                        Message = CommonResources.InvalidRunStatusForAcceptAll,
-                    };
-                }
-
-                calculatorRun.IsBillingFileGenerating = true;
-
-                await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                return new ServiceProcessResponseDto
-                {
-                    StatusCode = HttpStatusCode.OK,
-                };
-            }
-            catch (Exception exception)
+            if (calculatorRun is null)
             {
                 return new ServiceProcessResponseDto
                 {
-                    StatusCode = HttpStatusCode.InternalServerError,
-                    Message = exception.Message,
+                    StatusCode = HttpStatusCode.UnprocessableContent,
+                    Message = CommonResources.InvalidRunId,
                 };
             }
+
+            if (!ValidateRunForAcceptAllBillingInstructions(calculatorRun))
+            {
+                return new ServiceProcessResponseDto
+                {
+                    StatusCode = HttpStatusCode.UnprocessableContent,
+                    Message = CommonResources.InvalidRunStatusForAcceptAll,
+                };
+            }
+
+            calculatorRun.IsBillingFileGenerating = true;
+
+            await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            return new ServiceProcessResponseDto
+            {
+                StatusCode = HttpStatusCode.OK,
+            };
         }
 
         public async Task<bool?> IsBillingFileGeneratedLatest(int runId, CancellationToken cancellationToken)

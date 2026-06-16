@@ -97,11 +97,10 @@ namespace EPR.Calculator.API.Controllers
                     await this.context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
-                catch (Exception exception)
+                catch (Exception)
                 {
                     await transaction.RollbackAsync();
-                    this._telemetryClient.TrackTrace(string.Format(CommonResources.InternalServerErrorException, exception));
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                    throw;
                 }
             }
 
@@ -120,32 +119,26 @@ namespace EPR.Calculator.API.Controllers
                 return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
             }
 
-            try
+            
+            var relativeYear = await this.context.FindRelativeYearAsync(relativeYearValue);
+            if (relativeYear == null)
             {
-                var relativeYear = await this.context.FindRelativeYearAsync(relativeYearValue);
-                if (relativeYear == null)
-                {
-                    return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
-                }
-
-                var currentDefaultSetting = await this.context.DefaultParameterSettings
-                    .Include(x => x.Details)
-                    .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.RelativeYear == relativeYearValue);
-
-                if (currentDefaultSetting == null)
-                {
-                    return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
-                }
-
-                var templateDetails = await this.context.DefaultParameterTemplateMasterList.ToListAsync();
-
-                var schemeParameters = CreateDefaultParameterSettingMapper.Map(currentDefaultSetting, templateDetails);
-                return new ObjectResult(schemeParameters) { StatusCode = StatusCodes.Status200OK };
+                return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
             }
-            catch (Exception exception)
+
+            var currentDefaultSetting = await this.context.DefaultParameterSettings
+                .Include(x => x.Details)
+                .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.RelativeYear == relativeYearValue);
+
+            if (currentDefaultSetting == null)
             {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
             }
+
+            var templateDetails = await this.context.DefaultParameterTemplateMasterList.ToListAsync();
+
+            var schemeParameters = CreateDefaultParameterSettingMapper.Map(currentDefaultSetting, templateDetails);
+            return new ObjectResult(schemeParameters) { StatusCode = StatusCodes.Status200OK };
         }
     }
 }

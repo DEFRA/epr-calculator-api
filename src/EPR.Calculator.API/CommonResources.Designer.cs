@@ -79,15 +79,6 @@ namespace EPR.Calculator.API {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to An unexpected error occurred..
-        /// </summary>
-        public static string AnUnexpectedErrorOccurred {
-            get {
-                return ResourceManager.GetString("AnUnexpectedErrorOccurred", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Billing file is not the latest one..
         /// </summary>
         public static string BillingFileOutdated {
@@ -249,14 +240,6 @@ namespace EPR.Calculator.API {
             }
         }
 
-        /// <summary>
-        ///   Looks up a localized string similar to An error occurred while downloading the file: {0}.
-        /// </summary>
-        public static string DownloadFileError {
-            get {
-                return ResourceManager.GetString("DownloadFileError", resourceCulture);
-            }
-        }
 
         /// <summary>
         ///   Looks up a localized string similar to Enter the {0} for {1}.
@@ -309,15 +292,6 @@ namespace EPR.Calculator.API {
         public static string EnterTotalCosts {
             get {
                 return ResourceManager.GetString("EnterTotalCosts", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Exception copying blob for: {0} with exception :{1}.
-        /// </summary>
-        public static string ExceptionCopyingBlob {
-            get {
-                return ResourceManager.GetString("ExceptionCopyingBlob", resourceCulture);
             }
         }
 

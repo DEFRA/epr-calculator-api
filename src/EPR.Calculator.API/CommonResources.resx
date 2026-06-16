@@ -120,9 +120,6 @@
   <data name="BillingMessageType" xml:space="preserve">
     <value>Billing</value>
   </data>
-  <data name="BlobNotFoundErrorMessage" xml:space="preserve">
-    <value>Blob not found for this '{0}' run id to perform requested operation.</value>
-  </data>
   <data name="CalculationAlreadyRunning" xml:space="preserve">
     <value>The calculator is currently running. You will be able to run another calculation once the current one has finished.</value>
   </data>
@@ -212,9 +209,6 @@
   </data>
   <data name="OctetStream" xml:space="preserve">
     <value>application/octet-stream</value>
-  </data>
-  <data name="DownloadFileError" xml:space="preserve">
-    <value>An error occurred while downloading the file: {0}</value>
   </data>
   <data name="IncorrectBlobUriFormat" xml:space="preserve">
     <value>Blob Uri is not in correct format.</value>
@@ -360,9 +354,6 @@
   <data name="InternalServerErrorException" xml:space="preserve">
     <value>500InternalServerError Exception :{0}</value>
   </data>
-  <data name="ExceptionCopyingBlob" xml:space="preserve">
-    <value>Exception copying blob for: {0} with exception :{1}</value>
-  </data>
   <data name="ExpectingParameterType" xml:space="preserve">
     <value>Expecting only One with Parameter Type {0}</value>
   </data>
@@ -401,12 +392,6 @@
   </data>
   <data name="InvalidRunClassifications" xml:space="preserve">
     <value>Invalid run classifications.</value>
-  </data>
-  <data name="AnUnexpectedErrorOccurred" xml:space="preserve">
-    <value>An unexpected error occurred.</value>
-  </data>
-  <data name="AnErrorProcessingYourRequest" xml:space="preserve">
-    <value>An error occurred while processing your request.</value>
   </data>
   <data name="RelativeYearNotInDatabase" xml:space="preserve">
     <value>Relative year not found in the database.</value>

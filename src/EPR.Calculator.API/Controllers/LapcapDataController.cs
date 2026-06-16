@@ -96,11 +96,10 @@ namespace EPR.Calculator.API.Controllers
                     await this.context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
-                catch (Exception exception)
+                catch (Exception)
                 {
                     await transaction.RollbackAsync();
-                    this._telemetryClient.TrackTrace(string.Format(CommonResources.InternalServerErrorException, exception));
-                    return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
+                    throw;
                 }
             }
 
@@ -149,16 +148,9 @@ namespace EPR.Calculator.API.Controllers
                 return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
             }
 
-            try
-            {
-                var lapcaptemplateDetails = await this.context.LapcapDataTemplateMaster.ToListAsync();
-                var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(lapcapDataMaster, lapcaptemplateDetails);
-                return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
-            }
-            catch (Exception exception)
-            {
-                return this.StatusCode(StatusCodes.Status500InternalServerError, exception);
-            }
+            var lapcaptemplateDetails = await this.context.LapcapDataTemplateMaster.ToListAsync();
+            var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(lapcapDataMaster, lapcaptemplateDetails);
+            return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
         }
     }
 }

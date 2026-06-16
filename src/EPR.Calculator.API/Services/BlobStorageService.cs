@@ -37,16 +37,9 @@ namespace EPR.Calculator.API.Services
                 return Results.NotFound(fileName);
             }
 
-            try
-            {
-                var downloadResult = await blobClient.DownloadContentAsync();
-                var content = downloadResult.Value.Content.ToString();
-                return Results.File(Encoding.Unicode.GetBytes(content), CommonResources.OctetStream, fileName);
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem(string.Format(CommonResources.DownloadFileError, ex.Message));
-            }
+            var downloadResult = await blobClient.DownloadContentAsync();
+            var content = downloadResult.Value.Content.ToString();
+            return Results.File(Encoding.Unicode.GetBytes(content), CommonResources.OctetStream, fileName);
         }
 
         private BlobClient GetBlobClient(string fileName, string blobUri)

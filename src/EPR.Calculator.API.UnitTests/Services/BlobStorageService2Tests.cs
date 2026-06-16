@@ -92,7 +92,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task CopyBlobAsync_ReturnsFalse_WhenCopyThrows()
+        public async Task CopyBlobAsync_ThrowsError_WhenCopyThrows()
         {
             // Arrange
             var sourceContainer = "source";
@@ -112,10 +112,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 .ThrowsAsync(new Exception("Copy failed"));
 
             // Act
-            var result = await this.blobStorageService2.CopyBlobAsync(sourceContainer, destContainer, blobName);
-
-            // Assert
-            Assert.IsFalse(result);
+            await Assert.ThrowsAsync<Exception>(async () => await this.blobStorageService2.CopyBlobAsync(sourceContainer, destContainer, blobName));
         }
 
         [TestMethod]
@@ -141,7 +138,7 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task DeleteBlobAsync_ReturnsFalse_WhenDeleteThrows()
+        public async Task DeleteBlobAsync_ThrowsError_WhenDeleteThrows()
         {
             // Arrange
             var container = "source";
@@ -154,10 +151,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             this.mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(container)).Returns(this.mockSourceContainerClient.Object);
 
             // Act
-            var result = await this.blobStorageService2.DeleteBlobAsync(container, blobName);
-
-            // Assert
-            Assert.IsFalse(result);
+            await Assert.ThrowsAsync<Exception>(async () => await this.blobStorageService2.DeleteBlobAsync(container, blobName));
         }
     }
 }

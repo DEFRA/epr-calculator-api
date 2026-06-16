@@ -192,7 +192,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task Create_Calculator_Run_Return_500_If_ConnectionString_Configuration_Is_Empty()
+        public async Task Create_Calculator_Run_Throw_Error_If_ConnectionString_Configuration_Is_Empty()
         {
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
@@ -254,16 +254,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 HttpContext = context,
             };
 
-            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
-            var actionResultValue = actionResult?.Value as ConfigurationErrorsException;
-
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(500, actionResult.StatusCode);
-            Assert.AreEqual("Configuration item not found: ServiceBus__ConnectionString", actionResultValue?.Message);
+            await Assert.ThrowsAsync<ConfigurationErrorsException>(async () => await CalculatorController.Create(createCalculatorRunDto));
         }
 
         [TestMethod]
-        public async Task Create_Calculator_Run_Return_500_If_QueueName_Configuration_Is_Empty()
+        public async Task Create_Calculator_Run_Throw_Error_If_QueueName_Configuration_Is_Empty()
         {
             var createCalculatorRunDto = new CreateCalculatorRunDto
             {
@@ -324,12 +319,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 HttpContext = context,
             };
 
-            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
-            var actionResultValue = actionResult?.Value as ConfigurationErrorsException;
-
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(500, actionResult.StatusCode);
-            Assert.AreEqual("Configuration item not found: ServiceBus__QueueName", actionResultValue?.Message);
+            await Assert.ThrowsAsync<ConfigurationErrorsException>(async () => await CalculatorController.Create(createCalculatorRunDto));
         }
 
         [TestMethod]
@@ -608,7 +598,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task ClassificationByRelativeYear_Returns_InternalServerError_On_Exception()
+        public async Task ClassificationByRelativeYear_Returns_Throws_On_Exception()
         {
             // Arrange
             var relativeYear = new RelativeYear(2024);
@@ -630,12 +620,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IBillingFileService>());
 
             // Act
-            var actionResult = await controller.ClassificationByRelativeYear(request) as ObjectResult;
-
-            // Assert
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(StatusCodes.Status500InternalServerError, actionResult.StatusCode);
-            Assert.AreEqual("An unexpected error occurred.", actionResult.Value);
+            await Assert.ThrowsAsync<Exception>(async () => await controller.ClassificationByRelativeYear(request));
         }
 
         private ApplicationDBContext GetDbContextForCalculatorRunClassifications()
