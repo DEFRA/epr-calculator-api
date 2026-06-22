@@ -53,5 +53,10 @@ public class LapcapDataMasterConfiguration : IEntityTypeConfiguration<LapcapData
         builder.HasMany(e => e.RunDetails)
             .WithOne(e => e.LapcapDataMaster)
             .HasForeignKey(e => e.LapcapDataMasterId);
+
+        builder.HasIndex(x => x.RelativeYear)
+            .IsUnique()
+            .HasFilter("effective_to IS NULL")
+            .HasDatabaseName("UX_lapcap_data_master_active_relative_year");
     }
 }
