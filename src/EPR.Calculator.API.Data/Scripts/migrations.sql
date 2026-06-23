@@ -8366,3 +8366,55 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260616144420_AddActiveDefaultParameterAndLapcapConstraint'
+)
+BEGIN
+    DROP INDEX [IX_lapcap_data_master_relative_year] ON [lapcap_data_master];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260616144420_AddActiveDefaultParameterAndLapcapConstraint'
+)
+BEGIN
+    DROP INDEX [IX_default_parameter_setting_master_relative_year] ON [default_parameter_setting_master];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260616144420_AddActiveDefaultParameterAndLapcapConstraint'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [UX_lapcap_data_master_active_relative_year] ON [lapcap_data_master] ([relative_year]) WHERE effective_to IS NULL');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260616144420_AddActiveDefaultParameterAndLapcapConstraint'
+)
+BEGIN
+    EXEC(N'CREATE UNIQUE INDEX [UX_default_parameter_setting_master_active_relative_year] ON [default_parameter_setting_master] ([relative_year]) WHERE effective_to IS NULL');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260616144420_AddActiveDefaultParameterAndLapcapConstraint'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260616144420_AddActiveDefaultParameterAndLapcapConstraint', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
