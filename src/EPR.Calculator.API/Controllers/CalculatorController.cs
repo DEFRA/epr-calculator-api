@@ -1,4 +1,4 @@
-﻿using System.Configuration;
+using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -147,6 +147,7 @@ namespace EPR.Calculator.API.Controllers
                 CalculatorRunClassificationId = (int)RunClassification.RUNNING,
                 DefaultParameterSettingMasterId = activeDefaultParameterSettingsMaster.Id,
                 LapcapDataMasterId = activeLapcapDataMaster.Id,
+                BillingRunStatus = BillingRunStatus.None
             };
 
             using (var transaction = await this.context.Database.BeginTransactionAsync())
@@ -196,22 +197,20 @@ namespace EPR.Calculator.API.Controllers
             }
 
             var calculatorRuns = await (from run in this.context.CalculatorRuns
-                    join bill in this.context.CalculatorRunBillingFileMetadata on run.Id equals bill.CalculatorRunId
-                    into billFile
                     where run.RelativeYear == request.RelativeYear
-                                select new
-                                {
-                                    run.Id,
-                                    run.Name,
-                                    run.RelativeYear,
-                                    run.CreatedAt,
-                                    run.CreatedBy,
-                                    run.CalculatorRunClassificationId,
-                                    HasBillingFileGenerated = billFile.Any(),
-                                    run.IsBillingFileGenerating,
-                                })
-                    .OrderByDescending(run => run.CreatedAt)
-                    .ToListAsync();
+                    select new
+                    {
+                        run.Id,
+                        run.Name,
+                        run.RelativeYear,
+                        run.CreatedAt,
+                        run.CreatedBy,
+                        run.CalculatorRunClassificationId,
+                        HasBillingFileGenerated = run.BillingRunStatus == BillingRunStatus.Completed,
+                        IsBillingFileGenerating = run.BillingRunStatus == BillingRunStatus.Running
+                    })
+                .OrderByDescending(run => run.CreatedAt)
+                .ToListAsync();
 
             if (calculatorRuns.Count == 0)
             {
