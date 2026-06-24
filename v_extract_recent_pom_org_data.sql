@@ -16,6 +16,11 @@
 	Updated: 2025-10-22:	PM013:  Ticket - 624165:    Master script - Masterscript Bug -  Self-Managed Consumer Waste
 	Updated: 2025-11-06:	PM014:  Ticket - RAM M:     Master script - Adding R G A split for each RAM and RAM-M column
 	Updated: 2025-11-18:	PM015:  Ticket - 640727:    Master script - To handle BLANK value along with NULL records
+	Updated: 2026-06-24:	CF016:  Paycal compatibility - "Latest" Registration/POM submission now means latest ACCEPTED submission
+							(narrowed to GRANTED/ACCEPTED for Registration, ACCEPTED for POM), not latest regardless of status -
+							matching sp_GetPaycalPomData/sp_GetPaycalOrgData. "First" submission semantics are unchanged.
+	Updated: 2026-06-24:	CF017:  Paycal compatibility - POM tonnage pivots now exclude subsidiaries that are not Obligated
+							('O') per dbo.t_producer_obligation_determination, matching the subsidiary/submitter check Paycal applies.
 ******************************************************************************************************************************/
 TwoRow as
 (
@@ -106,6 +111,13 @@ ORG as
 			left join rpd.Nations N on N.Id = cs.NationId
 			left join [dbo].[v_submitted_pom_org_file_status] fs on fs.FileName = cd.filename
 		) A
+),
+ORG_LATEST_ACCEPTED as --CF016: latest ACCEPTED-only registration (Paycal-compatible: sp_GetPaycalPomData's latest_accepted_registration), independent of the first/QUERIED/rejected-fallback handling below
+(
+	select *
+		, row_number() over(partition by OrganisationId, ReferenceNumber, SubmissionPeriod order by Submission_time desc, Source asc, cd_organisation_size desc) as Latest_accepted_submission
+	from ORG
+	where Actual_Regulator_Status in ('GRANTED','ACCEPTED')
 ),
 ORG_REJECTED_SUBMISSION_ONLY as --YM006
 (
@@ -212,21 +224,11 @@ f_org_sql as
 	from ORG_REJECTED_WITH_OUT_PENDING_ACCEPTED 
 	where Last_rejected_submission = 1
  ) ,
- l_org_sql as
- (select [Org ID],	Rank,	ReportingYear	,[Submission date time],	[Submitted by]	,[Submission status],	[Regulator Decision],	[Actual Regulator Decision],	[Who submitted],[CS Nation],	cd_filename,	ComplianceSchemeId,	cd_organisation_size,	cd_submission_period_code ,IsResubmission_identifier from (select a.*, row_number() over(partition by [Org ID], ReportingYear,[Rank] order by [Submission date time] desc) as Lastest_status from 
+ l_org_sql as --CF016: latest ACCEPTED-only registration, replacing the old "latest regardless of status" + QUERIED-dedup + rejected-fallback chain above (still used by f_org_sql for "first")
  (
-select ReferenceNumber as 'Org ID', SubmissionPeriod as 'Rank', ReportingYear, Submission_time as 'Submission date time', case when ComplianceSchemeId is null then 'DP' else CS_Name end as 'Submitted by',	File_Status as 'Submission status', Regulator_Status as 'Regulator Decision', Actual_Regulator_Status as 'Actual Regulator Decision',	[Who submitted], [CS Nation] , cd_filename, ComplianceSchemeId, cd_organisation_size,cd_submission_period_code,IsResubmission_identifier --YM001--YM006
-	from ORG_PENDING_ACCEPT_ONLY_UPDATED_WITH_LEAD_DUPLICATE_QUERIED_REMOVED_WITH_RANK --YM003 --YM005
-	where Last_pending_accepted_submission_updated = 1
-	union 
-	select ReferenceNumber as 'Org ID', SubmissionPeriod as 'Rank', ReportingYear, Submission_time as 'Submission date time', case when ComplianceSchemeId is null then 'DP' else CS_Name end as 'Submitted by',	File_Status as 'Submission status', Regulator_Status as 'Regulator Decision', Actual_Regulator_Status as 'Actual Regulator Decision',	[Who submitted], [CS Nation] , cd_filename, ComplianceSchemeId, cd_organisation_size,cd_submission_period_code ,IsResubmission_identifier--YM001,YM006
-	from ORG_REJECTED_WITH_OUT_PENDING_ACCEPTED_RESUB 
-	where Last_rejected_resubmission = 1
-	union 
-	select ReferenceNumber as 'Org ID', SubmissionPeriod as 'Rank', ReportingYear, Submission_time as 'Submission date time', case when ComplianceSchemeId is null then 'DP' else CS_Name end as 'Submitted by',	File_Status as 'Submission status', Regulator_Status as 'Regulator Decision', Actual_Regulator_Status as 'Actual Regulator Decision',	[Who submitted], [CS Nation] , cd_filename, ComplianceSchemeId, cd_organisation_size,cd_submission_period_code ,IsResubmission_identifier--YM001,YM006
-	from ORG_PENDING_ACCEPTED_RESUBMISSION_ONLY
-	where Last_pending_accepted_resubmission=1) a
-	) b where Lastest_status=1
+	select ReferenceNumber as 'Org ID', SubmissionPeriod as 'Rank', ReportingYear, Submission_time as 'Submission date time', case when ComplianceSchemeId is null then 'DP' else CS_Name end as 'Submitted by',	File_Status as 'Submission status', Regulator_Status as 'Regulator Decision', Actual_Regulator_Status as 'Actual Regulator Decision',	[Who submitted], [CS Nation] , cd_filename, ComplianceSchemeId, cd_organisation_size,cd_submission_period_code ,IsResubmission_identifier
+	from ORG_LATEST_ACCEPTED
+	where Latest_accepted_submission = 1
  ),
  
 POM as
@@ -291,6 +293,13 @@ POM as
 			where fs.Regulator_Status <> 'Uploaded' --YM007
 		) A
 ),
+POM_LATEST_ACCEPTED as --CF016: latest ACCEPTED-only POM submission (Paycal-compatible: sp_GetPaycalPomData's latest_accepted_pom)
+(
+	select *
+		, row_number() over(partition by OrganisationId, ReferenceNumber, SubmissionPeriod order by Submission_time desc, Source desc) as Latest_accepted_submission
+	from POM
+	where Actual_Regulator_Status = 'ACCEPTED'
+),
 POM_REJECTED_ONLY as
 (
 	select *
@@ -324,11 +333,11 @@ f_pom_sql as
 	from POM_REJECTED_WITH_OUT_PENDING_ACCEPTED 
 	where Last_rejected_submission = 1
  ),
-l_pom_sql as
+l_pom_sql as --CF016: latest ACCEPTED-only POM submission, replacing "latest among pending+accepted regardless of status" (still used by f_pom_sql for "first")
  (
 	select ReferenceNumber as 'Org ID', SubmissionPeriod as 'Rank', ReportingYear, Submission_time as 'Submission date time', case when ComplianceSchemeId is null then 'DP' else CS_Name end as 'Submitted by',	File_Status as 'Submission status', Regulator_Status as 'Regulator Decision', Actual_Regulator_Status as 'Actual Regulator Decision',	[Who submitted], [CS Nation] , pm_filename, ComplianceSchemeId, pm_organisation_size,pm_submission_period_code ,IsResubmission_identifier--YM001
-	from POM_PENDING_ACCEPT_ONLY 
-	where Last_pending_accepted_submission = 1
+	from POM_LATEST_ACCEPTED
+	where Latest_accepted_submission = 1
  ),
 Rank_On_CS_Submission_for_org_file as
 (
@@ -498,17 +507,38 @@ submission_count as
 	) A 
 	group by [Org ID],ReportingYear
 ),
+POM_Filtered as --CF017: rpd.pom rows restricted to subsidiaries with an Obligated ('O') determination for the following reporting year - matches the org_id/subsidiary_id/submitter_id check Paycal applies via dbo.t_producer_obligation_determination (sp_GetPaycalOrgData uses submission_period_year = pom year + 1)
+(
+	select pm.*
+	from rpd.pom pm
+	inner join rpd.cosmos_file_metadata cfm on cfm.FileName = pm.FileName
+	left join rpd.Organisations o on o.ReferenceNumber = pm.organisation_id
+	inner join dbo.t_producer_obligation_determination ob
+		on ob.organisation_id = pm.organisation_id
+		and ISNULL(ob.subsidiary_id,'') = ISNULL(NULLIF(TRIM(pm.subsidiary_id),''),'')
+		and ob.submitter_id = COALESCE(cfm.ComplianceSchemeId, o.ExternalId)
+		and ob.obligation_status = 'O'
+		and ob.submission_period_year =
+			(case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023','July to December 2023') then 2023
+					when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024','July to December 2024') then 2024
+					when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025','July to December 2025') then 2025
+					when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026','July to December 2026') then 2026
+					when cfm.SubmissionPeriod in ('Jan to Jun 2027','January to June 2027','July to December 2027') then 2027
+					when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028','July to December 2028') then 2028
+					else 0
+					end) + 1
+),
 agg_POM as
 (
 	select FileName,organisation_id,[CW-AL],[CW-FC],[CW-GL],[CW-OT],[CW-PC],[CW-PL],[CW-ST],[CW-WD],[HDC-AL],[HDC-FC],[HDC-GL],[HDC-OT],[HDC-PC],[HDC-PL],[HDC-ST],[HDC-WD],[HH-AL],[HH-FC],[HH-GL],[HH-OT],[HH-PC],[HH-PL],[HH-ST],[HH-WD],[NDC-AL],[NDC-FC],[NDC-GL],[NDC-OT],[NDC-PC],[NDC-PL],[NDC-ST],[NDC-WD],[NH-AL],[NH-FC],[NH-GL],[NH-OT],[NH-PC],[NH-PL],[NH-ST],[NH-WD],[OW-AL],[OW-FC],[OW-GL],[OW-OT],[OW-PC],[OW-PL],[OW-ST],[OW-WD],[PB-AL],[PB-FC],[PB-GL],[PB-OT],[PB-PC],[PB-PL],[PB-ST],[PB-WD],[RU-AL],[RU-FC],[RU-GL],[RU-OT],[RU-PC],[RU-PL],[RU-ST],[RU-WD],[SP-AL],[SP-FC],[SP-GL],[SP-OT],[SP-PC],[SP-PL],[SP-ST],[SP-WD]
 	FROM
 	(
 			select FileName, organisation_id, Packaging_type +'-'+ packaging_material as Type_Material, packaging_material_weight
-			from rpd.pom
+			from POM_Filtered
 			where Packaging_type not in ('CW','OW')
 			union all
 			select FileName, organisation_id, Packaging_type +'-'+ packaging_material as Type_Material, packaging_material_weight
-			from rpd.pom
+			from POM_Filtered
 			where Packaging_type in ('CW','OW')
 			--and (from_country is null or to_country is null)
 			and (isnull(TRIM(from_country),'') = '' or isnull(TRIM(to_country),'') = '')
@@ -525,7 +555,7 @@ agg_units_POM as
 	FROM
 	(
 			select FileName, organisation_id, Packaging_type +'-'+ packaging_material as Type_Material, packaging_material_units
-			from rpd.pom
+			from POM_Filtered
 	) as TablePivot
 	PIVOT
 	(
@@ -546,7 +576,7 @@ agg_POM_by_RAM as
 						when trim(ram_rag_rating) in ('A-M','G-M','R-M') then 'RAM-M'
 						end as Type_Material_by_RAM
 			, packaging_material_weight
-			from rpd.pom
+			from POM_Filtered
 			where ram_rag_rating is not null
 	) as TablePivot
 	PIVOT
@@ -583,7 +613,7 @@ agg_POM_by_RAM_RGA as
 						end 
 						+'-'+trim(upper(ISNULL(ram_rag_rating,''))) as Type_Material_by_RAM
 			, packaging_material_weight
-			from rpd.pom
+			from POM_Filtered
 			where ram_rag_rating is not null
 	) as TablePivot
 	PIVOT
@@ -617,8 +647,8 @@ agg_POM_by_RAM_RGA as
    FROM (select FileName, 
                 organisation_id,
 				Packaging_type +'-'+ packaging_material+'-'+ISNULL(packaging_material_subtype,'') as Type_Material, packaging_material_weight 
-    from [rpd].[Pom]
-    where Packaging_type in ('HH','PB') 
+    from POM_Filtered
+    where Packaging_type in ('HH','PB')
 	  and packaging_material in ('PL')
 	  and packaging_material_subtype in ('Rigid','Flexible') ) as TablePivot 
 PIVOT(
@@ -641,9 +671,9 @@ agg_POM_by_RAM_and_subtype as
 						when trim(ram_rag_rating) in ('A-M','G-M','R-M') then 'RAM-M'
 						end as Type_Material_by_RAM
 			, packaging_material_weight
-			from rpd.pom
+			from POM_Filtered
 			where ram_rag_rating is not null
-			and Packaging_type in ('HH','PB') 
+			and Packaging_type in ('HH','PB')
 			and packaging_material in ('PL')
 			and trim(packaging_material_subtype) in ('Rigid','Flexible')
 	) as TablePivot
@@ -677,9 +707,9 @@ agg_POM_by_RAM_and_subtype_rga as
 						end 
 						+'-'+trim(upper(ISNULL(ram_rag_rating,''))) as Type_Material_by_RAM
 			, packaging_material_weight
-			from rpd.pom
+			from POM_Filtered
 			where ram_rag_rating is not null
-			and Packaging_type in ('HH','PB') 
+			and Packaging_type in ('HH','PB')
 			and packaging_material in ('PL')
 			and trim(packaging_material_subtype) in ('Rigid','Flexible')
 	) as TablePivot
@@ -707,7 +737,7 @@ agg_transitional_packaging_units_POM as
 	FROM
 	(
 			select FileName, organisation_id, packaging_material , transitional_packaging_units
-			from rpd.pom
+			from POM_Filtered
 	) as TablePivot
 	PIVOT
 	(
