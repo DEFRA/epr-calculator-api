@@ -19,11 +19,40 @@
 	Updated: 2026-06-24:	CF016:  Paycal compatibility - "Latest" Registration/POM submission now means latest ACCEPTED submission
 							(narrowed to GRANTED/ACCEPTED for Registration, ACCEPTED for POM), not latest regardless of status -
 							matching sp_GetPaycalPomData/sp_GetPaycalOrgData. "First" submission selection semantics are unchanged.
-							Also: the join to v_submitted_pom_org_file_status now matches on cfm_FileId+FileType (as Paycal does)
-							instead of FileName, since that view dedupes by cfm_FileId - this affects the Regulator_Status/
-							Actual_Regulator_Status used by both "first" and "latest".
+							Also: the Registration (ORG) join to v_submitted_pom_org_file_status now matches on cfm_FileId+FileType
+							(as Paycal does) instead of FileName, since that view dedupes by cfm_FileId - this affects the
+							Regulator_Status/Actual_Regulator_Status used by both "first" and "latest" registration. (POM's
+							equivalent join was replaced entirely by CF020 below.)
 	Updated: 2026-06-24:	CF017:  Paycal compatibility - POM tonnage pivots now exclude subsidiaries that are not Obligated
 							('O') per dbo.t_producer_obligation_determination, matching the subsidiary/submitter check Paycal applies.
+	Updated: 2026-06-24:	CF021:  Bugfix - the CF017 obligation-status join was changed from INNER to a conditional LEFT join,
+							scoped to organisation_size='L' only. v_producer_obligation_determination.sql (which feeds
+							t_producer_obligation_determination) only ever computes obligation status for Large producers - the
+							original INNER JOIN was wrongly treating every Small/Medium producer (and any historical year not yet
+							covered by the table) as "not obligated", which a CSV diff against the original view showed was
+							collapsing total POM tonnage by ~65%. Known residual risk: Large producers in historical years the
+							table doesn't yet cover will still be wrongly excluded (t_producer_obligation_determination may be a
+							partial/stale snapshot rather than the comprehensive live v_producer_obligation_determination view -
+							querying the table instead of the view was a deliberate performance trade-off).
+	Updated: 2026-06-24:	CF018:  Performance - POM data is only needed from 2024 onwards; pre-2024 SubmissionPeriods are now
+							excluded as early as possible, reducing row counts through the rest of the POM pipeline.
+							Registration (ORG) is unaffected - still full history. (Superseded/narrowed by CF022 below.)
+	Updated: 2026-06-24:	CF022:  Performance - the consuming system only ever uses Large producer ('L') data for 2024/2025
+							reporting years; everything else is discarded downstream regardless. Both ORG (registration) and
+							POM now filter to organisation_size='L' and the relevant 2024/2025 SubmissionPeriods as early as
+							possible (narrowing CF018's broader "2024+" prune), instead of computing and discarding Small/Medium
+							producers and 2026+ periods. NOTE: this is a deliberate, scope-narrowing departure from "keep all
+							organisation sizes/years, let the system filter downstream" - revisit if that consumption pattern
+							changes.
+	Updated: 2026-06-24:	CF020:  Performance - POM's Regulator_Status/IsResubmission_identifier are now computed inline
+							(POM_submitted_file_list..POM_decision CTEs) instead of joining v_submitted_pom_org_file_status.
+							That view's null-FileId backfill (sets A/B/C) is entirely registration-only but was being paid for
+							on every POM query too, since it isn't filterable by FileType. Registration (ORG) still joins the
+							real view, unchanged. This duplicates that view's Pom-branch logic, so the two must be kept in sync
+							if v_submitted_pom_org_file_status's Pom handling changes in future.
+	Updated: 2026-06-24:	CF019:  Performance - the tonnage pivots' new obligation-status join (CF017) now only considers the
+							small set of FileNames f_pom_sql/l_pom_sql actually select (the only FileNames the final SELECT can
+							ever reference), instead of scanning/joining every POM file ever submitted.
 ******************************************************************************************************************************/
 TwoRow as
 (
@@ -113,6 +142,11 @@ ORG as
 			left join rpd.persons p on p.UserId = u.id
 			left join rpd.Nations N on N.Id = cs.NationId
 			left join [dbo].[v_submitted_pom_org_file_status] fs on fs.cfm_FileId = cfm.FileId and fs.FileType = 'CompanyDetails' --CF016: match Paycal's join key (fileid+filetype) instead of FileName - v_submitted_pom_org_file_status dedupes by cfm_FileId, so joining by FileName could land on an unrelated row whenever cfm.FileId is null for the real file
+			where cd.organisation_size = 'L' --CF022: client only uses Large producer data - prune early for performance. Also naturally keeps just the parent CompanyDetails row (subsidiary rows have organisation_size blanked out), which is all this org-level cte needs anyway
+			and cfm.SubmissionPeriod in ( --CF022: client only needs 2024/2025 reporting years - mirrors the ReportingYear CASE above (note the 'January to December 2025/2026' annual periods that also map into 2024/2025)
+				'Jan to Jun 2024','January to June 2024','January to December 2025',
+				'Jan to Jun 2025','January to June 2025','January to December 2026','July to December 2025'
+			)
 		) A
 ),
 ORG_LATEST_ACCEPTED as --CF016: latest ACCEPTED-only registration (Paycal-compatible: sp_GetPaycalPomData's latest_accepted_registration), independent of the first/QUERIED/rejected-fallback handling below
@@ -233,7 +267,100 @@ f_org_sql as
 	from ORG_LATEST_ACCEPTED
 	where Latest_accepted_submission = 1
  ),
- 
+
+POM_submitted_file_list as --CF020: mirrors v_submitted_pom_org_file_status's submitted_file_list. POM's status is computed inline here (instead of joining that view) because its null-FileId backfill (sets A/B/C) is entirely registration-only (gated on SubmissionType='Registration'/type='RegulatorRegistrationDecision') and is otherwise paid for on every query regardless of FileType - see history note above
+(
+	select distinct SubmissionId, FileId, CONVERT(DATETIME,substring(Created,1,23)) as file_submitted_ts
+	from rpd.SubmissionEvents
+	where Type in ('Submitted')
+	and Fileid is not null
+	and (IsResubmission is null or IsResubmission = 0)
+),
+POM_first_PackagingResubmissionReferenceNumberCreated as --CF020: mirrors first_PackagingResubmissionReferenceNumberCreated_entry
+(
+	select distinct SubmissionId, min(CONVERT(DATETIME,substring(Created,1,23))) as first_ts
+	from rpd.SubmissionEvents
+	where Type in ('PackagingResubmissionReferenceNumberCreated')
+	group by SubmissionId
+),
+POM_resubmitted_list as --CF020: mirrors resubmitted_POM_list
+(
+	select distinct SubmissionId, FileId, IsResubmission as POM_resubmission_identifier
+	from rpd.SubmissionEvents
+	where Type in ('Submitted')
+	and Fileid is not null
+	and IsResubmission = 1
+	union
+	select sfl.SubmissionId, sfl.FileId, 1 as POM_resubmission_identifier
+	from POM_submitted_file_list sfl
+	inner join POM_first_PackagingResubmissionReferenceNumberCreated ent
+		on sfl.SubmissionId = ent.SubmissionId
+		and sfl.file_submitted_ts >= ent.first_ts
+),
+POM_resubmission_ids as --CF020: mirrors resubmission_ids (general - not Pom-specific in the source view either, kept equivalent here)
+(
+	select IsResubmission_identifier, Fileid
+	from
+	(
+		select distinct ISNULL(IsResubmission,0) as IsResubmission_identifier, Fileid
+			, row_number() over(partition by Fileid order by CONVERT(DATETIME,substring(Created,1,23))) as rnk
+		from rpd.SubmissionEvents
+		where Type = 'Submitted'
+		and Fileid is not null
+	) A
+	where rnk = 1
+),
+POM_submitted_Fileids as --CF020: mirrors submitted_Fileids
+(
+	select distinct Fileid as submitted_Fileid, SubmissionId as SubmissionId_of_submitted_record, CONVERT(DATETIME,substring(Created,1,23)) as Submitted_ts
+	from rpd.SubmissionEvents
+	where Type = 'Submitted' and Fileid is not null
+),
+POM_app_submitted_candidates as --CF020: mirrors get_all_RegistrationApplicationSubmitted
+(
+	select sub.submitted_Fileid as app_submitted_Fileid
+		, app_sub.SubmissionId, app_sub.SubmissionEventId
+		, row_number() over(partition by app_sub.SubmissionId, app_sub.SubmissionEventId order by sub.Submitted_ts desc) as RN
+	from rpd.SubmissionEvents app_sub
+	inner join POM_submitted_Fileids sub
+		on sub.SubmissionId_of_submitted_record = app_sub.SubmissionId
+		and CONVERT(DATETIME,substring(app_sub.Created,1,23)) >= sub.Submitted_ts
+	where app_sub.Type in ('RegistrationApplicationSubmitted','PackagingResubmissionApplicationSubmitted')
+),
+POM_app_submitted as --CF020: mirrors top_matching_og_get_all_RegistrationApplicationSubmitted
+(
+	select distinct app_submitted_Fileid from POM_app_submitted_candidates where RN = 1
+),
+POM_decision_raw as --CF020: mirrors the Pom branch of v_submitted_pom_org_file_status's res CTE, minus the registration-only fileid backfill - Pom decisions always carry their own FileId directly, so no backfill is needed
+(
+	select distinct cfm.FileId
+		, cfm.Created
+		, se.Created as Decision_Date
+		, case
+			when ISNULL(rpl.POM_resubmission_identifier,0) = 1 and app_submitted.app_submitted_Fileid is not null and se.Decision is null then 'Pending'
+			when ISNULL(rpl.POM_resubmission_identifier,0) = 1 and app_submitted.app_submitted_Fileid is null and se.Decision is null then 'Uploaded'
+			when ISNULL(rpl.POM_resubmission_identifier,0) = 0 and se.Decision is null then 'Pending'
+			else se.Decision
+			end as Regulator_Status
+		, ISNULL(rid.IsResubmission_identifier,0) as IsResubmission_identifier
+	from rpd.cosmos_file_metadata cfm
+	left join rpd.SubmissionEvents se on se.FileId = cfm.FileId and se.Type = 'RegulatorPoMDecision'
+	left join POM_resubmission_ids rid on rid.Fileid = cfm.FileId
+	left join POM_resubmitted_list rpl on rpl.FileId = cfm.FileId
+	left join POM_app_submitted app_submitted on app_submitted.app_submitted_Fileid = cfm.FileId
+	where cfm.FileType = 'Pom'
+	and cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024','July to December 2024','Jan to Jun 2025','January to June 2025','July to December 2025') --CF020/CF022: same 2024/2025-only prune as the POM cte below
+),
+POM_decision as --CF020: final per-file dedup, matching v_submitted_pom_org_file_status's row_number()-over-cfm_FileId pattern
+(
+	select FileId, Regulator_Status, IsResubmission_identifier
+	from
+	(
+		select *, row_number() over(partition by FileId order by Decision_Date desc, Created desc) as RowNumber
+		from POM_decision_raw
+	) ranked
+	where RowNumber = 1
+),
 POM as
 (
 		select *
@@ -292,8 +419,10 @@ POM as
 			left join rpd.users u on u.USerId = cfm.UserId
 			left join rpd.persons p on p.UserId = u.id
 			left join rpd.Nations N on N.Id = cs.NationId
-			left join [dbo].[v_submitted_pom_org_file_status] fs on fs.cfm_FileId = cfm.FileId and fs.FileType = 'Pom' --CF016: match Paycal's join key (fileid+filetype) instead of FileName, for the same reason as the ORG cte above
+			left join POM_decision fs on fs.FileId = cfm.FileId --CF020: Pom-only status computed inline above, instead of joining v_submitted_pom_org_file_status
 			where fs.Regulator_Status <> 'Uploaded' --YM007
+			and pm.organisation_size = 'L' --CF022: client only uses Large producer data - prune early for performance
+			and cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024','July to December 2024','Jan to Jun 2025','January to June 2025','July to December 2025') --CF022: client only needs 2024/2025 POM data (narrowed from the broader 2024+ filter, CF018)
 		) A
 ),
 POM_LATEST_ACCEPTED as --CF016: latest ACCEPTED-only POM submission (Paycal-compatible: sp_GetPaycalPomData's latest_accepted_pom)
@@ -510,17 +639,23 @@ submission_count as
 	) A 
 	group by [Org ID],ReportingYear
 ),
-POM_Filtered as --CF017: rpd.pom rows restricted to subsidiaries with an Obligated ('O') determination for the following reporting year - matches the org_id/subsidiary_id/submitter_id check Paycal applies via dbo.t_producer_obligation_determination (sp_GetPaycalOrgData uses submission_period_year = pom year + 1)
+Qualifying_POM_FileNames as --CF019: the only FileNames the final SELECT ever uses (ISNULL(lps.pm_filename,fps.pm_filename)) - restricting POM_Filtered to just these avoids scanning/joining every POM file ever submitted, only the first/latest-accepted ones actually used in the output
+(
+	select pm_filename from f_pom_sql where pm_filename is not null
+	union
+	select pm_filename from l_pom_sql where pm_filename is not null
+),
+POM_Filtered as --CF017/CF021: rpd.pom rows restricted to subsidiaries with an Obligated ('O') determination for the following reporting year, for Large producers only - dbo.t_producer_obligation_determination (and v_producer_obligation_determination, which feeds it) only ever computes obligation status for organisation_size='L' (see v_producer_obligation_determination.sql), so Small/Medium producers are never subject to this check at all, matching Paycal's Large-producer-specific scope
 (
 	select pm.*
 	from rpd.pom pm
+	inner join Qualifying_POM_FileNames qfn on qfn.pm_filename = pm.FileName --CF019: prune to only the files the output can ever reference, before the expensive obligation-determination join
 	inner join rpd.cosmos_file_metadata cfm on cfm.FileName = pm.FileName
 	left join rpd.Organisations o on o.ReferenceNumber = pm.organisation_id
-	inner join dbo.t_producer_obligation_determination ob
+	left join dbo.t_producer_obligation_determination ob
 		on ob.organisation_id = pm.organisation_id
 		and ISNULL(ob.subsidiary_id,'') = ISNULL(NULLIF(TRIM(pm.subsidiary_id),''),'')
 		and ob.submitter_id = COALESCE(cfm.ComplianceSchemeId, o.ExternalId)
-		and ob.obligation_status = 'O'
 		and ob.submission_period_year =
 			(case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023','July to December 2023') then 2023
 					when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024','July to December 2024') then 2024
@@ -530,6 +665,8 @@ POM_Filtered as --CF017: rpd.pom rows restricted to subsidiaries with an Obligat
 					when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028','July to December 2028') then 2028
 					else 0
 					end) + 1
+	where pm.organisation_size <> 'L' --CF021: not Large - obligation determination doesn't apply to this row at all, keep it unfiltered
+	   or ob.obligation_status = 'O' --CF021: Large - only keep subsidiaries explicitly marked Obligated (matches old INNER JOIN behaviour for Large; no-match still excludes, per known table-coverage-gap risk accepted for now)
 ),
 agg_POM as
 (
