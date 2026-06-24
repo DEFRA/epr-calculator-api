@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
@@ -31,9 +31,12 @@ namespace EPR.Calculator.API.Services
         /// <returns>bool</returns>
         private static bool ValidateRunForAcceptAllBillingInstructions(CalculatorRun run)
         {
+            // Valid if:
+            // * Billing file has not been sent to FSS (i.e. classification is not 'Completed')
+            // * Not already Running OR has been for more than 1 hour (i.e. 'stuck' due to unclean shutdown of the processor)
             return Util.AcceptableRunStatusForBillingInstructions().Contains(run.CalculatorRunClassificationId)
-                   &&
-                   !run.IsBillingFileGenerating.GetValueOrDefault();
+                   && (run.BillingRunStatus != BillingRunStatus.Running 
+                       || run.BillingRunStartedAt?.AddHours(1) < DateTime.UtcNow);
         }
 
         public async Task<ServiceProcessResponseDto> UpdateProducerBillingInstructionsAsync(
@@ -232,7 +235,8 @@ namespace EPR.Calculator.API.Services
                 };
             }
 
-            calculatorRun.IsBillingFileGenerating = true;
+            calculatorRun.BillingRunStatus = BillingRunStatus.Running;
+            calculatorRun.BillingRunStartedAt = DateTime.UtcNow;
 
             await applicationDBContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

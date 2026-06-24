@@ -196,7 +196,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             // Arrange
             CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
             calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            calculatorRun.IsBillingFileGenerating = false;
+            calculatorRun.BillingRunStatus = BillingRunStatus.None;
             await this.DbContext.SaveChangesAsync(CancellationToken.None);
 
             // Act

@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260603161538_BillingRunStatus")]
+    partial class BillingRunStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -725,10 +728,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RelativeYear")
-                        .IsUnique()
-                        .HasDatabaseName("UX_default_parameter_setting_master_active_relative_year")
-                        .HasFilter("effective_to IS NULL");
+                    b.HasIndex("RelativeYear");
 
                     b.ToTable("default_parameter_setting_master", (string)null);
                 });
@@ -1296,8 +1296,8 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnName("lapcap_data_master_id");
 
                     b.Property<decimal>("TotalCost")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)")
                         .HasColumnName("total_cost");
 
                     b.Property<string>("UniqueReference")
@@ -1354,10 +1354,7 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RelativeYear")
-                        .IsUnique()
-                        .HasDatabaseName("UX_lapcap_data_master_active_relative_year")
-                        .HasFilter("effective_to IS NULL");
+                    b.HasIndex("RelativeYear");
 
                     b.ToTable("lapcap_data_master", (string)null);
                 });
@@ -1401,7 +1398,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "ENG-AL",
                             Country = "England",
                             Material = "Aluminium",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1409,7 +1406,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "ENG-FC",
                             Country = "England",
                             Material = "Fibre composite",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1417,7 +1414,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "ENG-GL",
                             Country = "England",
                             Material = "Glass",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1425,7 +1422,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "ENG-PC",
                             Country = "England",
                             Material = "Paper or card",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1433,7 +1430,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "ENG-PL",
                             Country = "England",
                             Material = "Plastic",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1441,7 +1438,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "ENG-ST",
                             Country = "England",
                             Material = "Steel",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1449,7 +1446,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "ENG-WD",
                             Country = "England",
                             Material = "Wood",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1457,7 +1454,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "ENG-OT",
                             Country = "England",
                             Material = "Other",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1465,7 +1462,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "NI-AL",
                             Country = "Northern Ireland",
                             Material = "Aluminium",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1473,7 +1470,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "NI-FC",
                             Country = "Northern Ireland",
                             Material = "Fibre composite",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1481,7 +1478,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "NI-GL",
                             Country = "Northern Ireland",
                             Material = "Glass",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1489,7 +1486,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "NI-PC",
                             Country = "Northern Ireland",
                             Material = "Paper or card",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1497,7 +1494,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "NI-PL",
                             Country = "Northern Ireland",
                             Material = "Plastic",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1505,7 +1502,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "NI-ST",
                             Country = "Northern Ireland",
                             Material = "Steel",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1513,7 +1510,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "NI-WD",
                             Country = "Northern Ireland",
                             Material = "Wood",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1521,7 +1518,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "NI-OT",
                             Country = "Northern Ireland",
                             Material = "Other",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1529,7 +1526,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "SCT-AL",
                             Country = "Scotland",
                             Material = "Aluminium",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1537,7 +1534,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "SCT-FC",
                             Country = "Scotland",
                             Material = "Fibre composite",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1545,7 +1542,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "SCT-GL",
                             Country = "Scotland",
                             Material = "Glass",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1553,7 +1550,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "SCT-PC",
                             Country = "Scotland",
                             Material = "Paper or card",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1561,7 +1558,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "SCT-PL",
                             Country = "Scotland",
                             Material = "Plastic",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1569,7 +1566,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "SCT-ST",
                             Country = "Scotland",
                             Material = "Steel",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1577,7 +1574,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "SCT-WD",
                             Country = "Scotland",
                             Material = "Wood",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1585,7 +1582,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "SCT-OT",
                             Country = "Scotland",
                             Material = "Other",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1593,7 +1590,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "WLS-AL",
                             Country = "Wales",
                             Material = "Aluminium",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1601,7 +1598,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "WLS-FC",
                             Country = "Wales",
                             Material = "Fibre composite",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1609,7 +1606,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "WLS-GL",
                             Country = "Wales",
                             Material = "Glass",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1617,7 +1614,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "WLS-PC",
                             Country = "Wales",
                             Material = "Paper or card",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1625,7 +1622,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "WLS-PL",
                             Country = "Wales",
                             Material = "Plastic",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1633,7 +1630,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "WLS-ST",
                             Country = "Wales",
                             Material = "Steel",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1641,7 +1638,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "WLS-WD",
                             Country = "Wales",
                             Material = "Wood",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         },
                         new
@@ -1649,7 +1646,7 @@ namespace EPR.Calculator.API.Data.Migrations
                             UniqueReference = "WLS-OT",
                             Country = "Wales",
                             Material = "Other",
-                            TotalCostFrom = -999999999.99m,
+                            TotalCostFrom = 0m,
                             TotalCostTo = 999999999.99m
                         });
                 });
@@ -2236,851 +2233,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.HasKey("SubmissionPeriod");
 
                     b.ToTable("submission_period_lookup", (string)null);
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.TransformPartial", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CalculatorRunId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_id");
-
-                    b.Property<int>("DaysInSubmissionYear")
-                        .HasColumnType("int")
-                        .HasColumnName("days_in_submission_year");
-
-                    b.Property<int?>("DaysObligated")
-                        .HasColumnType("int")
-                        .HasColumnName("days_obligated");
-
-                    b.Property<decimal?>("HDCTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage");
-
-                    b.Property<decimal?>("HDCTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_amber");
-
-                    b.Property<decimal?>("HDCTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_amber_medical");
-
-                    b.Property<decimal?>("HDCTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_green");
-
-                    b.Property<decimal?>("HDCTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_green_medical");
-
-                    b.Property<decimal?>("HDCTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_red");
-
-                    b.Property<decimal?>("HDCTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_red_medical");
-
-                    b.Property<decimal>("HouseholdTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage");
-
-                    b.Property<decimal?>("HouseholdTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_amber");
-
-                    b.Property<decimal?>("HouseholdTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_amber_medical");
-
-                    b.Property<decimal?>("HouseholdTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_green");
-
-                    b.Property<decimal?>("HouseholdTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_green_medical");
-
-                    b.Property<decimal?>("HouseholdTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_red");
-
-                    b.Property<decimal?>("HouseholdTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_red_medical");
-
-                    b.Property<string>("JoiningDate")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("joining_date");
-
-                    b.Property<string>("Level")
-                        .IsRequired()
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)")
-                        .HasColumnName("level");
-
-                    b.Property<string>("MaterialCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("material_code");
-
-                    b.Property<decimal>("ObligatedFactor")
-                        .HasPrecision(16, 12)
-                        .HasColumnType("decimal(16,12)")
-                        .HasColumnName("obligated_factor");
-
-                    b.Property<int>("ProducerId")
-                        .HasColumnType("int")
-                        .HasColumnName("producer_id");
-
-                    b.Property<string>("ProducerName")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("producer_name");
-
-                    b.Property<decimal>("PublicBinTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage");
-
-                    b.Property<decimal?>("PublicBinTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_amber");
-
-                    b.Property<decimal?>("PublicBinTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_amber_medical");
-
-                    b.Property<decimal?>("PublicBinTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_green");
-
-                    b.Property<decimal?>("PublicBinTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_green_medical");
-
-                    b.Property<decimal?>("PublicBinTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_red");
-
-                    b.Property<decimal?>("PublicBinTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_red_medical");
-
-                    b.Property<decimal>("SMCWTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("smcw_tonnage");
-
-                    b.Property<int>("SubmissionYear")
-                        .HasColumnType("int")
-                        .HasColumnName("submission_year");
-
-                    b.Property<string>("SubsidiaryId")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("subsidiary_id");
-
-                    b.Property<string>("TradingName")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("trading_name");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CalculatorRunId");
-
-                    b.ToTable("transform_partial", (string)null);
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.TransformProjectedH1", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CalculatorRunId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_id");
-
-                    b.Property<decimal>("H2RamProportionsAmber")
-                        .HasPrecision(8, 6)
-                        .HasColumnType("decimal(8,6)")
-                        .HasColumnName("h2_ram_proportions_amber");
-
-                    b.Property<decimal>("H2RamProportionsAmberMedical")
-                        .HasPrecision(8, 6)
-                        .HasColumnType("decimal(8,6)")
-                        .HasColumnName("h2_ram_proportions_amber_medical");
-
-                    b.Property<decimal>("H2RamProportionsGreen")
-                        .HasPrecision(8, 6)
-                        .HasColumnType("decimal(8,6)")
-                        .HasColumnName("h2_ram_proportions_green");
-
-                    b.Property<decimal>("H2RamProportionsGreenMedical")
-                        .HasPrecision(8, 6)
-                        .HasColumnType("decimal(8,6)")
-                        .HasColumnName("h2_ram_proportions_green_medical");
-
-                    b.Property<decimal>("H2RamProportionsRed")
-                        .HasPrecision(8, 6)
-                        .HasColumnType("decimal(8,6)")
-                        .HasColumnName("h2_ram_proportions_red");
-
-                    b.Property<decimal>("H2RamProportionsRedMedical")
-                        .HasPrecision(8, 6)
-                        .HasColumnType("decimal(8,6)")
-                        .HasColumnName("h2_ram_proportions_red_medical");
-
-                    b.Property<decimal?>("HDCTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage");
-
-                    b.Property<decimal?>("HDCTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_amber");
-
-                    b.Property<decimal?>("HDCTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_amber_medical");
-
-                    b.Property<decimal?>("HDCTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_green");
-
-                    b.Property<decimal?>("HDCTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_green_medical");
-
-                    b.Property<decimal?>("HDCTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_red");
-
-                    b.Property<decimal?>("HDCTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_red_medical");
-
-                    b.Property<decimal?>("HDCTonnageWithoutRAM")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_without_ram");
-
-                    b.Property<decimal>("HouseholdTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage");
-
-                    b.Property<decimal>("HouseholdTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_amber");
-
-                    b.Property<decimal>("HouseholdTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_amber_medical");
-
-                    b.Property<decimal>("HouseholdTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_green");
-
-                    b.Property<decimal>("HouseholdTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_green_medical");
-
-                    b.Property<decimal>("HouseholdTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_red");
-
-                    b.Property<decimal>("HouseholdTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_red_medical");
-
-                    b.Property<decimal>("HouseholdTonnageWithoutRAM")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_without_ram");
-
-                    b.Property<string>("Level")
-                        .IsRequired()
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)")
-                        .HasColumnName("level");
-
-                    b.Property<string>("MaterialCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("material_code");
-
-                    b.Property<int>("ProducerId")
-                        .HasColumnType("int")
-                        .HasColumnName("producer_id");
-
-                    b.Property<decimal?>("ProjectedHDCTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_hdc_tonnage");
-
-                    b.Property<decimal?>("ProjectedHDCTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_hdc_tonnage_amber");
-
-                    b.Property<decimal?>("ProjectedHDCTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_hdc_tonnage_amber_medical");
-
-                    b.Property<decimal?>("ProjectedHDCTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_hdc_tonnage_green");
-
-                    b.Property<decimal?>("ProjectedHDCTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_hdc_tonnage_green_medical");
-
-                    b.Property<decimal?>("ProjectedHDCTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_hdc_tonnage_red");
-
-                    b.Property<decimal?>("ProjectedHDCTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_hdc_tonnage_red_medical");
-
-                    b.Property<decimal>("ProjectedHouseholdTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_household_tonnage");
-
-                    b.Property<decimal>("ProjectedHouseholdTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_household_tonnage_amber");
-
-                    b.Property<decimal>("ProjectedHouseholdTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_household_tonnage_amber_medical");
-
-                    b.Property<decimal>("ProjectedHouseholdTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_household_tonnage_green");
-
-                    b.Property<decimal>("ProjectedHouseholdTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_household_tonnage_green_medical");
-
-                    b.Property<decimal>("ProjectedHouseholdTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_household_tonnage_red");
-
-                    b.Property<decimal>("ProjectedHouseholdTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_household_tonnage_red_medical");
-
-                    b.Property<decimal>("ProjectedPublicBinTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_public_bin_tonnage");
-
-                    b.Property<decimal>("ProjectedPublicBinTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_public_bin_tonnage_amber");
-
-                    b.Property<decimal>("ProjectedPublicBinTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_public_bin_tonnage_amber_medical");
-
-                    b.Property<decimal>("ProjectedPublicBinTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_public_bin_tonnage_green");
-
-                    b.Property<decimal>("ProjectedPublicBinTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_public_bin_tonnage_green_medical");
-
-                    b.Property<decimal>("ProjectedPublicBinTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_public_bin_tonnage_red");
-
-                    b.Property<decimal>("ProjectedPublicBinTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_public_bin_tonnage_red_medical");
-
-                    b.Property<decimal>("PublicBinTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage");
-
-                    b.Property<decimal>("PublicBinTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_amber");
-
-                    b.Property<decimal>("PublicBinTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_amber_medical");
-
-                    b.Property<decimal>("PublicBinTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_green");
-
-                    b.Property<decimal>("PublicBinTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_green_medical");
-
-                    b.Property<decimal>("PublicBinTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_red");
-
-                    b.Property<decimal>("PublicBinTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_red_medical");
-
-                    b.Property<decimal>("PublicBinTonnageWithoutRAM")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_without_ram");
-
-                    b.Property<string>("SubmissionPeriodCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("submission_period");
-
-                    b.Property<string>("SubsidiaryId")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("subsidiary_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CalculatorRunId");
-
-                    b.ToTable("transform_projected_h1", (string)null);
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.TransformProjectedH2", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CalculatorRunId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_id");
-
-                    b.Property<decimal?>("HDCTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage");
-
-                    b.Property<decimal?>("HDCTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_amber");
-
-                    b.Property<decimal?>("HDCTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_amber_medical");
-
-                    b.Property<decimal?>("HDCTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_green");
-
-                    b.Property<decimal?>("HDCTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_green_medical");
-
-                    b.Property<decimal?>("HDCTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_red");
-
-                    b.Property<decimal?>("HDCTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_red_medical");
-
-                    b.Property<decimal?>("HDCTonnageWithoutRAM")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("hdc_tonnage_without_ram");
-
-                    b.Property<decimal>("HouseholdTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage");
-
-                    b.Property<decimal>("HouseholdTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_amber");
-
-                    b.Property<decimal>("HouseholdTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_amber_medical");
-
-                    b.Property<decimal>("HouseholdTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_green");
-
-                    b.Property<decimal>("HouseholdTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_green_medical");
-
-                    b.Property<decimal>("HouseholdTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_red");
-
-                    b.Property<decimal>("HouseholdTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_red_medical");
-
-                    b.Property<decimal>("HouseholdTonnageWithoutRAM")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("household_tonnage_without_ram");
-
-                    b.Property<string>("Level")
-                        .IsRequired()
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)")
-                        .HasColumnName("level");
-
-                    b.Property<string>("MaterialCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("material_code");
-
-                    b.Property<int>("ProducerId")
-                        .HasColumnType("int")
-                        .HasColumnName("producer_id");
-
-                    b.Property<decimal?>("ProjectedHDCTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_hdc_tonnage");
-
-                    b.Property<decimal?>("ProjectedHDCTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_hdc_tonnage_amber");
-
-                    b.Property<decimal?>("ProjectedHDCTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_hdc_tonnage_amber_medical");
-
-                    b.Property<decimal?>("ProjectedHDCTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_hdc_tonnage_green");
-
-                    b.Property<decimal?>("ProjectedHDCTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_hdc_tonnage_green_medical");
-
-                    b.Property<decimal?>("ProjectedHDCTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_hdc_tonnage_red");
-
-                    b.Property<decimal?>("ProjectedHDCTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_hdc_tonnage_red_medical");
-
-                    b.Property<decimal>("ProjectedHouseholdTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_household_tonnage");
-
-                    b.Property<decimal>("ProjectedHouseholdTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_household_tonnage_amber");
-
-                    b.Property<decimal>("ProjectedHouseholdTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_household_tonnage_amber_medical");
-
-                    b.Property<decimal>("ProjectedHouseholdTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_household_tonnage_green");
-
-                    b.Property<decimal>("ProjectedHouseholdTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_household_tonnage_green_medical");
-
-                    b.Property<decimal>("ProjectedHouseholdTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_household_tonnage_red");
-
-                    b.Property<decimal>("ProjectedHouseholdTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_household_tonnage_red_medical");
-
-                    b.Property<decimal>("ProjectedPublicBinTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_public_bin_tonnage");
-
-                    b.Property<decimal>("ProjectedPublicBinTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_public_bin_tonnage_amber");
-
-                    b.Property<decimal>("ProjectedPublicBinTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_public_bin_tonnage_amber_medical");
-
-                    b.Property<decimal>("ProjectedPublicBinTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_public_bin_tonnage_green");
-
-                    b.Property<decimal>("ProjectedPublicBinTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_public_bin_tonnage_green_medical");
-
-                    b.Property<decimal>("ProjectedPublicBinTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_public_bin_tonnage_red");
-
-                    b.Property<decimal>("ProjectedPublicBinTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("projected_public_bin_tonnage_red_medical");
-
-                    b.Property<decimal>("PublicBinTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage");
-
-                    b.Property<decimal>("PublicBinTonnageAmber")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_amber");
-
-                    b.Property<decimal>("PublicBinTonnageAmberMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_amber_medical");
-
-                    b.Property<decimal>("PublicBinTonnageGreen")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_green");
-
-                    b.Property<decimal>("PublicBinTonnageGreenMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_green_medical");
-
-                    b.Property<decimal>("PublicBinTonnageRed")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_red");
-
-                    b.Property<decimal>("PublicBinTonnageRedMedical")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_red_medical");
-
-                    b.Property<decimal>("PublicBinTonnageWithoutRAM")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("public_bin_tonnage_without_ram");
-
-                    b.Property<string>("SubmissionPeriodCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("submission_period");
-
-                    b.Property<string>("SubsidiaryId")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("subsidiary_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CalculatorRunId");
-
-                    b.ToTable("transform_projected_h2", (string)null);
-                });
-
-            modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.TransformScaled", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CalculatorRunId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_id");
-
-                    b.Property<int>("DaysInSubmissionPeriod")
-                        .HasColumnType("int")
-                        .HasColumnName("days_in_submission_period");
-
-                    b.Property<int>("DaysInWholePeriod")
-                        .HasColumnType("int")
-                        .HasColumnName("days_in_whole_period");
-
-                    b.Property<bool>("IsSubTotal")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_subtotal");
-
-                    b.Property<string>("Level")
-                        .IsRequired()
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)")
-                        .HasColumnName("level");
-
-                    b.Property<int>("MaterialId")
-                        .HasColumnType("int")
-                        .HasColumnName("material_id");
-
-                    b.Property<string>("PackagingType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("packaging_type");
-
-                    b.Property<int>("ProducerId")
-                        .HasColumnType("int")
-                        .HasColumnName("producer_id");
-
-                    b.Property<string>("ProducerName")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("producer_name");
-
-                    b.Property<decimal>("ScaledTonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("scaled_tonnage");
-
-                    b.Property<decimal>("ScaleupFactor")
-                        .HasPrecision(16, 12)
-                        .HasColumnType("decimal(16,12)")
-                        .HasColumnName("scaled_factor");
-
-                    b.Property<string>("SubmissionPeriodCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("submission_period");
-
-                    b.Property<string>("SubsidiaryId")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("subsidiary_id");
-
-                    b.Property<decimal>("Tonnage")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
-                        .HasColumnName("tonnage");
-
-                    b.Property<string>("TradingName")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("trading_name");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CalculatorRunId");
-
-                    b.ToTable("transform_scaled", (string)null);
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>

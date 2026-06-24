@@ -1,4 +1,5 @@
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes.DateTime;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -17,6 +18,16 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
         builder.Property(p => p.CalculatorRunClassificationId)
             .HasColumnName("calculator_run_classification_id")
             .IsRequired();
+
+        builder.Property(p => p.BillingRunStatus)
+            .HasColumnName("billing_run_status")
+            .HasMaxLength(50)
+            .IsUnicode(false)
+            .IsRequired();
+
+        builder.Property(p => p.BillingRunStartedAt)
+            .HasColumnName("billing_run_started_at")
+            .HasConversion<UtcDateTimeConverter>();
 
         builder.Property(p => p.Name)
             .HasColumnName("name")
@@ -60,9 +71,6 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
 
         builder.Property(p => p.DefaultParameterSettingMasterId)
             .HasColumnName("default_parameter_setting_master_id");
-
-        builder.Property(p => p.IsBillingFileGenerating)
-            .HasColumnName("is_billing_file_generating");
 
         builder.HasOne<CalculatorRunClassification>()
             .WithMany()

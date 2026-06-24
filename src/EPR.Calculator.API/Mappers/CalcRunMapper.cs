@@ -1,4 +1,5 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 
 namespace EPR.Calculator.API.Mappers
@@ -20,8 +21,8 @@ namespace EPR.Calculator.API.Mappers
                 UpdatedAt = run.UpdatedAt,
                 RunClassificationId = run.CalculatorRunClassificationId,
                 RelativeYear = run.RelativeYear,
-                IsBillingFileGenerating = run.IsBillingFileGenerating,
                 RunClassificationStatus = classification.Status,
+                IsBillingFileGenerating = run.BillingRunStatus is BillingRunStatus.Running,
                 IsBillingFileGeneratedLatest = isBillingFileGeneratedLatest,
             };
         }

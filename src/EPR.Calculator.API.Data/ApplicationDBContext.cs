@@ -2,6 +2,7 @@ using System.Reflection;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataSeeder;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.DataTypes.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Data;
@@ -79,5 +80,9 @@ public class ApplicationDBContext : DbContext
         // Configures global conversion for RelativeYear struct to underlying database int type.
         configurationBuilder.Properties<RelativeYear>()
             .HaveConversion<RelativeYearValueConverter, RelativeYearValueComparer>();
+
+        // Configures global conversion for BillingRunStatus enum to database string type.
+        configurationBuilder.Properties<BillingRunStatus>()
+            .HaveConversion<StringEnumConverter<BillingRunStatus>, EnumComparer<BillingRunStatus>>();
     }
 }

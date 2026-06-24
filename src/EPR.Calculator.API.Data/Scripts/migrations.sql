@@ -7897,62 +7897,215 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
+)
+BEGIN
+    DELETE FROM
+    	dbo.calculator_run_billing_file_metadata
+    WHERE
+    	billing_csv_filename IS NULL OR billing_json_filename IS NULL
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
 )
 BEGIN
     DECLARE @var47 sysname;
     SELECT @var47 = [d].[name]
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_red_medical');
-    IF @var47 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var47 + '];');
-    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_red_medical] decimal(8,6) NOT NULL;
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_billing_file_metadata]') AND [c].[name] = N'billing_json_filename');
+    IF @var47 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_billing_file_metadata] DROP CONSTRAINT [' + @var47 + '];');
+    ALTER TABLE [calculator_run_billing_file_metadata] ALTER COLUMN [billing_json_filename] nvarchar(400) NOT NULL;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
 )
 BEGIN
     DECLARE @var48 sysname;
     SELECT @var48 = [d].[name]
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_red');
-    IF @var48 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var48 + '];');
-    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_red] decimal(8,6) NOT NULL;
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_billing_file_metadata]') AND [c].[name] = N'billing_csv_filename');
+    IF @var48 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_billing_file_metadata] DROP CONSTRAINT [' + @var48 + '];');
+    ALTER TABLE [calculator_run_billing_file_metadata] ALTER COLUMN [billing_csv_filename] nvarchar(400) NOT NULL;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
+)
+BEGIN
+    WITH ranked AS (
+        SELECT
+            *,
+            ROW_NUMBER() OVER (
+                PARTITION BY calculator_run_id
+                ORDER BY id DESC
+            ) AS rn
+        FROM dbo.calculator_run_billing_file_metadata
+    )
+    DELETE FROM ranked
+    WHERE rn > 1
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
+)
+BEGIN
+    DROP INDEX [IX_index_calculator_run] ON [calculator_run];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD [billing_run_started_at] datetime2 NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD [billing_run_status] varchar(50) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
+)
+BEGIN
+    UPDATE
+        run
+    SET
+        run.billing_run_status = 'Completed',
+        run.billing_run_started_at = DATEADD(MINUTE, -15, metadata.billing_file_created_date)
+    FROM
+        dbo.calculator_run AS run
+    INNER JOIN
+        dbo.calculator_run_billing_file_metadata AS metadata
+        ON metadata.calculator_run_id = run.id
+    WHERE
+        run.billing_run_status IS NULL
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
+)
+BEGIN
+    UPDATE
+        run
+    SET
+        run.billing_run_status = 'Errored'
+    FROM
+        dbo.calculator_run AS run
+    WHERE
+        run.billing_run_status IS NULL AND
+        run.is_billing_file_generating = 1
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
+)
+BEGIN
+    UPDATE
+        run
+    SET
+        run.billing_run_status = 'None'
+    FROM
+        dbo.calculator_run AS run
+    WHERE
+        run.billing_run_status IS NULL AND
+        run.calculator_run_classification_id in (1,2,3,4,5,6)
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
+)
+BEGIN
+    UPDATE
+        run
+    SET
+        run.billing_run_status = 'Unknown'
+    FROM
+        dbo.calculator_run AS run
+    WHERE
+        run.billing_run_status IS NULL
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
 )
 BEGIN
     DECLARE @var49 sysname;
     SELECT @var49 = [d].[name]
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_green_medical');
-    IF @var49 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var49 + '];');
-    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_green_medical] decimal(8,6) NOT NULL;
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'billing_run_status');
+    IF @var49 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT [' + @var49 + '];');
+    ALTER TABLE [calculator_run] ALTER COLUMN [billing_run_status] varchar(50) NOT NULL;
 END;
 GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
 )
 BEGIN
     DECLARE @var50 sysname;
     SELECT @var50 = [d].[name]
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_green');
-    IF @var50 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var50 + '];');
-    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_green] decimal(8,6) NOT NULL;
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'is_billing_file_generating');
+    IF @var50 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT [' + @var50 + '];');
+    ALTER TABLE [calculator_run] DROP COLUMN [is_billing_file_generating];
 END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_index_calculator_run] ON [calculator_run] ([calculator_run_classification_id], [relative_year], [billing_run_status], [id]) INCLUDE ([name], [created_by], [created_at], [updated_by], [updated_at], [calculator_run_organization_data_master_id], [calculator_run_pom_data_master_id], [default_parameter_setting_master_id], [lapcap_data_master_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260603161538_BillingRunStatus', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
 GO
 
 IF NOT EXISTS (
@@ -7964,9 +8117,9 @@ BEGIN
     SELECT @var51 = [d].[name]
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_amber_medical');
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_red_medical');
     IF @var51 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var51 + '];');
-    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_amber_medical] decimal(8,6) NOT NULL;
+    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_red_medical] decimal(8,6) NOT NULL;
 END;
 GO
 
@@ -7979,8 +8132,68 @@ BEGIN
     SELECT @var52 = [d].[name]
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_amber');
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_red');
     IF @var52 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var52 + '];');
+    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_red] decimal(8,6) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+)
+BEGIN
+    DECLARE @var53 sysname;
+    SELECT @var53 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_green_medical');
+    IF @var53 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var53 + '];');
+    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_green_medical] decimal(8,6) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+)
+BEGIN
+    DECLARE @var54 sysname;
+    SELECT @var54 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_green');
+    IF @var54 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var54 + '];');
+    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_green] decimal(8,6) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+)
+BEGIN
+    DECLARE @var55 sysname;
+    SELECT @var55 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_amber_medical');
+    IF @var55 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var55 + '];');
+    ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_amber_medical] decimal(8,6) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
+)
+BEGIN
+    DECLARE @var56 sysname;
+    SELECT @var56 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_amber');
+    IF @var56 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var56 + '];');
     ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_amber] decimal(8,6) NOT NULL;
 END;
 GO

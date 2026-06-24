@@ -6,6 +6,8 @@ public class CalculatorRun
 {
     public int Id { get; set; }
     public int CalculatorRunClassificationId { get; set; }
+    public BillingRunStatus BillingRunStatus { get; set; }
+    public DateTime? BillingRunStartedAt { get; set; }
     public required string Name { get; set; }
     public RelativeYear RelativeYear { get; set; }
     public string CreatedBy { get; set; } = string.Empty;
@@ -16,7 +18,6 @@ public class CalculatorRun
     public int? CalculatorRunOrganisationDataMasterId { get; set; }
     public int? LapcapDataMasterId { get; set; }
     public int? DefaultParameterSettingMasterId { get; set; }
-    public bool? IsBillingFileGenerating { get; set; } = null;
 
     #region EF navigational properties
 
