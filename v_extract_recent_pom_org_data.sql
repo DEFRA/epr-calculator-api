@@ -18,7 +18,10 @@
 	Updated: 2025-11-18:	PM015:  Ticket - 640727:    Master script - To handle BLANK value along with NULL records
 	Updated: 2026-06-24:	CF016:  Paycal compatibility - "Latest" Registration/POM submission now means latest ACCEPTED submission
 							(narrowed to GRANTED/ACCEPTED for Registration, ACCEPTED for POM), not latest regardless of status -
-							matching sp_GetPaycalPomData/sp_GetPaycalOrgData. "First" submission semantics are unchanged.
+							matching sp_GetPaycalPomData/sp_GetPaycalOrgData. "First" submission selection semantics are unchanged.
+							Also: the join to v_submitted_pom_org_file_status now matches on cfm_FileId+FileType (as Paycal does)
+							instead of FileName, since that view dedupes by cfm_FileId - this affects the Regulator_Status/
+							Actual_Regulator_Status used by both "first" and "latest".
 	Updated: 2026-06-24:	CF017:  Paycal compatibility - POM tonnage pivots now exclude subsidiaries that are not Obligated
 							('O') per dbo.t_producer_obligation_determination, matching the subsidiary/submitter check Paycal applies.
 ******************************************************************************************************************************/
@@ -109,7 +112,7 @@ ORG as
 			left join rpd.users u on u.USerId = cfm.UserId
 			left join rpd.persons p on p.UserId = u.id
 			left join rpd.Nations N on N.Id = cs.NationId
-			left join [dbo].[v_submitted_pom_org_file_status] fs on fs.FileName = cd.filename
+			left join [dbo].[v_submitted_pom_org_file_status] fs on fs.cfm_FileId = cfm.FileId and fs.FileType = 'CompanyDetails' --CF016: match Paycal's join key (fileid+filetype) instead of FileName - v_submitted_pom_org_file_status dedupes by cfm_FileId, so joining by FileName could land on an unrelated row whenever cfm.FileId is null for the real file
 		) A
 ),
 ORG_LATEST_ACCEPTED as --CF016: latest ACCEPTED-only registration (Paycal-compatible: sp_GetPaycalPomData's latest_accepted_registration), independent of the first/QUERIED/rejected-fallback handling below
@@ -289,7 +292,7 @@ POM as
 			left join rpd.users u on u.USerId = cfm.UserId
 			left join rpd.persons p on p.UserId = u.id
 			left join rpd.Nations N on N.Id = cs.NationId
-			left join [dbo].[v_submitted_pom_org_file_status] fs on fs.FileName = pm.filename
+			left join [dbo].[v_submitted_pom_org_file_status] fs on fs.cfm_FileId = cfm.FileId and fs.FileType = 'Pom' --CF016: match Paycal's join key (fileid+filetype) instead of FileName, for the same reason as the ORG cte above
 			where fs.Regulator_Status <> 'Uploaded' --YM007
 		) A
 ),
