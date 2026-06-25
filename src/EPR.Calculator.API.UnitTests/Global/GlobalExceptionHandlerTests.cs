@@ -1,8 +1,5 @@
-﻿using System.Runtime.ExceptionServices;
-using System.Text.Json;
-using EPR.Calculator.API.Exceptions;
+﻿using EPR.Calculator.API.Exceptions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.UnitTests.Global
