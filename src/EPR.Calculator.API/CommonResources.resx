@@ -418,6 +418,6 @@
     <value>Classification {0} is not valid to be completed.</value>
   </data>
   <data name="BillingFileOutdated" xml:space="preserve">
-    <value>Billing file is not the latest one.</value>
+    <value>Billing file is either missing or outdated.</value>
   </data>
 </root>

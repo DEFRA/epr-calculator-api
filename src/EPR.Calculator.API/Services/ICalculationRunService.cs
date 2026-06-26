@@ -5,5 +5,5 @@ namespace EPR.Calculator.API.Services;
 
 public interface ICalculationRunService
 {
-    Task<List<ClassifiedCalculatorRunDto>> GetDesignatedRunsByFinanialYear(RelativeYear relativeYear, CancellationToken cancellationToken = default);
+    Task<List<CalculatorRunDto>> GetDesignatedRunsByFinanialYear(RelativeYear relativeYear, CancellationToken cancellationToken = default);
 }
