@@ -237,8 +237,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     mockServiceBusService.Object,
                     mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>(),
-                    Mock.Of<IBillingFileService>());
+                    Mock.Of<ICalculationRunService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -302,8 +301,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     mockServiceBusService.Object,
                     mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>(),
-                    Mock.Of<IBillingFileService>());
+                    Mock.Of<ICalculationRunService>());
 
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -342,7 +340,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 RelativeYear = new RelativeYear(2024),
             };
-            var actionResult = await CalculatorController.GetCalculatorRuns(runParams) as ObjectResult;
+            var actionResult = await CalculatorController.GetCalculatorRuns(runParams, CancellationToken.None) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(200, actionResult.StatusCode);
         }
@@ -354,7 +352,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 RelativeYear = new RelativeYear(2022),
             };
-            var actionResult = await CalculatorController.GetCalculatorRuns(runParams) as ObjectResult;
+            var actionResult = await CalculatorController.GetCalculatorRuns(runParams, CancellationToken.None) as ObjectResult;
             Assert.IsNotNull(actionResult);
             Assert.AreEqual(404, actionResult.StatusCode);
         }
@@ -500,8 +498,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IServiceBusService>(),
                 mockValidator.Object,
                 mockAvailableClassificationsService.Object,
-                Mock.Of<ICalculationRunService>(),
-                Mock.Of<IBillingFileService>());
+                Mock.Of<ICalculationRunService>());
 
             var expectedClassifications = new List<CalculatorRunClassificationDto>
             {
@@ -547,8 +544,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IServiceBusService>(),
                 mockValidator.Object,
                 Mock.Of<IAvailableClassificationsService>(),
-                Mock.Of<ICalculationRunService>(),
-                Mock.Of<IBillingFileService>());
+                Mock.Of<ICalculationRunService>());
 
             // Act
             var actionResult = await controller.ClassificationByRelativeYear(request) as ObjectResult;
@@ -585,8 +581,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IServiceBusService>(),
                 mockValidator.Object,
                 mockAvailableClassificationsService.Object,
-                Mock.Of<ICalculationRunService>(),
-                Mock.Of<IBillingFileService>());
+                Mock.Of<ICalculationRunService>());
 
             // Act
             var actionResult = await controller.ClassificationByRelativeYear(request) as ObjectResult;
@@ -616,8 +611,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IServiceBusService>(),
                 mockValidator.Object,
                 Mock.Of<IAvailableClassificationsService>(),
-                Mock.Of<ICalculationRunService>(),
-                Mock.Of<IBillingFileService>());
+                Mock.Of<ICalculationRunService>());
 
             // Act
             await Assert.ThrowsAsync<Exception>(async () => await controller.ClassificationByRelativeYear(request));

@@ -3,6 +3,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
@@ -73,8 +74,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockServiceBusService.Object,
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>(),
-                    Mock.Of<IBillingFileService>());
+                    Mock.Of<ICalculationRunService>());
 
             var response = await controller.GetCalculatorRun(1, CancellationToken.None) as ObjectResult;
             Assert.IsNotNull(response);
@@ -83,12 +83,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(run);
 
             Assert.AreEqual(1, run.RunId);
-            Assert.AreEqual("RUNNING", run.RunClassificationStatus);
             Assert.AreEqual(date, run.CreatedAt);
-            Assert.AreEqual(2, run.RunClassificationId);
+            Assert.AreEqual(RunClassification.RUNNING, run.RunClassification);
             Assert.IsNull(run.UpdatedAt);
             Assert.IsNull(run.UpdatedBy);
-            Assert.IsTrue(run.IsBillingFileGenerating);
+            Assert.AreEqual(BillingRunStatus.Running, run.BillingRunStatus);
         }
 
         [TestMethod]
@@ -102,8 +101,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockServiceBusService.Object,
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>(),
-                    Mock.Of<IBillingFileService>());
+                    Mock.Of<ICalculationRunService>());
 
             var response = await controller.GetCalculatorRun(1, CancellationToken.None) as ObjectResult;
             Assert.IsNotNull(response);

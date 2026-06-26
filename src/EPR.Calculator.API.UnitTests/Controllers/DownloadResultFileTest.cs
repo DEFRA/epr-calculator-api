@@ -85,8 +85,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockServiceBusService.Object,
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>(),
-                    Mock.Of<IBillingFileService>());
+                    Mock.Of<ICalculationRunService>());
             var mockResult = new Mock<IResult>();
             this.mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(mockResult.Object);
 
@@ -135,8 +134,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockServiceBusService.Object,
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>(),
-                    Mock.Of<IBillingFileService>());
+                    Mock.Of<ICalculationRunService>());
 
             this.mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(Results.NotFound(fileName));
 
