@@ -645,37 +645,52 @@ Qualifying_POM_FileNames as --CF019: the only FileNames the final SELECT ever us
 	union
 	select pm_filename from l_pom_sql where pm_filename is not null
 ),
-POM_With_Obligation as --joined POM+obligation rows, with the group-cascade flag computed in the same pass via a window function, before either filter below is applied
+POM_With_Year as --pulls the "reporting year" calc (POM's submission year + 1, the year obligation determination is keyed to) into a single named column, computed once and reused below, rather than repeating the same CASE expression in multiple places
 (
 	select pm.*
-		, ob.obligation_status
-		, max(case when pm.organisation_size = 'L' and ob.obligation_status is null then 1 else 0 end)
-			over (partition by pm.organisation_id) as org_has_missing_registration --mirrors EPR.Calculator.Service.Function's ErrorReportService.HandleMissingRegistrationData: that check is "for each subsidiary's (SubsidiaryId, SubmitterId), does a matching registration/obligation row exist? if ANY subsidiary in the organisation fails, flag the WHOLE organisation_id group" - the SubsidiaryId+SubmitterId match is enforced by the LEFT JOIN below (ob.subsidiary_id/ob.submitter_id conditions), so ob.obligation_status is null here means "no matching (subsidiary_id, submitter_id) row at all", not merely a non-'O' status - exactly the condition that triggers the cascade in the C# code. 1 for every row of the org if any Large-producer subsidiary/submitter combination is missing, else 0
+		, cfm.ComplianceSchemeId
+		, (case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023','July to December 2023') then 2023
+				when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024','July to December 2024') then 2024
+				when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025','July to December 2025') then 2025
+				when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026','July to December 2026') then 2026
+				when cfm.SubmissionPeriod in ('Jan to Jun 2027','January to June 2027','July to December 2027') then 2027
+				when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028','July to December 2028') then 2028
+				else 0
+				end) + 1 as obligation_year
 	from rpd.pom pm
 	inner join Qualifying_POM_FileNames qfn on qfn.pm_filename = pm.FileName --CF019: prune to only the files the output can ever reference, before the expensive obligation-determination join
 	inner join rpd.cosmos_file_metadata cfm on cfm.FileName = pm.FileName
-	left join rpd.Organisations o on o.ReferenceNumber = pm.organisation_id
+),
+POM_With_Obligation as --joined POM+obligation rows, before either filter below is applied
+(
+	select pwy.*
+		, ob.obligation_status
+	from POM_With_Year pwy
+	left join rpd.Organisations o on o.ReferenceNumber = pwy.organisation_id
 	left join dbo.t_producer_obligation_determination ob
-		on ob.organisation_id = pm.organisation_id
-		and ISNULL(ob.subsidiary_id,'') = ISNULL(NULLIF(TRIM(pm.subsidiary_id),''),'') --SubsidiaryId match (HandleMissingRegistrationData's o.SubsidiaryId == p.SubsidiaryId)
-		and ob.submitter_id = COALESCE(cfm.ComplianceSchemeId, o.ExternalId) --SubmitterId match (HandleMissingRegistrationData's o.SubmitterId == p.SubmitterId)
-		and ob.submission_period_year =
-			(case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023','July to December 2023') then 2023
-					when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024','July to December 2024') then 2024
-					when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025','July to December 2025') then 2025
-					when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026','July to December 2026') then 2026
-					when cfm.SubmissionPeriod in ('Jan to Jun 2027','January to June 2027','July to December 2027') then 2027
-					when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028','July to December 2028') then 2028
-					else 0
-					end) + 1
+		on ob.organisation_id = pwy.organisation_id
+		and ISNULL(ob.subsidiary_id,'') = ISNULL(NULLIF(TRIM(pwy.subsidiary_id),''),'') --SubsidiaryId match (HandleMissingRegistrationData's o.SubsidiaryId == p.SubsidiaryId)
+		and ob.submitter_id = COALESCE(pwy.ComplianceSchemeId, o.ExternalId) --SubmitterId match (HandleMissingRegistrationData's o.SubmitterId == p.SubmitterId)
+		and ob.submission_period_year = pwy.obligation_year
+),
+Org_Missing_Registration_Cascade as --mirrors EPR.Calculator.Service.Function's ErrorReportService.HandleMissingRegistrationData: that check runs within a SINGLE calculator run, i.e. one reporting year at a time - "for each subsidiary's (SubsidiaryId, SubmitterId) in that year's POM data, does a matching registration/obligation row exist? if ANY subsidiary fails, flag the WHOLE organisation_id group for that year". A GROUP BY + HAVING here computes this small (org, year) exclusion set once via aggregation, then POM_Filtered below anti-joins against it - cheaper than a row-level window function spanning the full multi-year join, which forces a sort/hash over every POM line item just to test this condition
+(
+	select organisation_id, obligation_year
+	from POM_With_Obligation
+	where organisation_size = 'L'
+	group by organisation_id, obligation_year
+	having max(case when obligation_status is null then 1 else 0 end) = 1
 ),
 POM_Filtered as --CF017/CF021: rpd.pom rows restricted to subsidiaries with an Obligated ('O') determination for the following reporting year, for Large producers only - dbo.t_producer_obligation_determination (and v_producer_obligation_determination, which feeds it) only ever computes obligation status for organisation_size='L' (see v_producer_obligation_determination.sql), so Small/Medium producers are never subject to this check at all, matching Paycal's Large-producer-specific scope
 (
 	select pwo.*
 	from POM_With_Obligation pwo
+	left join Org_Missing_Registration_Cascade cascade_excl
+		on cascade_excl.organisation_id = pwo.organisation_id
+	   and cascade_excl.obligation_year = pwo.obligation_year
 	where (pwo.organisation_size <> 'L' --CF021: not Large - obligation determination doesn't apply to this row at all, keep it unfiltered
 	   or pwo.obligation_status = 'O') --CF021: Large - only keep subsidiaries explicitly marked Obligated (matches old INNER JOIN behaviour for Large; no-match still excludes, per known table-coverage-gap risk accepted for now)
-	  and pwo.org_has_missing_registration = 0 --mirrors HandleMissingRegistrationData's all-or-nothing group cascade
+	  and cascade_excl.organisation_id is null --mirrors HandleMissingRegistrationData's all-or-nothing group cascade (see Org_Missing_Registration_Cascade above)
 ),
 agg_POM as
 (
