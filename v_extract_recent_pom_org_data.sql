@@ -10,7 +10,7 @@
 	Updated: 2025-06-11:	YM007:  Ticket - 548936:    Master script not to show resubmitted POM submission with "Uploaded" status
 	Updated: 2025-07-08:	YM008:  Ticket - 569433:    Master script - Org size to show only Parent Organisation
 	Updated: 2025-08-27:	PM009:  Ticket - 605220:    Master script - New column with RAM and RAM-M as new set of columns
-	Updated: 2025-08-28:	AA010:  Ticket - 605105:    Master script - New 4 additional columns will be introduced to split the plastics to “Rigid & Flexible” on Large producer 
+	Updated: 2025-08-28:	AA010:  Ticket - 605105:    Master script - New 4 additional columns will be introduced to split the plastics to “Rigid & Flexible” on Large producer
 	Updated: 2025-08-28:	PM011:  Ticket - 605220:    Master script - New columns with RAM and RAM-M For rigid, flexible columns added as part 605105
 	Updated: 2025-09-01:	PM012:  Ticket - 607670:    Master script - Split file as small or Large for the year 2025
 	Updated: 2025-10-22:	PM013:  Ticket - 624165:    Master script - Masterscript Bug -  Self-Managed Consumer Waste
@@ -54,56 +54,94 @@
 							small set of FileNames f_pom_sql/l_pom_sql actually select (the only FileNames the final SELECT can
 							ever reference), instead of scanning/joining every POM file ever submitted.
 ******************************************************************************************************************************/
-TwoRow as
+TargetObligationYear as --CF023: single configurable constant - client currently only needs reporting/obligation year 2026 (POM submission year 2025). Change ObligationYear here to retarget a different cycle; every join below that scopes by year reads from this one place instead of a separately-hardcoded literal. TargetPomYear (ObligationYear - 1) is the POM/registration submission year that feeds that obligation year
 (
-	select 1 as RankId , 'Jan to June 2023 - H1' as SP, 2023 as Reporting_Year
-	union 
-	select 2 as RankId , 'July to Dec 2023 - H2' as SP, 2023 as Reporting_Year
-	union
-	select 3 as RankId , 'Jan to June 2024 - H1' as SP, 2024 as Reporting_Year
-	union 
-	select 4 as RankId , 'July to Dec 2024 - H2' as SP, 2024 as Reporting_Year
-	union
-	select 5 as RankId , 'Jan to June 2025 - H1' as SP, 2025 as Reporting_Year
-	union 
-	select 6 as RankId , 'July to Dec 2025 - H2' as SP, 2025 as Reporting_Year
-	union
-	select 7 as RankId , 'Jan to June 2026 - H1' as SP, 2026 as Reporting_Year
-	union 
-	select 8 as RankId , 'July to Dec 2026 - H2' as SP, 2026 as Reporting_Year
-	union
-	select 9 as RankId , 'Jan to June 2027 - H1' as SP, 2027 as Reporting_Year
-	union 
-	select 10 as RankId , 'July to Dec 2027 - H2' as SP, 2027 as Reporting_Year
-	union
-	select 11 as RankId , 'Jan to June 2028 - H1' as SP, 2028 as Reporting_Year
-	union 
-	select 12 as RankId , 'July to Dec 2028 - H2' as SP, 2028 as Reporting_Year
+	select 2026 as ObligationYear, 2026 - 1 as TargetPomYear
+),
+ValidSubmissionPeriodsForTarget as
+(
+	select SP from
+	(
+		select 'Jan to Jun 2023' as SP, 2023 as Year
+		union all select 'January to June 2023', 2023
+		union all select 'July to December 2023', 2023
+		union all select 'Jan to Jun 2024', 2024
+		union all select 'January to June 2024', 2024
+		union all select 'July to December 2024', 2024
+		union all select 'January to December 2025', 2024
+		union all select 'Jan to Jun 2025', 2025
+		union all select 'January to June 2025', 2025
+		union all select 'July to December 2025', 2025
+		union all select 'January to December 2026', 2025
+		union all select 'Jan to Jun 2026', 2026
+		union all select 'January to June 2026', 2026
+		union all select 'July to December 2026', 2026
+		union all select 'Jan to Jun 2027', 2027
+		union all select 'January to June 2027', 2027
+		union all select 'July to December 2027', 2027
+		union all select 'Jan to Jun 2028', 2028
+		union all select 'January to June 2028', 2028
+		union all select 'July to December 2028', 2028
+	) AllPeriods
+	cross join TargetObligationYear toy
+	where AllPeriods.Year = toy.TargetPomYear
+),
+TwoRow as --CF023: scoped to TargetPomYear - this drives base_sql's Organisation x Period fan-out below, so narrowing it here directly limits the view's final output to just the relevant period row(s) instead of all twelve
+(
+	select RankId, SP, Reporting_Year
+	from
+	(
+		select 1 as RankId , 'Jan to June 2023 - H1' as SP, 2023 as Reporting_Year
+		union
+		select 2 as RankId , 'July to Dec 2023 - H2' as SP, 2023 as Reporting_Year
+		union
+		select 3 as RankId , 'Jan to June 2024 - H1' as SP, 2024 as Reporting_Year
+		union
+		select 4 as RankId , 'July to Dec 2024 - H2' as SP, 2024 as Reporting_Year
+		union
+		select 5 as RankId , 'Jan to June 2025 - H1' as SP, 2025 as Reporting_Year
+		union
+		select 6 as RankId , 'July to Dec 2025 - H2' as SP, 2025 as Reporting_Year
+		union
+		select 7 as RankId , 'Jan to June 2026 - H1' as SP, 2026 as Reporting_Year
+		union
+		select 8 as RankId , 'July to Dec 2026 - H2' as SP, 2026 as Reporting_Year
+		union
+		select 9 as RankId , 'Jan to June 2027 - H1' as SP, 2027 as Reporting_Year
+		union
+		select 10 as RankId , 'July to Dec 2027 - H2' as SP, 2027 as Reporting_Year
+		union
+		select 11 as RankId , 'Jan to June 2028 - H1' as SP, 2028 as Reporting_Year
+		union
+		select 12 as RankId , 'July to Dec 2028 - H2' as SP, 2028 as Reporting_Year
+	) AllTwoRow
+	cross join TargetObligationYear toy
+	where Reporting_Year = toy.TargetPomYear
 ),
 
 ORG as
 (
-		select *	
+		select *
 			, row_number() over(partition by OrganisationId, ReferenceNumber, SubmissionPeriod order by Submission_time asc, Source asc,cd_organisation_size desc) as First_submission
 			, row_number() over(partition by OrganisationId, ReferenceNumber, SubmissionPeriod order by Submission_time desc, Source asc,cd_organisation_size desc) as Last_submission
-		from 
+		from
 		(
 			select distinct o.id as OrganisationId, cd.organisation_id as ReferenceNumber
-					, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023') then 1 
+					, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023') then 1
 							when cfm.SubmissionPeriod = 'July to December 2023' then 2
-							when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024') then 3 
+							when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024') then 3
 							when cfm.SubmissionPeriod in ('January to December 2025') then 4
-							when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025') then 5 
+							when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025') then 5
 							when cfm.SubmissionPeriod in ('January to December 2026','July to December 2025') then 6
-							when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026') then 7 
+							when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026') then 7
 							when cfm.SubmissionPeriod = 'July to December 2026' then 8
-							when cfm.SubmissionPeriod in ('Jan to Jun 2027','January to June 2027') then 9 
+							when cfm.SubmissionPeriod in ('Jan to Jun 2027','January to June 2027') then 9
 							when cfm.SubmissionPeriod = 'July to December 2027' then 10
-							when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028') then 11 
+							when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028') then 11
 							when cfm.SubmissionPeriod = 'July to December 2028' then 12
 							else 0
 							end as SubmissionPeriod
-					, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023','July to December 2023') then 2023 
+					, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023','July to December 2023') then 2023
 							when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024','January to December 2025') then 2024
 							when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025','January to December 2026','July to December 2025') then 2025
 							when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026','July to December 2026') then 2026
@@ -129,7 +167,7 @@ ORG as
 						when 'APPROVED' then 'ACCEPTED'
 						else upper(trim(ISNULL(fs.Regulator_Status,'PENDING'))) end as Regulator_Status
 					, upper(trim(ISNULL(fs.Regulator_Status,'PENDING'))) as Actual_Regulator_Status
-					, case when cd.subsidiary_id is null then cd.organisation_size 
+					, case when cd.subsidiary_id is null then cd.organisation_size
 					     else null end as cd_organisation_size--YM008
 					--,cd.organisation_size as cd_organisation_size
 					, '202X-P0'as cd_submission_period_code --YM001
@@ -143,10 +181,7 @@ ORG as
 			left join rpd.Nations N on N.Id = cs.NationId
 			left join [dbo].[v_submitted_pom_org_file_status] fs on fs.cfm_FileId = cfm.FileId and fs.FileType = 'CompanyDetails' --CF016: match Paycal's join key (fileid+filetype) instead of FileName - v_submitted_pom_org_file_status dedupes by cfm_FileId, so joining by FileName could land on an unrelated row whenever cfm.FileId is null for the real file
 			where cd.organisation_size = 'L' --CF022: client only uses Large producer data - prune early for performance. Also naturally keeps just the parent CompanyDetails row (subsidiary rows have organisation_size blanked out), which is all this org-level cte needs anyway
-			and cfm.SubmissionPeriod in ( --CF022: client only needs 2024/2025 reporting years - mirrors the ReportingYear CASE above (note the 'January to December 2025/2026' annual periods that also map into 2024/2025)
-				'Jan to Jun 2024','January to June 2024','January to December 2025',
-				'Jan to Jun 2025','January to June 2025','January to December 2026','July to December 2025'
-			)
+			and cfm.SubmissionPeriod in (select SP from ValidSubmissionPeriodsForTarget) --CF023: client only needs TargetObligationYear's cycle - single source of truth, see ValidSubmissionPeriodsForTarget above
 		) A
 ),
 ORG_LATEST_ACCEPTED as --CF016: latest ACCEPTED-only registration (Paycal-compatible: sp_GetPaycalPomData's latest_accepted_registration), independent of the first/QUERIED/rejected-fallback handling below
@@ -206,14 +241,14 @@ ORG_PENDING_ACCEPT_ONLY_UPDATED as --YM003
 (
 select OPA.* from ORG_PENDING_ACCEPT_ONLY OPA
 left join ORG_LATEST_IS_NOT_QUERIED ONQ on OPA.OrganisationId = ONQ.OrganisationId and OPA.ReferenceNumber = ONQ.ReferenceNumber and OPA.SubmissionPeriod = ONQ.SubmissionPeriod
-where ONQ.OrganisationId is null 
-		or 
+where ONQ.OrganisationId is null
+		or
 		(OPA.Actual_Regulator_Status <> 'QUERIED' and  ONQ.OrganisationId is not null)
 ),
 
 ORG_PENDING_ACCEPT_ONLY_UPDATED_WITH_LEAD as --YM005
 (
-	select * 
+	select *
 		, lead(Actual_Regulator_Status,1,NULL) over (partition by OrganisationId,	ReferenceNumber,	SubmissionPeriod order by Submission_time asc) as lead_Actual_Regulator_Status
 		, lead(FileName,1,NULL) over (partition by OrganisationId,	ReferenceNumber,	SubmissionPeriod order by Submission_time asc) as lead_FileName
 	from ORG_PENDING_ACCEPT_ONLY_UPDATED
@@ -223,7 +258,7 @@ ORG_PENDING_ACCEPT_ONLY_UPDATED_WITH_LEAD_DUPLICATE_QUERIED_REMOVED as --YM005
 (
 	select * from ORG_PENDING_ACCEPT_ONLY_UPDATED_WITH_LEAD
 	except(
-		select * 
+		select *
 		from ORG_PENDING_ACCEPT_ONLY_UPDATED_WITH_LEAD
 		where Actual_Regulator_Status = 'QUERIED' and lead_Actual_Regulator_Status = 'QUERIED' and FileName <> lead_FileName
 		)
@@ -233,7 +268,7 @@ ORG_PENDING_ACCEPT_ONLY_UPDATED_WITH_LEAD_DUPLICATE_QUERIED_REMOVED_WITH_RANK as
 (
 	select *
 		, row_number() over(partition by OrganisationId, ReferenceNumber, SubmissionPeriod order by Submission_time asc, Source asc,cd_organisation_size desc) as First_pending_accepted_submission_updated
-		, row_number() over(partition by OrganisationId, ReferenceNumber, SubmissionPeriod order by Submission_time desc, Source asc,cd_organisation_size desc) as Last_pending_accepted_submission_updated 
+		, row_number() over(partition by OrganisationId, ReferenceNumber, SubmissionPeriod order by Submission_time desc, Source asc,cd_organisation_size desc) as Last_pending_accepted_submission_updated
 	from ORG_PENDING_ACCEPT_ONLY_UPDATED_WITH_LEAD_DUPLICATE_QUERIED_REMOVED
 ),
 
@@ -249,16 +284,16 @@ ORG_REJECTED_WITH_OUT_PENDING_ACCEPTED_RESUB as --YM006
 	select rej.* from ORG_REJECTED_RESUBMISSION_ONLY rej
 	left join ORG_PENDING_ACCEPTED_RESUBMISSION_ONLY par
 	on par.OrganisationId = rej.OrganisationId and par.ReferenceNumber = rej.ReferenceNumber and par.SubmissionPeriod = rej.SubmissionPeriod
-	where rej.Actual_Regulator_Status ='Rejected' and par.OrganisationId is null 
+	where rej.Actual_Regulator_Status ='Rejected' and par.OrganisationId is null
 ),
 f_org_sql as
  (
 	select ReferenceNumber as 'Org ID', SubmissionPeriod as 'Rank', ReportingYear, Submission_time as 'Submission date time', case when ComplianceSchemeId is null then 'DP' else CS_Name end as 'Submitted by',	File_Status as 'Submission status', Regulator_Status as 'Regulator Decision', Actual_Regulator_Status as 'Actual Regulator Decision',	[Who submitted], [CS Nation] , cd_filename, ComplianceSchemeId, cd_organisation_size,cd_submission_period_code ,IsResubmission_identifier
 	from ORG_PENDING_ACCEPT_ONLY_UPDATED_WITH_LEAD_DUPLICATE_QUERIED_REMOVED_WITH_RANK --YM001--YM003 --YM005--YM006
 	where First_pending_accepted_submission_updated = 1
-	union 
+	union
 	select ReferenceNumber as 'Org ID', SubmissionPeriod as 'Rank', ReportingYear, Submission_time as 'Submission date time', case when ComplianceSchemeId is null then 'DP' else CS_Name end as 'Submitted by',	File_Status as 'Submission status', Regulator_Status as 'Regulator Decision', Actual_Regulator_Status as 'Actual Regulator Decision',	[Who submitted], [CS Nation] , cd_filename, ComplianceSchemeId, cd_organisation_size,cd_submission_period_code ,IsResubmission_identifier--YM006
-	from ORG_REJECTED_WITH_OUT_PENDING_ACCEPTED 
+	from ORG_REJECTED_WITH_OUT_PENDING_ACCEPTED
 	where Last_rejected_submission = 1
  ) ,
  l_org_sql as --CF016: latest ACCEPTED-only registration, replacing the old "latest regardless of status" + QUERIED-dedup + rejected-fallback chain above (still used by f_org_sql for "first")
@@ -349,7 +384,7 @@ POM_decision_raw as --CF020: mirrors the Pom branch of v_submitted_pom_org_file_
 	left join POM_resubmitted_list rpl on rpl.FileId = cfm.FileId
 	left join POM_app_submitted app_submitted on app_submitted.app_submitted_Fileid = cfm.FileId
 	where cfm.FileType = 'Pom'
-	and cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024','July to December 2024','Jan to Jun 2025','January to June 2025','July to December 2025') --CF020/CF022: same 2024/2025-only prune as the POM cte below
+	and cfm.SubmissionPeriod in (select SP from ValidSubmissionPeriodsForTarget) --CF023: same TargetObligationYear-cycle prune as the POM cte below
 ),
 POM_decision as --CF020: final per-file dedup, matching v_submitted_pom_org_file_status's row_number()-over-cfm_FileId pattern
 (
@@ -366,24 +401,24 @@ POM as
 		select *
 			, row_number() over(partition by OrganisationId, ReferenceNumber, SubmissionPeriod order by Submission_time asc, Source desc) as First_submission
 			, row_number() over(partition by OrganisationId, ReferenceNumber, SubmissionPeriod order by Submission_time desc, Source desc) as Last_submission
-		from 
+		from
 		(
 			select distinct o.id as OrganisationId, pm.organisation_id as ReferenceNumber
-					, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023') then 1 
+					, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023') then 1
 							when cfm.SubmissionPeriod = 'July to December 2023' then 2
-							when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024') then 3 
+							when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024') then 3
 							when cfm.SubmissionPeriod = 'July to December 2024' then 4
-							when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025') then 5 
+							when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025') then 5
 							when cfm.SubmissionPeriod = 'July to December 2025' then 6
-							when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026') then 7 
+							when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026') then 7
 							when cfm.SubmissionPeriod = 'July to December 2026' then 8
-							when cfm.SubmissionPeriod in ('Jan to Jun 2027','January to June 2027') then 9 
+							when cfm.SubmissionPeriod in ('Jan to Jun 2027','January to June 2027') then 9
 							when cfm.SubmissionPeriod = 'July to December 2027' then 10
-							when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028') then 11 
+							when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028') then 11
 							when cfm.SubmissionPeriod = 'July to December 2028' then 12
 							else 0
 							end as SubmissionPeriod
-					, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023','July to December 2023') then 2023 
+					, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023','July to December 2023') then 2023
 							when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024','July to December 2024') then 2024
 							when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025','July to December 2025') then 2025
 							when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026','July to December 2026') then 2026
@@ -422,7 +457,7 @@ POM as
 			left join POM_decision fs on fs.FileId = cfm.FileId --CF020: Pom-only status computed inline above, instead of joining v_submitted_pom_org_file_status
 			where fs.Regulator_Status <> 'Uploaded' --YM007
 			and pm.organisation_size = 'L' --CF022: client only uses Large producer data - prune early for performance
-			and cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024','July to December 2024','Jan to Jun 2025','January to June 2025','July to December 2025') --CF022: client only needs 2024/2025 POM data (narrowed from the broader 2024+ filter, CF018)
+			and cfm.SubmissionPeriod in (select SP from ValidSubmissionPeriodsForTarget) --CF023: client only needs TargetObligationYear's cycle - single source of truth, see ValidSubmissionPeriodsForTarget above
 		) A
 ),
 POM_LATEST_ACCEPTED as --CF016: latest ACCEPTED-only POM submission (Paycal-compatible: sp_GetPaycalPomData's latest_accepted_pom)
@@ -438,7 +473,7 @@ POM_REJECTED_ONLY as
 		, row_number() over(partition by OrganisationId, ReferenceNumber, SubmissionPeriod order by Submission_time asc, Source asc) as First_rejected_submission
 		, row_number() over(partition by OrganisationId, ReferenceNumber, SubmissionPeriod order by Submission_time desc, Source asc) as Last_rejected_submission
 	from POM
-	where Regulator_Status = 'REJECTED' 
+	where Regulator_Status = 'REJECTED'
 ),
 POM_PENDING_ACCEPT_ONLY as
 (
@@ -446,7 +481,7 @@ POM_PENDING_ACCEPT_ONLY as
 		, row_number() over(partition by OrganisationId, ReferenceNumber, SubmissionPeriod order by Submission_time asc, Source asc) as First_pending_accepted_submission
 		, row_number() over(partition by OrganisationId, ReferenceNumber, SubmissionPeriod order by Submission_time desc, Source asc) as Last_pending_accepted_submission
 	from POM
-	where (Regulator_Status = 'PENDING' or  Regulator_Status = 'ACCEPTED') 
+	where (Regulator_Status = 'PENDING' or  Regulator_Status = 'ACCEPTED')
 ),
 POM_REJECTED_WITH_OUT_PENDING_ACCEPTED as
 (
@@ -458,11 +493,11 @@ POM_REJECTED_WITH_OUT_PENDING_ACCEPTED as
 f_pom_sql as
  (
 	select ReferenceNumber as 'Org ID', SubmissionPeriod as 'Rank', ReportingYear, Submission_time as 'Submission date time', case when ComplianceSchemeId is null then 'DP' else CS_Name end as 'Submitted by',	File_Status as 'Submission status', Regulator_Status as 'Regulator Decision', Actual_Regulator_Status as 'Actual Regulator Decision',	[Who submitted], [CS Nation] , pm_filename, ComplianceSchemeId, pm_organisation_size,pm_submission_period_code ,IsResubmission_identifier --YM001
-	from POM_PENDING_ACCEPT_ONLY 
+	from POM_PENDING_ACCEPT_ONLY
 	where First_pending_accepted_submission = 1
 	union
 	select ReferenceNumber as 'Org ID', SubmissionPeriod as 'Rank', ReportingYear, Submission_time as 'Submission date time', case when ComplianceSchemeId is null then 'DP' else CS_Name end as 'Submitted by',	File_Status as 'Submission status', Regulator_Status as 'Regulator Decision', Actual_Regulator_Status as 'Actual Regulator Decision',	[Who submitted], [CS Nation] , pm_filename, ComplianceSchemeId, pm_organisation_size,pm_submission_period_code ,IsResubmission_identifier--YM001
-	from POM_REJECTED_WITH_OUT_PENDING_ACCEPTED 
+	from POM_REJECTED_WITH_OUT_PENDING_ACCEPTED
 	where Last_rejected_submission = 1
  ),
 l_pom_sql as --CF016: latest ACCEPTED-only POM submission, replacing "latest among pending+accepted regardless of status" (still used by f_pom_sql for "first")
@@ -477,22 +512,22 @@ Rank_On_CS_Submission_for_org_file as
 		, row_number() over(partition by ComplianceSchemeId, FileType, SubmissionPeriod order by Submission_time desc) as Rank_on_submission_timestamp
 	from
 	(
-		select cfm.OrganisationId,  cfm.FileType 
-								, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023') then 1 
+		select cfm.OrganisationId,  cfm.FileType
+								, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023') then 1
 										when cfm.SubmissionPeriod = 'July to December 2023' then 2
-										when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024') then 3 
+										when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024') then 3
 										when cfm.SubmissionPeriod in ('January to December 2025') then 4
-										when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025') then 5 
+										when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025') then 5
 										when cfm.SubmissionPeriod = 'July to December 2025' then 6
-										when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026') then 7 
+										when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026') then 7
 										when cfm.SubmissionPeriod = 'July to December 2026' then 8
-										when cfm.SubmissionPeriod in ('Jan to Jun 2027','January to June 2027') then 9 
+										when cfm.SubmissionPeriod in ('Jan to Jun 2027','January to June 2027') then 9
 										when cfm.SubmissionPeriod = 'July to December 2027' then 10
-										when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028') then 11 
+										when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028') then 11
 										when cfm.SubmissionPeriod = 'July to December 2028' then 12
 										else 0
 										end as SubmissionPeriod
-								, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023','July to December 2023') then 2023 
+								, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023','July to December 2023') then 2023
 										when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024','January to December 2025') then 2024
 										when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025','July to December 2025') then 2025
 										when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026','July to December 2026') then 2026
@@ -507,6 +542,7 @@ Rank_On_CS_Submission_for_org_file as
 		left join [rpd].[error_files_not_processed] ef on ef.FileName = cfm.FileName
 		where cfm.FileType in ('CompanyDetails')
 		and cfm.ComplianceSchemeId is not null
+		and cfm.SubmissionPeriod in (select SP from ValidSubmissionPeriodsForTarget) --CF023: previously unscoped - was joining/ranking every CompanyDetails-by-CS file ever submitted, regardless of year, even though only TargetObligationYear's cycle can ever surface in the final output via the RankId join below
 	) A
 ),
 
@@ -517,7 +553,7 @@ Latest_org_by_CS as
 	inner join [rpd].[CompanyDetails] CD on RS.FileName = CD.FileName
 	inner join [rpd].[ComplianceSchemes] cs on cs.ExternalId = RS.ComplianceSchemeId
 	where Rank_on_submission_timestamp = 1
-	and FileType = 'CompanyDetails' 
+	and FileType = 'CompanyDetails'
 ),
 
 Rank_On_CS_Submission_for_pom_file as
@@ -526,22 +562,22 @@ Rank_On_CS_Submission_for_pom_file as
 		, row_number() over(partition by ComplianceSchemeId, FileType, SubmissionPeriod order by Submission_time desc) as Rank_on_submission_timestamp
 	from
 	(
-		select cfm.OrganisationId,  cfm.FileType 
-								, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023') then 1 
+		select cfm.OrganisationId,  cfm.FileType
+								, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023') then 1
 										when cfm.SubmissionPeriod = 'July to December 2023' then 2
-										when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024') then 3 
+										when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024') then 3
 										when cfm.SubmissionPeriod = 'July to December 2024' then 4
-										when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025') then 5 
+										when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025') then 5
 										when cfm.SubmissionPeriod = 'July to December 2025' then 6
-										when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026') then 7 
+										when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026') then 7
 										when cfm.SubmissionPeriod = 'July to December 2026' then 8
-										when cfm.SubmissionPeriod in ('Jan to Jun 2027','January to June 2027') then 9 
+										when cfm.SubmissionPeriod in ('Jan to Jun 2027','January to June 2027') then 9
 										when cfm.SubmissionPeriod = 'July to December 2027' then 10
-										when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028') then 11 
+										when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028') then 11
 										when cfm.SubmissionPeriod = 'July to December 2028' then 12
 										else 0
 										end as SubmissionPeriod
-								, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023','July to December 2023') then 2023 
+								, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023','July to December 2023') then 2023
 										when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024','July to December 2024') then 2024
 										when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025','July to December 2025') then 2025
 										when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026','July to December 2026') then 2026
@@ -556,6 +592,7 @@ Rank_On_CS_Submission_for_pom_file as
 		left join [rpd].[error_files_not_processed] ef on ef.FileName = cfm.FileName
 		where cfm.FileType in ('Pom')
 		and cfm.ComplianceSchemeId is not null
+		and cfm.SubmissionPeriod in (select SP from ValidSubmissionPeriodsForTarget) --CF023: previously unscoped - was joining/ranking every Pom-by-CS file ever submitted, regardless of year, even though only TargetObligationYear's cycle can ever surface in the final output via the RankId join below
 	) A
 ),
 
@@ -597,11 +634,11 @@ rptPOM_All_Submissions as
  (
 	 select O.Id as OrganisationId, N.Name as CS_Nation
 	from rpd.Organisations O
-	inner join [rpd].[OrganisationsConnections] OC 
+	inner join [rpd].[OrganisationsConnections] OC
 		on OC.FromOrganisationId = O.Id
-	inner join [rpd].[SelectedSchemes] SS 
+	inner join [rpd].[SelectedSchemes] SS
 		on SS.OrganisationConnectionId = OC.Id
-	inner join [rpd].[ComplianceSchemes] CS 
+	inner join [rpd].[ComplianceSchemes] CS
 		on SS.ComplianceSchemeId = CS.Id
 	inner join rpd.Nations N on N.Id = CS.NationId
 	where O.IsComplianceScheme = 0 and OC.IsDeleted = 0 and SS.IsDeleted = 0
@@ -625,7 +662,7 @@ base_sql as
 	inner join TwoRow on 1 = 1
 	left join rpd.Nations N on N.Id = Org.NationId
 	left join enr on enr.OrganisationId = org.Id and enr.RN = 1
-	left join CSN on CSN.OrganisationId = org.Id 
+	left join CSN on CSN.OrganisationId = org.Id
 	where Org.IsComplianceScheme = 0
 ),
 submission_count as
@@ -634,9 +671,9 @@ submission_count as
 	from
 	(
 		select [Org ID],ReportingYear from l_org_sql
-		union all 
+		union all
 		select [Org ID],ReportingYear From l_pom_sql
-	) A 
+	) A
 	group by [Org ID],ReportingYear
 ),
 Qualifying_POM_FileNames as --CF019: the only FileNames the final SELECT ever uses (ISNULL(lps.pm_filename,fps.pm_filename)) - restricting POM_Filtered to just these avoids scanning/joining every POM file ever submitted, only the first/latest-accepted ones actually used in the output
@@ -673,13 +710,15 @@ POM_With_Obligation as --joined POM+obligation rows, before either filter below 
 		and ob.submitter_id = COALESCE(pwy.ComplianceSchemeId, o.ExternalId) --SubmitterId match (HandleMissingRegistrationData's o.SubmitterId == p.SubmitterId)
 		and ob.submission_period_year = pwy.obligation_year
 ),
-Org_Missing_Registration_Cascade as --mirrors EPR.Calculator.Service.Function's ErrorReportService.HandleMissingRegistrationData: that check runs within a SINGLE calculator run, i.e. one reporting year at a time - "for each subsidiary's (SubsidiaryId, SubmitterId) in that year's POM data, does a matching registration/obligation row exist? if ANY subsidiary fails, flag the WHOLE organisation_id group for that year". A GROUP BY + HAVING here computes this small (org, year) exclusion set once via aggregation, then POM_Filtered below anti-joins against it - cheaper than a row-level window function spanning the full multi-year join, which forces a sort/hash over every POM line item just to test this condition
+Org_Missing_Registration_Cascade as --mirrors EPR.Calculator.Service.Function's ErrorReportService.HandleMissingRegistrationData: that check runs within a SINGLE calculator run, i.e. one reporting year at a time - "for each subsidiary's (SubsidiaryId, SubmitterId) in that year's POM data, does a matching registration/obligation row exist? if ANY subsidiary fails, flag the WHOLE organisation_id group for that year". A GROUP BY + HAVING here computes this small (org, year) exclusion set once via aggregation, then POM_Filtered below anti-joins against it - cheaper than a row-level window function spanning the full multi-year join, which forces a sort/hash over every POM line item just to test this condition. Restricted to TargetObligationYear (CF023) - other years fall through POM_Filtered unaffected by this cascade, exactly as before this change was introduced
 (
-	select organisation_id, obligation_year
-	from POM_With_Obligation
-	where organisation_size = 'L'
-	group by organisation_id, obligation_year
-	having max(case when obligation_status is null then 1 else 0 end) = 1
+	select pwo.organisation_id, pwo.obligation_year
+	from POM_With_Obligation pwo
+	cross join TargetObligationYear toy
+	where pwo.organisation_size = 'L'
+	  and pwo.obligation_year = toy.ObligationYear
+	group by pwo.organisation_id, pwo.obligation_year
+	having max(case when pwo.obligation_status is null then 1 else 0 end) = 1
 ),
 POM_Filtered as --CF017/CF021: rpd.pom rows restricted to subsidiaries with an Obligated ('O') determination for the following reporting year, for Large producers only - dbo.t_producer_obligation_determination (and v_producer_obligation_determination, which feeds it) only ever computes obligation status for organisation_size='L' (see v_producer_obligation_determination.sql), so Small/Medium producers are never subject to this check at all, matching Paycal's Large-producer-specific scope
 (
@@ -734,8 +773,8 @@ agg_POM_by_RAM as
 	FROM
 	(
 			select FileName
-			, organisation_id, Packaging_type +'-'+ packaging_material+'-'+ 
-					case 
+			, organisation_id, Packaging_type +'-'+ packaging_material+'-'+
+					case
 						when trim(ram_rag_rating) in ('A','G','R') then 'RAM'
 						when trim(ram_rag_rating) in ('A-M','G-M','R-M') then 'RAM-M'
 						end as Type_Material_by_RAM
@@ -754,7 +793,7 @@ agg_POM_by_RAM as
 ),
 agg_POM_by_RAM_RGA as
 (
-	select FileName,organisation_id,								
+	select FileName,organisation_id,
 								/*R*/
 								[HDC-GL-RAM-R],[PB-AL-RAM-R],[PB-FC-RAM-R],[PB-GL-RAM-R],[PB-OT-RAM-R],[PB-PC-RAM-R],[PB-PL-RAM-R],[PB-ST-RAM-R],[PB-WD-RAM-R],[HH-AL-RAM-R],[HH-FC-RAM-R],[HH-GL-RAM-R],[HH-OT-RAM-R],[HH-PC-RAM-R],[HH-PL-RAM-R],[HH-ST-RAM-R],[HH-WD-RAM-R],
 								/*R-M*/
@@ -770,11 +809,11 @@ agg_POM_by_RAM_RGA as
 	FROM
 	(
 			select FileName
-			, organisation_id, Packaging_type +'-'+ packaging_material+'-'+ 
-					case 
+			, organisation_id, Packaging_type +'-'+ packaging_material+'-'+
+					case
 						when trim(ram_rag_rating) in ('A','G','R') then 'RAM'
 						when trim(ram_rag_rating) in ('A-M','G-M','R-M') then 'RAM-M'
-						end 
+						end
 						+'-'+trim(upper(ISNULL(ram_rag_rating,''))) as Type_Material_by_RAM
 			, packaging_material_weight
 			from POM_Filtered
@@ -808,15 +847,15 @@ agg_POM_by_RAM_RGA as
 		[HH-PL-Flexible],
 		[PB-PL-Rigid],
 		[PB-PL-Flexible]
-   FROM (select FileName, 
+   FROM (select FileName,
                 organisation_id,
-				Packaging_type +'-'+ packaging_material+'-'+ISNULL(packaging_material_subtype,'') as Type_Material, packaging_material_weight 
+				Packaging_type +'-'+ packaging_material+'-'+ISNULL(packaging_material_subtype,'') as Type_Material, packaging_material_weight
     from POM_Filtered
     where Packaging_type in ('HH','PB')
 	  and packaging_material in ('PL')
-	  and packaging_material_subtype in ('Rigid','Flexible') ) as TablePivot 
+	  and packaging_material_subtype in ('Rigid','Flexible') ) as TablePivot
 PIVOT(
-      sum(packaging_material_weight) 
+      sum(packaging_material_weight)
 	  FOR Type_Material in ([HH-PL-Rigid],
 	                        [HH-PL-Flexible],
 							[PB-PL-Rigid],
@@ -829,8 +868,8 @@ agg_POM_by_RAM_and_subtype as
 	FROM
 	(
 			select FileName
-			, organisation_id, Packaging_type +'-'+ packaging_material+'-'+ISNULL(packaging_material_subtype,'')+'-'+ 
-					case 
+			, organisation_id, Packaging_type +'-'+ packaging_material+'-'+ISNULL(packaging_material_subtype,'')+'-'+
+					case
 						when trim(ram_rag_rating) in ('A','G','R') then 'RAM'
 						when trim(ram_rag_rating) in ('A-M','G-M','R-M') then 'RAM-M'
 						end as Type_Material_by_RAM
@@ -864,11 +903,11 @@ agg_POM_by_RAM_and_subtype_rga as
 	FROM
 	(
 			select FileName
-			, organisation_id, Packaging_type +'-'+ packaging_material+'-'+ISNULL(packaging_material_subtype,'')+'-'+ 
-					case 
+			, organisation_id, Packaging_type +'-'+ packaging_material+'-'+ISNULL(packaging_material_subtype,'')+'-'+
+					case
 						when trim(ram_rag_rating) in ('A','G','R') then 'RAM'
 						when trim(ram_rag_rating) in ('A-M','G-M','R-M') then 'RAM-M'
-						end 
+						end
 						+'-'+trim(upper(ISNULL(ram_rag_rating,''))) as Type_Material_by_RAM
 			, packaging_material_weight
 			from POM_Filtered
@@ -881,7 +920,7 @@ agg_POM_by_RAM_and_subtype_rga as
 	(
 		sum(packaging_material_weight)
 		FOR Type_Material_by_RAM in (
-								
+
 								[HH-PL-Rigid-RAM-R],[HH-PL-Rigid-RAM-G],[HH-PL-Rigid-RAM-A]
 								,[HH-PL-Rigid-RAM-M-R-M],[HH-PL-Rigid-RAM-M-G-M],[HH-PL-Rigid-RAM-M-A-M]
 								,[HH-PL-Flexible-RAM-R],[HH-PL-Flexible-RAM-G],[HH-PL-Flexible-RAM-A]
@@ -909,14 +948,14 @@ agg_transitional_packaging_units_POM as
 		FOR packaging_material in (AL,FC,GL,PC,PL,ST,WD,OT)
 	) AS PivotTable
 )
-select 
-	
-	bs.[Org ID]  as Org_ID								
-	,bs.[Org Name] as Org_name						
-	,bs.CH as CH_number								
-	,bs.[Nation of Enrolment] as Nation_of_enrolment	
-	,bs.Enrolment_date_time as Enrolment_date_time		
-	,bs.[Status of enrolment] as Enrolment_status		
+select
+
+	bs.[Org ID]  as Org_ID
+	,bs.[Org Name] as Org_name
+	,bs.CH as CH_number
+	,bs.[Nation of Enrolment] as Nation_of_enrolment
+	,bs.Enrolment_date_time as Enrolment_date_time
+	,bs.[Status of enrolment] as Enrolment_status
 	,bs.[Nation of Compliance Scheme regulator] as Nation_of_Compliance_Scheme_regulator
 	,bs.SP as Packaging_data_submission_period
 	, fps.[Submission date time] as Packaging_data_first_submission_datetime
@@ -942,48 +981,48 @@ select
 	, ISNULL(los.[CS Nation],'') Organisation_data_latest_submitted_CS_Nation
 	, ISNULL(los.[Actual Regulator Decision],'') as Organisation_data_latest_submission_status
 	, los.cd_organisation_size as Organisation_data_latest_submission_organisation_size
-	, case 
+	, case
 		when lps.[Submitted by] is null or lps.[Submitted by] = 'DP'
 			then 'NA'
 		else
-			ISNULL(lpbc.Is_present_latest_cs_sub_pom,'N') 
+			ISNULL(lpbc.Is_present_latest_cs_sub_pom,'N')
 		end as Organisation_exists_in_most_recent_packaging_data_submission
 	, case
 		when los.[Submitted by] is null or los.[Submitted by] = 'DP'
 			then 'NA'
 		else
-			ISNULL(loby.Is_present_latest_cs_sub_org,'N') 
+			ISNULL(loby.Is_present_latest_cs_sub_org,'N')
 		end as Organisation_exists_in_most_recent_organisation_data_submission
-	,ISNULL(rptPom.Is_Present_in_POM_report,'N') as Organisation_visible_in_PowerBI_Packaging_reports	
-	,ISNULL(rptReg.Is_Present_in_Reg_report,'N') as Organisation_visible_in_PowerBI_Orgdata_reports		
-	, case 
+	,ISNULL(rptPom.Is_Present_in_POM_report,'N') as Organisation_visible_in_PowerBI_Packaging_reports
+	,ISNULL(rptReg.Is_Present_in_Reg_report,'N') as Organisation_visible_in_PowerBI_Orgdata_reports
+	, case
 		when fps.pm_filename = lps.pm_filename and fps.pm_filename is not null and lps.pm_filename is not null
-			then 'Y' 
+			then 'Y'
 		when fps.pm_filename is not null and lps.pm_filename is null
 			then 'Y'
 		when fps.pm_filename <> lps.pm_filename and fps.pm_filename is not null and lps.pm_filename is not null
-			then 'N' 
+			then 'N'
 		when fps.pm_filename is null and lps.pm_filename is null
 			then 'NA'
-		else 'NA' 
+		else 'NA'
 		end as Single_File_Submission_Packaging
 	,fps.pm_filename as fps_pm_filename
 	,lps.pm_filename  as lps_pm_filename
-	, case 
+	, case
 		when fos.cd_filename = los.cd_filename and fos.cd_filename is not null and los.cd_filename is not null
-			then 'Y' 
+			then 'Y'
 		when fos.cd_filename is not null and los.cd_filename is null
 			then 'Y'
 		when fos.cd_filename <> los.cd_filename and fos.cd_filename is not null and los.cd_filename is not null
-			then 'N' 
+			then 'N'
 		when fos.cd_filename is null and los.cd_filename is null
 			then 'NA'
-		else 'NA' 
-		end as Single_File_Submission_Orgdata   
+		else 'NA'
+		end as Single_File_Submission_Orgdata
 	,fos.cd_filename as fos_cd_filename
 	,los.cd_filename  as los_cd_filename
-	--, case when sub_c.cnt = 4 then 'Y' else 'N' end as Reported_mandated_data_sets						
-	,CAST(bs.[Org soft deleted?] as varchar(2)) as Organisation_soft_deleted							
+	--, case when sub_c.cnt = 4 then 'Y' else 'N' end as Reported_mandated_data_sets
+	,CAST(bs.[Org soft deleted?] as varchar(2)) as Organisation_soft_deleted
 	,ISNULL(ap.[CW-AL],0) as [Self-managed consumer waste-Aluminium]
 	,ISNULL(ap.[CW-FC],0) as [Self-managed consumer waste-Fibre Composite]
 	,ISNULL(ap.[CW-GL],0) as [Self-managed consumer waste-Glass]
@@ -1020,7 +1059,7 @@ select
 	,ISNULL(aup.[HDC-WD],0) as [Household drinks containers-Wood (No.Units)]
 
 	,ISNULL(ap.[HH-AL],0) as [Total Household packaging-Aluminium]
-	
+
 	,ISNULL(ap_ram.[HH-AL-RAM],0) as [Total Household packaging-Aluminium RAM]
 	,ISNULL(ap_ram_rga.[HH-AL-RAM-R],0) as [Total Household packaging-Aluminium RAM R]
 	,ISNULL(ap_ram_rga.[HH-AL-RAM-G],0) as [Total Household packaging-Aluminium RAM G]
@@ -1286,7 +1325,7 @@ select
 	,ISNULL(ap.[SP-PL],0) as [Small organisation packaging - all-Plastic]
 	,ISNULL(ap.[SP-ST],0) as [Small organisation packaging - all-Steel]
 	,ISNULL(ap.[SP-WD],0) as [Small organisation packaging - all-Wood]
-	
+
 /** YM002 515336 Transitional_packaging_unit addition **/
 	,ISNULL(atpu.AL,0) as [Transitional organisation packaging - all-Aluminium]
 	,ISNULL(atpu.FC,0) as [Transitional organisation packaging - all-Fibre Composite]
@@ -1315,7 +1354,7 @@ left join t_rptPOM_All_Submissions rptPom on rptPom.organisation_id = bs.[Org ID
 left join agg_POM ap on ap.FileName =  ISNULL(lps.pm_filename,fps.pm_filename) and ap.organisation_id = ISNULL(lps.[Org ID],fps.[Org ID])
 left join agg_units_POM aup on aup.FileName = ISNULL(lps.pm_filename,fps.pm_filename) and aup.organisation_id = ISNULL(lps.[Org ID],fps.[Org ID])
 /** PM010 **/
-left join agg_POM_by_subtype aps on aps.FileName =  ISNULL(lps.pm_filename,fps.pm_filename) and aps.organisation_id = ISNULL(lps.[Org ID],fps.[Org ID]) 
+left join agg_POM_by_subtype aps on aps.FileName =  ISNULL(lps.pm_filename,fps.pm_filename) and aps.organisation_id = ISNULL(lps.[Org ID],fps.[Org ID])
 /** YM002 515336 Transitional_packaging_unit addition **/
 left join agg_transitional_packaging_units_POM atpu on atpu.FileName = ISNULL(lps.pm_filename,fps.pm_filename) and atpu.organisation_id = ISNULL(lps.[Org ID],fps.[Org ID])
 left join agg_POM_by_RAM ap_ram on ap_ram.FileName =  ISNULL(lps.pm_filename,fps.pm_filename) and ap_ram.organisation_id = ISNULL(lps.[Org ID],fps.[Org ID])
