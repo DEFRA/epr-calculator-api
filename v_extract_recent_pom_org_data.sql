@@ -682,6 +682,23 @@ Qualifying_POM_FileNames as --CF019: the only FileNames the final SELECT ever us
 	union
 	select pm_filename from l_pom_sql where pm_filename is not null
 ),
+f_pom_sql_narrow as --just the 2 columns Winning_POM_FileNames below needs - f_pom_sql/l_pom_sql carry many wide nvarchar metadata columns (submission dates, CS name/nation, status text, etc.), and joining the full width of both directly forced a worktable past SQL Server's 8060-byte row-size limit
+(
+	select [Org ID], [Rank], pm_filename from f_pom_sql
+),
+l_pom_sql_narrow as
+(
+	select [Org ID], [Rank], pm_filename from l_pom_sql
+),
+Winning_POM_FileNames as --CF025: the SINGLE FileName per (org, period) that the final output actually aggregates from - mirrors agg_POM's own join key (ISNULL(lps.pm_filename,fps.pm_filename)) further down. Qualifying_POM_FileNames above deliberately keeps BOTH first and latest for metadata columns (first/latest submission date etc.), but that's too broad for the Missing-Registration-Data cascade: an earlier "first" submission can still list a subsidiary that a LATER resubmission has since dropped (the same "latest registration supersedes" semantics as the registration side), and checking that superseded file's subsidiaries against current registration data wrongly flags a cascade for the whole org even though the file actually feeding the output never had a problem
+(
+	select distinct
+		  ISNULL(lps.[Org ID], fps.[Org ID])         as organisation_id
+		, ISNULL(lps.pm_filename, fps.pm_filename)   as pm_filename
+	from f_pom_sql_narrow fps
+	full outer join l_pom_sql_narrow lps on lps.[Org ID] = fps.[Org ID] and lps.[Rank] = fps.[Rank]
+	where ISNULL(lps.pm_filename, fps.pm_filename) is not null
+),
 POM_With_Year as --pulls the "reporting year" calc (POM's submission year + 1, the year obligation determination is keyed to) into a single named column, computed once and reused below, rather than repeating the same CASE expression in multiple places
 (
 	select pm.*
@@ -710,10 +727,11 @@ POM_With_Obligation as --joined POM+obligation rows, before either filter below 
 		and ob.submitter_id = COALESCE(pwy.ComplianceSchemeId, o.ExternalId) --SubmitterId match (HandleMissingRegistrationData's o.SubmitterId == p.SubmitterId)
 		and ob.submission_period_year = pwy.obligation_year
 ),
-Org_Missing_Registration_Cascade as --mirrors EPR.Calculator.Service.Function's ErrorReportService.HandleMissingRegistrationData: that check runs within a SINGLE calculator run, i.e. one reporting year at a time - "for each subsidiary's (SubsidiaryId, SubmitterId) in that year's POM data, does a matching registration/obligation row exist? if ANY subsidiary fails, flag the WHOLE organisation_id group for that year". A GROUP BY + HAVING here computes this small (org, year) exclusion set once via aggregation, then POM_Filtered below anti-joins against it - cheaper than a row-level window function spanning the full multi-year join, which forces a sort/hash over every POM line item just to test this condition. Restricted to TargetObligationYear (CF023) - other years fall through POM_Filtered unaffected by this cascade, exactly as before this change was introduced
+Org_Missing_Registration_Cascade as --mirrors EPR.Calculator.Service.Function's ErrorReportService.HandleMissingRegistrationData: that check runs within a SINGLE calculator run, i.e. one reporting year at a time - "for each subsidiary's (SubsidiaryId, SubmitterId) in that year's POM data, does a matching registration/obligation row exist? if ANY subsidiary fails, flag the WHOLE organisation_id group for that year". A GROUP BY + HAVING here computes this small (org, year) exclusion set once via aggregation, then POM_Filtered below anti-joins against it - cheaper than a row-level window function spanning the full multi-year join, which forces a sort/hash over every POM line item just to test this condition. Restricted to TargetObligationYear (CF023) - other years fall through POM_Filtered unaffected by this cascade, exactly as before this change was introduced. Also restricted to Winning_POM_FileNames (CF025) - evaluating against the broader Qualifying_POM_FileNames set let a superseded "first" submission's now-dropped subsidiaries trigger a false cascade even when the file that actually feeds the output never included them
 (
 	select pwo.organisation_id, pwo.obligation_year
 	from POM_With_Obligation pwo
+	inner join Winning_POM_FileNames wfn on wfn.organisation_id = pwo.organisation_id and wfn.pm_filename = pwo.FileName
 	cross join TargetObligationYear toy
 	where pwo.organisation_size = 'L'
 	  and pwo.obligation_year = toy.ObligationYear
