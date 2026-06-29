@@ -495,7 +495,7 @@ f_pom_sql as
 	select ReferenceNumber as 'Org ID', SubmissionPeriod as 'Rank', ReportingYear, Submission_time as 'Submission date time', case when ComplianceSchemeId is null then 'DP' else CS_Name end as 'Submitted by',	File_Status as 'Submission status', Regulator_Status as 'Regulator Decision', Actual_Regulator_Status as 'Actual Regulator Decision',	[Who submitted], [CS Nation] , pm_filename, ComplianceSchemeId, pm_organisation_size,pm_submission_period_code ,IsResubmission_identifier --YM001
 	from POM_PENDING_ACCEPT_ONLY
 	where First_pending_accepted_submission = 1
-	union
+	union all --CF027: was UNION - both branches are already mutually exclusive by construction (POM_REJECTED_WITH_OUT_PENDING_ACCEPTED explicitly excludes any Org/Ref/Period that has a row in POM_PENDING_ACCEPT_ONLY), so the DISTINCT was pure overhead; that dedup sort over ~14 wide columns was forcing a worktable past the 8060-byte limit once this CTE got pulled into the new Winning_POM_FileNames join below (CTEs inline, so narrowing a wrapper CTE doesn't skip this UNION's own work)
 	select ReferenceNumber as 'Org ID', SubmissionPeriod as 'Rank', ReportingYear, Submission_time as 'Submission date time', case when ComplianceSchemeId is null then 'DP' else CS_Name end as 'Submitted by',	File_Status as 'Submission status', Regulator_Status as 'Regulator Decision', Actual_Regulator_Status as 'Actual Regulator Decision',	[Who submitted], [CS Nation] , pm_filename, ComplianceSchemeId, pm_organisation_size,pm_submission_period_code ,IsResubmission_identifier--YM001
 	from POM_REJECTED_WITH_OUT_PENDING_ACCEPTED
 	where Last_rejected_submission = 1
@@ -676,32 +676,123 @@ submission_count as
 	) A
 	group by [Org ID],ReportingYear
 ),
-Qualifying_POM_FileNames as --CF019: the only FileNames the final SELECT ever uses (ISNULL(lps.pm_filename,fps.pm_filename)) - restricting POM_Filtered to just these avoids scanning/joining every POM file ever submitted, only the first/latest-accepted ones actually used in the output
+POM_Submission_Narrow as --CF029: standalone, narrow re-derivation of each qualifying POM file's org/period/status/timestamp, used ONLY to compute Winning_POM_FileNames below - does NOT route through POM/f_pom_sql/l_pom_sql, because those still inline back through POM's wide "select distinct" (subquery A, ~18 columns incl. FirstName/CS_Name/CS Nation joins) every time they're referenced, which kept forcing an 8060-byte worktable even after narrowing wrapper CTEs and removing the FULL OUTER JOIN. Source/tie-break uses cfm.ComplianceSchemeId directly instead of joining to ComplianceSchemes (cs.id is null <=> cfm.ComplianceSchemeId is null, barring an orphaned ComplianceSchemeId with no matching row - Source is only a same-timestamp tie-breaker, so this is a safe simplification)
 (
-	select pm_filename from f_pom_sql where pm_filename is not null
+	select distinct
+		  pm.organisation_id as [Org ID]
+		, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023') then 1
+				when cfm.SubmissionPeriod = 'July to December 2023' then 2
+				when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024') then 3
+				when cfm.SubmissionPeriod = 'July to December 2024' then 4
+				when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025') then 5
+				when cfm.SubmissionPeriod = 'July to December 2025' then 6
+				when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026') then 7
+				when cfm.SubmissionPeriod = 'July to December 2026' then 8
+				when cfm.SubmissionPeriod in ('Jan to Jun 2027','January to June 2027') then 9
+				when cfm.SubmissionPeriod = 'July to December 2027' then 10
+				when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028') then 11
+				when cfm.SubmissionPeriod = 'July to December 2028' then 12
+				else 0
+				end as [Rank]
+		, cfm.FileName as pm_filename
+		, CONVERT(DATETIME,substring(cfm.Created,1,23)) as Submission_time
+		, case when cfm.ComplianceSchemeId is NULL then 'DP' else 'CS' end as Source
+		, case upper(trim(ISNULL(pd.Regulator_Status,'PENDING')))
+			when 'QUERIED' then 'PENDING'
+			when 'GRANTED' then 'ACCEPTED'
+			when 'REFUSED' then 'ACCEPTED'
+			when 'CANCELLED' then 'ACCEPTED'
+			when 'APPROVED' then 'ACCEPTED'
+			else upper(trim(ISNULL(pd.Regulator_Status,'PENDING'))) end as Regulator_Status
+	from [rpd].[Pom] pm
+	left join [rpd].[cosmos_file_metadata] cfm on cfm.FileName = pm.FileName
+	left join POM_decision pd on pd.FileId = cfm.FileId
+	where pd.Regulator_Status <> 'Uploaded' --YM007, matches POM/subquery A's where clause (NULL <> 'Uploaded' is NULL, so a FileId with no POM_decision row is excluded here too - same behaviour as the original)
+	and pm.organisation_size = 'L' --CF022
+	and cfm.SubmissionPeriod in (select SP from ValidSubmissionPeriodsForTarget) --CF023
+),
+POM_Narrow_Ranked as
+(
+	select *
+		, row_number() over(partition by [Org ID],[Rank] order by Submission_time asc, Source desc) as First_submission
+		, row_number() over(partition by [Org ID],[Rank] order by Submission_time desc, Source desc) as Last_submission
+	from POM_Submission_Narrow
+),
+POM_Narrow_PENDING_ACCEPT_ONLY as
+(
+	select *
+		, row_number() over(partition by [Org ID],[Rank] order by Submission_time asc, Source asc) as First_pending_accepted_submission
+	from POM_Narrow_Ranked
+	where (Regulator_Status = 'PENDING' or Regulator_Status = 'ACCEPTED')
+),
+POM_Narrow_REJECTED_ONLY as
+(
+	select *
+		, row_number() over(partition by [Org ID],[Rank] order by Submission_time desc, Source asc) as Last_rejected_submission
+	from POM_Narrow_Ranked
+	where Regulator_Status = 'REJECTED'
+),
+POM_Narrow_REJECTED_WITH_OUT_PENDING_ACCEPTED as
+(
+	select rej.*
+	from POM_Narrow_REJECTED_ONLY rej
+	left join POM_Narrow_PENDING_ACCEPT_ONLY pa on pa.[Org ID] = rej.[Org ID] and pa.[Rank] = rej.[Rank]
+	where pa.[Org ID] is null
+),
+POM_Narrow_LATEST_ACCEPTED as
+(
+	select *
+		, row_number() over(partition by [Org ID],[Rank] order by Submission_time desc, Source desc) as Latest_accepted_submission
+	from POM_Narrow_Ranked
+	where Regulator_Status = 'ACCEPTED'
+),
+f_pom_sql_narrow as --CF029: mirrors f_pom_sql's "first" logic (pending/accepted, else earliest rejected fallback), but computed from the narrow chain above instead of f_pom_sql itself
+(
+	select [Org ID], [Rank], pm_filename from POM_Narrow_PENDING_ACCEPT_ONLY where First_pending_accepted_submission = 1
+	union all
+	select [Org ID], [Rank], pm_filename from POM_Narrow_REJECTED_WITH_OUT_PENDING_ACCEPTED where Last_rejected_submission = 1
+),
+l_pom_sql_narrow as --CF029: mirrors l_pom_sql's "latest accepted" logic, computed from the narrow chain above instead of l_pom_sql itself
+(
+	select [Org ID], [Rank], pm_filename from POM_Narrow_LATEST_ACCEPTED where Latest_accepted_submission = 1
+),
+Qualifying_POM_FileNames as --CF019/CF030: the only FileNames the final SELECT ever uses (ISNULL(lps.pm_filename,fps.pm_filename)) - restricting POM_Filtered to just these avoids scanning/joining every POM file ever submitted, only the first/latest-accepted ones actually used in the output. Moved to read from f_pom_sql_narrow/l_pom_sql_narrow (CF030) instead of f_pom_sql/l_pom_sql directly - pm_filename is identical either way, but the originals still route through POM's wide "select distinct" (subquery A) underneath, which kept forcing an 8060-byte worktable here even though only 1 column was ever projected out
+(
+	select pm_filename from f_pom_sql_narrow where pm_filename is not null
 	union
-	select pm_filename from l_pom_sql where pm_filename is not null
-),
-f_pom_sql_narrow as --just the 2 columns Winning_POM_FileNames below needs - f_pom_sql/l_pom_sql carry many wide nvarchar metadata columns (submission dates, CS name/nation, status text, etc.), and joining the full width of both directly forced a worktable past SQL Server's 8060-byte row-size limit
-(
-	select [Org ID], [Rank], pm_filename from f_pom_sql
-),
-l_pom_sql_narrow as
-(
-	select [Org ID], [Rank], pm_filename from l_pom_sql
+	select pm_filename from l_pom_sql_narrow where pm_filename is not null
 ),
 Winning_POM_FileNames as --CF025: the SINGLE FileName per (org, period) that the final output actually aggregates from - mirrors agg_POM's own join key (ISNULL(lps.pm_filename,fps.pm_filename)) further down. Qualifying_POM_FileNames above deliberately keeps BOTH first and latest for metadata columns (first/latest submission date etc.), but that's too broad for the Missing-Registration-Data cascade: an earlier "first" submission can still list a subsidiary that a LATER resubmission has since dropped (the same "latest registration supersedes" semantics as the registration side), and checking that superseded file's subsidiaries against current registration data wrongly flags a cascade for the whole org even though the file actually feeding the output never had a problem
 (
-	select distinct
-		  ISNULL(lps.[Org ID], fps.[Org ID])         as organisation_id
-		, ISNULL(lps.pm_filename, fps.pm_filename)   as pm_filename
-	from f_pom_sql_narrow fps
-	full outer join l_pom_sql_narrow lps on lps.[Org ID] = fps.[Org ID] and lps.[Rank] = fps.[Rank]
-	where ISNULL(lps.pm_filename, fps.pm_filename) is not null
+	select organisation_id, pm_filename
+	from
+	(
+		select [Org ID] as organisation_id, [Rank], pm_filename
+			, row_number() over (partition by [Org ID],[Rank] order by case when src = 'l' then 1 else 2 end) as rn --CF028: was a FULL OUTER JOIN between f_pom_sql_narrow/l_pom_sql_narrow - replaced with UNION ALL + row_number to pick "latest if present, else first", since the join's build/probe still forced a worktable past the 8060-byte limit even with narrow projections feeding it
+		from
+		(
+			select [Org ID], [Rank], pm_filename, 'l' as src from l_pom_sql_narrow where pm_filename is not null
+			union all
+			select [Org ID], [Rank], pm_filename, 'f' as src from f_pom_sql_narrow where pm_filename is not null
+		) combined
+	) ranked
+	where rn = 1
 ),
 POM_With_Year as --pulls the "reporting year" calc (POM's submission year + 1, the year obligation determination is keyed to) into a single named column, computed once and reused below, rather than repeating the same CASE expression in multiple places
 (
-	select pm.*
+	select pm.FileName
+		, pm.organisation_id
+		, pm.subsidiary_id
+		, pm.organisation_size
+		, pm.Packaging_type
+		, pm.packaging_material
+		, pm.packaging_material_weight
+		, pm.packaging_material_units
+		, pm.packaging_material_subtype
+		, pm.ram_rag_rating
+		, pm.transitional_packaging_units
+		, pm.from_country
+		, pm.to_country
 		, cfm.ComplianceSchemeId
 		, (case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023','July to December 2023') then 2023
 				when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024','July to December 2024') then 2024
@@ -711,7 +802,7 @@ POM_With_Year as --pulls the "reporting year" calc (POM's submission year + 1, t
 				when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028','July to December 2028') then 2028
 				else 0
 				end) + 1 as obligation_year
-	from rpd.pom pm
+	from rpd.pom pm --CF026: select only the columns POM_Filtered's consumers (agg_POM family + the cascade) actually need, rather than pm.* - carrying every wide column of rpd.pom through POM_With_Year/POM_With_Obligation/the cascade's GROUP BY was forcing a worktable past SQL Server's 8060-byte row-size limit (Msg 8618)
 	inner join Qualifying_POM_FileNames qfn on qfn.pm_filename = pm.FileName --CF019: prune to only the files the output can ever reference, before the expensive obligation-determination join
 	inner join rpd.cosmos_file_metadata cfm on cfm.FileName = pm.FileName
 ),
