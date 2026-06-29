@@ -1,478 +1,415 @@
 using System.Configuration;
 using System.Security.Claims;
 using System.Security.Principal;
-using System.Text.Json;
 using EPR.Calculator.API.Controllers;
-using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.UnitTests.Helpers;
-using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
     [TestClass]
     public class CalculatorControllerTests : BaseControllerTest
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CalculatorControllerTests"/> class.
-        /// </summary>
-        public CalculatorControllerTests()
+        [TestInitialize]
+        public void Setup()
         {
-            Fixture = TestFixtures.New();
-
-            // Set up authorisation.
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-            var context = new DefaultHttpContext { User = principal };
-            CalculatorController.ControllerContext = new ControllerContext { HttpContext = context };
+            CalculatorController.ControllerContext = CreateAuthenticatedControllerContext();
         }
 
-        public IFixture Fixture { get; init; }
+        [TestMethod]
+        public async Task Create_Returns_Accepted_When_Data_Is_Valid()
+        {
+            // Arrange
+            var relativeYear = new RelativeYear(2024);
+            AddDefaultParameterSettings(relativeYear);
+            AddLapcapData(relativeYear);
 
-        private CalculatorRunRelativeYear RelativeYear23_24 { get; } = new CalculatorRunRelativeYear { Value = new RelativeYear(2023) };
+            var request = new CreateCalculatorRunDto
+            {
+                CalculatorRunName = "Test calculator run",
+                RelativeYear = relativeYear,
+            };
+
+            // Act
+            var result = await CalculatorController.Create(request) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status202Accepted);
+        }
 
         [TestMethod]
-        public async Task Create_Calculator_Run()
+        public async Task Create_Returns_FailedDependency_When_DefaultParameterSettings_And_LapcapData_Missing()
         {
-            var createCalculatorRunDto = new CreateCalculatorRunDto
+            // Arrange - relative year 2024 has no default parameter settings or lapcap data seeded.
+            var request = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
                 RelativeYear = new RelativeYear(2024),
             };
 
-            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2024),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
+            // Act
+            var result = await CalculatorController.Create(request) as ObjectResult;
 
-            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2024),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-
-            DbContext.SaveChanges();
-
-            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(202, actionResult.StatusCode);
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status424FailedDependency);
+            result.Value.ShouldBe(string.Format(CommonResources.DataNotAvaialbleForRelativeYear, 2024));
         }
 
         [TestMethod]
-        public async Task Create_Calculator_Run_Return_404_If_No_Default_Parameter_Settings_And_Lapcap_Data()
+        public async Task Create_Returns_FailedDependency_When_DefaultParameterSettings_Missing()
         {
-            var createCalculatorRunDto = new CreateCalculatorRunDto
+            // Arrange
+            var relativeYear = new RelativeYear(2024);
+            AddLapcapData(relativeYear);
+
+            var request = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                RelativeYear = new RelativeYear(2024),
+                RelativeYear = relativeYear,
             };
 
-            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2023),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
+            // Act
+            var result = await CalculatorController.Create(request) as ObjectResult;
 
-            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2023),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
-
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(424, actionResult.StatusCode);
-            Assert.AreEqual("Default parameter settings and Lapcap data not available for the relative year 2024.", actionResult.Value);
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status424FailedDependency);
+            result.Value.ShouldBe(string.Format(CommonResources.DefaultParameterNotAvailable, 2024));
         }
 
         [TestMethod]
-        public async Task Create_Calculator_Run_Return_404_If_No_Default_Parameter_Settings()
+        public async Task Create_Returns_FailedDependency_When_LapcapData_Missing()
         {
-            var createCalculatorRunDto = new CreateCalculatorRunDto
+            // Arrange
+            var relativeYear = new RelativeYear(2024);
+            AddDefaultParameterSettings(relativeYear);
+
+            var request = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                RelativeYear = new RelativeYear(2024),
+                RelativeYear = relativeYear,
             };
 
-            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2023),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
+            // Act
+            var result = await CalculatorController.Create(request) as ObjectResult;
 
-            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2024),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
-
-            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(424, actionResult.StatusCode);
-            Assert.AreEqual("Default parameter settings not available for the relative year 2024.", actionResult.Value);
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status424FailedDependency);
+            result.Value.ShouldBe(string.Format(CommonResources.LapcapDataNotAvailable, 2024));
         }
 
         [TestMethod]
-        public async Task Create_Calculator_Run_Return_404_If_No_Lapcap_Data()
+        public async Task Create_Throws_ConfigurationErrorsException_When_ServiceBusConnectionString_Missing()
         {
-            var createCalculatorRunDto = new CreateCalculatorRunDto
+            // Arrange
+            var relativeYear = new RelativeYear(2024);
+            AddDefaultParameterSettings(relativeYear);
+            AddLapcapData(relativeYear);
+
+            var configuration = ConfigurationItems.GetConfigurationValues();
+            configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value = string.Empty;
+
+            var controller = CreateCalculatorController(configuration);
+
+            var request = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                RelativeYear = new RelativeYear(2027),
+                RelativeYear = relativeYear,
             };
 
-            DbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear { Value = new RelativeYear(2027) });
-            DbContext.SaveChanges();
-
-            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2027),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
-
-            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2023),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
-
-            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(424, actionResult.StatusCode);
-            Assert.AreEqual("Lapcap data not available for the relative year 2027.", actionResult.Value);
+            // Act & Assert
+            await Should.ThrowAsync<ConfigurationErrorsException>(async () => await controller.Create(request));
         }
 
         [TestMethod]
-        public async Task Create_Calculator_Run_Throw_Error_If_ConnectionString_Configuration_Is_Empty()
+        public async Task Create_Throws_ConfigurationErrorsException_When_ServiceBusQueueName_Missing()
         {
-            var createCalculatorRunDto = new CreateCalculatorRunDto
+            // Arrange
+            var relativeYear = new RelativeYear(2024);
+            AddDefaultParameterSettings(relativeYear);
+            AddLapcapData(relativeYear);
+
+            var configuration = ConfigurationItems.GetConfigurationValues();
+            configuration.GetSection("ServiceBus").GetSection("QueueName").Value = string.Empty;
+
+            var controller = CreateCalculatorController(configuration);
+
+            var request = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
-                RelativeYear = new RelativeYear(2024),
+                RelativeYear = relativeYear,
             };
 
-            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2024),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
-
-            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2024),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
-
-            var configs = ConfigurationItems.GetConfigurationValues();
-            configs.GetSection("ServiceBus").GetSection("ConnectionString").Value = string.Empty;
-
-            var mockServiceBusService = new Mock<IServiceBusService>();
-            var mockStorageService = new Mock<IStorageService>();
-            var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
-
-            CalculatorController =
-                new CalculatorController(
-                    DbContext,
-                    configs,
-                    mockStorageService.Object,
-                    mockServiceBusService.Object,
-                    mockValidator.Object,
-                    Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>());
-
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal,
-            };
-
-            CalculatorController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context,
-            };
-
-            await Assert.ThrowsAsync<ConfigurationErrorsException>(async () => await CalculatorController.Create(createCalculatorRunDto));
+            // Act & Assert
+            await Should.ThrowAsync<ConfigurationErrorsException>(async () => await controller.Create(request));
         }
 
         [TestMethod]
-        public async Task Create_Calculator_Run_Throw_Error_If_QueueName_Configuration_Is_Empty()
+        public async Task Create_Returns_BadRequest_When_RelativeYear_Invalid()
         {
-            var createCalculatorRunDto = new CreateCalculatorRunDto
-            {
-                CalculatorRunName = "Test calculator run",
-                RelativeYear = new RelativeYear(2024),
-            };
-
-            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2024),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
-
-            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2024),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
-
-            var configs = ConfigurationItems.GetConfigurationValues();
-            configs.GetSection("ServiceBus").GetSection("QueueName").Value = string.Empty;
-
-            var mockServiceBusService = new Mock<IServiceBusService>();
-            var mockStorageService = new Mock<IStorageService>();
-            var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
-            CalculatorController =
-                new CalculatorController(
-                    DbContext,
-                    configs,
-                    mockStorageService.Object,
-                    mockServiceBusService.Object,
-                    mockValidator.Object,
-                    Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>());
-
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal,
-            };
-
-            CalculatorController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context,
-            };
-
-            await Assert.ThrowsAsync<ConfigurationErrorsException>(async () => await CalculatorController.Create(createCalculatorRunDto));
-        }
-
-        [TestMethod]
-        public async Task Create_Calculator_Run_Return_400_If_RelativeYear_Invalid()
-        {
-            var createCalculatorRunDto = new CreateCalculatorRunDto
+            // Arrange
+            var request = new CreateCalculatorRunDto
             {
                 CalculatorRunName = "Test calculator run",
                 RelativeYear = new RelativeYear(-1),
             };
-            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(StatusCodes.Status400BadRequest, actionResult.StatusCode);
+
+            // Act
+            var result = await CalculatorController.Create(request) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
         }
 
         [TestMethod]
-        public async Task Get_Calculator_Runs_Return_Results_Test()
+        public async Task Create_Returns_UnprocessableEntity_When_AnotherRun_Is_Already_Running()
         {
-            var runParams = new CalculatorRunsParamsDto
-            {
-                RelativeYear = new RelativeYear(2024),
-            };
-            var actionResult = await CalculatorController.GetCalculatorRuns(runParams, CancellationToken.None) as ObjectResult;
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(200, actionResult.StatusCode);
-        }
-
-        [TestMethod]
-        public async Task Get_Calculator_Runs_Return_Not_Found_Test()
-        {
-            var runParams = new CalculatorRunsParamsDto
-            {
-                RelativeYear = new RelativeYear(2022),
-            };
-            var actionResult = await CalculatorController.GetCalculatorRuns(runParams, CancellationToken.None) as ObjectResult;
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(404, actionResult.StatusCode);
-        }
-
-        [TestMethod]
-        public void Get_Calculator_Run_Return_400_Error_With_No_NameSupplied()
-        {
-            CalculatorRunValidator validator = new CalculatorRunValidator();
-            string name = string.Empty;
-            var result = validator.Validate(name);
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual("Calculator Run Name is Required", result.Errors[0].ErrorMessage);
-        }
-
-        [TestMethod]
-        public async Task Get_Calculator_Run_Return_Results_By_Name_Test()
-        {
-            string calculatorRunName = "Test Run";
-
-            var actionResult = await CalculatorController.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(200, actionResult.Value);
-        }
-
-        [TestMethod]
-        public async Task Get_Calculator_Run_Return_Results_Not_found()
-        {
-            string calculatorRunName = "test 45610";
-
-            var actionResult = await CalculatorController.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(404, actionResult.StatusCode);
-        }
-
-        [TestMethod]
-        public async Task Get_Calculator_Run_Return_Result_With_String_Comparison_CaseInsensitive()
-        {
-            string calculatorRunName = "TEST run";
-
-            var actionResult = await CalculatorController.GetCalculatorRunByName(calculatorRunName) as ObjectResult;
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(200, actionResult.Value);
-        }
-
-        [TestMethod]
-        public async Task Create_Calculator_Run_Return_422_If_One_Calculation_Already_In_Running()
-        {
-            var createCalculatorRunDto = new CreateCalculatorRunDto
-            {
-                CalculatorRunName = "Test calculator run",
-                RelativeYear = new RelativeYear(2024),
-            };
-
-            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2024),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
-
-            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
-            {
-                Id = 1,
-                RelativeYear = new RelativeYear(2024),
-                CreatedBy = "Testuser",
-                CreatedAt = DateTime.UtcNow,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = null,
-            });
-            DbContext.SaveChanges();
+            // Arrange
+            var relativeYear = new RelativeYear(2024);
+            AddDefaultParameterSettings(relativeYear);
+            AddLapcapData(relativeYear);
 
             DbContext.CalculatorRuns.Add(new CalculatorRun
             {
-                CreatedBy = "Testuser",
+                Name = "Run In Progress",
+                RelativeYear = relativeYear,
+                CreatedBy = "Test user",
                 CreatedAt = DateTime.UtcNow,
-                CalculatorRunClassificationId = 2,
-                RelativeYear = new RelativeYear(2024),
-                Name = "TestOneAtATime",
+                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
             });
             DbContext.SaveChanges();
 
-            var actionResult = await CalculatorController.Create(createCalculatorRunDto) as ObjectResult;
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(422, actionResult.StatusCode);
-            var expectedJson = "{\"Message\":\"The calculator is currently running. You will be able to run another calculation once the current one has finished.\"}";
-            var actualJson = JsonSerializer.Serialize(actionResult?.Value);
-            Assert.AreEqual(expectedJson, actualJson);
+            var request = new CreateCalculatorRunDto
+            {
+                CalculatorRunName = "Test calculator run",
+                RelativeYear = relativeYear,
+            };
+
+            // Act
+            var result = await CalculatorController.Create(request) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status422UnprocessableEntity);
+            var message = result.Value?.GetType().GetProperty("Message")?.GetValue(result.Value) as string;
+            message.ShouldBe(CommonResources.CalculationAlreadyRunning);
         }
 
         [TestMethod]
-        public async Task CanCallRelativeYears()
+        public async Task GetCalculatorRuns_Returns_Ok_With_Matching_Runs()
+        {
+            // Arrange
+            var request = new CalculatorRunsParamsDto { RelativeYear = new RelativeYear(2024) };
+
+            // Act
+            var result = await CalculatorController.GetCalculatorRuns(request, CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status200OK);
+            var runs = result.Value as List<CalculatorRunDto>;
+            runs.ShouldNotBeNull();
+            runs.ShouldNotBeEmpty();
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRuns_Returns_Ok_With_Empty_List_When_No_Runs_Match()
+        {
+            // Arrange
+            var request = new CalculatorRunsParamsDto { RelativeYear = new RelativeYear(2022) };
+
+            // Act
+            var result = await CalculatorController.GetCalculatorRuns(request, CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status200OK);
+            var runs = result.Value as List<CalculatorRunDto>;
+            runs.ShouldNotBeNull();
+            runs.ShouldBeEmpty();
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRun_Returns_Ok_When_Found_By_Id()
+        {
+            // Arrange
+            var run = new CalculatorRun
+            {
+                Name = "Run Found By Id",
+                CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+                RelativeYear = new RelativeYear(2024),
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "Test user",
+                BillingRunStatus = BillingRunStatus.Running,
+            };
+            DbContext.CalculatorRuns.Add(run);
+            DbContext.SaveChanges();
+
+            // Act
+            var result = await CalculatorController.GetCalculatorRun(run.Id.ToString(), CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            var runDto = result.Value as CalculatorRunDto;
+            runDto.ShouldNotBeNull();
+            runDto.RunId.ShouldBe(run.Id);
+            runDto.RunClassification.ShouldBe(RunClassification.RUNNING);
+            runDto.BillingRunStatus.ShouldBe(BillingRunStatus.Running);
+            runDto.UpdatedAt.ShouldBeNull();
+            runDto.UpdatedBy.ShouldBeNull();
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRun_Returns_Ok_When_Found_By_Name()
+        {
+            // Arrange
+            var run = new CalculatorRun
+            {
+                Name = "Uniquely Named Run",
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                RelativeYear = new RelativeYear(2024),
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "Test user",
+            };
+            DbContext.CalculatorRuns.Add(run);
+            DbContext.SaveChanges();
+
+            // Act
+            var result = await CalculatorController.GetCalculatorRun(run.Name, CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            var runDto = result.Value as CalculatorRunDto;
+            runDto.ShouldNotBeNull();
+            runDto.RunId.ShouldBe(run.Id);
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRun_Returns_Ok_When_Found_By_Name_CaseInsensitive()
+        {
+            // Arrange
+            var run = new CalculatorRun
+            {
+                Name = "Case Sensitivity Check",
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                RelativeYear = new RelativeYear(2024),
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "Test user",
+            };
+            DbContext.CalculatorRuns.Add(run);
+            DbContext.SaveChanges();
+
+            // Act
+            var result = await CalculatorController.GetCalculatorRun(run.Name.ToUpperInvariant(), CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            var runDto = result.Value as CalculatorRunDto;
+            runDto.ShouldNotBeNull();
+            runDto.RunId.ShouldBe(run.Id);
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRun_Returns_Ok_With_BillingFile_Details_When_Present()
+        {
+            // Arrange
+            var run = new CalculatorRun
+            {
+                Name = "Run With Billing File",
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
+                RelativeYear = new RelativeYear(2024),
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "Test user",
+                BillingRunStatus = BillingRunStatus.Completed,
+            };
+            DbContext.CalculatorRuns.Add(run);
+            DbContext.SaveChanges();
+
+            DbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            {
+                BillingCsvFileName = "test.csv",
+                BillingJsonFileName = "test.json",
+                BillingFileCreatedBy = "Test user",
+                BillingFileCreatedDate = DateTime.UtcNow,
+                BillingFileAuthorisedDate = DateTime.UtcNow,
+                BillingFileAuthorisedBy = "Test user",
+                CalculatorRunId = run.Id,
+            });
+            DbContext.SaveChanges();
+
+            // Act
+            var result = await CalculatorController.GetCalculatorRun(run.Id.ToString(), CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            var runDto = result.Value as CalculatorRunDto;
+            runDto.ShouldNotBeNull();
+            runDto.RunClassification.ShouldBe(RunClassification.INITIAL_RUN_COMPLETED);
+            runDto.BillingFile.ShouldNotBeNull();
+            runDto.BillingFile.CsvFileName.ShouldBe("test.csv");
+            runDto.BillingFile.JsonFileName.ShouldBe("test.json");
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRun_Returns_NotFound_When_Not_Found_By_Id()
+        {
+            // Act
+            var result = await CalculatorController.GetCalculatorRun("999999", CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
+            result.Value.ShouldBe(string.Format(CommonResources.UnableToFindRun, 999999));
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRun_Returns_NotFound_When_Not_Found_By_Name()
+        {
+            // Act
+            var result = await CalculatorController.GetCalculatorRun("a run name that does not exist", CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
+        }
+
+        [TestMethod]
+        public async Task RelativeYears_Returns_Ok_With_Available_Years()
         {
             // Act
             var result = await CalculatorController.RelativeYears() as ObjectResult;
-            var resultList = (result?.Value as IEnumerable<RelativeYear>)?.ToList();
 
             // Assert
-            resultList.ShouldNotBeNull();
-            resultList.ShouldNotBeEmpty();
-            resultList.ShouldContain(new RelativeYear(2024));
+            result.ShouldNotBeNull();
+            var years = result.Value as IEnumerable<RelativeYear>;
+            years.ShouldNotBeNull();
+            years.ShouldContain(new RelativeYear(2024));
         }
 
         [TestMethod]
         public async Task ClassificationByRelativeYear_Returns_Options_For_Valid_RelativeYear()
         {
-            var initialRun = nameof(RunClassification.INITIAL_RUN);
-            var testRun = nameof(RunClassification.TEST_RUN);
-
-            if (initialRun == null || testRun == null)
-            {
-                Assert.Fail("Run classifications Enums not loaded");
-            }
-
             // Arrange
             var relativeYear = new RelativeYear(2024);
             var request = new CalcRelativeYearRequestDto { RunId = Random.Shared.Next(), RelativeYearValue = relativeYear.Value };
+
+            var expectedClassifications = new List<CalculatorRunClassificationDto>
+            {
+                new() { Id = (int)RunClassification.INITIAL_RUN, Status = nameof(RunClassification.INITIAL_RUN) },
+                new() { Id = (int)RunClassification.TEST_RUN, Status = nameof(RunClassification.TEST_RUN) },
+            };
 
             var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             mockValidator
@@ -488,44 +425,27 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     new() { Id = (int)RunClassification.TEST_RUN, Status = nameof(RunClassification.TEST_RUN) },
                 });
 
-            var dbContext = GetDbContextForCalculatorRunClassifications();
-
-            var individualCalcController = new CalculatorController(
-                dbContext,
-                ConfigurationItems.GetConfigurationValues(),
-                Mock.Of<IStorageService>(),
-                Mock.Of<IServiceBusService>(),
-                mockValidator.Object,
-                mockAvailableClassificationsService.Object,
-                Mock.Of<ICalculationRunService>());
-
-            var expectedClassifications = new List<CalculatorRunClassificationDto>
-            {
-                new CalculatorRunClassificationDto { Id = (int)RunClassification.INITIAL_RUN, Status = nameof(RunClassification.INITIAL_RUN) },
-                new() { Id = (int)RunClassification.TEST_RUN, Status = nameof(RunClassification.TEST_RUN) },
-            };
+            var controller = CreateCalculatorController(
+                validator: mockValidator.Object,
+                availableClassificationsService: mockAvailableClassificationsService.Object);
 
             // Act
-            var actionResult = await individualCalcController.ClassificationByRelativeYear(request) as ObjectResult;
+            var result = await controller.ClassificationByRelativeYear(request) as ObjectResult;
 
             // Assert
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(StatusCodes.Status200OK, actionResult.StatusCode);
-            var result = actionResult.Value as RelativeYearClassificationResponseDto;
-            Assert.IsNotNull(result);
-            var typeToAssert = typeof(CalculatorRunClassificationDto);
-            Assert.IsInstanceOfType(expectedClassifications[0], typeToAssert);
-            Assert.IsInstanceOfType(result.Classifications[1], typeToAssert);
-            result.Classifications.ShouldBeEquivalentTo(expectedClassifications);
-            Assert.AreEqual(result.RelativeYear, relativeYear);
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status200OK);
+            var response = result.Value as RelativeYearClassificationResponseDto;
+            response.ShouldNotBeNull();
+            response.RelativeYear.ShouldBe(relativeYear);
+            response.Classifications.ShouldBeEquivalentTo(expectedClassifications);
         }
 
         [TestMethod]
-        public async Task ClassificationByRelativeYear_Returns_BadRequest_For_Invalid_RelativeYear()
+        public async Task ClassificationByRelativeYear_Returns_BadRequest_When_Validation_Fails()
         {
             // Arrange
-            var relativeYear = new RelativeYear(2025); // Invalid format
-            var request = new CalcRelativeYearRequestDto { RunId = Random.Shared.Next(), RelativeYearValue = relativeYear.Value };
+            var request = new CalcRelativeYearRequestDto { RunId = Random.Shared.Next(), RelativeYearValue = 2025 };
 
             var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             mockValidator
@@ -533,35 +453,27 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .ReturnsAsync(new ValidationResultDto<ErrorDto>
                 {
                     IsInvalid = true,
-                    Errors = new List<ErrorDto> { new ErrorDto { Message = "Invalid relative year format." } },
+                    Errors = new List<ErrorDto> { new() { Message = "Invalid relative year format." } },
                 });
 
-            var controller = new CalculatorController(
-                DbContext,
-                ConfigurationItems.GetConfigurationValues(),
-                Mock.Of<IStorageService>(),
-                Mock.Of<IServiceBusService>(),
-                mockValidator.Object,
-                Mock.Of<IAvailableClassificationsService>(),
-                Mock.Of<ICalculationRunService>());
+            var controller = CreateCalculatorController(validator: mockValidator.Object);
 
             // Act
-            var actionResult = await controller.ClassificationByRelativeYear(request) as ObjectResult;
+            var result = await controller.ClassificationByRelativeYear(request) as ObjectResult;
 
             // Assert
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(StatusCodes.Status400BadRequest, actionResult.StatusCode);
-            var errors = actionResult.Value as List<ErrorDto>;
-            Assert.IsNotNull(errors);
-            Assert.AreEqual("Invalid relative year format.", errors[0].Message);
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status400BadRequest);
+            var errors = result.Value as List<ErrorDto>;
+            errors.ShouldNotBeNull();
+            errors[0].Message.ShouldBe("Invalid relative year format.");
         }
 
         [TestMethod]
         public async Task ClassificationByRelativeYear_Returns_NotFound_When_No_Classifications()
         {
             // Arrange
-            var relativeYear = new RelativeYear(2024);
-            var request = new CalcRelativeYearRequestDto { RunId = Random.Shared.Next(),RelativeYearValue = relativeYear.Value };
+            var request = new CalcRelativeYearRequestDto { RunId = Random.Shared.Next(), RelativeYearValue = 2024 };
 
             var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             mockValidator
@@ -573,70 +485,101 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Setup(s => s.GetAvailableClassificationsForRelativeYearAsync(request, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new List<CalculatorRunClassification>());
 
-            var controller = new CalculatorController(
-                DbContext,
-                ConfigurationItems.GetConfigurationValues(),
-                Mock.Of<IStorageService>(),
-                Mock.Of<IServiceBusService>(),
-                mockValidator.Object,
-                mockAvailableClassificationsService.Object,
-                Mock.Of<ICalculationRunService>());
+            var controller = CreateCalculatorController(
+                validator: mockValidator.Object,
+                availableClassificationsService: mockAvailableClassificationsService.Object);
 
             // Act
-            var actionResult = await controller.ClassificationByRelativeYear(request) as ObjectResult;
+            var result = await controller.ClassificationByRelativeYear(request) as ObjectResult;
 
             // Assert
-            Assert.IsNotNull(actionResult);
-            Assert.AreEqual(StatusCodes.Status404NotFound, actionResult.StatusCode);
-            Assert.AreEqual("No classifications found.", actionResult.Value);
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
+            result.Value.ShouldBe(CommonResources.NoClassificationsFound);
         }
 
         [TestMethod]
-        public async Task ClassificationByRelativeYear_Returns_Throws_On_Exception()
+        public async Task ClassificationByRelativeYear_Throws_When_Validator_Throws()
         {
             // Arrange
-            var relativeYear = new RelativeYear(2024);
-            var request = new CalcRelativeYearRequestDto { RunId = Random.Shared.Next(),RelativeYearValue = relativeYear.Value };
+            var request = new CalcRelativeYearRequestDto { RunId = Random.Shared.Next(), RelativeYearValue = 2024 };
 
             var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
             mockValidator
                 .Setup(v => v.Validate(request, It.IsAny<CancellationToken>()))
                 .Throws(new Exception());
 
-            var controller = new CalculatorController(
-                DbContext,
-                ConfigurationItems.GetConfigurationValues(),
-                Mock.Of<IStorageService>(),
-                Mock.Of<IServiceBusService>(),
-                mockValidator.Object,
-                Mock.Of<IAvailableClassificationsService>(),
-                Mock.Of<ICalculationRunService>());
+            var controller = CreateCalculatorController(validator: mockValidator.Object);
 
-            // Act
-            await Assert.ThrowsAsync<Exception>(async () => await controller.ClassificationByRelativeYear(request));
+            // Act & Assert
+            await Should.ThrowAsync<Exception>(async () => await controller.ClassificationByRelativeYear(request));
         }
 
-        private ApplicationDBContext GetDbContextForCalculatorRunClassifications()
+        [TestMethod]
+        public void CalculatorRunValidator_Validate_Returns_Required_Error_When_Name_Is_Empty()
         {
-            var dbContext = Fixture.Create<ApplicationDBContext>();
-            dbContext.CalculatorRunClassifications.RemoveRange(dbContext.CalculatorRunClassifications);
-            List<CalculatorRunClassification> classifications =
-            [
-                new() { Id = 1, Status = "IN THE QUEUE", CreatedBy = "Test user" },
-                new() { Id = 2, Status = "RUNNING", CreatedBy = "Test user" },
-                new() { Id = 3, Status = "UNCLASSIFIED", CreatedBy = "Test user" },
-                new() { Id = 4, Status = "TEST RUN", CreatedBy = "Test user" },
-                new() { Id = 5, Status = "ERROR", CreatedBy = "Test user" },
-                new() { Id = 6, Status = "DELETED", CreatedBy = "Test user" },
-                new() { Id = 7, Status = "INITIAL RUN COMPLETED", CreatedBy = "Test user" },
-                new() { Id = 8, Status = "INITIAL RUN", CreatedBy = "Test user" },
-                new() { Id = 9, Status = "INTERIM RE-CALCULATION RUN", CreatedBy = "Test user" },
-                new() { Id = 10, Status = "FINAL RUN", CreatedBy = "Test user" },
-                new() { Id = 11, Status = "FINAL RE-CALCULATION RUN", CreatedBy = "Test user" },
-            ];
-            dbContext.CalculatorRunClassifications.AddRange(classifications);
+            // Arrange
+            var validator = new CalculatorRunValidator();
 
-            return dbContext;
+            // Act
+            var result = validator.Validate(string.Empty);
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.Errors[0].ErrorMessage.ShouldBe(CommonResources.CalculatorRunNameRequired);
+        }
+
+        private static ControllerContext CreateAuthenticatedControllerContext(string userName = "TestUser")
+        {
+            var identity = new GenericIdentity(userName);
+            identity.AddClaim(new Claim("name", userName));
+            var principal = new ClaimsPrincipal(identity);
+
+            return new ControllerContext { HttpContext = new DefaultHttpContext { User = principal } };
+        }
+
+        private CalculatorController CreateCalculatorController(
+            IConfiguration? configuration = null,
+            ICalcRelativeYearRequestDtoDataValidator? validator = null,
+            IAvailableClassificationsService? availableClassificationsService = null)
+        {
+            return new CalculatorController(
+                DbContext,
+                configuration ?? ConfigurationItems.GetConfigurationValues(),
+                Mock.Of<IStorageService>(),
+                Mock.Of<IServiceBusService>(),
+                validator ?? Mock.Of<ICalcRelativeYearRequestDtoDataValidator>(),
+                availableClassificationsService ?? Mock.Of<IAvailableClassificationsService>(),
+                Mock.Of<ICalculationRunService>())
+            {
+                ControllerContext = CreateAuthenticatedControllerContext(),
+            };
+        }
+
+        private void AddDefaultParameterSettings(RelativeYear relativeYear, DateTime? effectiveTo = null)
+        {
+            DbContext.DefaultParameterSettings.Add(new DefaultParameterSettingMaster
+            {
+                RelativeYear = relativeYear,
+                CreatedBy = "Test user",
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
+                EffectiveTo = effectiveTo,
+            });
+            DbContext.SaveChanges();
+        }
+
+        private void AddLapcapData(RelativeYear relativeYear, DateTime? effectiveTo = null)
+        {
+            DbContext.LapcapDataMaster.Add(new LapcapDataMaster
+            {
+                RelativeYear = relativeYear,
+                CreatedBy = "Test user",
+                CreatedAt = DateTime.UtcNow,
+                EffectiveFrom = DateTime.UtcNow,
+                EffectiveTo = effectiveTo,
+            });
+            DbContext.SaveChanges();
         }
     }
 }

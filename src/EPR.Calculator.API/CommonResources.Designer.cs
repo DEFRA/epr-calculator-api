@@ -150,6 +150,15 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Calculator Run Name must not be a number.
+        /// </summary>
+        public static string CalculatorRunNameNotNumber {
+            get {
+                return ResourceManager.GetString("CalculatorRunNameNotNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Calculator Run Name is Required.
         /// </summary>
         public static string CalculatorRunNameRequired {
@@ -942,11 +951,11 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to find Run Id {0}.
+        ///   Looks up a localized string similar to Unable to find Run &apos;{0}&apos;.
         /// </summary>
-        public static string UnableToFindRunId {
+        public static string UnableToFindRun {
             get {
-                return ResourceManager.GetString("UnableToFindRunId", resourceCulture);
+                return ResourceManager.GetString("UnableToFindRun", resourceCulture);
             }
         }
         

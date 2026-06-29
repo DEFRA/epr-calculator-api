@@ -50,7 +50,7 @@ public class CalculatorNewController(
         var calculatorRun = await dbContext.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runStatusUpdateDto.RunId);
         if (calculatorRun == null)
         {
-            return new ObjectResult(string.Format(CommonResources.UnableToFindRunId, runStatusUpdateDto.RunId))
+            return new ObjectResult(string.Format(CommonResources.UnableToFindRun, runStatusUpdateDto.RunId))
                 { StatusCode = StatusCodes.Status422UnprocessableEntity };
         }
 
@@ -84,25 +84,6 @@ public class CalculatorNewController(
         return StatusCode(201);
     }
 
-    [HttpGet]
-    [Route("calculatorRuns/{runId}")]
-    [ProducesResponseType(typeof(CalculatorRunDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetCalculatorRun(int runId, CancellationToken cancellationToken)
-    {
-        var runDto = await dbContext.CalculatorRuns
-            .Where(run => run.Id == runId)
-            .Select(CalcRunMapper.ToDto)
-            .SingleOrDefaultAsync(cancellationToken);
-
-        if (runDto == null)
-            return new NotFoundObjectResult(string.Format(CommonResources.UnableToFindRunId, runId));
-
-        return new ObjectResult(runDto);
-    }
-
     [HttpPost]
     [Route("prepareBillingFileSendToFSS/{runId}")]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
@@ -124,7 +105,7 @@ public class CalculatorNewController(
             .SingleOrDefaultAsync(cancellationToken);
 
         if (runDto == null)
-            return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format(CommonResources.UnableToFindRunId, runId));
+            return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format(CommonResources.UnableToFindRun, runId));
 
         if (runDto.BillingFile is not { IsLatest: true })
             return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format(CommonResources.BillingFileOutdated, runId));

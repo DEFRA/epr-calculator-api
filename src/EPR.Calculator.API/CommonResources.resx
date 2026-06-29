@@ -252,6 +252,9 @@
   <data name="CalculatorRunNameRequired" xml:space="preserve">
     <value>Calculator Run Name is Required</value>
   </data>
+    <data name="CalculatorRunNameNotNumber" xml:space="preserve">
+    <value>Calculator Run Name must not be a number</value>
+  </data>
   <data name="OrganisationIdRequired" xml:space="preserve">
     <value>Organisation Id is required.</value>
   </data>
@@ -294,8 +297,8 @@
   <data name="LapcapDataNotAvailable" xml:space="preserve">
     <value>Lapcap data not available for the relative year {0}.</value>
   </data>
-  <data name="UnableToFindRunId" xml:space="preserve">
-    <value>Unable to find Run Id {0}</value>
+  <data name="UnableToFindRun" xml:space="preserve">
+    <value>Unable to find Run '{0}'</value>
   </data>
   <data name="UnableToFindClassificationId" xml:space="preserve">
     <value>Unable to find Classification Id {0}</value>

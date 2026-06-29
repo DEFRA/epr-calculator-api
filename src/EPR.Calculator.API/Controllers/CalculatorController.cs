@@ -74,11 +74,9 @@ public class CalculatorController(
         if (!string.IsNullOrWhiteSpace(dataPreCheckMessage))
             return new ObjectResult(dataPreCheckMessage) { StatusCode = StatusCodes.Status424FailedDependency };
 
-        // Return bad gateway error if the calculator run name provided already exists
-        var calculatorRunNameExistsMessage = CalculatorRunNameExists(request.CalculatorRunName);
-        if (!string.IsNullOrWhiteSpace(calculatorRunNameExistsMessage))
+        if (!ValidateCalculatorRunName(request.CalculatorRunName, out var errorMessage))
         {
-            return new ObjectResult(calculatorRunNameExistsMessage)
+            return new ObjectResult(errorMessage)
             {
                 StatusCode = StatusCodes.Status400BadRequest
             };
@@ -168,41 +166,27 @@ public class CalculatorController(
     }
 
     [HttpGet]
-    [Route("calculatorRuns/{runId}")]
+    [Route("calculatorRuns/{runIdOrName}")]
     [ProducesResponseType(typeof(CalculatorRunDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetCalculatorRun(int runId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetCalculatorRun(string runIdOrName, CancellationToken cancellationToken)
     {
-        var runDto = await dbContext.CalculatorRuns
-            .Where(run => run.Id == runId)
+        IQueryable<CalculatorRun> query = dbContext.CalculatorRuns;
+
+        query = int.TryParse(runIdOrName, out var runId)
+            ? query.Where(run => run.Id == runId)
+            : query.Where(run => EF.Functions.Like(run.Name, runIdOrName));
+
+        var runDto = await query
             .Select(CalcRunMapper.ToDto)
             .SingleOrDefaultAsync(cancellationToken);
 
         if (runDto == null)
-            return new NotFoundObjectResult(string.Format(CommonResources.UnableToFindRunId, runId));
+            return new NotFoundObjectResult(string.Format(CommonResources.UnableToFindRun, runIdOrName));
 
         return new ObjectResult(runDto);
-    }
-
-    [HttpGet]
-    [Route("CheckCalcNameExists/{name}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetCalculatorRunByName([FromRoute] string name)
-    {
-        if (!ModelState.IsValid)
-            return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
-
-        var calculatorRun = await dbContext.CalculatorRuns.CountAsync(run => EF.Functions.Like(run.Name, name));
-
-        if (calculatorRun <= 0)
-            return new ObjectResult(CommonResources.NoDataForCalcualtorName) { StatusCode = StatusCodes.Status404NotFound };
-
-        return new ObjectResult(StatusCodes.Status200OK);
     }
 
     [HttpGet]
@@ -291,15 +275,16 @@ public class CalculatorController(
         return string.Empty;
     }
 
-    private string CalculatorRunNameExists(string runName)
+    private bool ValidateCalculatorRunName(string runName, [NotNullWhen(false)] out string? errorMessage)
     {
-        var calculatorRun = dbContext.CalculatorRuns.Count(run => EF.Functions.Like(run.Name, runName));
+        errorMessage = null;
 
-        // Return calculator run name already exists
-        if (calculatorRun > 0)
-            return string.Format(CommonResources.CalculatorRunNameExists, runName);
+        if(int.TryParse(runName, out _))
+            errorMessage = string.Format(CommonResources.CalculatorRunNameNotNumber);
 
-        // All good, return empty string
-        return string.Empty;
+        if (dbContext.CalculatorRuns.Any(run => EF.Functions.Like(run.Name, runName)))
+            errorMessage = string.Format(CommonResources.CalculatorRunNameExists, runName);
+
+        return errorMessage == null;
     }
 }
