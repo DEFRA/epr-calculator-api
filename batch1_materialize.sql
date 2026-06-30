@@ -630,18 +630,23 @@ rptPOM_All_Submissions as
 		where SR.[Key] = 'Packaging.ApprovedPerson'
  ),
 
- CSN as
+ CSN as --CF035: an org can have multiple active SelectedSchemes rows under the same compliance scheme group registered for different nations (e.g. org 117071 had both a Northern Ireland and an England SelectedSchemes row for "Beyondly") - without a dedup, base_sql's "inner join CSN" (no RN filter, unlike enr below which already has one) fanned out EVERY downstream row for that org by however many CSN rows existed, doubling its entire masterscript output (confirmed: org 117071's output was exactly 2x what it should be). row_number()+RN=1 below, applied the same way base_sql already applies it to enr, picks one deterministically - CS_Nation is a display-only field here, not used in any tonnage calculation, so the specific tie-break choice doesn't affect correctness, only the duplication does
  (
-	 select O.Id as OrganisationId, N.Name as CS_Nation
-	from rpd.Organisations O
-	inner join [rpd].[OrganisationsConnections] OC
-		on OC.FromOrganisationId = O.Id
-	inner join [rpd].[SelectedSchemes] SS
-		on SS.OrganisationConnectionId = OC.Id
-	inner join [rpd].[ComplianceSchemes] CS
-		on SS.ComplianceSchemeId = CS.Id
-	inner join rpd.Nations N on N.Id = CS.NationId
-	where O.IsComplianceScheme = 0 and OC.IsDeleted = 0 and SS.IsDeleted = 0
+	select OrganisationId, CS_Nation from
+	(
+		select O.Id as OrganisationId, N.Name as CS_Nation
+			, row_number() over(partition by O.Id order by CS.Id) as RN --CF035
+		from rpd.Organisations O
+		inner join [rpd].[OrganisationsConnections] OC
+			on OC.FromOrganisationId = O.Id
+		inner join [rpd].[SelectedSchemes] SS
+			on SS.OrganisationConnectionId = OC.Id
+		inner join [rpd].[ComplianceSchemes] CS
+			on SS.ComplianceSchemeId = CS.Id
+		inner join rpd.Nations N on N.Id = CS.NationId
+		where O.IsComplianceScheme = 0 and OC.IsDeleted = 0 and SS.IsDeleted = 0
+	) ranked
+	where RN = 1
  ),
 base_sql as
 (
