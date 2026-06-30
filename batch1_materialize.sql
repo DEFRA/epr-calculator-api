@@ -810,6 +810,7 @@ POM_With_Obligation as --joined POM+obligation rows, before either filter below 
 (
 	select pwy.*
 		, ob.obligation_status
+		, o.ExternalId --CF034: needed downstream in POM_Filtered to join Subsidiary_Period_Coverage on the same COALESCE(ComplianceSchemeId, o.ExternalId) submitter_id used everywhere else in this view
 	from POM_With_Year pwy
 	left join rpd.Organisations o on o.ReferenceNumber = pwy.organisation_id
 	left join dbo.t_producer_obligation_determination ob
@@ -817,6 +818,40 @@ POM_With_Obligation as --joined POM+obligation rows, before either filter below 
 		and ISNULL(ob.subsidiary_id,'') = ISNULL(NULLIF(TRIM(pwy.subsidiary_id),''),'') --SubsidiaryId match (HandleMissingRegistrationData's o.SubsidiaryId == p.SubsidiaryId)
 		and ob.submitter_id = COALESCE(pwy.ComplianceSchemeId, o.ExternalId) --SubmitterId match (HandleMissingRegistrationData's o.SubmitterId == p.SubmitterId)
 		and ob.submission_period_year = pwy.obligation_year
+),
+Subsidiary_Period_Coverage as --CF034: mirrors EPR.Calculator.Service.Function's ErrorReportService.HandleMissingPomData - that check is PER-SUBSIDIARY (unlike HandleMissingRegistrationData's all-or-nothing org-wide cascade above): a (organisation_id, subsidiary_id, submitter_id) that's Obligated but doesn't itself have ACCEPTED POM data for BOTH H1 and H2 of the relevant POM year gets excluded from output, even if ANOTHER subsidiary in the same org/submitter covers the missing half (sp_GetPaycalPomData's own "both periods" inclusion filter only checks at org+submitter granularity, with no subsidiary_id - see organisation_period_flags there vs sp_GetPaycalOrgData-before.sql's organisation_period_flags, which DOES include subsidiary_id). Confirmed against org 103013: subsidiaries 111553/112540 had H1-only accepted POM data, and their in-scope (HH/PB/HDC-GL) weight (117.05t + 48.99t = 166.04t) matched that org's full masterscript-vs-UAT diff almost exactly. RankId/half classification reuses the same SubmissionPeriod CASE pattern used throughout this view (ORG/POM's subquery A, Rank_On_CS_Submission_for_*) for consistency - odd RankId = H1, even = H2
+(
+	select organisation_id, NULLIF(TRIM(subsidiary_id),'') as subsidiary_id, submitter_id
+		, max(case when RankId % 2 = 1 then 1 else 0 end) as has_h1
+		, max(case when RankId % 2 = 0 then 1 else 0 end) as has_h2
+	from
+	(
+		select pm.organisation_id, pm.subsidiary_id
+			, COALESCE(cfm.ComplianceSchemeId, o.ExternalId) as submitter_id
+			, case when cfm.SubmissionPeriod in ('Jan to Jun 2023','January to June 2023') then 1
+					when cfm.SubmissionPeriod = 'July to December 2023' then 2
+					when cfm.SubmissionPeriod in ('Jan to Jun 2024','January to June 2024') then 3
+					when cfm.SubmissionPeriod = 'July to December 2024' then 4
+					when cfm.SubmissionPeriod in ('Jan to Jun 2025','January to June 2025') then 5
+					when cfm.SubmissionPeriod = 'July to December 2025' then 6
+					when cfm.SubmissionPeriod in ('Jan to Jun 2026','January to June 2026') then 7
+					when cfm.SubmissionPeriod = 'July to December 2026' then 8
+					when cfm.SubmissionPeriod in ('Jan to Jun 2027','January to June 2027') then 9
+					when cfm.SubmissionPeriod = 'July to December 2027' then 10
+					when cfm.SubmissionPeriod in ('Jan to Jun 2028','January to June 2028') then 11
+					when cfm.SubmissionPeriod = 'July to December 2028' then 12
+					else 0
+					end as RankId
+		from rpd.pom pm
+		inner join rpd.Organisations o on o.ReferenceNumber = pm.organisation_id
+		inner join rpd.cosmos_file_metadata cfm on cfm.FileName = pm.FileName
+		inner join POM_decision pd on pd.FileId = cfm.FileId
+		where pm.organisation_size = 'L'
+		and upper(trim(pd.Regulator_Status)) = 'ACCEPTED'
+		and cfm.SubmissionPeriod in (select SP from ValidSubmissionPeriodsForTarget) --CF023
+	) x
+	where RankId <> 0
+	group by organisation_id, NULLIF(TRIM(subsidiary_id),''), submitter_id
 ),
 Org_Missing_Registration_Cascade as --mirrors EPR.Calculator.Service.Function's ErrorReportService.HandleMissingRegistrationData: that check runs within a SINGLE calculator run, i.e. one reporting year at a time - "for each subsidiary's (SubsidiaryId, SubmitterId) in that year's POM data, does a matching registration/obligation row exist? if ANY subsidiary fails, flag the WHOLE organisation_id group for that year". A GROUP BY + HAVING here computes this small (org, year) exclusion set once via aggregation, then POM_Filtered below anti-joins against it - cheaper than a row-level window function spanning the full multi-year join, which forces a sort/hash over every POM line item just to test this condition. Restricted to TargetObligationYear (CF023) - other years fall through POM_Filtered unaffected by this cascade, exactly as before this change was introduced. Also restricted to Winning_POM_FileNames (CF025) - evaluating against the broader Qualifying_POM_FileNames set let a superseded "first" submission's now-dropped subsidiaries trigger a false cascade even when the file that actually feeds the output never included them
 --CF033: HandleMissingRegistrationData's real input (calculator_run_pom_data_detail) is sourced from sp_GetPaycalPomData, which only ever selects Packaging_type IN ('HH','CW','PB') or (Packaging_type='HDC' and packaging_material='GL') - see sp_GetPaycalPomData-before.sql. A subsidiary whose ONLY rpd.pom rows fall outside that scope (e.g. Packaging_type='OW') never reaches the real cascade check at all, regardless of whether it has a t_producer_obligation_determination row. Without this scoping, a newly-onboarded subsidiary with only zero-weight 'OW' rows and no determination row yet was wrongly zeroing out its entire org's legitimate weight (confirmed against org 111484, where UAT includes the org's real ~979.5t untouched). Verified safe against the 3 known genuine cascade orgs (101979/100964/115361), each of which has at least one in-scope missing-determination subsidiary, so they still correctly trigger after this change
@@ -839,8 +874,13 @@ POM_Filtered as --CF017/CF021: rpd.pom rows restricted to subsidiaries with an O
 	left join Org_Missing_Registration_Cascade cascade_excl
 		on cascade_excl.organisation_id = pwo.organisation_id
 	   and cascade_excl.obligation_year = pwo.obligation_year
+	left join Subsidiary_Period_Coverage spc --CF034
+		on spc.organisation_id = pwo.organisation_id
+	   and ISNULL(spc.subsidiary_id,'') = ISNULL(NULLIF(TRIM(pwo.subsidiary_id),''),'') --NULL-safe match, same pattern as the t_producer_obligation_determination join above
+	   and spc.submitter_id = COALESCE(pwo.ComplianceSchemeId, pwo.ExternalId)
 	where (pwo.organisation_size <> 'L' --CF021: not Large - obligation determination doesn't apply to this row at all, keep it unfiltered
 	   or pwo.obligation_status = 'O') --CF021: Large - only keep subsidiaries explicitly marked Obligated (matches old INNER JOIN behaviour for Large; no-match still excludes, per known table-coverage-gap risk accepted for now)
 	  and cascade_excl.organisation_id is null --mirrors HandleMissingRegistrationData's all-or-nothing group cascade (see Org_Missing_Registration_Cascade above)
+	  and (pwo.organisation_size <> 'L' or spc.has_h1 = 1 and spc.has_h2 = 1) --CF034: mirrors HandleMissingPomData's per-subsidiary H1+H2 completeness check (see Subsidiary_Period_Coverage above) - a no-match row (spc.has_h1/has_h2 both null) also fails this and is excluded, matching HandleMissingPomData treating "no accepted POM data at all for this subsidiary" the same as "incomplete period coverage"
 )
 select * into #PomFiltered from POM_Filtered;
