@@ -819,6 +819,7 @@ POM_With_Obligation as --joined POM+obligation rows, before either filter below 
 		and ob.submission_period_year = pwy.obligation_year
 ),
 Org_Missing_Registration_Cascade as --mirrors EPR.Calculator.Service.Function's ErrorReportService.HandleMissingRegistrationData: that check runs within a SINGLE calculator run, i.e. one reporting year at a time - "for each subsidiary's (SubsidiaryId, SubmitterId) in that year's POM data, does a matching registration/obligation row exist? if ANY subsidiary fails, flag the WHOLE organisation_id group for that year". A GROUP BY + HAVING here computes this small (org, year) exclusion set once via aggregation, then POM_Filtered below anti-joins against it - cheaper than a row-level window function spanning the full multi-year join, which forces a sort/hash over every POM line item just to test this condition. Restricted to TargetObligationYear (CF023) - other years fall through POM_Filtered unaffected by this cascade, exactly as before this change was introduced. Also restricted to Winning_POM_FileNames (CF025) - evaluating against the broader Qualifying_POM_FileNames set let a superseded "first" submission's now-dropped subsidiaries trigger a false cascade even when the file that actually feeds the output never included them
+--CF033: HandleMissingRegistrationData's real input (calculator_run_pom_data_detail) is sourced from sp_GetPaycalPomData, which only ever selects Packaging_type IN ('HH','CW','PB') or (Packaging_type='HDC' and packaging_material='GL') - see sp_GetPaycalPomData-before.sql. A subsidiary whose ONLY rpd.pom rows fall outside that scope (e.g. Packaging_type='OW') never reaches the real cascade check at all, regardless of whether it has a t_producer_obligation_determination row. Without this scoping, a newly-onboarded subsidiary with only zero-weight 'OW' rows and no determination row yet was wrongly zeroing out its entire org's legitimate weight (confirmed against org 111484, where UAT includes the org's real ~979.5t untouched). Verified safe against the 3 known genuine cascade orgs (101979/100964/115361), each of which has at least one in-scope missing-determination subsidiary, so they still correctly trigger after this change
 (
 	select pwo.organisation_id, pwo.obligation_year
 	from POM_With_Obligation pwo
@@ -827,7 +828,9 @@ Org_Missing_Registration_Cascade as --mirrors EPR.Calculator.Service.Function's 
 	where pwo.organisation_size = 'L'
 	  and pwo.obligation_year = toy.ObligationYear
 	group by pwo.organisation_id, pwo.obligation_year
-	having max(case when pwo.obligation_status is null then 1 else 0 end) = 1
+	having max(case when pwo.obligation_status is null
+	                 and (pwo.Packaging_type in ('HH','CW','PB') or (pwo.Packaging_type = 'HDC' and pwo.packaging_material = 'GL')) --CF033
+	                then 1 else 0 end) = 1
 ),
 POM_Filtered as --CF017/CF021: rpd.pom rows restricted to subsidiaries with an Obligated ('O') determination for the following reporting year, for Large producers only - dbo.t_producer_obligation_determination (and v_producer_obligation_determination, which feeds it) only ever computes obligation status for organisation_size='L' (see v_producer_obligation_determination.sql), so Small/Medium producers are never subject to this check at all, matching Paycal's Large-producer-specific scope
 (
