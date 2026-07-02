@@ -11,16 +11,19 @@ using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 
 namespace EPR.Calculator.API.Controllers;
 
 [Route("v1")]
-[SuppressMessage("Major Code Smell", "S6960:Controllers should not have mixed responsibilities", Justification = "It's all calculator run related")]
+[SuppressMessage("Major Code Smell", "S6960:Controllers should not have mixed responsibilities", Justification = "Legacy tech debt to be addressed later.")]
+[SuppressMessage("Major Code Smell", "S107:Methods should not have too many parameters", Justification = "Legacy tech debt to be addressed later.")]
 public class CalculatorController(
     ApplicationDBContext dbContext,
     IConfiguration configuration,
     IStorageService storageService,
     IServiceBusService serviceBusService,
+    ICalculatorRunStatusDataValidator runStatusValidator,
     ICalcRelativeYearRequestDtoDataValidator validator,
     IAvailableClassificationsService availableClassificationsService,
     ICalculationRunService calculationRunService)
@@ -247,6 +250,50 @@ public class CalculatorController(
         var runDto = RelativeYearClassificationsMapper.Map(relativeYear, classifications, runs);
 
         return Ok(runDto);
+    }
+
+    [HttpDelete]
+    [Route("calculatorRuns/{runId:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> DeleteCalculatorRun(int runId, CancellationToken cancellationToken)
+    {
+        var run = await dbContext.CalculatorRuns
+            .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken);
+
+        if (run == null || run.CalculatorRunClassificationId == (int)RunClassification.DELETED)
+            return NoContent();
+
+        var request = new CalculatorRunStatusUpdateDto
+        {
+            RunId = runId,
+            ClassificationId = (int) RunClassification.DELETED
+        };
+
+        // Perform basic validation on classification status
+        var validationResult = runStatusValidator.Validate(run, request);
+
+        if (validationResult.IsInvalid)
+            return new ObjectResult(validationResult.Errors) { StatusCode = StatusCodes.Status422UnprocessableEntity };
+
+        // Perform validation to check other designated runs are not in progress and not already completed for the same relative year
+        var designatedRuns = await calculationRunService.GetDesignatedRunsByFinanialYear(run.RelativeYear, cancellationToken);
+
+        validationResult = runStatusValidator.Validate(designatedRuns, run, request);
+
+        if (validationResult.IsInvalid)
+            return new ObjectResult(validationResult.Errors) { StatusCode = StatusCodes.Status422UnprocessableEntity };
+
+        run.CalculatorRunClassificationId = (int) RunClassification.DELETED;
+        run.UpdatedAt = DateTime.UtcNow;
+        run.UpdatedBy = User.GetDisplayName();
+
+        dbContext.CalculatorRuns.Update(run);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return NoContent();
     }
 
     private string DataPreChecksBeforeInitialisingCalculatorRun(RelativeYear relativeYear)

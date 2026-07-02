@@ -48,6 +48,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ConfigurationItems.GetConfigurationValues(),
                 mockStorageService.Object,
                 mockServiceBusService.Object,
+                Mock.Of<ICalculatorRunStatusDataValidator>(),
                 mockValidator.Object,
                 Mock.Of<IAvailableClassificationsService>(),
                 Mock.Of<ICalculationRunService>());

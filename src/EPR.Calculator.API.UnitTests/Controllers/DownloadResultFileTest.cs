@@ -82,6 +82,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
+                    Mock.Of<ICalculatorRunStatusDataValidator>(),
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
                     Mock.Of<ICalculationRunService>());
@@ -131,6 +132,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     this.mockConfig.Object,
                     this.mockStorageService.Object,
                     this.mockServiceBusService.Object,
+                    Mock.Of<ICalculatorRunStatusDataValidator>(),
                     this.mockValidator.Object,
                     Mock.Of<IAvailableClassificationsService>(),
                     Mock.Of<ICalculationRunService>());

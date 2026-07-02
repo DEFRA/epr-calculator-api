@@ -529,6 +529,155 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             result.Errors[0].ErrorMessage.ShouldBe(CommonResources.CalculatorRunNameRequired);
         }
 
+        [TestMethod]
+        public async Task DeleteCalculatorRun_Returns_NoContent_When_Run_Does_Not_Exist()
+        {
+            // Arrange
+            var mockRunStatusValidator = new Mock<ICalculatorRunStatusDataValidator>();
+            var controller = CreateCalculatorController(runStatusValidator: mockRunStatusValidator.Object);
+
+            // Act
+            var result = await controller.DeleteCalculatorRun(999, CancellationToken.None) as NoContentResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            mockRunStatusValidator.Verify(
+                v => v.Validate(It.IsAny<CalculatorRun>(), It.IsAny<CalculatorRunStatusUpdateDto>()),
+                Times.Never);
+        }
+
+        [TestMethod]
+        public async Task DeleteCalculatorRun_Returns_NoContent_When_Run_Already_Deleted()
+        {
+            // Arrange
+            var run = AddCalculatorRun(RunClassification.DELETED);
+
+            var mockRunStatusValidator = new Mock<ICalculatorRunStatusDataValidator>();
+            var controller = CreateCalculatorController(runStatusValidator: mockRunStatusValidator.Object);
+
+            // Act
+            var result = await controller.DeleteCalculatorRun(run.Id, CancellationToken.None) as NoContentResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            mockRunStatusValidator.Verify(
+                v => v.Validate(It.IsAny<CalculatorRun>(), It.IsAny<CalculatorRunStatusUpdateDto>()),
+                Times.Never);
+        }
+
+        [TestMethod]
+        public async Task DeleteCalculatorRun_Returns_UnprocessableEntity_When_Run_Status_Validation_Fails()
+        {
+            // Arrange
+            var run = AddCalculatorRun(RunClassification.UNCLASSIFIED);
+
+            var mockRunStatusValidator = new Mock<ICalculatorRunStatusDataValidator>();
+            mockRunStatusValidator
+                .Setup(v => v.Validate(It.IsAny<CalculatorRun>(), It.IsAny<CalculatorRunStatusUpdateDto>()))
+                .Returns(new GenericValidationResultDto
+                {
+                    IsInvalid = true,
+                    Errors = new List<string> { "Run cannot be deleted." },
+                });
+
+            var controller = CreateCalculatorController(runStatusValidator: mockRunStatusValidator.Object);
+
+            // Act
+            var result = await controller.DeleteCalculatorRun(run.Id, CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status422UnprocessableEntity);
+            var errors = result.Value as List<string>;
+            errors.ShouldNotBeNull();
+            errors[0].ShouldBe("Run cannot be deleted.");
+            DbContext.CalculatorRuns.Single(r => r.Id == run.Id)
+                .CalculatorRunClassificationId.ShouldBe((int)RunClassification.UNCLASSIFIED);
+        }
+
+        [TestMethod]
+        public async Task DeleteCalculatorRun_Returns_UnprocessableEntity_When_Designated_Runs_Validation_Fails()
+        {
+            // Arrange
+            var run = AddCalculatorRun(RunClassification.UNCLASSIFIED);
+            var designatedRuns = new List<CalculatorRunDto>();
+
+            var mockRunStatusValidator = new Mock<ICalculatorRunStatusDataValidator>();
+            mockRunStatusValidator
+                .Setup(v => v.Validate(It.IsAny<CalculatorRun>(), It.IsAny<CalculatorRunStatusUpdateDto>()))
+                .Returns(new GenericValidationResultDto());
+            mockRunStatusValidator
+                .Setup(v => v.Validate(designatedRuns, It.IsAny<CalculatorRun>(), It.IsAny<CalculatorRunStatusUpdateDto>()))
+                .Returns(new GenericValidationResultDto
+                {
+                    IsInvalid = true,
+                    Errors = new List<string> { "Another designated run is in progress." },
+                });
+
+            var mockCalculationRunService = new Mock<ICalculationRunService>();
+            mockCalculationRunService
+                .Setup(s => s.GetDesignatedRunsByFinanialYear(run.RelativeYear, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(designatedRuns);
+
+            var controller = CreateCalculatorController(
+                runStatusValidator: mockRunStatusValidator.Object,
+                calculationRunService: mockCalculationRunService.Object);
+
+            // Act
+            var result = await controller.DeleteCalculatorRun(run.Id, CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status422UnprocessableEntity);
+            var errors = result.Value as List<string>;
+            errors.ShouldNotBeNull();
+            errors[0].ShouldBe("Another designated run is in progress.");
+            DbContext.CalculatorRuns.Single(r => r.Id == run.Id)
+                .CalculatorRunClassificationId.ShouldBe((int)RunClassification.UNCLASSIFIED);
+        }
+
+        [TestMethod]
+        public async Task DeleteCalculatorRun_Marks_Run_As_Deleted_When_Validation_Passes()
+        {
+            // Arrange
+            var run = AddCalculatorRun(RunClassification.UNCLASSIFIED);
+            var designatedRuns = new List<CalculatorRunDto>();
+
+            var mockRunStatusValidator = new Mock<ICalculatorRunStatusDataValidator>();
+            mockRunStatusValidator
+                .Setup(v => v.Validate(
+                    It.Is<CalculatorRun>(r => r.Id == run.Id),
+                    It.Is<CalculatorRunStatusUpdateDto>(dto =>
+                        dto.RunId == run.Id && dto.ClassificationId == (int)RunClassification.DELETED)))
+                .Returns(new GenericValidationResultDto());
+            mockRunStatusValidator
+                .Setup(v => v.Validate(
+                    designatedRuns,
+                    It.Is<CalculatorRun>(r => r.Id == run.Id),
+                    It.Is<CalculatorRunStatusUpdateDto>(dto =>
+                        dto.RunId == run.Id && dto.ClassificationId == (int)RunClassification.DELETED)))
+                .Returns(new GenericValidationResultDto());
+
+            var mockCalculationRunService = new Mock<ICalculationRunService>();
+            mockCalculationRunService
+                .Setup(s => s.GetDesignatedRunsByFinanialYear(run.RelativeYear, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(designatedRuns);
+
+            var controller = CreateCalculatorController(
+                runStatusValidator: mockRunStatusValidator.Object,
+                calculationRunService: mockCalculationRunService.Object);
+
+            // Act
+            var result = await controller.DeleteCalculatorRun(run.Id, CancellationToken.None) as NoContentResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            var deletedRun = DbContext.CalculatorRuns.Single(r => r.Id == run.Id);
+            deletedRun.CalculatorRunClassificationId.ShouldBe((int)RunClassification.DELETED);
+            deletedRun.UpdatedBy.ShouldBe("TestUser");
+            deletedRun.UpdatedAt.ShouldNotBeNull();
+        }
+
         private static ControllerContext CreateAuthenticatedControllerContext(string userName = "TestUser")
         {
             var identity = new GenericIdentity(userName);
@@ -541,19 +690,37 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private CalculatorController CreateCalculatorController(
             IConfiguration? configuration = null,
             ICalcRelativeYearRequestDtoDataValidator? validator = null,
-            IAvailableClassificationsService? availableClassificationsService = null)
+            IAvailableClassificationsService? availableClassificationsService = null,
+            ICalculatorRunStatusDataValidator? runStatusValidator = null,
+            ICalculationRunService? calculationRunService = null)
         {
             return new CalculatorController(
                 DbContext,
                 configuration ?? ConfigurationItems.GetConfigurationValues(),
                 Mock.Of<IStorageService>(),
                 Mock.Of<IServiceBusService>(),
+                runStatusValidator ?? Mock.Of<ICalculatorRunStatusDataValidator>(),
                 validator ?? Mock.Of<ICalcRelativeYearRequestDtoDataValidator>(),
                 availableClassificationsService ?? Mock.Of<IAvailableClassificationsService>(),
-                Mock.Of<ICalculationRunService>())
+                calculationRunService ?? Mock.Of<ICalculationRunService>())
             {
                 ControllerContext = CreateAuthenticatedControllerContext(),
             };
+        }
+
+        private CalculatorRun AddCalculatorRun(RunClassification classification)
+        {
+            var run = new CalculatorRun
+            {
+                Name = "Test run to delete",
+                RelativeYear = new RelativeYear(2024),
+                CreatedBy = "Test user",
+                CreatedAt = DateTime.UtcNow,
+                CalculatorRunClassificationId = (int)classification,
+            };
+            DbContext.CalculatorRuns.Add(run);
+            DbContext.SaveChanges();
+            return run;
         }
 
         private void AddDefaultParameterSettings(RelativeYear relativeYear, DateTime? effectiveTo = null)
