@@ -8631,3 +8631,91 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260703151838_AddProducerFeesAndRenameProjected'
+)
+BEGIN
+    EXEC sp_rename N'[producer_reported_material_projected]', N'producer_material_packaging';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260703151838_AddProducerFeesAndRenameProjected'
+)
+BEGIN
+    EXEC sp_rename N'[producer_material_packaging].[IX_producer_reported_material_projected_material_id]', N'IX_producer_material_packaging_material_id', N'INDEX';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260703151838_AddProducerFeesAndRenameProjected'
+)
+BEGIN
+    EXEC sp_rename N'[producer_material_packaging].[IX_producer_reported_material_projected_producer_detail_id]', N'IX_producer_material_packaging_producer_detail_id', N'INDEX';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260703151838_AddProducerFeesAndRenameProjected'
+)
+BEGIN
+    DECLARE @var57 sysname;
+    SELECT @var57 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_billing_file_metadata]') AND [c].[name] = N'billing_json_filename');
+    IF @var57 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_billing_file_metadata] DROP CONSTRAINT [' + @var57 + '];');
+    ALTER TABLE [calculator_run_billing_file_metadata] ALTER COLUMN [billing_json_filename] nvarchar(400) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260703151838_AddProducerFeesAndRenameProjected'
+)
+BEGIN
+    DECLARE @var58 sysname;
+    SELECT @var58 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_billing_file_metadata]') AND [c].[name] = N'billing_csv_filename');
+    IF @var58 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_billing_file_metadata] DROP CONSTRAINT [' + @var58 + '];');
+    ALTER TABLE [calculator_run_billing_file_metadata] ALTER COLUMN [billing_csv_filename] nvarchar(400) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260703151838_AddProducerFeesAndRenameProjected'
+)
+BEGIN
+    CREATE TABLE [calc_result_producer_fees] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [details] json NOT NULL,
+        [total] json NOT NULL,
+        CONSTRAINT [PK_calc_result_producer_fees] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260703151838_AddProducerFeesAndRenameProjected'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260703151838_AddProducerFeesAndRenameProjected', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
