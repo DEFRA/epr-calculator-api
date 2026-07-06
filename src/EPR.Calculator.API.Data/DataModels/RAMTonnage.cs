@@ -25,6 +25,6 @@ namespace EPR.Calculator.API.Data.DataModels
         public static decimal GetReportedTonnage(List<ProducerReportedMaterial> reportedMaterials, string packagingType, Func<ProducerReportedMaterial, decimal?> tonnageFunc) =>
             reportedMaterials.Where(p => p.PackagingType == packagingType).Sum(t => tonnageFunc(t) ?? 0);
 
-        public static RamTonnage Empty = new RamTonnage();
+        public static RamTonnage Empty => new RamTonnage();
     }
 }

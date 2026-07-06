@@ -6,6 +6,6 @@ namespace EPR.Calculator.API.Data.DataModels
         public decimal? Amber { get; init; }
         public decimal? Green { get; init; }
         public decimal? Total { get; init; }
-        public static RamTonnageGroup Empty = new RamTonnageGroup();
+        public static RamTonnageGroup Empty => new RamTonnageGroup();
     }
 }

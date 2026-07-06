@@ -12,7 +12,7 @@
 
         public decimal Total => England + Wales + Scotland + NorthernIreland;
 
-        public static readonly ByCountryCost Empty =
+        public static ByCountryCost Empty =>
             new(){ England = 0, Wales = 0, Scotland = 0, NorthernIreland = 0 };
 
         public static ByCountryCost operator *(ByCountryCost a, decimal scalar) =>
@@ -68,7 +68,7 @@
 
         public decimal Total => England + Wales + Scotland + NorthernIreland;
 
-        public static readonly ByCountryApportionment Empty =
+        public static ByCountryApportionment Empty =>
             new(){ England = 0, Wales = 0, Scotland = 0, NorthernIreland = 0 };
 
         public static ByCountryCost operator *(decimal value, ByCountryApportionment a) =>

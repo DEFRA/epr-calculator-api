@@ -8,7 +8,7 @@ public class FeeWithBadDebt
 
     public required ByCountryCost ByCountry { get; set; }
 
-    public static readonly FeeWithBadDebt Empty = new()
+    public static FeeWithBadDebt Empty => new()
     {
         FeeWithoutBadDebt = 0,
         BadDebt           = 0,
