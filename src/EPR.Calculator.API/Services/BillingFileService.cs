@@ -35,7 +35,7 @@ namespace EPR.Calculator.API.Services
             // * Billing file has not been sent to FSS (i.e. classification is not 'Completed')
             // * Not already Running OR has been for more than 1 hour (i.e. 'stuck' due to unclean shutdown of the processor)
             return Util.AcceptableRunStatusForBillingInstructions().Contains(run.CalculatorRunClassificationId)
-                   && (run.BillingRunStatus != BillingRunStatus.Running 
+                   && (run.BillingRunStatus != BillingRunStatus.Running
                        || run.BillingRunStartedAt?.AddHours(1) < DateTime.UtcNow);
         }
 
@@ -45,6 +45,7 @@ namespace EPR.Calculator.API.Services
             ProduceBillingInstuctionRequestDto produceBillingInstuctionRequestDto,
             CancellationToken cancellationToken)
         {
+
             var calculatorRun = await applicationDBContext.CalculatorRuns
                         .SingleOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatusForBillingInstructions().Contains(x.CalculatorRunClassificationId), cancellationToken)
                         .ConfigureAwait(false);
@@ -189,6 +190,7 @@ namespace EPR.Calculator.API.Services
                 PageSize = requestDto.PageSize,
                 RunName = run.Name,
                 CalculatorRunId = run.Id,
+                TotalRecords = await query.CountAsync(cancellationToken)
             };
 
             await this.PopulatePagedBillingInstructionsAsync(query, requestDto, run.Id, run.RelativeYear, response, cancellationToken);
@@ -439,7 +441,6 @@ namespace EPR.Calculator.API.Services
         {
             var groupedStatusResult = await groupedStatus.ToListAsync(cancellationToken);
 
-            response.TotalRecords = groupedStatusResult.Sum(s => s.TotalRecords);
             response.TotalAcceptedRecords = groupedStatusResult.Find(s => s.Status == BillingStatus.Accepted.ToString())?.TotalRecords ?? 0;
             response.TotalRejectedRecords = groupedStatusResult.Find(s => s.Status == BillingStatus.Rejected.ToString())?.TotalRecords ?? 0;
             response.TotalPendingRecords = groupedStatusResult.Find(s => s.Status == BillingStatus.Pending.ToString())?.TotalRecords ?? 0;
