@@ -153,9 +153,6 @@
   <data name="NotAValidClassificationStatus" xml:space="preserve">
     <value>Classification status is not valid for this '{0}' run id to perform requested operation.</value>
   </data>
-  <data name="PolicyName" xml:space="preserve">
-    <value>AllowAllOrigins</value>
-  </data>
   <data name="ProducerBillingInstructionsDefaultPageNumber" xml:space="preserve">
     <value>1</value>
   </data>

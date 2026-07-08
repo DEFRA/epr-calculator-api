@@ -699,15 +699,6 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AllowAllOrigins.
-        /// </summary>
-        public static string PolicyName {
-            get {
-                return ResourceManager.GetString("PolicyName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to 1.
         /// </summary>
         public static string ProducerBillingInstructionsDefaultPageNumber {
