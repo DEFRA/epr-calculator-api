@@ -2,7 +2,7 @@
 
 namespace EPR.Calculator.API.Data.DataModels;
 
-public class ProducerFeeDetail
+public record ProducerFeeDetail
 {
     public required int ProducerId { get; set; }
 

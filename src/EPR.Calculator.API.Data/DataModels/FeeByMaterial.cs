@@ -1,6 +1,6 @@
 ﻿namespace EPR.Calculator.API.Data.DataModels;
 
-public class MaterialFee
+public record MaterialFee
 {
     public required string MaterialCode { get; set; }
 

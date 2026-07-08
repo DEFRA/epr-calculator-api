@@ -1,6 +1,6 @@
 ﻿namespace EPR.Calculator.API.Data.DataModels;
 
-public class DisposalFee
+public record DisposalFee
 {
     public required RamTonnage HhTonnage { get; set; }
 
@@ -29,4 +29,16 @@ public class DisposalFee
     public decimal? PreviousInvoicedTonnage { get; set; }
 
     public decimal? TonnageChange { get; set; }
+
+    public static DisposalFee Empty => new DisposalFee { 
+        HhTonnage = RamTonnage.Empty,
+        PbTonnage = RamTonnage.Empty,
+        HdcTonnage = RamTonnage.Empty,
+        TotalTonnage = RamTonnage.Empty,
+        FeeWithBadDebtByCountry = ByCountryCost.Empty,
+        ActionedSmcwTonnage = RamTonnageGroup.Empty,
+        NetTonnage = RamTonnageGroup.Empty,
+        PricePerTonne = RamTonnageGroup.Empty,
+        Fee = RamTonnageGroup.Empty
+    };
 }
