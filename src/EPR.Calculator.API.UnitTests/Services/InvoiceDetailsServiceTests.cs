@@ -58,9 +58,14 @@ namespace EPR.Calculator.API.UnitTests.Services
             const decimal totalProducerBill = 1000m;
             const decimal liabilityDifference = 500m;
 
-            InvoiceDetailsService.GetOutstandingBalance("Rejected", "INITIAL", totalProducerBill, null).ShouldBe(totalProducerBill);
-            InvoiceDetailsService.GetOutstandingBalance("Rejected", "REBILL", totalProducerBill, liabilityDifference).ShouldBe(liabilityDifference);
+            InvoiceDetailsService.GetOutstandingBalance("Rejected", "INITIAL", totalProducerBill, liabilityDifference).ShouldBe(totalProducerBill);
+            InvoiceDetailsService.GetOutstandingBalance("Rejected", "REBILL" , totalProducerBill, liabilityDifference).ShouldBe(liabilityDifference);
             InvoiceDetailsService.GetOutstandingBalance("Accepted", "INITIAL", totalProducerBill, liabilityDifference).ShouldBeNull();
+            InvoiceDetailsService.GetOutstandingBalance("Accepted", "REBILL" , totalProducerBill, liabilityDifference).ShouldBeNull();
+            InvoiceDetailsService.GetOutstandingBalance(null      , "INITIAL", totalProducerBill, liabilityDifference).ShouldBeNull();
+            InvoiceDetailsService.GetOutstandingBalance(null      , "REBILL" , totalProducerBill, liabilityDifference).ShouldBeNull();
+            InvoiceDetailsService.GetOutstandingBalance("Rejected", "INITIAL", null             , liabilityDifference).ShouldBeNull();
+            InvoiceDetailsService.GetOutstandingBalance("Rejected", "REBILL" , totalProducerBill, null               ).ShouldBeNull();
         }
 
         [TestMethod]
