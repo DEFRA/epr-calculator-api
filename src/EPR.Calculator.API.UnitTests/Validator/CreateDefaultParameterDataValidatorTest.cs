@@ -113,7 +113,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 ParameterFileName = "TestFileName",
             };
             var vr = Validator.Validate(dto);
-            Assert.AreEqual(Data.Count, vr.Errors.Count(error => error.Message.Contains("Enter the")));
+            Assert.AreEqual(Data.Count, vr.Errors.Count);
         }
 
         [TestMethod]
@@ -139,7 +139,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 ParameterFileName = "TestFileName",
             };
             var vr = Validator.Validate(dto);
-            Assert.AreEqual(1, vr.Errors.Count(error => error.Message.Contains("Expecting only One with Parameter Type")));
+            Assert.AreEqual(1, vr.Errors.Count(error => error.Message.Contains("duplicate")));
         }
 
         [TestMethod]
@@ -162,13 +162,19 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 SchemeParameterTemplateValues = schemeParameterTemplateValues,
                 ParameterFileName = "TestFileName",
             };
-            var vr = Validator.Validate(dto);
-            Assert.AreEqual(1, vr.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium can only include numbers, commas and decimal points")));
-            Assert.AreEqual(1, vr.Errors.Count(error => error.Message.Contains("The Bad debt provision percentage percentage increase can only include numbers, commas, decimal points and a percentage symbol (%)")));
-            Assert.AreEqual(1, vr.Errors.Count(error => error.Message.Contains("Materiality threshold for Amount Decrease can only include numbers, commas and decimal points")));
-            Assert.AreEqual(1, vr.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage increase can only include numbers, commas, decimal points and a percentage symbol (%)")));
-            Assert.AreEqual(1, vr.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage decrease can only include numbers, commas, decimal points and a percentage symbol (%)")));
-            Assert.AreEqual(1, vr.Errors.Count(error => error.Message.Contains("Tonnage change threshold for Amount Increase can only include numbers, commas and decimal points")));
+
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    "The parameter COMC-AL can only include numbers, commas and decimal points",
+                    "The parameter BADEBT-P can only include numbers, commas, decimal points and a percentage symbol (%)",
+                    "The parameter MATT-AD can only include numbers, commas and decimal points",
+                    "The parameter MATT-PI can only include numbers, commas, decimal points and a percentage symbol (%)",
+                    "The parameter MATT-PD can only include numbers, commas, decimal points and a percentage symbol (%)",
+                    "The parameter TONT-AI can only include numbers, commas and decimal points",
+                    "The parameter REDM-RF can only include numbers, commas and decimal points"
+                },
+                Validator.Validate(dto).Errors.Select(x => x.Message).ToList());
         }
 
         [TestMethod]
@@ -192,14 +198,23 @@ namespace EPR.Calculator.API.UnitTests.Validator
             };
 
             var vr = Validator.Validate(dto);
-            Assert.AreEqual(7, vr?.Errors.Count(error => error.Message.Contains("must be between")));
-            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("Communication costs for Aluminium must be between £0 and £999999999.99")));
-            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("The Bad debt provision percentage must be between 0% and 999.99%")));
-            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("Materiality threshold for Amount Decrease must be between £-999999999.99 and £0")));
-            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage increase must be between 0% and 999.99%")));
-            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("The Materiality threshold percentage decrease must be between -999.99% and 0%")));
-            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("Tonnage change threshold for Amount Increase must be between £0 and £999999999.99")));
-            Assert.AreEqual(1, vr?.Errors.Count(error => error.Message.Contains("Red modulation factor for Modulation Factor must be between 1.000 and 2.000")));
+            foreach (var e in vr.Errors)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    "The parameter COMC-AL must be between £0 and £999999999.99",
+                    "The parameter BADEBT-P must be between 0% and 999.99%",
+                    "The parameter MATT-AD must be between £-999999999.99 and £0",
+                    "The parameter MATT-PI must be between 0% and 999.99%",
+                    "The parameter MATT-PD must be between -999.99% and 0%",
+                    "The parameter TONT-AI must be between £0 and £999999999.99",
+                    "The parameter REDM-RF must be between 1.000 and 2.000"
+                },
+                Validator.Validate(dto).Errors.Select(x => x.Message).ToList());
         }
 
         private static string GetInvalidValueForUniqueRef(string parameterUniqueReferenceId)

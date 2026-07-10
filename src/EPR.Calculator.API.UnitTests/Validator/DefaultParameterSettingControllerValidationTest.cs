@@ -6,6 +6,7 @@ using EPR.Calculator.API.UnitTests.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Azure.Amqp.Framing;
 
 namespace EPR.Calculator.API.UnitTests.Validator
 {
@@ -122,11 +123,19 @@ namespace EPR.Calculator.API.UnitTests.Validator
 
             var errors = actionResult?.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
             Assert.IsNotNull(errors);
-            Assert.AreEqual(1, errors.Count());
-            var firstError = errors.First();
-            Assert.AreEqual("BADEBT-P", firstError.ParameterUniqueRef);
-            Assert.AreEqual("Bad debt provision", firstError.ParameterCategory);
-            Assert.AreEqual("Percentage", firstError.ParameterType);
+
+            foreach (var error in errors)
+            {
+                Console.WriteLine(error.Message);
+            }
+
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    "The parameter BADEBT-P is missing. Add the parameter to the file.",
+                    "The parameter Somehthing else is an unexpected parameter. Remove it from the file."
+                },
+                errors.Select(x => x.Message).ToList());
         }
     }
 }

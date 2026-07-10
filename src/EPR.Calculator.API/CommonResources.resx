@@ -354,41 +354,44 @@
   <data name="InternalServerErrorException" xml:space="preserve">
     <value>500InternalServerError Exception :{0}</value>
   </data>
-  <data name="ExpectingParameterType" xml:space="preserve">
-    <value>Expecting only One with Parameter Type {0}</value>
-  </data>
-  <data name="PercentageIncrease" xml:space="preserve">
-    <value>The {0} percentage increase </value>
-  </data>
-  <data name="PercentageDecrease" xml:space="preserve">
-    <value>The {0} percentage decrease </value>
+  <data name="DuplicateDefaultParameter" xml:space="preserve">
+    <value>The parameter {0} is duplicated. Remove the duplicated row in the file.</value>
   </data>
   <data name="CanOnlyIncudeNumbersAndPercentage" xml:space="preserve">
-    <value>can only include numbers, commas, decimal points and a percentage symbol (%)</value>
+    <value>The parameter {0} can only include numbers, commas, decimal points and a percentage symbol (%)</value>
   </data>
   <data name="CanOnlyIncludeNumbers" xml:space="preserve">
-    <value>can only include numbers, commas and decimal points</value>
+    <value>The parameter {0} can only include numbers, commas and decimal points</value>
   </data>
   <data name="ParameterType" xml:space="preserve">
-    <value>Parameter Type {0} </value>
+    <value>Parameter Type {0}</value>
   </data>
   <data name="ParameterCategory" xml:space="preserve">
-    <value>and Parameter Category {0} </value>
+    <value>and Parameter Category {0}</value>
   </data>
   <data name="ParameterUniqueRef" xml:space="preserve">
     <value>Parameter Unique ref {0}</value>
   </data>
   <data name="MustBeBetween" xml:space="preserve">
-    <value>must be between {0} and {1} </value>
+    <value>The parameter {0} must be between {1} and {2}</value>
   </data>
-  <data name="EnterDefaultParameterType" xml:space="preserve">
-    <value>Enter the {0} for {1}</value>
+  <data name="MustBeBetweenWithCurrency" xml:space="preserve">
+    <value>The parameter {0} must be between £{1} and £{2}</value>
   </data>
-  <data name="EnterTheIncrease" xml:space="preserve">
-    <value>Enter the {0} increase</value>
+  <data name="MustBeBetweenWithPercentage" xml:space="preserve">
+    <value>The parameter {0} must be between {1}% and {2}%</value>
   </data>
-  <data name="EnterTheDecrease" xml:space="preserve">
-    <value>Enter the {0} decrease</value>
+  <data name="MustBeBetweenWithTons" xml:space="preserve">
+    <value>The parameter {0} must be between {1} and {2} tons</value>
+  </data>
+  <data name="EnterDefaultParameter" xml:space="preserve">
+    <value>The value for {0} is blank. Add a value for {0}</value>
+  </data>
+  <data name="MissingDefaultParameter" xml:space="preserve">
+    <value>The parameter {0} is missing. Add the parameter to the file.</value>
+  </data>
+  <data name="UnexpectedDefaultParameter" xml:space="preserve">
+    <value>The parameter {0} is an unexpected parameter. Remove it from the file.</value>
   </data>
   <data name="InvalidRunClassifications" xml:space="preserve">
     <value>Invalid run classifications.</value>
@@ -401,18 +404,6 @@
   </data>
   <data name="InvalidClassificationId" xml:space="preserve">
     <value>Invalid ClassificationId</value>
-  </data>
-  <data name="MustBeBetweenWithCurrency" xml:space="preserve">
-    <value>must be between £{0} and £{1}</value>
-  </data>
-  <data name="EnterThePercentageIncrease" xml:space="preserve">
-    <value>Enter the {0} percentage increase</value>
-  </data>
-  <data name="EnterThePercentageDecrease" xml:space="preserve">
-    <value>Enter the {0} percentage decrease</value>
-  </data>
-  <data name="MustBeBetweenWithPercentage" xml:space="preserve">
-    <value>must be between {0}% and {1}%</value>
   </data>
   <data name="UnableToChangeStatusToCompleted" xml:space="preserve">
     <value>Classification {0} is not valid to be completed.</value>

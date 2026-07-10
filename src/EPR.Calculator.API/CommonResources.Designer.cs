@@ -240,13 +240,30 @@ namespace EPR.Calculator.API {
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string similar to Missing value for {0}.
+        /// </summary>
+        public static string EnterDefaultParameter {
+            get {
+                return ResourceManager.GetString("EnterDefaultParameter", resourceCulture);
+            }
+        }
 
         /// <summary>
-        ///   Looks up a localized string similar to Enter the {0} for {1}.
+        ///   Looks up a localized string similar to Missing parameter {0}.
         /// </summary>
-        public static string EnterDefaultParameterType {
+        public static string MissingDefaultParameter {
             get {
-                return ResourceManager.GetString("EnterDefaultParameterType", resourceCulture);
+                return ResourceManager.GetString("MissingDefaultParameter", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unexpected parameter {0}.
+        /// </summary>
+        public static string UnexpectedDefaultParameter {
+            get {
+                return ResourceManager.GetString("UnexpectedDefaultParameter", resourceCulture);
             }
         }
 
@@ -269,24 +286,6 @@ namespace EPR.Calculator.API {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Enter the {0} percentage decrease.
-        /// </summary>
-        public static string EnterThePercentageDecrease {
-            get {
-                return ResourceManager.GetString("EnterThePercentageDecrease", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Enter the {0} percentage increase.
-        /// </summary>
-        public static string EnterThePercentageIncrease {
-            get {
-                return ResourceManager.GetString("EnterThePercentageIncrease", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Enter the total costs for {0} in {1}.
         /// </summary>
         public static string EnterTotalCosts {
@@ -298,9 +297,9 @@ namespace EPR.Calculator.API {
         /// <summary>
         ///   Looks up a localized string similar to Expecting only One with Parameter Type {0}.
         /// </summary>
-        public static string ExpectingParameterType {
+        public static string DuplicateDefaultParameter {
             get {
-                return ResourceManager.GetString("ExpectingParameterType", resourceCulture);
+                return ResourceManager.GetString("DuplicateDefaultParameter", resourceCulture);
             }
         }
 
@@ -548,6 +547,15 @@ namespace EPR.Calculator.API {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to must be between {0} and {1}tons.
+        /// </summary>
+        public static string MustBeBetweenWithTons {
+            get {
+                return ResourceManager.GetString("MustBeBetweenWithTons", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to No billing file metadata for Run Id {0}.
         /// </summary>
         public static string NoBillingFileMetadataForRunId {
@@ -706,24 +714,6 @@ namespace EPR.Calculator.API {
         public static string ParameterUniqueRef {
             get {
                 return ResourceManager.GetString("ParameterUniqueRef", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to The {0} percentage decrease .
-        /// </summary>
-        public static string PercentageDecrease {
-            get {
-                return ResourceManager.GetString("PercentageDecrease", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to The {0} percentage increase .
-        /// </summary>
-        public static string PercentageIncrease {
-            get {
-                return ResourceManager.GetString("PercentageIncrease", resourceCulture);
             }
         }
 
