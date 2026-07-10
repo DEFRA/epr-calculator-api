@@ -10,13 +10,14 @@ namespace EPR.Calculator.API.Validators
             this.RuleFor(x => x.RelativeYear)
                 .NotEmpty()
                 .WithMessage(CommonResources.RelativeYearRequired);
+
             this.RuleFor(x => x.SchemeParameterTemplateValues)
-                .NotNull()
-                .Must(x => x.Count() == CommonResources.DefaultParameterUniqueReferences.Split(',').Length)
-                .WithMessage(string.Format(CommonResources.SchemeParameterTemplateValuesMissing, CommonResources.DefaultParameterUniqueReferences.Split(',').Length));
+                .NotNull();
+
             this.RuleFor(x => x.ParameterFileName)
                 .NotEmpty()
                 .WithMessage(CommonResources.FileNameRequired);
+
             this.RuleFor(x => x.ParameterFileName)
                 .MaximumLength(256)
                 .WithMessage(CommonResources.MaxFileNameLength);
