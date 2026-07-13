@@ -63,7 +63,7 @@ public static class ServiceRegistration
             });
         });
 
-        services.AddSingleton<IBlobStorage, BlobStorage>();
+        services.AddSingleton<IBlobStorageService, BlobStorageService>();
 
         return services;
     }
@@ -91,7 +91,7 @@ public static class ServiceRegistration
             });
         });
 
-        services.AddSingleton<IServiceBus, ServiceBusWrapper>();
+        services.AddSingleton<IServiceBusService, ServiceBusService>();
 
         return services;
     }
