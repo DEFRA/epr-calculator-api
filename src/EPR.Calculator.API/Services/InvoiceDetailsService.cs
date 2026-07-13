@@ -58,12 +58,15 @@ namespace EPR.Calculator.Service.Function.Services
             decimal? totalProducerBillWithBadDebtProvision,
             decimal? liabilityDifference)
         {
-            return (billingInstructionAcceptReject, suggestedBillingInstruction) switch
+            if (billingInstructionAcceptReject is null ||
+                billingInstructionAcceptReject == "Accepted")
             {
-                (not "Accepted", "INITIAL") => totalProducerBillWithBadDebtProvision,
-                (not "Accepted", _) => liabilityDifference,
-                _ => null
-            };
+                return null;
+            }
+
+            return suggestedBillingInstruction == "INITIAL"
+                ? totalProducerBillWithBadDebtProvision
+                : liabilityDifference;
         }
 
         public async Task<int> InsertInvoiceDetailsAtProducerLevel(int runId, DateTime instructionConfirmedDate, string instructionConfirmedBy, CancellationToken cancellationToken)
