@@ -1,64 +1,105 @@
-﻿using System.Net;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Principal;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
-using EPR.Calculator.API.Services.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
-namespace EPR.Calculator.API.UnitTests.Controllers
+namespace EPR.Calculator.API.UnitTests.Controllers;
+
+[TestClass]
+public class ProducerBillingFileControllerTests
 {
-    [TestClass]
-    public class ProducerBillingFileControllerTests
+    private const int RunId = 1;
+    private const string UserName = "TestUser";
+
+    private Mock<IBillingFileService> billingFileServiceMock = null!;
+    private Mock<IServiceBusService> serviceBusMock = null!;
+    private ProducerBillingFileController controller = null!;
+
+    [TestInitialize]
+    public void Setup()
     {
-        private readonly ProducerBillingFileController producerFileControllerTest;
-
-        private readonly Mock<IBillingFileService> billingFileServiceMock;
-
-        private readonly Mock<IServiceBusService> serviceBusServiceMock;
-
-        private readonly Mock<IConfiguration> configMock;
-
-        public ProducerBillingFileControllerTests()
+        billingFileServiceMock = new Mock<IBillingFileService>();
+        serviceBusMock = new Mock<IServiceBusService>();
+        controller = new ProducerBillingFileController(
+            billingFileServiceMock.Object,
+            serviceBusMock.Object)
         {
-            this.billingFileServiceMock = new Mock<IBillingFileService>();
-            this.serviceBusServiceMock = new Mock<IServiceBusService>();
-            this.configMock = new Mock<IConfiguration>();
-            this.producerFileControllerTest = new ProducerBillingFileController(this.billingFileServiceMock.Object, this.serviceBusServiceMock.Object, this.configMock.Object);
+            ControllerContext = CreateAuthenticatedControllerContext(UserName),
+        };
+    }
 
-            // Mock User Claims
-            // Set up authorisation.
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-            var context = new DefaultHttpContext { User = principal };
-            this.producerFileControllerTest.ControllerContext = new ControllerContext { HttpContext = context };
-        }
+    [TestMethod]
+    [DataRow(HttpStatusCode.OK, "OK")]
+    [DataRow(HttpStatusCode.BadRequest, "Bad Request.")]
+    [DataRow(HttpStatusCode.UnprocessableEntity, "Unprocessable Entity")]
+    public async Task ProducerBillingInstructions_ReturnsStatusCodeAndMessageFromService(
+        HttpStatusCode statusCode,
+        string message)
+    {
+        // Arrange
+        SetupBillingFileService(statusCode, message);
 
-        [TestMethod]
-        [DataRow(StatusCodes.Status200OK, "OK")]
-        [DataRow(StatusCodes.Status400BadRequest, "Bad Request.")]
-        [DataRow(StatusCodes.Status422UnprocessableEntity, "Unprocessable Entity")]
-        public async Task ProducerBillingInstructions_ShouldReturn202Accepted_WhenUpdateSuccessful(
-            int httpStatusCode,
-            string message)
-        {
-            // Arrange
-            this.billingFileServiceMock.Setup(s => s.StartGeneratingBillingFileAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new ServiceProcessResponseDto { StatusCode = (HttpStatusCode)httpStatusCode });
+        // Act
+        var result = await controller.ProducerBillingInstructions(RunId, CancellationToken.None) as ObjectResult;
 
-            this.serviceBusServiceMock.Setup(s => s.SendMessage(It.IsAny<string>(), It.IsAny<BillingFileGenerationMessage>()));
-            this.configMock.Setup(s => s.GetSection(It.IsAny<string>()).GetSection(It.IsAny<string>()).Value).Returns("test");
+        // Assert
+        result.ShouldNotBeNull();
+        result.StatusCode.ShouldBe((int)statusCode);
+        result.Value.ShouldBe(message);
+    }
 
-            // Act
-            var result = await this.producerFileControllerTest.ProducerBillingInstructions(1, CancellationToken.None) as ObjectResult;
+    [TestMethod]
+    public async Task ProducerBillingInstructions_SendsBillingMessageWithRunAndApprover_WhenServiceReturnsOk()
+    {
+        // Arrange
+        SetupBillingFileService(HttpStatusCode.OK);
 
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(httpStatusCode, result.StatusCode);
-        }
+        // Act
+        await controller.ProducerBillingInstructions(RunId, CancellationToken.None);
+
+        // Assert
+        serviceBusMock.Verify(
+            s => s.SendMessage(It.Is<BillingFileGenerationMessage>(
+                m => m.CalculatorRunId == RunId && m.ApprovedBy == UserName)),
+            Times.Once);
+    }
+
+    [TestMethod]
+    [DataRow(HttpStatusCode.BadRequest)]
+    [DataRow(HttpStatusCode.UnprocessableEntity)]
+    [DataRow(HttpStatusCode.InternalServerError)]
+    public async Task ProducerBillingInstructions_DoesNotSendBillingMessage_WhenServiceDoesNotReturnOk(
+        HttpStatusCode statusCode)
+    {
+        // Arrange
+        SetupBillingFileService(statusCode);
+
+        // Act
+        await controller.ProducerBillingInstructions(RunId, CancellationToken.None);
+
+        // Assert
+        serviceBusMock.Verify(
+            s => s.SendMessage(It.IsAny<BillingFileGenerationMessage>()),
+            Times.Never);
+    }
+
+    private void SetupBillingFileService(HttpStatusCode statusCode, string? message = null)
+    {
+        billingFileServiceMock
+            .Setup(s => s.StartGeneratingBillingFileAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new BillingFileService.Response { StatusCode = statusCode, Message = message });
+    }
+
+    private static ControllerContext CreateAuthenticatedControllerContext(string userName)
+    {
+        var identity = new GenericIdentity(userName);
+        identity.AddClaim(new Claim("name", userName));
+        var principal = new ClaimsPrincipal(identity);
+
+        return new ControllerContext { HttpContext = new DefaultHttpContext { User = principal } };
     }
 }

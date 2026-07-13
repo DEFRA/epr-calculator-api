@@ -5,7 +5,6 @@ using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
-using EPR.Calculator.API.Services.Abstractions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,7 +41,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             // Arrange
             this.billingFileServiceMock.Setup(s => s.UpdateProducerBillingInstructionsAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<ProduceBillingInstuctionRequestDto>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new ServiceProcessResponseDto { StatusCode = (HttpStatusCode)httpStatusCode });
+                .ReturnsAsync(new BillingFileService.Response { StatusCode = (HttpStatusCode)httpStatusCode });
 
             var requestDto = new ProduceBillingInstuctionRequestDto
             {

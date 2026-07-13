@@ -1,4 +1,4 @@
-﻿using EPR.Calculator.API.Controllers;
+using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Services;
@@ -8,132 +8,130 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace EPR.Calculator.API.UnitTests.Controllers
+namespace EPR.Calculator.API.UnitTests.Controllers;
+
+[TestClass]
+public class BillingFileControllerTests
 {
-    [TestClass]
-    public class BillingFileControllerTests
+    private const int RunId = 123;
+    private const string CsvFilename = "billing.csv";
+
+    private Mock<IBlobStorageService> blobStorageMock = null!;
+    private ApplicationDBContext context = null!;
+    private BillingFileController controller = null!;
+
+    [TestInitialize]
+    public void TestInitialize()
     {
-        private readonly BillingFileController billingFileControllerUnderTest;
+        blobStorageMock = new Mock<IBlobStorageService>();
 
-        private readonly Mock<IStorageService> storageServiceMock;
+        var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
+        context = new ApplicationDBContext(dbContextOptions);
+        context.Database.EnsureCreated();
 
-        private readonly ApplicationDBContext context;
+        controller = new BillingFileController(blobStorageMock.Object, context);
+    }
 
-        public BillingFileControllerTests()
+    [TestCleanup]
+    public void TestCleanup()
+    {
+        context.Database.EnsureDeleted();
+        context.Dispose();
+    }
+
+    [TestMethod]
+    public async Task DownloadCsvBillingFile_ReturnsNotFound_WhenBillingMetadataDoesNotExist()
+    {
+        // Arrange (no billing metadata is seeded for the run)
+
+        // Act
+        var result = await controller.DownloadCsvBillingFile(RunId);
+
+        // Assert
+        ShouldBeBillingFileNotFound(result, RunId);
+    }
+
+    [TestMethod]
+    public async Task DownloadCsvBillingFile_ReturnsNotFound_WhenCsvFileMetadataDoesNotExist()
+    {
+        // Arrange
+        SeedBillingMetadata(RunId, CsvFilename);
+
+        // Act
+        var result = await controller.DownloadCsvBillingFile(RunId);
+
+        // Assert
+        ShouldBeBillingFileNotFound(result, RunId);
+    }
+
+    [TestMethod]
+    public async Task DownloadCsvBillingFile_ReturnsNotFound_WhenBlobStreamIsNull()
+    {
+        // Arrange
+        SeedBillingMetadata(RunId, CsvFilename);
+        SeedCsvMetadata(RunId, CsvFilename);
+        blobStorageMock
+            .Setup(x => x.OpenBillingCsvStream(CsvFilename, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Stream?)null);
+
+        // Act
+        var result = await controller.DownloadCsvBillingFile(RunId);
+
+        // Assert
+        ShouldBeBillingFileNotFound(result, RunId);
+    }
+
+    [TestMethod]
+    public async Task DownloadCsvBillingFile_ReturnsCsvFile_WhenBillingFileExists()
+    {
+        // Arrange
+        SeedBillingMetadata(RunId, CsvFilename);
+        SeedCsvMetadata(RunId, CsvFilename);
+        using var stream = new MemoryStream();
+        blobStorageMock
+            .Setup(x => x.OpenBillingCsvStream(CsvFilename, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(stream);
+
+        // Act
+        var result = await controller.DownloadCsvBillingFile(RunId);
+
+        // Assert
+        var fileResult = result.ShouldBeOfType<FileStreamHttpResult>();
+        fileResult.ContentType.ShouldBe("text/csv");
+        fileResult.FileDownloadName.ShouldBe(CsvFilename);
+        blobStorageMock.Verify(x => x.OpenBillingCsvStream(CsvFilename, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    private void SeedBillingMetadata(int runId, string csvFilename)
+    {
+        context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
         {
-            storageServiceMock = new Mock<IStorageService>();
+            CalculatorRunId = runId,
+            BillingCsvFileName = csvFilename,
+            BillingFileCreatedBy = "test-user",
+            BillingFileCreatedDate = DateTime.UtcNow,
+            BillingJsonFileName = csvFilename[..^4] + ".json",
+        });
+        context.SaveChanges();
+    }
 
-            var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-                .UseInMemoryDatabase(databaseName: "PayCal")
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-                .Options;
-            context = new ApplicationDBContext(dbContextOptions);
-            context.Database.EnsureCreated();
-
-            billingFileControllerUnderTest = new BillingFileController(storageServiceMock.Object, context);
-        }
-
-        [TestMethod]
-        public async Task DownloadBillingFile_ReturnsBadRequest_WhenModelStateIsInvalid()
+    private void SeedCsvMetadata(int runId, string csvFilename)
+    {
+        context.CalculatorRunCsvFileMetadata.Add(new CalculatorRunCsvFileMetadata
         {
-            // Arrange
-            billingFileControllerUnderTest.ModelState.AddModelError("key", "error");
+            CalculatorRunId = runId,
+            FileName = csvFilename,
+            BlobUri = $"https://example.com/{csvFilename}",
+        });
+        context.SaveChanges();
+    }
 
-            // Act
-            var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(1);
-
-            // Assert
-            result.ShouldBeOfType<BadRequest<IEnumerable<ModelError>>>();
-        }
-
-        [TestMethod]
-        public async Task DownloadBillingFile_ReturnsNotFound_WhenNoMetadataFound()
-        {
-            // Arrange
-            int runId = 9999; // Use a runId that does not exist in the in-memory DB
-
-            // Act
-            var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
-
-            // Assert
-            result.ShouldBeOfType<NotFound<string>>();
-        }
-
-        [TestMethod]
-        public async Task DownloadBillingFile_ThrowsException_WhenStorageThrows()
-        {
-            // Arrange
-            int runId = 123;
-            var billingMeta = new CalculatorRunBillingFileMetadata()
-            {
-                CalculatorRunId = runId,
-                BillingCsvFileName = "csvfile.json",
-                BillingJsonFileName = "jsonfile.json",
-                BillingFileCreatedBy = "user",
-                BillingFileCreatedDate = DateTime.UtcNow,
-            };
-
-            var csvMeta = new CalculatorRunCsvFileMetadata()
-            {
-                FileName = "csvfile.json",
-                BlobUri = "C:\\dev\\file.json",
-                CalculatorRunId = runId,
-            };
-            context.CalculatorRunBillingFileMetadata.Add(billingMeta);
-            context.CalculatorRunCsvFileMetadata.Add(csvMeta);
-            context.SaveChanges();
-
-            storageServiceMock
-                .Setup(x => x.DownloadFile("csvfile.json", "C:\\dev\\file.json"))
-                .ThrowsAsync(new Exception("fail"));
-
-            // Act
-            await Should.ThrowAsync<Exception>(async () => await billingFileControllerUnderTest.DownloadCsvBillingFile(runId));
-
-            // Tidy Up
-            context.CalculatorRunBillingFileMetadata.Remove(billingMeta);
-            context.CalculatorRunCsvFileMetadata.Remove(csvMeta);
-            context.SaveChanges();
-        }
-
-        [TestMethod]
-        public async Task DownloadBillingFile_ReturnsFileResult_WhenSuccess()
-        {
-            // Arrange
-            int runId = 456;
-            var billingMeta = new CalculatorRunBillingFileMetadata
-            {
-                CalculatorRunId = runId,
-                BillingCsvFileName = "csvfile.json",
-                BillingJsonFileName = "file2.json",
-                BillingFileCreatedBy = "user",
-                BillingFileCreatedDate = DateTime.UtcNow,
-            };
-            var csvMeta = new CalculatorRunCsvFileMetadata
-            {
-                FileName = "csvfile.json",
-                BlobUri = "C:\\dev\\csvfile.json",
-                CalculatorRunId = runId,
-            };
-            context.CalculatorRunBillingFileMetadata.Add(billingMeta);
-            context.CalculatorRunCsvFileMetadata.Add(csvMeta);
-            context.SaveChanges();
-
-            var expectedResult = Mock.Of<IResult>();
-            storageServiceMock
-                .Setup(x => x.DownloadFile("csvfile.json", "C:\\dev\\csvfile.json"))
-                .ReturnsAsync(expectedResult);
-
-            // Act
-            var result = await billingFileControllerUnderTest.DownloadCsvBillingFile(runId);
-
-            // Assert
-            result.ShouldBeSameAs(expectedResult);
-
-            // Tidy Up
-            context.CalculatorRunBillingFileMetadata.Remove(billingMeta);
-            context.CalculatorRunCsvFileMetadata.Remove(csvMeta);
-            context.SaveChanges();
-        }
+    private static void ShouldBeBillingFileNotFound(IResult result, int runId)
+    {
+        var notFound = result.ShouldBeOfType<NotFound<string>>();
+        notFound.Value.ShouldBe(string.Format(CommonResources.NoBillingFileMetadataForRunId, runId));
     }
 }

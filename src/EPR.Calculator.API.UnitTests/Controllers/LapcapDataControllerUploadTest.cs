@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -79,7 +80,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             lapcapDataValidator.Setup(x => x.Validate(It.IsAny<CreateLapcapDataDto>()))
                 .Returns(new ValidationResultDto<CreateLapcapDataErrorDto> { IsInvalid = false });
 
-            var controller = new LapcapDataController(dbContext, lapcapDataValidator.Object, TelemetryClient)
+            var controller = new LapcapDataController(dbContext, lapcapDataValidator.Object, Mock.Of<ILogger<LapcapDataController>>())
             {
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };
@@ -184,7 +185,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             lapcapDataValidator.Setup(x => x.Validate(It.IsAny<CreateLapcapDataDto>()))
                 .Returns(new ValidationResultDto<CreateLapcapDataErrorDto> { IsInvalid = false });
 
-            var controller = new LapcapDataController(dbContext, lapcapDataValidator.Object, TelemetryClient)
+            var controller = new LapcapDataController(dbContext, lapcapDataValidator.Object, Mock.Of<ILogger<LapcapDataController>>())
             {
                 ControllerContext = new ControllerContext { HttpContext = context }
             };

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -87,7 +88,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 .Returns(new ValidationResultDto<CreateDefaultParameterSettingErrorDto> { IsInvalid = false });
 
             // Controller
-            this.DefaultParameterController = new DefaultParameterSettingController(DbContext, defaultParameterValidator.Object, TelemetryClient)
+            this.DefaultParameterController = new DefaultParameterSettingController(DbContext, defaultParameterValidator.Object, Mock.Of<ILogger<DefaultParameterSettingController>>())
             {
                 ControllerContext = new ControllerContext { HttpContext = context },
             };

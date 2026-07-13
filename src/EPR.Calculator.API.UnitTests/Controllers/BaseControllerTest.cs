@@ -5,10 +5,9 @@ using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Validators;
-using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
+using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -25,14 +24,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 DefaultParameterSettingHelper.GetDefaultParameterTemplateMasterData().ToList());
             this.DbContext.SaveChanges();
 
-            TelemetryClient = new TelemetryClient(new TelemetryConfiguration());
 
             var validator = new CreateDefaultParameterDataValidator(this.DbContext);
-            this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator, TelemetryClient);
+            this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator, Mock.Of<ILogger<DefaultParameterSettingController>>());
             ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(this.DbContext);
-            this.LapcapDataController = new LapcapDataController(this.DbContext, lapcapDataValidator, TelemetryClient);
+            this.LapcapDataController = new LapcapDataController(this.DbContext, lapcapDataValidator, Mock.Of<ILogger<LapcapDataController>>());
 
-            var mockStorageService = new Mock<IStorageService>();
+            var mockStorageService = new Mock<IBlobStorageService>();
             var mockServiceBusService = new Mock<IServiceBusService>();
             var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
             var mockClient = new Mock<ServiceBusClient>();
@@ -45,7 +43,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             this.CalculatorController = new CalculatorController(
                 this.DbContext,
-                ConfigurationItems.GetConfigurationValues(),
                 mockStorageService.Object,
                 mockServiceBusService.Object,
                 Mock.Of<ICalculatorRunStatusDataValidator>(),
@@ -64,8 +61,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         protected LapcapDataController LapcapDataController { get; set; }
 
         protected CalculatorController CalculatorController { get; set; }
-
-        protected TelemetryClient TelemetryClient { get; set; }
 
         public static IEnumerable<LapcapDataTemplateMaster> GetLapcapTemplateMasterData()
         {

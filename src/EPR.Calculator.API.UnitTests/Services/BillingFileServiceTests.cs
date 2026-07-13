@@ -1,49 +1,56 @@
-﻿using System.Net;
+using System.Net;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
-using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace EPR.Calculator.API.UnitTests.Services
 {
     [TestClass]
-    public class BillingFileServiceTests : InMemoryApplicationDbContext
+    public class BillingFileServiceTests
     {
-        private readonly BillingFileService billingFileServiceUnderTest;
-        private readonly Mock<IBlobStorageService2> mockBlobStorageService2;
+        private const string TestUser = "TestUser";
 
-        private readonly Mock<IConfiguration> mockConfiguration;
+        private ApplicationDBContext dbContext = null!;
+        private Mock<IBlobStorageService> blobStorage = null!;
+        private BillingFileService service = null!;
 
-        public BillingFileServiceTests()
+        [TestInitialize]
+        public void TestInitialize()
         {
-            this.mockBlobStorageService2 = new Mock<IBlobStorageService2>();
-            this.mockConfiguration = new Mock<IConfiguration>();
+            // A uniquely named in-memory database keeps every test fully isolated.
+            var options = new DbContextOptionsBuilder<ApplicationDBContext>()
+                .UseInMemoryDatabase($"BillingFileServiceTests-{Guid.NewGuid()}")
+                .ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+                .Options;
 
-            this.billingFileServiceUnderTest = new BillingFileService(
-                this.DbContext,
-                this.mockBlobStorageService2.Object,
-                this.mockConfiguration.Object);
+            this.dbContext = new ApplicationDBContext(options);
+            this.dbContext.Database.EnsureCreated();
+
+            this.blobStorage = new Mock<IBlobStorageService>();
+            this.service = new BillingFileService(this.dbContext, this.blobStorage.Object);
         }
 
-        public TestContext TestContext { get; set; }
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            this.dbContext.Database.EnsureDeleted();
+            this.dbContext.Dispose();
+        }
 
         [TestMethod]
-        public async Task ProducerBillingInstructionsAsync_ShouldReturnUnprocessableContent_WhenCalculatorRunNotFound()
+        public async Task UpdateProducerBillingInstructions_ReturnsUnprocessable_WhenRunDoesNotExist()
         {
             // Arrange
-            var requestDto = new ProduceBillingInstuctionRequestDto
-            {
-                Status = BillingStatus.Accepted.ToString(),
-                OrganisationIds = new List<int> { 1, 2, 3 },
-            };
-            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
+            const int nonExistentRunId = 999;
 
             // Act
-            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(100, "TestUser", requestDto, CancellationToken.None);
+            var result = await this.service.UpdateProducerBillingInstructionsAsync(
+                nonExistentRunId, TestUser, AcceptRequest(1), CancellationToken.None);
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
@@ -51,20 +58,14 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task ProducerBillingInstructionsAsync_ShouldReturnUnprocessableContent_WhenRunStatusIsInvalid()
+        public async Task UpdateProducerBillingInstructions_ReturnsUnprocessable_WhenRunClassificationIsInvalid()
         {
             // Arrange
-            var requestDto = new ProduceBillingInstuctionRequestDto
-            {
-                Status = BillingStatus.Accepted.ToString(),
-                OrganisationIds = new List<int> { 1, 2, 3 },
-            };
-            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.UNCLASSIFIED;
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
+            await SeedAsync(CreateRun(1, RunClassification.UNCLASSIFIED));
 
             // Act
-            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(2, "TestUser", requestDto, CancellationToken.None);
+            var result = await this.service.UpdateProducerBillingInstructionsAsync(
+                1, TestUser, AcceptRequest(1), CancellationToken.None);
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
@@ -72,20 +73,16 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task ProducerBillingInstructionsAsync_ShouldReturnUnprocessableContent_WhenOrganisationIdIsInvalid()
+        public async Task UpdateProducerBillingInstructions_ReturnsUnprocessable_WhenOrganisationIdIsInvalid()
         {
             // Arrange
-            var requestDto = new ProduceBillingInstuctionRequestDto
-            {
-                Status = BillingStatus.Accepted.ToString(),
-                OrganisationIds = new List<int> { 1, 2 },
-            };
-            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
+            await SeedAsync(
+                CreateRun(1),
+                CreateBillingInstruction(producerId: 1, runId: 1, suggestedInstruction: "Initial"));
 
-            // Act
-            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
+            // Act - organisation 2 has no billing instruction row for this run
+            var result = await this.service.UpdateProducerBillingInstructionsAsync(
+                1, TestUser, AcceptRequest(1, 2), CancellationToken.None);
 
             // Assert
             Assert.AreEqual(HttpStatusCode.UnprocessableContent, result.StatusCode);
@@ -93,222 +90,137 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task ProducerBillingInstructionsAsync_ShouldReturnOk_WhenAcceptedUpdateSuccessful()
+        public async Task UpdateProducerBillingInstructions_AcceptsInstruction_WhenRequestIsValid()
         {
             // Arrange
-            var requestDto = new ProduceBillingInstuctionRequestDto
-            {
-                Status = BillingStatus.Accepted.ToString(),
-                OrganisationIds = new List<int> { 1 },
-            };
-            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
+            await SeedAsync(
+                CreateRun(1),
+                CreateBillingInstruction(producerId: 1, runId: 1, suggestedInstruction: "Initial"));
 
             // Act
-            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
+            var result = await this.service.UpdateProducerBillingInstructionsAsync(
+                1, TestUser, AcceptRequest(1), CancellationToken.None);
 
             // Assert
-            var updatedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.OrderBy(x => x.CalculatorRunId).FirstOrDefault();
-            Assert.AreEqual(updatedRecord?.BillingInstructionAcceptReject, BillingStatus.Accepted.ToString());
-            Assert.IsNotNull(updatedRecord?.LastModifiedAcceptReject);
-            Assert.IsNotNull(updatedRecord?.LastModifiedAcceptRejectBy);
             Assert.AreEqual(HttpStatusCode.NoContent, result.StatusCode);
+
+            var updated = await GetBillingInstructionAsync(producerId: 1, runId: 1);
+            Assert.AreEqual(BillingStatus.Accepted.ToString(), updated.BillingInstructionAcceptReject);
+            Assert.IsNotNull(updated.LastModifiedAcceptReject);
+            Assert.AreEqual(TestUser, updated.LastModifiedAcceptRejectBy);
         }
 
         [TestMethod]
-        public async Task ProducerBillingInstructionsAsync_ShouldReturnOk_WhenRejectionUpdateSuccessful()
+        public async Task UpdateProducerBillingInstructions_RejectsInstructionWithReason_WhenRequestIsValid()
         {
             // Arrange
-            var requestDto = new ProduceBillingInstuctionRequestDto
-            {
-                Status = BillingStatus.Rejected.ToString(),
-                OrganisationIds = new List<int> { 1 },
-                ReasonForRejection = "Test",
-            };
-            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
+            await SeedAsync(
+                CreateRun(1),
+                CreateBillingInstruction(producerId: 1, runId: 1, suggestedInstruction: "Initial"));
 
             // Act
-            var result = await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(1, "TestUser", requestDto, CancellationToken.None);
+            var result = await this.service.UpdateProducerBillingInstructionsAsync(
+                1, TestUser, RejectRequest("Test", 1), CancellationToken.None);
 
             // Assert
-            var updatedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.OrderBy(x => x.CalculatorRunId).FirstOrDefault();
-            Assert.AreEqual(updatedRecord?.BillingInstructionAcceptReject, BillingStatus.Rejected.ToString());
-            Assert.AreEqual(updatedRecord?.ReasonForRejection, requestDto.ReasonForRejection);
-            Assert.IsNotNull(updatedRecord?.LastModifiedAcceptReject);
-            Assert.IsNotNull(updatedRecord?.LastModifiedAcceptRejectBy);
             Assert.AreEqual(HttpStatusCode.NoContent, result.StatusCode);
+
+            var updated = await GetBillingInstructionAsync(producerId: 1, runId: 1);
+            Assert.AreEqual(BillingStatus.Rejected.ToString(), updated.BillingInstructionAcceptReject);
+            Assert.AreEqual("Test", updated.ReasonForRejection);
+            Assert.IsNotNull(updated.LastModifiedAcceptReject);
+            Assert.AreEqual(TestUser, updated.LastModifiedAcceptRejectBy);
         }
 
         [TestMethod]
-        public async Task UpdateProducerBillingInstructionsAsync_ShouldClearReasonForRejection_WhenStatusChangesFromRejectedToAccepted()
+        public async Task UpdateProducerBillingInstructions_ClearsReasonForRejection_WhenStatusChangesFromRejectedToAccepted()
         {
             // Arrange
-            var runId = 1;
-            var producerId = 1;
-            var initialReason = "Initial rejection reason";
+            await SeedAsync(
+                CreateRun(1),
+                CreateBillingInstruction(producerId: 1, runId: 1, suggestedInstruction: "Initial"));
 
-            // Ensure a CalculatorRun exists and is in the correct state
-            var calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
+            // Act - reject with a reason, then accept the same instruction
+            await this.service.UpdateProducerBillingInstructionsAsync(
+                1, TestUser, RejectRequest("Initial rejection reason", 1), CancellationToken.None);
+            await this.service.UpdateProducerBillingInstructionsAsync(
+                1, TestUser, AcceptRequest(1), CancellationToken.None);
 
-            // First, reject the record with a reason
-            var rejectRequest = new ProduceBillingInstuctionRequestDto
-            {
-                Status = BillingStatus.Rejected.ToString(),
-                OrganisationIds = new List<int> { producerId },
-                ReasonForRejection = initialReason,
-            };
-
-            await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(
-                runId, "TestUser", rejectRequest, CancellationToken.None);
-
-            // Assert rejection applied
-            var rejectedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.OrderBy(x => x.CalculatorRunId).FirstOrDefault();
-            Assert.AreEqual(BillingStatus.Rejected.ToString(), rejectedRecord?.BillingInstructionAcceptReject);
-            Assert.AreEqual(initialReason, rejectedRecord?.ReasonForRejection);
-
-            // Now, accept the record (should clear the reason)
-            var acceptRequest = new ProduceBillingInstuctionRequestDto
-            {
-                Status = BillingStatus.Accepted.ToString(),
-                OrganisationIds = new List<int> { producerId },
-
-                // ReasonForRejection intentionally omitted
-            };
-
-            await this.billingFileServiceUnderTest.UpdateProducerBillingInstructionsAsync(
-                runId, "TestUser", acceptRequest, CancellationToken.None);
-
-            // Assert acceptance and reason cleared
-            var acceptedRecord = this.DbContext.ProducerResultFileSuggestedBillingInstruction.OrderBy(x => x.CalculatorRunId).FirstOrDefault();
-            Assert.AreEqual(BillingStatus.Accepted.ToString(), acceptedRecord?.BillingInstructionAcceptReject);
-            Assert.IsNull(acceptedRecord?.ReasonForRejection);
+            // Assert
+            var updated = await GetBillingInstructionAsync(producerId: 1, runId: 1);
+            Assert.AreEqual(BillingStatus.Accepted.ToString(), updated.BillingInstructionAcceptReject);
+            Assert.IsNull(updated.ReasonForRejection);
         }
 
         [TestMethod]
-        public async Task ProducerBillingInstructionsAcceptAllAsync_ShouldReturnOk_WhenAcceptedUpdateSuccessful()
+        public async Task StartGeneratingBillingFile_ReturnsOk_WhenRunIsValid()
         {
             // Arrange
-            CalculatorRun calculatorRun = this.DbContext.CalculatorRuns.First();
-            calculatorRun.CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN;
-            calculatorRun.BillingRunStatus = BillingRunStatus.None;
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
+            var run = CreateRun(1);
+            run.BillingRunStatus = BillingRunStatus.None;
+            await SeedAsync(run);
 
             // Act
-            var result = await this.billingFileServiceUnderTest.StartGeneratingBillingFileAsync(1, "TestUser", CancellationToken.None);
+            var result = await this.service.StartGeneratingBillingFileAsync(1, TestUser, CancellationToken.None);
 
             // Assert
             Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
         }
 
         [TestMethod]
-        public async Task MoveBillingJsonFile_ShouldReturnFalse_WhenMetadataNotFound()
+        public async Task MoveBillingJsonFile_ReturnsFalse_WhenMetadataNotFound()
         {
             // Arrange
-            int runId = 999; // Use a runId that does not exist in the metadata table
-            using var cancellationTokenSource = new CancellationTokenSource();
+            const int runWithoutMetadata = 999;
 
             // Act
-            var result = await this.billingFileServiceUnderTest.MoveBillingJsonFile(runId, cancellationTokenSource.Token);
+            var result = await this.service.MoveBillingJsonFile(runWithoutMetadata, CancellationToken.None);
 
             // Assert
             result.ShouldBeFalse();
-            this.mockBlobStorageService2.Verify(
-                x => x.MoveBlobAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
+            this.blobStorage.Verify(
+                x => x.MoveBillingJsonToFss(It.IsAny<string>(), It.IsAny<CancellationToken>()),
                 Times.Never());
         }
 
         [TestMethod]
-        public async Task MoveBillingJsonFile_ShouldReturnTrue_WhenMoveSucceeds()
+        public async Task MoveBillingJsonFile_MovesFileAndReturnsTrue_WhenMetadataExists()
         {
             // Arrange
-            int runId = 1;
-            var billingJsonFileName = "test-billing.json";
-            var sourceContainer = "source-container";
-            var targetContainer = "target-container";
-            using var cancellationTokenSource = new CancellationTokenSource();
-
-            // Add metadata to the in-memory DB
-            this.DbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            const string billingJsonFileName = "test-billing.json";
+            await SeedAsync(new CalculatorRunBillingFileMetadata
             {
-                CalculatorRunId = runId,
+                CalculatorRunId = 1,
                 BillingCsvFileName = "ignored",
                 BillingJsonFileName = billingJsonFileName,
                 BillingFileCreatedDate = DateTime.UtcNow,
                 BillingFileCreatedBy = "test",
             });
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
-
-            // Mock configuration for container names
-            var blobStorageSettings = new Dictionary<string, string>
-            {
-                { "BlobStorage:BillingFileJsonContainerName", sourceContainer },
-                { "BlobStorage:BillingFileJsonForFssContainerName", targetContainer },
-            };
-
-            var config = new ConfigurationBuilder()
-                .AddInMemoryCollection(blobStorageSettings.Select(kv => new KeyValuePair<string, string?>(kv.Key, kv.Value)))
-                .Build();
-
-            this.mockConfiguration.Setup(x => x.GetSection("BlobStorage")).Returns(config.GetSection("BlobStorage"));
-
-            // Mock blob move
-            this.mockBlobStorageService2
-                .Setup(x => x.MoveBlobAsync(sourceContainer, targetContainer, billingJsonFileName))
+            this.blobStorage
+                .Setup(x => x.MoveBillingJsonToFss(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Act
-            var result = await this.billingFileServiceUnderTest.MoveBillingJsonFile(runId, cancellationTokenSource.Token);
+            var result = await this.service.MoveBillingJsonFile(1, CancellationToken.None);
 
             // Assert
             result.ShouldBeTrue();
-            this.mockBlobStorageService2.Verify(
-                x => x.MoveBlobAsync(sourceContainer, targetContainer, billingJsonFileName),
+            this.blobStorage.Verify(
+                x => x.MoveBillingJsonToFss(billingJsonFileName, It.IsAny<CancellationToken>()),
                 Times.Once());
         }
 
         [TestMethod]
-        public async Task GetProducerBillingInstructionsAsync_ReturnsRecords_WhenValid()
+        public async Task GetProducerBillingInstructions_ReturnsRecordsWithTotals_WhenRunHasInstructions()
         {
             // Arrange
-            var runId = 9200;
-            var runName = $"{runId} - potato";
-
-            this.DbContext.CalculatorRuns.Add(new CalculatorRun
-            {
-                Id = runId,
-                Name = runName,
-                RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-            });
-            this.DbContext.ProducerDetail.Add(new ProducerDetail
-            {
-                ProducerId = 1,
-                CalculatorRunId = runId,
-                ProducerName = "Producer1",
-            });
-            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
-            {
-                ProducerId = 1,
-                CalculatorRunId = runId,
-                SuggestedBillingInstruction = "Initial",
-                SuggestedInvoiceAmount = 100,
-                BillingInstructionAcceptReject = "Accepted",
-            });
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
-
-            var requestDto = new ProducerBillingInstructionsRequestDto
-            {
-                PageNumber = 1,
-                PageSize = 10,
-            };
+            const string runName = "Test Run";
+            await SeedAsync(
+                CreateRun(1, name: runName),
+                CreateBillingInstruction(producerId: 1, runId: 1, suggestedInstruction: "Initial", suggestedInvoiceAmount: 100, acceptRejectStatus: "Accepted"));
 
             // Act
-            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
+            var result = await this.service.GetProducerBillingInstructionsAsync(1, CreateRequest(), CancellationToken.None);
 
             // Assert
             Assert.IsNotNull(result);
@@ -324,24 +236,16 @@ namespace EPR.Calculator.API.UnitTests.Services
             Assert.AreEqual(1, result.PageNumber);
             Assert.AreEqual(10, result.PageSize);
             Assert.AreEqual(runName, result.RunName);
-
-            this.DbContext.ProducerResultFileSuggestedBillingInstruction.RemoveRange(this.DbContext.ProducerResultFileSuggestedBillingInstruction);
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
         }
 
         [TestMethod]
-        public async Task GetProducerBillingInstructionsAsync_ReturnsEmpty_WhenNoRecords()
+        public async Task GetProducerBillingInstructions_ReturnsEmpty_WhenRunHasNoInstructions()
         {
             // Arrange
-            var runId = 2;
-            var requestDto = new ProducerBillingInstructionsRequestDto
-            {
-                PageNumber = 1,
-                PageSize = 10,
-            };
+            await SeedAsync(CreateRun(1));
 
             // Act
-            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
+            var result = await this.service.GetProducerBillingInstructionsAsync(1, CreateRequest(), CancellationToken.None);
 
             // Assert
             Assert.IsNotNull(result);
@@ -350,101 +254,49 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task GetProducerBillingInstructionsAsync_ReturnsNull_WhenRunDoesNotExist()
+        public async Task GetProducerBillingInstructions_ReturnsNull_WhenRunDoesNotExist()
         {
             // Arrange
-            var nonExistingRunId = 999999; // Use a runId that does not exist in the DB
-            var requestDto = new ProducerBillingInstructionsRequestDto
-            {
-                PageNumber = 1,
-                PageSize = 10,
-            };
+            const int nonExistentRunId = 999999;
 
             // Act
-            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(nonExistingRunId, requestDto, CancellationToken.None);
+            var result = await this.service.GetProducerBillingInstructionsAsync(nonExistentRunId, CreateRequest(), CancellationToken.None);
 
             // Assert
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public async Task GetProducerBillingInstructionsAsync_ShouldUseFallback_WhenProducerNameMissingInCurrentRun()
+        public async Task GetProducerBillingInstructions_UsesFallbackProducerName_WhenNameMissingInCurrentRun()
         {
-            // Arrange
-            var runId = 4962;
-            var runName = "Run 4962";
+            // Arrange - the current run holds no organisation data, so the name must be resolved
+            // from an earlier run's organisation snapshot for the same relative year.
+            const int missingProducerId = 999;
 
-            var calculatorRunRelativeYear = this.DbContext.CalculatorRunRelativeYears.SingleOrDefault(f => f.Value == 2024);
-
-            if (calculatorRunRelativeYear == null)
-            {
-                calculatorRunRelativeYear = new CalculatorRunRelativeYear { Value = new RelativeYear(2024) };
-                this.DbContext.CalculatorRunRelativeYears.Add(calculatorRunRelativeYear);
-
-                using var cts = new CancellationTokenSource();
-                await this.DbContext.SaveChangesAsync(cts.Token);
-            }
-
-            this.DbContext.CalculatorRuns.Add(new CalculatorRun
-            {
-                Id = runId,
-                Name = runName,
-                RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN
-            });
-
-            int missingProducerId = 999; // does NOT exist in current ProducerDetail
-
-            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(
-                new ProducerResultFileSuggestedBillingInstruction
-                {
-                    ProducerId = missingProducerId,
-                    CalculatorRunId = runId,
-                    SuggestedBillingInstruction = "Initial",
-                    SuggestedInvoiceAmount = 100,
-                    BillingInstructionAcceptReject = "Pending"
-                });
-
-            var master = new CalculatorRunOrganisationDataMaster
+            var organisationSnapshot = new CalculatorRunOrganisationDataMaster
             {
                 RelativeYear = new RelativeYear(2024),
                 EffectiveFrom = DateTime.UtcNow.AddDays(-5),
-                EffectiveTo = null,
-                CreatedBy = "testsuperuser.paycal",
-                CreatedAt = DateTime.UtcNow.AddDays(-5)
+                CreatedBy = "test",
+                CreatedAt = DateTime.UtcNow.AddDays(-5),
             };
-            this.DbContext.CalculatorRunOrganisationDataMaster.Add(master);
+            var previousRun = CreateRun(2, name: "Previous Run Snapshot");
+            previousRun.CalculatorRunOrganisationDataMaster = organisationSnapshot;
 
-            var previousRun = new CalculatorRun
-            {
-                Name = "Previous Run Snapshot",
-                RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-                CalculatorRunOrganisationDataMasterId = master.Id
-            };
-            this.DbContext.CalculatorRuns.Add(previousRun);
-
-            // Add fallback OrganisationData details
-            this.DbContext.CalculatorRunOrganisationDataDetails.Add(
+            await SeedAsync(
+                CreateRun(1, RunClassification.INTERIM_RECALCULATION_RUN, "Current Run"),
+                CreateBillingInstruction(producerId: missingProducerId, runId: 1, suggestedInstruction: "Initial", suggestedInvoiceAmount: 100, acceptRejectStatus: "Pending"),
+                organisationSnapshot,
+                previousRun,
                 new CalculatorRunOrganisationDataDetail
                 {
-                    CalculatorRunOrganisationDataMasterId = master.Id,
+                    CalculatorRunOrganisationDataMaster = organisationSnapshot,
                     OrganisationId = missingProducerId,
                     OrganisationName = "Fallback Producer Name",
-                    SubsidiaryId = null
                 });
 
-            await this.DbContext.SaveChangesAsync();
-
-            var requestDto = new ProducerBillingInstructionsRequestDto
-            {
-                PageNumber = 1,
-                PageSize = 10
-            };
-
             // Act
-            var result = await this.billingFileServiceUnderTest
-                .GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
+            var result = await this.service.GetProducerBillingInstructionsAsync(1, CreateRequest(), CancellationToken.None);
 
             // Assert
             Assert.IsNotNull(result);
@@ -453,293 +305,172 @@ namespace EPR.Calculator.API.UnitTests.Services
         }
 
         [TestMethod]
-        public async Task GetProducerBillingInstructionsAsync_UsesPendingStatus_WhenBillingInstructionAcceptRejectIsNull()
+        public async Task GetProducerBillingInstructions_UsesPendingStatus_WhenAcceptRejectIsNull()
         {
             // Arrange
-            var runId = 9300;
-            var runName = $"{runId} - test run";
-
-            this.DbContext.CalculatorRuns.Add(new CalculatorRun
-            {
-                Id = runId,
-                Name = runName,
-                RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-            });
-            this.DbContext.ProducerDetail.Add(new ProducerDetail
-            {
-                ProducerId = 2,
-                CalculatorRunId = runId,
-                ProducerName = "Producer2",
-            });
-            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
-            {
-                ProducerId = 2,
-                CalculatorRunId = runId,
-                SuggestedBillingInstruction = "Invoice", // Should result in PendingStatus = "Pending"
-                SuggestedInvoiceAmount = 200,
-                BillingInstructionAcceptReject = null, // Null to trigger PendingStatus usage
-            });
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
-
-            var requestDto = new ProducerBillingInstructionsRequestDto
-            {
-                PageNumber = 1,
-                PageSize = 10,
-            };
+            await SeedAsync(
+                CreateRun(1),
+                CreateBillingInstruction(producerId: 2, runId: 1, suggestedInstruction: "Invoice", suggestedInvoiceAmount: 200, acceptRejectStatus: null));
 
             // Act
-            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
+            var result = await this.service.GetProducerBillingInstructionsAsync(1, CreateRequest(), CancellationToken.None);
 
             // Assert
             Assert.IsNotNull(result);
             Assert.HasCount(1, result.Records);
-            Assert.AreEqual("Pending", result.Records[0].BillingInstructionAcceptReject); // Should use PendingStatus
-            Assert.AreEqual(1, result.TotalPendingRecords); // Verify totals
+            Assert.AreEqual("Pending", result.Records[0].BillingInstructionAcceptReject);
+            Assert.AreEqual(1, result.TotalPendingRecords);
             Assert.AreEqual(0, result.TotalAcceptedRecords);
         }
 
         [TestMethod]
-        public async Task GetProducerBillingInstructionsAsync_UsesNoActionStatus_WhenSuggestedBillingInstructionIsNoActionPlaceholder()
-        {
-            var runId = 9400;
-            var runName = $"{runId} - test run";
-
-            this.DbContext.CalculatorRuns.Add(new CalculatorRun
-            {
-                Id = runId,
-                Name = runName,
-                RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-            });
-            this.DbContext.ProducerDetail.Add(new ProducerDetail
-            {
-                ProducerId = 3,
-                CalculatorRunId = runId,
-                ProducerName = "Producer3",
-            });
-            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
-            {
-                ProducerId = 3,
-                CalculatorRunId = runId,
-                SuggestedBillingInstruction = "-", // NoActionPlaceholder, should result in PendingStatus = "Noaction"
-                SuggestedInvoiceAmount = 300,
-                BillingInstructionAcceptReject = null, // Null to trigger PendingStatus usage
-            });
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
-
-            var requestDto = new ProducerBillingInstructionsRequestDto
-            {
-                PageNumber = 1,
-                PageSize = 10,
-            };
-
-            // Act
-            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.HasCount(1, result.Records);
-            Assert.AreEqual("Noaction", result.Records[0].BillingInstructionAcceptReject); // Should use PendingStatus
-            Assert.AreEqual(1, result.TotalNoActionRecords); // Verify totals
-        }
-
-        [TestMethod]
-        public async Task GetProducerBillingInstructionsAsync_CalculatesSuggestedInvoiceAmount_WhenCancelInstruction()
-        {
-            var runId = 9500;
-            var runName = $"{runId} - test run";
-
-            this.DbContext.CalculatorRuns.Add(new CalculatorRun
-            {
-                Id = runId,
-                Name = runName,
-                RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-            });
-            this.DbContext.ProducerDetail.Add(new ProducerDetail
-            {
-                ProducerId = 4,
-                CalculatorRunId = runId,
-                ProducerName = "Producer4",
-            });
-            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
-            {
-                ProducerId = 4,
-                CalculatorRunId = runId,
-                SuggestedBillingInstruction = "cancel", // Should use CurrentYearInvoiceTotalToDate
-                SuggestedInvoiceAmount = 400,
-                CurrentYearInvoiceTotalToDate = 500, // Expected value
-                BillingInstructionAcceptReject = "Accepted",
-            });
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
-
-            var requestDto = new ProducerBillingInstructionsRequestDto
-            {
-                PageNumber = 1,
-                PageSize = 10,
-            };
-
-            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
-
-            Assert.IsNotNull(result);
-            Assert.HasCount(1, result.Records);
-            Assert.AreEqual(500, result.Records[0].SuggestedInvoiceAmount); // Should use CurrentYearInvoiceTotalToDate
-        }
-
-        [TestMethod]
-        public async Task GetProducerBillingInstructionsAsync_FiltersByOrganisationId()
-        {
-            var runId = 9600;
-            var runName = $"{runId} - test run";
-
-            this.DbContext.CalculatorRuns.Add(new CalculatorRun
-            {
-                Id = runId,
-                Name = runName,
-                RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-            });
-            this.DbContext.ProducerDetail.AddRange(
-                new ProducerDetail { ProducerId = 5, CalculatorRunId = runId, ProducerName = "Producer5" },
-                new ProducerDetail { ProducerId = 6, CalculatorRunId = runId, ProducerName = "Producer6" }
-            );
-            this.DbContext.ProducerResultFileSuggestedBillingInstruction.AddRange(
-                new ProducerResultFileSuggestedBillingInstruction
-                {
-                    ProducerId = 5,
-                    CalculatorRunId = runId,
-                    SuggestedBillingInstruction = "Initial",
-                    SuggestedInvoiceAmount = 100,
-                    BillingInstructionAcceptReject = "Accepted",
-                },
-                new ProducerResultFileSuggestedBillingInstruction
-                {
-                    ProducerId = 6,
-                    CalculatorRunId = runId,
-                    SuggestedBillingInstruction = "Delta",
-                    SuggestedInvoiceAmount = 200,
-                    BillingInstructionAcceptReject = "Pending",
-                }
-            );
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
-
-            var requestDto = new ProducerBillingInstructionsRequestDto
-            {
-                PageNumber = 1,
-                PageSize = 10,
-                SearchQuery = new ProducerBillingInstructionsSearchQueryDto { OrganisationId = 5 }
-            };
-
-            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
-
-            Assert.IsNotNull(result);
-            Assert.HasCount(1, result.Records);
-            Assert.AreEqual(5, result.Records[0].ProducerId); // Only ProducerId 5 should be returned
-        }
-
-        [TestMethod]
-        public async Task GetProducerBillingInstructionsAsync_FiltersByStatus()
-        {
-            var runId = 9700;
-            var runName = $"{runId} - test run";
-
-            this.DbContext.CalculatorRuns.Add(new CalculatorRun
-            {
-                Id = runId,
-                Name = runName,
-                RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-            });
-            this.DbContext.ProducerDetail.AddRange(
-                new ProducerDetail { ProducerId = 7, CalculatorRunId = runId, ProducerName = "Producer7" },
-                new ProducerDetail { ProducerId = 8, CalculatorRunId = runId, ProducerName = "Producer8" }
-            );
-            this.DbContext.ProducerResultFileSuggestedBillingInstruction.AddRange(
-                new ProducerResultFileSuggestedBillingInstruction
-                {
-                    ProducerId = 7,
-                    CalculatorRunId = runId,
-                    SuggestedBillingInstruction = "Initial",
-                    SuggestedInvoiceAmount = 100,
-                    BillingInstructionAcceptReject = "Accepted",
-                },
-                new ProducerResultFileSuggestedBillingInstruction
-                {
-                    ProducerId = 8,
-                    CalculatorRunId = runId,
-                    SuggestedBillingInstruction = "Delta",
-                    SuggestedInvoiceAmount = 200,
-                    BillingInstructionAcceptReject = "Pending",
-                }
-            );
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
-
-            var requestDto = new ProducerBillingInstructionsRequestDto
-            {
-                PageNumber = 1,
-                PageSize = 10,
-                SearchQuery = new ProducerBillingInstructionsSearchQueryDto { Status = new List<string> { "Accepted" } }
-            };
-
-            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.HasCount(1, result.Records);
-            Assert.AreEqual("Accepted", result.Records[0].BillingInstructionAcceptReject); // Only Accepted should be returned
-        }
-
-        [TestMethod]
-        public async Task GetProducerBillingInstructionsAsync_FiltersByBillingInstruction_IncludingNoAction()
+        public async Task GetProducerBillingInstructions_UsesNoActionStatus_WhenInstructionIsNoActionPlaceholder()
         {
             // Arrange
-            var runId = 9800;
-            var runName = $"{runId} - test run";
+            await SeedAsync(
+                CreateRun(1),
+                CreateBillingInstruction(producerId: 3, runId: 1, suggestedInstruction: "-", suggestedInvoiceAmount: 300, acceptRejectStatus: null));
 
-            this.DbContext.CalculatorRuns.Add(new CalculatorRun
-            {
-                Id = runId,
-                Name = runName,
-                RelativeYear = new RelativeYear(2024),
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-            });
-            this.DbContext.ProducerDetail.AddRange(
-                new ProducerDetail { ProducerId = 9, CalculatorRunId = runId, ProducerName = "Producer9" },
-                new ProducerDetail { ProducerId = 10, CalculatorRunId = runId, ProducerName = "Producer10" }
-            );
-            this.DbContext.ProducerResultFileSuggestedBillingInstruction.AddRange(
-                new ProducerResultFileSuggestedBillingInstruction
-                {
-                    ProducerId = 9,
-                    CalculatorRunId = runId,
-                    SuggestedBillingInstruction = "-", // NoActionPlaceholder
-                    SuggestedInvoiceAmount = 100,
-                    BillingInstructionAcceptReject = "Accepted",
-                },
-                new ProducerResultFileSuggestedBillingInstruction
-                {
-                    ProducerId = 10,
-                    CalculatorRunId = runId,
-                    SuggestedBillingInstruction = "Initial",
-                    SuggestedInvoiceAmount = 200,
-                    BillingInstructionAcceptReject = "Pending",
-                }
-            );
-            await this.DbContext.SaveChangesAsync(CancellationToken.None);
+            // Act
+            var result = await this.service.GetProducerBillingInstructionsAsync(1, CreateRequest(), CancellationToken.None);
 
-            var requestDto = new ProducerBillingInstructionsRequestDto
-            {
-                PageNumber = 1,
-                PageSize = 10,
-                SearchQuery = new ProducerBillingInstructionsSearchQueryDto { BillingInstruction = new List<string> { "Noaction" } }
-            };
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.HasCount(1, result.Records);
+            Assert.AreEqual("Noaction", result.Records[0].BillingInstructionAcceptReject);
+            Assert.AreEqual(1, result.TotalNoActionRecords);
+        }
 
-            var result = await this.billingFileServiceUnderTest.GetProducerBillingInstructionsAsync(runId, requestDto, CancellationToken.None);
+        [TestMethod]
+        public async Task GetProducerBillingInstructions_UsesCurrentYearInvoiceTotal_WhenInstructionIsCancel()
+        {
+            // Arrange
+            await SeedAsync(
+                CreateRun(1),
+                CreateBillingInstruction(producerId: 4, runId: 1, suggestedInstruction: "cancel", suggestedInvoiceAmount: 400, acceptRejectStatus: "Accepted", currentYearInvoiceTotalToDate: 500));
 
+            // Act
+            var result = await this.service.GetProducerBillingInstructionsAsync(1, CreateRequest(), CancellationToken.None);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.HasCount(1, result.Records);
+            Assert.AreEqual(500, result.Records[0].SuggestedInvoiceAmount);
+        }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructions_FiltersByOrganisationId()
+        {
+            // Arrange
+            await SeedAsync(
+                CreateRun(1),
+                CreateBillingInstruction(producerId: 5, runId: 1, suggestedInstruction: "Initial", suggestedInvoiceAmount: 100, acceptRejectStatus: "Accepted"),
+                CreateBillingInstruction(producerId: 6, runId: 1, suggestedInstruction: "Delta", suggestedInvoiceAmount: 200, acceptRejectStatus: "Pending"));
+            var request = CreateRequest(new ProducerBillingInstructionsSearchQueryDto { OrganisationId = 5 });
+
+            // Act
+            var result = await this.service.GetProducerBillingInstructionsAsync(1, request, CancellationToken.None);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.HasCount(1, result.Records);
+            Assert.AreEqual(5, result.Records[0].ProducerId);
+        }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructions_FiltersByStatus()
+        {
+            // Arrange
+            await SeedAsync(
+                CreateRun(1),
+                CreateBillingInstruction(producerId: 7, runId: 1, suggestedInstruction: "Initial", suggestedInvoiceAmount: 100, acceptRejectStatus: "Accepted"),
+                CreateBillingInstruction(producerId: 8, runId: 1, suggestedInstruction: "Delta", suggestedInvoiceAmount: 200, acceptRejectStatus: "Pending"));
+            var request = CreateRequest(new ProducerBillingInstructionsSearchQueryDto { Status = new List<string> { "Accepted" } });
+
+            // Act
+            var result = await this.service.GetProducerBillingInstructionsAsync(1, request, CancellationToken.None);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.HasCount(1, result.Records);
+            Assert.AreEqual("Accepted", result.Records[0].BillingInstructionAcceptReject);
+        }
+
+        [TestMethod]
+        public async Task GetProducerBillingInstructions_FiltersByBillingInstruction_IncludingNoAction()
+        {
+            // Arrange
+            await SeedAsync(
+                CreateRun(1),
+                CreateBillingInstruction(producerId: 9, runId: 1, suggestedInstruction: "-", suggestedInvoiceAmount: 100, acceptRejectStatus: "Accepted"),
+                CreateBillingInstruction(producerId: 10, runId: 1, suggestedInstruction: "Initial", suggestedInvoiceAmount: 200, acceptRejectStatus: "Pending"));
+            var request = CreateRequest(new ProducerBillingInstructionsSearchQueryDto { BillingInstruction = new List<string> { "Noaction" } });
+
+            // Act
+            var result = await this.service.GetProducerBillingInstructionsAsync(1, request, CancellationToken.None);
+
+            // Assert
             Assert.IsNotNull(result);
             Assert.HasCount(1, result.Records);
             Assert.AreEqual("-", result.Records[0].SuggestedBillingInstruction);
         }
+
+        private async Task SeedAsync(params object[] entities)
+        {
+            this.dbContext.AddRange(entities);
+            await this.dbContext.SaveChangesAsync(CancellationToken.None);
+        }
+
+        private Task<ProducerResultFileSuggestedBillingInstruction> GetBillingInstructionAsync(int producerId, int runId) =>
+            this.dbContext.ProducerResultFileSuggestedBillingInstruction
+                .SingleAsync(x => x.ProducerId == producerId && x.CalculatorRunId == runId);
+
+        private static CalculatorRun CreateRun(
+            int id,
+            RunClassification classification = RunClassification.INITIAL_RUN,
+            string? name = null) => new()
+            {
+                Id = id,
+                Name = name ?? $"Run {id}",
+                RelativeYear = new RelativeYear(2024),
+                CalculatorRunClassificationId = (int)classification,
+            };
+
+        private static ProducerResultFileSuggestedBillingInstruction CreateBillingInstruction(
+            int producerId,
+            int runId,
+            string suggestedInstruction,
+            decimal? suggestedInvoiceAmount = null,
+            string? acceptRejectStatus = null,
+            decimal? currentYearInvoiceTotalToDate = null) => new()
+            {
+                ProducerId = producerId,
+                CalculatorRunId = runId,
+                SuggestedBillingInstruction = suggestedInstruction,
+                SuggestedInvoiceAmount = suggestedInvoiceAmount,
+                BillingInstructionAcceptReject = acceptRejectStatus,
+                CurrentYearInvoiceTotalToDate = currentYearInvoiceTotalToDate,
+            };
+
+        private static ProducerBillingInstructionsRequestDto CreateRequest(
+            ProducerBillingInstructionsSearchQueryDto? searchQuery = null) => new()
+            {
+                PageNumber = 1,
+                PageSize = 10,
+                SearchQuery = searchQuery,
+            };
+
+        private static ProduceBillingInstuctionRequestDto AcceptRequest(params int[] organisationIds) => new()
+        {
+            Status = BillingStatus.Accepted.ToString(),
+            OrganisationIds = organisationIds,
+        };
+
+        private static ProduceBillingInstuctionRequestDto RejectRequest(string reason, params int[] organisationIds) => new()
+        {
+            Status = BillingStatus.Rejected.ToString(),
+            OrganisationIds = organisationIds,
+            ReasonForRejection = reason,
+        };
     }
 }

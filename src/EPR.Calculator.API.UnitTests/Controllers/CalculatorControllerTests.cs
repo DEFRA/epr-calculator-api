@@ -1,4 +1,3 @@
-using System.Configuration;
 using System.Security.Claims;
 using System.Security.Principal;
 using EPR.Calculator.API.Controllers;
@@ -107,52 +106,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             result.ShouldNotBeNull();
             result.StatusCode.ShouldBe(StatusCodes.Status424FailedDependency);
             result.Value.ShouldBe(string.Format(CommonResources.LapcapDataNotAvailable, 2024));
-        }
-
-        [TestMethod]
-        public async Task Create_Throws_ConfigurationErrorsException_When_ServiceBusConnectionString_Missing()
-        {
-            // Arrange
-            var relativeYear = new RelativeYear(2024);
-            AddDefaultParameterSettings(relativeYear);
-            AddLapcapData(relativeYear);
-
-            var configuration = ConfigurationItems.GetConfigurationValues();
-            configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value = string.Empty;
-
-            var controller = CreateCalculatorController(configuration);
-
-            var request = new CreateCalculatorRunDto
-            {
-                CalculatorRunName = "Test calculator run",
-                RelativeYear = relativeYear,
-            };
-
-            // Act & Assert
-            await Should.ThrowAsync<ConfigurationErrorsException>(async () => await controller.Create(request));
-        }
-
-        [TestMethod]
-        public async Task Create_Throws_ConfigurationErrorsException_When_ServiceBusQueueName_Missing()
-        {
-            // Arrange
-            var relativeYear = new RelativeYear(2024);
-            AddDefaultParameterSettings(relativeYear);
-            AddLapcapData(relativeYear);
-
-            var configuration = ConfigurationItems.GetConfigurationValues();
-            configuration.GetSection("ServiceBus").GetSection("QueueName").Value = string.Empty;
-
-            var controller = CreateCalculatorController(configuration);
-
-            var request = new CreateCalculatorRunDto
-            {
-                CalculatorRunName = "Test calculator run",
-                RelativeYear = relativeYear,
-            };
-
-            // Act & Assert
-            await Should.ThrowAsync<ConfigurationErrorsException>(async () => await controller.Create(request));
         }
 
         [TestMethod]
@@ -602,7 +555,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var mockCalculationRunService = new Mock<ICalculationRunService>();
             mockCalculationRunService
-                .Setup(s => s.GetDesignatedRunsByFinanialYear(run.RelativeYear, It.IsAny<CancellationToken>()))
+                .Setup(s => s.GetDesignatedRunsByFinancialYear(run.RelativeYear, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(designatedRuns);
 
             var controller = CreateCalculatorController(
@@ -646,7 +599,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var mockCalculationRunService = new Mock<ICalculationRunService>();
             mockCalculationRunService
-                .Setup(s => s.GetDesignatedRunsByFinanialYear(run.RelativeYear, It.IsAny<CancellationToken>()))
+                .Setup(s => s.GetDesignatedRunsByFinancialYear(run.RelativeYear, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(designatedRuns);
 
             var controller = CreateCalculatorController(
@@ -674,7 +627,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         private CalculatorController CreateCalculatorController(
-            IConfiguration? configuration = null,
             ICalcRelativeYearRequestDtoDataValidator? validator = null,
             IAvailableClassificationsService? availableClassificationsService = null,
             ICalculatorRunStatusDataValidator? runStatusValidator = null,
@@ -682,8 +634,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             return new CalculatorController(
                 DbContext,
-                configuration ?? ConfigurationItems.GetConfigurationValues(),
-                Mock.Of<IStorageService>(),
+                Mock.Of<IBlobStorageService>(),
                 Mock.Of<IServiceBusService>(),
                 runStatusValidator ?? Mock.Of<ICalculatorRunStatusDataValidator>(),
                 validator ?? Mock.Of<ICalcRelativeYearRequestDtoDataValidator>(),

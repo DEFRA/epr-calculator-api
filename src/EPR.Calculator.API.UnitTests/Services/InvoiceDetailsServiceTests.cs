@@ -1,5 +1,5 @@
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.Service.Function.Services;
+using EPR.Calculator.API.Services;
 
 namespace EPR.Calculator.API.UnitTests.Services
 {
