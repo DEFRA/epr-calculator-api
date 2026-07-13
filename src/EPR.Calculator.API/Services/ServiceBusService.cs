@@ -1,37 +1,27 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using Azure.Messaging.ServiceBus;
-using EPR.Calculator.API.Models;
-using Microsoft.Extensions.Azure;
+using EPR.Calculator.API.Options;
+using Microsoft.Extensions.Options;
 
-namespace EPR.Calculator.API.Services
+namespace EPR.Calculator.API.Services;
+
+public interface IServiceBusService
 {
-    public class ServiceBusService : IServiceBusService
+    public Task SendMessage<T>(T message);
+}
+
+[ExcludeFromCodeCoverage(Justification = "This is a thin wrapper around the Azure SDK; meaningful correctness is not verifiable in unit tests.")]
+public class ServiceBusService (
+    ServiceBusClient serviceBusClient,
+    IOptions<ServiceBusOptions> options
+) : IServiceBusService
+{
+    public async Task SendMessage<T>(T message)
     {
-        private readonly IAzureClientFactory<ServiceBusClient> serviceBusClientFactory;
-
-        public ServiceBusService(IAzureClientFactory<ServiceBusClient> serviceBusClientFactory)
-        {
-            this.serviceBusClientFactory = serviceBusClientFactory;
-        }
-
-        public async Task SendMessage(string serviceBusQueueName, CalculatorRunMessage calculatorRunMessage)
-        {
-            var messageString = JsonSerializer.Serialize(calculatorRunMessage);
-            await SendMessageAsync(serviceBusQueueName, messageString);
-        }
-
-        public async Task SendMessage(string serviceBusQueueName, BillingFileGenerationMessage billingFileGenerationMessage)
-        {
-            var messageString = JsonSerializer.Serialize(billingFileGenerationMessage);
-            await SendMessageAsync(serviceBusQueueName, messageString);
-        }
-
-        private async Task SendMessageAsync(string queueName, string message)
-        {
-            var client = this.serviceBusClientFactory.CreateClient(CommonResources.ServiceBusClientName);
-            var serviceBusSender = client.CreateSender(queueName);
-            ServiceBusMessage serviceBusMessage = new ServiceBusMessage(message);
-            await serviceBusSender.SendMessageAsync(serviceBusMessage);
-        }
+        var messageString = JsonSerializer.Serialize(message);
+        var serviceBusMessage = new ServiceBusMessage(messageString);
+        await using var sender = serviceBusClient.CreateSender(options.Value.QueueName);
+        await sender.SendMessageAsync(serviceBusMessage);
     }
 }
