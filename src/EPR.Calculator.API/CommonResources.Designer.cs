@@ -60,15 +60,6 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Account name is missing in configuration..
-        /// </summary>
-        public static string AccountNameMissingError {
-            get {
-                return ResourceManager.GetString("AccountNameMissingError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Billing file is either missing or outdated..
         /// </summary>
         public static string BillingFileOutdated {
@@ -96,38 +87,11 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Billing.
-        /// </summary>
-        public static string BillingMessageType {
-            get {
-                return ResourceManager.GetString("BillingMessageType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Blob delete for: {0} unsuccessful.
         /// </summary>
         public static string BlobDeleteUnsuccessful {
             get {
                 return ResourceManager.GetString("BlobDeleteUnsuccessful", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to BlobStorage settings are missing in configuration..
-        /// </summary>
-        public static string BlobSettingsMissingError {
-            get {
-                return ResourceManager.GetString("BlobSettingsMissingError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to BlobStorage.
-        /// </summary>
-        public static string BlobStorageSection {
-            get {
-                return ResourceManager.GetString("BlobStorageSection", resourceCulture);
             }
         }
         
@@ -182,15 +146,6 @@ namespace EPR.Calculator.API {
         public static string CanOnlyIncudeNumbersAndPercentage {
             get {
                 return ResourceManager.GetString("CanOnlyIncudeNumbersAndPercentage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Container name is missing in configuration..
-        /// </summary>
-        public static string ContainerNameMissingError {
-            get {
-                return ResourceManager.GetString("ContainerNameMissingError", resourceCulture);
             }
         }
         
@@ -321,15 +276,6 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Blob Uri is not in correct format..
-        /// </summary>
-        public static string IncorrectBlobUriFormat {
-            get {
-                return ResourceManager.GetString("IncorrectBlobUriFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to 500InternalServerError Exception :{0}.
         /// </summary>
         public static string InternalServerErrorException {
@@ -452,24 +398,6 @@ namespace EPR.Calculator.API {
         public static string LapcapDataUniqueReferences {
             get {
                 return ResourceManager.GetString("LapcapDataUniqueReferences", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Lapcap File Name in lapcapData API :{0}.
-        /// </summary>
-        public static string LapcapFileName {
-            get {
-                return ResourceManager.GetString("LapcapFileName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to local.
-        /// </summary>
-        public static string Local {
-            get {
-                return ResourceManager.GetString("Local", resourceCulture);
             }
         }
         
@@ -600,15 +528,6 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to application/octet-stream.
-        /// </summary>
-        public static string OctetStream {
-            get {
-                return ResourceManager.GetString("OctetStream", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to OrganisationId must be greater than 0 if provided..
         /// </summary>
         public static string OrganisationIdGreaterThan0 {
@@ -650,15 +569,6 @@ namespace EPR.Calculator.API {
         public static string ParameterCategory {
             get {
                 return ResourceManager.GetString("ParameterCategory", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Parameter File Name in API :{0}.
-        /// </summary>
-        public static string ParameterFileName {
-            get {
-                return ResourceManager.GetString("ParameterFileName", resourceCulture);
             }
         }
         
@@ -771,15 +681,6 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Result.
-        /// </summary>
-        public static string ResultMessageType {
-            get {
-                return ResourceManager.GetString("ResultMessageType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to RunId should have a value greater than 0.
         /// </summary>
         public static string RunIdGreaterThan0 {
@@ -807,47 +708,11 @@ namespace EPR.Calculator.API {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SASuperUser.
-        /// </summary>
-        public static string SASuperUserRole {
-            get {
-                return ResourceManager.GetString("SASuperUserRole", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Uploaded Scheme parameter template should have a count of {0}.
         /// </summary>
         public static string SchemeParameterTemplateValuesMissing {
             get {
                 return ResourceManager.GetString("SchemeParameterTemplateValuesMissing", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to calculator.
-        /// </summary>
-        public static string ServiceBusClientName {
-            get {
-                return ResourceManager.GetString("ServiceBusClientName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Configuration item not found: ServiceBus__ConnectionString.
-        /// </summary>
-        public static string ServiceBusConnectionStringMissing {
-            get {
-                return ResourceManager.GetString("ServiceBusConnectionStringMissing", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Configuration item not found: ServiceBus__QueueName.
-        /// </summary>
-        public static string ServiceBusQueueNameMissing {
-            get {
-                return ResourceManager.GetString("ServiceBusQueueNameMissing", resourceCulture);
             }
         }
         
@@ -875,15 +740,6 @@ namespace EPR.Calculator.API {
         public static string StatusRequired {
             get {
                 return ResourceManager.GetString("StatusRequired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to RpdStatus,PrepareCalcResults,Transpose.
-        /// </summary>
-        public static string TimeoutPolicies {
-            get {
-                return ResourceManager.GetString("TimeoutPolicies", resourceCulture);
             }
         }
         
@@ -956,15 +812,6 @@ namespace EPR.Calculator.API {
         public static string UnableToMoveBillingFile {
             get {
                 return ResourceManager.GetString("UnableToMoveBillingFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Validation errors :{0}.
-        /// </summary>
-        public static string ValidationErrors {
-            get {
-                return ResourceManager.GetString("ValidationErrors", resourceCulture);
             }
         }
     }
