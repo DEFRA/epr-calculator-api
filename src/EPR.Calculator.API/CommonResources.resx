@@ -119,15 +119,9 @@
   </resheader>
   <data name="CalculationAlreadyRunning" xml:space="preserve">
     <value>The calculator is currently running. You will be able to run another calculation once the current one has finished.</value>
-  </data>
-  <data name="CsvFileMetadataNotFoundErrorMessage" xml:space="preserve">
-    <value>Result csv file metadata not found for this '{0}' run id to perform requested operation.</value>
-  </data>
+  </data>VB
   <data name="FileNameRequired" xml:space="preserve">
     <value>FileName is required</value>
-  </data>
-  <data name="GenerateBillingFileAlreadyRequest" xml:space="preserve">
-    <value>Generating billing file for this '{0}' run id already requested.</value>
   </data>
   <data name="InvalidRelativeYear" xml:space="preserve">
     <value>The relative year is invalid.</value>
@@ -273,9 +267,6 @@
   <data name="BlobDeleteUnsuccessful" xml:space="preserve">
     <value>Blob delete for: {0} unsuccessful</value>
   </data>
-  <data name="FileNotFound" xml:space="preserve">
-    <value>File not found at path: {0}</value>
-  </data>
   <data name="InvalidClassification" xml:space="preserve">
     <value>Invalid Classification for {0}</value>
   </data>
@@ -312,12 +303,6 @@
   <data name="CanOnlyIncludeNumbers" xml:space="preserve">
     <value>The parameter {0} can only include numbers, commas and decimal points</value>
   </data>
-  <data name="ParameterType" xml:space="preserve">
-    <value>Parameter Type {0}</value>
-  </data>
-  <data name="ParameterCategory" xml:space="preserve">
-    <value>and Parameter Category {0}</value>
-  </data>
   <data name="ParameterUniqueRef" xml:space="preserve">
     <value>Parameter Unique ref {0}</value>
   </data>
@@ -350,9 +335,6 @@
   </data>
   <data name="NoMatchingRunFound" xml:space="preserve">
     <value>No matching run found with the specified relative year.</value>
-  </data>
-  <data name="InvalidClassificationId" xml:space="preserve">
-    <value>Invalid ClassificationId</value>
   </data>
   <data name="UnableToChangeStatusToCompleted" xml:space="preserve">
     <value>Classification {0} is not valid to be completed.</value>

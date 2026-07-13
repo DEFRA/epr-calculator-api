@@ -213,24 +213,6 @@ namespace EPR.Calculator.API {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Enter the {0} decrease.
-        /// </summary>
-        public static string EnterTheDecrease {
-            get {
-                return ResourceManager.GetString("EnterTheDecrease", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Enter the {0} increase.
-        /// </summary>
-        public static string EnterTheIncrease {
-            get {
-                return ResourceManager.GetString("EnterTheIncrease", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Enter the total costs for {0} in {1}.
         /// </summary>
         public static string EnterTotalCosts {
@@ -290,15 +272,6 @@ namespace EPR.Calculator.API {
         public static string InvalidClassification {
             get {
                 return ResourceManager.GetString("InvalidClassification", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid ClassificationId.
-        /// </summary>
-        public static string InvalidClassificationId {
-            get {
-                return ResourceManager.GetString("InvalidClassificationId", resourceCulture);
             }
         }
 
