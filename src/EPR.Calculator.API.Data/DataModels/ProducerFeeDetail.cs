@@ -50,12 +50,14 @@ public record ProducerFeeDetail
     internal ICollection<MaterialFee> MaterialFees { get; set; } = [];
 
     [NotMapped]
-    public IReadOnlyDictionary<string, MaterialFee> FeesByMaterial
+    public IReadOnlyDictionary<string, Fees> FeesByMaterial
     {
-        get => MaterialFees.ToDictionary(s => s.MaterialCode);
+        get => MaterialFees.ToDictionary(s => s.MaterialCode, v => new Fees { DisposalFee = v.DisposalFee, CommFee = v.CommFee });
         set
         {
-            MaterialFees = [..value.Values];
+            MaterialFees = [..value.Select(kvp => 
+                new MaterialFee{ MaterialCode = kvp.Key, DisposalFee = kvp.Value.DisposalFee, CommFee = kvp.Value.CommFee }
+            )];
             _disposalFeesByMaterial = null;
             _commsFeesByMaterial = null;
         }

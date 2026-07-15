@@ -8719,3 +8719,50 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260715113917_AddModulationAndSmcw'
+)
+BEGIN
+    CREATE TABLE [calc_result_modulation] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [green_factor] decimal(9,6) NOT NULL,
+        [red_factor] decimal(6,3) NOT NULL,
+        [material_modulations] json NOT NULL,
+        CONSTRAINT [PK_calc_result_modulation] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260715113917_AddModulationAndSmcw'
+)
+BEGIN
+    CREATE TABLE [calc_result_smcw] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [material_totals] json NOT NULL,
+        [producer_totals] json NOT NULL,
+        CONSTRAINT [PK_calc_result_smcw] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260715113917_AddModulationAndSmcw'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260715113917_AddModulationAndSmcw', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
