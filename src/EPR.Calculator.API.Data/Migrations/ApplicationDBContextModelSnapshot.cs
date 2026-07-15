@@ -121,40 +121,40 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AuthorisedBy")
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("billing_file_authorised_by");
-
-                    b.Property<DateTime?>("AuthorisedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("billing_file_authorised_date");
-
-                    b.Property<int>("CalculatorRunId")
-                        .HasColumnType("int")
-                        .HasColumnName("calculator_run_id");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(400)
-                        .HasColumnType("nvarchar(400)")
-                        .HasColumnName("billing_file_created_by");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("billing_file_created_date");
-
-                    b.Property<string>("CsvFileName")
+                    b.Property<string>("BillingCsvFileName")
                         .IsRequired()
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("billing_csv_filename");
 
-                    b.Property<string>("JsonFileName")
+                    b.Property<string>("BillingFileAuthorisedBy")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("billing_file_authorised_by");
+
+                    b.Property<DateTime?>("BillingFileAuthorisedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("billing_file_authorised_date");
+
+                    b.Property<string>("BillingFileCreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("billing_file_created_by");
+
+                    b.Property<DateTime>("BillingFileCreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("billing_file_created_date");
+
+                    b.Property<string>("BillingJsonFileName")
                         .IsRequired()
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("billing_json_filename");
+
+                    b.Property<int>("CalculatorRunId")
+                        .HasColumnType("int")
+                        .HasColumnName("calculator_run_id");
 
                     b.HasKey("Id");
 
@@ -3125,7 +3125,7 @@ namespace EPR.Calculator.API.Data.Migrations
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunBillingFileMetadata", b =>
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
-                        .WithMany("BillingFileMetadata")
+                        .WithMany("CalculatorRunBillingFileMetadata")
                         .HasForeignKey("CalculatorRunId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -3136,7 +3136,7 @@ namespace EPR.Calculator.API.Data.Migrations
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunCsvFileMetadata", b =>
                 {
                     b.HasOne("EPR.Calculator.API.Data.DataModels.CalculatorRun", "CalculatorRun")
-                        .WithMany("ResultFileMetadata")
+                        .WithMany("CsvFileMetadata")
                         .HasForeignKey("CalculatorRunId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -3370,9 +3370,11 @@ namespace EPR.Calculator.API.Data.Migrations
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRun", b =>
                 {
-                    b.Navigation("BillingFileMetadata");
+                    b.Navigation("CalculatorRunBillingFileMetadata");
 
                     b.Navigation("CountryApportionments");
+
+                    b.Navigation("CsvFileMetadata");
 
                     b.Navigation("ErrorReports");
 
@@ -3383,8 +3385,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Navigation("ProducerInvoicedMaterialNetTonnage");
 
                     b.Navigation("ProducerResultFileSuggestedBillingInstruction");
-
-                    b.Navigation("ResultFileMetadata");
                 });
 
             modelBuilder.Entity("EPR.Calculator.API.Data.DataModels.CalculatorRunOrganisationDataMaster", b =>
