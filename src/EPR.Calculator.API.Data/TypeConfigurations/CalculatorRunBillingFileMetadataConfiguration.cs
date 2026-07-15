@@ -16,11 +16,13 @@ public class CalculatorRunBillingFileMetadataConfiguration : IEntityTypeConfigur
 
         builder.Property(p => p.BillingCsvFileName)
             .HasColumnName("billing_csv_filename")
-            .HasMaxLength(400);
+            .HasMaxLength(400)
+            .IsRequired();
 
         builder.Property(p => p.BillingJsonFileName)
             .HasColumnName("billing_json_filename")
-            .HasMaxLength(400);
+            .HasMaxLength(400)
+            .IsRequired();
 
         builder.Property(p => p.BillingFileCreatedDate)
             .HasColumnName("billing_file_created_date")
