@@ -5,7 +5,7 @@ trigger:
   paths:
     include:
       - 'src/*'
-      
+
 parameters:
 
   - name: sonarqubeInstance
@@ -16,7 +16,7 @@ parameters:
     - 'SonarQube'
     # - 'SonarQubeLatest'
 
-pool: DEFRA-COMMON-ubuntu2004-SSV3
+pool: DEFRA-COMMON-UBUNTU-SSV3
 
 variables:
   - template: vars/DEV4-development.yaml
