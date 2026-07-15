@@ -1,6 +1,6 @@
 trigger: none
 pr: none
-pool: DEFRA-COMMON-ubuntu2004-SSV3
+pool: DEFRA-COMMON-UBUNTU-SSV3
 appendCommitMessageToRunName: false
 name: 'Deploy code to $(serviceName)'
 
@@ -32,7 +32,7 @@ parameters:
     - preprod
     - preprod2
     - prod
-    - DEV15    
+    - DEV15
 - name: imageTag
   displayName: Enter Tag for the Image (Docker tag) or Release name (Git repo tag)
   default: ''
@@ -62,7 +62,7 @@ variables:
   - ${{ elseif eq(parameters.envToDeploy, 'dev15') }}:
     - name: env
       value: DEV15
-    - template: vars/${{ parameters.envToDeploy }}.yaml    
+    - template: vars/${{ parameters.envToDeploy }}.yaml
 # Release tags reference
   - template: pipelines/image-tags/${{ parameters.envToDeploy }}.yaml@ReleaseTags
   - ${{ if eq(parameters.envToDeploy, 'development') }}:
@@ -71,8 +71,9 @@ variables:
 resources:
   repositories:
     - repository: CommonTemplates
-      name: RWD-CPR-EPR4P-ADO/epr-webapps-code-deploy-templates
-      type: git
+      name: defra/epr-webapps-code-deploy-templates
+      type: github
+      endpoint: defra
       ref: main
 
     # The repo will be reference the repo by a release tag (if the imageTag parameter contains 'release') otherwise it will pull down the main branch.
@@ -86,7 +87,7 @@ resources:
       name: RWD-CPR-EPR4P-ADO/epr-playwright-bdd
       type: git
       ref: main
-      
+
 extends:
   template: epr-deployment-pipeline.yaml@CommonTemplates
   parameters:
