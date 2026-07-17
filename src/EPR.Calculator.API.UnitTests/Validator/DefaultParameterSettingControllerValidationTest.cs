@@ -124,11 +124,6 @@ namespace EPR.Calculator.API.UnitTests.Validator
             var errors = actionResult?.Value as IEnumerable<CreateDefaultParameterSettingErrorDto>;
             Assert.IsNotNull(errors);
 
-            foreach (var error in errors)
-            {
-                Console.WriteLine(error.Message);
-            }
-
             CollectionAssert.AreEquivalent(
                 new[]
                 {
