@@ -166,13 +166,13 @@ namespace EPR.Calculator.API.UnitTests.Validator
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    "The parameter COMC-AL can only include numbers, commas and decimal points",
-                    "The parameter BADEBT-P can only include numbers, commas, decimal points and a percentage symbol (%)",
-                    "The parameter MATT-AD can only include numbers, commas and decimal points",
-                    "The parameter MATT-PI can only include numbers, commas, decimal points and a percentage symbol (%)",
-                    "The parameter MATT-PD can only include numbers, commas, decimal points and a percentage symbol (%)",
-                    "The parameter TONT-AI can only include numbers, commas and decimal points",
-                    "The parameter REDM-RF can only include numbers, commas and decimal points"
+                    "The parameter COMC-AL can only include numbers, commas and decimal points.",
+                    "The parameter BADEBT-P can only include numbers, commas, decimal points and a percentage symbol (%).",
+                    "The parameter MATT-AD can only include numbers, commas and decimal points.",
+                    "The parameter MATT-PI can only include numbers, commas, decimal points and a percentage symbol (%).",
+                    "The parameter MATT-PD can only include numbers, commas, decimal points and a percentage symbol (%).",
+                    "The parameter TONT-AI can only include numbers, commas and decimal points.",
+                    "The parameter REDM-RF can only include numbers, commas and decimal points."
                 },
                 Validator.Validate(dto).Errors.Select(x => x.Message).ToList());
         }
@@ -197,22 +197,16 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 ParameterFileName = "TestFileName",
             };
 
-            var vr = Validator.Validate(dto);
-            foreach (var e in vr.Errors)
-            {
-                Console.WriteLine(e.Message);
-            }
-
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    "The parameter COMC-AL must be between £0 and £999999999.99",
-                    "The parameter BADEBT-P must be between 0% and 999.99%",
-                    "The parameter MATT-AD must be between £-999999999.99 and £0",
-                    "The parameter MATT-PI must be between 0% and 999.99%",
-                    "The parameter MATT-PD must be between -999.99% and 0%",
-                    "The parameter TONT-AI must be between £0 and £999999999.99",
-                    "The parameter REDM-RF must be between 1.000 and 2.000"
+                    "The parameter COMC-AL must be between £0 and £999999999.99.",
+                    "The parameter BADEBT-P must be between 0% and 999.99%.",
+                    "The parameter MATT-AD must be between £-999999999.99 and £0.",
+                    "The parameter MATT-PI must be between 0% and 999.99%.",
+                    "The parameter MATT-PD must be between -999.99% and 0%.",
+                    "The parameter TONT-AI must be between £0 and £999999999.99.",
+                    "The parameter REDM-RF must be between 1.000 and 2.000."
                 },
                 Validator.Validate(dto).Errors.Select(x => x.Message).ToList());
         }

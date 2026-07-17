@@ -136,7 +136,7 @@
     <value>Run is not having the right status or Is Billing File Generating is already set to true</value>
   </data>
   <data name="LapcapDataTemplateValuesMissing" xml:space="preserve">
-    <value>Uploaded Lapcap parameter template should have a count of {0}</value>
+    <value>Uploaded Lapcap parameter template should have a count of {0}.</value>
   </data>
   <data name="MaxFileNameLength" xml:space="preserve">
     <value>File name should be less than 256 characters</value>
@@ -280,16 +280,16 @@
     <value>Billing instruction cannot contain duplicate values.</value>
   </data>
   <data name="EnterTotalCosts" xml:space="preserve">
-    <value>Enter the total costs for {0} in {1}</value>
+    <value>Enter the total costs for {0} in {1}.</value>
   </data>
   <data name="TotalCostsForMaterial" xml:space="preserve">
-    <value>Total costs for {0} can only include numbers, commas and decimal points</value>
+    <value>Total costs for {0} can only include numbers, commas and decimal points.</value>
   </data>
   <data name="TotalCostsRange" xml:space="preserve">
-    <value>Total costs for {0} in {1} must be between £{2} and £{3}</value>
+    <value>Total costs for {0} in {1} must be between £{2} and £{3}.</value>
   </data>
   <data name="TotalCostForMaterialAndCountry" xml:space="preserve">
-    <value>You have entered the total costs for {0} in {1} more than once</value>
+    <value>You have entered the total costs for {0} in {1} more than once.</value>
   </data>
   <data name="InternalServerErrorException" xml:space="preserve">
     <value>500InternalServerError Exception :{0}</value>
@@ -298,28 +298,28 @@
     <value>The parameter {0} is duplicated. Remove the duplicated row in the file.</value>
   </data>
   <data name="CanOnlyIncudeNumbersAndPercentage" xml:space="preserve">
-    <value>The parameter {0} can only include numbers, commas, decimal points and a percentage symbol (%)</value>
+    <value>The parameter {0} can only include numbers, commas, decimal points and a percentage symbol (%).</value>
   </data>
   <data name="CanOnlyIncludeNumbers" xml:space="preserve">
-    <value>The parameter {0} can only include numbers, commas and decimal points</value>
+    <value>The parameter {0} can only include numbers, commas and decimal points.</value>
   </data>
   <data name="ParameterUniqueRef" xml:space="preserve">
     <value>Parameter Unique ref {0}</value>
   </data>
   <data name="MustBeBetween" xml:space="preserve">
-    <value>The parameter {0} must be between {1} and {2}</value>
+    <value>The parameter {0} must be between {1} and {2}.</value>
   </data>
   <data name="MustBeBetweenWithCurrency" xml:space="preserve">
-    <value>The parameter {0} must be between £{1} and £{2}</value>
+    <value>The parameter {0} must be between £{1} and £{2}.</value>
   </data>
   <data name="MustBeBetweenWithPercentage" xml:space="preserve">
-    <value>The parameter {0} must be between {1}% and {2}%</value>
+    <value>The parameter {0} must be between {1}% and {2}%.</value>
   </data>
   <data name="MustBeBetweenWithTons" xml:space="preserve">
-    <value>The parameter {0} must be between {1} and {2} tons</value>
+    <value>The parameter {0} must be between {1} and {2} tons.</value>
   </data>
   <data name="EnterDefaultParameter" xml:space="preserve">
-    <value>The value for {0} is blank. Add a value for {0}</value>
+    <value>The value for {0} is blank. Add a value for {0}.</value>
   </data>
   <data name="MissingDefaultParameter" xml:space="preserve">
     <value>The parameter {0} is missing. Add the parameter to the file.</value>
