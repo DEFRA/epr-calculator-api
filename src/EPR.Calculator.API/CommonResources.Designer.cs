@@ -132,24 +132,6 @@ namespace EPR.Calculator.API {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to can only include numbers, commas and decimal points.
-        /// </summary>
-        public static string CanOnlyIncludeNumbers {
-            get {
-                return ResourceManager.GetString("CanOnlyIncludeNumbers", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to can only include numbers, commas, decimal points and a percentage symbol (%).
-        /// </summary>
-        public static string CanOnlyIncudeNumbersAndPercentage {
-            get {
-                return ResourceManager.GetString("CanOnlyIncudeNumbersAndPercentage", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Result csv file metadata not found for this &apos;{0}&apos; run id to perform requested operation..
         /// </summary>
         public static string CsvFileMetadataNotFoundErrorMessage {
@@ -186,47 +168,11 @@ namespace EPR.Calculator.API {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Missing value for {0}.
-        /// </summary>
-        public static string EnterDefaultParameter {
-            get {
-                return ResourceManager.GetString("EnterDefaultParameter", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Missing parameter {0}.
-        /// </summary>
-        public static string MissingDefaultParameter {
-            get {
-                return ResourceManager.GetString("MissingDefaultParameter", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Unexpected parameter {0}.
-        /// </summary>
-        public static string UnexpectedDefaultParameter {
-            get {
-                return ResourceManager.GetString("UnexpectedDefaultParameter", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Enter the total costs for {0} in {1}.
         /// </summary>
         public static string EnterTotalCosts {
             get {
                 return ResourceManager.GetString("EnterTotalCosts", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Expecting only One with Parameter Type {0}.
-        /// </summary>
-        public static string DuplicateDefaultParameter {
-            get {
-                return ResourceManager.GetString("DuplicateDefaultParameter", resourceCulture);
             }
         }
 
@@ -389,42 +335,6 @@ namespace EPR.Calculator.API {
         public static string MaxFileNameSupported {
             get {
                 return ResourceManager.GetString("MaxFileNameSupported", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to must be between {0} and {1} .
-        /// </summary>
-        public static string MustBeBetween {
-            get {
-                return ResourceManager.GetString("MustBeBetween", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to must be between £{0} and £{1}.
-        /// </summary>
-        public static string MustBeBetweenWithCurrency {
-            get {
-                return ResourceManager.GetString("MustBeBetweenWithCurrency", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to must be between {0}% and {1}%.
-        /// </summary>
-        public static string MustBeBetweenWithPercentage {
-            get {
-                return ResourceManager.GetString("MustBeBetweenWithPercentage", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to must be between {0} and {1}tons.
-        /// </summary>
-        public static string MustBeBetweenWithTons {
-            get {
-                return ResourceManager.GetString("MustBeBetweenWithTons", resourceCulture);
             }
         }
 

@@ -479,6 +479,12 @@ namespace EPR.Calculator.API.UnitTests.Helpers
                     ParameterType = "Red modulation factor",
                     ValidRangeFrom = 1.000M,
                     ValidRangeTo = 2.000M,
+                },
+                new()
+                {
+                    ParameterUniqueReferenceId = "COFF-DT",
+                    ParameterCategory = "Optional Date",
+                    ParameterType = "Cut-off date",
                 }
             };
             return list;

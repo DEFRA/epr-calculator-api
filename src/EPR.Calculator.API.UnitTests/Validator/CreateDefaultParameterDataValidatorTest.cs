@@ -84,11 +84,25 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 },
                 new DefaultParameterTemplateMaster
                 {
+                    ParameterUniqueReferenceId = "LRET-AL",
+                    ParameterCategory = "Aluminium",
+                    ParameterType = "Late reporting tonnage",
+                    ValidRangeFrom = 0m,
+                    ValidRangeTo = 999999999.999m,
+                },
+                new DefaultParameterTemplateMaster
+                {
                     ParameterUniqueReferenceId = "REDM-RF",
-                    ParameterCategory = "Modulation Factor",
                     ParameterType = "Red modulation factor",
+                    ParameterCategory = "Modulation Factor",
                     ValidRangeFrom = 1.000m,
                     ValidRangeTo = 2.000m,
+                },
+                new DefaultParameterTemplateMaster
+                {
+                    ParameterUniqueReferenceId = "COFF-DT",
+                    ParameterCategory = "Optional Date",
+                    ParameterType = "Cut-off date",
                 }
             };
 
@@ -172,7 +186,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
                     "The parameter MATT-PI can only include numbers, commas, decimal points and a percentage symbol (%).",
                     "The parameter MATT-PD can only include numbers, commas, decimal points and a percentage symbol (%).",
                     "The parameter TONT-AI can only include numbers, commas and decimal points.",
-                    "The parameter REDM-RF can only include numbers, commas and decimal points."
+                    "The parameter REDM-RF can only include numbers, commas and decimal points.",
+                    "The parameter LRET-AL can only include numbers, commas and decimal points.",
+                    "The parameter COFF-DT value is invalid. Enter a valid date or 'NA'."
                 },
                 Validator.Validate(dto).Errors.Select(x => x.Message).ToList());
         }
@@ -197,16 +213,21 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 ParameterFileName = "TestFileName",
             };
 
+
+            Validator.Validate(dto).Errors.Select(x => x.Message).ToList().ForEach(x => Console.WriteLine(x));
+
             CollectionAssert.AreEquivalent(
                 new[]
                 {
+
                     "The parameter COMC-AL must be between £0 and £999999999.99.",
                     "The parameter BADEBT-P must be between 0% and 999.99%.",
                     "The parameter MATT-AD must be between £-999999999.99 and £0.",
                     "The parameter MATT-PI must be between 0% and 999.99%.",
                     "The parameter MATT-PD must be between -999.99% and 0%.",
                     "The parameter TONT-AI must be between £0 and £999999999.99.",
-                    "The parameter REDM-RF must be between 1.000 and 2.000."
+                    "The parameter REDM-RF must be between 1.000 and 2.000.",
+                    "The parameter LRET-AL must be between 0 and 999999999.999 tons."
                 },
                 Validator.Validate(dto).Errors.Select(x => x.Message).ToList());
         }
@@ -222,6 +243,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 "MATT-PD" => "-1000",
                 "TONT-AI" => "-1",
                 "REDM-RF" => "2.500",
+                "COFF-DT" => "01/01/2000", // TODO has not min/max?
+                "LRET-AL" => "1,000,000,000.00",
                 _ => "0",
             };
         }

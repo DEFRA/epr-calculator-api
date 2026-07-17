@@ -673,9 +673,10 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("parameter_unique_ref");
 
-                    b.Property<decimal>("ParameterValue")
+                    b.Property<string>("ParameterValue")
+                        .IsRequired()
                         .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("parameter_value");
 
                     b.HasKey("Id");
@@ -1230,6 +1231,14 @@ namespace EPR.Calculator.API.Data.Migrations
                             ParameterType = "Red modulation factor",
                             ValidRangeFrom = 1.000m,
                             ValidRangeTo = 2.000m
+                        },
+                        new
+                        {
+                            ParameterUniqueReferenceId = "COFF-DT",
+                            ParameterCategory = "Optional Date",
+                            ParameterType = "Cut-off date",
+                            ValidRangeFrom = 0m,
+                            ValidRangeTo = 0m
                         });
                 });
 

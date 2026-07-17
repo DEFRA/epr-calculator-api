@@ -8632,6 +8632,79 @@ GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260715154551_AddCutOffDateDefaultParameter'
+)
+BEGIN
+    DECLARE @var57 sysname;
+    SELECT @var57 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[default_parameter_setting_detail]') AND [c].[name] = N'parameter_value');
+    IF @var57 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_setting_detail] DROP CONSTRAINT [' + @var57 + '];');
+    ALTER TABLE [default_parameter_setting_detail] ALTER COLUMN [parameter_value] nvarchar(max) NOT NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260715154551_AddCutOffDateDefaultParameter'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
+        SET IDENTITY_INSERT [default_parameter_template_master] ON;
+    EXEC(N'INSERT INTO [default_parameter_template_master] ([parameter_unique_ref], [parameter_category], [parameter_type], [valid_Range_from], [valid_Range_to])
+    VALUES (N''COFF-DT'', N''Optional Date'', N''Cut-off date'', 0.0, 0.0)');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
+        SET IDENTITY_INSERT [default_parameter_template_master] OFF;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260715154551_AddCutOffDateDefaultParameter'
+)
+BEGIN
+
+                    INSERT INTO default_parameter_setting_detail
+                    (
+                        default_parameter_setting_master_id,
+                        parameter_unique_ref,
+                        parameter_value
+                    )
+                    SELECT
+                        dpsm.Id,
+                        'COFF-DT',
+                        'NA'
+                    FROM default_parameter_setting_master dpsm
+                    WHERE NOT EXISTS
+                    (
+                        SELECT 1
+                        FROM default_parameter_setting_detail dpsd
+                        WHERE dpsd.default_parameter_setting_master_id = dpsm.Id
+                        AND dpsd.parameter_unique_ref = 'COFF-DT'
+                    );
+                
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260715154551_AddCutOffDateDefaultParameter'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260715154551_AddCutOffDateDefaultParameter', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260716130437_AddProducerFeeTables'
 )
 BEGIN

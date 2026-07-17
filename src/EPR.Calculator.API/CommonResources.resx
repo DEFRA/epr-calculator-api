@@ -163,7 +163,7 @@
     <value>Uploaded Scheme parameter template should have a count of {0}</value>
   </data>
   <data name="DefaultParameterUniqueReferences" xml:space="preserve">
-    <value>BADEBT-P,COMC-AL,COMC-FC,COMC-GL,COMC-PC,COMC-PL,COMC-ST,COMC-WD,COMC-OT,COMC-UK,COMC-ENG,COMC-WLS,COMC-SCT,COMC-NIR,LAPC-ENG,LAPC-NIR,LAPC-SCT,LAPC-WLS,LRET-AL-R,LRET-AL,LRET-AL-G,LRET-FC-R,LRET-FC,LRET-FC-G,LRET-GL-R,LRET-GL,LRET-GL-G,LRET-OT-R,LRET-OT,LRET-OT-G,LRET-PC-R,LRET-PC,LRET-PC-G,LRET-PL-R,LRET-PL,LRET-PL-G,LRET-ST-R,LRET-ST,LRET-ST-G,LRET-WD-R,LRET-WD,LRET-WD-G,MATT-AD,MATT-AI,MATT-PD,MATT-PI,SAOC-ENG,SAOC-NIR,SAOC-SCT,SAOC-WLS,SCSC-ENG,SCSC-NIR,SCSC-SCT,SCSC-WLS,TONT-AD,TONT-AI,TONT-PD,TONT-PI,REDM-RF</value>
+    <value>BADEBT-P,COMC-AL,COMC-FC,COMC-GL,COMC-PC,COMC-PL,COMC-ST,COMC-WD,COMC-OT,COMC-UK,COMC-ENG,COMC-WLS,COMC-SCT,COMC-NIR,LAPC-ENG,LAPC-NIR,LAPC-SCT,LAPC-WLS,LRET-AL-R,LRET-AL,LRET-AL-G,LRET-FC-R,LRET-FC,LRET-FC-G,LRET-GL-R,LRET-GL,LRET-GL-G,LRET-OT-R,LRET-OT,LRET-OT-G,LRET-PC-R,LRET-PC,LRET-PC-G,LRET-PL-R,LRET-PL,LRET-PL-G,LRET-ST-R,LRET-ST,LRET-ST-G,LRET-WD-R,LRET-WD,LRET-WD-G,MATT-AD,MATT-AI,MATT-PD,MATT-PI,SAOC-ENG,SAOC-NIR,SAOC-SCT,SAOC-WLS,SCSC-ENG,SCSC-NIR,SCSC-SCT,SCSC-WLS,TONT-AD,TONT-AI,TONT-PD,TONT-PI,REDM-RF,COFF-DT</value>
   </data>
   <data name="LapcapDataUniqueReferences" xml:space="preserve">
     <value>ENG-AL,ENG-FC,ENG-GL,ENG-OT,ENG-PC,ENG-PL,ENG-ST,ENG-WD,NI-AL,NI-FC,NI-GL,NI-OT,NI-PC,NI-PL,NI-ST,NI-WD,SCT-AL,SCT-FC,SCT-GL,SCT-OT,SCT-PC,SCT-PL,SCT-ST,SCT-WD,WLS-AL,WLS-FC,WLS-GL,WLS-OT,WLS-PC,WLS-PL,WLS-ST,WLS-WD</value>
@@ -294,38 +294,8 @@
   <data name="InternalServerErrorException" xml:space="preserve">
     <value>500InternalServerError Exception :{0}</value>
   </data>
-  <data name="DuplicateDefaultParameter" xml:space="preserve">
-    <value>The parameter {0} is duplicated. Remove the duplicated row in the file.</value>
-  </data>
-  <data name="CanOnlyIncudeNumbersAndPercentage" xml:space="preserve">
-    <value>The parameter {0} can only include numbers, commas, decimal points and a percentage symbol (%).</value>
-  </data>
-  <data name="CanOnlyIncludeNumbers" xml:space="preserve">
-    <value>The parameter {0} can only include numbers, commas and decimal points.</value>
-  </data>
   <data name="ParameterUniqueRef" xml:space="preserve">
     <value>Parameter Unique ref {0}</value>
-  </data>
-  <data name="MustBeBetween" xml:space="preserve">
-    <value>The parameter {0} must be between {1} and {2}.</value>
-  </data>
-  <data name="MustBeBetweenWithCurrency" xml:space="preserve">
-    <value>The parameter {0} must be between £{1} and £{2}.</value>
-  </data>
-  <data name="MustBeBetweenWithPercentage" xml:space="preserve">
-    <value>The parameter {0} must be between {1}% and {2}%.</value>
-  </data>
-  <data name="MustBeBetweenWithTons" xml:space="preserve">
-    <value>The parameter {0} must be between {1} and {2} tons.</value>
-  </data>
-  <data name="EnterDefaultParameter" xml:space="preserve">
-    <value>The value for {0} is blank. Add a value for {0}.</value>
-  </data>
-  <data name="MissingDefaultParameter" xml:space="preserve">
-    <value>The parameter {0} is missing. Add the parameter to the file.</value>
-  </data>
-  <data name="UnexpectedDefaultParameter" xml:space="preserve">
-    <value>The parameter {0} is an unexpected parameter. Remove it from the file.</value>
   </data>
   <data name="InvalidRunClassifications" xml:space="preserve">
     <value>Invalid run classifications.</value>

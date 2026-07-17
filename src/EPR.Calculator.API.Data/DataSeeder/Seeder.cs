@@ -482,6 +482,12 @@ public static class Seeder
                 ParameterType = "Red modulation factor",
                 ValidRangeFrom = 1.000M,
                 ValidRangeTo = 2.000M
+            },
+            new DefaultParameterTemplateMaster
+            {
+                ParameterUniqueReferenceId = "COFF-DT",
+                ParameterCategory = "Optional Date",
+                ParameterType = "Cut-off date"
             });
     }
 

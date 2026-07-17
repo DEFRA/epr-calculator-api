@@ -26,7 +26,7 @@ namespace EPR.Calculator.API.UnitTests
                     Id = 150,
                     DefaultParameterSettingMasterId = 200,
                     ParameterUniqueReferenceId = "BADEBT-P",
-                    ParameterValue = 30.99m,
+                    ParameterValue = "30.99",
                     DefaultParameterSettingMaster = defaultParameterSettingMaster,
                 },
             };
@@ -36,7 +36,7 @@ namespace EPR.Calculator.API.UnitTests
                 Id = 150,
                 DefaultParameterSettingMasterId = 200,
                 ParameterUniqueReferenceId = "BADEBT-P",
-                ParameterValue = 30.99m,
+                ParameterValue = "30.99",
                 DefaultParameterSettingMaster = defaultParameterSettingMaster,
             };
 

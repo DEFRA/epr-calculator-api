@@ -26,6 +26,6 @@ namespace EPR.Calculator.API.Dtos
 
         public required string ParameterCategory { get; set; }
 
-        public decimal ParameterValue { get; set; }
+        public required string ParameterValue { get; set; }
     }
 }

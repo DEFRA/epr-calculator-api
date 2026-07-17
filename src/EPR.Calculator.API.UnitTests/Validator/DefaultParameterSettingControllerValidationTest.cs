@@ -92,6 +92,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 HttpContext = context,
             };
             var schemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>();
+
             foreach (var uniqueRef in CommonResources.DefaultParameterUniqueReferences.Split(','))
             {
                 schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
@@ -102,7 +103,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
             }
 
             schemeParameterTemplateValues.Single(x => x.ParameterUniqueReferenceId == "REDM-RF").ParameterValue = "1.200";
-            schemeParameterTemplateValues.Single(x => x.ParameterUniqueReferenceId == "BADEBT-P").ParameterUniqueReferenceId = "Somehthing else";
+            schemeParameterTemplateValues.Single(x => x.ParameterUniqueReferenceId == "BADEBT-P").ParameterUniqueReferenceId = "Something else";
+
             var createDefaultParameterDto = new CreateDefaultParameterSettingDto
             {
                 RelativeYear = new RelativeYear(2000),
@@ -121,7 +123,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
                 new[]
                 {
                     "The parameter BADEBT-P is missing. Add the parameter to the file.",
-                    "The parameter Somehthing else is an unexpected parameter. Remove it from the file."
+                    "The parameter Something else is an unexpected parameter. Remove it from the file.",
+                    "The parameter COFF-DT value is invalid. Enter a valid date or 'NA'."
                 },
                 errors.Select(x => x.Message).ToList());
         }

@@ -1,4 +1,5 @@
-﻿using EPR.Calculator.API.Data;
+﻿using System.Globalization;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -11,11 +12,11 @@ public class CreateDefaultParameterDataValidator(ApplicationDBContext context) :
 
     public ValidationResultDto<CreateDefaultParameterSettingErrorDto> Validate(CreateDefaultParameterSettingDto createDefaultParameterSettingDto)
     {
-        IEnumerable<DefaultParameterTemplateMaster> defaultTemplateMasterList = this.context.DefaultParameterTemplateMasterList.ToList();
-        var templateValues = createDefaultParameterSettingDto.SchemeParameterTemplateValues;
+        IEnumerable<DefaultParameterTemplateMaster> masterList = this.context.DefaultParameterTemplateMasterList.ToList();
 
-        var errors = ValidateExpectedParameters(defaultTemplateMasterList, templateValues)
-            .Concat(ValidateUnexpectedParameters(defaultTemplateMasterList, templateValues))
+        var errors = masterList
+            .SelectMany(master => ValidateParameter(master, createDefaultParameterSettingDto.SchemeParameterTemplateValues))
+            .Concat(ValidateUnexpectedParameters(masterList, createDefaultParameterSettingDto.SchemeParameterTemplateValues))
             .ToList();
 
         return new ValidationResultDto<CreateDefaultParameterSettingErrorDto>
@@ -25,53 +26,60 @@ public class CreateDefaultParameterDataValidator(ApplicationDBContext context) :
         };
     }
 
-    private static List<CreateDefaultParameterSettingErrorDto> ValidateExpectedParameters(
-        IEnumerable<DefaultParameterTemplateMaster> defaultParameters,
-        IEnumerable<SchemeParameterTemplateValueDto> templateValues)
+    private static IEnumerable<CreateDefaultParameterSettingErrorDto> ValidateParameter(
+        DefaultParameterTemplateMaster master,
+        IEnumerable<SchemeParameterTemplateValueDto> values)
     {
-        var errors = new List<CreateDefaultParameterSettingErrorDto>();
+        var matches = values
+            .Where(x => x.ParameterUniqueReferenceId == master.ParameterUniqueReferenceId)
+            .ToList();
 
-        foreach (var defaultParameter in defaultParameters)
+        return matches.Count switch
         {
-            var matchingTemplates = templateValues.Where(x => x.ParameterUniqueReferenceId == defaultParameter.ParameterUniqueReferenceId);
+            0 => [CreateErrorDto(master, $"The parameter {master.ParameterUniqueReferenceId} is missing. Add the parameter to the file.")],
+            1 => ValidateValue(master, matches.Single().ParameterValue),
+            _ => [CreateErrorDto(master, $"The parameter {master.ParameterUniqueReferenceId} is duplicated. Remove the duplicated row in the file.")],
+        };
+    }
 
-            if (matchingTemplates.Count() > 1)
+    private static IEnumerable<CreateDefaultParameterSettingErrorDto> ValidateValue(
+        DefaultParameterTemplateMaster master,
+        string rawValue)
+    {
+        var id    = master.ParameterUniqueReferenceId;
+        var value = IsPercentage(master)
+            ? rawValue.TrimEnd('%')
+            : rawValue.Replace("£", string.Empty);
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            yield return CreateErrorDto(master, $"The value for {id} is blank. Add a value for {id}.");
+        }
+        else if (master.ParameterCategory == "Optional Date")
+        {
+            if (!value.Equals("NA", StringComparison.OrdinalIgnoreCase) && !DateTime.TryParseExact(value, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
             {
-                errors.Add(CreateErrorDto(defaultParameter, string.Format(CommonResources.DuplicateDefaultParameter, defaultParameter.ParameterUniqueReferenceId)));
-            }
-            else if (!matchingTemplates.Any())
-            {
-                errors.Add(CreateErrorDto(defaultParameter, string.Format(CommonResources.MissingDefaultParameter, defaultParameter.ParameterUniqueReferenceId)));
-            }
-            else
-            {
-                var parameterValueStr = GetParameterValue(defaultParameter, matchingTemplates.Single().ParameterValue);
-                if (string.IsNullOrEmpty(parameterValueStr))
-                {
-                    errors.Add(CreateErrorDto(defaultParameter, string.Format(CommonResources.EnterDefaultParameter, defaultParameter.ParameterUniqueReferenceId)));
-                }
-                else if (decimal.TryParse(parameterValueStr, out decimal parameterValue))
-                {
-                    if (parameterValue < defaultParameter.ValidRangeFrom || parameterValue > defaultParameter.ValidRangeTo)
-                    {
-                        errors.Add(CreateErrorDto(defaultParameter, FormattedErrorForOutOfRangeValues(defaultParameter)));
-                    }
-                }
-                else
-                {
-                    errors.Add(CreateErrorDto(defaultParameter,  FormattedErrorForNonDecimalValues(defaultParameter)));
-                }
+                yield return CreateErrorDto(master, $"The parameter {id} value is invalid. Enter a valid date or 'NA'.");
             }
         }
-
-        return errors;
+        else if (!decimal.TryParse(value, out var decimalValue))
+        {
+            yield return IsPercentage(master)
+                ? CreateErrorDto(master, $"The parameter {id} can only include numbers, commas, decimal points and a percentage symbol (%).")
+                : CreateErrorDto(master, $"The parameter {id} can only include numbers, commas and decimal points.");
+        }
+        else if (decimalValue < master.ValidRangeFrom ||
+                 decimalValue > master.ValidRangeTo)
+        {
+            yield return CreateErrorDto(master, OutOfRangeValues(master));
+        }
     }
 
     private static List<CreateDefaultParameterSettingErrorDto> ValidateUnexpectedParameters(
-        IEnumerable<DefaultParameterTemplateMaster> defaultParameters,
+        IEnumerable<DefaultParameterTemplateMaster> masterList,
         IEnumerable<SchemeParameterTemplateValueDto> templateValues)
     {
-        var expectedIds = defaultParameters
+        var expectedIds = masterList
             .Select(x => x.ParameterUniqueReferenceId)
             .ToHashSet();
 
@@ -79,16 +87,16 @@ public class CreateDefaultParameterDataValidator(ApplicationDBContext context) :
             .Where(x => !expectedIds.Contains(x.ParameterUniqueReferenceId))
             .Select(x => CreateErrorDto(
                 parameterUniqueRef: x.ParameterUniqueReferenceId,
-                errorMessage      : string.Format(CommonResources.UnexpectedDefaultParameter, x.ParameterUniqueReferenceId)))
+                errorMessage      : $"The parameter {x.ParameterUniqueReferenceId} is an unexpected parameter. Remove it from the file."))
             .ToList();
     }
 
-    private static CreateDefaultParameterSettingErrorDto CreateErrorDto(DefaultParameterTemplateMaster defaultParameter, string errorMessage) =>
+    private static CreateDefaultParameterSettingErrorDto CreateErrorDto(DefaultParameterTemplateMaster master, string errorMessage) =>
         new()
         {
-            ParameterUniqueRef = defaultParameter.ParameterUniqueReferenceId,
-            ParameterType      = defaultParameter.ParameterType,
-            ParameterCategory  = defaultParameter.ParameterCategory,
+            ParameterUniqueRef = master.ParameterUniqueReferenceId,
+            ParameterType      = master.ParameterType,
+            ParameterCategory  = master.ParameterCategory,
             Message            = errorMessage,
             Description        = string.Empty,
         };
@@ -103,67 +111,54 @@ public class CreateDefaultParameterDataValidator(ApplicationDBContext context) :
             Description        = string.Empty,
         };
 
-    private static string GetParameterValue(DefaultParameterTemplateMaster defaultParameter, string parameterValue) =>
-        IsPercentage(defaultParameter)
-            ? parameterValue.TrimEnd('%')
-            : parameterValue.Replace("£", string.Empty);
-
-    private static string FormattedErrorForNonDecimalValues(DefaultParameterTemplateMaster defaultParameter) =>
-        IsPercentage(defaultParameter)
-            ? string.Format(CommonResources.CanOnlyIncudeNumbersAndPercentage, defaultParameter.ParameterUniqueReferenceId)
-            : string.Format(CommonResources.CanOnlyIncludeNumbers            , defaultParameter.ParameterUniqueReferenceId);
-
-    private static string FormattedErrorForOutOfRangeValues(DefaultParameterTemplateMaster defaultParameter)
+    private static string OutOfRangeValues(DefaultParameterTemplateMaster master)
     {
-        var id   = defaultParameter.ParameterUniqueReferenceId;
-        var from = defaultParameter.ValidRangeFrom;
-        var to   = defaultParameter.ValidRangeTo;
+        var id   = master.ParameterUniqueReferenceId;
+        var from = master.ValidRangeFrom;
+        var to   = master.ValidRangeTo;
 
-        if (IsTonnage(defaultParameter))
+        if (IsTonnage(master))
         {
-            return string.Format(CommonResources.MustBeBetweenWithTons      , id, decimal.Truncate(from), Math.Round(to, 3, MidpointRounding.ToZero));
+            return $"The parameter {id} must be between {decimal.Truncate(from)} and {Math.Round(to, 3, MidpointRounding.ToZero)} tons.";
+
         }
-        else if (IsBadDebt(defaultParameter))
+        else if (IsBadDebt(master) || IsPercentageIncrease(master))
         {
-            return string.Format(CommonResources.MustBeBetweenWithPercentage, id, decimal.Truncate(from), Math.Round(to, 2, MidpointRounding.ToZero));
+            return $"The parameter {id} must be between {decimal.Truncate(from)}% and {Math.Round(to, 2, MidpointRounding.ToZero)}%.";
         }
-        else if (IsPercentageIncrease(defaultParameter))
+        else if (IsPercentageDecrease(master))
         {
-            return string.Format(CommonResources.MustBeBetweenWithPercentage, id, decimal.Truncate(from), Math.Round(to, 2, MidpointRounding.ToZero));
+            return $"The parameter {id} must be between {Math.Round(from, 2, MidpointRounding.ToZero)}% and {decimal.Truncate(to)}%.";
         }
-        else if (IsPercentageDecrease(defaultParameter))
+        else if (IsFactor(master))
         {
-            return string.Format(CommonResources.MustBeBetweenWithPercentage, id, Math.Round(from, 2, MidpointRounding.ToZero), decimal.Truncate(to));
-        }
-        else if (IsFactor(defaultParameter))
-        {
-            return string.Format(CommonResources.MustBeBetween              , id, Math.Round(from, 3, MidpointRounding.ToZero), Math.Round(to, 3, MidpointRounding.ToZero));
+            return $"The parameter {id} must be between {Math.Round(from, 3, MidpointRounding.ToZero)} and {Math.Round(to, 3, MidpointRounding.ToZero)}.";
         }
         else
         {
-            return string.Format(CommonResources.MustBeBetweenWithCurrency  , id, Math.Round(from, 2, MidpointRounding.ToZero), Math.Round(to, 2, MidpointRounding.ToZero));
+            return $"The parameter {id} must be between £{Math.Round(from, 2, MidpointRounding.ToZero)} and £{Math.Round(to, 2, MidpointRounding.ToZero)}.";
         }
     }
 
-    private static bool IsTonnage(DefaultParameterTemplateMaster defaultParameter) =>
-         defaultParameter.ParameterType    .Contains("tonnage", StringComparison.OrdinalIgnoreCase) &&
-        !defaultParameter.ParameterCategory.Contains("amount" , StringComparison.OrdinalIgnoreCase) &&
-        !defaultParameter.ParameterCategory.Contains("percent", StringComparison.OrdinalIgnoreCase);
+    private static bool IsTonnage(DefaultParameterTemplateMaster master) =>
+         master.ParameterType    .Contains("tonnage", StringComparison.OrdinalIgnoreCase) &&
+        !master.ParameterCategory.Contains("amount" , StringComparison.OrdinalIgnoreCase) &&
+        !master.ParameterCategory.Contains("percent", StringComparison.OrdinalIgnoreCase);
 
-    private static bool IsFactor(DefaultParameterTemplateMaster defaultParameter) =>
-        defaultParameter.ParameterType    .Contains("factor", StringComparison.OrdinalIgnoreCase) &&
-        defaultParameter.ParameterCategory.Contains("factor", StringComparison.OrdinalIgnoreCase);
+    private static bool IsFactor(DefaultParameterTemplateMaster master) =>
+        master.ParameterType    .Contains("factor", StringComparison.OrdinalIgnoreCase) &&
+        master.ParameterCategory.Contains("factor", StringComparison.OrdinalIgnoreCase);
 
-    private static bool IsBadDebt(DefaultParameterTemplateMaster defaultParameter) =>
-        defaultParameter.ParameterType.Contains("bad debt", StringComparison.OrdinalIgnoreCase);
+    private static bool IsBadDebt(DefaultParameterTemplateMaster master) =>
+        master.ParameterType.Contains("bad debt", StringComparison.OrdinalIgnoreCase);
 
-    private static bool IsPercentage(DefaultParameterTemplateMaster defaultParameter) =>
-        (!string.IsNullOrEmpty(defaultParameter.ParameterCategory) && defaultParameter.ParameterCategory.Contains("percent", StringComparison.OrdinalIgnoreCase)) ||
-        (!string.IsNullOrEmpty(defaultParameter.ParameterType    ) && defaultParameter.ParameterType    .Contains("percent", StringComparison.OrdinalIgnoreCase));
+    private static bool IsPercentage(DefaultParameterTemplateMaster master) =>
+        (!string.IsNullOrEmpty(master.ParameterCategory) && master.ParameterCategory.Contains("percent", StringComparison.OrdinalIgnoreCase)) ||
+        (!string.IsNullOrEmpty(master.ParameterType    ) && master.ParameterType    .Contains("percent", StringComparison.OrdinalIgnoreCase));
 
-    private static bool IsPercentageIncrease(DefaultParameterTemplateMaster defaultParameter) =>
-        IsPercentage(defaultParameter) && defaultParameter.ValidRangeFrom >= 0;
+    private static bool IsPercentageIncrease(DefaultParameterTemplateMaster master) =>
+        IsPercentage(master) && master.ValidRangeFrom >= 0;
 
-    private static bool IsPercentageDecrease(DefaultParameterTemplateMaster defaultParameter) =>
-        IsPercentage(defaultParameter) && defaultParameter.ValidRangeFrom < 0;
+    private static bool IsPercentageDecrease(DefaultParameterTemplateMaster master) =>
+        IsPercentage(master) && master.ValidRangeFrom < 0;
 }
