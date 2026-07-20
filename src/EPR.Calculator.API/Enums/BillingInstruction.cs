@@ -1,6 +1,6 @@
 ﻿namespace EPR.Calculator.API.Enums
 {
-    public enum BillingInstruction
+    public enum BillingInstructionAction
     {
         Initial,
         Delta,

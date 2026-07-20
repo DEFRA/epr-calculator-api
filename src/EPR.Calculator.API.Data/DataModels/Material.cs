@@ -10,7 +10,7 @@ public class Material
     #region EF navigational properties
 
     public virtual ICollection<ProducerReportedMaterial> ProducerReportedMaterials { get; } = [];
-    public virtual ICollection<ProducerReportedMaterialProjected> ProducerReportedMaterialProjecteds { get; } = [];
+    public virtual ICollection<ProducerMaterialPackaging> ProducerMaterialPackaging { get; } = [];
     public virtual ICollection<ProducerInvoicedMaterialNetTonnage> ProducerInvoicedMaterialNetTonnage { get; } = [];
 
     #endregion

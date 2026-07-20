@@ -1,6 +1,6 @@
 ﻿namespace EPR.Calculator.API.Data.DataModels;
 
-public class ProducerReportedMaterialProjected
+public class ProducerMaterialPackaging
 {
     public int Id { get; set; }
     public int MaterialId { get; set; }

@@ -37,7 +37,7 @@ public class ProducerDetailConfiguration : IEntityTypeConfiguration<ProducerDeta
             .WithOne(e => e.ProducerDetail)
             .HasForeignKey(e => e.ProducerDetailId);
 
-        builder.HasMany(e => e.ProducerReportedMaterialProjecteds)
+        builder.HasMany(e => e.ProducerMaterialPackaging)
             .WithOne(e => e.ProducerDetail)
             .HasForeignKey(e => e.ProducerDetailId);
     }
