@@ -128,16 +128,17 @@ namespace EPR.Calculator.API.Data.Migrations
 
             // Remaining runs with is_billing_file_generating=true:
             // Set billing_run_status=Errored
+            // Wrapped in EXEC() so SQL Server defers column name resolution to runtime.
+            // is_billing_file_generating is dropped later in this migration; without EXEC()
+            // the IF NOT EXISTS guard in the generated script does not protect against
+            // Msg 207 (invalid column name) because SQL Server validates DML column
+            // references at compile time, before evaluating the IF condition.
             migrationBuilder.Sql("""
-                UPDATE
-                    run
-                SET
-                    run.billing_run_status = 'Errored'
-                FROM
-                    dbo.calculator_run AS run
-                WHERE
-                    run.billing_run_status IS NULL AND
-                    run.is_billing_file_generating = 1
+                EXEC(N'UPDATE run
+                SET run.billing_run_status = ''Errored''
+                FROM dbo.calculator_run AS run
+                WHERE run.billing_run_status IS NULL
+                AND run.is_billing_file_generating = 1')
                 """);
 
             // Remaining runs with IN_THE_QUEUE/RUNNING/UNCLASSIFIED/TEST_RUN/ERROR/DELETED run status:
