@@ -8008,15 +8008,11 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
 )
 BEGIN
-    UPDATE
-        run
-    SET
-        run.billing_run_status = 'Errored'
-    FROM
-        dbo.calculator_run AS run
-    WHERE
-        run.billing_run_status IS NULL AND
-        run.is_billing_file_generating = 1
+    EXEC(N'UPDATE run
+    SET run.billing_run_status = ''Errored''
+    FROM dbo.calculator_run AS run
+    WHERE run.billing_run_status IS NULL
+    AND run.is_billing_file_generating = 1')
 END;
 GO
 
