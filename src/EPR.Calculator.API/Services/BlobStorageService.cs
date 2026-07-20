@@ -1,69 +1,61 @@
 ﻿using System.Configuration;
 using System.Text;
-using Azure.Storage;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.Utils;
 
-namespace EPR.Calculator.API.Services
+namespace EPR.Calculator.API.Services;
+
+public class BlobStorageService : IStorageService
 {
-    public class BlobStorageService : IStorageService
+    private readonly BlobServiceClient blobServiceClient;
+    private readonly BlobContainerClient containerClient;
+    private readonly ILogger<BlobStorageService> logger;
+
+    public BlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration, ILogger<BlobStorageService> logger)
     {
-        private readonly BlobContainerClient containerClient;
-        private readonly StorageSharedKeyCredential sharedKeyCredential;
-        private readonly ILogger<BlobStorageService> logger;
+        var settings = configuration
+            .GetSection(CommonResources.BlobStorageSection)
+            .Get<BlobStorageSettings>() ?? throw new ConfigurationErrorsException(CommonResources.BlobSettingsMissingError);
+        this.blobServiceClient = blobServiceClient;
 
-        public BlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration, ILogger<BlobStorageService> logger)
+        containerClient = blobServiceClient
+            .GetBlobContainerClient(settings.ResultFileCSVContainerName ?? throw new ConfigurationErrorsException(CommonResources.ContainerNameMissingError));
+
+        this.logger = logger;
+    }
+
+    /// <inheritdoc />
+    public async Task<IResult> DownloadFile(string fileName, string blobUri)
+    {
+        var blobClient = GetBlobClient(fileName, blobUri);
+
+        if (!await blobClient.ExistsAsync())
+            return Results.NotFound(fileName);
+
+        var downloadResult = await blobClient.DownloadContentAsync();
+        var content = downloadResult.Value.Content.ToString();
+        return Results.File(Encoding.Unicode.GetBytes(content), CommonResources.OctetStream, fileName);
+    }
+
+    private BlobClient GetBlobClient(string fileName, string blobUri)
+    {
+        if (!string.IsNullOrEmpty(blobUri))
         {
-            var settings = configuration.GetSection(CommonResources.BlobStorageSection).Get<BlobStorageSettings>() ??
-                throw new ConfigurationErrorsException(CommonResources.BlobSettingsMissingError);
+            try
+            {
+                var blobUriBuilder = new BlobUriBuilder(new Uri(blobUri));
 
-            settings.ExtractAccountDetails();
+                if (!string.IsNullOrWhiteSpace(blobUriBuilder.BlobContainerName) && !string.IsNullOrWhiteSpace(blobUriBuilder.BlobName))
+                    return blobServiceClient.GetBlobContainerClient(blobUriBuilder.BlobContainerName).GetBlobClient(blobUriBuilder.BlobName);
 
-            this.sharedKeyCredential = new StorageSharedKeyCredential(settings.AccountName, settings.AccountKey);
-
-            this.containerClient = blobServiceClient.GetBlobContainerClient(settings.ResultFileCSVContainerName ??
-                throw new ConfigurationErrorsException(CommonResources.ContainerNameMissingError));
-
-            this.logger = logger;
+                logger.LogWarning("Blob Uri is missing container or blob name; falling back to configured container");
+            }
+            catch (UriFormatException exception)
+            {
+                logger.LogError(exception, "Blob Uri is not in correct format");
+            }
         }
 
-        /// <inheritdoc/>
-        public async Task<IResult> DownloadFile(string fileName, string blobUri)
-        {
-            BlobClient blobClient = this.GetBlobClient(fileName, blobUri);
-
-            if (!await blobClient.ExistsAsync())
-            {
-                return Results.NotFound(fileName);
-            }
-
-            var downloadResult = await blobClient.DownloadContentAsync();
-            var content = downloadResult.Value.Content.ToString();
-            return Results.File(Encoding.Unicode.GetBytes(content), CommonResources.OctetStream, fileName);
-        }
-
-        private BlobClient GetBlobClient(string fileName, string blobUri)
-        {
-            BlobClient? blobClient = null;
-
-            if (!string.IsNullOrEmpty(blobUri))
-            {
-                try
-                {
-                    blobClient = new BlobClient(new Uri(blobUri), this.sharedKeyCredential);
-                }
-                catch (UriFormatException exception)
-                {
-                    this.logger.LogError(exception, "Blob Uri is not in correct format.");
-                    blobClient = this.containerClient.GetBlobClient(fileName);
-                }
-            }
-            else
-            {
-                blobClient = this.containerClient.GetBlobClient(fileName);
-            }
-
-            return blobClient;
-        }
+        return containerClient.GetBlobClient(fileName);
     }
 }

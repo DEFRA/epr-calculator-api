@@ -3,7 +3,6 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Services;
 using Microsoft.Extensions.Configuration;
 
@@ -366,71 +365,6 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.IsNull(result);
-        }
-
-        [TestMethod]
-        public async Task IsBillingFileGeneratedLatest_ShouldReturnFalse_WhenModifiedAfterBillGenerated()
-        {
-            // Arrange
-            int runId = 516;
-            using var cancellationTokenSource = new CancellationTokenSource();
-            var cancellationToken = cancellationTokenSource.Token;
-
-            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
-            {
-                CalculatorRunId = runId,
-                SuggestedBillingInstruction = "Invoice",
-                LastModifiedAcceptReject = DateTime.UtcNow.AddMinutes(-1),
-            });
-
-            this.DbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                CalculatorRunId = runId,
-                BillingJsonFileName = "ignored",
-                BillingCsvFileName = "ignored",
-                BillingFileCreatedDate = DateTime.UtcNow.AddDays(-1),
-                BillingFileCreatedBy = "test",
-            });
-
-            await this.DbContext.SaveChangesAsync(cancellationToken);
-
-            // Act
-            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationToken);
-
-            // Assert
-            result.ShouldBe(false);
-        }
-
-        [TestMethod]
-        public async Task IsBillingFileGeneratedLatest_ShouldReturnTrue_WhenBillingFileGeneratedLatest()
-        {
-            // Arrange
-            int runId = 516;
-            using var cancellationTokenSource = new CancellationTokenSource();
-            var cancellationToken = cancellationTokenSource.Token;
-
-            this.DbContext.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
-            {
-                CalculatorRunId = runId,
-                SuggestedBillingInstruction = "Invoice",
-                LastModifiedAcceptReject = DateTime.UtcNow.AddDays(-1),
-            });
-
-            this.DbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                CalculatorRunId = runId,
-                BillingJsonFileName = "ignored",
-                BillingCsvFileName = "ignored",
-                BillingFileCreatedDate = DateTime.UtcNow.AddMinutes(-1),
-                BillingFileCreatedBy = "test",
-            });
-            await this.DbContext.SaveChangesAsync(cancellationToken);
-
-            // Act
-            var result = await this.billingFileServiceUnderTest.IsBillingFileGeneratedLatest(runId, cancellationToken);
-
-            // Assert
-            result.ShouldBe(true);
         }
 
         [TestMethod]

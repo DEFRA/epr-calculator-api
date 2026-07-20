@@ -2,7 +2,6 @@
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services;

@@ -1,21 +1,20 @@
-﻿using System.Net;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Principal;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Services.Abstractions;
-using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
 using EPR.Calculator.API.Validators;
 using EPR.Calculator.Service.Function.Services;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -24,17 +23,15 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     [TestClass]
     public class CalculatorNewControllerTests
     {
-        private readonly Mock<IBillingFileService> mockBillingFileService;
-        private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
-        private readonly Mock<IInvoiceDetailsService> mockInvoiceDetailsService;
-        private readonly Mock<ICalculationRunService> mockCalculationRunService;
-        private readonly ApplicationDBContext context;
-        private readonly CalculatorNewController controller;
+        private const int CalculatorRunId = 1;
 
-        public CalculatorNewControllerTests()
+        private Mock<IBillingFileService> mockBillingFileService = null!;
+        private ApplicationDBContext context = null!;
+        private CalculatorNewController controller = null!;
+
+        [TestInitialize]
+        public void Setup()
         {
-            Fixture = TestFixtures.New();
-
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: "PayCal")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
@@ -42,60 +39,30 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context = new ApplicationDBContext(dbContextOptions);
             context.Database.EnsureCreated();
 
-            mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
             mockBillingFileService = new Mock<IBillingFileService>();
-            mockInvoiceDetailsService = new Mock<IInvoiceDetailsService>();
-            mockCalculationRunService = new Mock<ICalculationRunService>();
 
-            var config = TelemetryConfiguration.CreateDefault();
-            var telemetryClient = new TelemetryClient(config);
+            var telemetryClient = new TelemetryClient(TelemetryConfiguration.CreateDefault());
 
             controller = new CalculatorNewController(
                 context,
-                mockValidator.Object,
+                Mock.Of<ICalculatorRunStatusDataValidator>(),
                 mockBillingFileService.Object,
-                mockInvoiceDetailsService.Object,
+                Mock.Of<IInvoiceDetailsService>(),
                 telemetryClient,
-                mockCalculationRunService.Object);
+                Mock.Of<ICalculationRunService>())
+            {
+                ControllerContext = CreateAuthenticatedControllerContext(),
+            };
 
             context.CalculatorRuns.Add(new CalculatorRun
             {
-                CalculatorRunClassificationId = 8,
+                Id = CalculatorRunId,
+                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
                 RelativeYear = new RelativeYear(2024),
-                Name = "Name",
-                Id = 1,
-            });
-            context.CalculatorRuns.Add(new CalculatorRun
-            {
-                CalculatorRunClassificationId = 3,
-                RelativeYear = new RelativeYear(2024),
-                Name = "Second run",
-                Id = 2,
-            });
-            context.CalculatorRuns.Add(new CalculatorRun
-            {
-                CalculatorRunClassificationId = 7,
-                RelativeYear = new RelativeYear(2024),
-                Name = "Calc Billing Run Test",
-                Id = 3,
-            });
-            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                Id = 1,
-                BillingCsvFileName = "test.csv",
-                BillingJsonFileName = "test.json",
-                BillingFileCreatedBy = "testUser",
-                BillingFileAuthorisedDate = DateTime.UtcNow,
-                BillingFileAuthorisedBy = "testUser",
-                BillingFileCreatedDate = DateTime.UtcNow,
-                CalculatorRunId = 3,
+                Name = "Test calculator run",
             });
             context.SaveChanges();
         }
-
-        public TestContext TestContext { get; set; }
-
-        private IFixture Fixture { get; init; }
 
         [TestCleanup]
         public void CleanUp()
@@ -104,281 +71,148 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void PrepareBillingFileSendToFSS_SendFile_Successfully()
+        public async Task PrepareBillingFileSendToFSS_Returns_Accepted_When_Successful()
         {
-            ControllerContext();
-
-            // Set up the mock to return a value
+            // Arrange
             mockBillingFileService
-                .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
+                .Setup(x => x.MoveBillingJsonFile(CalculatorRunId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
-
-            mockBillingFileService
-               .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
-               .ReturnsAsync(true);
-
-            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                BillingCsvFileName = "test2.csv",
-                BillingJsonFileName = "test2.json",
-                BillingFileCreatedBy = "testUser",
-                BillingFileCreatedDate = DateTime.UtcNow,
-                CalculatorRunId = 1,
-            });
-            context.SaveChanges();
-            var task = controller.PrepareBillingFileSendToFSS(1, CancellationToken.None);
-            task.Wait(TestContext.CancellationTokenSource.Token);
-
-            var result = task.Result as StatusCodeResult;
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual(202, result.StatusCode);
-        }
-
-        [TestMethod]
-        public void PrepareBillingFileSendToFSS_SendFile_BillingFileOutdated()
-        {
-            ControllerContext();
-
-            // Set up the mock to return a value
-            mockBillingFileService
-                .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(true);
-
-            mockBillingFileService
-                .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(false);
-
-            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                BillingCsvFileName = "test2.csv",
-                BillingJsonFileName = "test2.json",
-                BillingFileCreatedBy = "testUser",
-                BillingFileCreatedDate = DateTime.UtcNow,
-                CalculatorRunId = 1,
-            });
-            context.SaveChanges();
-
-            using var cancellationTokenSource = new CancellationTokenSource();
-            var cancellationToken = cancellationTokenSource.Token;
-
-            var task = controller.PrepareBillingFileSendToFSS(1, cancellationToken);
-            task.Wait(cancellationToken);
-
-            var result = task.Result as ObjectResult;
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual(422, result.StatusCode);
-            Assert.IsNotNull(result.Value);
-            Assert.AreEqual("Billing file is not the latest one.", result.Value);
-        }
-
-        [TestMethod]
-        public void PrepareBillingFileSendToFSS_Invalid()
-        {
-            ControllerContext();
-            var task = controller.PrepareBillingFileSendToFSS(-1, CancellationToken.None);
-            task.Wait(TestContext.CancellationTokenSource.Token);
-
-            var result = task.Result as ObjectResult;
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual(400, result.StatusCode);
-            Assert.IsNotNull(result.Value);
-            Assert.AreEqual("Invalid Run Id -1", result.Value);
-        }
-
-        [TestMethod]
-        public async Task GetCalculatorRunWithBillingDetails_Get_Valid_Run()
-        {
-            ControllerContext();
-            var response = await controller.GetCalculatorRun(3) as ObjectResult;
-
-            Assert.IsNotNull(response);
-            var run = response.Value as CalculatorRunBillingDto;
-            Assert.IsNotNull(run);
-            Assert.AreEqual(3, run.RunId);
-            Assert.AreEqual("INITIAL RUN COMPLETED", run.RunClassificationStatus);
-            Assert.AreEqual(7, run.RunClassificationId);
-            Assert.IsNull(run.UpdatedAt);
-            Assert.IsNull(run.UpdatedBy);
-            Assert.AreEqual("test.json", run.BillingJsonFileName);
-            Assert.AreEqual("test.csv", run.BillingCsvFileName);
-        }
-
-        [TestMethod]
-        public async Task GetCalculatorRunWithBillingDetails_Get_NotFound_Run()
-        {
-            ControllerContext();
-            var response = await controller.GetCalculatorRun(5) as ObjectResult;
-            Assert.IsNotNull(response);
-            Assert.AreEqual(404, response.StatusCode);
-            Assert.AreEqual("Unable to find Run Id 5", response.Value);
-        }
-
-        [TestMethod]
-        public async Task GetCalculatorRunWithBillingDetails_Get_InValid_Run()
-        {
-            ControllerContext();
-            var response = await controller.GetCalculatorRun(-1) as ObjectResult;
-            Assert.IsNotNull(response);
-            Assert.AreEqual(400, response.StatusCode);
-            Assert.AreEqual("Invalid Run Id -1", response.Value);
-        }
-
-        [TestMethod]
-        public void PrepareBillingFileSendToFSS_MoveBillingJsonFileFails_Returns422()
-        {
-            ControllerContext();
-
-            // Arrange: runId 1 is valid and meets preconditions
-            mockBillingFileService
-                .Setup(x => x.MoveBillingJsonFile(1, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(false);
-
-            mockBillingFileService
-               .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
-               .ReturnsAsync(true);
-
-            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                BillingCsvFileName = "test2.csv",
-                BillingJsonFileName = "test2.json",
-                BillingFileCreatedBy = "testUser",
-                BillingFileCreatedDate = DateTime.UtcNow,
-                CalculatorRunId = 1,
-            });
-
-            context.SaveChanges();
+            AddBillingFileMetadata(CalculatorRunId);
 
             // Act
-            var task = controller.PrepareBillingFileSendToFSS(1, CancellationToken.None);
-            task.Wait(TestContext.CancellationTokenSource.Token);
+            var result = await controller.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None) as StatusCodeResult;
 
             // Assert
-            var result = task.Result as ObjectResult;
-            Assert.IsNotNull(result);
-            Assert.AreEqual(422, result.StatusCode);
-            Assert.AreEqual("Unable to move billing json file for Run Id 1", result.Value);
-
-            context.CalculatorRunBillingFileMetadata.RemoveRange(context.CalculatorRunBillingFileMetadata);
-            context.SaveChanges();
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status202Accepted);
         }
 
-        /// <summary>
-        /// Checks that the CalculatorRunClassificationId value is updated to the correct "completed" status
-        /// when the classification is set to valid initial values.
-        /// </summary>
-        /// <param name="initialValue">The initial value of the run status.</param>
-        /// <param name="expectedNewValue">The value the status should have after the method is run.</param>
-        /// <returns>A <see cref="Task"/>.</returns>
+        [TestMethod]
+        public async Task PrepareBillingFileSendToFSS_Returns_UnprocessableEntity_When_BillingFile_Outdated()
+        {
+            // Arrange
+            mockBillingFileService
+                .Setup(x => x.MoveBillingJsonFile(CalculatorRunId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+
+            context.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
+            {
+                CalculatorRunId = CalculatorRunId,
+                LastModifiedAcceptReject = DateTime.UtcNow.AddDays(1),
+                SuggestedBillingInstruction = "ignored",
+            });
+            AddBillingFileMetadata(CalculatorRunId);
+
+            // Act
+            var result = await controller.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status422UnprocessableEntity);
+            result.Value.ShouldBe(CommonResources.BillingFileOutdated);
+        }
+
+        [TestMethod]
+        public async Task PrepareBillingFileSendToFSS_Returns_UnprocessableEntity_When_Run_Not_Found()
+        {
+            // Act
+            var result = await controller.PrepareBillingFileSendToFSS(-1, CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status422UnprocessableEntity);
+            result.Value.ShouldBe(string.Format(CommonResources.UnableToFindRun, -1));
+        }
+
+        [TestMethod]
+        public async Task PrepareBillingFileSendToFSS_Returns_UnprocessableEntity_When_MoveBillingJsonFile_Fails()
+        {
+            // Arrange
+            mockBillingFileService
+                .Setup(x => x.MoveBillingJsonFile(CalculatorRunId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(false);
+            AddBillingFileMetadata(CalculatorRunId);
+
+            // Act
+            var result = await controller.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status422UnprocessableEntity);
+            result.Value.ShouldBe(string.Format(CommonResources.UnableToMoveBillingFile, CalculatorRunId));
+        }
+
         [TestMethod]
         [DataRow(RunClassification.INITIAL_RUN, RunClassification.INITIAL_RUN_COMPLETED)]
         [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED)]
         [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
         [DataRow(RunClassification.FINAL_RUN, RunClassification.FINAL_RUN_COMPLETED)]
-        public async Task PrepareBillingFileSendToFSS_UpdateToCompleted(
+        public async Task PrepareBillingFileSendToFSS_Updates_Classification_To_Completed(
             RunClassification initialValue,
             RunClassification expectedNewValue)
         {
             // Arrange
-            ControllerContext();
-
-            var calculatorRunId = 1;
-            var calculatorRun = context.CalculatorRuns
-                .Single(run => run.Id == calculatorRunId);
-
+            var calculatorRun = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId);
             calculatorRun.CalculatorRunClassificationId = (int)initialValue;
 
-            // Set up the billings service to report that the file was successfully transfered.
             mockBillingFileService
-                .Setup(x => x.MoveBillingJsonFile(calculatorRunId, It.IsAny<CancellationToken>()))
+                .Setup(x => x.MoveBillingJsonFile(CalculatorRunId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
-
-            mockBillingFileService
-               .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
-               .ReturnsAsync(true);
-
-            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
-            {
-                BillingCsvFileName = "test2.csv",
-                BillingJsonFileName = "test2.json",
-                BillingFileCreatedBy = "testUser",
-                BillingFileCreatedDate = DateTime.UtcNow,
-                CalculatorRunId = calculatorRunId,
-            });
-
-            context.SaveChanges();
+            AddBillingFileMetadata(CalculatorRunId);
 
             // Act
-            var result = (StatusCodeResult)await controller.PrepareBillingFileSendToFSS(calculatorRunId, CancellationToken.None);
+            var result = (IStatusCodeActionResult)await controller.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None);
             var newClassification = (RunClassification)context.CalculatorRuns
-                .Single(run => run.Id == calculatorRunId).CalculatorRunClassificationId;
+                .Single(run => run.Id == CalculatorRunId).CalculatorRunClassificationId;
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(HttpStatusCode.Accepted, (HttpStatusCode)result.StatusCode);
-            Assert.AreEqual(expectedNewValue, newClassification);
-
-            context.CalculatorRunBillingFileMetadata.RemoveRange(context.CalculatorRunBillingFileMetadata);
-            context.SaveChanges();
+            result.StatusCode.ShouldBe((int)HttpStatusCode.Accepted);
+            newClassification.ShouldBe(expectedNewValue);
         }
 
-        /// <summary>
-        /// Checks that when the initial CalculatorRunClassificationId is not one of the valid initial
-        /// values, an error is returned, and the classification is not updated.
-        /// </summary>
-        /// <param name="initialValue">The initial value of the run status.</param>
-        /// <returns>A <see cref="Task"/>.</returns>
         [TestMethod]
         [DataRow(RunClassification.RUNNING)]
         [DataRow(RunClassification.TEST_RUN)]
         [DataRow(RunClassification.DELETED)]
         [DataRow(RunClassification.INTHEQUEUE)]
-        public async Task PrepareBillingFileSendToFSS_FailWhenInvalidClassification(RunClassification initialValue)
+        public async Task PrepareBillingFileSendToFSS_Returns_UnprocessableEntity_When_Classification_Invalid(RunClassification initialValue)
         {
-            ControllerContext();
-
-            var calculatorRunId = 1;
-            var calculatorRun = context.CalculatorRuns
-                .Single(run => run.Id == calculatorRunId);
-
+            // Arrange
+            var calculatorRun = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId);
             calculatorRun.CalculatorRunClassificationId = (int)initialValue;
-
-            mockBillingFileService
-               .Setup(x => x.IsBillingFileGeneratedLatest(1, It.IsAny<CancellationToken>()))
-               .ReturnsAsync(true);
+            AddBillingFileMetadata(CalculatorRunId);
 
             // Act
-            var result = (ObjectResult)await controller.PrepareBillingFileSendToFSS(1, CancellationToken.None);
+            var result = (ObjectResult)await controller.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None);
             var newClassification = (RunClassification)context.CalculatorRuns
-                    .Single(run => run.Id == calculatorRunId).CalculatorRunClassificationId;
+                .Single(run => run.Id == CalculatorRunId).CalculatorRunClassificationId;
 
             // Assert
-            Assert.AreEqual(HttpStatusCode.UnprocessableContent, (HttpStatusCode)result.StatusCode!);
-            Assert.AreEqual(initialValue, newClassification);
-            var expectedMessage = $"Classification {(RunClassification)calculatorRun.CalculatorRunClassificationId} is not valid to be completed.";
-            Assert.AreEqual(expectedMessage, result.Value);
+            result.StatusCode.ShouldBe((int)HttpStatusCode.UnprocessableContent);
+            newClassification.ShouldBe(initialValue);
+            result.Value.ShouldBe(string.Format(CommonResources.UnableToChangeStatusToCompleted, initialValue));
+        }
 
-            context.CalculatorRunBillingFileMetadata.RemoveRange(context.CalculatorRunBillingFileMetadata);
+        private void AddBillingFileMetadata(int calculatorRunId)
+        {
+            context.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
+            {
+                BillingCsvFileName = "test.csv",
+                BillingJsonFileName = "test.json",
+                BillingFileCreatedBy = "Test user",
+                BillingFileCreatedDate = DateTime.UtcNow,
+                CalculatorRunId = calculatorRunId,
+            });
             context.SaveChanges();
         }
 
-        private void ControllerContext()
+        private static ControllerContext CreateAuthenticatedControllerContext()
         {
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
             var principal = new ClaimsPrincipal(identity);
 
-            var userContext = new DefaultHttpContext()
-            {
-                User = principal,
-            };
-
-            controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = userContext,
-            };
+            return new ControllerContext { HttpContext = new DefaultHttpContext { User = principal } };
         }
     }
 }

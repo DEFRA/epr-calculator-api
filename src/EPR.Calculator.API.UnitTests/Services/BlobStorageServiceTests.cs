@@ -109,5 +109,34 @@ namespace EPR.Calculator.API.UnitTests.Services
             Assert.IsNotNull(notFoundResult);
             Assert.AreEqual(fileName, notFoundResult.Value);
         }
+
+        [TestMethod]
+        public async Task DownloadFile_ShouldResolveBlobClientFromBlobUri_WhenBlobUriProvided()
+        {
+            // Arrange
+            var fileName = "fallback-file-name.csv";
+            var blobUri = "http://127.0.0.1:10000/devstoreaccount1/paycal-results/8169-foo%202_Results%20File_20260703.csv";
+            var content = "test content";
+            var binaryData = BinaryData.FromString(content);
+            var downloadDetails = BlobsModelFactory.BlobDownloadDetails(
+                contentLength: content.Length,
+                contentType: "application/octet-stream");
+
+            var downloadResult = BlobsModelFactory.BlobDownloadResult(
+                content: binaryData,
+                details: downloadDetails);
+
+            this.mockBlobClient.Setup(x => x.ExistsAsync(default)).ReturnsAsync(Response.FromValue(true, null!));
+            this.mockBlobClient.Setup(x => x.DownloadContentAsync()).ReturnsAsync(Response.FromValue(downloadResult, null!));
+
+            // Act
+            var result = await this.blobStorageService.DownloadFile(fileName, blobUri);
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(FileContentHttpResult));
+            this.mockBlobServiceClient.Verify(x => x.GetBlobContainerClient("paycal-results"), Times.Once);
+            this.mockBlobContainerClient.Verify(x => x.GetBlobClient(It.Is<string>(name => name.Contains("8169-foo"))), Times.Once);
+            this.mockBlobContainerClient.Verify(x => x.GetBlobClient(fileName), Times.Never);
+        }
     }
 }
