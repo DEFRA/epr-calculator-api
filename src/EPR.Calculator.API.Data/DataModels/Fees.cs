@@ -1,6 +1,14 @@
 ﻿namespace EPR.Calculator.API.Data.DataModels;
 
-public record MaterialFee
+public record Fees
+{
+    public required DisposalFee DisposalFee { get; set; }
+
+    public required CommsFee CommFee { get; set; }
+
+}
+
+internal record MaterialFee
 {
     public required string MaterialCode { get; set; }
 
@@ -9,3 +17,5 @@ public record MaterialFee
     public required CommsFee CommFee { get; set; }
 
 }
+
+

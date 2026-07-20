@@ -45,6 +45,9 @@ public class ApplicationDBContext : DbContext
     public DbSet<ProducerMaterialPackaging> ProducerMaterialPackaging { get; set; }
     public DbSet<ProducerFees> ProducerDisposalFee { get; set; }
     public DbSet<ProducerFeeDetail> ProducerFeeDetails { get; set; }
+    public DbSet<SelfManagedConsumerWaste> SelfManagedConsumerWaste { get; set; }
+    public DbSet<ProducerSelfManagedConsumerWaste> ProducerSelfManagedConsumerWaste { get; set; }
+    public DbSet<ModulationResult> ModulationResult { get; set; }
     public DbSet<CalculatorRunCsvFileMetadata> CalculatorRunCsvFileMetadata { get; set; }
     public DbSet<SubmissionPeriodLookup> SubmissionPeriodLookup { get; set; }
     public DbSet<ProducerInvoicedMaterialNetTonnage> ProducerInvoicedMaterialNetTonnage { get; set; }

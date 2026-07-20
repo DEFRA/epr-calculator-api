@@ -36,9 +36,9 @@ public record DisposalFee
         HdcTonnage = RamTonnage.Empty,
         TotalTonnage = RamTonnage.Empty,
         FeeWithBadDebtByCountry = ByCountryCost.Empty,
-        ActionedSmcwTonnage = RamTonnageGroup.Empty,
-        NetTonnage = RamTonnageGroup.Empty,
-        PricePerTonne = RamTonnageGroup.Empty,
-        Fee = RamTonnageGroup.Empty
+        ActionedSmcwTonnage = new RamTonnageGroup(),
+        NetTonnage = new RamTonnageGroup(),
+        PricePerTonne = new RamTonnageGroup(),
+        Fee = new RamTonnageGroup()
     };
 }
