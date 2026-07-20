@@ -29,7 +29,7 @@ parameters:
       - preprod
       - preprod2
       - prod
-      - DEV15      
+      - DEV15
     default: development
 
   - name: solutionFolder
@@ -41,7 +41,7 @@ parameters:
     type: string
     default: ''
 
-pool: DEFRA-COMMON-ubuntu2004-SSV3
+pool: DEFRA-COMMON-UBUNTU-SSV3
 
 variables:
 
