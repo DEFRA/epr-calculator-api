@@ -1,4 +1,4 @@
-﻿using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -311,7 +311,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
         public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsFalse_WhenNoDesignatedRunPerformed()
         {
             // Arrange
-            List<ClassifiedCalculatorRunDto> designatedRuns = [];
+            List<CalculatorRunDto> designatedRuns = [];
             var calculatorRun = new CalculatorRun
             {
                 RelativeYear = new RelativeYear(2024),
@@ -351,16 +351,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
             RunClassification requestRunClassification)
         {
             // Arrange
-            List<ClassifiedCalculatorRunDto> designatedRuns = [];
-            designatedRuns.Add(new ClassifiedCalculatorRunDto
-            {
-                RunId = 101,
-                RunName = $"My - {existingRunClassification}",
-                RunClassificationId = (int)existingRunClassification,
-                RunClassificationStatus = existingRunClassification.ToString(),
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                UpdatedAt = DateTime.UtcNow.AddDays(-1),
-            });
+            List<CalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(CreateDto(101, existingRunClassification));
+
             var calculatorRun = new CalculatorRun
             {
                 RelativeYear = new RelativeYear(2024),
@@ -391,16 +384,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
             RunClassification requestRunClassification)
         {
             // Arrange
-            List<ClassifiedCalculatorRunDto> designatedRuns = [];
-            designatedRuns.Add(new ClassifiedCalculatorRunDto
-            {
-                RunId = 101,
-                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
-                RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
-                RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                UpdatedAt = DateTime.UtcNow.AddDays(-1),
-            });
+            List<CalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(CreateDto(101, RunClassification.INITIAL_RUN_COMPLETED));
+
             var calculatorRun = new CalculatorRun
             {
                 RelativeYear = new RelativeYear(2024),
@@ -431,16 +417,8 @@ namespace EPR.Calculator.API.UnitTests.Validator
            RunClassification requestRunClassification)
         {
             // Arrange
-            List<ClassifiedCalculatorRunDto> designatedRuns = [];
-            designatedRuns.Add(new ClassifiedCalculatorRunDto
-            {
-                RunId = 101,
-                RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
-                RunClassificationId = (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
-                RunClassificationStatus = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                UpdatedAt = DateTime.UtcNow.AddDays(-1),
-            });
+            List<CalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(CreateDto(101, RunClassification.FINAL_RECALCULATION_RUN_COMPLETED));
             var calculatorRun = new CalculatorRun
             {
                 RelativeYear = new RelativeYear(2024),
@@ -473,16 +451,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
           RunClassification requestRunClassification)
         {
             // Arrange
-            List<ClassifiedCalculatorRunDto> designatedRuns = [];
-            designatedRuns.Add(new ClassifiedCalculatorRunDto
-            {
-                RunId = 101,
-                RunName = $"My - {RunClassification.FINAL_RUN_COMPLETED}",
-                RunClassificationId = (int)RunClassification.FINAL_RUN_COMPLETED,
-                RunClassificationStatus = RunClassification.FINAL_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                UpdatedAt = DateTime.UtcNow.AddDays(-1),
-            });
+            List<CalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(CreateDto(101, RunClassification.FINAL_RUN_COMPLETED));
+
             var calculatorRun = new CalculatorRun
             {
                 RelativeYear = new RelativeYear(2024),
@@ -513,16 +484,9 @@ namespace EPR.Calculator.API.UnitTests.Validator
           RunClassification requestRunClassification)
         {
             // Arrange
-            List<ClassifiedCalculatorRunDto> designatedRuns = [];
-            designatedRuns.Add(new ClassifiedCalculatorRunDto
-            {
-                RunId = 101,
-                RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
-                RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
-                RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                UpdatedAt = DateTime.UtcNow.AddDays(-1),
-            });
+            List<CalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(CreateDto(101, RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED));
+
             var calculatorRun = new CalculatorRun
             {
                 RelativeYear = new RelativeYear(2024),
@@ -550,7 +514,7 @@ namespace EPR.Calculator.API.UnitTests.Validator
         public void ValidateWithDesignatedRunsMethod_ShouldReturnIsInvalidAsTrue_WhenSystemDontHaveValidRunsToPerformFinalRun()
         {
             // Arrange
-            List<ClassifiedCalculatorRunDto> designatedRuns = [];
+            List<CalculatorRunDto> designatedRuns = [];
             var calculatorRun = new CalculatorRun
             {
                 RelativeYear = new RelativeYear(2024),
@@ -586,59 +550,17 @@ namespace EPR.Calculator.API.UnitTests.Validator
           bool haveFinalRunCompleted)
         {
             // Arrange
-            List<ClassifiedCalculatorRunDto> designatedRuns = [];
-            designatedRuns.Add(new ClassifiedCalculatorRunDto
-            {
-                RunId = 101,
-                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
-                RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
-                RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                UpdatedAt = DateTime.UtcNow.AddDays(-1),
-                BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
-            });
+            List<CalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(CreateDto(101, RunClassification.INITIAL_RUN_COMPLETED));
 
             if (haveInterimRecalculationRunCompleted)
-            {
-                designatedRuns.Add(new ClassifiedCalculatorRunDto
-                {
-                    RunId = 102,
-                    RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
-                    RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
-                    RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.UtcNow.AddDays(-1),
-                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
-                });
-            }
+                designatedRuns.Add(CreateDto(102, RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED));
 
             if (haveFinalRecalculationRunCompleted)
-            {
-                designatedRuns.Add(new ClassifiedCalculatorRunDto
-                {
-                    RunId = 102,
-                    RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
-                    RunClassificationId = (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
-                    RunClassificationStatus = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.UtcNow.AddDays(-1),
-                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
-                });
-            }
+                designatedRuns.Add(CreateDto(103, RunClassification.FINAL_RECALCULATION_RUN_COMPLETED));
 
             if (haveFinalRunCompleted)
-            {
-                designatedRuns.Add(new ClassifiedCalculatorRunDto
-                {
-                    RunId = 102,
-                    RunName = $"My - {RunClassification.FINAL_RUN_COMPLETED}",
-                    RunClassificationId = (int)RunClassification.FINAL_RUN_COMPLETED,
-                    RunClassificationStatus = RunClassification.FINAL_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.UtcNow.AddDays(-1),
-                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
-                });
-            }
+                designatedRuns.Add(CreateDto(104, RunClassification.FINAL_RUN_COMPLETED));
 
             var calculatorRun = new CalculatorRun
             {
@@ -670,31 +592,11 @@ namespace EPR.Calculator.API.UnitTests.Validator
             bool haveInterimRecalculationRunCompleted)
         {
             // Arrange
-            List<ClassifiedCalculatorRunDto> designatedRuns = [];
-            designatedRuns.Add(new ClassifiedCalculatorRunDto
-            {
-                RunId = 101,
-                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
-                RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
-                RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                UpdatedAt = DateTime.UtcNow.AddDays(-1),
-                BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
-            });
+            List<CalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(CreateDto(101, RunClassification.INITIAL_RUN_COMPLETED));
 
             if (haveInterimRecalculationRunCompleted)
-            {
-                designatedRuns.Add(new ClassifiedCalculatorRunDto
-                {
-                    RunId = 102,
-                    RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
-                    RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
-                    RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.UtcNow.AddDays(-1),
-                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
-                });
-            }
+                designatedRuns.Add(CreateDto(102, RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED));
 
             var calculatorRun = new CalculatorRun
             {
@@ -728,45 +630,14 @@ namespace EPR.Calculator.API.UnitTests.Validator
             bool haveFinalRecalculationRunCompleted)
         {
             // Arrange
-            List<ClassifiedCalculatorRunDto> designatedRuns = [];
-            designatedRuns.Add(new ClassifiedCalculatorRunDto
-            {
-                RunId = 101,
-                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
-                RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
-                RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                UpdatedAt = DateTime.UtcNow.AddDays(-1),
-                BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
-            });
+            List<CalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(CreateDto(101, RunClassification.INITIAL_RUN_COMPLETED));
 
             if (haveInterimRecalculationRunCompleted)
-            {
-                designatedRuns.Add(new ClassifiedCalculatorRunDto
-                {
-                    RunId = 102,
-                    RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
-                    RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
-                    RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.UtcNow.AddDays(-1),
-                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
-                });
-            }
+                designatedRuns.Add(CreateDto(102, RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED));
 
             if (haveFinalRecalculationRunCompleted)
-            {
-                designatedRuns.Add(new ClassifiedCalculatorRunDto
-                {
-                    RunId = 103,
-                    RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
-                    RunClassificationId = (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
-                    RunClassificationStatus = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.UtcNow.AddDays(-1),
-                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
-                });
-            }
+                designatedRuns.Add(CreateDto(103, RunClassification.FINAL_RECALCULATION_RUN_COMPLETED));
 
             var calculatorRun = new CalculatorRun
             {
@@ -803,59 +674,17 @@ namespace EPR.Calculator.API.UnitTests.Validator
             bool haveFinalRunCompleted)
         {
             // Arrange
-            List<ClassifiedCalculatorRunDto> designatedRuns = [];
-            designatedRuns.Add(new ClassifiedCalculatorRunDto
-            {
-                RunId = 101,
-                RunName = $"My - {RunClassification.INITIAL_RUN_COMPLETED}",
-                RunClassificationId = (int)RunClassification.INITIAL_RUN_COMPLETED,
-                RunClassificationStatus = RunClassification.INITIAL_RUN_COMPLETED.ToString(),
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                UpdatedAt = DateTime.UtcNow.AddDays(-1),
-                BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
-            });
+            List<CalculatorRunDto> designatedRuns = [];
+            designatedRuns.Add(CreateDto(101, RunClassification.INITIAL_RUN_COMPLETED));
 
             if (haveInterimRecalculationRunCompleted)
-            {
-                designatedRuns.Add(new ClassifiedCalculatorRunDto
-                {
-                    RunId = 102,
-                    RunName = $"My - {RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED}",
-                    RunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED,
-                    RunClassificationStatus = RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.UtcNow.AddDays(-1),
-                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
-                });
-            }
+                designatedRuns.Add(CreateDto(102, RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED));
 
             if (haveFinalRecalculationRunCompleted)
-            {
-                designatedRuns.Add(new ClassifiedCalculatorRunDto
-                {
-                    RunId = 102,
-                    RunName = $"My - {RunClassification.FINAL_RECALCULATION_RUN_COMPLETED}",
-                    RunClassificationId = (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED,
-                    RunClassificationStatus = RunClassification.FINAL_RECALCULATION_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.UtcNow.AddDays(-1),
-                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
-                });
-            }
+                designatedRuns.Add(CreateDto(103, RunClassification.FINAL_RECALCULATION_RUN_COMPLETED));
 
             if (haveFinalRunCompleted)
-            {
-                designatedRuns.Add(new ClassifiedCalculatorRunDto
-                {
-                    RunId = 102,
-                    RunName = $"My - {RunClassification.FINAL_RUN_COMPLETED}",
-                    RunClassificationId = (int)RunClassification.FINAL_RUN_COMPLETED,
-                    RunClassificationStatus = RunClassification.FINAL_RUN_COMPLETED.ToString(),
-                    CreatedAt = DateTime.UtcNow.AddDays(-1),
-                    UpdatedAt = DateTime.UtcNow.AddDays(-1),
-                    BillingFileAuthorisedDate = DateTime.UtcNow.AddDays(-1)
-                });
-            }
+                designatedRuns.Add(CreateDto(104, RunClassification.FINAL_RUN_COMPLETED));
 
             var calculatorRun = new CalculatorRun
             {
@@ -879,6 +708,42 @@ namespace EPR.Calculator.API.UnitTests.Validator
             // Assert
             Assert.IsNotNull(genericValidationResultDto);
             Assert.IsTrue(genericValidationResultDto.IsInvalid);
+        }
+
+        private static CalculatorRunDto CreateDto(int runId, RunClassification classification)
+        {
+            var hasBeenSentToFss = classification
+                is RunClassification.INITIAL_RUN_COMPLETED
+                or RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED
+                or RunClassification.FINAL_RECALCULATION_RUN_COMPLETED;
+
+            return new CalculatorRunDto
+            {
+                RunId = runId,
+                RunName = $"My - {classification}",
+                RunClassification = classification,
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                UpdatedAt = DateTime.UtcNow.AddDays(-1),
+                RelativeYear = new RelativeYear(2024),
+                CreatedBy = "ignored",
+                UpdatedBy = "ignored",
+                BillingRunStatus = hasBeenSentToFss ? BillingRunStatus.Completed : BillingRunStatus.None,
+                BillingRunStartedAt = hasBeenSentToFss ? DateTime.UtcNow.AddHours(-1) : null,
+                BillingFile = !hasBeenSentToFss
+                    ? null
+                    : new CalculatorRunDto.BillingFileDto
+                    {
+                        Id = runId,
+                        IsLatest = false,
+                        HasBeenSentToFss = hasBeenSentToFss,
+                        CsvFileName = "test.csv",
+                        JsonFileName = "test.json",
+                        CreatedAt = DateTime.UtcNow.AddDays(-1),
+                        CreatedBy = "ignored",
+                        SentAt = DateTime.UtcNow.AddDays(-1),
+                        SentBy = "ignored"
+                    }
+            };
         }
     }
 }

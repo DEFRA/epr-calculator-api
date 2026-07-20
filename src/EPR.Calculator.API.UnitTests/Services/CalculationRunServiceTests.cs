@@ -44,7 +44,7 @@ public class CalculationRunServiceTests
         this.dbContext.SaveChanges();
 
         this.loggerMock = new Mock<ILogger<CalculationRunService>>();
-        this.service = new CalculationRunService(this.dbContext, this.loggerMock.Object);
+        this.service = new CalculationRunService(this.dbContext);
     }
 
     [TestCleanup]
@@ -124,9 +124,9 @@ public class CalculationRunServiceTests
         // Assert
         result.Count.ShouldBe(2);
         result[0].RunId.ShouldBe(2);
-        result[0].RunClassificationId.ShouldBe((int)RunClassification.INITIAL_RUN_COMPLETED);
+        result[0].RunClassification.ShouldBe(RunClassification.INITIAL_RUN_COMPLETED);
         result[1].RunId.ShouldBe(3);
-        result[1].RunClassificationId.ShouldBe((int)RunClassification.INTERIM_RECALCULATION_RUN);
+        result[1].RunClassification.ShouldBe(RunClassification.INTERIM_RECALCULATION_RUN);
     }
 
     private void AddRunToDb(RunClassification classification, int requestId, int relativeYearValue)

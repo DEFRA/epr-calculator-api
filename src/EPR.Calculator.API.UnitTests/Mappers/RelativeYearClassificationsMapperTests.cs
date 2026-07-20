@@ -57,7 +57,7 @@ public class RelativeYearClassificationsMapperTests
     {
         // Arrange
         var classifications = this.Fixture.Create<List<CalculatorRunClassification>>();
-        var runs = this.Fixture.Create<List<ClassifiedCalculatorRunDto>>();
+        var runs = this.Fixture.Create<List<CalculatorRunDto>>();
 
         // Act
         var result = RelativeYearClassificationsMapper.Map(new RelativeYear(2024), classifications, runs);

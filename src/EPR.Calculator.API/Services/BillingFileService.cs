@@ -4,7 +4,6 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
-using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Utils;
@@ -246,36 +245,6 @@ namespace EPR.Calculator.API.Services
             {
                 StatusCode = HttpStatusCode.OK,
             };
-        }
-
-        public async Task<bool?> IsBillingFileGeneratedLatest(int runId, CancellationToken cancellationToken)
-        {
-            if (!await applicationDBContext.ProducerResultFileSuggestedBillingInstruction.AnyAsync(
-                    x => x.CalculatorRunId == runId, cancellationToken).ConfigureAwait(false)
-                ||
-                !await applicationDBContext.CalculatorRunBillingFileMetadata.AnyAsync(
-                    x => x.CalculatorRunId == runId, cancellationToken).ConfigureAwait(false))
-            {
-                return null;
-            }
-
-            var lastModifiedAcceptReject = await applicationDBContext.ProducerResultFileSuggestedBillingInstruction
-                .Where(x => x.CalculatorRunId == runId)
-                .OrderByDescending(x => x.LastModifiedAcceptReject)
-                .AsNoTracking()
-                .Select(x => x.LastModifiedAcceptReject)
-                .FirstOrDefaultAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-            var billingGeneratedDate = await applicationDBContext.CalculatorRunBillingFileMetadata
-                .Where(x => x.CalculatorRunId == runId)
-                .OrderByDescending(x => x.BillingFileCreatedDate)
-                .AsNoTracking()
-                .Select(x => x.BillingFileCreatedDate)
-                .FirstOrDefaultAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-            return lastModifiedAcceptReject.HasValue && billingGeneratedDate > lastModifiedAcceptReject.Value;
         }
 
         private static void UpdateBillingInstruction(
