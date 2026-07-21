@@ -8708,3 +8708,76 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260717111524_AddModulationAndSmcw'
+)
+BEGIN
+    CREATE TABLE [calc_result_modulation] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [green_factor] decimal(9,6) NOT NULL,
+        [red_factor] decimal(6,3) NOT NULL,
+        [material_modulations] json NOT NULL,
+        CONSTRAINT [PK_calc_result_modulation] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260717111524_AddModulationAndSmcw'
+)
+BEGIN
+    CREATE TABLE [calc_result_smcw] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [material_totals] json NOT NULL,
+        CONSTRAINT [PK_calc_result_smcw] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260717111524_AddModulationAndSmcw'
+)
+BEGIN
+    CREATE TABLE [calc_result_smcw_producer] (
+        [id] int NOT NULL IDENTITY,
+        [smcw_id] int NOT NULL,
+        [producer_id] int NOT NULL,
+        [subsidiary_id] nvarchar(400) NULL,
+        [level] int NOT NULL,
+        [material_totals] json NOT NULL,
+        CONSTRAINT [PK_calc_result_smcw_producer] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_calc_result_smcw_producer_calc_result_smcw_smcw_id] FOREIGN KEY ([smcw_id]) REFERENCES [calc_result_smcw] ([id]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260717111524_AddModulationAndSmcw'
+)
+BEGIN
+    CREATE INDEX [IX_calc_result_smcw_producer_smcw_id] ON [calc_result_smcw_producer] ([smcw_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260717111524_AddModulationAndSmcw'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260717111524_AddModulationAndSmcw', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
