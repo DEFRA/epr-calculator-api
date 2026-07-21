@@ -7,7 +7,7 @@ namespace EPR.Calculator.API.Validators;
 public class ProducerBillingInstructionsSearchQueryDtoValidator : AbstractValidator<ProducerBillingInstructionsSearchQueryDto>
 {
     private static readonly HashSet<string> AllowedStatuses = Enum.GetNames<BillingStatus>().ToHashSet(StringComparer.OrdinalIgnoreCase);
-    private static readonly HashSet<string> AllowedInstructionSuggestions = Enum.GetNames<BillingInstruction>().ToHashSet(StringComparer.OrdinalIgnoreCase);
+    private static readonly HashSet<string> AllowedInstructionSuggestions = Enum.GetNames<BillingInstructionAction>().ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     public ProducerBillingInstructionsSearchQueryDtoValidator()
     {

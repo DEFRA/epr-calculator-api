@@ -41,7 +41,7 @@ internal static class ProducerBillingInstructionsQueryExtensions
         {
             var billingInstructionList = searchQuery.BillingInstruction.Select(b => b?.Trim()).Where(b => !string.IsNullOrWhiteSpace(b)).ToList();
 
-            bool includeNoAction = billingInstructionList.Exists(b => string.Equals(b, BillingInstruction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase));
+            bool includeNoAction = billingInstructionList.Exists(b => string.Equals(b, BillingInstructionAction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase));
 
             if (includeNoAction)
             {

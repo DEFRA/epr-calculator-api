@@ -8627,3 +8627,84 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260716130437_AddProducerFeeTables'
+)
+BEGIN
+    EXEC sp_rename N'[producer_reported_material_projected]', N'producer_material_packaging';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260716130437_AddProducerFeeTables'
+)
+BEGIN
+    EXEC sp_rename N'[producer_material_packaging].[IX_producer_reported_material_projected_material_id]', N'IX_producer_material_packaging_material_id', N'INDEX';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260716130437_AddProducerFeeTables'
+)
+BEGIN
+    EXEC sp_rename N'[producer_material_packaging].[IX_producer_reported_material_projected_producer_detail_id]', N'IX_producer_material_packaging_producer_detail_id', N'INDEX';
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260716130437_AddProducerFeeTables'
+)
+BEGIN
+    CREATE TABLE [calc_result_producer_fees] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [total] json NOT NULL,
+        CONSTRAINT [PK_calc_result_producer_fees] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260716130437_AddProducerFeeTables'
+)
+BEGIN
+    CREATE TABLE [calc_result_producer_fee_detail] (
+        [id] int NOT NULL IDENTITY,
+        [producer_fees_id] int NOT NULL,
+        [detail] json NOT NULL,
+        CONSTRAINT [PK_calc_result_producer_fee_detail] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_calc_result_producer_fee_detail_calc_result_producer_fees_producer_fees_id] FOREIGN KEY ([producer_fees_id]) REFERENCES [calc_result_producer_fees] ([id]) ON DELETE CASCADE
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260716130437_AddProducerFeeTables'
+)
+BEGIN
+    CREATE INDEX [IX_calc_result_producer_fee_detail_producer_fees_id] ON [calc_result_producer_fee_detail] ([producer_fees_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260716130437_AddProducerFeeTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260716130437_AddProducerFeeTables', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+

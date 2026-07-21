@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EPR.Calculator.API.Data.TypeConfigurations;
 
-public class ProducerReportedMaterialProjectedConfiguration : IEntityTypeConfiguration<ProducerReportedMaterialProjected>
+public class TransformProducerReportedMaterialConfiguration : IEntityTypeConfiguration<ProducerMaterialPackaging>
 {
-    public void Configure(EntityTypeBuilder<ProducerReportedMaterialProjected> builder)
+    public void Configure(EntityTypeBuilder<ProducerMaterialPackaging> builder)
     {
-        builder.ToTable("producer_reported_material_projected");
+        builder.ToTable("producer_material_packaging");
 
         builder.Property(p => p.Id)
             .HasColumnName("id")

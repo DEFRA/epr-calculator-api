@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataSeeder;
 using EPR.Calculator.API.Data.DataTypes;
@@ -36,13 +36,15 @@ public class ApplicationDBContext : DbContext
     public DbSet<ProducerDetail> ProducerDetail { get; set; }
     public DbSet<CountryApportionment> CountryApportionment { get; set; }
     public DbSet<ProducerReportedMaterial> ProducerReportedMaterial { get; set; }
-    public DbSet<ProducerReportedMaterialProjected> ProducerReportedMaterialProjected { get; set; }
     public DbSet<CostType> CostType { get; set; }
     public DbSet<Country> Country { get; set; }
     public DbSet<TransformProjectedH1> TransformProjectedH1 { get; set; }
     public DbSet<TransformProjectedH2> TransformProjectedH2 { get; set; }
     public DbSet<TransformScaled> TransformScaled { get; set; }
     public DbSet<TransformPartial> TransformPartial { get; set; }
+    public DbSet<ProducerMaterialPackaging> ProducerMaterialPackaging { get; set; }
+    public DbSet<ProducerFees> ProducerDisposalFee { get; set; }
+    public DbSet<ProducerFeeDetail> ProducerFeeDetails { get; set; }
     public DbSet<CalculatorRunCsvFileMetadata> CalculatorRunCsvFileMetadata { get; set; }
     public DbSet<SubmissionPeriodLookup> SubmissionPeriodLookup { get; set; }
     public DbSet<ProducerInvoicedMaterialNetTonnage> ProducerInvoicedMaterialNetTonnage { get; set; }
@@ -84,5 +86,7 @@ public class ApplicationDBContext : DbContext
         // Configures global conversion for BillingRunStatus enum to database string type.
         configurationBuilder.Properties<BillingRunStatus>()
             .HaveConversion<StringEnumConverter<BillingRunStatus>, EnumComparer<BillingRunStatus>>();
+
+        configurationBuilder.Properties<decimal>().HavePrecision(18, 6);
     }
 }

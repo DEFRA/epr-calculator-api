@@ -1,4 +1,4 @@
-using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -30,7 +30,7 @@ public class MaterialConfiguration : IEntityTypeConfiguration<Material>
             .WithOne(e => e.Material)
             .HasForeignKey(e => e.MaterialId);
 
-        builder.HasMany(e => e.ProducerReportedMaterialProjecteds)
+        builder.HasMany(e => e.ProducerMaterialPackaging)
             .WithOne(e => e.Material)
             .HasForeignKey(e => e.MaterialId);
 
