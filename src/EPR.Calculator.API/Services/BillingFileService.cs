@@ -44,7 +44,7 @@ public interface IBillingFileService
 
 public class BillingFileService(
     ApplicationDBContext dbContext,
-    IBlobStorage blobStorage
+    IBlobStorageService blobStorage
 ) : IBillingFileService
 {
     private const string NoActionPlaceholder = "-";

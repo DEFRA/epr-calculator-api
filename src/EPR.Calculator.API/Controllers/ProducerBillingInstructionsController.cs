@@ -1,53 +1,44 @@
 ﻿using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Services.Abstractions;
+using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EPR.Calculator.API.Controllers
+namespace EPR.Calculator.API.Controllers;
+
+[ApiController]
+[Produces("application/json")]
+[Route("v1")]
+public class ProducerBillingInstructionsController(
+    IBillingFileService billingFileService
+) : ControllerBase
 {
     /// <summary>
-    /// Controller responsible for handling producer billing instruction operations.
+    ///     Retrieve producer billing instructions for a specific calculator run.
     /// </summary>
-    [Route("v1")]
-    public class ProducerBillingInstructionsController(
-        IBillingFileService billingFileService) : BaseControllerBase
+    [HttpPost]
+    [Route("producerBillingInstructions/{runId}")]
+    [ProducesResponseType(typeof(ProducerBillingInstructionsResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> ProducerBillingInstructions(
+        [FromRoute] int runId,
+        [FromBody] ProducerBillingInstructionsRequestDto requestDto,
+        CancellationToken cancellationToken = default)
     {
-        /// <summary>
-        /// Retrieve producer billing instructions for a specific calculator run.
-        /// </summary>
-        /// <param name="requestDto" type="ProducerBillingInstructionsRequestDto">Request object.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Http response on success or failure.</returns>
-        [HttpPost]
-        [Route("producerBillingInstructions/{runId}")]
-        [ProducesResponseType(typeof(ProducerBillingInstructionsResponseDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> ProducerBillingInstructions(
-            [FromRoute] int runId,
-            [FromBody] ProducerBillingInstructionsRequestDto requestDto,
-            CancellationToken cancellationToken = default)
+        var serviceProcessResponseDto = await billingFileService.GetProducerBillingInstructionsAsync(
+            runId,
+            requestDto,
+            cancellationToken).ConfigureAwait(false);
+
+        if (serviceProcessResponseDto == null)
         {
-            if (!this.ModelState.IsValid)
+            return NotFound(new ErrorDto
             {
-                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
-            }
-
-            var serviceProcessResponseDto = await billingFileService.GetProducerBillingInstructionsAsync(
-                runId,
-                requestDto,
-                cancellationToken).ConfigureAwait(false);
-
-            if (serviceProcessResponseDto == null)
-            {
-                return this.NotFound(new ErrorDto
-                {
-                    Message = CommonResources.RunNotFound,
-                    Description = CommonResources.RunNotFound,
-                });
-            }
-
-            return this.Ok(serviceProcessResponseDto); 
+                Message = CommonResources.RunNotFound,
+                Description = CommonResources.RunNotFound
+            });
         }
+
+        return Ok(serviceProcessResponseDto);
     }
 }

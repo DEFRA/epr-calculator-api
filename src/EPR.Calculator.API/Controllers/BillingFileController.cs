@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Controllers;
 
-/// <summary>
-///     Controller responsible for handling billing file-related operations.
-/// </summary>
+[ApiController]
+[Produces("application/json")]
+[Route("v1")]
 public class BillingFileController(
-    IStorageService storageService,
-    ApplicationDBContext context)
-    : BaseControllerBase
+    IBlobStorageService blobStorage,
+    ApplicationDBContext context
+) : ControllerBase
 {
     /// <summary>
     ///     Downloads the CSV billing file for the specified calculator run.
@@ -28,13 +28,10 @@ public class BillingFileController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IResult> DownloadCsvBillingFile(int runId)
     {
-        if (!ModelState.IsValid)
-        {
-            var badRequest = Results.BadRequest(ModelState.Values.SelectMany(x => x.Errors));
-            return badRequest;
-        }
-
-        var latestBillingFileMetaData = await context.CalculatorRunBillingFileMetadata.Where(x => x.CalculatorRunId == runId).OrderByDescending(x => x.BillingFileCreatedDate).FirstOrDefaultAsync();
+        var latestBillingFileMetaData = await context.CalculatorRunBillingFileMetadata
+            .Where(x => x.CalculatorRunId == runId)
+            .OrderByDescending(x => x.BillingFileCreatedDate)
+            .FirstOrDefaultAsync();
 
         if (latestBillingFileMetaData == null)
             return Results.NotFound(string.Format(CommonResources.NoBillingFileMetadataForRunId, runId));
@@ -42,14 +39,20 @@ public class BillingFileController(
         if (string.IsNullOrEmpty(latestBillingFileMetaData.BillingCsvFileName))
             return Results.NotFound(string.Format(CommonResources.NoBillingFileMetadataForRunId, runId));
 
-        var csvFileMetaData = await context.CalculatorRunCsvFileMetadata.SingleOrDefaultAsync(x =>
-            x.CalculatorRunId == runId
-            &&
-            x.FileName == latestBillingFileMetaData.BillingCsvFileName);
+        var csvFileMetadata = await context.CalculatorRunCsvFileMetadata
+            .Where(x =>
+                x.CalculatorRunId == runId
+                && x.FileName == latestBillingFileMetaData.BillingCsvFileName)
+            .SingleOrDefaultAsync();
 
-        if (csvFileMetaData == null)
+        if (csvFileMetadata == null)
             return Results.NotFound(string.Format(CommonResources.NoBillingFileMetadataForRunId, runId));
 
-        return await storageService.DownloadFile(csvFileMetaData.FileName, csvFileMetaData.BlobUri);
+        var stream = await blobStorage.OpenBillingCsvStream(csvFileMetadata.FileName);
+
+        if (stream == null)
+            return Results.NotFound(string.Format(CommonResources.NoBillingFileMetadataForRunId, runId));
+
+        return Results.File(stream, "text/csv", csvFileMetadata.FileName);
     }
 }

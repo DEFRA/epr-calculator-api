@@ -516,20 +516,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void CalculatorRunValidator_Validate_Returns_Required_Error_When_Name_Is_Empty()
-        {
-            // Arrange
-            var validator = new CalculatorRunValidator();
-
-            // Act
-            var result = validator.Validate(string.Empty);
-
-            // Assert
-            result.ShouldNotBeNull();
-            result.Errors[0].ErrorMessage.ShouldBe(CommonResources.CalculatorRunNameRequired);
-        }
-
-        [TestMethod]
         public async Task DeleteCalculatorRun_Returns_NoContent_When_Run_Does_Not_Exist()
         {
             // Arrange

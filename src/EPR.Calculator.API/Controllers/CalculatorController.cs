@@ -1,10 +1,10 @@
-using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
@@ -15,19 +15,20 @@ using Microsoft.Identity.Web;
 
 namespace EPR.Calculator.API.Controllers;
 
+[ApiController]
+[Produces("application/json")]
 [Route("v1")]
 [SuppressMessage("Major Code Smell", "S6960:Controllers should not have mixed responsibilities", Justification = "Legacy tech debt to be addressed later.")]
 [SuppressMessage("Major Code Smell", "S107:Methods should not have too many parameters", Justification = "Legacy tech debt to be addressed later.")]
 public class CalculatorController(
     ApplicationDBContext dbContext,
-    IConfiguration configuration,
-    IStorageService storageService,
-    IServiceBusService serviceBusService,
+    IBlobStorageService blobStorage,
+    IServiceBusService serviceBus,
     ICalculatorRunStatusDataValidator runStatusValidator,
     ICalcRelativeYearRequestDtoDataValidator validator,
     IAvailableClassificationsService availableClassificationsService,
-    ICalculationRunService calculationRunService)
-    : ControllerBase
+    ICalculationRunService calculationRunService
+) : ControllerBase
 {
     [HttpPost]
     [Route("calculatorRun")]
@@ -39,20 +40,6 @@ public class CalculatorController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
     {
-        var claim = User.Claims.FirstOrDefault(x => x.Type == "name");
-        if (claim == null)
-            return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
-
-        var userName = claim.Value;
-
-        // Return bad request if the model is invalid
-        if (!ModelState.IsValid)
-        {
-            return StatusCode(
-                StatusCodes.Status400BadRequest,
-                ModelState.Values.SelectMany(x => x.Errors));
-        }
-
         var isCalcAlreadyRunning = await dbContext.CalculatorRuns.AnyAsync(run => run.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
         if (isCalcAlreadyRunning)
         {
@@ -85,16 +72,6 @@ public class CalculatorController(
             };
         }
 
-        // Read configuration items: service bus connection string and queue name
-        var serviceBusConnectionString = configuration.GetSection("ServiceBus").GetSection("ConnectionString").Value;
-        var serviceBusQueueName = configuration.GetSection("ServiceBus").GetSection("QueueName").Value;
-
-        if (string.IsNullOrWhiteSpace(serviceBusConnectionString))
-            throw new ConfigurationErrorsException(CommonResources.ServiceBusConnectionStringMissing);
-
-        if (string.IsNullOrWhiteSpace(serviceBusQueueName))
-            throw new ConfigurationErrorsException(CommonResources.ServiceBusQueueNameMissing);
-
         // Get active default parameter settings master
         var activeDefaultParameterSettingsMaster = await dbContext.DefaultParameterSettings
             .SingleAsync(x => x.EffectiveTo == null && x.RelativeYear == relativeYear.Value);
@@ -108,7 +85,7 @@ public class CalculatorController(
         {
             Name = request.CalculatorRunName,
             RelativeYear = relativeYear.Value,
-            CreatedBy = userName,
+            CreatedBy = User.GetName(),
             CreatedAt = DateTime.UtcNow,
             CalculatorRunClassificationId = (int)RunClassification.RUNNING,
             DefaultParameterSettingMasterId = activeDefaultParameterSettingsMaster.Id,
@@ -128,11 +105,11 @@ public class CalculatorController(
                 var calculatorRunMessage = new CalculatorRunMessage
                 {
                     CalculatorRunId = calculatorRun.Id,
-                    CreatedBy = User.Identity?.Name ?? userName
+                    CreatedBy = User.GetName()
                 };
 
                 // Send message
-                await serviceBusService.SendMessage(serviceBusQueueName, calculatorRunMessage);
+                await serviceBus.SendMessage(calculatorRunMessage);
 
                 // All good, commit transaction
                 await transaction.CommitAsync();
@@ -156,9 +133,6 @@ public class CalculatorController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
-            return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
-
         var runDtos = await dbContext.CalculatorRuns
             .Where(run => run.RelativeYear == request.RelativeYear)
             .Select(CalcRunMapper.ToDto)
@@ -199,17 +173,17 @@ public class CalculatorController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IResult> DownloadResultFile(int runId)
     {
-        if (!ModelState.IsValid)
-        {
-            var badRequest = Results.BadRequest(ModelState.Values.SelectMany(x => x.Errors));
-            return badRequest;
-        }
-
         var csvFileMetadata = await dbContext.CalculatorRunCsvFileMetadata.SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId && metadata.FileName != null && metadata.FileName.Contains("_Results"));
+
         if (csvFileMetadata == null)
             return Results.NotFound(string.Format(CommonResources.NoCSVFileFound, runId));
 
-        return await storageService.DownloadFile(csvFileMetadata.FileName, csvFileMetadata.BlobUri);
+        var stream = await blobStorage.OpenResultCsvStream(csvFileMetadata.FileName);
+
+        if (stream == null)
+            return Results.NotFound(string.Format(CommonResources.NoCSVFileFound, runId));
+
+        return Results.File(stream, "text/csv", csvFileMetadata.FileName);
     }
 
     [HttpGet]
@@ -233,9 +207,6 @@ public class CalculatorController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> ClassificationByRelativeYear([FromQuery] CalcRelativeYearRequestDto request)
     {
-        if (!ModelState.IsValid)
-            return StatusCode(StatusCodes.Status400BadRequest, ModelState.Values.SelectMany(x => x.Errors));
-
         var validationResult = await validator.Validate(request);
         if (validationResult.IsInvalid)
             return BadRequest(validationResult.Errors);
@@ -245,7 +216,7 @@ public class CalculatorController(
         if (classifications.Count == 0)
             return NotFound(CommonResources.NoClassificationsFound);
 
-        var runs = await calculationRunService.GetDesignatedRunsByFinanialYear(relativeYear);
+        var runs = await calculationRunService.GetDesignatedRunsByFinancialYear(relativeYear);
 
         var runDto = RelativeYearClassificationsMapper.Map(relativeYear, classifications, runs);
 
@@ -279,7 +250,7 @@ public class CalculatorController(
             return new ObjectResult(validationResult.Errors) { StatusCode = StatusCodes.Status422UnprocessableEntity };
 
         // Perform validation to check other designated runs are not in progress and not already completed for the same relative year
-        var designatedRuns = await calculationRunService.GetDesignatedRunsByFinanialYear(run.RelativeYear, cancellationToken);
+        var designatedRuns = await calculationRunService.GetDesignatedRunsByFinancialYear(run.RelativeYear, cancellationToken);
 
         validationResult = runStatusValidator.Validate(designatedRuns, run, request);
 
@@ -326,7 +297,7 @@ public class CalculatorController(
     {
         errorMessage = null;
 
-        if(int.TryParse(runName, out _))
+        if (int.TryParse(runName, out _))
             errorMessage = string.Format(CommonResources.CalculatorRunNameNotNumber);
 
         if (dbContext.CalculatorRuns.Any(run => EF.Functions.Like(run.Name, runName)))

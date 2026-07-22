@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Azure.Messaging.ServiceBus;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.Data;
@@ -7,10 +7,9 @@ using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Options;
@@ -99,9 +98,10 @@ public static class ServiceRegistration
     public static IServiceCollection AddRequestValidation(this IServiceCollection services)
     {
         services
-            .AddFluentValidationAutoValidation()
-            .AddFluentValidationClientsideAdapters()
             .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+        services.Configure<MvcOptions>(options =>
+            options.Filters.Add<FluentValidationActionFilter>());
 
         services.AddScoped<ICreateDefaultParameterDataValidator, CreateDefaultParameterDataValidator>();
         services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();

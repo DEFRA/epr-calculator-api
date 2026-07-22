@@ -1,156 +1,125 @@
-﻿using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Validators;
-using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 
-namespace EPR.Calculator.API.Controllers
+namespace EPR.Calculator.API.Controllers;
+
+[ApiController]
+[Produces("application/json")]
+[Route("v1")]
+public class LapcapDataController (
+    ApplicationDBContext context,
+    ILapcapDataValidator validator,
+    ILogger<LapcapDataController> logger
+) : ControllerBase
 {
-    [Route("v1")]
-    public class LapcapDataController : ControllerBase
+    [HttpPost]
+    [Route("lapcapData")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Create([FromBody] CreateLapcapDataDto request)
     {
-        private readonly ApplicationDBContext context;
-        private readonly ILapcapDataValidator validator;
-        private readonly TelemetryClient _telemetryClient;
+        logger.LogDebug("Requested LAPCAP filename: {LapcapFilename}", request.LapcapFileName);
 
-        public LapcapDataController(ApplicationDBContext context, ILapcapDataValidator validator, TelemetryClient telemetryClient)
+        var validationResult = validator.Validate(request);
+        if (validationResult.IsInvalid)
+            return BadRequest(validationResult.Errors);
+
+        var templateMaster = await context.LapcapDataTemplateMaster.ToListAsync();
+        using (var transaction = await context.Database.BeginTransactionAsync())
         {
-            this.context = context;
-            this.validator = validator;
-            this._telemetryClient = telemetryClient;
-        }
-
-        [HttpPost]
-        [Route("lapcapData")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] CreateLapcapDataDto request)
-        {
-            this._telemetryClient.TrackTrace(string.Format(CommonResources.LapcapFileName, request.LapcapFileName));
-            var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
-            if (claim == null)
+            try
             {
-                return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
-            }
+                var relativeYear = await context.FindRelativeYearAsync(request.RelativeYear.Value);
+                if (relativeYear == null)
+                    return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
 
-            var userName = claim.Value;
-            if (!this.ModelState.IsValid)
-            {
-                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
-            }
+                var oldLapcapData = await context.LapcapDataMaster
+                    .Where(x => x.EffectiveTo == null && x.RelativeYear == request.RelativeYear)
+                    .ToListAsync();
 
-            var validationResult = this.validator.Validate(request);
-            if (validationResult.IsInvalid)
-            {
-                this._telemetryClient.TrackTrace(string.Format(CommonResources.LapcapFileName, request.LapcapFileName));
-                this._telemetryClient.TrackTrace(string.Format(CommonResources.InternalServerErrorException, validationResult.Errors));
-                return this.BadRequest(validationResult.Errors);
-            }
+                oldLapcapData.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // Side effecting db update
 
-            var templateMaster = await this.context.LapcapDataTemplateMaster.ToListAsync();
-            using (var transaction = await this.context.Database.BeginTransactionAsync())
-            {
-                try
+                var lapcapDataMaster = new LapcapDataMaster
                 {
-                    var relativeYear = await this.context.FindRelativeYearAsync(request.RelativeYear.Value);
-                    if (relativeYear == null)
-                    {
-                        return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
-                    }
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = User.GetName(),
+                    EffectiveFrom = DateTime.UtcNow,
+                    EffectiveTo = null,
+                    LapcapFileName = request.LapcapFileName,
+                    RelativeYear = request.RelativeYear
+                };
+                await context.LapcapDataMaster.AddAsync(lapcapDataMaster);
 
-                    var oldLapcapData = await this.context.LapcapDataMaster
-                        .Where(x => x.EffectiveTo == null && x.RelativeYear == request.RelativeYear)
-                        .ToListAsync();
-
-                    oldLapcapData.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // Side effecting db update
-
-                    var lapcapDataMaster = new LapcapDataMaster
-                    {
-                        CreatedAt = DateTime.UtcNow,
-                        CreatedBy = userName,
-                        EffectiveFrom = DateTime.UtcNow,
-                        EffectiveTo = null,
-                        LapcapFileName = request.LapcapFileName,
-                        RelativeYear = request.RelativeYear
-                    };
-                    await this.context.LapcapDataMaster.AddAsync(lapcapDataMaster);
-
-                    foreach (var templateValue in request.LapcapDataTemplateValues)
-                    {
-                        var uniqueReference = templateMaster.Single(x =>
-                            x.Material == templateValue.Material && x.Country == templateValue.CountryName).UniqueReference;
-
-                        await this.context.LapcapDataDetail.AddAsync(new LapcapDataDetail
-                        {
-                            TotalCost = decimal.Parse(templateValue.TotalCost.Replace("£", string.Empty)),
-                            UniqueReference = uniqueReference,
-                            LapcapDataMaster = lapcapDataMaster,
-                        });
-                    }
-
-                    await this.context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                }
-                catch (Exception)
+                foreach (var templateValue in request.LapcapDataTemplateValues)
                 {
-                    await transaction.RollbackAsync();
-                    throw;
+                    var uniqueReference = templateMaster.Single(x =>
+                        x.Material == templateValue.Material && x.Country == templateValue.CountryName).UniqueReference;
+
+                    await context.LapcapDataDetail.AddAsync(new LapcapDataDetail
+                    {
+                        TotalCost = decimal.Parse(templateValue.TotalCost.Replace("£", string.Empty)),
+                        UniqueReference = uniqueReference,
+                        LapcapDataMaster = lapcapDataMaster
+                    });
                 }
-            }
 
-            return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
-        /// <summary>
-        /// Retrieves LAPCAP data for a specified year.
-        /// </summary>
-        /// <param name="relativeYearValue">The year for which to retrieve LAPCAP data.</param>
-        /// <returns>
-        /// An IActionResult containing the LAPCAP data for the specified year, or an appropriate error message:
-        /// - 400 Bad Request if the model state is invalid.
-        /// - 404 Not Found if no data is available for the specified year.
-        /// - 500 Internal Server Error if an exception occurs during data retrieval.
-        /// </returns>
-        /// <response code="200">Returns the LAPCAP data for the specified year.</response>
-        /// <response code="400">If the model state is invalid.</response>
-        /// <response code="404">If no data is available for the specified year.</response>
-        /// <response code="500">If an internal server error occurs.</response>
-        [HttpGet]
-        [Route("lapcapData/{relativeYearValue}")]
-        [ProducesResponseType(typeof(List<LapCapParameterDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] int relativeYearValue)
-        {
-            if (!this.ModelState.IsValid)
-            {
-                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
-            }
+        return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+    }
 
-            var relativeYear = await this.context.FindRelativeYearAsync(relativeYearValue);
-            if (relativeYear == null)
-            {
-                return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
-            }
+    /// <summary>
+    ///     Retrieves LAPCAP data for a specified year.
+    /// </summary>
+    /// <param name="relativeYearValue">The year for which to retrieve LAPCAP data.</param>
+    /// <returns>
+    ///     An IActionResult containing the LAPCAP data for the specified year, or an appropriate error message:
+    ///     - 400 Bad Request if the model state is invalid.
+    ///     - 404 Not Found if no data is available for the specified year.
+    ///     - 500 Internal Server Error if an exception occurs during data retrieval.
+    /// </returns>
+    /// <response code="200">Returns the LAPCAP data for the specified year.</response>
+    /// <response code="400">If the model state is invalid.</response>
+    /// <response code="404">If no data is available for the specified year.</response>
+    /// <response code="500">If an internal server error occurs.</response>
+    [HttpGet]
+    [Route("lapcapData/{relativeYearValue}")]
+    [ProducesResponseType(typeof(List<LapCapParameterDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Get([FromRoute] int relativeYearValue)
+    {
+        var relativeYear = await context.FindRelativeYearAsync(relativeYearValue);
+        if (relativeYear == null)
+            return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
 
-            var lapcapDataMaster = await context.LapcapDataMaster
-              .Include(m => m.Details)
-              .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.RelativeYear == relativeYear);
+        var lapcapDataMaster = await context.LapcapDataMaster
+            .Include(m => m.Details)
+            .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.RelativeYear == relativeYear);
 
-            if (lapcapDataMaster == null)
-            {
-                return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
-            }
+        if (lapcapDataMaster == null)
+            return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
 
-            var lapcaptemplateDetails = await this.context.LapcapDataTemplateMaster.ToListAsync();
-            var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(lapcapDataMaster, lapcaptemplateDetails);
-            return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
-        }
+        var lapcaptemplateDetails = await context.LapcapDataTemplateMaster.ToListAsync();
+        var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(lapcapDataMaster, lapcaptemplateDetails);
+        return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
     }
 }

@@ -1,144 +1,110 @@
-﻿using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Validators;
-using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 
-namespace EPR.Calculator.API.Controllers
+namespace EPR.Calculator.API.Controllers;
+
+[ApiController]
+[Produces("application/json")]
+[Route("v1")]
+public class DefaultParameterSettingController (
+    ApplicationDBContext context,
+    ICreateDefaultParameterDataValidator validator,
+    ILogger<DefaultParameterSettingController> logger
+) : ControllerBase
 {
-    [Route("v1")]
-    public class DefaultParameterSettingController : ControllerBase
+    [HttpPost]
+    [Route("defaultParameterSetting")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Create([FromBody] CreateDefaultParameterSettingDto request)
     {
-        private readonly ApplicationDBContext context;
-        private readonly ICreateDefaultParameterDataValidator validator;
-        private readonly TelemetryClient _telemetryClient;
+        logger.LogDebug("Requested Parameter filename: {ParameterFilename}", request.ParameterFileName);
 
-        public DefaultParameterSettingController(
-            ApplicationDBContext context,
-            ICreateDefaultParameterDataValidator validator,
-            TelemetryClient telemetryClient)
+        var validationResult = validator.Validate(request);
+
+        if (validationResult.IsInvalid)
+            return BadRequest(validationResult.Errors);
+
+        using (var transaction = await context.Database.BeginTransactionAsync())
         {
-            this.context = context;
-            this.validator = validator;
-            this._telemetryClient = telemetryClient;
-        }
-
-        [HttpPost]
-        [Route("defaultParameterSetting")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] CreateDefaultParameterSettingDto request)
-        {
-            this._telemetryClient.TrackTrace(string.Format(CommonResources.ParameterFileName, request.ParameterFileName));
-            var claim = this.User.Claims.FirstOrDefault(x => x.Type == "name");
-            if (claim == null)
+            try
             {
-                return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
-            }
+                var relativeYear = await context.FindRelativeYearAsync(request.RelativeYear.Value);
+                if (relativeYear == null)
+                    return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
 
-            var userName = claim.Value;
-            if (!this.ModelState.IsValid)
-            {
-                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
-            }
+                var oldDefaultSettings = await context.DefaultParameterSettings
+                    .Where(x => x.EffectiveTo == null && x.RelativeYear == request.RelativeYear)
+                    .ToListAsync();
 
-            var validationResult = this.validator.Validate(request);
-            if (validationResult != null && validationResult.IsInvalid)
-            {
-                this._telemetryClient.TrackTrace(string.Format(CommonResources.ParameterFileName, request.ParameterFileName));
-                this._telemetryClient.TrackTrace(string.Format(CommonResources.ValidationErrors, validationResult.Errors));
-                return this.BadRequest(validationResult.Errors);
-            }
+                oldDefaultSettings.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // side effecting db update
 
-            using (var transaction = await this.context.Database.BeginTransactionAsync())
-            {
-                try
+                var defaultParamSettingMaster = new DefaultParameterSettingMaster
                 {
-                    var relativeYear = await this.context.FindRelativeYearAsync(request.RelativeYear.Value);
-                    if (relativeYear == null)
-                    {
-                        return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
-                    }
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = User.GetName(),
+                    EffectiveFrom = DateTime.UtcNow,
+                    EffectiveTo = null,
+                    RelativeYear = request.RelativeYear,
+                    ParameterFileName = request.ParameterFileName
+                };
+                await context.DefaultParameterSettings.AddAsync(defaultParamSettingMaster);
 
-                    var oldDefaultSettings = await this.context.DefaultParameterSettings
-                        .Where(x => x.EffectiveTo == null && x.RelativeYear == request.RelativeYear)
-                        .ToListAsync();
-
-                    oldDefaultSettings.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // side effecting db update
-
-                    var defaultParamSettingMaster = new DefaultParameterSettingMaster
-                    {
-                        CreatedAt = DateTime.UtcNow,
-                        CreatedBy = userName,
-                        EffectiveFrom = DateTime.UtcNow,
-                        EffectiveTo = null,
-                        RelativeYear = request.RelativeYear,
-                        ParameterFileName = request.ParameterFileName,
-                    };
-                    await this.context.DefaultParameterSettings.AddAsync(defaultParamSettingMaster);
-
-                    var defaultParameterSettingDetails = request.SchemeParameterTemplateValues
+                var defaultParameterSettingDetails = request.SchemeParameterTemplateValues
                     .Select(templateValue => new DefaultParameterSettingDetail
                     {
                         ParameterValue = decimal.Parse(templateValue.ParameterValue.TrimEnd('%').Replace("£", string.Empty)),
                         ParameterUniqueReferenceId = templateValue.ParameterUniqueReferenceId,
-                        DefaultParameterSettingMaster = defaultParamSettingMaster,
+                        DefaultParameterSettingMaster = defaultParamSettingMaster
                     })
                     .ToList();
 
-                    await this.context.DefaultParameterSettingDetail.AddRangeAsync(defaultParameterSettingDetails);
+                await context.DefaultParameterSettingDetail.AddRangeAsync(defaultParameterSettingDetails);
 
-                    await this.context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                }
-                catch (Exception)
-                {
-                    await transaction.RollbackAsync();
-                    throw;
-                }
+                await context.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
-
-            return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
-        [HttpGet]
-        [Route("defaultParameterSetting/{relativeYearValue}")]
-        [ProducesResponseType(typeof(List<DefaultSchemeParametersDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] int relativeYearValue)
-        {
-            if (!this.ModelState.IsValid)
-            {
-                return this.StatusCode(StatusCodes.Status400BadRequest, this.ModelState.Values.SelectMany(x => x.Errors));
-            }
+        return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+    }
 
-            
-            var relativeYear = await this.context.FindRelativeYearAsync(relativeYearValue);
-            if (relativeYear == null)
-            {
-                return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
-            }
+    [HttpGet]
+    [Route("defaultParameterSetting/{relativeYearValue}")]
+    [ProducesResponseType(typeof(List<DefaultSchemeParametersDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Get([FromRoute] int relativeYearValue)
+    {
+        var relativeYear = await context.FindRelativeYearAsync(relativeYearValue);
+        if (relativeYear == null)
+            return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
 
-            var currentDefaultSetting = await this.context.DefaultParameterSettings
-                .Include(x => x.Details)
-                .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.RelativeYear == relativeYearValue);
+        var currentDefaultSetting = await context.DefaultParameterSettings
+            .Include(x => x.Details)
+            .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.RelativeYear == relativeYearValue);
 
-            if (currentDefaultSetting == null)
-            {
-                return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
-            }
+        if (currentDefaultSetting == null)
+            return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
 
-            var templateDetails = await this.context.DefaultParameterTemplateMasterList.ToListAsync();
+        var templateDetails = await context.DefaultParameterTemplateMasterList.ToListAsync();
 
-            var schemeParameters = CreateDefaultParameterSettingMapper.Map(currentDefaultSetting, templateDetails);
-            return new ObjectResult(schemeParameters) { StatusCode = StatusCodes.Status200OK };
-        }
+        var schemeParameters = CreateDefaultParameterSettingMapper.Map(currentDefaultSetting, templateDetails);
+        return new ObjectResult(schemeParameters) { StatusCode = StatusCodes.Status200OK };
     }
 }
