@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260722145707_AddCostDataAndCancelledProducerTables")]
+    partial class AddCostDataAndCancelledProducerTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -801,10 +804,9 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("parameter_unique_ref");
 
-                    b.Property<string>("ParameterValue")
-                        .IsRequired()
+                    b.Property<decimal>("ParameterValue")
                         .HasPrecision(18, 3)
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("decimal(18,3)")
                         .HasColumnName("parameter_value");
 
                     b.HasKey("Id");
@@ -1359,14 +1361,6 @@ namespace EPR.Calculator.API.Data.Migrations
                             ParameterType = "Red modulation factor",
                             ValidRangeFrom = 1.000m,
                             ValidRangeTo = 2.000m
-                        },
-                        new
-                        {
-                            ParameterUniqueReferenceId = "COFF-DT",
-                            ParameterCategory = "Optional Date",
-                            ParameterType = "Cut-off date",
-                            ValidRangeFrom = 0m,
-                            ValidRangeTo = 0m
                         });
                 });
 
