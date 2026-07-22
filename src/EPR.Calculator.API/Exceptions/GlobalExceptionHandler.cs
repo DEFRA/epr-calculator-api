@@ -5,26 +5,20 @@ using Microsoft.AspNetCore.Diagnostics;
 
 namespace EPR.Calculator.API.Exceptions
 {
-    public class GlobalExceptionHandler : IExceptionHandler
+    public class GlobalExceptionHandler (ILogger<GlobalExceptionHandler> logger)
+        : IExceptionHandler
     {
         private static readonly JsonSerializerOptions Options = new()
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         };
 
-        private readonly ILogger<GlobalExceptionHandler> logger;
-
-        public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
-        {
-            this.logger = logger;
-        }
-
         public async ValueTask<bool> TryHandleAsync(
             HttpContext httpContext,
             Exception exception,
             CancellationToken cancellationToken)
         {
-            var errorMessage = "An unexpected error occurred.";
+            const string errorMessage = "An unexpected error occurred";
             logger.LogError(exception, errorMessage);
             httpContext.Response.ContentType = "application/json";
             httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
