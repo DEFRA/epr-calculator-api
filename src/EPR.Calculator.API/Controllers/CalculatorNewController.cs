@@ -1,28 +1,27 @@
-﻿using System.Collections.Immutable;
-using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Services;
-using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
-using EPR.Calculator.Service.Function.Services;
-using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 
 namespace EPR.Calculator.API.Controllers;
 
-[Route("V2")]
 [ApiController]
+[Produces("application/json")]
+[Route("V2")]
 public class CalculatorNewController(
     ApplicationDBContext dbContext,
     ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
     IBillingFileService billingFileService,
     IInvoiceDetailsService invoiceDetailsService,
-    TelemetryClient telemetryClient,
-    ICalculationRunService calculationRunService)
-    : ControllerBase
+    ILogger<CalculatorNewController> logger,
+    ICalculationRunService calculationRunService
+) : ControllerBase
 {
     [HttpPut]
     [Route("calculatorRuns")]
@@ -32,12 +31,6 @@ public class CalculatorNewController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> PutCalculatorRunStatus([FromBody] CalculatorRunStatusUpdateDto runStatusUpdateDto)
     {
-        var claim = User.Claims.FirstOrDefault(x => x.Type == "name");
-        if (claim == null)
-            return new ObjectResult(CommonResources.NoClaimInRequest) { StatusCode = StatusCodes.Status401Unauthorized };
-
-        var userName = claim.Value;
-
         var classification = await dbContext.CalculatorRunClassifications.SingleOrDefaultAsync(x =>
             x.Id == runStatusUpdateDto.ClassificationId);
 
@@ -64,7 +57,7 @@ public class CalculatorNewController(
         }
 
         // Perform validation to check other designated runs are not in progress and not already completed for the same relative year
-        var designatedRuns = await calculationRunService.GetDesignatedRunsByFinanialYear(calculatorRun.RelativeYear);
+        var designatedRuns = await calculationRunService.GetDesignatedRunsByFinancialYear(calculatorRun.RelativeYear);
 
         genericValidationResultDto = calculatorRunStatusDataValidator.Validate(designatedRuns, calculatorRun, runStatusUpdateDto);
 
@@ -76,7 +69,7 @@ public class CalculatorNewController(
 
         calculatorRun.CalculatorRunClassificationId = runStatusUpdateDto.ClassificationId;
         calculatorRun.UpdatedAt = DateTime.UtcNow;
-        calculatorRun.UpdatedBy = userName;
+        calculatorRun.UpdatedBy = User.GetName();
 
         dbContext.CalculatorRuns.Update(calculatorRun);
         await dbContext.SaveChangesAsync();
@@ -92,13 +85,8 @@ public class CalculatorNewController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> PrepareBillingFileSendToFSS(int runId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> PrepareBillingFileSendToFSS(int runId, CancellationToken cancellationToken = default)
     {
-        var claim = User.Claims.FirstOrDefault(x => x.Type == "name");
-
-        if (claim == null)
-            return StatusCode(StatusCodes.Status401Unauthorized, CommonResources.NoClaimInRequest);
-
         var runDto = await dbContext.CalculatorRuns
             .Where(run => run.Id == runId)
             .Select(CalcRunMapper.ToDto)
@@ -132,7 +120,7 @@ public class CalculatorNewController(
             var metadata = calculatorRun.CalculatorRunBillingFileMetadata
                 .Single(m => m.Id == runDto.BillingFile.Id);
 
-            var sentBy = claim.Value;
+            var sentBy = User.GetName();
             var sentAt = DateTime.UtcNow;
 
             calculatorRun.CalculatorRunClassificationId = newClassification;
@@ -142,11 +130,7 @@ public class CalculatorNewController(
             var affectedRows = await invoiceDetailsService
                 .InsertInvoiceDetailsAtProducerLevel(runId, sentAt, sentBy, cancellationToken);
 
-            telemetryClient.TrackEvent("InsertInvoiceDetailsAtProducerLevel", new Dictionary<string, string>
-            {
-                { "RunId", runId.ToString() },
-                { "RowsAffected", affectedRows.ToString() }
-            });
+            logger.LogDebug("Inserting {RowsAffected} invoice details at producer level for run {RunId}", affectedRows, runId);
 
             dbContext.CalculatorRuns.Update(calculatorRun);
             await dbContext.SaveChangesAsync(cancellationToken);

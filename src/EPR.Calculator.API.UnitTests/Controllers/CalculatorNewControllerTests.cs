@@ -7,16 +7,13 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
-using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
-using EPR.Calculator.Service.Function.Services;
-using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -41,14 +38,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             mockBillingFileService = new Mock<IBillingFileService>();
 
-            var telemetryClient = new TelemetryClient(TelemetryConfiguration.CreateDefault());
-
             controller = new CalculatorNewController(
                 context,
                 Mock.Of<ICalculatorRunStatusDataValidator>(),
                 mockBillingFileService.Object,
                 Mock.Of<IInvoiceDetailsService>(),
-                telemetryClient,
+                Mock.Of<ILogger<CalculatorNewController>>(),
                 Mock.Of<ICalculationRunService>())
             {
                 ControllerContext = CreateAuthenticatedControllerContext(),

@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
@@ -7,6 +6,11 @@ using EPR.Calculator.API.Mappers;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services;
+
+public interface ICalculationRunService
+{
+    Task<List<CalculatorRunDto>> GetDesignatedRunsByFinancialYear(RelativeYear relativeYear, CancellationToken cancellationToken = default);
+}
 
 public class CalculationRunService(ApplicationDBContext context)
     : ICalculationRunService
@@ -23,7 +27,7 @@ public class CalculationRunService(ApplicationDBContext context)
         (int)RunClassification.FINAL_RUN_COMPLETED
     ];
 
-    public async Task<List<CalculatorRunDto>> GetDesignatedRunsByFinanialYear(RelativeYear relativeYear, CancellationToken cancellationToken = default)
+    public async Task<List<CalculatorRunDto>> GetDesignatedRunsByFinancialYear(RelativeYear relativeYear, CancellationToken cancellationToken = default)
     {
         return await context.CalculatorRuns
             .Where(run => run.RelativeYear == relativeYear

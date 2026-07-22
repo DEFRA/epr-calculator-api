@@ -34,13 +34,13 @@ namespace EPR.Calculator.API.UnitTests.Global
             Assert.AreEqual(StatusCodes.Status500InternalServerError, this.httpContext.Response.StatusCode);
             var responseBody = this.httpContext.Response.Body;
             responseBody.Seek(0, SeekOrigin.Begin);
-            Assert.AreEqual("""{"Status":500,"Message":"An unexpected error occurred.","Instance":{"Value":"","HasValue":false}}""", await new StreamReader(responseBody).ReadToEndAsync());
+            Assert.AreEqual("""{"Status":500,"Message":"An unexpected error occurred","Instance":{"Value":"","HasValue":false}}""", await new StreamReader(responseBody).ReadToEndAsync());
 
             this.mockLogger.Verify(
                logger => logger.Log(
                    LogLevel.Error,
                    It.IsAny<EventId>(),
-                   It.Is<It.IsAnyType>((state, t) => state.ToString()!.Contains("An unexpected error occurred.")),
+                   It.Is<It.IsAnyType>((state, t) => state.ToString()!.Contains("An unexpected error occurred")),
                    exception,
                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                Times.Once);

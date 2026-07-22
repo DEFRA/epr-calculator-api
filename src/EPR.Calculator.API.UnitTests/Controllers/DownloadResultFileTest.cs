@@ -1,10 +1,8 @@
-﻿using EPR.Calculator.API.Controllers;
+using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -15,138 +13,102 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     [TestClass]
     public class DownloadResultFileTest
     {
-        private readonly ApplicationDBContext context;
-        private readonly Mock<IConfiguration> mockConfig;
-        private readonly Mock<IStorageService> mockStorageService;
-        private readonly Mock<IServiceBusService> mockServiceBusService;
-        private readonly Mock<ICalcRelativeYearRequestDtoDataValidator> mockValidator;
+        private const int RunId = 1;
+        private const string ResultsFileName = "1-Calc RunName_Results File_20241111.csv";
 
-        public DownloadResultFileTest()
+        private ApplicationDBContext context = null!;
+        private Mock<IBlobStorageService> mockBlobStorage = null!;
+        private CalculatorController controller = null!;
+
+        [TestInitialize]
+        public void TestInitialize()
         {
-            this.mockStorageService = new Mock<IStorageService>();
-            this.mockServiceBusService = new Mock<IServiceBusService>();
-            this.mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
-            this.mockConfig = new Mock<IConfiguration>();
-            var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
-                .UseInMemoryDatabase(databaseName: "PayCal")
+            var options = new DbContextOptionsBuilder<ApplicationDBContext>()
+                .UseInMemoryDatabase(databaseName: $"PayCal-{Guid.NewGuid()}")
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
-            context = new ApplicationDBContext(dbContextOptions);
-            context.Database.EnsureCreated();
 
-            this.RelativeYear24_25 = new CalculatorRunRelativeYear { Value = new RelativeYear(2024) };
-            this.context.CalculatorRunRelativeYears.Add(this.RelativeYear24_25);
-            this.context.SaveChanges();
+            this.context = new ApplicationDBContext(options);
+            this.context.Database.EnsureCreated();
+
+            this.mockBlobStorage = new Mock<IBlobStorageService>();
+
+            this.controller = new CalculatorController(
+                this.context,
+                this.mockBlobStorage.Object,
+                Mock.Of<IServiceBusService>(),
+                Mock.Of<ICalculatorRunStatusDataValidator>(),
+                Mock.Of<ICalcRelativeYearRequestDtoDataValidator>(),
+                Mock.Of<IAvailableClassificationsService>(),
+                Mock.Of<ICalculationRunService>());
         }
-
-        private CalculatorRunRelativeYear RelativeYear24_25 { get; init; }
 
         [TestCleanup]
-        public void CleanUp()
+        public void TestCleanup()
         {
             this.context.Database.EnsureDeleted();
+            this.context.Dispose();
         }
 
         [TestMethod]
-        public async Task DownloadResultFile_ShouldReturnFileResult_WhenFileExists()
+        public async Task DownloadResultFile_ReturnsCsvFile_WhenMetadataAndBlobExist()
         {
             // Arrange
-            var date = new DateTime(2024, 11, 11, 0, 0, 0, DateTimeKind.Unspecified);
-            var runId = 1;
-            var fileName = "1-Calc RunName_Results File_20241111.csv";
-            var blobUri = $"https://example.com/{fileName}";
-
-            this.context.CalculatorRuns.Add(new CalculatorRun
-            {
-                Name = "Calc RunName",
-                CalculatorRunClassificationId = 2,
-                CreatedAt = date,
-                CreatedBy = "User23",
-                LapcapDataMasterId = 1,
-                DefaultParameterSettingMasterId = 1,
-                RelativeYear = new RelativeYear(2024),
-            });
-
-            this.context.CalculatorRunCsvFileMetadata.Add(new CalculatorRunCsvFileMetadata
-            {
-                CalculatorRunId = runId,
-                FileName = fileName,
-                BlobUri = blobUri,
-            });
-
-            this.context.SaveChanges();
-
-            var controller =
-                new CalculatorController(
-                    this.context,
-                    this.mockConfig.Object,
-                    this.mockStorageService.Object,
-                    this.mockServiceBusService.Object,
-                    Mock.Of<ICalculatorRunStatusDataValidator>(),
-                    this.mockValidator.Object,
-                    Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>());
-            var mockResult = new Mock<IResult>();
-            this.mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(mockResult.Object);
+            this.AddResultsFileMetadata();
+            using var stream = new MemoryStream();
+            this.SetupResultCsvStream(stream);
 
             // Act
-            var downloadResultFile = await controller.DownloadResultFile(runId);
+            var result = await this.controller.DownloadResultFile(RunId);
 
             // Assert
-            this.mockStorageService.Verify(x => x.DownloadFile(fileName, blobUri));
-            Assert.AreEqual(mockResult.Object, downloadResultFile);
+            var fileResult = result.ShouldBeOfType<FileStreamHttpResult>();
+            fileResult.ContentType.ShouldBe("text/csv");
+            fileResult.FileDownloadName.ShouldBe(ResultsFileName);
         }
 
         [TestMethod]
-        public async Task DownloadResultFile_ShouldReturnNotFound_WhenFileDoesNotExist()
+        public async Task DownloadResultFile_ReturnsNotFound_WhenMetadataMissing()
         {
-            // Arrange
-            var runId = 1;
-            var fileName = "1-Calc RunName_Results File_20241111.csv";
-            var blobUri = $"https://example.com/{fileName}";
-
-            this.context.CalculatorRuns.Add(new CalculatorRun
-            {
-                Id = runId,
-                Name = "Calc RunName",
-                CalculatorRunClassificationId = 2,
-                CreatedAt = new DateTime(2024, 11, 11, 0, 0, 0, DateTimeKind.Unspecified),
-                CreatedBy = "User23",
-                LapcapDataMasterId = 1,
-                DefaultParameterSettingMasterId = 1,
-                RelativeYear = new RelativeYear(2024)
-            });
-
-            this.context.CalculatorRunCsvFileMetadata.Add(new CalculatorRunCsvFileMetadata
-            {
-                CalculatorRunId = runId,
-                FileName = fileName,
-                BlobUri = blobUri,
-            });
-
-            this.context.SaveChanges();
-
-            var controller =
-                new CalculatorController(
-                    this.context,
-                    this.mockConfig.Object,
-                    this.mockStorageService.Object,
-                    this.mockServiceBusService.Object,
-                    Mock.Of<ICalculatorRunStatusDataValidator>(),
-                    this.mockValidator.Object,
-                    Mock.Of<IAvailableClassificationsService>(),
-                    Mock.Of<ICalculationRunService>());
-
-            this.mockStorageService.Setup(x => x.DownloadFile(fileName, blobUri)).ReturnsAsync(Results.NotFound(fileName));
+            // Arrange - no CSV file metadata is seeded for the run.
 
             // Act
-            var downloadResultFile = await controller.DownloadResultFile(runId);
+            var result = await this.controller.DownloadResultFile(RunId);
 
             // Assert
-            this.mockStorageService.Verify(x => x.DownloadFile(fileName, blobUri));
-            Assert.IsInstanceOfType(downloadResultFile, typeof(NotFound<string>));
-            var notFoundObjectResult = (NotFound<string>)downloadResultFile;
-            Assert.AreEqual(fileName, notFoundObjectResult.Value);
+            var notFound = result.ShouldBeOfType<NotFound<string>>();
+            notFound.Value.ShouldBe(string.Format(CommonResources.NoCSVFileFound, RunId));
         }
+
+        [TestMethod]
+        public async Task DownloadResultFile_ReturnsNotFound_WhenBlobStreamMissing()
+        {
+            // Arrange
+            this.AddResultsFileMetadata();
+            this.SetupResultCsvStream(null);
+
+            // Act
+            var result = await this.controller.DownloadResultFile(RunId);
+
+            // Assert
+            var notFound = result.ShouldBeOfType<NotFound<string>>();
+            notFound.Value.ShouldBe(string.Format(CommonResources.NoCSVFileFound, RunId));
+        }
+
+        private void AddResultsFileMetadata()
+        {
+            this.context.CalculatorRunCsvFileMetadata.Add(new CalculatorRunCsvFileMetadata
+            {
+                CalculatorRunId = RunId,
+                FileName = ResultsFileName,
+                BlobUri = $"https://example.com/{ResultsFileName}",
+            });
+            this.context.SaveChanges();
+        }
+
+        private void SetupResultCsvStream(Stream? stream) =>
+            this.mockBlobStorage
+                .Setup(x => x.OpenResultCsvStream(ResultsFileName, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(stream);
     }
 }

@@ -7,15 +7,14 @@ using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
-using EPR.Calculator.API.Services.Abstractions;
 using EPR.Calculator.API.Validators;
-using EPR.Calculator.Service.Function.Services;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -44,15 +43,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.mockInvoiceDetailsService = new Mock<IInvoiceDetailsService>();
             this.mockCalculationRunService = new Mock<ICalculationRunService>();
 
-            var config = TelemetryConfiguration.CreateDefault();
-            var telemetryClient = new TelemetryClient(config);
 
             this.calculatorNewControllerUnderTest = new CalculatorNewController(
                 this.context,
                 this.mockValidator.Object,
                 this.mockBillingFileService.Object,
                 this.mockInvoiceDetailsService.Object,
-                telemetryClient,
+                Mock.Of<ILogger<CalculatorNewController>>(),
                 this.mockCalculationRunService.Object);
 
             this.context.CalculatorRuns.Add(new CalculatorRun
@@ -105,7 +102,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     It.IsAny<CalculatorRunStatusUpdateDto>()))
                 .Returns(new GenericValidationResultDto { IsInvalid = false });
             this.mockCalculationRunService.Setup(
-                x => x.GetDesignatedRunsByFinanialYear(
+                x => x.GetDesignatedRunsByFinancialYear(
                     It.IsAny<RelativeYear>(),
                     default)).ReturnsAsync(designatedRuns);
             this.mockValidator.Setup(
@@ -131,7 +128,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     It.IsAny<CalculatorRunStatusUpdateDto>()),
                 Times.Once());
             this.mockCalculationRunService.Verify(
-                x => x.GetDesignatedRunsByFinanialYear(
+                x => x.GetDesignatedRunsByFinancialYear(
                     It.IsAny<RelativeYear>(),
                     default),
                 Times.Once());
@@ -201,7 +198,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     It.IsAny<CalculatorRunStatusUpdateDto>()),
                 Times.Once());
             this.mockCalculationRunService.Verify(
-                x => x.GetDesignatedRunsByFinanialYear(
+                x => x.GetDesignatedRunsByFinancialYear(
                     It.IsAny<RelativeYear>(),
                     default),
                 Times.Never());
@@ -260,7 +257,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     It.IsAny<CalculatorRunStatusUpdateDto>()))
                 .Returns(new GenericValidationResultDto { IsInvalid = false });
             this.mockCalculationRunService.Setup(
-                x => x.GetDesignatedRunsByFinanialYear(
+                x => x.GetDesignatedRunsByFinancialYear(
                     It.IsAny<RelativeYear>(),
                     default)).ReturnsAsync(designatedRuns);
             this.mockValidator.Setup(
@@ -297,7 +294,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     It.IsAny<CalculatorRunStatusUpdateDto>()),
                 Times.Once());
             this.mockCalculationRunService.Verify(
-                x => x.GetDesignatedRunsByFinanialYear(
+                x => x.GetDesignatedRunsByFinancialYear(
                     It.IsAny<RelativeYear>(),
                     default),
                 Times.Once());

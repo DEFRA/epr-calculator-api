@@ -1,142 +1,399 @@
-﻿using System.Configuration;
+using System.Text;
 using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
-using EPR.Calculator.API.UnitTests.Helpers;
-using EPR.Calculator.API.Utils;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace EPR.Calculator.API.UnitTests.Services
+namespace EPR.Calculator.API.UnitTests.Services;
+
+[TestClass]
+public class BlobStorageServiceTests
 {
-    [TestClass]
-    public class BlobStorageServiceTests
+    private const string ResultCsvContainerName = "result-csv";
+    private const string BillingCsvContainerName = "billing-csv";
+    private const string BillingJsonContainerName = "billing-json";
+    private const string FssContainerName = "fss";
+    private const string TestFilename = "test-file.csv";
+    private static readonly UnicodeEncoding Utf16 = new(bigEndian: false, byteOrderMark: true);
+    private Mock<BlobContainerClient> billingCsvContainer = null!;
+    private Mock<BlobContainerClient> billingJsonContainer = null!;
+
+    private Mock<BlobServiceClient> blobServiceClient = null!;
+    private Mock<BlobContainerClient> fssContainer = null!;
+    private Mock<ILogger<BlobStorageService>> logger = null!;
+    private Mock<BlobContainerClient> resultCsvContainer = null!;
+    private BlobStorageService service = null!;
+
+    [TestInitialize]
+    public void TestInitialize()
     {
-        private readonly Mock<BlobServiceClient> mockBlobServiceClient;
-        private readonly Mock<BlobContainerClient> mockBlobContainerClient;
-        private readonly Mock<BlobClient> mockBlobClient;
-        private readonly Mock<ILogger<BlobStorageService>> mockLogger;
-        private readonly BlobStorageService blobStorageService;
+        resultCsvContainer = new Mock<BlobContainerClient>();
+        billingCsvContainer = new Mock<BlobContainerClient>();
+        billingJsonContainer = new Mock<BlobContainerClient>();
+        fssContainer = new Mock<BlobContainerClient>();
+        billingJsonContainer.SetupGet(x => x.Name).Returns(BillingJsonContainerName);
+        fssContainer.SetupGet(x => x.Name).Returns(FssContainerName);
 
-        public BlobStorageServiceTests()
+        blobServiceClient = new Mock<BlobServiceClient>();
+        blobServiceClient.Setup(x => x.GetBlobContainerClient(ResultCsvContainerName)).Returns(resultCsvContainer.Object);
+        blobServiceClient.Setup(x => x.GetBlobContainerClient(BillingCsvContainerName)).Returns(billingCsvContainer.Object);
+        blobServiceClient.Setup(x => x.GetBlobContainerClient(BillingJsonContainerName)).Returns(billingJsonContainer.Object);
+        blobServiceClient.Setup(x => x.GetBlobContainerClient(FssContainerName)).Returns(fssContainer.Object);
+
+        logger = new Mock<ILogger<BlobStorageService>>();
+
+        var options = Microsoft.Extensions.Options.Options.Create(new BlobStorageOptions
         {
-            this.mockBlobServiceClient = new Mock<BlobServiceClient>();
-            this.mockBlobContainerClient = new Mock<BlobContainerClient>();
-            this.mockBlobClient = new Mock<BlobClient>();
-            var configs = ConfigurationItems.GetConfigurationValues();
+            ConnectionString = "UseDevelopmentStorage=true",
+            ResultFileCsvContainer = ResultCsvContainerName,
+            BillingFileCsvContainer = BillingCsvContainerName,
+            BillingFileJsonContainer = BillingJsonContainerName,
+            FssContainer = FssContainerName
+        });
 
-            this.mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(It.IsAny<string>()))
-                .Returns(this.mockBlobContainerClient.Object);
+        service = new BlobStorageService(blobServiceClient.Object, options, logger.Object);
+    }
 
-            this.mockBlobContainerClient.Setup(x => x.GetBlobClient(It.IsAny<string>()))
-                .Returns(this.mockBlobClient.Object);
+    // ── Re-encoding behaviour (via OpenResultCsvStream) ─────────────────────
 
-            this.mockLogger = new Mock<ILogger<BlobStorageService>>();
+    [TestMethod]
+    public async Task OpenResultCsvStream_ReturnsUtf16WithBom_WhenBlobIsUtf8()
+    {
+        // Arrange
+        const string content = "hello, world";
+        SetupBlobClientWithBytes(resultCsvContainer, TestFilename, Encoding.UTF8.GetBytes(content));
 
-            this.blobStorageService = new BlobStorageService(
-                this.mockBlobServiceClient.Object,
-                configs,
-                this.mockLogger.Object);
+        // Act
+        var result = await service.OpenResultCsvStream(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        AssertIsUtf16WithBom(await ReadBytesAsync(result), content);
+    }
+
+    [TestMethod]
+    public async Task OpenResultCsvStream_ReturnsUtf16WithBom_WhenBlobIsUtf8WithBom()
+    {
+        // Arrange
+        const string content = "test content with UTF-8 BOM";
+        var utf8Bom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
+        var bytes = utf8Bom.GetPreamble().Concat(utf8Bom.GetBytes(content)).ToArray();
+        SetupBlobClientWithBytes(resultCsvContainer, TestFilename, bytes);
+
+        // Act
+        var result = await service.OpenResultCsvStream(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        AssertIsUtf16WithBom(await ReadBytesAsync(result), content);
+    }
+
+    [TestMethod]
+    public async Task OpenResultCsvStream_IsIdempotent_WhenBlobIsAlreadyUtf16()
+    {
+        // Arrange
+        const string content = "already UTF-16";
+        var bytes = Utf16.GetPreamble().Concat(Utf16.GetBytes(content)).ToArray();
+        SetupBlobClientWithBytes(resultCsvContainer, TestFilename, bytes);
+
+        // Act
+        var result = await service.OpenResultCsvStream(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        AssertIsUtf16WithBom(await ReadBytesAsync(result), content);
+    }
+
+    [TestMethod]
+    public async Task OpenResultCsvStream_ReturnsUtf16WithBom_WhenBlobIsEmpty()
+    {
+        // Arrange
+        SetupBlobClientWithBytes(resultCsvContainer, TestFilename, []);
+
+        // Act
+        var result = await service.OpenResultCsvStream(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        AssertIsUtf16WithBom(await ReadBytesAsync(result), string.Empty);
+    }
+
+    [TestMethod]
+    public async Task OpenResultCsvStream_PreservesMultibyteUnicodeCharacters()
+    {
+        // Arrange
+        const string content = "H\u00e9llo W\u00f6rld \U0001f30d";
+        SetupBlobClientWithBytes(resultCsvContainer, TestFilename, Encoding.UTF8.GetBytes(content));
+
+        // Act
+        var result = await service.OpenResultCsvStream(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        AssertIsUtf16WithBom(await ReadBytesAsync(result), content);
+    }
+
+    [TestMethod]
+    public async Task OpenResultCsvStream_ReturnsStreamPositionedAtStart()
+    {
+        // Arrange
+        SetupBlobClientWithBytes(resultCsvContainer, TestFilename, Encoding.UTF8.GetBytes("position check"));
+
+        // Act
+        var result = await service.OpenResultCsvStream(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.Position.ShouldBe(0L);
+    }
+
+    // ── Constructor ───────────────────────────────────────────────────────────
+
+    [TestMethod]
+    public void Constructor_CreatesContainerClientForEachConfiguredContainer()
+    {
+        blobServiceClient.Verify(x => x.GetBlobContainerClient(ResultCsvContainerName), Times.Once);
+        blobServiceClient.Verify(x => x.GetBlobContainerClient(BillingCsvContainerName), Times.Once);
+        blobServiceClient.Verify(x => x.GetBlobContainerClient(BillingJsonContainerName), Times.Once);
+        blobServiceClient.Verify(x => x.GetBlobContainerClient(FssContainerName), Times.Once);
+    }
+
+    // ── OpenResultCsvStream ───────────────────────────────────────────────────
+
+    [TestMethod]
+    public async Task OpenResultCsvStream_ReturnsReEncodedContent_WhenBlobExists()
+    {
+        // Arrange
+        const string content = "col1,col2\nval1,val2";
+        SetupBlobClientWithContent(resultCsvContainer, TestFilename, content);
+
+        // Act
+        var result = await service.OpenResultCsvStream(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        (await ReadContentAsync(result)).ShouldBe(content);
+    }
+
+    [TestMethod]
+    public async Task OpenResultCsvStream_ReturnsNull_WhenBlobNotFound()
+    {
+        // Arrange
+        SetupBlobClientWith404(resultCsvContainer, TestFilename);
+
+        // Act
+        var result = await service.OpenResultCsvStream(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldBeNull();
+    }
+
+    // ── OpenBillingCsvStream ──────────────────────────────────────────────────
+
+    [TestMethod]
+    public async Task OpenBillingCsvStream_ReturnsReEncodedContent_WhenBlobExists()
+    {
+        // Arrange
+        const string content = "billing,data\n1,2";
+        SetupBlobClientWithContent(billingCsvContainer, TestFilename, content);
+
+        // Act
+        var result = await service.OpenBillingCsvStream(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldNotBeNull();
+        (await ReadContentAsync(result)).ShouldBe(content);
+    }
+
+    [TestMethod]
+    public async Task OpenBillingCsvStream_ReturnsNull_WhenBlobNotFound()
+    {
+        // Arrange
+        SetupBlobClientWith404(billingCsvContainer, TestFilename);
+
+        // Act
+        var result = await service.OpenBillingCsvStream(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldBeNull();
+    }
+
+    // ── MoveBillingJsonToFss ──────────────────────────────────────────────────
+
+    [TestMethod]
+    public async Task MoveBillingJsonToFss_ReturnsFalse_WhenSourceBlobDoesNotExist()
+    {
+        // Arrange
+        var sourceBlobClient = new Mock<BlobClient>();
+        sourceBlobClient.Setup(x => x.ExistsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Response.FromValue(value: false, Mock.Of<Response>()));
+        billingJsonContainer.Setup(x => x.GetBlobClient(TestFilename)).Returns(sourceBlobClient.Object);
+
+        // Act
+        var result = await service.MoveBillingJsonToFss(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    [TestMethod]
+    public async Task MoveBillingJsonToFss_ReturnsTrue_WhenCopyAndDeleteSucceed()
+    {
+        // Arrange
+        var sourceBlobClient = SetupCopyScenario(throwOnCopy: false);
+        SetupDeleteReturns(sourceBlobClient, succeeds: true);
+
+        // Act
+        var result = await service.MoveBillingJsonToFss(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldBeTrue();
+    }
+
+    [TestMethod]
+    public async Task MoveBillingJsonToFss_ReturnsFalse_WhenCopyThrowsRequestFailedException()
+    {
+        // Arrange
+        SetupCopyScenario(throwOnCopy: true);
+
+        // Act
+        var result = await service.MoveBillingJsonToFss(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldBeFalse();
+        VerifyLoggedOnce(LogLevel.Error);
+    }
+
+    [TestMethod]
+    public async Task MoveBillingJsonToFss_ReturnsTrue_WhenCopySucceedsButDeleteFails()
+    {
+        // Arrange
+        var sourceBlobClient = SetupCopyScenario(throwOnCopy: false);
+        SetupDeleteReturns(sourceBlobClient, succeeds: false);
+
+        // Act
+        var result = await service.MoveBillingJsonToFss(TestFilename, CancellationToken.None);
+
+        // Assert
+        result.ShouldBeTrue();
+        VerifyLoggedOnce(LogLevel.Warning);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private static void SetupBlobClientWithContent(Mock<BlobContainerClient> container, string filename, string utf8Content)
+        => SetupBlobClientWithBytes(container, filename, Encoding.UTF8.GetBytes(utf8Content));
+
+    private static void SetupBlobClientWithBytes(Mock<BlobContainerClient> container, string filename, byte[] bytes)
+    {
+        var blobStream = new MemoryStream(bytes);
+        var blobClient = new Mock<BlobClient>();
+        blobClient.Setup(x => x.OpenReadAsync(It.IsAny<long>(), It.IsAny<int?>(), It.IsAny<BlobRequestConditions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(blobStream);
+        container.Setup(x => x.GetBlobClient(filename)).Returns(blobClient.Object);
+    }
+
+    private static void SetupBlobClientWith404(Mock<BlobContainerClient> container, string filename)
+    {
+        var blobClient = new Mock<BlobClient>();
+        blobClient.Setup(x => x.OpenReadAsync(It.IsAny<long>(), It.IsAny<int?>(), It.IsAny<BlobRequestConditions>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new RequestFailedException(status: 404, "BlobNotFound"));
+        container.Setup(x => x.GetBlobClient(filename)).Returns(blobClient.Object);
+    }
+
+    private Mock<BlobClient> SetupCopyScenario(bool throwOnCopy)
+    {
+        var sourceBlobClient = new Mock<BlobClient>();
+        sourceBlobClient.Setup(x => x.ExistsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Response.FromValue(value: true, Mock.Of<Response>()));
+        sourceBlobClient.SetupGet(x => x.Uri)
+            .Returns(new Uri("https://test.blob.core.windows.net/billing-json/test-file.csv"));
+        billingJsonContainer.Setup(x => x.GetBlobClient(TestFilename)).Returns(sourceBlobClient.Object);
+
+        fssContainer.Setup(x => x.CreateIfNotExistsAsync(
+                It.IsAny<PublicAccessType>(),
+                It.IsAny<IDictionary<string, string>>(),
+                It.IsAny<BlobContainerEncryptionScopeOptions>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Response<BlobContainerInfo>?)null);
+
+        var destBlobClient = new Mock<BlobClient>();
+        fssContainer.Setup(x => x.GetBlobClient(TestFilename)).Returns(destBlobClient.Object);
+
+        if (throwOnCopy)
+        {
+            destBlobClient.Setup(x => x.StartCopyFromUriAsync(
+                    It.IsAny<Uri>(),
+                    It.IsAny<IDictionary<string, string>>(),
+                    It.IsAny<AccessTier?>(),
+                    It.IsAny<BlobRequestConditions>(),
+                    It.IsAny<BlobRequestConditions>(),
+                    It.IsAny<RehydratePriority?>(),
+                    It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new RequestFailedException(status: 500, "InternalServerError"));
+        }
+        else
+        {
+            var copyOp = new Mock<CopyFromUriOperation>();
+            copyOp.Setup(x => x.WaitForCompletionAsync(It.IsAny<CancellationToken>()))
+                .Returns(ValueTask.FromResult(Response.FromValue(value: 0L, Mock.Of<Response>())));
+            destBlobClient.Setup(x => x.StartCopyFromUriAsync(
+                    It.IsAny<Uri>(),
+                    It.IsAny<IDictionary<string, string>>(),
+                    It.IsAny<AccessTier?>(),
+                    It.IsAny<BlobRequestConditions>(),
+                    It.IsAny<BlobRequestConditions>(),
+                    It.IsAny<RehydratePriority?>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(copyOp.Object);
         }
 
-        public TestContext TestContext { get; set; }
+        return sourceBlobClient;
+    }
 
-        [TestMethod]
-        public void Constructor_ShouldThrowException_WhenBlobStorageSettingsMissing()
-        {
-            // Arrange
-            var configurationMock = new Mock<IConfiguration>();
-            var configurationSectionMock = new Mock<IConfigurationSection>();
-            var blobStorageSettings = new BlobStorageSettings { ResultFileCSVContainerName = "test-container" };
-            configurationSectionMock.Setup(x => x.Value).Returns(blobStorageSettings.ResultFileCSVContainerName);
-            configurationMock.Setup(x => x.GetSection("BlobStorage")).Returns(configurationSectionMock.Object);
+    private static void SetupDeleteReturns(Mock<BlobClient> sourceBlobClient, bool succeeds)
+    {
+        sourceBlobClient.Setup(x => x.DeleteIfExistsAsync(
+                It.IsAny<DeleteSnapshotsOption>(),
+                It.IsAny<BlobRequestConditions?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Response.FromValue(succeeds, Mock.Of<Response>()));
+    }
 
-            // Act & Assert is handled by ExpectedException
-            Assert.ThrowsExactly<ConfigurationErrorsException>(
-                () => new BlobStorageService(
-                    this.mockBlobServiceClient.Object,
-                    configurationMock.Object,
-                    this.mockLogger.Object));
-        }
+    private void VerifyLoggedOnce(LogLevel level) =>
+        logger.Verify(
+            x => x.Log(
+                level,
+                It.IsAny<EventId>(),
+                It.IsAny<It.IsAnyType>(),
+                It.IsAny<Exception?>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
 
-        [TestMethod]
-        public async Task DownloadFile_ShouldReturnFileResult_WhenFileExists()
-        {
-            // Arrange
-            var fileName = "test.txt";
-            var blobUri = "https://example.com/test.txt";
-            var content = "test content";
-            var binaryData = BinaryData.FromString(content);
-            var downloadDetails = BlobsModelFactory.BlobDownloadDetails(
-                contentLength: content.Length,
-                contentType: "application/octet-stream");
+    private static async Task<byte[]> ReadBytesAsync(Stream stream)
+    {
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+        return ms.ToArray();
+    }
 
-            var downloadResult = BlobsModelFactory.BlobDownloadResult(
-                content: binaryData,
-                details: downloadDetails);
+    private static async Task<string> ReadContentAsync(Stream stream)
+    {
+        // detectEncodingFromByteOrderMarks reads the UTF-16 LE BOM written by ReEncodeAsUtf16Async
+        // and decodes the stream correctly, returning the original string content.
+        using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
+        return await reader.ReadToEndAsync();
+    }
 
-            this.mockBlobClient.Setup(x => x.ExistsAsync(default)).ReturnsAsync(Response.FromValue(true, null!));
-            this.mockBlobClient.Setup(x => x.DownloadContentAsync()).ReturnsAsync(Response.FromValue(downloadResult, null!));
-            this.mockBlobClient.Setup(x => x.Uri).Returns(new Uri(blobUri));
-            blobUri = string.Empty;
+    private static void AssertIsUtf16WithBom(byte[] bytes, string expectedContent)
+    {
+        var bom = Utf16.GetPreamble();
+        bytes.Length.ShouldBeGreaterThanOrEqualTo(bom.Length);
+        bytes[..bom.Length].ShouldBe(bom, "Expected UTF-16 LE byte-order mark");
 
-            // Act
-            var result = await this.blobStorageService.DownloadFile(fileName, blobUri);
-
-            // Assert
-            Assert.IsInstanceOfType(result, typeof(FileContentHttpResult));
-            var fileContentResult = (FileContentHttpResult)result;
-            Assert.AreEqual("application/octet-stream", fileContentResult.ContentType);
-            Assert.AreEqual(fileName, fileContentResult.FileDownloadName);
-        }
-
-        [TestMethod]
-        public async Task DownloadFile_ShouldReturnNotFound_WhenFileDoesNotExist()
-        {
-            // Arrange
-            var fileName = "test.txt";
-            var blobUri = string.Empty;
-            this.mockBlobClient.Setup(x => x.ExistsAsync(default)).ReturnsAsync(Response.FromValue(false, null!));
-
-            // Act
-            var result = await this.blobStorageService.DownloadFile(fileName, blobUri);
-
-            // Assert
-            Assert.IsInstanceOfType(result, typeof(NotFound<string>));
-            var notFoundResult = result as NotFound<string>;
-            Assert.IsNotNull(notFoundResult);
-            Assert.AreEqual(fileName, notFoundResult.Value);
-        }
-
-        [TestMethod]
-        public async Task DownloadFile_ShouldResolveBlobClientFromBlobUri_WhenBlobUriProvided()
-        {
-            // Arrange
-            var fileName = "fallback-file-name.csv";
-            var blobUri = "http://127.0.0.1:10000/devstoreaccount1/paycal-results/8169-foo%202_Results%20File_20260703.csv";
-            var content = "test content";
-            var binaryData = BinaryData.FromString(content);
-            var downloadDetails = BlobsModelFactory.BlobDownloadDetails(
-                contentLength: content.Length,
-                contentType: "application/octet-stream");
-
-            var downloadResult = BlobsModelFactory.BlobDownloadResult(
-                content: binaryData,
-                details: downloadDetails);
-
-            this.mockBlobClient.Setup(x => x.ExistsAsync(default)).ReturnsAsync(Response.FromValue(true, null!));
-            this.mockBlobClient.Setup(x => x.DownloadContentAsync()).ReturnsAsync(Response.FromValue(downloadResult, null!));
-
-            // Act
-            var result = await this.blobStorageService.DownloadFile(fileName, blobUri);
-
-            // Assert
-            Assert.IsInstanceOfType(result, typeof(FileContentHttpResult));
-            this.mockBlobServiceClient.Verify(x => x.GetBlobContainerClient("paycal-results"), Times.Once);
-            this.mockBlobContainerClient.Verify(x => x.GetBlobClient(It.Is<string>(name => name.Contains("8169-foo"))), Times.Once);
-            this.mockBlobContainerClient.Verify(x => x.GetBlobClient(fileName), Times.Never);
-        }
+        var decoded = Utf16.GetString(bytes, bom.Length, bytes.Length - bom.Length);
+        decoded.ShouldBe(expectedContent);
     }
 }

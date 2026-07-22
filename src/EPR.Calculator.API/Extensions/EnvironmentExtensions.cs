@@ -2,5 +2,5 @@
 
 public static class EnvironmentExtensions
 {
-    public static bool IsLocal(this IHostEnvironment hostEnvironment) => hostEnvironment.IsEnvironment(CommonResources.Local);
+    public static bool IsLocal(this IHostEnvironment hostEnvironment) => hostEnvironment.IsEnvironment("local");
 }

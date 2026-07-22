@@ -74,7 +74,7 @@ public class CalculationRunServiceTests
         this.AddRunToDb(classification, requestId: 1, 1923);
 
         // Act
-        var result = await this.service.GetDesignatedRunsByFinanialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
+        var result = await this.service.GetDesignatedRunsByFinancialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
 
         // Assert
         result.Count.ShouldBe(0);
@@ -103,7 +103,7 @@ public class CalculationRunServiceTests
         this.AddRunToDb(classification, requestId: 1, 2024);
 
         // Act
-        var result = await this.service.GetDesignatedRunsByFinanialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
+        var result = await this.service.GetDesignatedRunsByFinancialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
 
         // Assert
         result.Count.ShouldBe(expectedRowCount);
@@ -119,7 +119,7 @@ public class CalculationRunServiceTests
         this.AddRunToDb(RunClassification.TEST_RUN, requestId: 4, 2024);
 
         // Act
-        var result = await this.service.GetDesignatedRunsByFinanialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
+        var result = await this.service.GetDesignatedRunsByFinancialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
 
         // Assert
         result.Count.ShouldBe(2);

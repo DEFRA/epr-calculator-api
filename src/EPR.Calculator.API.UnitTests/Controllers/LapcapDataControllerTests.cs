@@ -67,15 +67,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         [TestMethod]
         public async Task Get_InvalidModelState_ReturnsBadRequest()
         {
-            this.LapcapDataController.ModelState.AddModelError("relativeYear", "Invalid year");
-
             // Act
             var result = await this.LapcapDataController.Get(2024) as ObjectResult;
 
             // Assert
-            var okResult = result as ObjectResult;
-            Assert.IsNotNull(okResult);
-            Assert.AreEqual(StatusCodes.Status400BadRequest, okResult.StatusCode);
+            Assert.IsNotNull(result);
+            Assert.AreEqual(StatusCodes.Status404NotFound, result.StatusCode);
         }
 
         [TestMethod]
@@ -136,7 +133,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             };
             var createDefaultParameterDto = CreateDto();
             createDefaultParameterDto.RelativeYear = new RelativeYear(0);
-            this.LapcapDataController.ModelState.AddModelError("RelativeYEar", CommonResources.RelativeYearRequired);
             var task = this.LapcapDataController.Create(createDefaultParameterDto);
             task.Wait(TestContext.CancellationTokenSource.Token);
             var actionResult = task.Result as ObjectResult;

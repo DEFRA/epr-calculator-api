@@ -5,7 +5,6 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.UnitTests.Services
 {
@@ -19,7 +18,6 @@ namespace EPR.Calculator.API.UnitTests.Services
         // Fields, no underscores per SonarQube
         private ApplicationDBContext dbContext = null!;
         private AvailableClassificationsService service = null!;
-        private Mock<ILogger<AvailableClassificationsService>> loggerMock = null!;
 
         public TestContext TestContext { get; set; }
 
@@ -53,8 +51,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             dbContext.SaveChanges();
 
-            loggerMock = new Mock<ILogger<AvailableClassificationsService>>();
-            service = new AvailableClassificationsService(dbContext, loggerMock.Object);
+            service = new AvailableClassificationsService(dbContext);
         }
 
         [TestCleanup]

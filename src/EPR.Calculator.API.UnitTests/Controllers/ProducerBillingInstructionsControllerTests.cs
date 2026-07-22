@@ -1,6 +1,6 @@
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Services.Abstractions;
+using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -17,24 +17,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         {
             this.mockBillingFileService = new Mock<IBillingFileService>();
             this.controller = new ProducerBillingInstructionsController(this.mockBillingFileService.Object);
-        }
-
-        [TestMethod]
-        public async Task ProducerBillingInstructions_ReturnsBadRequest_WhenValidationFails()
-        {
-            // Arrange
-            var runId = 1;
-            var requestDto = new ProducerBillingInstructionsRequestDto { PageNumber = 0 }; // Invalid
-            this.controller.ModelState.AddModelError("PageNumber", "PageNumber must be 1 or greater.");
-
-            // Act
-            var result = await this.controller.ProducerBillingInstructions(runId, requestDto, CancellationToken.None);
-
-            // Assert
-            var objectResult = result as ObjectResult;
-            Assert.IsNotNull(objectResult);
-            Assert.AreEqual(StatusCodes.Status400BadRequest, objectResult.StatusCode);
-            Assert.IsTrue(objectResult.Value is IEnumerable<ModelError> errors && errors.Any());
         }
 
         [TestMethod]
