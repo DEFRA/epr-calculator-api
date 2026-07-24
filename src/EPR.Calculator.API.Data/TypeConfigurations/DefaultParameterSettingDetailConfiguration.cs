@@ -19,7 +19,7 @@ public class DefaultParameterSettingDetailConfiguration : IEntityTypeConfigurati
 
         builder.Property(p => p.ParameterValue)
             .HasColumnName("parameter_value")
-            .HasPrecision(18, 3);
+            .HasMaxLength(100);
 
         builder.HasOne(d => d.ParameterUniqueReference)
             .WithMany()

@@ -1,11 +1,13 @@
-﻿namespace EPR.Calculator.API.Data.DataModels;
+﻿using System.Globalization;
+
+namespace EPR.Calculator.API.Data.DataModels;
 
 public class DefaultParameterSettingDetail
 {
     public int Id { get; set; }
     public int DefaultParameterSettingMasterId { get; set; }
     public required string ParameterUniqueReferenceId { get; set; }
-    public decimal ParameterValue { get; set; }
+    public required string ParameterValue { get; set; }
 
     #region EF navigational properties
 

@@ -5,7 +5,6 @@ using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
-using EPR.Calculator.API.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services;
@@ -56,7 +55,7 @@ public class BillingFileService(
         CancellationToken cancellationToken)
     {
         var calculatorRun = await dbContext.CalculatorRuns
-            .SingleOrDefaultAsync(x => x.Id == runId && Util.AcceptableRunStatusForBillingInstructions().Contains(x.CalculatorRunClassificationId), cancellationToken)
+            .SingleOrDefaultAsync(x => x.Id == runId && AcceptableRunStatusForBillingInstructions().Contains(x.CalculatorRunClassificationId), cancellationToken)
             .ConfigureAwait(false);
 
         if (calculatorRun is null)
@@ -243,7 +242,7 @@ public class BillingFileService(
         // Valid if:
         // * Billing file has not been sent to FSS (i.e. classification is not 'Completed')
         // * Not already Running OR has been for more than 1 hour (i.e. 'stuck' due to unclean shutdown of the processor)
-        return Util.AcceptableRunStatusForBillingInstructions().Contains(run.CalculatorRunClassificationId)
+        return AcceptableRunStatusForBillingInstructions().Contains(run.CalculatorRunClassificationId)
                && (run.BillingRunStatus != BillingRunStatus.Running
                    || run.BillingRunStartedAt?.AddHours(1) < DateTime.UtcNow);
     }
@@ -429,6 +428,14 @@ public class BillingFileService(
         response.TotalCancelBillRecords = groupedBillingInstructionResult.Find(s => string.Equals(s.Suggestion, BillingInstructionAction.Cancel.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
         response.TotalNoActionRecords = groupedBillingInstructionResult.Find(s => string.Equals(s.Suggestion, BillingInstructionAction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
     }
+
+    private static IEnumerable<int> AcceptableRunStatusForBillingInstructions() =>
+        [
+            (int)RunClassification.INITIAL_RUN,
+            (int)RunClassification.INTERIM_RECALCULATION_RUN,
+            (int)RunClassification.FINAL_RUN,
+            (int)RunClassification.FINAL_RECALCULATION_RUN,
+        ];
 
     public record Response
     {

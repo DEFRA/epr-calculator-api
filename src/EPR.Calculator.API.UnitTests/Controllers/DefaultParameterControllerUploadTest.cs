@@ -64,6 +64,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 DefaultParameterSettingMaster = defaultParameterSettingMaster29,
                 ParameterUniqueReferenceId = CommonResources.DefaultParameterUniqueReferences.Split(',')[0],
+                ParameterValue = "0"
             };
 
             var defaultParameterSettingMaster30 = new DefaultParameterSettingMaster
@@ -76,6 +77,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 DefaultParameterSettingMaster = defaultParameterSettingMaster30,
                 ParameterUniqueReferenceId = CommonResources.DefaultParameterUniqueReferences.Split(',')[0],
+                ParameterValue = "0"
             };
 
             DbContext.DefaultParameterSettings.AddRange(defaultParameterSettingMaster29, defaultParameterSettingMaster30);

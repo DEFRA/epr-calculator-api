@@ -87,7 +87,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 ParameterUniqueRef = "BADEBT-P",
                 ParameterType = "Aluminium",
                 ParameterCategory = "Communication costs",
-                ParameterValue = 90m,
+                ParameterValue = "90",
             };
 
             // Act
@@ -102,9 +102,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var actionResul2 = okResult.Value as List<DefaultSchemeParametersDto>;
             Assert.AreEqual(actionResul2?.Count, CommonResources.DefaultParameterUniqueReferences.Split(',').Length);
 
-            Assert.AreEqual(tempdateData.Id, actionResul2?[0].Id);
-            Assert.AreEqual(tempdateData.ParameterValue, actionResul2?[0].ParameterValue);
-            Assert.AreEqual(tempdateData.ParameterUniqueRef, actionResul2?[0].ParameterUniqueRef);
+            Assert.AreEqual(1         , actionResul2?[0].Id);
+            Assert.AreEqual("90.000"  , actionResul2?[0].ParameterValue);
+            Assert.AreEqual("BADEBT-P", actionResul2?[0].ParameterUniqueRef);
         }
 
         [TestMethod]
@@ -229,6 +229,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                     schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
                     {
                         ParameterValue = "1.200",
+                        ParameterUniqueReferenceId = item,
+                    });
+                }
+                else if (item == "COFF-DT")
+                {
+                    schemeParameterTemplateValues.Add(new SchemeParameterTemplateValueDto
+                    {
+                        ParameterValue = "30/12/2026",
                         ParameterUniqueReferenceId = item,
                     });
                 }

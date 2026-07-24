@@ -1,3 +1,4 @@
+using System.Globalization;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
@@ -6,7 +7,6 @@ using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Web;
 
 namespace EPR.Calculator.API.Controllers;
 
@@ -61,11 +61,25 @@ public class DefaultParameterSettingController (
                 await context.DefaultParameterSettings.AddAsync(defaultParamSettingMaster);
 
                 var defaultParameterSettingDetails = request.SchemeParameterTemplateValues
-                    .Select(templateValue => new DefaultParameterSettingDetail
+                    .Select(templateValue =>
                     {
-                        ParameterValue = decimal.Parse(templateValue.ParameterValue.TrimEnd('%').Replace("£", string.Empty)),
-                        ParameterUniqueReferenceId = templateValue.ParameterUniqueReferenceId,
-                        DefaultParameterSettingMaster = defaultParamSettingMaster
+                        var parameterValue = templateValue.ParameterValue
+                            .TrimEnd('%')
+                            .Replace("£", "")
+                            .Replace(",", "")
+                            .Trim();
+
+                        if (decimal.TryParse(parameterValue, NumberStyles.Number, CultureInfo.InvariantCulture, out var value))
+                        {
+                            parameterValue = Math.Round(value, 3).ToString("F3", CultureInfo.InvariantCulture);
+                        }
+
+                        return new DefaultParameterSettingDetail
+                        {
+                            ParameterValue                = parameterValue,
+                            ParameterUniqueReferenceId    = templateValue.ParameterUniqueReferenceId,
+                            DefaultParameterSettingMaster = defaultParamSettingMaster
+                        };
                     })
                     .ToList();
 
