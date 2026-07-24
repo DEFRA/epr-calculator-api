@@ -18,6 +18,7 @@ public class CalcResultParameterOtherCost
     public Materiality TonnageChangeIncrease { get; set; } = new Materiality { Amount = 0, Percentage = 0 };
     public Materiality TonnageChangeDecrease { get; set; } = new Materiality { Amount = 0, Percentage = 0 };
     public decimal BadDebtValue { get; set; }
+    public DateTime? CutOffDate { get; set; }
 }
 
 public record Materiality

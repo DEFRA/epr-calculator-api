@@ -804,9 +804,10 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("parameter_unique_ref");
 
-                    b.Property<decimal>("ParameterValue")
-                        .HasPrecision(18, 3)
-                        .HasColumnType("decimal(18,3)")
+                    b.Property<string>("ParameterValue")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("parameter_value");
 
                     b.HasKey("Id");
@@ -1361,6 +1362,14 @@ namespace EPR.Calculator.API.Data.Migrations
                             ParameterType = "Red modulation factor",
                             ValidRangeFrom = 1.000m,
                             ValidRangeTo = 2.000m
+                        },
+                        new
+                        {
+                            ParameterUniqueReferenceId = "COFF-DT",
+                            ParameterCategory = "Optional Date",
+                            ParameterType = "Cut-off date",
+                            ValidRangeFrom = 0m,
+                            ValidRangeTo = 0m
                         });
                 });
 
@@ -4026,6 +4035,9 @@ namespace EPR.Calculator.API.Data.Migrations
                             b1.Property<decimal>("BadDebtValue")
                                 .HasPrecision(18, 6)
                                 .HasColumnType("decimal(18,6)");
+
+                            b1.Property<DateTime?>("CutOffDate")
+                                .HasColumnType("datetime2");
 
                             b1.HasKey("CalcResultParameterOtherCostEntryId");
 

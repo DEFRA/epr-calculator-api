@@ -803,8 +803,8 @@ namespace EPR.Calculator.API.Data.Migrations
 
                     b.Property<string>("ParameterValue")
                         .IsRequired()
-                        .HasPrecision(18, 3)
-                        .HasColumnType("nvarchar(max)")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
                         .HasColumnName("parameter_value");
 
                     b.HasKey("Id");
@@ -4032,6 +4032,9 @@ namespace EPR.Calculator.API.Data.Migrations
                             b1.Property<decimal>("BadDebtValue")
                                 .HasPrecision(18, 6)
                                 .HasColumnType("decimal(18,6)");
+
+                            b1.Property<DateTime?>("CutOffDate")
+                                .HasColumnType("datetime2");
 
                             b1.HasKey("CalcResultParameterOtherCostEntryId");
 
