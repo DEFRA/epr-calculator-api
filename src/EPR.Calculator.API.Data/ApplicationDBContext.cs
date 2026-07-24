@@ -56,6 +56,13 @@ public class ApplicationDBContext : DbContext
     public DbSet<CalculatorRunRelativeYear> CalculatorRunRelativeYears { get; set; }
     public DbSet<CalculatorRunBillingFileMetadata> CalculatorRunBillingFileMetadata { get; set; }
     public DbSet<ErrorReport> ErrorReports { get; set; }
+    public DbSet<CalcResultLapcapDataEntry> LapcapData { get; set; }
+    public DbSet<CalcResultCommsCostEntry> CommCost { get; set; }
+    public DbSet<CalcResultLateReportingTonnageEntry> LateReportingTonnage { get; set; }
+    public DbSet<CalcResultParameterOtherCostEntry> ParameterOtherCost { get; set; }
+    public DbSet<CalcResultOnePlusFourApportionmentEntry> OnePlusFourApportionment { get; set; }
+    public DbSet<CalcResultLaDisposalCostDataEntry> LaDisposalCostData { get; set; }
+    public DbSet<CalcResultCancelledProducerEntry> CancelledProducers { get; set; }
 
     public async Task<RelativeYear?> FindRelativeYearAsync(int value, CancellationToken cancellationToken = default)
     {
