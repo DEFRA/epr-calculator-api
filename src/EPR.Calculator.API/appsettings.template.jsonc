@@ -1,0 +1,49 @@
+{
+  /* -----------------------------------------------------------------------------
+    App configuration template for EPR.Calculator.API.
+
+    Clone it to secrets.json with the correct UserSecretsId location:
+    {secrets root}/86bfd8af-32c6-4de1-869a-572d24c3ea1f/secrets.json
+
+    Values given are examples for local hosting; if connecting to Defra's
+    infrastructure get correct values from Azure/KeyVault.
+  */
+
+  // Adjust as desired for more verbose logging.
+  "Logging": {
+    "LogLevel": {
+      "default"                                       : "Information",
+      "EPR.Calculator"                                : "Debug",
+      "Microsoft.AspNetCore"                          : "Warning",
+      "Microsoft"                                     : "Warning",
+      "Microsoft.AspNetCore.Hosting"                  : "Information",
+      "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+    }
+  },
+
+  "AzureAd": {
+    "Instance": "https://login.microsoftonline.com/",
+    "ClientId": "",
+    "TenantId": ""
+  },
+
+  // It is recommended to use a dedicated login with db_datareader/db_datawriter
+  // roles rather than using sa account.
+  "Database": {
+    "ConnectionString": "Server=.;Database=paycal;User ID=paycal_user;Password=;TrustServerCertificate=True;",
+    "CommandTimeout"  : "00:15:00"
+  },
+
+  "BlobStorage": {
+    "ConnectionString"        : "UseDevelopmentStorage=true",
+    "ResultFileCsvContainer"  : "paycal-results",
+    "BillingFileCsvContainer" : "paycal-billing-csv",
+    "BillingFileJsonContainer": "paycal-billing-json",
+    "FssContainer"            : "paycal-fss"
+  },
+
+  "ServiceBus": {
+    "ConnectionString": "",
+    "QueueName"       : "defra.epr.calculator.run.local"
+  }
+}
