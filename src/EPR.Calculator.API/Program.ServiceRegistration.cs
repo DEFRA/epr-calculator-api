@@ -83,9 +83,6 @@ public static class ServiceRegistration
                     .GetRequiredService<IOptions<ServiceBusOptions>>()
                     .Value;
 
-                clientOptions.RetryOptions.MaxRetries = appOptions.MaxRetries;
-                clientOptions.RetryOptions.Delay = appOptions.RetryDelay;
-
                 return new ServiceBusClient(appOptions.ConnectionString, clientOptions);
             });
         });
