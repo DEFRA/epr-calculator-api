@@ -42,7 +42,7 @@ parameters:
     default: ''
 
 pool: DEFRA-COMMON-UBUNTU-SSV3
-  vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-22.04'
 
 variables:
 
