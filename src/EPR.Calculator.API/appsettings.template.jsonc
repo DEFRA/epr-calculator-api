@@ -2,8 +2,10 @@
   /* -----------------------------------------------------------------------------
     App configuration template for EPR.Calculator.API.
 
-    Clone it to secrets.json with the correct UserSecretsId location:
-    {secrets root}/86bfd8af-32c6-4de1-869a-572d24c3ea1f/secrets.json
+    When running locally, clone it to either:
+     - appsettings.local.json (gitignored)
+     - secrets.json with the correct UserSecretsId location:
+       {secrets root}/86bfd8af-32c6-4de1-869a-572d24c3ea1f/secrets.json
 
     Values given are examples for local hosting matching epr-local-environment.
     When connecting to Defra's infrastructure, obtain the correct values from
