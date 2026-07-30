@@ -483,3 +483,6 @@ $RECYCLE.BIN/
 
 # SonarScanner folder
 **/.sonarqube/*
+
+# App configs for local dev
+**/appsettings.local.json

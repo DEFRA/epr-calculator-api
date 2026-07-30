@@ -1,0 +1,52 @@
+{
+  /* -----------------------------------------------------------------------------
+    App configuration template for EPR.Calculator.API.
+
+    When running locally, clone it to either:
+     - appsettings.local.json (gitignored)
+     - secrets.json with the correct UserSecretsId location:
+       {secrets root}/86bfd8af-32c6-4de1-869a-572d24c3ea1f/secrets.json
+
+    Values given are examples for local hosting matching epr-local-environment.
+    When connecting to Defra's infrastructure, obtain the correct values from
+    Azure/KeyVault.
+  */
+
+  // Adjust as desired for more verbose logging.
+  "Logging": {
+    "LogLevel": {
+      "default"                                       : "Information",
+      "EPR.Calculator"                                : "Debug",
+      "Microsoft.AspNetCore"                          : "Warning",
+      "Microsoft"                                     : "Warning",
+      "Microsoft.AspNetCore.Hosting"                  : "Information",
+      "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+    }
+  },
+
+  "AzureAd": {
+    "Instance": "https://login.microsoftonline.com/",
+    "ClientId": "",
+    "TenantId": ""
+  },
+
+  // Note: while the API itself should only requires db_datareader/db_datawriter
+  // roles, running the EF migration scripts requires db_owner or equivalent.
+  "Database": {
+    "ConnectionString": "Server=.;Database=paycal;User ID=paycal_user;Password=;TrustServerCertificate=True;",
+    "CommandTimeout"  : "00:15:00"
+  },
+
+  "BlobStorage": {
+    "ConnectionString"        : "UseDevelopmentStorage=true",
+    "ResultFileCsvContainer"  : "paycal",
+    "BillingFileCsvContainer" : "paycal-billingfilecsv",
+    "BillingFileJsonContainer": "paycal-billingfilejson",
+    "FssContainer"            : "paycal-billingfilejsonauthorisedforfss"
+  },
+
+  "ServiceBus": {
+    "ConnectionString": "",
+    "QueueName"       : "defra.epr.calculator.run.local"
+  }
+}

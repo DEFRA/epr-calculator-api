@@ -13,7 +13,6 @@ public record DatabaseOptions
 
     [Required(AllowEmptyStrings = false)] public string ConnectionString { get; init; } = null!;
 
-    [Required]
     [Range(typeof(TimeSpan), "00:00:01", "01:00:00")]
-    public TimeSpan CommandTimeout { get; init; } = TimeSpan.FromMinutes(15);
+    public TimeSpan CommandTimeout { get; init; }
 }
