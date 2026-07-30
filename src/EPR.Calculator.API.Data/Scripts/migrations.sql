@@ -8854,3 +8854,126 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260722145707_AddCostDataAndCancelledProducerTables'
+)
+BEGIN
+    CREATE TABLE [calc_result_cancelled_producer] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [cancelled_producer] json NOT NULL,
+        CONSTRAINT [PK_calc_result_cancelled_producer] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260722145707_AddCostDataAndCancelledProducerTables'
+)
+BEGIN
+    CREATE TABLE [calc_result_comms_cost] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [comms_cost] json NOT NULL,
+        CONSTRAINT [PK_calc_result_comms_cost] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260722145707_AddCostDataAndCancelledProducerTables'
+)
+BEGIN
+    CREATE TABLE [calc_result_la_disposal_cost] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [la_disposal_cost] json NOT NULL,
+        CONSTRAINT [PK_calc_result_la_disposal_cost] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260722145707_AddCostDataAndCancelledProducerTables'
+)
+BEGIN
+    CREATE TABLE [calc_result_lapcap_data] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [lapcap] json NOT NULL,
+        CONSTRAINT [PK_calc_result_lapcap_data] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260722145707_AddCostDataAndCancelledProducerTables'
+)
+BEGIN
+    CREATE TABLE [calc_result_late_reporting_tonnage] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [late_reporting_tonnage] json NOT NULL,
+        CONSTRAINT [PK_calc_result_late_reporting_tonnage] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260722145707_AddCostDataAndCancelledProducerTables'
+)
+BEGIN
+    CREATE TABLE [calc_result_one_plus_four_apportionment] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [one_plus_four_apppointment] json NOT NULL,
+        CONSTRAINT [PK_calc_result_one_plus_four_apportionment] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260722145707_AddCostDataAndCancelledProducerTables'
+)
+BEGIN
+    CREATE TABLE [calc_result_parameter_other_cost] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [parameter_other_cost] json NOT NULL,
+        CONSTRAINT [PK_calc_result_parameter_other_cost] PRIMARY KEY ([id])
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260722145707_AddCostDataAndCancelledProducerTables'
+)
+BEGIN
+    CREATE INDEX [IX_calc_result_cancelled_producer_calculator_run_id] ON [calc_result_cancelled_producer] ([calculator_run_id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260722145707_AddCostDataAndCancelledProducerTables'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260722145707_AddCostDataAndCancelledProducerTables', N'8.0.7');
+END;
+GO
+
+COMMIT;
+GO
+
