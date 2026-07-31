@@ -126,20 +126,23 @@ public class CalculatorController(
         return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };
     }
 
-    [HttpPost]
-    [Route("calculatorRuns")]
+    [HttpGet("calculatorRuns")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetCalculatorRuns([FromBody] CalculatorRunsParamsDto request, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetCalculatorRuns(
+        [FromQuery] RelativeYear? relativeYear,
+        [FromQuery] string? runName,
+        CancellationToken cancellationToken)
     {
         var runDtos = await dbContext.CalculatorRuns
-            .Where(run => run.RelativeYear == request.RelativeYear)
-            .Select(CalcRunMapper.ToDto)
+            .Where(run => relativeYear == null || run.RelativeYear == relativeYear)
+            .Where(run => runName == null || EF.Functions.Like(run.Name, runName)) // Safe for user-supplied query params (parameterised SQL). Supports LIKE wildcards: %, _.
             .OrderByDescending(run => run.CreatedAt)
+            .Select(CalcRunMapper.ToDto)
             .ToListAsync(cancellationToken);
 
-        return new ObjectResult(runDtos) { StatusCode = StatusCodes.Status200OK };
+        return Ok(runDtos);
     }
 
     [HttpGet]

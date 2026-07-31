@@ -86,7 +86,7 @@ namespace EPR.Calculator.API.UnitTests
                     new()
                     {
                         CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-                        Name = "Test Run",
+                        Name = "Test Run 1",
                         RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
                         CreatedBy = "Test User",
@@ -102,7 +102,7 @@ namespace EPR.Calculator.API.UnitTests
                     new()
                     {
                         CalculatorRunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN,
-                        Name = "Test Run",
+                        Name = "Test Run 2",
                         RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
                         CreatedBy = "Test User",

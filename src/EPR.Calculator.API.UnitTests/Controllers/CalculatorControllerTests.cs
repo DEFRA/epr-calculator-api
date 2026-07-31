@@ -161,13 +161,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task GetCalculatorRuns_Returns_Ok_With_Matching_Runs()
+        public async Task GetCalculatorRuns_Returns_Ok_With_Matching_Runs_When_RelativeYear_Matches()
         {
-            // Arrange
-            var request = new CalculatorRunsParamsDto { RelativeYear = new RelativeYear(2024) };
-
             // Act
-            var result = await CalculatorController.GetCalculatorRuns(request, CancellationToken.None) as ObjectResult;
+            var result = await CalculatorController.GetCalculatorRuns(new RelativeYear(2024), runName: null, CancellationToken.None) as ObjectResult;
 
             // Assert
             result.ShouldNotBeNull();
@@ -178,13 +175,52 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task GetCalculatorRuns_Returns_Ok_With_Empty_List_When_No_Runs_Match()
+        public async Task GetCalculatorRuns_Returns_Ok_With_Empty_List_When_RelativeYear_Does_Not_Match()
         {
-            // Arrange
-            var request = new CalculatorRunsParamsDto { RelativeYear = new RelativeYear(2022) };
-
             // Act
-            var result = await CalculatorController.GetCalculatorRuns(request, CancellationToken.None) as ObjectResult;
+            var result = await CalculatorController.GetCalculatorRuns(new RelativeYear(2022), runName: null, CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status200OK);
+            var runs = result.Value as List<CalculatorRunDto>;
+            runs.ShouldNotBeNull();
+            runs.ShouldBeEmpty();
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRuns_Returns_Ok_With_Matching_Runs_When_Full_Name_Matches()
+        {
+            // Act
+            var result = await CalculatorController.GetCalculatorRuns(relativeYear: null, runName: "Test Run 1", CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status200OK);
+            var runs = result.Value as List<CalculatorRunDto>;
+            runs.ShouldNotBeNull();
+            runs.Count.ShouldBe(1);
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRuns_Returns_Ok_With_Matching_Runs_When_Partial_Name_Matches()
+        {
+            // Act
+            var result = await CalculatorController.GetCalculatorRuns(relativeYear: null, runName: "%Run%", CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status200OK);
+            var runs = result.Value as List<CalculatorRunDto>;
+            runs.ShouldNotBeNull();
+            runs.Count.ShouldBe(2);
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRuns_Returns_Ok_With_Empty_List_When_Name_Does_Not_Match()
+        {
+            // Act
+            var result = await CalculatorController.GetCalculatorRuns(relativeYear: null, runName: "some bad name", CancellationToken.None) as ObjectResult;
 
             // Assert
             result.ShouldNotBeNull();
