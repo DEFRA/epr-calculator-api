@@ -146,31 +146,25 @@ public class CalculatorController(
     }
 
     [HttpGet]
-    [Route("calculatorRuns/{runIdOrName}")]
+    [Route("calculatorRuns/{runId:int}")]
     [ProducesResponseType(typeof(CalculatorRunDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetCalculatorRun(string runIdOrName, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetCalculatorRun(int runId, CancellationToken cancellationToken)
     {
-        IQueryable<CalculatorRun> query = dbContext.CalculatorRuns;
-
-        query = int.TryParse(runIdOrName, out var runId)
-            ? query.Where(run => run.Id == runId)
-            : query.Where(run => EF.Functions.Like(run.Name, runIdOrName));
-
-        var runDto = await query
+        var runDto = await dbContext.CalculatorRuns
+            .Where(run => run.Id == runId)
             .Select(CalcRunMapper.ToDto)
             .SingleOrDefaultAsync(cancellationToken);
 
         if (runDto == null)
-            return new NotFoundObjectResult(string.Format(CommonResources.UnableToFindRun, runIdOrName));
+            return new NotFoundObjectResult(string.Format(CommonResources.UnableToFindRun, runId));
 
         return new ObjectResult(runDto);
     }
 
     [HttpGet]
-    [Route("DownloadResult/{runId}")]
+    [Route("DownloadResult/{runId:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
