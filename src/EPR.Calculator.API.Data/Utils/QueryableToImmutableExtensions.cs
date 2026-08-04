@@ -1,7 +1,8 @@
+﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 
-namespace EPR.Calculator.API.BackgroundService.Utils;
+namespace EPR.Calculator.API.Data.Utils;
 
 /// <summary>
 ///     Provides extension methods for Entity Framework's <see cref="IQueryable{T}" /> to materialize the results to

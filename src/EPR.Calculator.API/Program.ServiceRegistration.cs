@@ -140,7 +140,6 @@ public static class ServiceRegistration
             options.Filters.Add<FluentValidationActionFilter>());
 
         services.AddScoped<ICreateDefaultParameterDataValidator, CreateDefaultParameterDataValidator>();
-        services.AddScoped<ILapcapDataValidator, LapcapDataValidator>();
         services.AddScoped<ICalcRelativeYearRequestDtoDataValidator, CalcRelativeYearRequestDtoDataValidator>();
         services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatusDataValidator>();
 

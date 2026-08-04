@@ -57,8 +57,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.AreEqual(200, okResult.StatusCode);
 
             var actionResul2 = okResult.Value as List<LapCapParameterDto>;
-            Assert.AreEqual(actionResul2?.Count, CommonResources.LapcapDataUniqueReferences.Split(',').Length);
-
             Assert.AreEqual(tempdateData.Id, actionResul2?[0].Id);
             Assert.AreEqual(tempdateData.TotalCost, actionResul2?[0].TotalCost);
             Assert.AreEqual(tempdateData.LapcapTempUniqueRef, actionResul2?[0].LapcapTempUniqueRef);
@@ -108,123 +106,28 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             task.Wait(TestContext.CancellationTokenSource.Token);
             var actionResult = task.Result as ObjectResult;
             Assert.AreEqual(201, actionResult?.StatusCode);
-
-            Assert.AreEqual(
-                CommonResources.LapcapDataUniqueReferences.Split(',').Length,
-                this.DbContext.LapcapDataDetail.Count());
             Assert.AreEqual(1, this.DbContext.LapcapDataMaster.Count());
         }
 
-        [TestMethod]
-        public void CreateTest_With_Missing_Year()
+        private static CreateLapcapDataRequest CreateDto(IReadOnlyCollection<string>? uniqueRefsToAvoid = null)
         {
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
+            uniqueRefsToAvoid ??= new List<string>();
 
-            var context = new DefaultHttpContext()
-            {
-                User = principal,
-            };
-
-            this.LapcapDataController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context,
-            };
-            var createDefaultParameterDto = CreateDto();
-            createDefaultParameterDto.RelativeYear = new RelativeYear(0);
-            var task = this.LapcapDataController.Create(createDefaultParameterDto);
-            task.Wait(TestContext.CancellationTokenSource.Token);
-            var actionResult = task.Result as ObjectResult;
-            Assert.AreEqual(400, actionResult?.StatusCode);
-        }
-
-        [TestMethod]
-        public void CreateTest_With_Missing_Records()
-        {
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal,
-            };
-
-            this.LapcapDataController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context,
-            };
-            var uniqueRef = "ENG-WD";
-            var createDefaultParameterDto = CreateDto([uniqueRef]);
-            var task = this.LapcapDataController.Create(createDefaultParameterDto);
-            task.Wait(TestContext.CancellationTokenSource.Token);
-            var actionResult = task.Result as ObjectResult;
-            Assert.AreEqual(400, actionResult?.StatusCode);
-            var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;
-            Assert.IsNotNull(errors);
-            Assert.AreEqual(uniqueRef, errors.First().UniqueReference);
-            Assert.AreEqual("Enter the total costs for Wood in England.", errors.First().Message);
-        }
-
-        [TestMethod]
-        public void CreateTest_With_More_Records()
-        {
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var context = new DefaultHttpContext()
-            {
-                User = principal,
-            };
-
-            this.LapcapDataController.ControllerContext = new ControllerContext
-            {
-                HttpContext = context,
-            };
-            var createDefaultParameterDto = CreateDto();
-            var list = new List<LapcapDataTemplateValueDto>(createDefaultParameterDto.LapcapDataTemplateValues);
-            if (list != null)
-            {
-                list.Add(new LapcapDataTemplateValueDto { CountryName = "England", Material = "Wood", TotalCost = "9" });
-                createDefaultParameterDto.LapcapDataTemplateValues = list.AsEnumerable();
-            }
-
-            var task = this.LapcapDataController.Create(createDefaultParameterDto);
-            task.Wait(TestContext.CancellationTokenSource.Token);
-            var actionResult = task.Result as ObjectResult;
-            Assert.AreEqual(400, actionResult?.StatusCode);
-            var errors = actionResult?.Value as IEnumerable<CreateLapcapDataErrorDto>;
-            Assert.IsNotNull(errors);
-            Assert.AreEqual(1, errors.Count(x => x.Message == "You have entered the total costs for Wood in England more than once."));
-        }
-
-        private static CreateLapcapDataDto CreateDto(IEnumerable<string>? uniqueRefsToAvoid = null)
-        {
-            var lapcapDataTemplateValues = new List<LapcapDataTemplateValueDto>();
-            var masterData = GetLapcapTemplateMasterData();
-            foreach (var templateMaster in masterData)
-            {
-                if (uniqueRefsToAvoid == null || !uniqueRefsToAvoid.Contains(templateMaster.UniqueReference))
-                {
-                    lapcapDataTemplateValues.Add(new LapcapDataTemplateValueDto
-                    {
-                        TotalCost = "20",
-                        CountryName = templateMaster.Country,
-                        Material = templateMaster.Material,
-                    });
-                }
-            }
-
-            var createDefaultParameterDto = new CreateLapcapDataDto
+            return new CreateLapcapDataRequest
             {
                 RelativeYear = new RelativeYear(2024),
-                LapcapDataTemplateValues = lapcapDataTemplateValues,
-                LapcapFileName = "SomeTestFileName",
+                Values = [
+                    ..GetLapcapTemplateMasterData()
+                        .Where(m => !uniqueRefsToAvoid.Contains(m.UniqueReference))
+                        .Select(m => new CreateLapcapDataRequest.LapcapValue
+                        {
+                            Country = m.Country,
+                            Material = m.Material,
+                            TotalCost = 20
+                        })
+                ],
+                Filename = "SomeTestFileName",
             };
-
-            return createDefaultParameterDto;
         }
     }
 }
