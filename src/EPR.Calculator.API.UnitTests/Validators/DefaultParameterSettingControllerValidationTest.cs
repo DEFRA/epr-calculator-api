@@ -1,13 +1,12 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Security.Principal;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.UnitTests.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace EPR.Calculator.API.UnitTests.Validator
+namespace EPR.Calculator.API.UnitTests.Validators
 {
     [TestClass]
     public class DefaultParameterSettingControllerValidationTest : BaseControllerTest
