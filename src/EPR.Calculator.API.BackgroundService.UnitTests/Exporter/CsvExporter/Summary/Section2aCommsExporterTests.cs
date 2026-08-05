@@ -1,0 +1,42 @@
+using System.Text;
+using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Summary;
+using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
+
+namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Summary;
+
+[TestClass]
+public class Section2aCommsExporterTests
+{
+    private readonly IProducerFeesPartExporter exporter = new Section2aCommsExporter();
+
+    [TestMethod]
+    public void Section2aCommsExporter_Export_CSV()
+    {
+        // Arrange
+        var materials = TestDataHelper.GetMaterialDetails();
+        const bool applyModulation = false;
+        var producerFees = TestDataHelper.GetProducerFees();
+        var csvContent = new StringBuilder();
+
+        // Act
+        ProducerFeesExporterTestUtils.Render(exporter, materials, applyModulation, producerFees, csvContent);
+        var result = csvContent.ToString().ReplaceLineEndings("\n").Split("\n").ToArray();
+        Console.WriteLine(string.Join("\n", result));
+
+        var expected = new string?[][] {
+            new string?[7],
+            ["Summary of Fee for Comms Costs - by Material", null, null, null, null, null, null],
+            ["2a Total Producer Fee for Comms Costs - by Material w/o Bad Debt provision",
+             "Total Bad Debt Provision",
+             "2a Total Producer Fee for Comms Costs - by Material with Bad Debt provision",
+             "England Total with Bad Debt provision",
+             "Wales Total with Bad Debt provision",
+             "Scotland Total with Bad Debt provision",
+             "Northern Ireland Total with Bad Debt provision"],
+            ["£1290.78", "£77.45", "£1368.22", "£718.23", "£181.27", "£332.85", "£135.88"],
+            ["£1290.78", "£77.45", "£1368.22", "£718.23", "£181.27", "£332.85", "£135.88"]
+        };
+
+        CsvTestUtils.AssertSquareCsv(expected, result, expectedLength: 7);
+    }
+}

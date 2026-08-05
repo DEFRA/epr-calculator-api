@@ -1,0 +1,66 @@
+using System.Text;
+using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Summary;
+using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
+
+namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Summary;
+
+[TestClass]
+public class ProducerIdentityExporterTests
+{
+    private readonly IProducerFeesPartExporter exporter = new ProducerIdentityExporter([], []);
+
+    [TestMethod]
+    public void ProducerIdentityExporter_Export_CSV()
+    {
+        // Arrange
+        var materials = TestDataHelper.GetMaterialDetails();
+        const bool applyModulation = false;
+        var producerFees = TestDataHelper.GetProducerFees();
+        var csvContent = new StringBuilder();
+
+        // Act
+        ProducerFeesExporterTestUtils.Render(exporter, materials, applyModulation, producerFees, csvContent);
+        var result = csvContent.ToString().ReplaceLineEndings("\n").Split("\n").ToArray();
+        Console.WriteLine(string.Join("\n", result));
+
+        var expected = new string?[][] {
+            new string?[10],
+            new string?[10],
+            ["Producer ID",
+             "Subsidiary ID",
+             "Producer / Subsidiary Name",
+             "Trading Name",
+             "Level",
+             "Scaled-up tonnages?",
+             "Partial Calculation?",
+             "Registration Status Code",
+             "Joiners Date",
+             "Leavers Date"
+            ],
+            ["1",
+             "",
+             "Allied Packaging",
+             null,
+             "1",
+             "No",
+             "No",
+             null,
+             null,
+             null
+            ],
+            ["",
+             "",
+             "",
+             null,
+             "",
+             "",
+             "",
+             null,
+             null,
+             null
+            ]
+        };
+
+        CsvTestUtils.AssertSquareCsv(expected, result, expectedLength: 10);
+    }
+}
