@@ -63,7 +63,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ProjectedPro
             }
         }
 
-        private void PrepareProjectedProducersHeaders(ProjectedProducersHeaders headers, StringBuilder csvContent)
+        private static void PrepareProjectedProducersHeaders(ProjectedProducersHeaders headers, StringBuilder csvContent)
         {
             // Add projected producers headers
             csvContent.AppendLine(CsvSanitiser.SanitiseData(headers.TitleHeader.Name));

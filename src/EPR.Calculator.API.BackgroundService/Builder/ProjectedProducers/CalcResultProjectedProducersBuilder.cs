@@ -68,7 +68,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers
             return (updatedProducers, result);
         }
 
-        private ProducerDetail ApplyProjectedMaterials(
+        private static ProducerDetail ApplyProjectedMaterials(
             ProducerDetail pd,
             ICalcResultProjectedProducer h1Row,
             ICalcResultProjectedProducer h2Row,

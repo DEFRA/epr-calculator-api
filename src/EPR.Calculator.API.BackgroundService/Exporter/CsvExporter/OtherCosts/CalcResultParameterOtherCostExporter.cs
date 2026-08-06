@@ -61,7 +61,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.OtherCosts
             csvContent.AppendLine();
         }
 
-        public void SchemeSetupCost(CalcResultParameterOtherCost otherCost, StringBuilder csvContent)
+        public static void SchemeSetupCost(CalcResultParameterOtherCost otherCost, StringBuilder csvContent)
         {
             csvContent.Append(CsvSanitiser.SanitiseData("5 Scheme set up cost Yearly Cost"));
             csvContent.Append(CsvSanitiser.SanitiseData(otherCost.SchemeSetupCost.England        , DecimalPlaces.Two, DecimalFormats.F2, isCurrency: true));
@@ -72,7 +72,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.OtherCosts
             csvContent.AppendLine();
         }
 
-        public void LaDataPrepCosts(CalcResultParameterOtherCost otherCost, StringBuilder csvContent)
+        public static void LaDataPrepCosts(CalcResultParameterOtherCost otherCost, StringBuilder csvContent)
         {
             csvContent.Append(CsvSanitiser.SanitiseData("4 LA Data Prep Charge"));
             csvContent.Append(CsvSanitiser.SanitiseData(otherCost.LaDataPrepCharge.England        , DecimalPlaces.Two, DecimalFormats.F2, isCurrency: true));

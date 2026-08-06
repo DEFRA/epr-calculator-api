@@ -59,7 +59,7 @@ namespace EPR.Calculator.API.BackgroundService.Models
             return PartialHouseholdTonnage() + PartialPublicBinTonnage() + (PartialHouseholdDrinksContainersTonnage() ?? 0);
         }
 
-        private RamTonnage ToPartialRam(RamTonnage ram, decimal partialAmount)
+        private static RamTonnage ToPartialRam(RamTonnage ram, decimal partialAmount)
         {
             return new RamTonnage
             {

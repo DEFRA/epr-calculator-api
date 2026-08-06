@@ -481,7 +481,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
                 }
             };
 
-        private SelfManagedConsumerWaste MkSelfManagedConsumerWaste(int runId)
+        private static SelfManagedConsumerWaste MkSelfManagedConsumerWaste(int runId)
         {
             var smcwData = new SelfManagedConsumerWasteData
             {
@@ -514,7 +514,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
         }
 
-        private ModulationResult MkModulationResult(int runId)
+        private static ModulationResult MkModulationResult(int runId)
         {
             var material = new MaterialDetail { Id = 1, Code = MaterialCodes.Aluminium, Name = "Aluminium" };
 
@@ -540,7 +540,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
         }
 
-        private CalcResultH2ProjectedProducerMaterialTonnage MkH2MaterialTonnage(bool isGlass = false)
+        private static CalcResultH2ProjectedProducerMaterialTonnage MkH2MaterialTonnage(bool isGlass = false)
         {
             return new CalcResultH2ProjectedProducerMaterialTonnage
             {
@@ -610,7 +610,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
         }
 
-        private CalcResultH1ProjectedProducerMaterialTonnage MkH1MaterialTonnage(bool isGlass = false)
+        private static CalcResultH1ProjectedProducerMaterialTonnage MkH1MaterialTonnage(bool isGlass = false)
         {
             return new CalcResultH1ProjectedProducerMaterialTonnage
             {
@@ -689,7 +689,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
         }
 
-        private CalcResultPartialObligationTonnage MkPartialMaterialTonnage(bool isModulated = true, bool isGlass = false, decimal obligatedFactor = 0.5m)
+        private static CalcResultPartialObligationTonnage MkPartialMaterialTonnage(bool isModulated = true, bool isGlass = false, decimal obligatedFactor = 0.5m)
         {
             return new CalcResultPartialObligationTonnage
             {

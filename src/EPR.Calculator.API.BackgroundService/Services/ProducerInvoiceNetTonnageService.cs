@@ -38,7 +38,7 @@ public class ProducerInvoiceNetTonnageService(
             }
         });
 
-    private ImmutableList<ProducerInvoicedMaterialNetTonnage> GetInvoicedMaterialNetTonnage(CalcResult calcResult, IReadOnlyList<MaterialDetail> materials)
+    private static ImmutableList<ProducerInvoicedMaterialNetTonnage> GetInvoicedMaterialNetTonnage(CalcResult calcResult, IReadOnlyList<MaterialDetail> materials)
     {
         var producers = calcResult.ProducerFees.Details
             .Where(producer => producer.FeeDetail.Level == CommonConstants.LevelOne.ToString());

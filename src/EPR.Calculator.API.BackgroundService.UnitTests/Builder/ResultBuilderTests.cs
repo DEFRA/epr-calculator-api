@@ -98,8 +98,8 @@ public class ResultBuilderTests : TestsFor<ResultBuilder>
         mockCommsCostReportBuilder
             .Setup(m => m.ConstructAsync(runContext, It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<CalcResultOnePlusFourApportionment>(), It.IsAny<CalcResultLateReportingTonnage>()))
             .ReturnsAsync(mockCalcResultCommsCost.Object);
-        mockLateReportingBuilder.Setup(m => m.ConstructAsync(runContext, It.IsAny<IImmutableList<MaterialDetail>>()))
-            .ReturnsAsync(mockCalcResultLateReportingTonnage);
+        mockLateReportingBuilder.Setup(m => m.Construct(runContext, It.IsAny<IImmutableList<MaterialDetail>>()))
+            .Returns(mockCalcResultLateReportingTonnage);
         mockCalcRunLaDisposalCostBuilder.Setup(m => m.ConstructAsync(runContext, It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<CalcResultLapcapData>(), It.IsAny<CalcResultLateReportingTonnage>(), It.IsAny<SelfManagedConsumerWaste>()))
             .ReturnsAsync(mockCalcResultLaDisposalCostData.Object);
         mockReportedProducerService.Setup(m => m.GetProducers(runContext))

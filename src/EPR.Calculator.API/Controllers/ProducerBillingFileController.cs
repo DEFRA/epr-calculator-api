@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using EPR.Calculator.API.BackgroundService;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
@@ -12,7 +13,7 @@ namespace EPR.Calculator.API.Controllers;
 [Route("v1")]
 public class ProducerBillingFileController(
     IBillingFileService billingFileService,
-    IServiceBusService serviceBus
+    IBackgroundTaskQueue backgroundTaskQueue
 ) : ControllerBase
 {
     /// <summary>
@@ -35,13 +36,13 @@ public class ProducerBillingFileController(
 
         if (serviceProcessResponseDto.StatusCode == HttpStatusCode.OK)
         {
-            var serviceBusMessage = new BillingFileGenerationMessage
+            var message = new BackgroundServiceMessage
             {
+                MessageType     = BackgroundServiceMessageType.Billing,
                 CalculatorRunId = runId,
-                ApprovedBy = User.GetName()
+                Username        = User.GetName(),
             };
-
-            await serviceBus.SendMessage(serviceBusMessage);
+            await backgroundTaskQueue.QueueAsync(message, cancellationToken);
         }
 
         return new ObjectResult(serviceProcessResponseDto.Message)

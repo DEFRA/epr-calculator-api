@@ -217,7 +217,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pr
             Assert.IsTrue(rows[13][0].Contains(CalcResultProjectedProducersHeaders.NoProjectedProducers));
         }
 
-        private ImmutableList<CalcResultH2ProjectedProducer> GetH2ProjectedProducersList()
+        private static ImmutableList<CalcResultH2ProjectedProducer> GetH2ProjectedProducersList()
         {
             return new List<CalcResultH2ProjectedProducer>()
             {
@@ -271,7 +271,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pr
             }.ToImmutableList();
         }
 
-        private ImmutableList<CalcResultH2ProjectedProducer> GetCompleteH2ProjectedProducersList()
+        private static ImmutableList<CalcResultH2ProjectedProducer> GetCompleteH2ProjectedProducersList()
         {
             return new List<CalcResultH2ProjectedProducer>()
             {
@@ -398,7 +398,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pr
             }.ToImmutableList();
         }
 
-        private ImmutableList<CalcResultH1ProjectedProducer> GetH1ProjectedProducersList()
+        private static ImmutableList<CalcResultH1ProjectedProducer> GetH1ProjectedProducersList()
         {
             return new List<CalcResultH1ProjectedProducer>()
             {
@@ -471,7 +471,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pr
             }.ToImmutableList();
         }
 
-        private ImmutableList<CalcResultH1ProjectedProducer> GetCompleteH1ProjectedProducersList()
+        private static ImmutableList<CalcResultH1ProjectedProducer> GetCompleteH1ProjectedProducersList()
         {
             return new List<CalcResultH1ProjectedProducer>()
             {

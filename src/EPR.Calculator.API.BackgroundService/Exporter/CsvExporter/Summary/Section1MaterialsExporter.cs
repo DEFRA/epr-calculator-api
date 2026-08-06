@@ -153,7 +153,7 @@ public class Section1MaterialsExporter : IProducerFeesPartExporter
         "Critical Code Smell",
         "S3776:Cognitive Complexity of methods should not be too high",
         Justification = "Temporaraly suppress - will refactor later.")]
-    private void AppendProducerDisposalFeesByMaterial(
+    private static void AppendProducerDisposalFeesByMaterial(
         StringBuilder csvContent,
         ProducerFeeExportRow producer,
         string key,

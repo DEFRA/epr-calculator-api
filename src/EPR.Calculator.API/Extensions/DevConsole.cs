@@ -1,10 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
 
-namespace EPR.Calculator.API.BackgroundService.Logging;
+namespace EPR.Calculator.API.Extensions;
 
 [ExcludeFromCodeCoverage]
 public static class DevConsole
@@ -34,52 +35,71 @@ public static class DevConsole
 
     public static ITextFormatter Logger()
     {
-        const string prefix = "[{@t:HH:mm:ss} {@l:u3}]";
-        const string suffix = " {Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1)} {@m}\n{@x}";
-
         return new ConsoleFormatter(
-            new ExpressionTemplate(prefix, theme: Theme),
-            new ExpressionTemplate(suffix, theme: Theme),
+            new ExpressionTemplate(
+                "[{@t:HH:mm:ss} {@l:u3}] {Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1)} {@m}\n{@x}",
+                theme: Theme,
+                applyThemeWhenOutputIsRedirected: true),
             Styles);
     }
 
     public static ITextFormatter Telemetry()
     {
-        const string prefix = "\x1b[38;5;0111m[{@t:HH:mm:ss} TEL]";
-        const string suffix = "\x1b[38;5;0111m {@m}\n{@x}";
-
         return new ConsoleFormatter(
-            new ExpressionTemplate(prefix),
-            new ExpressionTemplate(suffix),
+            new ExpressionTemplate(
+                "\u001B[38;5;0111m[{@t:HH:mm:ss} TEL] {@m}\n{@x}",
+                theme: Theme,
+                applyThemeWhenOutputIsRedirected: true),
             Styles);
     }
 
     private sealed class ConsoleFormatter(
-        ExpressionTemplate prefix,
-        ExpressionTemplate suffix,
+        ITextFormatter formatter,
         IReadOnlyDictionary<TemplateThemeStyle, string> styles)
         : ITextFormatter
     {
         public void Format(LogEvent logEvent, TextWriter output)
         {
-            prefix.Format(logEvent, output);
+            formatter.Format(logEvent, new RunIdTextWriter(logEvent, output, styles));
 
-            if (TryGetRunType(logEvent, out var runType)
-                && logEvent.Properties.TryGetValue("RunId", out var runId))
+            // reset terminal colours
+            output.Write("\u001B[0m");
+        }
+    }
+
+    private sealed class RunIdTextWriter(
+        LogEvent logEvent,
+        TextWriter inner,
+        IReadOnlyDictionary<TemplateThemeStyle, string> styles)
+        : TextWriter
+    {
+        private bool _writtenRunId;
+
+        public override Encoding Encoding => inner.Encoding;
+
+        public override void Write(string? value)
+        {
+            if (!_writtenRunId)
             {
-                output.Write(styles.GetValueOrDefault(TemplateThemeStyle.TertiaryText));
-                output.Write(" [");
-                output.Write(styles.GetValueOrDefault(TemplateThemeStyle.String));
-                output.Write(runType);
-                output.Write(styles.GetValueOrDefault(TemplateThemeStyle.TertiaryText));
-                output.Write(':');
-                output.Write(styles.GetValueOrDefault(TemplateThemeStyle.Number));
-                runId.Render(output);
-                output.Write(styles.GetValueOrDefault(TemplateThemeStyle.TertiaryText));
-                output.Write(']');
+                _writtenRunId = true;
+
+                if (TryGetRunType(logEvent, out var runType)
+                    && logEvent.Properties.TryGetValue("RunId", out var runId))
+                {
+                    inner.Write(styles[TemplateThemeStyle.TertiaryText]);
+                    inner.Write(" [");
+                    inner.Write(styles[TemplateThemeStyle.String]);
+                    inner.Write(runType);
+                    inner.Write(styles[TemplateThemeStyle.TertiaryText]);
+                    inner.Write(':');
+                    inner.Write(styles[TemplateThemeStyle.Number]);
+                    runId.Render(inner);
+                    inner.Write(styles[TemplateThemeStyle.TertiaryText]);
+                    inner.Write(']');
+                }
             }
 
-            suffix.Format(logEvent, output);
+            inner.Write(value);
         }
 
         private static bool TryGetRunType(LogEvent logEvent, out string runTypeStr)
@@ -89,8 +109,12 @@ public static class DevConsole
             if (!logEvent.Properties.TryGetValue("RunType", out var pv))
                 return false;
 
-            runTypeStr = pv is ScalarValue { Value: string s } ? s : pv.ToString();
+            runTypeStr = pv is ScalarValue { Value: string s }
+                ? s
+                : pv.ToString();
+
             runTypeStr = runTypeStr.PadRight(1)[..1].ToUpperInvariant() + "R";
+
             return true;
         }
     }

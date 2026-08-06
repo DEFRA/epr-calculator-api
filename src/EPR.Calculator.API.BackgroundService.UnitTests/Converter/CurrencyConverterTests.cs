@@ -91,7 +91,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Converter
             Assert.AreEqual($"\"{value.ToString("C", CultureInfo.GetCultureInfo("en-GB"))}\"", result);
         }
 
-        private Utf8JsonReader BuildReader(string value)
+        private static Utf8JsonReader BuildReader(string value)
         {
             var valueAsBytes = Encoding.UTF8.GetBytes(value);
             var reader = new Utf8JsonReader(valueAsBytes);

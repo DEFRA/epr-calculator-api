@@ -6,7 +6,6 @@ using EPR.Calculator.API.UnitTests.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.Azure.Amqp.Framing;
 
 namespace EPR.Calculator.API.UnitTests.Validator
 {

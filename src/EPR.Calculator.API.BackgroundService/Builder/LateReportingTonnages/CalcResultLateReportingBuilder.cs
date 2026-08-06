@@ -5,13 +5,13 @@ namespace EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages
 {
     public interface ICalcResultLateReportingBuilder
     {
-        Task<CalcResultLateReportingTonnage> ConstructAsync(RunContext runContext, IImmutableList<MaterialDetail> materials);
+        CalcResultLateReportingTonnage Construct(RunContext runContext, IImmutableList<MaterialDetail> materials);
     }
 
     public class CalcResultLateReportingBuilder()
         : ICalcResultLateReportingBuilder
     {
-        public async Task<CalcResultLateReportingTonnage> ConstructAsync(RunContext runContext, IImmutableList<MaterialDetail> materials)
+        public CalcResultLateReportingTonnage Construct(RunContext runContext, IImmutableList<MaterialDetail> materials)
         {
             var tonnageDetails = materials
                 .Select(material =>

@@ -1,4 +1,5 @@
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using Microsoft.EntityFrameworkCore;
@@ -7,10 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using Serilog.Sinks.SystemConsole.Themes;
 using Testcontainers.MsSql;
 
-namespace EPR.Calculator.API.BackgroundService.UnitTests.IntegrationTests;
+namespace EPR.Calculator.API.IntegrationTests;
 
 public abstract class BaseIntegrationTest
 {
@@ -46,7 +46,7 @@ public abstract class BaseIntegrationTest
     {
         var configuration = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("IntegrationTests/appsettings.integration.json")
+            .AddJsonFile("appsettings.integration.json")
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Database:ConnectionString"] = SqlContainer.GetConnectionString()
@@ -57,8 +57,7 @@ public abstract class BaseIntegrationTest
             .ReadFrom.Configuration(configuration)
             .Enrich.FromLogContext()
             .WriteTo.Console(
-                theme: AnsiConsoleTheme.Code,
-                applyThemeToRedirectedOutput: true)
+                DevConsole.Logger())
             .CreateLogger();
 
         services
@@ -66,16 +65,22 @@ public abstract class BaseIntegrationTest
             .AddLogging(x =>
             {
                 x.ClearProviders();
-                x.AddSerilog(Log.Logger, true);
+                x.AddSerilog(Log.Logger, dispose: true);
             })
-            .AddAppDependencies()
+            .AddPayCalAuthentication(configuration)
+            .AddPayCalAuthorization()
+            .AddDatabase()
+            .AddBlobStorage()
+            .AddRequestValidation()
+            .AddPayCalServices()
+            .AddBackgroundServices()
             .AddDbContextFactory<ApplicationDBContext>(options => { options.UseSqlServer(SqlContainer.GetConnectionString()); })
             .RemoveAll<CommonDataApiHttpClient>()
             .AddSingleton<FakeCommonDataApiClient>()
             .AddSingleton<ICommonDataApiClient>(sp => sp.GetRequiredService<FakeCommonDataApiClient>())
-            .RemoveAll<IStorageService>()
-            .AddSingleton<FakeBlobStorageService>()
-            .AddSingleton<IStorageService>(sp => sp.GetRequiredService<FakeBlobStorageService>());
+            .RemoveAll<IStorageUploadService>()
+            .AddSingleton<FakeBlobStorageUploadService>()
+            .AddSingleton<IStorageUploadService>(sp => sp.GetRequiredService<FakeBlobStorageUploadService>());
     }
 }
 

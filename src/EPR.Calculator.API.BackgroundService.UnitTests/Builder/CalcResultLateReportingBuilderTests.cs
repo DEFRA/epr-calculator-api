@@ -15,7 +15,7 @@ public class CalcResultLateReportingBuilderTest : TestsFor<CalcResultLateReporti
     );
 
     [TestMethod]
-    public async Task Construct_ShouldReturnCorrectResults()
+    public void Construct_ShouldReturnCorrectResults()
     {
         var runContext = TestDataHelper.CalculatorRun2025;
         runContext = runContext with
@@ -43,7 +43,7 @@ public class CalcResultLateReportingBuilderTest : TestsFor<CalcResultLateReporti
             }
         };
 
-        var result = await testSubject.ConstructAsync(runContext, Materials);
+        var result = testSubject.Construct(runContext, Materials);
 
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.ByMaterial.Count);

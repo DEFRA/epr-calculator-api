@@ -385,7 +385,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
                 }
             };
 
-        private ModulationResult MkModulationResult(int runId)
+        private static ModulationResult MkModulationResult(int runId)
         {
             var material = new MaterialDetail { Id = 1, Code = MaterialCodes.Aluminium, Name = "Aluminium" };
 
@@ -411,7 +411,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
         }
 
-        private SelfManagedConsumerWaste MkSelfManagedConsumerWaste(int runId)
+        private static SelfManagedConsumerWaste MkSelfManagedConsumerWaste(int runId)
         {
             var smcwData = new SelfManagedConsumerWasteData
             {
@@ -444,7 +444,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
         }
 
-        private TransformProjectedH1 MkTransformProjectedH1(int runId, int producerId, string? subsidiaryId, string materialCode, string level, bool isGlass = false) {
+        private static TransformProjectedH1 MkTransformProjectedH1(int runId, int producerId, string? subsidiaryId, string materialCode, string level, bool isGlass = false) {
             return new TransformProjectedH1
             {
                 CalculatorRunId = runId,
@@ -504,7 +504,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
         }
 
-        private TransformProjectedH2 MkTransformProjectedH2(int runId, int producerId, string? subsidiaryId, string materialCode, string level, bool isGlass = false) {
+        private static TransformProjectedH2 MkTransformProjectedH2(int runId, int producerId, string? subsidiaryId, string materialCode, string level, bool isGlass = false) {
             return new TransformProjectedH2
             {
                 CalculatorRunId = runId,
@@ -558,7 +558,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
         }
 
-        private TransformScaled MkTransformScaled(int runId, int producerId, string? subId, int materialId, string packagingType)
+        private static TransformScaled MkTransformScaled(int runId, int producerId, string? subId, int materialId, string packagingType)
         {
             return new TransformScaled()
             {
@@ -580,7 +580,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
         }
 
-        private TransformPartial MkTransformPartial(int runId, int producerId, string? subsidiaryId, string materialCode, string level, bool isModulated = true, bool isGlass = false) {
+        private static TransformPartial MkTransformPartial(int runId, int producerId, string? subsidiaryId, string materialCode, string level, bool isModulated = true, bool isGlass = false) {
             return new TransformPartial
             {
                 CalculatorRunId = runId,

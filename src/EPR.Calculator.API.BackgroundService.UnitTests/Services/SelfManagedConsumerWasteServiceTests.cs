@@ -11,7 +11,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
     [TestClass]
     public class SelfManagedConsumerWasteServiceTests
     {
-        private ApplicationDBContext CreateContext()
+        private static ApplicationDBContext CreateContext()
         {
             var options = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -20,7 +20,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             return new ApplicationDBContext(options);
         }
 
-        private int SeedProducer(
+        private static int SeedProducer(
             ApplicationDBContext context,
             decimal hh,
             decimal hhRed,

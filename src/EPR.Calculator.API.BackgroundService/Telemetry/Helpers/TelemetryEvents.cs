@@ -9,10 +9,10 @@ public static class TelemetryEvents
 {
     public static EventTelemetry RunInit() => new("RunInit");
 
-    public static EventTelemetry RunInitFailed(string serviceBusMessage)
+    public static EventTelemetry RunInitFailed(string backgroundServiceMessage)
     {
         return new EventTelemetry("RunInitFailed")
-            .WithProperty("ServiceBusMessage", serviceBusMessage);
+            .WithProperty("BackgroundServiceMessage", backgroundServiceMessage);
     }
 
     public static EventTelemetry RunStarted(RunContext runContext)

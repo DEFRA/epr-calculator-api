@@ -101,7 +101,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.La
             CsvTestUtils.AssertCsv(expected, result);
         }
 
-        private CalcResultLaDisposalCostData GetCalcResultLaDisposalCostData()
+        private static CalcResultLaDisposalCostData GetCalcResultLaDisposalCostData()
         {
             return new CalcResultLaDisposalCostData
             {

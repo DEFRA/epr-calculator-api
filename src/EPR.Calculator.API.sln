@@ -9,6 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPR.Calculator.API", "EPR.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPR.Calculator.API.Data", "EPR.Calculator.API.Data\EPR.Calculator.API.Data.csproj", "{AAA2DE3D-7FB5-4E77-A808-5026051D98E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPR.Calculator.API.IntegrationTests", "EPR.Calculator.API.IntegrationTests\EPR.Calculator.API.IntegrationTests.csproj", "{83A122D2-C5AC-4F8D-BE48-BF8F464B5EA5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPR.Calculator.API.BackgroundService", "EPR.Calculator.API.BackgroundService\EPR.Calculator.API.BackgroundService.csproj", "{1B3B0C01-228A-443F-8FB7-8DC2DA4E18A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EPR.Calculator.API.BackgroundService.UnitTests", "EPR.Calculator.API.BackgroundService.UnitTests\EPR.Calculator.API.BackgroundService.UnitTests.csproj", "{85CDF52F-1AFE-4590-82B9-0C6E6BF8A696}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +36,17 @@ Global
 		{AAA2DE3D-7FB5-4E77-A808-5026051D98E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AAA2DE3D-7FB5-4E77-A808-5026051D98E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AAA2DE3D-7FB5-4E77-A808-5026051D98E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83A122D2-C5AC-4F8D-BE48-BF8F464B5EA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83A122D2-C5AC-4F8D-BE48-BF8F464B5EA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83A122D2-C5AC-4F8D-BE48-BF8F464B5EA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83A122D2-C5AC-4F8D-BE48-BF8F464B5EA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B3B0C01-228A-443F-8FB7-8DC2DA4E18A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B3B0C01-228A-443F-8FB7-8DC2DA4E18A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B3B0C01-228A-443F-8FB7-8DC2DA4E18A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B3B0C01-228A-443F-8FB7-8DC2DA4E18A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85CDF52F-1AFE-4590-82B9-0C6E6BF8A696}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85CDF52F-1AFE-4590-82B9-0C6E6BF8A696}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85CDF52F-1AFE-4590-82B9-0C6E6BF8A696}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85CDF52F-1AFE-4590-82B9-0C6E6BF8A696}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -69,8 +69,8 @@ public class ResultBuilder(
             () => calcResultWriter.StoreLapcapData(runContext.RunId, result.CalcResultLapcapData, cancellationToken),
             nameof(calcResultWriter.StoreLapcapData));
 
-        result.CalcResultLateReportingTonnageData = await logger.LogDuration(
-            () => lateReportingTonnageBuilder.ConstructAsync(runContext, materials),
+        result.CalcResultLateReportingTonnageData = logger.LogDuration(
+            () => lateReportingTonnageBuilder.Construct(runContext, materials),
             nameof(lateReportingTonnageBuilder));
 
         await logger.LogDuration(

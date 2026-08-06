@@ -7,7 +7,7 @@ namespace EPR.Calculator.API.BackgroundService.Options;
 ///     Configuration options for <see cref="BlobStorageService" />.
 /// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public record BlobStorageOptions
+public record BlobStorageUploadOptions
 {
     public const string SectionKey = "BlobStorage";
 

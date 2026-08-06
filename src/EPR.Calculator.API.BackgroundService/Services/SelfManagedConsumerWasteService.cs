@@ -92,7 +92,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
             };
         }
 
-        private IL1 BuildL1(
+        private static IL1 BuildL1(
             ILookup<(int, string?), ProducerMaterialPackaging> projectedMaterialsLookup,
             IGrouping<int, ProducerDetail> group,
             MaterialDetail material

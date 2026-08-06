@@ -262,7 +262,7 @@ public class ProducerFeesUtilTests
 
     private CalcResultLateReportingTonnage GetCalcResultLateReportingTonnage() => Fixture.Create<CalcResultLateReportingTonnage>();
 
-    private ModulationDetail mkModulationDetail(decimal adc, decimal rdc, decimal gdc, decimal at, decimal rt, decimal gt, decimal rAtAdc, decimal gAtAdc)
+    private static ModulationDetail mkModulationDetail(decimal adc, decimal rdc, decimal gdc, decimal at, decimal rt, decimal gt, decimal rAtAdc, decimal gAtAdc)
     {
         return new ModulationDetail
         {

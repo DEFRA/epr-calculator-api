@@ -139,7 +139,7 @@ public class CalcResultCommsCostBuilderTest : TestsFor<CalcResultCommsCostBuilde
         Assert.IsTrue(result.Any(r => r.Material!.Code == "GL" && r.PackagingType == "HDC" && r.PackagingTonnage == 150 && r.SubmissionPeriod == "2025-H2"));
     }
 
-    private void SeedDatabase(ApplicationDBContext context, RunContext runContext)
+    private static void SeedDatabase(ApplicationDBContext context, RunContext runContext)
     {
         var run = new CalculatorRun { Id = runContext.RunId, RelativeYear = runContext.RelativeYear, Name = runContext.RunName };
         context.CalculatorRuns.Add(run);

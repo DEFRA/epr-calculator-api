@@ -1,9 +1,13 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using EPR.Calculator.API;
+using EPR.Calculator.API.BackgroundService.Logging;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.HealthCheck;
+using Serilog;
+using Serilog.Filters;
+using Serilog.Sinks.SystemConsole.Themes;
 
 [assembly: SuppressMessage(
     "SonarAnalyzer.CSharp",
@@ -13,7 +17,32 @@ using EPR.Calculator.API.HealthCheck;
 const string corsPolicy = "AllowAllOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly(), optional: true);
+builder.Configuration
+    .AddUserSecrets(Assembly.GetExecutingAssembly(), optional: true)
+    .AddEnvironmentVariables();
+
+builder.Host.UseSerilog((ctx, services, lc) =>
+{
+    var telemetrySource = Matching.FromSource(typeof(LoggerTelemetryClient).FullName!);
+
+    lc.ReadFrom.Configuration(ctx.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext();
+
+    if (ctx.HostingEnvironment.IsEnvironment("Local"))
+    {
+        lc.WriteTo.Logger(lc => lc
+            .Filter.ByExcluding(telemetrySource)
+            .WriteTo.Console(DevConsole.Logger()))
+          .WriteTo.Logger(lc => lc
+            .Filter.ByIncludingOnly(telemetrySource)
+            .MinimumLevel.Verbose()
+            .WriteTo.Console(DevConsole.Telemetry()));
+    } else
+    {
+        lc.WriteTo.ApplicationInsights(services.GetRequiredService<Microsoft.ApplicationInsights.TelemetryClient>(), TelemetryConverter.Traces);
+    }
+});
 
 // Framework services.
 builder.Services.AddControllers();
@@ -37,9 +66,9 @@ builder.Services
     .AddPayCalAuthorization()
     .AddDatabase()
     .AddBlobStorage()
-    .AddServiceBus()
     .AddRequestValidation()
-    .AddPayCalServices();
+    .AddPayCalServices()
+    .AddBackgroundServices();
 
 var app = builder.Build();
 

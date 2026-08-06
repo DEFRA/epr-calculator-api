@@ -157,7 +157,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Sc
             Assert.IsTrue(result.Contains("Scaled-up Household Drinks Containers Tonnage - Glass"));
         }
 
-        private ImmutableList<MaterialDetail> GetMaterials()
+        private static ImmutableList<MaterialDetail> GetMaterials()
         {
             return new List<MaterialDetail>
             {
@@ -166,7 +166,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Sc
             }.ToImmutableList();
         }
 
-        private ImmutableList<CalcResultScaledupProducer> GetCalcResultScaledupProducerList()
+        private static ImmutableList<CalcResultScaledupProducer> GetCalcResultScaledupProducerList()
         {
             return [
                 new CalcResultScaledupProducer

@@ -150,7 +150,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             VerifyL1Matches(result[0], result.Skip(1));
         }
 
-        private void VerifyL1Matches(Result l1, IEnumerable<Result> l2s)
+        private static void VerifyL1Matches(Result l1, IEnumerable<Result> l2s)
         {
             Assert.AreEqual(1, l1.Level);
             foreach (var l2 in l2s)

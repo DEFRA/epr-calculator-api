@@ -281,7 +281,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pa
             Assert.IsTrue(rows[6][0].Contains(CalcResultPartialObligationHeaders.NoPartialObligations));
         }
 
-        private ImmutableList<CalcResultPartialObligation> GetCalcResultPartialObligationsListWithRam()
+        private static ImmutableList<CalcResultPartialObligation> GetCalcResultPartialObligationsListWithRam()
         {
             return
             [
@@ -357,7 +357,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Pa
             ];
         }
 
-        private ImmutableList<CalcResultPartialObligation> GetCalcResultPartialObligationsList()
+        private static ImmutableList<CalcResultPartialObligation> GetCalcResultPartialObligationsList()
         {
             return new List<CalcResultPartialObligation>
             {

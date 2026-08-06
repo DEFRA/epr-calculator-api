@@ -28,7 +28,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.PartialObligations
             this.dbContext = dbContext;
         }
 
-        private ProducerReportedMaterial Scale(bool applyModulation, ProducerReportedMaterial reportedMaterial, CalcResultPartialObligation partialObligation)
+        private static ProducerReportedMaterial Scale(bool applyModulation, ProducerReportedMaterial reportedMaterial, CalcResultPartialObligation partialObligation)
         {
             var p = partialObligation.ObligatedFactor;
             if (!applyModulation || reportedMaterial.PackagingType == PackagingTypes.ConsumerWaste)

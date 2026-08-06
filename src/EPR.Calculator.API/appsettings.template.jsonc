@@ -13,14 +13,14 @@
   */
 
   // Adjust as desired for more verbose logging.
-  "Logging": {
-    "LogLevel": {
-      "default"                                       : "Information",
-      "EPR.Calculator"                                : "Debug",
-      "Microsoft.AspNetCore"                          : "Warning",
-      "Microsoft"                                     : "Warning",
-      "Microsoft.AspNetCore.Hosting"                  : "Information",
-      "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Warning",
+      "Override": {
+        "EPR.Calculator": "Information",
+        "EPR.Calculator.API.BackgroundService": "Debug",
+        "Microsoft.AspNetCore.Hosting.Diagnostics": "Information"
+      }
     }
   },
 
@@ -45,8 +45,16 @@
     "FssContainer"            : "paycal-billingfilejsonauthorisedforfss"
   },
 
-  "ServiceBus": {
-    "ConnectionString": "",
-    "QueueName"       : "defra.epr.calculator.run.local"
+  "CommonDataApi": {
+    "DataLoader": {
+      "Enabled"              : false,
+      "PomBatchSize"         : 10000,
+      "OrganisationBatchSize": 10000
+    },
+    "HttpClient": {
+      "BaseUrl"           : "https://localhost:5001",
+      "CompressionEnabled": true,
+      "StreamStartTimeout": "00:15:00"
+    }
   }
 }

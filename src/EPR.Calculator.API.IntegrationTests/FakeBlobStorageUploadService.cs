@@ -1,8 +1,8 @@
 using EPR.Calculator.API.BackgroundService.Services;
 
-namespace EPR.Calculator.API.BackgroundService.UnitTests.IntegrationTests;
+namespace EPR.Calculator.API.IntegrationTests;
 
-public class FakeBlobStorageService : IStorageService
+public class FakeBlobStorageUploadService : IStorageUploadService
 {
     private readonly Dictionary<string, string> store = new();
 

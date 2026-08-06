@@ -203,7 +203,7 @@ public class CalcResultSummaryCommsCostTwoBTotalBillTests
 
     private CalcResultLateReportingTonnage GetCalcResultLateReportingTonnage() => Fixture.Create<CalcResultLateReportingTonnage>();
 
-    private CalcResultOnePlusFourApportionment GetCalcResultOnePlusFourApportionment()
+    private static CalcResultOnePlusFourApportionment GetCalcResultOnePlusFourApportionment()
     {
         return new CalcResultOnePlusFourApportionment
         {

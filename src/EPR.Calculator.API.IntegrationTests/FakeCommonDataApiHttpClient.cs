@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 
-namespace EPR.Calculator.API.BackgroundService.UnitTests.IntegrationTests;
+namespace EPR.Calculator.API.IntegrationTests;
 
 public class FakeCommonDataApiClient : ICommonDataApiClient
 {

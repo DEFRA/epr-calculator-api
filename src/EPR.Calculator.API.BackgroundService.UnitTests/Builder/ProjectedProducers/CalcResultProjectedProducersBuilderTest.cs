@@ -701,13 +701,13 @@ public class CalcResultProjectedProducersBuilderTest : TestsFor<CalcResultProjec
         return ConvertResultPrevious(testSubject.Construct(runContext, materialDetails, ToL1Producers(given)).Item2);
     }
 
-    private string ToPrintable(string[] arr) =>
+    private static string ToPrintable(string[] arr) =>
         arr is null ? "null" : "[" + string.Join(", ", arr.Select(x => x?.ToString() ?? "null")) + "]";
 
-    private string ToPrintableArray(string[][] arr) =>
+    private static string ToPrintableArray(string[][] arr) =>
         arr is null ? "null" : "[\n" + string.Join("\n", arr.Select(x => ToPrintable(x))) + "\n]";
 
-    private void AssertExcepted(string[][] expected, string[][] actual)
+    private static void AssertExcepted(string[][] expected, string[][] actual)
     {
         var data = $"Arrays differ. expected={ToPrintableArray(expected)} actual={ToPrintableArray(actual)}";
 
