@@ -1,8 +1,10 @@
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 // ReSharper disable once CheckNamespace - Avoids namespace/classname duplication weirdness
 namespace EPR.Calculator.API.Data.DataTypes;
 
+[TypeConverter(typeof(RelativeYearTypeConverter))]
 [JsonConverter(typeof(RelativeYearJsonConverter))]
 public readonly record struct RelativeYear(int Value)
 {

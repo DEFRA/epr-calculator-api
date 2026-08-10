@@ -161,13 +161,10 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task GetCalculatorRuns_Returns_Ok_With_Matching_Runs()
+        public async Task GetCalculatorRuns_Returns_Ok_With_Matching_Runs_When_RelativeYear_Matches()
         {
-            // Arrange
-            var request = new CalculatorRunsParamsDto { RelativeYear = new RelativeYear(2024) };
-
             // Act
-            var result = await CalculatorController.GetCalculatorRuns(request, CancellationToken.None) as ObjectResult;
+            var result = await CalculatorController.GetCalculatorRuns(new RelativeYear(2024), runName: null, CancellationToken.None) as ObjectResult;
 
             // Assert
             result.ShouldNotBeNull();
@@ -178,13 +175,66 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task GetCalculatorRuns_Returns_Ok_With_Empty_List_When_No_Runs_Match()
+        public async Task GetCalculatorRuns_Returns_Ok_With_Empty_List_When_RelativeYear_Does_Not_Match()
         {
-            // Arrange
-            var request = new CalculatorRunsParamsDto { RelativeYear = new RelativeYear(2022) };
-
             // Act
-            var result = await CalculatorController.GetCalculatorRuns(request, CancellationToken.None) as ObjectResult;
+            var result = await CalculatorController.GetCalculatorRuns(new RelativeYear(2022), runName: null, CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status200OK);
+            var runs = result.Value as List<CalculatorRunDto>;
+            runs.ShouldNotBeNull();
+            runs.ShouldBeEmpty();
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRuns_Returns_Ok_With_Matching_Runs_When_Full_Name_Matches()
+        {
+            // Act
+            var result = await CalculatorController.GetCalculatorRuns(relativeYear: null, runName: "Test Run 1", CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status200OK);
+            var runs = result.Value as List<CalculatorRunDto>;
+            runs.ShouldNotBeNull();
+            runs.Count.ShouldBe(1);
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRuns_Returns_Ok_With_Matching_Runs_When_Full_Name_Matches_Case_Insenstive()
+        {
+            // Act
+            var result = await CalculatorController.GetCalculatorRuns(relativeYear: null, runName: "TEST RUN 1", CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status200OK);
+            var runs = result.Value as List<CalculatorRunDto>;
+            runs.ShouldNotBeNull();
+            runs.Count.ShouldBe(1);
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRuns_Returns_Ok_With_Matching_Runs_When_Partial_Name_Matches()
+        {
+            // Act
+            var result = await CalculatorController.GetCalculatorRuns(relativeYear: null, runName: "%Run%", CancellationToken.None) as ObjectResult;
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.StatusCode.ShouldBe(StatusCodes.Status200OK);
+            var runs = result.Value as List<CalculatorRunDto>;
+            runs.ShouldNotBeNull();
+            runs.Count.ShouldBe(2);
+        }
+
+        [TestMethod]
+        public async Task GetCalculatorRuns_Returns_Ok_With_Empty_List_When_Name_Does_Not_Match()
+        {
+            // Act
+            var result = await CalculatorController.GetCalculatorRuns(relativeYear: null, runName: "some bad name", CancellationToken.None) as ObjectResult;
 
             // Assert
             result.ShouldNotBeNull();
@@ -211,7 +261,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             DbContext.SaveChanges();
 
             // Act
-            var result = await CalculatorController.GetCalculatorRun(run.Id.ToString(), CancellationToken.None) as ObjectResult;
+            var result = await CalculatorController.GetCalculatorRun(run.Id, CancellationToken.None) as ObjectResult;
 
             // Assert
             result.ShouldNotBeNull();
@@ -224,55 +274,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             runDto.UpdatedBy.ShouldBeNull();
         }
 
-        [TestMethod]
-        public async Task GetCalculatorRun_Returns_Ok_When_Found_By_Name()
-        {
-            // Arrange
-            var run = new CalculatorRun
-            {
-                Name = "Uniquely Named Run",
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-                RelativeYear = new RelativeYear(2024),
-                CreatedAt = DateTime.UtcNow,
-                CreatedBy = "Test user",
-            };
-            DbContext.CalculatorRuns.Add(run);
-            DbContext.SaveChanges();
 
-            // Act
-            var result = await CalculatorController.GetCalculatorRun(run.Name, CancellationToken.None) as ObjectResult;
-
-            // Assert
-            result.ShouldNotBeNull();
-            var runDto = result.Value as CalculatorRunDto;
-            runDto.ShouldNotBeNull();
-            runDto.RunId.ShouldBe(run.Id);
-        }
-
-        [TestMethod]
-        public async Task GetCalculatorRun_Returns_Ok_When_Found_By_Name_CaseInsensitive()
-        {
-            // Arrange
-            var run = new CalculatorRun
-            {
-                Name = "Case Sensitivity Check",
-                CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
-                RelativeYear = new RelativeYear(2024),
-                CreatedAt = DateTime.UtcNow,
-                CreatedBy = "Test user",
-            };
-            DbContext.CalculatorRuns.Add(run);
-            DbContext.SaveChanges();
-
-            // Act
-            var result = await CalculatorController.GetCalculatorRun(run.Name.ToUpperInvariant(), CancellationToken.None) as ObjectResult;
-
-            // Assert
-            result.ShouldNotBeNull();
-            var runDto = result.Value as CalculatorRunDto;
-            runDto.ShouldNotBeNull();
-            runDto.RunId.ShouldBe(run.Id);
-        }
 
         [TestMethod]
         public async Task GetCalculatorRun_Returns_Ok_With_BillingFile_Details_When_Present()
@@ -303,7 +305,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             DbContext.SaveChanges();
 
             // Act
-            var result = await CalculatorController.GetCalculatorRun(run.Id.ToString(), CancellationToken.None) as ObjectResult;
+            var result = await CalculatorController.GetCalculatorRun(run.Id, CancellationToken.None) as ObjectResult;
 
             // Assert
             result.ShouldNotBeNull();
@@ -319,23 +321,12 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public async Task GetCalculatorRun_Returns_NotFound_When_Not_Found_By_Id()
         {
             // Act
-            var result = await CalculatorController.GetCalculatorRun("999999", CancellationToken.None) as ObjectResult;
+            var result = await CalculatorController.GetCalculatorRun(999999, CancellationToken.None) as ObjectResult;
 
             // Assert
             result.ShouldNotBeNull();
             result.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
             result.Value.ShouldBe(string.Format(CommonResources.UnableToFindRun, 999999));
-        }
-
-        [TestMethod]
-        public async Task GetCalculatorRun_Returns_NotFound_When_Not_Found_By_Name()
-        {
-            // Act
-            var result = await CalculatorController.GetCalculatorRun("a run name that does not exist", CancellationToken.None) as ObjectResult;
-
-            // Assert
-            result.ShouldNotBeNull();
-            result.StatusCode.ShouldBe(StatusCodes.Status404NotFound);
         }
 
         [TestMethod]
