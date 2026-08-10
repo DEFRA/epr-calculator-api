@@ -5,9 +5,10 @@ using EPR.Calculator.API.BackgroundService.Logging;
 using EPR.Calculator.API.Exceptions;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.HealthCheck;
+using Microsoft.ApplicationInsights;
 using Serilog;
 using Serilog.Filters;
-using Serilog.Sinks.SystemConsole.Themes;
+using Serilog.Formatting.Compact;
 
 [assembly: SuppressMessage(
     "SonarAnalyzer.CSharp",
@@ -21,27 +22,35 @@ builder.Configuration
     .AddUserSecrets(Assembly.GetExecutingAssembly(), optional: true)
     .AddEnvironmentVariables();
 
-builder.Host.UseSerilog((ctx, services, lc) =>
+builder.Host.UseSerilog((ctx, services, logger) =>
 {
     var telemetrySource = Matching.FromSource(typeof(LoggerTelemetryClient).FullName!);
 
-    lc.ReadFrom.Configuration(ctx.Configuration)
+    logger.ReadFrom.Configuration(ctx.Configuration)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext();
 
-    if (ctx.HostingEnvironment.IsEnvironment("Local"))
+    if (ctx.HostingEnvironment.IsLocal())
     {
-        lc.WriteTo.Logger(lc => lc
-            .Filter.ByExcluding(telemetrySource)
-            .WriteTo.Console(DevConsole.Logger()))
-          .WriteTo.Logger(lc => lc
-            .Filter.ByIncludingOnly(telemetrySource)
-            .MinimumLevel.Verbose()
-            .WriteTo.Console(DevConsole.Telemetry()));
-    } else
-    {
-        lc.WriteTo.ApplicationInsights(services.GetRequiredService<Microsoft.ApplicationInsights.TelemetryClient>(), TelemetryConverter.Traces);
+        // Use human readable DevConsole for local envs
+        logger
+            .WriteTo.Logger(lc => lc
+                .Filter.ByExcluding(telemetrySource)
+                .WriteTo.Console(DevConsole.Logger()))
+            .WriteTo.Logger(lc => lc
+                .Filter.ByIncludingOnly(telemetrySource)
+                .MinimumLevel.Verbose()
+                .WriteTo.Console(DevConsole.Telemetry()));
     }
+    else
+    {
+        // Other envs should still log to console (for live log sessions, etc)
+        logger.WriteTo.Console(new RenderedCompactJsonFormatter());
+    }
+
+    // Forward logs to app insights if available
+    if (ServiceRegistration.HasApplicationInsights())
+        logger.WriteTo.ApplicationInsights(services.GetRequiredService<TelemetryClient>(), TelemetryConverter.Traces);
 });
 
 // Framework services.
@@ -62,6 +71,7 @@ builder.Services.AddCors(options => options.AddPolicy(
 
 // EPR services.
 builder.Services
+    .AddTelemetry()
     .AddPayCalAuthentication(builder.Configuration)
     .AddPayCalAuthorization()
     .AddDatabase()

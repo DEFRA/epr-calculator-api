@@ -64,6 +64,23 @@ namespace EPR.Calculator.API;
 
 public static class ServiceRegistration
 {
+    public static bool HasApplicationInsights()
+    {
+        // APPINSIGHTS_INSTRUMENTATIONKEY is obsolete but still in use for now
+        var instrumentationKey = Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY");
+        return instrumentationKey is not null and not "" and not "00000000-0000-0000-0000-000000000000";
+    }
+
+    public static IServiceCollection AddTelemetry(this IServiceCollection services)
+    {
+        if (HasApplicationInsights())
+            services.AddSingleton<ITelemetryClient, AppInsightsTelemetryClient>();
+        else
+            services.AddSingleton<ITelemetryClient, LoggerTelemetryClient>();
+
+        return services;
+    }
+
     public static IServiceCollection AddDatabase(this IServiceCollection services)
     {
         services
@@ -144,14 +161,6 @@ public static class ServiceRegistration
     {
         // Register CoreDependencies
         services.AddSingleton<TimeProvider>(_ => TimeProvider.System);
-
-        // Register Telemetry
-        var instrumentationKey = Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY");
-
-        if (instrumentationKey is null or "" or "00000000-0000-0000-0000-000000000000")
-            services.AddSingleton<ITelemetryClient, LoggerTelemetryClient>();
-        else
-            services.AddSingleton<ITelemetryClient, AppInsightsTelemetryClient>();
 
         // Register BlobStorageUpload
         services

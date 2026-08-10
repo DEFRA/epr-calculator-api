@@ -65,8 +65,14 @@ public abstract class BaseIntegrationTest
             .AddLogging(x =>
             {
                 x.ClearProviders();
+
+                // Serilog owns filtering (see appsettings.integration.json). The host app replaces
+                // the ILoggerFactory entirely; here Serilog is a provider, so the Microsoft filters
+                // would otherwise silently drop anything below Information before Serilog sees it.
+                x.SetMinimumLevel(LogLevel.Trace);
                 x.AddSerilog(Log.Logger, dispose: true);
             })
+            .AddTelemetry()
             .AddPayCalAuthentication(configuration)
             .AddPayCalAuthorization()
             .AddDatabase()

@@ -12,14 +12,20 @@
     Azure/KeyVault.
   */
 
-  // Adjust as desired for more verbose logging.
+  // Serilog replaces ILoggerFactory so the app doesn't use the standard "Logging"
+  // config section. appsettings.json is tuned for Azure hosting environments;
+  // this is more verbose for local development. Change as needed.
   "Serilog": {
     "MinimumLevel": {
       "Default": "Warning",
       "Override": {
-        "EPR.Calculator": "Information",
+        "EPR.Calculator": "Debug",
         "EPR.Calculator.API.BackgroundService": "Debug",
-        "Microsoft.AspNetCore.Hosting.Diagnostics": "Information"
+        "Microsoft.AspNetCore.Authentication": "Warning",
+        "Microsoft.AspNetCore.Hosting.Diagnostics": "Information",
+        "Microsoft.EntityFrameworkCore": "Warning",
+        "Microsoft.Hosting.Lifetime": "Information",
+        "Microsoft.IdentityModel": "Warning"
       }
     }
   },
