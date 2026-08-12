@@ -60,11 +60,11 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Modulation
             nl();
 
             append("Material");
-            append("Producer Household Packaging Tonnage");
+            append("Household Tonnage");
             append("Public Bin Tonnage");
             append("Household Drinks Containers Tonnage");
             append("Late Reporting Tonnage");
-            append("Actioned Self-Managed Consumer Waste");
+            append("Actioned Self-managed Consumer Waste Tonnage");
             append("Net Tonnage + Late Reporting Tonnage");
             append("Red + Red Medical Net Tonnage + Late Reporting Tonnage");
             append("Amber + Amber Medical Net Tonnage + Late Reporting Tonnage");

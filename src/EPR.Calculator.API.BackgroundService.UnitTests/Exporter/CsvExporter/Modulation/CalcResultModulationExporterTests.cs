@@ -118,11 +118,11 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Mo
                 new[]
                 {
                     "Material",
-                    "Producer Household Packaging Tonnage",
+                    "Household Tonnage",
                     "Public Bin Tonnage",
                     "Household Drinks Containers Tonnage",
                     "Late Reporting Tonnage",
-                    "Actioned Self-Managed Consumer Waste",
+                    "Actioned Self-managed Consumer Waste Tonnage",
                     "Net Tonnage + Late Reporting Tonnage",
                     "Red + Red Medical Net Tonnage + Late Reporting Tonnage",
                     "Amber + Amber Medical Net Tonnage + Late Reporting Tonnage",

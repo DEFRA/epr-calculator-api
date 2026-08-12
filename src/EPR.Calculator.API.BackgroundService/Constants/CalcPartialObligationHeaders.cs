@@ -13,7 +13,7 @@
         public static readonly string JoiningDate = "Joining date";
         public static readonly string ObligatedDays = "Obligated days";
         public static readonly string ObligatedPercentage = "Obligated %";
-        public static readonly string HouseholdPackagingWasteTonnage = "Household Packaging Tonnage";
+        public static readonly string HouseholdPackagingWasteTonnage = "Household Tonnage";
         public static readonly string HouseholdRedTonnage = MaterialTonnageHeader("Household", "Red");
         public static readonly string HouseholdAmberTonnage = MaterialTonnageHeader("Household", "Amber");
         public static readonly string HouseholdGreenTonnage = MaterialTonnageHeader("Household", "Green");
@@ -35,8 +35,8 @@
         public static readonly string HouseholdDrinksContainersAmberMedicalTonnage = MaterialTonnageHeader("Household Drinks Containers", "Amber Medical");
         public static readonly string HouseholdDrinksContainersGreenMedicalTonnage = MaterialTonnageHeader("Household Drinks Containers", "Green Medical");
         public static readonly string TotalTonnage = "Total Tonnage";
-        public static readonly string SelfManagedConsumerWasteTonnage = "Self Managed Consumer Waste Tonnage";
-        public static readonly string PartialHouseholdPackagingWasteTonnage = "Partial Household Packaging Tonnage";
+        public static readonly string SelfManagedConsumerWasteTonnage = "Self-managed Consumer Waste Tonnage";
+        public static readonly string PartialHouseholdPackagingWasteTonnage = "Partial Household Tonnage";
         public static readonly string PartialHouseholdRedTonnage = MaterialTonnageHeader("Partial Household", "Red");
         public static readonly string PartialHouseholdAmberTonnage = MaterialTonnageHeader("Partial Household", "Amber");
         public static readonly string PartialHouseholdGreenTonnage = MaterialTonnageHeader("Partial Household", "Green");
@@ -58,7 +58,7 @@
         public static readonly string PartialHouseholdDrinksContainersAmberMedicalTonnage = MaterialTonnageHeader("Partial Household Drinks Containers", "Amber Medical");
         public static readonly string PartialHouseholdDrinksContainersGreenMedicalTonnage = MaterialTonnageHeader("Partial Household Drinks Containers", "Green Medical");
         public static readonly string PartialTotalTonnage = "Partial Total Tonnage";
-        public static readonly string PartialSelfManagedConsumerWasteTonnage = "Partial Self Managed Consumer Waste Tonnage";
+        public static readonly string PartialSelfManagedConsumerWasteTonnage = "Partial Self-managed Consumer Waste Tonnage";
         public static readonly string NoPartialObligations = "None";
         private static string MaterialTonnageHeader(string type, string RAM) { return $"{type} {RAM} Material Tonnage"; }
     }

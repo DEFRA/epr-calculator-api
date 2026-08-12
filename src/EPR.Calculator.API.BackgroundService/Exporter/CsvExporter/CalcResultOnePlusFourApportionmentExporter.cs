@@ -18,13 +18,13 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter
             csvContent.AppendLine();
             csvContent.AppendLine();
 
-            csvContent.AppendLine(CsvSanitiser.SanitiseData("1 + 4 Apportionment %s"));
+            csvContent.AppendLine(CsvSanitiser.SanitiseData("1 + 4 Apportionment %"));
 
             AppendHeaders(csvContent);
             AppendByCountryCost("1 Fee for LA Disposal Costs", calcResult1Plus4Apportionment.LaDisposalCost, csvContent);
             AppendByCountryCost("4 LA Data Prep Charge"      , calcResult1Plus4Apportionment.LADataPrepCharge, csvContent);
             AppendByCountryCost("Total of 1 + 4"             , calcResult1Plus4Apportionment.TotalOnePlusFour, csvContent);
-            AppendByCountryApportionment("1 + 4 Apportionment %s", calcResult1Plus4Apportionment.OnePlusFourApportionment, csvContent);
+            AppendByCountryApportionment("1 + 4 Apportionment %", calcResult1Plus4Apportionment.OnePlusFourApportionment, csvContent);
         }
 
         private static void AppendHeaders(StringBuilder csvContent)
@@ -34,7 +34,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter
             csvContent.Append(CsvSanitiser.SanitiseData("Wales"));
             csvContent.Append(CsvSanitiser.SanitiseData("Scotland"));
             csvContent.Append(CsvSanitiser.SanitiseData("Northern Ireland"));
-            csvContent.Append(CsvSanitiser.SanitiseData("Total"));
+            csvContent.Append(CsvSanitiser.SanitiseData("Total UK"));
             csvContent.AppendLine();
         }
 

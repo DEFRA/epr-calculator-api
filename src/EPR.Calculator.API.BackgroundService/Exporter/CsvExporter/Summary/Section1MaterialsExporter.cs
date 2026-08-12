@@ -24,7 +24,7 @@ public class Section1MaterialsExporter : IProducerFeesPartExporter
         var headers = new List<string>();
         headers.Add("Previous Invoiced Tonnage");
 
-        headers.Add("Household Packaging Tonnage");
+        headers.Add("Household Tonnage");
         if (applyModulation)
         {
             headers.AddRange([
@@ -78,21 +78,21 @@ public class Section1MaterialsExporter : IProducerFeesPartExporter
                 "Red + Red Medical Total Tonnage",
                 "Amber + Amber Medical Total Tonnage",
                 "Green + Green Medical Total Tonnage",
-                "Self Managed Consumer Waste Tonnage",
-                "Actioned Self Managed Consumer Waste Tonnage",
-                "Red + Red Medical Actioned Self Managed Consumer Waste Tonnage",
-                "Amber + Amber Medical Actioned Self Managed Consumer Waste Tonnage",
-                "Green + Green Medical Actioned Self Managed Consumer Waste Tonnage",
+                "Self-managed Consumer Waste Tonnage",
+                "Actioned Self-managed Consumer Waste Tonnage",
+                "Red + Red Medical Actioned Self-managed Consumer Waste Tonnage",
+                "Amber + Amber Medical Actioned Self-managed Consumer Waste Tonnage",
+                "Green + Green Medical Actioned Self-managed Consumer Waste Tonnage",
                 "Net Tonnage",
                 "Red + Red Medical Net Tonnage",
                 "Amber + Amber Medical Net Tonnage",
                 "Green + Green Medical Net Tonnage",
-                "Residual SMCW"
+                "Residual Self-managed Consumer Waste'"
             ]);
         } else {
             headers.AddRange([
                 "Total Tonnage",
-                "Self Managed Consumer Waste Tonnage",
+                "Self-managed Consumer Waste Tonnage",
                 "Net Tonnage"
             ]);
         }

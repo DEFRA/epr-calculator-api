@@ -47,13 +47,13 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter
                 new string[] {},
                 new[] { "Parameters - Late Reporting Tonnages" },
                 new[] { "Material",
-                        "Late Reporting Tonnage",
                         "Red + Red Medical Late Reporting Tonnage",
                         "Amber + Amber Medical Late Reporting Tonnage",
-                        "Green + Green Medical Late Reporting Tonnage" },
-                new[] { "Aluminium","1.230","2.340","3.450","4.560" },
-                new[] { "Glass"     ,"1.340","2.450","3.560","4.670" },
-                new[] { "Total"    ,"2.570","4.790","7.010","9.230" },
+                        "Green + Green Medical Late Reporting Tonnage",
+                        "Total Late Reporting Tonnage" },
+                new[] { "Aluminium","2.340","3.450","4.560","1.230" },
+                new[] { "Glass"     ,"2.450","3.560","4.670","1.340" },
+                new[] { "Total"    ,"4.790","7.010","9.230","2.570" },
                 new string[] { }
             };
 

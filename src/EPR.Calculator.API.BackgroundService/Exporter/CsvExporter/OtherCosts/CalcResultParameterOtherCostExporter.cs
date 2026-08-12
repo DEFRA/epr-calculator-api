@@ -36,7 +36,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.OtherCosts
             csvContent.AppendLine();
 
             csvContent.Append(CsvSanitiser.SanitiseData("7 Materiality"));
-            csvContent.Append(CsvSanitiser.SanitiseData("Amount £s"));
+            csvContent.Append(CsvSanitiser.SanitiseData("Amount £"));
             csvContent.Append(CsvSanitiser.SanitiseData("%"));
             csvContent.AppendLine();
             csvContent.Append(CsvSanitiser.SanitiseData("Increase"));
@@ -48,7 +48,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.OtherCosts
             csvContent.Append(CsvSanitiser.SanitiseData(otherCost.MaterialityDecrease.Percentage, DecimalPlaces.Two, DecimalFormats.F2, isPercentage: true));
             csvContent.AppendLine();
             csvContent.Append(CsvSanitiser.SanitiseData("8 Tonnage Change"));
-            csvContent.Append(CsvSanitiser.SanitiseData("Amount £s"));
+            csvContent.Append(CsvSanitiser.SanitiseData("Amount £"));
             csvContent.Append(CsvSanitiser.SanitiseData("%"));
             csvContent.AppendLine();
             csvContent.Append(CsvSanitiser.SanitiseData("Increase"));
@@ -63,7 +63,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.OtherCosts
 
         public static void SchemeSetupCost(CalcResultParameterOtherCost otherCost, StringBuilder csvContent)
         {
-            csvContent.Append(CsvSanitiser.SanitiseData("5 Scheme set up cost Yearly Cost"));
+            csvContent.Append(CsvSanitiser.SanitiseData("5 Scheme Annual Set-up Cost"));
             csvContent.Append(CsvSanitiser.SanitiseData(otherCost.SchemeSetupCost.England        , DecimalPlaces.Two, DecimalFormats.F2, isCurrency: true));
             csvContent.Append(CsvSanitiser.SanitiseData(otherCost.SchemeSetupCost.Wales          , DecimalPlaces.Two, DecimalFormats.F2, isCurrency: true));
             csvContent.Append(CsvSanitiser.SanitiseData(otherCost.SchemeSetupCost.Scotland       , DecimalPlaces.Two, DecimalFormats.F2, isCurrency: true));
