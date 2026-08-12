@@ -10,6 +10,7 @@ using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Logging;
 using EPR.Calculator.API.BackgroundService.Telemetry.Helpers;
 using Microsoft.Extensions.DependencyInjection;
+using BackgroundServiceBase = Microsoft.Extensions.Hosting.BackgroundService;
 
 namespace EPR.Calculator.API.BackgroundService;
 
@@ -54,7 +55,7 @@ public class MessageProcessingBackgroundService(
     IServiceScopeFactory scopeFactory,
     ITelemetryClient telemetry,
     ILogger<MessageProcessingBackgroundService> logger)
-    : Microsoft.Extensions.Hosting.BackgroundService
+    : BackgroundServiceBase
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
