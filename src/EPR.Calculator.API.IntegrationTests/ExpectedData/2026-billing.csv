@@ -10,7 +10,7 @@ Parameters File,"",,"08/07/2026 16:22",,"",
 
 
 "LAPCAP Data",
-"Material","England LA Disposal Cost","Wales LA Disposal Cost","Scotland LA Disposal Cost","Northern Ireland LA Disposal Cost","1 LA Disposal Cost Total",
+"Material","England LA Disposal Cost","Wales LA Disposal Cost","Scotland LA Disposal Cost","Northern Ireland LA Disposal Cost","1 LA Disposal Cost Total UK",
 "Aluminium","£5000.00","£1750.00","£2000.00","£1250.00","£10000.00",
 "Fibre Composite","£7500.00","£2100.00","£3400.00","£1750.00","£14750.00",
 "Glass","£45000.00","£0.00","£20700.00","£4500.00","£70200.00",
@@ -20,7 +20,7 @@ Parameters File,"",,"08/07/2026 16:22",,"",
 "Wood","£0.00","£12000.00","£0.00","£5600.00","£17600.00",
 "Other Materials","£3400.00","£2100.00","£4200.00","£700.00","£10400.00",
 "Total","£109800.00","£24750.00","£49300.00","£19300.00","£203150.00",
-"1 Country Apportionment %s","54.04873246%","12.18311592%","24.26778243%","9.50036919%","100.00000000%",
+"1 Country Apportionment %","54.04873246%","12.18311592%","24.26778243%","9.50036919%","100.00000000%",
 
 
 "Parameters - Late Reporting Tonnages",
@@ -37,11 +37,11 @@ Parameters File,"",,"08/07/2026 16:22",,"",
 
 
 "Parameters - Other",
-,"England","Wales","Scotland","Northern Ireland","Total",
+,"England","Wales","Scotland","Northern Ireland","Total UK",
 "3 SA Operating Costs","£22579320.00","£1360200.00","£2176320.00","£1088160.00","£27204000.00",
 
 "4 LA Data Prep Charge","£0.00","£0.00","£0.00","£0.00","£0.00",
-"4 Country Apportionment %s","0.00000000%","0.00000000%","0.00000000%","0.00000000%","100.00000000%",
+"4 Country Apportionment %","0.00000000%","0.00000000%","0.00000000%","0.00000000%","100.00000000%",
 
 "5 Scheme Annual Set-up Cost","£22580000.00","£1360000.00","£2176000.00","£1088000.00","£27204000.00",
 
@@ -64,7 +64,7 @@ Parameters File,"",,"08/07/2026 16:22",,"",
 
 
 "Parameters - Comms Costs",
-,"England","Wales","Scotland","Northern Ireland","Total",
+,"England","Wales","Scotland","Northern Ireland","Total UK",
 "1 + 4 Apportionment %","54.04873246%","12.18311592%","24.26778243%","9.50036919%","100.00000000%",
 
 "2a Comms Costs - by Material","England","Wales","Scotland","Northern Ireland","Total UK","Household Tonnage","Public Bin Tonnage","Household Drinks Containers Tonnage","Late Reporting Tonnage","Household Tonnage + Late Reporting Tonnage + Public Bin Tonnage + Household Drinks Containers Tonnage","Comms Cost - by Material Price Per Tonne",
@@ -84,7 +84,7 @@ Parameters File,"",,"08/07/2026 16:22",,"",
 
 
 "LA Disposal Cost Data",
-"Material","England","Wales","Scotland","Northern Ireland","Total","Household Tonnage","Public Bin Tonnage","Household Drinks Containers Tonnage","Late Reporting Tonnage","Actioned Self-managed Consumer Waste","Net Tonnage + Late Reporting Tonnage","Disposal Cost Per Tonne",
+"Material","England","Wales","Scotland","Northern Ireland","Total UK","Household Tonnage","Public Bin Tonnage","Household Drinks Containers Tonnage","Late Reporting Tonnage","Actioned Self-managed Consumer Waste","Net Tonnage + Late Reporting Tonnage","Disposal Cost Per Tonne",
 "Aluminium","£5000.00","£1750.00","£2000.00","£1250.00","£10000.00","6585.638","0.000",,"2188324.000","2200.000","2192709.638","£0.0046",
 "Fibre Composite","£7500.00","£2100.00","£3400.00","£1750.00","£14750.00","0.000","0.000",,"21514717.000","0.000","21514717.000","£0.0007",
 "Glass","£45000.00","£0.00","£20700.00","£4500.00","£70200.00","0.000","0.000","0.000","13163573.900","0.000","13163573.900","£0.0053",

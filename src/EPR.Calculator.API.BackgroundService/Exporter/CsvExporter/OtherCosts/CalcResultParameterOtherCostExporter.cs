@@ -85,7 +85,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.OtherCosts
 
         public static void CountryApportionment(CalcResultParameterOtherCost otherCost, StringBuilder csvContent)
         {
-            csvContent.Append(CsvSanitiser.SanitiseData("4 Country Apportionment %s"));
+            csvContent.Append(CsvSanitiser.SanitiseData("4 Country Apportionment %"));
             csvContent.Append(CsvSanitiser.SanitiseData(otherCost.CountryApportionment.England        , DecimalPlaces.Eight, DecimalFormats.F8, isPercentage: true));
             csvContent.Append(CsvSanitiser.SanitiseData(otherCost.CountryApportionment.Wales          , DecimalPlaces.Eight, DecimalFormats.F8, isPercentage: true));
             csvContent.Append(CsvSanitiser.SanitiseData(otherCost.CountryApportionment.Scotland       , DecimalPlaces.Eight, DecimalFormats.F8, isPercentage: true));
@@ -101,7 +101,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.OtherCosts
             csvContent.Append(CsvSanitiser.SanitiseData("Wales"));
             csvContent.Append(CsvSanitiser.SanitiseData("Scotland"));
             csvContent.Append(CsvSanitiser.SanitiseData("Northern Ireland"));
-            csvContent.Append(CsvSanitiser.SanitiseData("Total"));
+            csvContent.Append(CsvSanitiser.SanitiseData("Total UK"));
             csvContent.AppendLine();
 
             csvContent.Append(CsvSanitiser.SanitiseData("3 SA Operating Costs"));

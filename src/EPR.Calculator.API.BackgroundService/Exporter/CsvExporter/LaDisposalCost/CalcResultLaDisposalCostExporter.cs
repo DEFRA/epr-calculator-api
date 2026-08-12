@@ -48,7 +48,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.LaDisposalCo
             csvContent.Append(CsvSanitiser.SanitiseData(CommonConstants.Wales));
             csvContent.Append(CsvSanitiser.SanitiseData(CommonConstants.Scotland));
             csvContent.Append(CsvSanitiser.SanitiseData(CommonConstants.NorthernIreland));
-            csvContent.Append(CsvSanitiser.SanitiseData(CommonConstants.Total));
+            csvContent.Append(CsvSanitiser.SanitiseData("Total UK"));
             csvContent.Append(CsvSanitiser.SanitiseData(CommonConstants.ProducerReportedHouseholdPackagingWasteTonnage));
             csvContent.Append(CsvSanitiser.SanitiseData(CommonConstants.ReportedPublicBinTonnage));
             csvContent.Append(CsvSanitiser.SanitiseData(CommonConstants.HouseholdDrinkContainers));

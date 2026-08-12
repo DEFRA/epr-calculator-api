@@ -38,7 +38,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Co
                 new string[] {},
                 new string[] {},
                 new[] { "Parameters - Comms Costs" },
-                new[] { null, "England","Wales","Scotland","Northern Ireland","Total" },
+                new[] { null, "England","Wales","Scotland","Northern Ireland","Total UK" },
                 new[] {"1 + 4 Apportionment %","10.00000000%","20.00000000%","30.00000000%","40.00000000%","100.00000000%"},
                 new string[] { },
                 new[] { "2a Comms Costs - by Material","England","Wales","Scotland","Northern Ireland","Total UK","Household Tonnage","Public Bin Tonnage","Household Drinks Containers Tonnage","Late Reporting Tonnage","Household Tonnage + Late Reporting Tonnage + Public Bin Tonnage + Household Drinks Containers Tonnage","Comms Cost - by Material Price Per Tonne" },

@@ -36,7 +36,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Lapcap
             }
             AppendRow("Total", calcResultLapcapData.Total, csvContent);
 
-            csvContent.Append($"{CsvSanitiser.SanitiseData("1 Country Apportionment %s")}");
+            csvContent.Append($"{CsvSanitiser.SanitiseData("1 Country Apportionment %")}");
             csvContent.Append(CsvSanitiser.SanitiseData(calcResultLapcapData.CountryApportionment.England        , DecimalPlaces.Eight, DecimalFormats.F8, isPercentage: true));
             csvContent.Append(CsvSanitiser.SanitiseData(calcResultLapcapData.CountryApportionment.Wales          , DecimalPlaces.Eight, DecimalFormats.F8, isPercentage: true));
             csvContent.Append(CsvSanitiser.SanitiseData(calcResultLapcapData.CountryApportionment.Scotland       , DecimalPlaces.Eight, DecimalFormats.F8, isPercentage: true));
@@ -53,7 +53,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Lapcap
             csvContent.Append(CsvSanitiser.SanitiseData("Wales LA Disposal Cost"));
             csvContent.Append(CsvSanitiser.SanitiseData("Scotland LA Disposal Cost"));
             csvContent.Append(CsvSanitiser.SanitiseData("Northern Ireland LA Disposal Cost"));
-            csvContent.Append(CsvSanitiser.SanitiseData("1 LA Disposal Cost Total"));
+            csvContent.Append(CsvSanitiser.SanitiseData("1 LA Disposal Cost Total UK"));
             csvContent.AppendLine();
         }
 

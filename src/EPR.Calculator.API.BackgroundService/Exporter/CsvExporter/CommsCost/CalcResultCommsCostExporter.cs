@@ -81,7 +81,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CommsCost
             csvContent.Append(CsvSanitiser.SanitiseData("Wales"));
             csvContent.Append(CsvSanitiser.SanitiseData("Scotland"));
             csvContent.Append(CsvSanitiser.SanitiseData("Northern Ireland"));
-            csvContent.Append(CsvSanitiser.SanitiseData("Total"));
+            csvContent.Append(CsvSanitiser.SanitiseData("Total UK"));
             csvContent.AppendLine();
         }
 
