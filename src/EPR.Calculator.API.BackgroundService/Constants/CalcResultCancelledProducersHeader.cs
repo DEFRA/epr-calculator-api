@@ -10,15 +10,6 @@ namespace EPR.Calculator.API.BackgroundService.Constants
         public static readonly string LastTonnage = "Last Tonnage";
         public const int LastTonnageSubHeaderIndex = 3;
 
-        public static readonly string Aluminium = "Aluminium";
-        public static readonly string FibreComposite = "Fibre composite";
-        public static readonly string Glass = "Glass";
-        public static readonly string PaperOrCard = "Paper or Card";
-        public static readonly string Plastic = "Plastic";
-        public static readonly string Steel = "Steel";
-        public static readonly string Wood = "Wood";
-        public static readonly string OtherMaterials = "Other materials";
-
         public static readonly string LatestInvoice = "Latest Invoice";
         public const int LatestInvoiceSubHeaderIndex = 11;
 

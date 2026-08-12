@@ -72,7 +72,7 @@ public class BillingFileExporterTests : TestsFor<BillingFileExporter>
         producerFeesExporter.Verify(mock => mock.Export(runContext, It.IsAny<ProducerFees>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<IReadOnlyList<int>>(), It.IsAny<IReadOnlyList<(int, string?)>>(), It.IsAny<StringBuilder>()));
         laDisposalCostExporter.Verify(mock => mock.Export(runContext, It.IsAny<CalcResultLaDisposalCostData>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
         commsCostExporter.Verify(mock => mock.Export(It.IsAny<CalcResultCommsCost>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
-        cancelledProducersExporter.Verify(mock => mock.Export(It.IsAny<IReadOnlyList<CalcResultCancelledProducer>>(), It.IsAny<StringBuilder>()));
+        cancelledProducersExporter.Verify(mock => mock.Export(It.IsAny<IReadOnlyList<CalcResultCancelledProducer>>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
 
         Assert.IsNotNull(result);
     }
@@ -99,7 +99,7 @@ public class BillingFileExporterTests : TestsFor<BillingFileExporter>
         producerFeesExporter.Verify(mock => mock.Export(runContext, It.IsAny<ProducerFees>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<IReadOnlyList<int>>(), It.IsAny<IReadOnlyList<(int, string?)>>(), It.IsAny<StringBuilder>()));
         laDisposalCostExporter.Verify(mock => mock.Export(runContext, It.IsAny<CalcResultLaDisposalCostData>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
         commsCostExporter.Verify(mock => mock.Export(It.IsAny<CalcResultCommsCost>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
-        cancelledProducersExporter.Verify(mock => mock.Export(It.IsAny<IReadOnlyList<CalcResultCancelledProducer>>(), It.IsAny<StringBuilder>()));
+        cancelledProducersExporter.Verify(mock => mock.Export(It.IsAny<IReadOnlyList<CalcResultCancelledProducer>>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
 
         Assert.IsNotNull(result);
     }

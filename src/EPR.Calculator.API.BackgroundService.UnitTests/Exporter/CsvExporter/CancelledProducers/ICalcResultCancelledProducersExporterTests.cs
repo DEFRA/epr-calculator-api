@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Immutable;
+using System.Text;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CancelledProducers;
 using EPR.Calculator.API.Data.DataModels;
 
@@ -8,6 +9,13 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Ca
     public class ICalcResultCancelledProducersExporterTests
     {
         private Mock<ICalcResultCancelledProducersExporter> _exporterMock;
+
+        private readonly ImmutableList<MaterialDetail> materials =
+        [
+            new() { Id = 1, Code = "AL", Name = "Aluminium" },
+            new() { Id = 2, Code = "GL", Name = "Glass" },
+            new() { Id = 3, Code = "OT", Name = "Other materials" }
+        ];
 
         public ICalcResultCancelledProducersExporterTests()
         {
@@ -38,10 +46,10 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Ca
             var sb = new StringBuilder();
 
             // Act
-            _exporterMock.Object.Export(response, sb);
+            _exporterMock.Object.Export(response, materials, sb);
 
             // Assert
-            _exporterMock.Verify(e => e.Export(response, sb), Times.Once);
+            _exporterMock.Verify(e => e.Export(response, materials, sb), Times.Once);
         }
     }
 }

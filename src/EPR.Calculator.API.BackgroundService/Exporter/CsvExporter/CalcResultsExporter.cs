@@ -101,7 +101,7 @@ public class CalcResultsExporter(
         }
 
         logger.LogDuration(
-            () => cancelledProducersExporter.Export(calcResult.CalcResultCancelledProducers, csvContent),
+            () => cancelledProducersExporter.Export(calcResult.CalcResultCancelledProducers, materials, csvContent),
             nameof(cancelledProducersExporter)
         );
 

@@ -28,7 +28,15 @@ public class BillingFileJsonWriter(IMaterialService materialService)
 
     public async Task<string> WriteToString(BillingRunContext runContext, CalcResult calcResult)
     {
-        var materials = await materialService.GetMaterials();
+        var materials = (await materialService.GetMaterials())
+                            .Select(m => m.Code switch
+                            {
+                                "PC" => m with { Name = "Paper or card" },
+                                "FC" => m with { Name = "Fibre composite" },
+                                "OT" => m with { Name = "Other materials" },
+                                _ => m
+                            }).ToImmutableList(); //Maintain previous capitalisation 
+
         var billingFileContent = BillingFileJson.From(runContext, calcResult, materials);
 
         return JsonSerializer.Serialize(billingFileContent, JsonSerializerOptions);

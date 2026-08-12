@@ -17,6 +17,7 @@ public abstract class BaseIntegrationTest
     private static readonly MsSqlContainer SqlContainer =
         new MsSqlBuilder("mcr.microsoft.com/mssql/server:2025-latest")
             .WithReuse(true)
+            .WithCreateParameterModifier(parameters => parameters.User = "0:0") // SQL Server 2025's non-root default can't create /.system
             .Build();
 
     protected static ServiceProvider Provider { get; private set; } = null!;

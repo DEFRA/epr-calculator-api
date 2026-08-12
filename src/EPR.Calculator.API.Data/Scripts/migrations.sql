@@ -139,7 +139,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240730085820_AddInitialMigration', N'8.0.7');
+    VALUES (N'20240730085820_AddInitialMigration', N'8.0.13');
 END;
 GO
 
@@ -211,7 +211,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240731130652_202407311405_UpdateTemplateMaster', N'8.0.7');
+    VALUES (N'20240731130652_202407311405_UpdateTemplateMaster', N'8.0.13');
 END;
 GO
 
@@ -271,7 +271,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240731135218_202407311451_UpdateTemplateMasterValues', N'8.0.7');
+    VALUES (N'20240731135218_202407311451_UpdateTemplateMasterValues', N'8.0.13');
 END;
 GO
 
@@ -364,7 +364,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240731140140_202407311501_UpdateTemplateMasterType', N'8.0.7');
+    VALUES (N'20240731140140_202407311501_UpdateTemplateMasterType', N'8.0.13');
 END;
 GO
 
@@ -461,7 +461,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240808120743_UpdateTemplateMaster', N'8.0.7');
+    VALUES (N'20240808120743_UpdateTemplateMaster', N'8.0.13');
 END;
 GO
 
@@ -522,7 +522,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240809123714_decimalPrecision', N'8.0.7');
+    VALUES (N'20240809123714_decimalPrecision', N'8.0.13');
 END;
 GO
 
@@ -619,7 +619,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240809131657_UpdateTemplateMasterData', N'8.0.7');
+    VALUES (N'20240809131657_UpdateTemplateMasterData', N'8.0.13');
 END;
 GO
 
@@ -648,7 +648,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240814103125_UpdateBadDebtInTemplateMaster', N'8.0.7');
+    VALUES (N'20240814103125_UpdateBadDebtInTemplateMaster', N'8.0.13');
 END;
 GO
 
@@ -726,7 +726,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240902153316_AddCalcRunTables', N'8.0.7');
+    VALUES (N'20240902153316_AddCalcRunTables', N'8.0.13');
 END;
 GO
 
@@ -865,7 +865,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240905110503_LapcapData', N'8.0.7');
+    VALUES (N'20240905110503_LapcapData', N'8.0.13');
 END;
 GO
 
@@ -981,7 +981,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240905121521_LapcapDataSeed', N'8.0.7');
+    VALUES (N'20240905121521_LapcapDataSeed', N'8.0.13');
 END;
 GO
 
@@ -1070,7 +1070,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240909095829_LapcapRelationship', N'8.0.7');
+    VALUES (N'20240909095829_LapcapRelationship', N'8.0.13');
 END;
 GO
 
@@ -1108,7 +1108,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240924094510_DeleteLevyFromDefaultParamaterMaster', N'8.0.7');
+    VALUES (N'20240924094510_DeleteLevyFromDefaultParamaterMaster', N'8.0.13');
 END;
 GO
 
@@ -1154,7 +1154,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240924110427_AddCommunicationCostsDefaultParamaterMaster', N'8.0.7');
+    VALUES (N'20240924110427_AddCommunicationCostsDefaultParamaterMaster', N'8.0.13');
 END;
 GO
 
@@ -1179,7 +1179,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240924194409_UpdateLapcapDataMasterYearColumnName', N'8.0.7');
+    VALUES (N'20240924194409_UpdateLapcapDataMasterYearColumnName', N'8.0.13');
 END;
 GO
 
@@ -1484,7 +1484,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241004134649_CalcRunTables', N'8.0.7');
+    VALUES (N'20241004134649_CalcRunTables', N'8.0.13');
 END;
 GO
 
@@ -1555,7 +1555,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241007082551_CalcRunMinorChanges', N'8.0.7');
+    VALUES (N'20241007082551_CalcRunMinorChanges', N'8.0.13');
 END;
 GO
 
@@ -1713,7 +1713,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241018110438_OrganisationAndPomChanges', N'8.0.7');
+    VALUES (N'20241018110438_OrganisationAndPomChanges', N'8.0.13');
 END;
 GO
 
@@ -1740,7 +1740,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241018130224_UpdateOtherMaterialsDefaultParameterMaster', N'8.0.7');
+    VALUES (N'20241018130224_UpdateOtherMaterialsDefaultParameterMaster', N'8.0.13');
 END;
 GO
 
@@ -1767,7 +1767,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241021102314_UpdateOtherMaterialsLateReportingTonnage', N'8.0.7');
+    VALUES (N'20241021102314_UpdateOtherMaterialsLateReportingTonnage', N'8.0.13');
 END;
 GO
 
@@ -1892,7 +1892,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241021110702_CalcRunPomAndOrganisationRemoveKeys', N'8.0.7');
+    VALUES (N'20241021110702_CalcRunPomAndOrganisationRemoveKeys', N'8.0.13');
 END;
 GO
 
@@ -2023,7 +2023,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241021130056_OrganisationIdAndSubsidaryIdNullable', N'8.0.7');
+    VALUES (N'20241021130056_OrganisationIdAndSubsidaryIdNullable', N'8.0.13');
 END;
 GO
 
@@ -2154,7 +2154,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241024125526_OrganisationIDToInt', N'8.0.7');
+    VALUES (N'20241024125526_OrganisationIDToInt', N'8.0.13');
 END;
 GO
 
@@ -2270,7 +2270,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241024134320_PackagingMaterialWeightToDouble', N'8.0.7');
+    VALUES (N'20241024134320_PackagingMaterialWeightToDouble', N'8.0.13');
 END;
 GO
 
@@ -2494,7 +2494,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241025140420_CalculationResultsTables', N'8.0.7');
+    VALUES (N'20241025140420_CalculationResultsTables', N'8.0.13');
 END;
 GO
 
@@ -2563,7 +2563,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241028092305_CreateMasterDataForCalcResultsTables', N'8.0.7');
+    VALUES (N'20241028092305_CreateMasterDataForCalcResultsTables', N'8.0.13');
 END;
 GO
 
@@ -2670,7 +2670,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables', N'8.0.7');
+    VALUES (N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables', N'8.0.13');
 END;
 GO
 
@@ -2750,7 +2750,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241029110303_AddNewColumnParameterFileNameToDefaultParamSettingMasterTable', N'8.0.7');
+    VALUES (N'20241029110303_AddNewColumnParameterFileNameToDefaultParamSettingMasterTable', N'8.0.13');
 END;
 GO
 
@@ -2830,7 +2830,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241104130025_AddNewColumnLapcapFileNameToLapcapDataMaster', N'8.0.7');
+    VALUES (N'20241104130025_AddNewColumnLapcapFileNameToLapcapDataMaster', N'8.0.13');
 END;
 GO
 
@@ -2861,7 +2861,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241114200611_RemoveCreateAtCalculatorRunClassification', N'8.0.7');
+    VALUES (N'20241114200611_RemoveCreateAtCalculatorRunClassification', N'8.0.13');
 END;
 GO
 
@@ -2889,7 +2889,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241114200729_UpdateOtherParamLapcap', N'8.0.7');
+    VALUES (N'20241114200729_UpdateOtherParamLapcap', N'8.0.13');
 END;
 GO
 
@@ -2920,7 +2920,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241115161403_AddPackagingTonnagePrecision', N'8.0.7');
+    VALUES (N'20241115161403_AddPackagingTonnagePrecision', N'8.0.13');
 END;
 GO
 
@@ -3024,7 +3024,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241120130054_LapCapNorthernIrelandRename', N'8.0.7');
+    VALUES (N'20241120130054_LapCapNorthernIrelandRename', N'8.0.13');
 END;
 GO
 
@@ -3054,7 +3054,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241129145454_AddNewClassficationStatus', N'8.0.7');
+    VALUES (N'20241129145454_AddNewClassficationStatus', N'8.0.13');
 END;
 GO
 
@@ -3145,7 +3145,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250117164554_AllowNullSubmissionPeriodForPom', N'8.0.7');
+    VALUES (N'20250117164554_AllowNullSubmissionPeriodForPom', N'8.0.13');
 END;
 GO
 
@@ -3287,7 +3287,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250122092344_PomAndOrganisationProcedures', N'8.0.7');
+    VALUES (N'20250122092344_PomAndOrganisationProcedures', N'8.0.13');
 END;
 GO
 
@@ -3328,7 +3328,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250123134310_AddCalculatorRunCsvFileMetadata', N'8.0.7');
+    VALUES (N'20250123134310_AddCalculatorRunCsvFileMetadata', N'8.0.13');
 END;
 GO
 
@@ -3379,7 +3379,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250205150405_AddSubmissionPeriodLookup', N'8.0.7');
+    VALUES (N'20250205150405_AddSubmissionPeriodLookup', N'8.0.13');
 END;
 GO
 
@@ -3480,7 +3480,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250318112342_AddFinancialYearTable', N'8.0.7');
+    VALUES (N'20250318112342_AddFinancialYearTable', N'8.0.13');
 END;
 GO
 
@@ -3608,7 +3608,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250318130352_FinancialYearMigrations', N'8.0.7');
+    VALUES (N'20250318130352_FinancialYearMigrations', N'8.0.13');
 END;
 GO
 
@@ -3651,7 +3651,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250319095159_AddFinancialYearForeignKeys', N'8.0.7');
+    VALUES (N'20250319095159_AddFinancialYearForeignKeys', N'8.0.13');
 END;
 GO
 
@@ -3676,7 +3676,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250424155648_AddingHasBillingFileGeneratedColumn', N'8.0.7');
+    VALUES (N'20250424155648_AddingHasBillingFileGeneratedColumn', N'8.0.13');
 END;
 GO
 
@@ -3706,7 +3706,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250427142501_AddNewRunClassification', N'8.0.7');
+    VALUES (N'20250427142501_AddNewRunClassification', N'8.0.13');
 END;
 GO
 
@@ -3750,7 +3750,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250428101935_AddNewRunClassifications', N'8.0.7');
+    VALUES (N'20250428101935_AddNewRunClassifications', N'8.0.13');
 END;
 GO
 
@@ -3795,7 +3795,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250507155935_AddCalculatorRunBillingFileMetadataTable', N'8.0.7');
+    VALUES (N'20250507155935_AddCalculatorRunBillingFileMetadataTable', N'8.0.13');
 END;
 GO
 
@@ -3829,7 +3829,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250509113737_AddTradingName', N'8.0.7');
+    VALUES (N'20250509113737_AddTradingName', N'8.0.13');
 END;
 GO
 
@@ -3854,7 +3854,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250516101138_AddTradingNameToProducerDetail', N'8.0.7');
+    VALUES (N'20250516101138_AddTradingNameToProducerDetail', N'8.0.13');
 END;
 GO
 
@@ -3941,7 +3941,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250516101257_UpdateOrganisationSproc', N'8.0.7');
+    VALUES (N'20250516101257_UpdateOrganisationSproc', N'8.0.13');
 END;
 GO
 
@@ -3973,7 +3973,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250521145003_AddProducerInvoicedMaterialNetTonnage', N'8.0.7');
+    VALUES (N'20250521145003_AddProducerInvoicedMaterialNetTonnage', N'8.0.13');
 END;
 GO
 
@@ -4009,7 +4009,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250521145147_AddProducerDesignatedRunInvoiceInstruction', N'8.0.7');
+    VALUES (N'20250521145147_AddProducerDesignatedRunInvoiceInstruction', N'8.0.13');
 END;
 GO
 
@@ -4054,7 +4054,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250521145341_AddProducerResultFileSuggestedBillingInstruction', N'8.0.7');
+    VALUES (N'20250521145341_AddProducerResultFileSuggestedBillingInstruction', N'8.0.13');
 END;
 GO
 
@@ -4142,7 +4142,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250522093001_AddProducerDesignatedRunHistoryRelationships', N'8.0.7');
+    VALUES (N'20250522093001_AddProducerDesignatedRunHistoryRelationships', N'8.0.13');
 END;
 GO
 
@@ -4167,7 +4167,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250620144219_AddNewColumnIsBillingFileGenerating', N'8.0.7');
+    VALUES (N'20250620144219_AddNewColumnIsBillingFileGenerating', N'8.0.13');
 END;
 GO
 
@@ -4198,7 +4198,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250709123908_RemoveColumnHasBillingFileGenerated', N'8.0.7');
+    VALUES (N'20250709123908_RemoveColumnHasBillingFileGenerated', N'8.0.13');
 END;
 GO
 
@@ -4269,7 +4269,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250717154431_DeleteFinancialYearsData', N'8.0.7');
+    VALUES (N'20250717154431_DeleteFinancialYearsData', N'8.0.13');
 END;
 GO
 
@@ -4301,7 +4301,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250721090348_AddNewPostInitialStatuses', N'8.0.7');
+    VALUES (N'20250721090348_AddNewPostInitialStatuses', N'8.0.13');
 END;
 GO
 
@@ -4358,7 +4358,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250721154526_AddFunctionGetInvoiceAmount', N'8.0.7');
+    VALUES (N'20250721154526_AddFunctionGetInvoiceAmount', N'8.0.13');
 END;
 GO
 
@@ -4418,7 +4418,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250721161113_GetCurrentYearInvoicedTotalAfterThisRun', N'8.0.7');
+    VALUES (N'20250721161113_GetCurrentYearInvoicedTotalAfterThisRun', N'8.0.13');
 END;
 GO
 
@@ -4474,7 +4474,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250721161345_GetOutstandingBalance', N'8.0.7');
+    VALUES (N'20250721161345_GetOutstandingBalance', N'8.0.13');
 END;
 GO
 
@@ -4590,7 +4590,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250721161415_GetInvoiceDetailsAtProducerLevel', N'8.0.7');
+    VALUES (N'20250721161415_GetInvoiceDetailsAtProducerLevel', N'8.0.13');
 END;
 GO
 
@@ -4615,7 +4615,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250723131102_MarkInitialRunsAsDeleted', N'8.0.7');
+    VALUES (N'20250723131102_MarkInitialRunsAsDeleted', N'8.0.13');
 END;
 GO
 
@@ -4646,7 +4646,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250723132540_UpdateInvoiceNetTonnageColumnPrecision', N'8.0.7');
+    VALUES (N'20250723132540_UpdateInvoiceNetTonnageColumnPrecision', N'8.0.13');
 END;
 GO
 
@@ -4732,7 +4732,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250723143822_AddFinancialYears', N'8.0.7');
+    VALUES (N'20250723143822_AddFinancialYears', N'8.0.13');
 END;
 GO
 
@@ -4763,7 +4763,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250724153138_UpdateNetTonnagePrecision', N'8.0.7');
+    VALUES (N'20250724153138_UpdateNetTonnagePrecision', N'8.0.13');
 END;
 GO
 
@@ -4879,7 +4879,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250725133129_AlterInsertInvoiceDetails', N'8.0.7');
+    VALUES (N'20250725133129_AlterInsertInvoiceDetails', N'8.0.13');
 END;
 GO
 
@@ -4995,7 +4995,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250728083102_UpdateBillingInstructionId', N'8.0.7');
+    VALUES (N'20250728083102_UpdateBillingInstructionId', N'8.0.13');
 END;
 GO
 
@@ -5085,7 +5085,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250814125052_AlterCreateRunPomProcedure', N'8.0.7');
+    VALUES (N'20250814125052_AlterCreateRunPomProcedure', N'8.0.13');
 END;
 GO
 
@@ -5166,7 +5166,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250814130248_AlterCreateRunOrganisationProcedure', N'8.0.7');
+    VALUES (N'20250814130248_AlterCreateRunOrganisationProcedure', N'8.0.13');
 END;
 GO
 
@@ -5200,7 +5200,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250815134048_AddProducerIdIndex', N'8.0.7');
+    VALUES (N'20250815134048_AddProducerIdIndex', N'8.0.13');
 END;
 GO
 
@@ -5246,7 +5246,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250909091510_UpdateProducerSuggestedBilling', N'8.0.7');
+    VALUES (N'20250909091510_UpdateProducerSuggestedBilling', N'8.0.13');
 END;
 GO
 
@@ -5262,7 +5262,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250911160340_CorrectMigration', N'8.0.7');
+    VALUES (N'20250911160340_CorrectMigration', N'8.0.13');
 END;
 GO
 
@@ -5326,7 +5326,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251003125307_AlterGetCurrentYearInvoicedTotalAfterThisRunFunction', N'8.0.7');
+    VALUES (N'20251003125307_AlterGetCurrentYearInvoicedTotalAfterThisRunFunction', N'8.0.13');
 END;
 GO
 
@@ -5404,7 +5404,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251023100303_AddErrorTables', N'8.0.7');
+    VALUES (N'20251023100303_AddErrorTables', N'8.0.13');
 END;
 GO
 
@@ -5465,7 +5465,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251023123530_AddNonClusteredIndexes', N'8.0.7');
+    VALUES (N'20251023123530_AddNonClusteredIndexes', N'8.0.13');
 END;
 GO
 
@@ -5512,7 +5512,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251024094126_AddErrorTypesReferenceData', N'8.0.7');
+    VALUES (N'20251024094126_AddErrorTypesReferenceData', N'8.0.13');
 END;
 GO
 
@@ -5553,7 +5553,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251029132348_UpdateErrorTypesSeedDataReplaceUnknownType', N'8.0.7');
+    VALUES (N'20251029132348_UpdateErrorTypesSeedDataReplaceUnknownType', N'8.0.13');
 END;
 GO
 
@@ -5593,7 +5593,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251031131142_RemoveErrorTypeDescriptionColumnAndSeedData', N'8.0.7');
+    VALUES (N'20251031131142_RemoveErrorTypeDescriptionColumnAndSeedData', N'8.0.13');
 END;
 GO
 
@@ -5663,7 +5663,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251117125358_AddSubmitterIdObligationStatusInPOMandOrg', N'8.0.7');
+    VALUES (N'20251117125358_AddSubmitterIdObligationStatusInPOMandOrg', N'8.0.13');
 END;
 GO
 
@@ -5805,7 +5805,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251117130042_ModifyCreateRunOrgAndCreateRunPOMSprocs', N'8.0.7');
+    VALUES (N'20251117130042_ModifyCreateRunOrgAndCreateRunPOMSprocs', N'8.0.13');
 END;
 GO
 
@@ -6063,7 +6063,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251204164331_AddColumnsToOrgDetailAndModifySproc', N'8.0.7');
+    VALUES (N'20251204164331_AddColumnsToOrgDetailAndModifySproc', N'8.0.13');
 END;
 GO
 
@@ -6106,7 +6106,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251209101514_GrantPermissions', N'8.0.7');
+    VALUES (N'20251209101514_GrantPermissions', N'8.0.13');
 END;
 GO
 
@@ -6173,7 +6173,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251209164843_AmendErrorReport', N'8.0.7');
+    VALUES (N'20251209164843_AmendErrorReport', N'8.0.13');
 END;
 GO
 
@@ -6292,7 +6292,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251217120330_JoinerLeaverDatesOrg', N'8.0.7');
+    VALUES (N'20251217120330_JoinerLeaverDatesOrg', N'8.0.13');
 END;
 GO
 
@@ -6398,7 +6398,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260107144455_AddFutureSubmissionPeriods', N'8.0.7');
+    VALUES (N'20260107144455_AddFutureSubmissionPeriods', N'8.0.13');
 END;
 GO
 
@@ -6476,7 +6476,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260218155412_UpdateGetCurrentYearInvoicedTotalAfterThisRun', N'8.0.7');
+    VALUES (N'20260218155412_UpdateGetCurrentYearInvoicedTotalAfterThisRun', N'8.0.13');
 END;
 GO
 
@@ -6546,7 +6546,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260220163836_RemoveStoredProcsAndFuncs', N'8.0.7');
+    VALUES (N'20260220163836_RemoveStoredProcsAndFuncs', N'8.0.13');
 END;
 GO
 
@@ -6949,7 +6949,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260224105304_UseRelativeYear', N'8.0.7');
+    VALUES (N'20260224105304_UseRelativeYear', N'8.0.13');
 END;
 GO
 
@@ -7030,7 +7030,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260303000000_FixRecreatePomOrgDataTables', N'8.0.7');
+    VALUES (N'20260303000000_FixRecreatePomOrgDataTables', N'8.0.13');
 END;
 GO
 
@@ -7195,7 +7195,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260311141533_AddModulationDefaultParameters', N'8.0.7');
+    VALUES (N'20260311141533_AddModulationDefaultParameters', N'8.0.13');
 END;
 GO
 
@@ -7301,7 +7301,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260316112551_AddModulationFields', N'8.0.7');
+    VALUES (N'20260316112551_AddModulationFields', N'8.0.13');
 END;
 GO
 
@@ -7353,7 +7353,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260319164244_AddHasH1AndHasH2OrganisationData', N'8.0.7');
+    VALUES (N'20260319164244_AddHasH1AndHasH2OrganisationData', N'8.0.13');
 END;
 GO
 
@@ -7421,7 +7421,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260401135019_AddSubmissionPeriodProducerReportedMaterialAndProjectedTable', N'8.0.7');
+    VALUES (N'20260401135019_AddSubmissionPeriodProducerReportedMaterialAndProjectedTable', N'8.0.13');
 END;
 GO
 
@@ -7613,7 +7613,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260416083412_RemoveUnsupportedRelativeYears', N'8.0.7');
+    VALUES (N'20260416083412_RemoveUnsupportedRelativeYears', N'8.0.13');
 END;
 GO
 
@@ -7885,7 +7885,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260602101250_AddTransformTables', N'8.0.7');
+    VALUES (N'20260602101250_AddTransformTables', N'8.0.13');
 END;
 GO
 
@@ -8094,7 +8094,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260603161538_BillingRunStatus', N'8.0.7');
+    VALUES (N'20260603161538_BillingRunStatus', N'8.0.13');
 END;
 GO
 
@@ -8200,7 +8200,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260604163323_AmendTransformProjectedH1', N'8.0.7');
+    VALUES (N'20260604163323_AmendTransformProjectedH1', N'8.0.13');
 END;
 GO
 
@@ -8568,7 +8568,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260608135126_AllowNegativeLapCap', N'8.0.7');
+    VALUES (N'20260608135126_AllowNegativeLapCap', N'8.0.13');
 END;
 GO
 
@@ -8620,7 +8620,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260616144420_AddActiveDefaultParameterAndLapcapConstraint', N'8.0.7');
+    VALUES (N'20260616144420_AddActiveDefaultParameterAndLapcapConstraint', N'8.0.13');
 END;
 GO
 
@@ -8693,7 +8693,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260715154551_AddCutOffDateDefaultParameter', N'8.0.7');
+    VALUES (N'20260715154551_AddCutOffDateDefaultParameter', N'8.0.13');
 END;
 GO
 
@@ -8774,7 +8774,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260716130437_AddProducerFeeTables', N'8.0.7');
+    VALUES (N'20260716130437_AddProducerFeeTables', N'8.0.13');
 END;
 GO
 
@@ -8847,7 +8847,7 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260717111524_AddModulationAndSmcw', N'8.0.7');
+    VALUES (N'20260717111524_AddModulationAndSmcw', N'8.0.13');
 END;
 GO
 
@@ -8970,7 +8970,56 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260722145707_AddCostDataAndCancelledProducerTables', N'8.0.7');
+    VALUES (N'20260722145707_AddCostDataAndCancelledProducerTables', N'8.0.13');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260810155245_UpdateMaterialName'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [name] = N''Fibre Composite'', [description] = N''Fibre Composite''
+    WHERE [code] = N''FC'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260810155245_UpdateMaterialName'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [name] = N''Paper or Card'', [description] = N''Paper or Card''
+    WHERE [code] = N''PC'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260810155245_UpdateMaterialName'
+)
+BEGIN
+    EXEC(N'UPDATE [material] SET [name] = N''Other Materials'', [description] = N''Other Materials''
+    WHERE [code] = N''OT'';
+    SELECT @@ROWCOUNT');
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260810155245_UpdateMaterialName'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260810155245_UpdateMaterialName', N'8.0.13');
 END;
 GO
 
