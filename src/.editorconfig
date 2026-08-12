@@ -79,7 +79,9 @@ dotnet_naming_rule.private_static_fields_should_be_pascal_case.symbols = private
 dotnet_naming_rule.private_static_fields_should_be_pascal_case.style = private_static_fields_should_be_pascal_case
 dotnet_naming_rule.private_static_fields_should_be_pascal_case.severity = suggestion
 
-# Analyzer configuration
+# Analyzer configuration. These have been set to mirror SonarQube server settings.
+# Note that those with severity = error will be rejected in the CI pipeline.
+
 # CS1591: Missing XML comment for publicly visible type or member
 dotnet_diagnostic.CS1591.severity = none
 
@@ -98,12 +100,17 @@ dotnet_diagnostic.CA2016.severity = warning
 # MSTEST0037: Use proper 'Assert' methods
 dotnet_diagnostic.MSTEST0037.severity = suggestion
 
+# S1135: Complete the task associated to this 'TODO' comment.
+dotnet_diagnostic.S1135.severity = silent
+
 # S107: Methods should not have too many parameters
-dotnet_diagnostic.S107.severity = warning
+dotnet_diagnostic.S107.severity = error
 
 # S3776: Cognitive Complexity of methods should not be too high
-dotnet_diagnostic.S3776.severity = warning
+dotnet_diagnostic.S3776.severity = error
 
 [**/Migrations/*.cs]
 generated_code = true
+
+# S3776: Rename class to match pascal case naming rules, trim underscores from the name.
 dotnet_diagnostic.S101.severity = none
