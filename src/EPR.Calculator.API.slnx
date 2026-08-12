@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Tests/">
+    <Project Path="EPR.Calculator.API.BackgroundService.UnitTests/EPR.Calculator.API.BackgroundService.UnitTests.csproj" />
+    <Project Path="EPR.Calculator.API.IntegrationTests/EPR.Calculator.API.IntegrationTests.csproj" />
+    <Project Path="EPR.Calculator.API.UnitTests/EPR.Calculator.API.UnitTests.csproj" />
+  </Folder>
+  <Project Path="EPR.Calculator.API.BackgroundService/EPR.Calculator.API.BackgroundService.csproj" />
+  <Project Path="EPR.Calculator.API.Data/EPR.Calculator.API.Data.csproj" />
+  <Project Path="EPR.Calculator.API/EPR.Calculator.API.csproj" />
+</Solution>
