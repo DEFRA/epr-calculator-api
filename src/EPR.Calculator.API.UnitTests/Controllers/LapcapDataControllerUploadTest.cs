@@ -76,7 +76,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var httpContext = new DefaultHttpContext { User = principal };
 
-            var controller = new LapcapDataController(dbContext, Mock.Of<ILogger<LapcapDataController>>())
+            var controller = new LapcapDataController(dbContext)
             {
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };

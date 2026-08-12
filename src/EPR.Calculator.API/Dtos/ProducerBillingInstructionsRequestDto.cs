@@ -8,7 +8,7 @@
         /// <summary>
         /// Gets or sets the search term for filtering.
         /// </summary>
-        public ProducerBillingInstructionsSearchQueryDto? SearchQuery { get; set; }
+        public ProducerBillingInstructionsSearchQueryDto SearchQuery { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the page number for pagination.

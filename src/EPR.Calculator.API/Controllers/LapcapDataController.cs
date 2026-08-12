@@ -13,8 +13,7 @@ namespace EPR.Calculator.API.Controllers;
 [Produces("application/json")]
 [Route("v1")]
 public class LapcapDataController (
-    ApplicationDBContext context,
-    ILogger<LapcapDataController> logger
+    ApplicationDBContext context
 ) : ControllerBase
 {
     [HttpPost]
@@ -25,8 +24,6 @@ public class LapcapDataController (
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Create(CreateLapcapDataRequest request, CancellationToken cancellationToken = default)
     {
-        logger.LogDebug("Requested LAPCAP filename: {LapcapFilename}", request.Filename);
-
         await using (var transaction = await context.Database.BeginTransactionAsync(cancellationToken))
         {
             try

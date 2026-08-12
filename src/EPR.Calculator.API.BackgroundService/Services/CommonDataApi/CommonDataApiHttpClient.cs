@@ -105,27 +105,25 @@ namespace EPR.Calculator.API.BackgroundService.Services.CommonDataApi
             using var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
             // Force HTTP/1.1 for requests. HTTP/2's framing layer can buffer
-            // response data in a way that prevents line-by-line NDJSON streaming
+            // response data in a way that prevents incremental NDJSON streaming
             // from working correctly (notably on macOS).
             request.Version = HttpVersion.Version11;
 
             using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, linkedCts.Token);
             response.EnsureSuccessStatusCode();
 
-            var stream = await GetResponseStream(response, linkedCts.Token);
-            using var reader = new StreamReader(stream);
+            await using var stream = await GetResponseStream(response, linkedCts.Token);
 
-            while (!reader.EndOfStream)
+            // topLevelValues: true reads whitespace-separated top-level JSON values,
+            // which is exactly the NDJSON wire format, straight from the UTF-8 bytes.
+            var records = JsonSerializer.DeserializeAsyncEnumerable<T>(
+                stream,
+                topLevelValues: true,
+                NdJsonOptions,
+                cancellationToken);
+
+            await foreach (var record in records)
             {
-                var line = await reader.ReadLineAsync(cancellationToken);
-
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    continue;
-                }
-
-                var record = JsonSerializer.Deserialize<T>(line, NdJsonOptions);
-
                 if (record is not null)
                 {
                     yield return record;
