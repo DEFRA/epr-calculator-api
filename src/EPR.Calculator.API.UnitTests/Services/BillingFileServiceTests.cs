@@ -457,7 +457,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             {
                 PageNumber = 1,
                 PageSize = 10,
-                SearchQuery = searchQuery,
+                SearchQuery = searchQuery ?? new ()
             };
 
         private static ProduceBillingInstuctionRequestDto AcceptRequest(params int[] organisationIds) => new()
