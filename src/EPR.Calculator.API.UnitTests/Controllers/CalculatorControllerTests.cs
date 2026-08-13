@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Security.Principal;
+using EPR.Calculator.API.BackgroundService;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
@@ -626,7 +627,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             return new CalculatorController(
                 DbContext,
                 Mock.Of<IBlobStorageService>(),
-                Mock.Of<IServiceBusService>(),
+                Mock.Of<IBackgroundTaskQueue>(),
                 runStatusValidator ?? Mock.Of<ICalculatorRunStatusDataValidator>(),
                 validator ?? Mock.Of<ICalcRelativeYearRequestDtoDataValidator>(),
                 availableClassificationsService ?? Mock.Of<IAvailableClassificationsService>(),

@@ -12,15 +12,21 @@
     Azure/KeyVault.
   */
 
-  // Adjust as desired for more verbose logging.
-  "Logging": {
-    "LogLevel": {
-      "default"                                       : "Information",
-      "EPR.Calculator"                                : "Debug",
-      "Microsoft.AspNetCore"                          : "Warning",
-      "Microsoft"                                     : "Warning",
-      "Microsoft.AspNetCore.Hosting"                  : "Information",
-      "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+  // Serilog replaces ILoggerFactory so the app doesn't use the standard "Logging"
+  // config section. appsettings.json is tuned for Azure hosting environments;
+  // this is more verbose for local development. Change as needed.
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Warning",
+      "Override": {
+        "EPR.Calculator": "Debug",
+        "EPR.Calculator.API.BackgroundService": "Debug",
+        "Microsoft.AspNetCore.Authentication": "Warning",
+        "Microsoft.AspNetCore.Hosting.Diagnostics": "Information",
+        "Microsoft.EntityFrameworkCore": "Warning",
+        "Microsoft.Hosting.Lifetime": "Information",
+        "Microsoft.IdentityModel": "Warning"
+      }
     }
   },
 
@@ -45,8 +51,16 @@
     "FssContainer"            : "paycal-billingfilejsonauthorisedforfss"
   },
 
-  "ServiceBus": {
-    "ConnectionString": "",
-    "QueueName"       : "defra.epr.calculator.run.local"
+  "CommonDataApi": {
+    "DataLoader": {
+      "Enabled"              : false,
+      "PomBatchSize"         : 10000,
+      "OrganisationBatchSize": 10000
+    },
+    "HttpClient": {
+      "BaseUrl"           : "https://localhost:5001",
+      "CompressionEnabled": true,
+      "StreamStartTimeout": "00:15:00"
+    }
   }
 }

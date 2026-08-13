@@ -1,4 +1,4 @@
-﻿using Azure.Messaging.ServiceBus;
+﻿using EPR.Calculator.API.BackgroundService;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
@@ -6,7 +6,6 @@ using EPR.Calculator.API.Services;
 using EPR.Calculator.API.UnitTests.Helpers;
 using EPR.Calculator.API.Validators;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
@@ -31,20 +30,13 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.LapcapDataController = new LapcapDataController(this.DbContext, lapcapDataValidator, Mock.Of<ILogger<LapcapDataController>>());
 
             var mockStorageService = new Mock<IBlobStorageService>();
-            var mockServiceBusService = new Mock<IServiceBusService>();
-            var mockFactory = new Mock<IAzureClientFactory<ServiceBusClient>>();
-            var mockClient = new Mock<ServiceBusClient>();
-            var mockServiceBusSender = new Mock<ServiceBusSender>();
             var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
-            mockServiceBusSender.Setup(msbs => msbs.SendMessageAsync(It.IsAny<ServiceBusMessage>(), default)).Returns(Task.CompletedTask);
-            mockClient.Setup(mc => mc.CreateSender(It.IsAny<string>())).Returns(mockServiceBusSender.Object);
-
-            mockFactory.Setup(m => m.CreateClient(It.IsAny<string>())).Returns(mockClient.Object);
+            var mockBackgroundTaskQueue = new Mock<IBackgroundTaskQueue>();
 
             this.CalculatorController = new CalculatorController(
                 this.DbContext,
                 mockStorageService.Object,
-                mockServiceBusService.Object,
+                mockBackgroundTaskQueue.Object,
                 Mock.Of<ICalculatorRunStatusDataValidator>(),
                 mockValidator.Object,
                 Mock.Of<IAvailableClassificationsService>(),

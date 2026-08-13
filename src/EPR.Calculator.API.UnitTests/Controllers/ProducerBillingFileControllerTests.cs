@@ -1,6 +1,7 @@
 using System.Net;
 using System.Security.Claims;
 using System.Security.Principal;
+using EPR.Calculator.API.BackgroundService;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
@@ -16,17 +17,17 @@ public class ProducerBillingFileControllerTests
     private const string UserName = "TestUser";
 
     private Mock<IBillingFileService> billingFileServiceMock = null!;
-    private Mock<IServiceBusService> serviceBusMock = null!;
+    private Mock<IBackgroundTaskQueue> backgroundTaskQueueMock = null!;
     private ProducerBillingFileController controller = null!;
 
     [TestInitialize]
     public void Setup()
     {
         billingFileServiceMock = new Mock<IBillingFileService>();
-        serviceBusMock = new Mock<IServiceBusService>();
+        backgroundTaskQueueMock = new Mock<IBackgroundTaskQueue>();
         controller = new ProducerBillingFileController(
             billingFileServiceMock.Object,
-            serviceBusMock.Object)
+            backgroundTaskQueueMock.Object)
         {
             ControllerContext = CreateAuthenticatedControllerContext(UserName),
         };
@@ -62,9 +63,10 @@ public class ProducerBillingFileControllerTests
         await controller.ProducerBillingInstructions(RunId, CancellationToken.None);
 
         // Assert
-        serviceBusMock.Verify(
-            s => s.SendMessage(It.Is<BillingFileGenerationMessage>(
-                m => m.CalculatorRunId == RunId && m.ApprovedBy == UserName)),
+        backgroundTaskQueueMock.Verify(
+            s => s.QueueAsync(It.Is<BackgroundServiceMessage>(
+                m => m.CalculatorRunId == RunId && m.Username == UserName),
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -82,8 +84,8 @@ public class ProducerBillingFileControllerTests
         await controller.ProducerBillingInstructions(RunId, CancellationToken.None);
 
         // Assert
-        serviceBusMock.Verify(
-            s => s.SendMessage(It.IsAny<BillingFileGenerationMessage>()),
+        backgroundTaskQueueMock.Verify(
+            s => s.QueueAsync(It.IsAny<BackgroundServiceMessage>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 

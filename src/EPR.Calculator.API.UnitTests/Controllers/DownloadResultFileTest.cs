@@ -1,3 +1,4 @@
+using EPR.Calculator.API.BackgroundService;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -36,7 +37,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.controller = new CalculatorController(
                 this.context,
                 this.mockBlobStorage.Object,
-                Mock.Of<IServiceBusService>(),
+                Mock.Of<IBackgroundTaskQueue>(),
                 Mock.Of<ICalculatorRunStatusDataValidator>(),
                 Mock.Of<ICalcRelativeYearRequestDtoDataValidator>(),
                 Mock.Of<IAvailableClassificationsService>(),

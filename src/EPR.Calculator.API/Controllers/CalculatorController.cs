@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using EPR.Calculator.API.BackgroundService;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
@@ -23,7 +24,7 @@ namespace EPR.Calculator.API.Controllers;
 public class CalculatorController(
     ApplicationDBContext dbContext,
     IBlobStorageService blobStorage,
-    IServiceBusService serviceBus,
+    IBackgroundTaskQueue backgroundTaskQueue,
     ICalculatorRunStatusDataValidator runStatusValidator,
     ICalcRelativeYearRequestDtoDataValidator validator,
     IAvailableClassificationsService availableClassificationsService,
@@ -101,16 +102,6 @@ public class CalculatorController(
                 await dbContext.CalculatorRuns.AddAsync(calculatorRun);
                 await dbContext.SaveChangesAsync();
 
-                // Setup message
-                var calculatorRunMessage = new CalculatorRunMessage
-                {
-                    CalculatorRunId = calculatorRun.Id,
-                    CreatedBy = User.GetName()
-                };
-
-                // Send message
-                await serviceBus.SendMessage(calculatorRunMessage);
-
                 // All good, commit transaction
                 await transaction.CommitAsync();
             }
@@ -121,6 +112,16 @@ public class CalculatorController(
                 throw;
             }
         }
+
+        // Setup message
+        var message = new BackgroundServiceMessage
+        {
+            MessageType     = BackgroundServiceMessageType.Result,
+            CalculatorRunId = calculatorRun.Id,
+            Username        = User.GetName(),
+        };
+
+        await backgroundTaskQueue.QueueAsync(message);
 
         // Return accepted status code: Accepted
         return new ObjectResult(null) { StatusCode = StatusCodes.Status202Accepted };

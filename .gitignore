@@ -486,3 +486,5 @@ $RECYCLE.BIN/
 
 # App configs for local dev
 **/appsettings.local.json
+
+coveragereport/

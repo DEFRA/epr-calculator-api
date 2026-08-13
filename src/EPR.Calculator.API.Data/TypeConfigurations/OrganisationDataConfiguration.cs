@@ -6,7 +6,7 @@ namespace EPR.Calculator.API.Data.TypeConfigurations;
 
 public class OrganisationDataConfiguration : IEntityTypeConfiguration<OrganisationData>
 {
-    // Ensure fields names match CalculatorRunOrganisationDataDetailConfiguration for bulk insert https://github.com/DEFRA/epr-calculator-service/blob/main/src/EPR.Calculator.Service.Function/Services/CalculatorRunOrgData.cs
+    // Ensure fields names match CalculatorRunOrganisationDataDetailConfiguration for bulk insert https://github.com/DEFRA/epr-calculator-service/blob/main/src/EPR.Calculator.API.BackgroundService/Services/CalculatorRunOrgData.cs
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<OrganisationData> builder)
     {
