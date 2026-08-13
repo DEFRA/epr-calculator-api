@@ -3,7 +3,7 @@ using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Converter;
 using EPR.Calculator.API.Data.DataModels;
 
-namespace EPR.Calculator.API.BackgroundService.JsonExporter.Model;
+namespace EPR.Calculator.API.BackgroundService.Exporter.JsonExporter.Model;
 
 public record CancelledProducers
 {

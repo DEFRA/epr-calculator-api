@@ -1,8 +1,8 @@
 using System.Text.Json;
+using EPR.Calculator.API.BackgroundService.Exporter.JsonExporter.Model;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.BackgroundService.Models;
 
-namespace EPR.Calculator.API.BackgroundService.UnitTests.JsonExporter.Model;
+namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.JsonExporter.Model;
 
 [TestClass]
 public class CalcResultParameterOtherCostJsonTests

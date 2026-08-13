@@ -1,7 +1,7 @@
-using EPR.Calculator.API.BackgroundService.JsonExporter.Model;
+using EPR.Calculator.API.BackgroundService.Exporter.JsonExporter.Model;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 
-namespace EPR.Calculator.API.BackgroundService.UnitTests.JsonExporter.Model;
+namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.JsonExporter.Model;
 
 [TestClass]
 public class BillingFileJsonTests

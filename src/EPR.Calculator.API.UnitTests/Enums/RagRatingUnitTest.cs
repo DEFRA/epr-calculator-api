@@ -1,4 +1,6 @@
-namespace EPR.Calculator.API.Data.Enums
+using EPR.Calculator.API.Data.Enums;
+
+namespace EPR.Calculator.API.UnitTests.Enums
 {
     [TestClass]
     public class RagRatingExtensionsTests
