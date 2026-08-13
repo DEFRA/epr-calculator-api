@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace EPR.Calculator.API.BackgroundService.UnitTests.JsonExporter.Model;
+namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.JsonExporter.Model;
 
 public static class JsonTestUtils
 {

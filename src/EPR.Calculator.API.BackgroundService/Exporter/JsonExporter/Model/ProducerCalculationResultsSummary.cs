@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace EPR.Calculator.API.BackgroundService.JsonExporter.Model;
+namespace EPR.Calculator.API.BackgroundService.Exporter.JsonExporter.Model;
 
 public class ProducerCalculationResultsSummary
 {

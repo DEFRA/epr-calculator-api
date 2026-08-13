@@ -1,8 +1,8 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
 using EPR.Calculator.API.BackgroundService.Converter;
+using EPR.Calculator.API.BackgroundService.Exporter.JsonExporter.Model;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
-using EPR.Calculator.API.BackgroundService.JsonExporter.Model;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
 

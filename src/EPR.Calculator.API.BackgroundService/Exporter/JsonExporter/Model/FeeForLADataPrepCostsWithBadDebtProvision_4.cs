@@ -1,10 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
-using EPR.Calculator.API.BackgroundService.Models;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Utils;
+using EPR.Calculator.API.Data.DataModels;
 
-namespace EPR.Calculator.API.BackgroundService.JsonExporter.Model;
+namespace EPR.Calculator.API.BackgroundService.Exporter.JsonExporter.Model;
 
 [SuppressMessage("Naming", "S101:Types should be named in PascalCase", Justification = "Required for JSON contract")]
 public class FeeForLADataPrepCostsWithBadDebtProvision_4
