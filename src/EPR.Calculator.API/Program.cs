@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Reflection;
 using EPR.Calculator.API;
 using EPR.Calculator.API.BackgroundService.Logging;
@@ -16,6 +17,10 @@ using Serilog.Formatting.Compact;
     Justification = "Pre-existing behaviour.")]
 
 const string corsPolicy = "AllowAllOrigins";
+
+var enGb = new CultureInfo("en-GB");
+CultureInfo.DefaultThreadCurrentCulture = enGb;
+CultureInfo.DefaultThreadCurrentUICulture = enGb;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration

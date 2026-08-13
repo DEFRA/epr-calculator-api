@@ -4,7 +4,6 @@ using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Utils;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Logging;
-using EPR.Calculator.API.BackgroundService.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Services;

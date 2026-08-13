@@ -3,10 +3,9 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Mappers;
-using EPR.Calculator.API.Validators;
+using EPR.Calculator.API.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Web;
 
 namespace EPR.Calculator.API.Controllers;
 
@@ -15,7 +14,6 @@ namespace EPR.Calculator.API.Controllers;
 [Route("v1")]
 public class LapcapDataController (
     ApplicationDBContext context,
-    ILapcapDataValidator validator,
     ILogger<LapcapDataController> logger
 ) : ControllerBase
 {
@@ -25,26 +23,20 @@ public class LapcapDataController (
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Create([FromBody] CreateLapcapDataDto request)
+    public async Task<IActionResult> Create(CreateLapcapDataRequest request, CancellationToken cancellationToken = default)
     {
-        logger.LogDebug("Requested LAPCAP filename: {LapcapFilename}", request.LapcapFileName);
+        logger.LogDebug("Requested LAPCAP filename: {LapcapFilename}", request.Filename);
 
-        var validationResult = validator.Validate(request);
-        if (validationResult.IsInvalid)
-            return BadRequest(validationResult.Errors);
-
-        var templateMaster = await context.LapcapDataTemplateMaster.ToListAsync();
-        using (var transaction = await context.Database.BeginTransactionAsync())
+        await using (var transaction = await context.Database.BeginTransactionAsync(cancellationToken))
         {
             try
             {
-                var relativeYear = await context.FindRelativeYearAsync(request.RelativeYear.Value);
-                if (relativeYear == null)
-                    return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
+                var master = await context.LapcapDataTemplateMaster
+                    .ToDictionaryAsync(LapcapKeyHelper.KeyFor, cancellationToken);
 
                 var oldLapcapData = await context.LapcapDataMaster
                     .Where(x => x.EffectiveTo == null && x.RelativeYear == request.RelativeYear)
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
 
                 oldLapcapData.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // Side effecting db update
 
@@ -54,30 +46,27 @@ public class LapcapDataController (
                     CreatedBy = User.GetName(),
                     EffectiveFrom = DateTime.UtcNow,
                     EffectiveTo = null,
-                    LapcapFileName = request.LapcapFileName,
-                    RelativeYear = request.RelativeYear
+                    LapcapFileName = request.Filename!,
+                    RelativeYear = request.RelativeYear!.Value
                 };
-                await context.LapcapDataMaster.AddAsync(lapcapDataMaster);
+                await context.LapcapDataMaster.AddAsync(lapcapDataMaster, cancellationToken);
 
-                foreach (var templateValue in request.LapcapDataTemplateValues)
+                foreach (var value in request.Values!)
                 {
-                    var uniqueReference = templateMaster.Single(x =>
-                        x.Material == templateValue.Material && x.Country == templateValue.CountryName).UniqueReference;
-
                     await context.LapcapDataDetail.AddAsync(new LapcapDataDetail
                     {
-                        TotalCost = decimal.Parse(templateValue.TotalCost.Replace("£", string.Empty)),
-                        UniqueReference = uniqueReference,
+                        TotalCost = value.TotalCost!.Value,
+                        UniqueReference = master[LapcapKeyHelper.KeyFor(value)].UniqueReference,
                         LapcapDataMaster = lapcapDataMaster
-                    });
+                    }, cancellationToken);
                 }
 
-                await context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                await context.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
             }
             catch (Exception)
             {
-                await transaction.RollbackAsync();
+                await transaction.RollbackAsync(CancellationToken.None);
                 throw;
             }
         }

@@ -6,6 +6,7 @@ using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Fixtures;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using EPR.Calculator.API.BackgroundService.Utils;
+using EPR.Calculator.API.Data.Utils;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -729,4 +730,3 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         }
     }
 }
-

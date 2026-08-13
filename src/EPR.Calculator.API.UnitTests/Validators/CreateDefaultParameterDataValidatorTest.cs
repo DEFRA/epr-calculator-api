@@ -6,7 +6,7 @@ using EPR.Calculator.API.Validators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace EPR.Calculator.API.UnitTests.Validator
+namespace EPR.Calculator.API.UnitTests.Validators
 {
     [TestClass]
     public class CreateDefaultParameterDataValidatorTest

@@ -26,8 +26,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var validator = new CreateDefaultParameterDataValidator(this.DbContext);
             this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator, Mock.Of<ILogger<DefaultParameterSettingController>>());
-            ILapcapDataValidator lapcapDataValidator = new LapcapDataValidator(this.DbContext);
-            this.LapcapDataController = new LapcapDataController(this.DbContext, lapcapDataValidator, Mock.Of<ILogger<LapcapDataController>>());
+            this.LapcapDataController = new LapcapDataController(this.DbContext, Mock.Of<ILogger<LapcapDataController>>());
 
             var mockStorageService = new Mock<IBlobStorageService>();
             var mockValidator = new Mock<ICalcRelativeYearRequestDtoDataValidator>();
