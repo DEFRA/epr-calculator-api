@@ -1,4 +1,3 @@
-using System.Text;
 using Azure;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.Options;
@@ -49,31 +48,12 @@ public class BlobStorageService : IBlobStorageService
 
         try
         {
-            var blobStream = await blob.OpenReadAsync(cancellationToken: cancellationToken);
-
-            // Preserves existing behaviour - not entirely sure why this is necessary.
-            // Files are currently written/stored as UTF-8.
-            // If UTF-16 is important, files should be written as such to begin with.
-            // This method would then just return blobStream rather than having to re-encode.
-            return await ReEncodeAsUtf16Async(blobStream, cancellationToken);
+            return await blob.OpenReadAsync(cancellationToken: cancellationToken);
         }
         catch (RequestFailedException ex) when (ex.Status == 404)
         {
             return null;
         }
-    }
-
-    private static async Task<MemoryStream> ReEncodeAsUtf16Async(Stream source, CancellationToken cancellationToken)
-    {
-        using var reader = new StreamReader(source, detectEncodingFromByteOrderMarks: true);
-        var content = await reader.ReadToEndAsync(cancellationToken);
-
-        var memoryStream = new MemoryStream();
-        await using var writer = new StreamWriter(memoryStream, new UnicodeEncoding(bigEndian: false, byteOrderMark: true), leaveOpen: true);
-        await writer.WriteAsync(content.AsMemory(), cancellationToken);
-        await writer.FlushAsync(cancellationToken);
-        memoryStream.Position = 0;
-        return memoryStream;
     }
 
     private async Task<bool> MoveBlob(BlobContainerClient source, BlobContainerClient destination, string blobName, CancellationToken cancellationToken)
