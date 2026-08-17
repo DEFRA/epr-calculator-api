@@ -87,7 +87,7 @@ public class Section1MaterialsExporter : IProducerFeesPartExporter
                 "Red + Red Medical Net Tonnage",
                 "Amber + Amber Medical Net Tonnage",
                 "Green + Green Medical Net Tonnage",
-                "Residual Self-managed Consumer Waste'"
+                "Residual Self-managed Consumer Waste"
             ]);
         } else {
             headers.AddRange([
