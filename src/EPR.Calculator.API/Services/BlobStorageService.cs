@@ -9,6 +9,7 @@ public interface IBlobStorageService
 {
     Task<Stream?> OpenResultCsvStream(string filename, CancellationToken cancellationToken = default);
     Task<Stream?> OpenBillingCsvStream(string filename, CancellationToken cancellationToken = default);
+    Task<Stream?> OpenBillingJsonStream(string filename, CancellationToken cancellationToken = default);
     Task<bool> MoveBillingJsonToFss(string filename, CancellationToken cancellationToken = default);
 }
 
@@ -37,7 +38,10 @@ public class BlobStorageService : IBlobStorageService
         OpenBlobStream(resultCsvContainer, filename, cancellationToken);
 
     public Task<Stream?> OpenBillingCsvStream(string filename, CancellationToken cancellationToken = default) =>
-        OpenBlobStream(billingCsvContainer, filename, cancellationToken);
+        OpenBlobStream(billingCsvContainer, filename, cancellationToken);    
+    
+    public Task<Stream?> OpenBillingJsonStream(string filename, CancellationToken cancellationToken = default) =>
+        OpenBlobStream(billingJsonContainer, filename, cancellationToken) ?? OpenBlobStream(fssContainer, filename, cancellationToken);
 
     public Task<bool> MoveBillingJsonToFss(string filename, CancellationToken cancellationToken = default) =>
         MoveBlob(billingJsonContainer, fssContainer, filename, cancellationToken);

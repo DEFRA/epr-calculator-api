@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.BackgroundService;
+using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
@@ -27,7 +28,8 @@ public class CalculatorController(
     ICalculatorRunStatusDataValidator runStatusValidator,
     ICalcRelativeYearRequestDtoDataValidator validator,
     IAvailableClassificationsService availableClassificationsService,
-    ICalculationRunService calculationRunService
+    ICalculationRunService calculationRunService,
+    IFileExportService fileExportService
 ) : ControllerBase
 {
     [HttpPost]
@@ -164,23 +166,34 @@ public class CalculatorController(
     }
 
     [HttpGet]
-    [Route("DownloadResult/{runId:int}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [Route("downloadResultCsv/{runId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IResult> DownloadResultFile(int runId)
+    public async Task<IActionResult> DownloadResultCsv(int runId, CancellationToken cancellationToken = default)
+    {
+        return await fileExportService.Export(runId, RunType.Calculator, FileExportType.Csv, cancellationToken) switch
+        {
+            FileExportResult.Exported s => File(s.Content, "text/csv", s.FileName),
+            FileExportResult.NotFound _ => NotFound(),
+            FileExportResult.NotCached _ => await DownloadResultCsvFromBlobStorage(runId),
+            _ => throw new InvalidOperationException($"Unexpected {nameof(FileExportResult)}")
+        };
+    }
+
+    private async Task<IActionResult> DownloadResultCsvFromBlobStorage(int runId)
     {
         var csvFileMetadata = await dbContext.CalculatorRunCsvFileMetadata.SingleOrDefaultAsync(metadata => metadata.CalculatorRunId == runId && metadata.FileName != null && metadata.FileName.Contains("_Results"));
 
         if (csvFileMetadata == null)
-            return Results.NotFound(string.Format(CommonResources.NoCSVFileFound, runId));
+            return NotFound(string.Format(CommonResources.NoCSVFileFound, runId));
 
         var stream = await blobStorage.OpenResultCsvStream(csvFileMetadata.FileName);
 
         if (stream == null)
-            return Results.NotFound(string.Format(CommonResources.NoCSVFileFound, runId));
+            return NotFound(string.Format(CommonResources.NoCSVFileFound, runId));
 
-        return Results.File(stream, "text/csv", csvFileMetadata.FileName);
+        return File(stream, "text/csv", csvFileMetadata.FileName);
     }
 
     [HttpGet]
