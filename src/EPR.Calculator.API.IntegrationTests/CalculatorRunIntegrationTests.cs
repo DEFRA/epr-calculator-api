@@ -1,20 +1,21 @@
 using System.Globalization;
+using System.Security.Claims;
 using CsvHelper;
 using CsvHelper.Configuration;
+using EPR.Calculator.API.Controllers;
+using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.BackgroundService.Enums;
-using EPR.Calculator.API.BackgroundService.Features.BillingRuns;
-using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
-using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
-using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
-using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
-using EPR.Calculator.API.BackgroundService.Utils;
 using EPR.Calculator.API.Data.Utils;
+using EPR.Calculator.API.Dtos;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-
+using System.Text;
+using System.Text.Json;
+using EPR.Calculator.API.BackgroundService.Enums;
 namespace EPR.Calculator.API.IntegrationTests;
 
 [TestCategory("IntegrationTests")]
@@ -26,66 +27,139 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
     private static readonly DateTime Now = DateTime.UtcNow;
 
     [TestMethod]
-    public async Task IntegrationTest_2025() => await RunTest("test2025", new RelativeYear(2025), "some-user");
+    public async Task IntegrationTest_2025() => await RunTest($"test2025-{Guid.NewGuid():N}", new RelativeYear(2025), "some-user");
 
     [TestMethod]
-    public async Task IntegrationTest_2026() => await RunTest("test2026", new RelativeYear(2026), "some-user");
+    public async Task IntegrationTest_2026() => await RunTest($"test2026-{Guid.NewGuid():N}", new RelativeYear(2026), "some-user");
 
     private async static Task RunTest(string name, RelativeYear relativeYear, String rundBy)
     {
-        await using var db = await Provider
-            .CreateScope()
-            .ServiceProvider
-            .GetRequiredService<IDbContextFactory<ApplicationDBContext>>()
+        await using var scope = Provider.CreateAsyncScope();
+        var services = scope.ServiceProvider;
+
+        await using var db = await services.GetRequiredService<IDbContextFactory<ApplicationDBContext>>()
             .CreateDbContextAsync();
 
-        var calculatorRunId = await SeedCalculatorRun(db, name, relativeYear, "TestData/defaultParams.csv", "TestData/lapcap.csv");
+        await SeedCalculatorData(db, relativeYear, "TestData/defaultParams.csv", "TestData/lapcap.csv");
 
         var fakeCommonDataApi                   = Provider.GetRequiredService<FakeCommonDataApiClient>();
         fakeCommonDataApi.OrganisationResponses = OrganisationResponses($"TestData/{relativeYear}-organisation-data.csv");
         fakeCommonDataApi.PomResponses          = PomResponses($"TestData/{relativeYear}-pom-data.csv");
 
-        var fakeBlobStorageUploadService = Provider.GetRequiredService<FakeBlobStorageUploadService>();
+        var calculatorController          = CreateController<CalculatorController>(services);
+        var calculatorNewController       = CreateController<CalculatorNewController>(services);
+        var producerBillingFileController = CreateController<ProducerBillingFileController>(services);
+        var billingFileController         = CreateController<BillingFileController>(services);
 
-        var calculatorRunResult = await PerformCalculatorRun(calculatorRunId, rundBy);
+        // Results
+        var createRunResult = (await calculatorController.Create(new CreateCalculatorRunDto {CalculatorRunName = name, RelativeYear = relativeYear}))
+            .ShouldBeOfType<ObjectResult>();
+
+        createRunResult.StatusCode.ShouldBe(StatusCodes.Status202Accepted, $"Controller returned: {JsonSerializer.Serialize(createRunResult.Value)}");
+
+        var runId = await db.CalculatorRuns
+            .Where(x => x.Name == name)
+            .Select(x => x.Id)
+            .SingleAsync();
+
+        await WaitUntil(
+            async () =>
+            {
+                var status = await db.CalculatorRuns
+                    .AsNoTracking()
+                    .Where(x => x.Id == runId)
+                    .Select(x => x.CalculatorRunClassificationId)
+                    .SingleAsync();
+
+                return status == RunClassificationStatusIds.ERRORID
+                    ? throw new Exception($"Calculator run {runId} entered Errored state.")
+                    : status == RunClassificationStatusIds.UNCLASSIFIEDID;
+            },
+            $"Calculator run {runId} did not complete.");
+
+        await AssertCsv(
+            actualContents: await ExecuteFileResult(await calculatorController.DownloadResultCsv(runId), services),
+            expectedPath: $"ExpectedData/{relativeYear}-results.csv",
+            ignoreLines: [1, 2, 3, 7, 8, 9],
+            label: "Results CSV");
+
+        // Billing
+        foreach (var run in await db.CalculatorRuns
+                                    .Where(x =>
+                                        x.RelativeYear == relativeYear &&
+                                        x.CalculatorRunClassificationId == RunClassificationStatusIds.INITIALRUNID)
+                                    .ToListAsync())
         {
-            var contents      = fakeBlobStorageUploadService.Get(calculatorRunResult.ExportResult.CsvMetadata.FileName);
-            var actualLines   = string.Join(Environment.NewLine, contents.Split(Environment.NewLine, StringSplitOptions.None                                   )).Trim().Split(Environment.NewLine);
-            var expectedLines = string.Join(Environment.NewLine, await File.ReadAllLinesAsync($"ExpectedData/{relativeYear}-results.csv")).Trim().Split(Environment.NewLine);
-
-            actualLines.Length.ShouldBe(expectedLines.Length, $"Results CSV mismatch: {DisplayFullContents(contents)}");
-
-            var ignoreLines = new List<int> {2, 3, 7, 8, 9}; // Ignore run id and date fields
-            AssertLines(actualLines, expectedLines, ignoreLines, "Results CSV", contents);
+            run.CalculatorRunClassificationId = RunClassificationStatusIds.DELETEDID;
         }
+        await db.SaveChangesAsync();
 
-        await SeedAcceptOrRejectProducers(db, calculatorRunId, rundBy, $"TestData/{relativeYear}-accept-or-reject-producers.csv");
+        var setBillingClassificationResult = await calculatorNewController.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto {
+                RunId = runId,
+                ClassificationId = RunClassificationStatusIds.INITIALRUNID
+            });
 
-        var billingRunResult = await PerformBillingRun(db, calculatorRunId, rundBy);
+        if (setBillingClassificationResult is StatusCodeResult statusCodeResult)
         {
-            var contents      = fakeBlobStorageUploadService.Get(billingRunResult.ExportResult.CsvMetadata.FileName);
-            var actualLines   = string.Join(Environment.NewLine, contents.Split(Environment.NewLine, StringSplitOptions.None                                     )).Trim().Split(Environment.NewLine);
-            var expectedLines = string.Join(Environment.NewLine, await File.ReadAllLinesAsync($"ExpectedData/{relativeYear}-billing.csv")).Trim().Split(Environment.NewLine);
-
-            actualLines.Length.ShouldBe(expectedLines.Length, $"Billing CSV mismatch: {DisplayFullContents(contents)}");
-
-            var ignoreLines = new List<int> {2, 3, 7, 8, 9}; // Ignore run id and date fields
-            AssertLines(actualLines, expectedLines, ignoreLines, "Billing CSV", contents);
+            statusCodeResult.StatusCode.ShouldBe(StatusCodes.Status201Created);
         }
-        {   // TODO sort json fields before comparison?
-            var contents      = fakeBlobStorageUploadService.Get(billingRunResult.ExportResult.JsonMetadata.BillingJsonFileName!);
-            var actualLines   = string.Join(Environment.NewLine, contents.Split(Environment.NewLine, StringSplitOptions.None                                    )).Trim().Split(Environment.NewLine);
-            var expectedLines = string.Join(Environment.NewLine, await File.ReadAllLinesAsync($"ExpectedData/{relativeYear}-billing.json")).Trim().Split(Environment.NewLine);
-
-            actualLines.Length.ShouldBe(expectedLines.Length, $"Billing JSON mismatch: {DisplayFullContents(contents)}");
-
-            var ignoreLines = new List<int> {4, 5, 9, 11, 13, 16}; // Ignore run id and date fields
-            AssertLines(actualLines, expectedLines, ignoreLines, "Billing JSON", contents);
+        else
+        {
+            throw new Exception($"Controller returned: {JsonSerializer.Serialize(setBillingClassificationResult.ShouldBeOfType<ObjectResult>().Value)}");
         }
+
+        await SeedAcceptOrRejectProducers(db, runId, rundBy, $"TestData/{relativeYear}-accept-or-reject-producers.csv");
+
+        var startBillingResult = (await producerBillingFileController.ProducerBillingInstructions(runId))
+            .ShouldBeOfType<ObjectResult>();
+
+        startBillingResult.StatusCode.ShouldBe(StatusCodes.Status200OK, $"Controller returned: {JsonSerializer.Serialize(startBillingResult.Value)}");
+
+        await WaitUntil(
+            async () =>
+            {
+                var status = await db.CalculatorRuns
+                    .AsNoTracking()
+                    .Where(x => x.Id == runId)
+                    .Select(x => x.BillingRunStatus)
+                    .SingleAsync();
+
+                return status == BillingRunStatus.Errored
+                    ? throw new Exception($"Billing run for calculator run {runId} entered Errored state.")
+                    : status == BillingRunStatus.Completed;
+            },
+            $"Billing run for calculator run {runId} did not complete.");
+
+        await AssertCsv(
+            actualContents: await ExecuteFileResult(await billingFileController.DownloadBillingCsv(runId), services),
+            expectedPath: $"ExpectedData/{relativeYear}-billing.csv",
+            ignoreLines: [1, 2, 3, 7, 8, 9],
+            label: "Billing CSV");
+
+        await AssertCsv(
+            actualContents: await ExecuteFileResult(await billingFileController.DownloadBillingJson(runId), services),
+            expectedPath: $"ExpectedData/{relativeYear}-billing.json",
+            ignoreLines: [3, 4, 5, 9, 11, 13, 16],
+            label: "Billing JSON");
     }
 
-    private static void AssertLines(string[] actualLines, string[] expectedLines, List<int> ignoreLines, string label, string contents)
+    private static async Task AssertCsv(string actualContents, string expectedPath, List<int> ignoreLines, string label)
     {
+        static string DisplayFullContents(string contents) =>
+            $"Full contents:\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n{contents}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
+
+        var actualLines = actualContents
+            .Trim()
+            .Split(Environment.NewLine);
+
+        var expectedLines = string.Join(Environment.NewLine, await File.ReadAllLinesAsync(expectedPath))
+            .Trim()
+            .Split(Environment.NewLine);
+
+        actualLines.Length.ShouldBe(
+            expectedLines.Length,
+            $"{label} mismatch: {DisplayFullContents(actualContents)}");
+
         try
         {
             for (var i = 0; i < actualLines.Length; i++)
@@ -95,46 +169,52 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         }
         catch (Exception ex)
         {
-            throw new Exception($"{ex.Message}; {DisplayFullContents(contents)}", ex); // Needs to be lazy as dramatically increases test time if added to ShouldBe message
+            throw new Exception($"{ex.Message}; {DisplayFullContents(actualContents)}", ex); // Needs to be lazy as dramatically increases test time if added to ShouldBe message
         }
     }
 
-    private static string DisplayFullContents(string contents) =>
-        $"Full contents:\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n{contents}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
-
-
-    private static async Task<CalculatorRunResult> PerformCalculatorRun(int runId, string user)
+    private static T CreateController<T>(IServiceProvider services)
+        where T : ControllerBase
     {
-        await using var scope = Provider.CreateAsyncScope();
-        var builder   = scope.ServiceProvider.GetRequiredService<ICalculatorRunContextBuilder>();
-        var processor = scope.ServiceProvider.GetRequiredService<ICalculatorRunProcessor>();
+        var scope = services.CreateAsyncScope();
 
-        var runContext = await builder.Build(runId, user, CancellationToken.None);
-        var runResult = await processor.Process(runContext, CancellationToken.None);
-        runResult.Succeeded.ShouldBeTrue();
+        var controller = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider);
 
-        return (CalculatorRunResult) runResult;
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext
+            {
+                RequestServices = scope.ServiceProvider,
+                User = new ClaimsPrincipal(new ClaimsIdentity(
+                    [
+                        new Claim(ClaimTypes.Name, "some-user"),
+                        new Claim(ClaimTypes.NameIdentifier, "some-user")
+                    ],
+                    authenticationType: "IntegrationTest"))
+            }
+        };
+
+        controller.HttpContext.Response.RegisterForDispose(scope);
+
+        return controller;
     }
 
-    private static async Task<BillingRunResult> PerformBillingRun(ApplicationDBContext dbContext, int runId, string user)
+    private static async Task WaitUntil(Func<Task<bool>> condition, string failureMessage, TimeSpan? timeout = null)
     {
-        // Simulates the billing run being started by a user in the FE
-        var calcRun = await dbContext.CalculatorRuns.SingleAsync(r => r.Id == runId);
-        calcRun.CalculatorRunClassificationId = RunClassificationStatusIds.INITIALRUNID;
-        calcRun.BillingRunStatus = BillingRunStatus.Running;
-        calcRun.BillingRunStartedAt = DateTime.UtcNow;
-        await dbContext.SaveChangesAsync();
+        var until = DateTime.UtcNow + (timeout ?? TimeSpan.FromSeconds(30));
+        while (DateTime.UtcNow < until)
+        {
+            if (await condition())
+                return;
 
-        await using var scope = Provider.CreateAsyncScope();
-        var builder   = scope.ServiceProvider.GetRequiredService<IBillingRunContextBuilder>();
-        var processor = scope.ServiceProvider.GetRequiredService<IBillingRunProcessor>();
+            await Task.Delay(100);
+        }
 
-        var runContext = await builder.Build(runId, user, CancellationToken.None);
-        var runResult = await processor.Process(runContext, CancellationToken.None);
-        runResult.Succeeded.ShouldBeTrue();
-
-        return (BillingRunResult) runResult;
+        throw new TimeoutException(failureMessage);
     }
+
+    private static Task<string> ExecuteFileResult(IActionResult result, IServiceProvider services) =>
+        Task.FromResult(Encoding.UTF8.GetString(result.ShouldBeOfType<FileContentResult>().FileContents));
 
     private static CsvReader SlurpCsv(string csvPath) =>
         new(new StreamReader(csvPath), new CsvConfiguration(CultureInfo.InvariantCulture)
@@ -143,7 +223,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
             MissingFieldFound = null
         });
 
-    private async static Task<int> SeedCalculatorRun(ApplicationDBContext db, String name, RelativeYear relativeYear, String defaultParamsPath, String lapcapPath)
+    private async static Task SeedCalculatorData(ApplicationDBContext db, RelativeYear relativeYear, String defaultParamsPath, String lapcapPath)
     {
         var oldDefaultSettings = await db.DefaultParameterSettings
             .Where(x => x.EffectiveTo == null && x.RelativeYear == relativeYear)
@@ -180,22 +260,6 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         var templates = await db.LapcapDataTemplateMaster.ToImmutableListAsync();
         db.LapcapDataDetail.AddRange(LapcapDataDetails(lapcapPath, lapcap, templates));
         await db.SaveChangesAsync();
-
-        var run = new CalculatorRun
-        {
-            Name                            = name,
-            RelativeYear                    = relativeYear,
-            CreatedBy                       = "some-user",
-            CreatedAt                       = Now,
-            CalculatorRunClassificationId   = (int)RunClassification.RUNNING,
-            DefaultParameterSettingMasterId = parameterMaster.Id,
-            LapcapDataMasterId              = lapcap.Id,
-            BillingRunStatus                = BillingRunStatus.None
-        };
-        db.CalculatorRuns.Add(run);
-        await db.SaveChangesAsync();
-
-        return run.Id;
     }
 
     private static async Task SeedAcceptOrRejectProducers(ApplicationDBContext db, int calculatorRunId, string modifiedBy, string csvPath)
