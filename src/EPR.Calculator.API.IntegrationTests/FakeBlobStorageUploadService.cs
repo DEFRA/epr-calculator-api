@@ -42,6 +42,9 @@ public class FakeBlobStorageUploadService : IStorageUploadService, IBlobStorageS
     public Task<Stream?> OpenBillingCsvStream(string filename, CancellationToken cancellationToken = default) =>
         OpenStream(filename);
 
+    public Task<Stream?> OpenBillingJsonStream(string filename, CancellationToken cancellationToken = default) =>
+        OpenStream(filename);
+
     public Task<bool> MoveBillingJsonToFss(string filename, CancellationToken cancellationToken = default) =>
         Task.FromResult(File.Exists(PathFor(filename)));
 
