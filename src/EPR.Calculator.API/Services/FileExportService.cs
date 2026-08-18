@@ -59,7 +59,7 @@ public class FileExportService(
         RunClassificationStatusIds.ERRORID,
         RunClassificationStatusIds.DELETEDID
     ];
-        
+
     public async Task<FileExportResult> Export(int runId, RunType runType, FileExportType fileType, CancellationToken cancellationToken) =>
         await telemetryClient.TrackDuration(nameof(FileExportService),
             () => runType switch
@@ -114,8 +114,8 @@ public class FileExportService(
     }
 
     private async Task<CalculatorRunContext?> GetCalculatorRunContext(int runId, CancellationToken cancellationToken)
-    { 
-       var run = await dbContext.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
+    {
+       var run = await dbContext.CalculatorRuns.AsNoTracking().SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
         if(run is null || NonDownloadableClassifications.Contains(run.CalculatorRunClassificationId))
             return null;
@@ -128,7 +128,7 @@ public class FileExportService(
             RelativeYear = run.RelativeYear,
             User = run.CreatedBy,
             DefaultParameters = await parameterService.GetDefaultParameters(runId)
-        }; 
+        };
     }
 
     private async Task<BillingRunContext?> GetBillingRunContext(int runId, CancellationToken cancellationToken) {

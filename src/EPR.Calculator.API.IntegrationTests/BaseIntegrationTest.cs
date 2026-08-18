@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Testcontainers.MsSql;
+using Microsoft.Extensions.Hosting;
 
 namespace EPR.Calculator.API.IntegrationTests;
 
@@ -30,6 +31,11 @@ public abstract class BaseIntegrationTest
         ConfigureServices(services);
         Provider = services.BuildServiceProvider();
 
+        foreach (var hostedService in Provider.GetServices<IHostedService>())
+        {
+            await hostedService.StartAsync(CancellationToken.None);
+        }
+
         using var scope = Provider.CreateScope();
         var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ApplicationDBContext>>();
         await using var db = await factory.CreateDbContextAsync();
@@ -39,6 +45,11 @@ public abstract class BaseIntegrationTest
 
     public static async Task CleanupAsync()
     {
+        foreach (var hostedService in Provider.GetServices<IHostedService>())
+        {
+            await hostedService.StopAsync(CancellationToken.None);
+        }
+
         await Provider.DisposeAsync();
         Log.CloseAndFlush();
     }
