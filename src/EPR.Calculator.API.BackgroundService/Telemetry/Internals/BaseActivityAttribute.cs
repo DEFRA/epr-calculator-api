@@ -7,7 +7,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 namespace EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 
 [ExcludeFromCodeCoverage]
-internal abstract class BaseActivityAttribute : OverrideMethodAspect
+public abstract class BaseActivityAttribute : OverrideMethodAspect
 {
     private readonly string? activityName;
     private readonly string? threshold;
