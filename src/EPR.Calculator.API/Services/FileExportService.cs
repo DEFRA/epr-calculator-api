@@ -11,7 +11,6 @@ using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Constants;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.Common;
-using EPR.Calculator.API.BackgroundService.Logging;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Telemetry;
@@ -24,11 +23,19 @@ namespace EPR.Calculator.API.Services;
 
 public interface IFileExportService
 {
-    Task<FileExportResult?> Export(int runId, RunType runType, FileExportType fileType, CancellationToken cancellationToken);
+    Task<FileExportResult> Export(int runId, RunType runType, FileExportType fileType, CancellationToken cancellationToken);
 }
 
 public enum FileExportType { Csv, Json }
-public record FileExportResult(byte[] Content, string FileName);
+
+
+public abstract record FileExportResult
+{
+    private FileExportResult() { }
+    public sealed record Exported(byte[] Content, string FileName) : FileExportResult;
+    public sealed record NotFound() : FileExportResult;
+    public sealed record NotCached() : FileExportResult;
+}
 
 [SuppressMessage("Major Code Smell", "S107:Methods should not have too many parameters", Justification = "This is suppressed for now and will be refactored later.")]
 public class FileExportService(
@@ -40,9 +47,7 @@ public class FileExportService(
     IParameterService parameterService,
     ICalcResultsExporter resultsFileExporter,
     IBillingFileExporter billingFileExporter,
-    IBillingFileJsonWriter billingJsonWriter,
-    ITelemetryClient telemetryClient,
-    ILogger<FileExportService> logger
+    IBillingFileJsonWriter billingJsonWriter
 )  : IFileExportService
 {
     private static readonly ImmutableHashSet<int> NonDownloadableClassifications = [
@@ -51,45 +56,54 @@ public class FileExportService(
         RunClassificationStatusIds.ERRORID,
         RunClassificationStatusIds.DELETEDID
     ];
-        
-    public async Task<FileExportResult?> Export(int runId, RunType runType, FileExportType fileType, CancellationToken cancellationToken) =>
-        await telemetryClient.TrackDuration(nameof(FileExportService),
-            async () => runType switch
-            {
-                RunType.Calculator => await ExportResultCsv(runId, cancellationToken),
-                RunType.Billing => await ExportBilling(runId, fileType, cancellationToken),
-                _ => null
-            }
-    );
 
-    private async Task<FileExportResult?> ExportResultCsv(int runId, CancellationToken cancellationToken)
+    [ActivityMetric(nameof(Metrics.FileExportDuration), threshold: "00:00:10")]
+    public Task<FileExportResult> Export(int runId, RunType runType, FileExportType fileType, CancellationToken cancellationToken)
+    {
+        return runType switch
+        {
+            RunType.Calculator => ExportResultCsv(runId, cancellationToken),
+            RunType.Billing => ExportBilling(runId, fileType, cancellationToken),
+            _ => Task.FromResult<FileExportResult>(new FileExportResult.NotFound())
+        };
+    }
+
+    private async Task<FileExportResult> ExportResultCsv(int runId, CancellationToken cancellationToken)
     {
         var runContext = await GetCalculatorRunContext(runId, cancellationToken);
 
         if(runContext is null)
-            return null;
+            return new FileExportResult.NotFound();
 
         var result = await GetResult(runContext, cancellationToken);
+
+        if (result is null)
+            return new FileExportResult.NotCached();
+
         var content = await resultsFileExporter.Export(runContext, result);
-        return new FileExportResult(Encoding.UTF8.GetBytes(content), $"{runContext.RunName}.csv");
+        return new FileExportResult.Exported(Encoding.UTF8.GetBytes(content), $"{runContext.RunName}.csv");
     }
 
-    private async Task<FileExportResult?> ExportBilling(int runId, FileExportType billingFileType, CancellationToken cancellationToken)
+    private async Task<FileExportResult> ExportBilling(int runId, FileExportType billingFileType, CancellationToken cancellationToken)
     {
         var runContext = await GetBillingRunContext(runId, cancellationToken);
 
         if(runContext is null)
-            return null;
+            return new FileExportResult.NotFound();
 
         var result = await GetResult(runContext, cancellationToken);
+
+        if (result is null)
+            return new FileExportResult.NotCached();
+
         var filteredResult = FilterResult(runId, result, runContext.AcceptedProducerIds);
         return billingFileType switch
         {
-            FileExportType.Csv => new FileExportResult(
+            FileExportType.Csv => new FileExportResult.Exported(
                 Encoding.UTF8.GetBytes(await billingFileExporter.Export(runContext, filteredResult)),
                 $"{runContext.RunName}.csv"
             ),
-            FileExportType.Json => new FileExportResult(
+            FileExportType.Json => new FileExportResult.Exported(
                 Encoding.UTF8.GetBytes(await billingJsonWriter.WriteToString(runContext, filteredResult)),
                 $"{runContext.RunName}.json"
             ),
@@ -98,28 +112,21 @@ public class FileExportService(
     }
 
     private async Task<CalculatorRunContext?> GetCalculatorRunContext(int runId, CancellationToken cancellationToken)
-    { 
-       var run = await dbContext.CalculatorRuns
-                    .Join(
-                        dbContext.CalculatorRunClassifications,
-                        run => run.CalculatorRunClassificationId,
-                        classification => classification.Id,
-                        (run, classification) => new { Run = run, Classification = classification })
-                        .AsNoTracking()
-                        .SingleOrDefaultAsync(x => x.Run.Id == runId, cancellationToken);
+    {
+       var run = await dbContext.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
-        if(run is null || NonDownloadableClassifications.Contains(run.Classification.Id))
+        if(run is null || NonDownloadableClassifications.Contains(run.CalculatorRunClassificationId))
             return null;
 
         return new CalculatorRunContext
         {
-            RunId = run.Run.Id,
-            RunName = run.Run.Name.Trim(),
-            ProcessingStartedAt = run.Run.CreatedAt,
-            RelativeYear = run.Run.RelativeYear,
-            User = run.Run.CreatedBy,
+            RunId = run.Id,
+            RunName = run.Name.Trim(),
+            ProcessingStartedAt = run.CreatedAt,
+            RelativeYear = run.RelativeYear,
+            User = run.CreatedBy,
             DefaultParameters = await parameterService.GetDefaultParameters(runId)
-        }; 
+        };
     }
 
     private async Task<BillingRunContext?> GetBillingRunContext(int runId, CancellationToken cancellationToken) {
@@ -130,7 +137,7 @@ public class FileExportService(
             .Include(r => r.CalculatorRunBillingFileMetadata)
             .SingleOrDefaultAsync(r => r.Id == runId, cancellationToken);
 
-        if (run is null || run.BillingRunStatus != BillingRunStatus.Completed)
+        if (run is null || run.BillingRunStatus != BillingRunStatus.Completed || run.CalculatorRunClassificationId == RunClassificationStatusIds.DELETEDID)
             return null;
 
         var billingFileMetadata = run.CalculatorRunBillingFileMetadata
@@ -158,90 +165,46 @@ public class FileExportService(
         };
     }
 
-    private async Task<CalcResult> GetResult(RunContext runContext, CancellationToken cancellationToken)
+    private async Task<CalcResult?> GetResult(RunContext runContext, CancellationToken cancellationToken)
     {
+        var hasData = await dbContext.ProducerDisposalFee.AnyAsync(f => f.CalculatorRunId == runContext.RunId, cancellationToken);
+
+        if(!hasData)
+            return null;
+
         var result = CalcResult.Empty;
 
-        result.CalcResultDetail = await logger.LogDuration(
-            () => calcResultDetailBuilder.ConstructAsync(runContext),
-            nameof(calcResultDetailBuilder));
-
-        result.CalcResultLapcapData = await logger.LogDuration(
-            () => calcResultReader.ReadLapcapData(runContext.RunId, cancellationToken),
-            nameof(calcResultReader.ReadLapcapData));
-
-        result.CalcResultLateReportingTonnageData = await logger.LogDuration(
-            () => calcResultReader.ReadLateReportingTonnage(runContext.RunId, cancellationToken),
-            nameof(calcResultReader.ReadLateReportingTonnage));
-
-        result.CalcResultParameterOtherCost = await logger.LogDuration(
-            () => calcResultReader.ReadParameterOtherCost(runContext.RunId, cancellationToken),
-            nameof(calcResultReader.ReadParameterOtherCost));
-
-        result.CalcResultOnePlusFourApportionment = await logger.LogDuration(
-            () => calcResultReader.ReadOnePlusFourApportionment(runContext.RunId, cancellationToken),
-            nameof(calcResultReader.ReadOnePlusFourApportionment));
+        result.CalcResultDetail = await calcResultDetailBuilder.ConstructAsync(runContext, cancellationToken);
+        result.CalcResultLapcapData = await calcResultReader.ReadLapcapData(runContext.RunId, cancellationToken);
+        result.CalcResultLateReportingTonnageData = await calcResultReader.ReadLateReportingTonnage(runContext.RunId, cancellationToken);
+        result.CalcResultParameterOtherCost = await calcResultReader.ReadParameterOtherCost(runContext.RunId, cancellationToken);
+        result.CalcResultOnePlusFourApportionment = await calcResultReader.ReadOnePlusFourApportionment(runContext.RunId, cancellationToken);
 
         if (runContext.RequiresModulation)
         {
-            result.CalcResultProjectedProducers.H1ProjectedProducers = (await logger.LogDuration(
-                () => calcResultReader.ReadH1ProjectedData(runContext.RunId, cancellationToken),
-                nameof(calcResultReader.ReadH1ProjectedData))).ToImmutableList();
-
-            result.CalcResultProjectedProducers.H2ProjectedProducers = (await logger.LogDuration(
-                () => calcResultReader.ReadH2ProjectedData(runContext.RunId, cancellationToken),
-                nameof(calcResultReader.ReadH2ProjectedData))).ToImmutableList();
+            result.CalcResultProjectedProducers.H1ProjectedProducers = await calcResultReader.ReadH1ProjectedData(runContext.RunId, cancellationToken);
+            result.CalcResultProjectedProducers.H2ProjectedProducers = await  calcResultReader.ReadH2ProjectedData(runContext.RunId, cancellationToken);
         }
 
         if (runContext.RequiresScaling)
-        {
-            result.CalcResultScaledupProducers.ScaledupProducers = (await logger.LogDuration(
-                () => calcResultReader.ReadScaledData(runContext.RunId, cancellationToken),
-                nameof(calcResultReader.ReadScaledData))).ToImmutableList();
-        }
+            result.CalcResultScaledupProducers.ScaledupProducers = await calcResultReader.ReadScaledData(runContext.RunId, cancellationToken);
 
-        result.CalcResultPartialObligations.PartialObligations = (await logger.LogDuration(
-            () => calcResultReader.ReadPartialData(runContext.RunId, cancellationToken),
-            nameof(calcResultReader.ReadPartialData))).ToImmutableList();
+        result.CalcResultPartialObligations.PartialObligations = await calcResultReader.ReadPartialData(runContext.RunId, cancellationToken);
+        result.CalcResultCancelledProducers = await calcResultReader.ReadCancelledProducers(runContext.RunId, cancellationToken);
+        result.Smcw = await calcResultReader.ReadSmcw(runContext.RunId, cancellationToken);
+        result.CalcResultLaDisposalCostData = await calcResultReader.ReadLaDisposalCostData(runContext.RunId, cancellationToken);
+        result.CalcResultCommsCostReportDetail = await calcResultReader.ReadCommsCost(runContext.RunId, cancellationToken);
 
-        result.CalcResultCancelledProducers = (await logger.LogDuration(
-            () => calcResultReader.ReadCancelledProducers(runContext.RunId, cancellationToken),
-            nameof(calcResultReader.ReadCancelledProducers))).ToList();
-
-        result.Smcw = await logger.LogDuration(
-            () => calcResultReader.ReadSmcw(runContext.RunId, cancellationToken),
-            nameof(calcResultReader.ReadSmcw));
-
-        result.CalcResultLaDisposalCostData = await logger.LogDuration(
-            () => calcResultReader.ReadLaDisposalCostData(runContext.RunId, cancellationToken),
-            nameof(calcResultReader.ReadLaDisposalCostData));
-
-        result.CalcResultCommsCostReportDetail = await logger.LogDuration(
-            () => calcResultReader.ReadCommsCost(runContext.RunId, cancellationToken),
-            nameof(calcResultReader.ReadCommsCost));
-
-        if(runContext.RunType is RunType.Billing) {
-            result.CalcResultRejectedProducers = await logger.LogDuration(
-                () => rejectedProducersBuilder.ConstructAsync(runContext),
-                nameof(rejectedProducersBuilder));
-        }
+        if(runContext.RunType is RunType.Billing)
+            result.CalcResultRejectedProducers = await rejectedProducersBuilder.ConstructAsync(runContext, cancellationToken);
 
         if (runContext.RequiresModulation)
-        {
-            result.CalcResultModulation = await logger.LogDuration(
-                () => calcResultReader.ReadModulationResult(runContext.RunId, cancellationToken),
-                nameof(calcResultReader.ReadModulationResult));
-        }
+            result.CalcResultModulation = await calcResultReader.ReadModulationResult(runContext.RunId, cancellationToken);
 
-        result.ProducerFees = await logger.LogDuration(
-                () => calcResultReader.ReadProducerFees(runContext.RunId, cancellationToken),
-                nameof(calcResultReader.ReadProducerFees));
+        result.ProducerFees = await calcResultReader.ReadProducerFees(runContext.RunId, cancellationToken);
 
-        if (runContext.RunType is RunType.Calculator) {
-            result.CalcResultErrorReports = logger.LogDuration(
-                () => errorReportBuilder.Construct(runContext),
-                nameof(errorReportBuilder));
-        }
+        if (runContext.RunType is RunType.Calculator)
+            result.CalcResultErrorReports = errorReportBuilder.Construct(runContext);
 
         return result;
     }
