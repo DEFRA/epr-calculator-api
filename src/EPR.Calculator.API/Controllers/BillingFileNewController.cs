@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Services;
@@ -10,7 +11,8 @@ namespace EPR.Calculator.API.Controllers;
 [Produces("application/json")]
 [Route("v2")]
 public class BillingFileNewController(
-    IBillingFileService billingFileService
+    IBillingFileService billingFileService,
+    IFileExportService fileExportService
 ) : ControllerBase
 {
     /// <summary>
@@ -41,5 +43,33 @@ public class BillingFileNewController(
         {
             StatusCode = (int)serviceProcessResponseDto.StatusCode
         };
+    }
+  
+    [HttpGet]
+    [Route("downloadBillingCsv/{runId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DownloadBillingCsv(int runId, CancellationToken cancellationToken = default)
+    {
+        var export = await fileExportService.Export(runId, RunType.Billing, FileExportType.Csv, cancellationToken);
+
+        if (export is null)
+            return NotFound();
+
+        return File(export.Content, "text/csv", export.FileName);
+    }
+
+    [HttpGet]
+    [Route("downloadBillingJson/{runId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DownloadBillingJson(int runId, CancellationToken cancellationToken = default)
+    {
+        var export = await fileExportService.Export(runId, RunType.Billing, FileExportType.Json, cancellationToken);
+
+        if (export is null)
+            return NotFound();
+
+        return File(export.Content, "application/json", export.FileName);
     }
 }
