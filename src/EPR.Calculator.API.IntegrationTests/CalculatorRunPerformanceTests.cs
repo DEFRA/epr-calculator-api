@@ -59,8 +59,6 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
         fakeCommonDataApi.OrganisationResponses = OrganisationResponses(organisationPath);
         fakeCommonDataApi.Poms                  = () => StreamPoms(pomPath);
 
-        var fakeBlobStorage = Provider.GetRequiredService<FakeBlobStorageUploadService>();
-
         var calculatorTimings     = new List<TimeSpan>();
         var resultsCsvTimings     = new List<TimeSpan>();
         var billingTimings        = new List<TimeSpan>();
@@ -109,7 +107,6 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
             var name = $"performance-{relativeYear}-{Guid.NewGuid():N}";
 
             db.ChangeTracker.Clear();   // db is reused across iterations; don't let tracked entities accumulate
-            fakeBlobStorage.Reset();    // and don't let previous runs' file contents pin the heap
 
             Step(i + 1, "Calculator run");
 
@@ -136,10 +133,10 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
             calculatorTimings.Add(stopwatch.Elapsed);
             calculatorAllocations.Add(GC.GetTotalAllocatedBytes() - allocatedBefore);
 
-            // Results CSV - written to blob storage during the run; read it back and save to disk
+            // Results CSV - generated on demand by the download endpoint
             Step(i + 1, "Read results CSV");
             stopwatch.Restart();
-            await SaveBlobFile(fakeBlobStorage, await ResultsFileName(db, runId), Path.Combine(outputDirectory, $"run-{i + 1}-results.csv"));
+            await DownloadAndSave<CalculatorController>(services, c => c.DownloadResultCsv(runId), Path.Combine(outputDirectory, $"run-{i + 1}-results.csv"));
             stopwatch.Stop();
             resultsCsvTimings.Add(stopwatch.Elapsed);
 
@@ -179,23 +176,17 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
             stopwatch.Stop();
             billingTimings.Add(stopwatch.Elapsed);
 
-            var billingMetadata = await db.CalculatorRunBillingFileMetadata
-                .AsNoTracking()
-                .Where(x => x.CalculatorRunId == runId)
-                .OrderByDescending(x => x.BillingFileCreatedDate)
-                .FirstAsync();
-
-            // Billing CSV - read from blob
+            // Billing CSV - generated on demand by the download endpoint
             Step(i + 1, "Read billing CSV");
             stopwatch.Restart();
-            await SaveBlobFile(fakeBlobStorage, billingMetadata.BillingCsvFileName, Path.Combine(outputDirectory, $"run-{i + 1}-billing.csv"));
+            await DownloadAndSave<BillingFileController>(services, c => c.DownloadBillingCsv(runId), Path.Combine(outputDirectory, $"run-{i + 1}-billing.csv"));
             stopwatch.Stop();
             billingCsvTimings.Add(stopwatch.Elapsed);
 
-            // Billing JSON - read from blob
+            // Billing JSON - generated on demand by the download endpoint
             Step(i + 1, "Read billing JSON");
             stopwatch.Restart();
-            await SaveBlobFile(fakeBlobStorage, billingMetadata.BillingJsonFileName, Path.Combine(outputDirectory, $"run-{i + 1}-billing.json"));
+            await DownloadAndSave<BillingFileController>(services, c => c.DownloadBillingJson(runId), Path.Combine(outputDirectory, $"run-{i + 1}-billing.json"));
             stopwatch.Stop();
             billingJsonTimings.Add(stopwatch.Elapsed);
         }
@@ -331,17 +322,11 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
         Console.WriteLine($"GC heap ceiling:                         {Gb(gcCeiling)}{note}");
     }
 
-    private static async Task<string> ResultsFileName(ApplicationDBContext db, int runId) =>
-        await db.CalculatorRunCsvFileMetadata
-            .AsNoTracking()
-            .Where(x => x.CalculatorRunId == runId)
-            .Select(x => x.FileName)
-            .SingleAsync();
-
-    private static Task SaveBlobFile(FakeBlobStorageUploadService blob, string fileName, string path)
+    private static async Task DownloadAndSave<T>(IServiceProvider services, Func<T, Task<IActionResult>> download, string path)
+        where T : ControllerBase
     {
-        blob.CopyTo(fileName, path);
-        return Task.CompletedTask;
+        var result = await CallController<T, IActionResult>(services, download);
+        await File.WriteAllBytesAsync(path, result.ShouldBeOfType<FileContentResult>().FileContents);
     }
 
     private static OrganisationScenario GetOrganisationScenario(int index)
