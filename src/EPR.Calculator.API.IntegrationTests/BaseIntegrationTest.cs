@@ -3,6 +3,7 @@ using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -45,6 +46,19 @@ public abstract class BaseIntegrationTest
         await using var db = await factory.CreateDbContextAsync();
 
         await db.Database.MigrateAsync();
+
+        // The SQL Server container is reused (WithReuse(true)) across local test sessions to
+        // avoid paying its startup cost every run, so its data outlives any single `dotnet test`
+        // invocation. If a previous session was interrupted (e.g. a cancelled debug run) while a
+        // run was mid-flight, that run is left behind still classified as RUNNING/IN_THE_QUEUE.
+        // CalculatorController.Create() refuses to start a new run while any run anywhere has
+        // one of those classifications, so a single abandoned row can permanently block every
+        // future session. Reclassify any such leftovers as errored before tests start.
+        await db.CalculatorRuns
+            .Where(run =>
+                run.CalculatorRunClassificationId == RunClassificationStatusIds.RUNNINGID ||
+                run.CalculatorRunClassificationId == RunClassificationStatusIds.INTHEQUEUEID)
+            .ExecuteUpdateAsync(s => s.SetProperty(run => run.CalculatorRunClassificationId, RunClassificationStatusIds.ERRORID));
     }
 
     public static async Task CleanupAsync()
@@ -95,6 +109,7 @@ public abstract class BaseIntegrationTest
             .AddPayCalBlobStorage()
             .AddPayCalServices()
             .AddPayCalBackgroundServices()
+            .AddPayCalRequestValidation()
             .AddDbContextFactory<ApplicationDBContext>(options => { options.UseSqlServer(SqlContainer.GetConnectionString()); })
             .RemoveAll<CommonDataApiHttpClient>()
             .AddSingleton<FakeCommonDataApiClient>()
