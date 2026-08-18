@@ -46,6 +46,16 @@
         "resolved": "2026.2.0",
         "contentHash": "drvAEaI7Xf4wU6dx4UTB9MoZWXZlraaQ0qoeThPQ411FxNhId7QdUTukIC9I8aUHP0ycAaGwZNKqSvfOZQvUlg=="
       },
+      "Metalama.Framework": {
+        "type": "Direct",
+        "requested": "[2026.1.24, )",
+        "resolved": "2026.1.24",
+        "contentHash": "0wIjNDhWZmIo4J7HtPhpcOqCVJoTRWDrOMGNhqKB9LNMTZ4PdFtn+O1jqCC8JSGqR4H478UQxRbHQqpG85nbsQ==",
+        "dependencies": {
+          "Metalama.Compiler": "2026.1.16",
+          "Metalama.Framework.Redist": "2026.1.24"
+        }
+      },
       "Microsoft.AspNetCore.OpenApi": {
         "type": "Direct",
         "requested": "[10.0.11, )",
@@ -282,6 +292,16 @@
         "type": "Transitive",
         "resolved": "1.0.0",
         "contentHash": "dcAqM8TcyZQ/T466CvqNMUUn/G0FQE+4R7l62ngXH7hLFP9yA7yoP/ySsLgiXx3pGUQC3J+cUvXmJOOR/eC+oQ=="
+      },
+      "Metalama.Compiler": {
+        "type": "Transitive",
+        "resolved": "2026.1.16",
+        "contentHash": "D+GEjdUOY0FwZhLYz1vnvODYo0gjxBjLqp6pCtQDIFph2M7GjA5hzfQ6usmGex/3+I6ZV/CRwamfjoAe0MtfgA=="
+      },
+      "Metalama.Framework.Redist": {
+        "type": "Transitive",
+        "resolved": "2026.1.24",
+        "contentHash": "tQMIocYRgPLQ8xVeNxDEou5ee/gvQZMniXImzTDytsZnpjLvVKhEmmwH5YDjFXCuolv2p2krHeCZ5BWv4Srv1Q=="
       },
       "Microsoft.ApplicationInsights": {
         "type": "Transitive",

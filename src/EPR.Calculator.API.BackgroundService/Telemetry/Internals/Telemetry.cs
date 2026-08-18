@@ -59,7 +59,7 @@ public sealed class Telemetry<TCategory> : Telemetry, ITelemetry<TCategory>
     ///     A shared instance for <typeparamref name="TCategory" />, used by <see cref="ActivityMetricAttribute" /> when
     ///     the target type has no <see cref="ITelemetry" /> constructor parameter.
     /// </summary>
-    internal static readonly Telemetry<TCategory> Instance = new();
+    public static readonly Telemetry<TCategory> Instance = new();
 
     /// <summary>
     ///     The fully qualified name of <typeparamref name="TCategory" />, used as the activity's log category.
