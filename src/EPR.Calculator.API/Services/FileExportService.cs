@@ -104,16 +104,23 @@ public class FileExportService(
                 $"{runContext.RunName}.csv"
             ),
             FileExportType.Json => new FileExportResult.Exported(
-                Encoding.UTF8.GetBytes(await billingJsonWriter.WriteToString(runContext, filteredResult)),
+                await WriteBillingJson(runContext, filteredResult, cancellationToken),
                 $"{runContext.RunName}.json"
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(billingFileType), billingFileType, null)
         };
     }
 
+    private async Task<byte[]> WriteBillingJson(BillingRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken)
+    {
+        using var stream = new MemoryStream();
+        await billingJsonWriter.WriteTo(stream, runContext, calcResult, cancellationToken);
+        return stream.ToArray();
+    }
+
     private async Task<CalculatorRunContext?> GetCalculatorRunContext(int runId, CancellationToken cancellationToken)
     {
-       var run = await dbContext.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
+        var run = await dbContext.CalculatorRuns.AsNoTracking().SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
         if(run is null || NonDownloadableClassifications.Contains(run.CalculatorRunClassificationId))
             return null;
