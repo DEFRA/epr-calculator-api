@@ -591,7 +591,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         private CalculatorController CreateCalculatorController(
             ICalcRelativeYearRequestDtoDataValidator? validator = null,
             IAvailableClassificationsService? availableClassificationsService = null,
-            IRunClassificationValidator? runStatusValidator = null)
+            IRunClassificationValidator? runStatusValidator = null,
+            IFileExportService? fileExportService = null)
         {
             return new CalculatorController(
                 DbContext,
@@ -599,7 +600,8 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 Mock.Of<IBackgroundTaskQueue>(),
                 runStatusValidator ?? Mock.Of<IRunClassificationValidator>(),
                 validator ?? Mock.Of<ICalcRelativeYearRequestDtoDataValidator>(),
-                availableClassificationsService ?? Mock.Of<IAvailableClassificationsService>())
+                availableClassificationsService ?? Mock.Of<IAvailableClassificationsService>(),
+                fileExportService ?? Mock.Of<IFileExportService>())
             {
                 ControllerContext = CreateAuthenticatedControllerContext(),
             };
