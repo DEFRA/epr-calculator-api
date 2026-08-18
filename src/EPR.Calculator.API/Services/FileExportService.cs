@@ -113,7 +113,7 @@ public class FileExportService(
 
     private async Task<CalculatorRunContext?> GetCalculatorRunContext(int runId, CancellationToken cancellationToken)
     {
-       var run = await dbContext.CalculatorRuns.SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
+        var run = await dbContext.CalculatorRuns.AsNoTracking().SingleOrDefaultAsync(x => x.Id == runId, cancellationToken);
 
         if(run is null || NonDownloadableClassifications.Contains(run.CalculatorRunClassificationId))
             return null;
