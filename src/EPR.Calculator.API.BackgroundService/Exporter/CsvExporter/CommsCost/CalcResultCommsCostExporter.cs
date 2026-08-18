@@ -29,7 +29,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CommsCost
             var onePlusFourApportionment = communicationCost.OnePlusFourApportionment;
 
             AppendHeaderApportionmentHeaders(csvContent);
-            csvContent.Append(CsvSanitiser.SanitiseData("1 + 4 Apportionment %s"));
+            csvContent.Append(CsvSanitiser.SanitiseData("1 + 4 Apportionment %"));
             csvContent.Append(CsvSanitiser.SanitiseData(onePlusFourApportionment.England        , DecimalPlaces.Eight, DecimalFormats.F8, isPercentage: true));
             csvContent.Append(CsvSanitiser.SanitiseData(onePlusFourApportionment.Wales          , DecimalPlaces.Eight, DecimalFormats.F8, isPercentage: true));
             csvContent.Append(CsvSanitiser.SanitiseData(onePlusFourApportionment.Scotland       , DecimalPlaces.Eight, DecimalFormats.F8, isPercentage: true));
@@ -54,7 +54,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CommsCost
             csvContent.Append(CsvSanitiser.SanitiseData("Wales"));
             csvContent.Append(CsvSanitiser.SanitiseData("Scotland"));
             csvContent.Append(CsvSanitiser.SanitiseData("Northern Ireland"));
-            csvContent.Append(CsvSanitiser.SanitiseData("Total"));
+            csvContent.Append(CsvSanitiser.SanitiseData("Total UK"));
             csvContent.AppendLine();
 
             csvContent.Append(CsvSanitiser.SanitiseData("2b Comms Costs - UK wide"));
@@ -81,7 +81,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CommsCost
             csvContent.Append(CsvSanitiser.SanitiseData("Wales"));
             csvContent.Append(CsvSanitiser.SanitiseData("Scotland"));
             csvContent.Append(CsvSanitiser.SanitiseData("Northern Ireland"));
-            csvContent.Append(CsvSanitiser.SanitiseData("Total"));
+            csvContent.Append(CsvSanitiser.SanitiseData("Total UK"));
             csvContent.AppendLine();
         }
 
@@ -92,12 +92,12 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CommsCost
             csvContent.Append(CsvSanitiser.SanitiseData("Wales"));
             csvContent.Append(CsvSanitiser.SanitiseData("Scotland"));
             csvContent.Append(CsvSanitiser.SanitiseData("Northern Ireland"));
-            csvContent.Append(CsvSanitiser.SanitiseData("Total"));
-            csvContent.Append(CsvSanitiser.SanitiseData("Producer Household Packaging Tonnage"));
+            csvContent.Append(CsvSanitiser.SanitiseData("Total UK"));
+            csvContent.Append(CsvSanitiser.SanitiseData("Household Tonnage"));
             csvContent.Append(CsvSanitiser.SanitiseData("Public Bin Tonnage"));
             csvContent.Append(CsvSanitiser.SanitiseData("Household Drinks Containers Tonnage"));
             csvContent.Append(CsvSanitiser.SanitiseData("Late Reporting Tonnage"));
-            csvContent.Append(CsvSanitiser.SanitiseData("Producer Household Tonnage + Late Reporting Tonnage + Public Bin Tonnage + Household Drinks Containers Tonnage"));
+            csvContent.Append(CsvSanitiser.SanitiseData("Household Tonnage + Late Reporting Tonnage + Public Bin Tonnage + Household Drinks Containers Tonnage"));
             csvContent.Append(CsvSanitiser.SanitiseData("Comms Cost - by Material Price Per Tonne"));
             csvContent.AppendLine();
         }

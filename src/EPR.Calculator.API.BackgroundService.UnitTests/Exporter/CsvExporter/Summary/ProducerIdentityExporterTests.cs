@@ -34,8 +34,8 @@ public class ProducerIdentityExporterTests
              "Scaled-up tonnages?",
              "Partial Calculation?",
              "Registration Status Code",
-             "Joiners Date",
-             "Leavers Date"
+             "Joiner's Date",
+             "Leaver's Date"
             ],
             ["1",
              "",

@@ -21,7 +21,7 @@ public class   Section2aMaterialsExporter : IProducerFeesPartExporter
     {
         var headers = new List<string>();
         headers.AddRange([
-            "Household Packaging Tonnage",
+            "Household Tonnage",
             "Public Bin Tonnage"
         ]);
 

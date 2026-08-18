@@ -92,7 +92,7 @@ public class BillingFileExporter(
             );
 
         logger.LogDuration(
-            () => cancelledProducersExporter.Export(calcResult.CalcResultCancelledProducers, csvContent),
+            () => cancelledProducersExporter.Export(calcResult.CalcResultCancelledProducers, materials, csvContent),
             nameof(cancelledProducersExporter)
         );
 

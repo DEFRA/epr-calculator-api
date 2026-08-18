@@ -8,24 +8,24 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CancelledPro
 {
     public interface ICalcResultCancelledProducersExporter
     {
-        public void Export(IReadOnlyList<CalcResultCancelledProducer> calcResultCancelledProducers, StringBuilder csvContent);
+        public void Export(IReadOnlyList<CalcResultCancelledProducer> calcResultCancelledProducers, IImmutableList<MaterialDetail> materials, StringBuilder csvContent);
     }
 
     public class CalcResultCancelledProducersExporter : ICalcResultCancelledProducersExporter
     {
 
-        public void Export(IReadOnlyList<CalcResultCancelledProducer> calcResultCancelledProducers, StringBuilder csvContent)
+        public void Export(IReadOnlyList<CalcResultCancelledProducer> calcResultCancelledProducers, IImmutableList<MaterialDetail> materials, StringBuilder csvContent)
         {
             // Add empty lines
             csvContent.AppendLine();
             csvContent.AppendLine();
 
             // Add headers
-            PrepareCancelledProducersHeader(csvContent);
+            PrepareCancelledProducersHeader(materials, csvContent);
             PrepareCancelledProducersValues(calcResultCancelledProducers, csvContent);
         }
 
-        private static void PrepareCancelledProducersHeader(StringBuilder csvContent)
+        private static void PrepareCancelledProducersHeader(IImmutableList<MaterialDetail> materials, StringBuilder csvContent)
         {
             // Add cancelled producers header
             csvContent.AppendLine(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.CancelledProducers));
@@ -34,7 +34,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CancelledPro
             WriteCancelledProducersSecondaryHeaders(csvContent);
 
             // Add column header
-            WriteCancelledProducersColumnHeaders(csvContent);
+            WriteCancelledProducersColumnHeaders(materials, csvContent);
             csvContent.AppendLine();
         }
 
@@ -81,19 +81,15 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CancelledPro
             csvContent.AppendLine(headerRow);
         }
 
-        private static void WriteCancelledProducersColumnHeaders(StringBuilder csvContent)
+        private static void WriteCancelledProducersColumnHeaders(IImmutableList<MaterialDetail> materials, StringBuilder csvContent)
         {
             csvContent.Append(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.ProducerId));
             csvContent.Append(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.ProducerOrSubsidiaryName));
             csvContent.Append(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.TradingName));
-            csvContent.Append(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.Aluminium));
-            csvContent.Append(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.FibreComposite));
-            csvContent.Append(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.Glass));
-            csvContent.Append(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.PaperOrCard));
-            csvContent.Append(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.Plastic));
-            csvContent.Append(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.Steel));
-            csvContent.Append(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.Wood));
-            csvContent.Append(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.OtherMaterials));
+            foreach (var mat in materials.Select(m => m.Name))
+            {
+                csvContent.Append(CsvSanitiser.SanitiseData(mat));
+            }
             csvContent.Append(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.CurrentYearInvoicedTotalToDate));
             csvContent.Append(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.RunNumber));
             csvContent.Append(CsvSanitiser.SanitiseData(CalcResultCancelledProducersHeader.RunName));

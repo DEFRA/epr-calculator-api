@@ -8,6 +8,13 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Ca
     [TestClass]
     public class CalcResultCancelledProducersExporterTests
     {
+        private readonly ImmutableList<MaterialDetail> materials =
+        [
+            new() { Id = 1, Code = "AL", Name = "Aluminium" },
+            new() { Id = 2, Code = "GL", Name = "Glass" },
+            new() { Id = 3, Code = "OT", Name = "Other Materials" }
+        ];
+
         [TestMethod]
         public void Export_ShouldWriteExpectedHeadersToCsv()
         {
@@ -44,7 +51,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Ca
             };
 
             // Act
-            exporter.Export(cancelledProducersResponse, stringBuilder);
+            exporter.Export(cancelledProducersResponse, materials, stringBuilder);
             var csvOutput = stringBuilder.ToString();
 
             // Assert
@@ -54,14 +61,9 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Ca
             Assert.IsTrue(csvOutput.Contains(CalcResultCancelledProducersHeader.ProducerId), "CSV should include ProducerId column.");
             Assert.IsTrue(csvOutput.Contains(CalcResultCancelledProducersHeader.BillingInstructionId), "CSV should include BillingInstructionId column.");
             Assert.IsTrue(csvOutput.Contains(CalcResultCancelledProducersHeader.TradingName), "CSV should include TradingName column.");
-            Assert.IsTrue(csvOutput.Contains(CalcResultCancelledProducersHeader.Aluminium), "CSV should include Aluminium column.");
-            Assert.IsTrue(csvOutput.Contains(CalcResultCancelledProducersHeader.FibreComposite), "CSV should include FibreComposite column.");
-            Assert.IsTrue(csvOutput.Contains(CalcResultCancelledProducersHeader.Glass), "CSV should include Glass column.");
-            Assert.IsTrue(csvOutput.Contains(CalcResultCancelledProducersHeader.PaperOrCard), "CSV should include PaperOrCard column.");
-            Assert.IsTrue(csvOutput.Contains(CalcResultCancelledProducersHeader.Plastic), "CSV should include Plastic column.");
-            Assert.IsTrue(csvOutput.Contains(CalcResultCancelledProducersHeader.Steel), "CSV should include Steel column.");
-            Assert.IsTrue(csvOutput.Contains(CalcResultCancelledProducersHeader.Wood), "CSV should include Wood column.");
-            Assert.IsTrue(csvOutput.Contains(CalcResultCancelledProducersHeader.OtherMaterials), "CSV should include OtherMaterials column.");
+            Assert.IsTrue(csvOutput.Contains("Aluminium"), "CSV should include Aluminium column.");
+            Assert.IsTrue(csvOutput.Contains("Glass"), "CSV should include Glass column.");
+            Assert.IsTrue(csvOutput.Contains("Other Materials"), "CSV should include Other Materials column.");
             Assert.IsTrue(csvOutput.Contains(CalcResultCancelledProducersHeader.CurrentYearInvoicedTotalToDate), "CSV should include CurrentYearInvoicedTotalToDate column.");
             Assert.IsTrue(csvOutput.Contains(CalcResultCancelledProducersHeader.RunNumber), "CSV should include RunNumber column.");
             Assert.IsTrue(csvOutput.Contains(CalcResultCancelledProducersHeader.RunName), "CSV should include RunName column.");
@@ -83,7 +85,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Ca
             var csvContent = new StringBuilder();
 
             // Act
-            exporter.Export(response, csvContent);
+            exporter.Export(response, materials, csvContent);
 
             // Assert
             var result = csvContent.ToString();
@@ -118,7 +120,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Ca
             var csvContent = new StringBuilder();
 
             // Act
-            exporter.Export(cancelledProducersResponse, csvContent);
+            exporter.Export(cancelledProducersResponse, materials, csvContent);
 
             // Assert
             var result = csvContent.ToString();
@@ -138,7 +140,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Ca
             var csvContent = new StringBuilder();
 
             // Act
-            exporter.Export(response, csvContent);
+            exporter.Export(response, materials, csvContent);
 
             // Assert
             var result = csvContent.ToString();

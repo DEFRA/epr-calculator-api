@@ -36,18 +36,18 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter
             var expected = new[] {
                 new string[] {},
                 new string[] {},
-                new[] { "1 + 4 Apportionment %s" },
+                new[] { "1 + 4 Apportionment %" },
                 new[] { null,
                         "England",
                         "Wales",
                         "Scotland",
                         "Northern Ireland",
-                        "Total"
+                        "Total UK"
                 },
                 new[] { "1 Fee for LA Disposal Costs",   "£109800.00",   "£24750.00",   "£49300.00",  "£19300.00",    "£203150.00" },
                 new[] { "4 LA Data Prep Charge"      ,    "£16000.00",    "£7000.00",    "£9000.00",   "£4500.00",     "£36500.00" },
                 new[] { "Total of 1 + 4"             ,   "£125800.00",   "£31750.00",   "£58300.00",  "£23800.00",    "£239650.00" },
-                new[] { "1 + 4 Apportionment %s"     , "52.49321928%","13.24848738%","24.32714375%","9.93114959%", "100.00000000%" },
+                new[] { "1 + 4 Apportionment %"     , "52.49321928%","13.24848738%","24.32714375%","9.93114959%", "100.00000000%" },
                 new string[] { }
             };
 

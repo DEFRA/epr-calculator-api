@@ -35,10 +35,10 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter
             csvContent.Append(CsvSanitiser.SanitiseData("Parameters - Late Reporting Tonnages"));
             csvContent.AppendLine();
             csvContent.Append(CsvSanitiser.SanitiseData("Material"));
-            csvContent.Append(CsvSanitiser.SanitiseData("Late Reporting Tonnage"));
             csvContent.Append(CsvSanitiser.SanitiseData("Red + Red Medical Late Reporting Tonnage"));
             csvContent.Append(CsvSanitiser.SanitiseData("Amber + Amber Medical Late Reporting Tonnage"));
             csvContent.Append(CsvSanitiser.SanitiseData("Green + Green Medical Late Reporting Tonnage"));
+            csvContent.Append(CsvSanitiser.SanitiseData("Total Late Reporting Tonnage"));
             csvContent.AppendLine();
 
             foreach (var kv in calcResultLateReportingData.ByMaterial)
@@ -53,10 +53,10 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter
         private static void AppendRow(string name, CalcResultLateReportingTonnageDetail lateReportingData, StringBuilder csvContent)
         {
             csvContent.Append(CsvSanitiser.SanitiseData(name));
-            csvContent.Append(CsvSanitiser.SanitiseData(lateReportingData.Total, DecimalPlaces.Three, DecimalFormats.F3));
             csvContent.Append(CsvSanitiser.SanitiseData(lateReportingData.Red  , DecimalPlaces.Three, DecimalFormats.F3));
             csvContent.Append(CsvSanitiser.SanitiseData(lateReportingData.Amber, DecimalPlaces.Three, DecimalFormats.F3));
             csvContent.Append(CsvSanitiser.SanitiseData(lateReportingData.Green, DecimalPlaces.Three, DecimalFormats.F3));
+            csvContent.Append(CsvSanitiser.SanitiseData(lateReportingData.Total, DecimalPlaces.Three, DecimalFormats.F3));
             csvContent.AppendLine();
         }
     }
