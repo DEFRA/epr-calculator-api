@@ -152,6 +152,7 @@ public static class ServiceRegistration
         services.AddScoped<IBillingFileService, BillingFileService>();
         services.AddScoped<IAvailableClassificationsService, AvailableClassificationsService>();
         services.AddScoped<ICalculationRunService, CalculationRunService>();
+        services.AddScoped<IFileExportService, FileExportService>();
 
         return services;
     }
