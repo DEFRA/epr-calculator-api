@@ -140,8 +140,9 @@ public class FileExportServiceTests
         AddBillingFileMetadata(RunId);
         AddProducerFeeRow(RunId);
         billingJsonWriterMock
-            .Setup(x => x.WriteToString(It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>()))
-            .ReturnsAsync(JsonContent);
+            .Setup(x => x.WriteTo(It.IsAny<Stream>(), It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>(), It.IsAny<CancellationToken>()))
+            .Returns<Stream, BillingRunContext, CalcResult, CancellationToken>((stream, _, _, cancellationToken) =>
+                stream.WriteAsync(Encoding.UTF8.GetBytes(JsonContent), cancellationToken).AsTask());
 
         var result = await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None);
 
