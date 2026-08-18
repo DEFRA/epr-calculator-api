@@ -1,4 +1,12 @@
-﻿using EPR.Calculator.API.Data;
+﻿using System.Text;
+using EPR.Calculator.API.BackgroundService.Builder;
+using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter;
+using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
+using EPR.Calculator.API.BackgroundService.Features.Common;
+using EPR.Calculator.API.BackgroundService.Services;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Extensions;
@@ -19,7 +27,8 @@ public class CalculatorNewController(
     IBillingFileService billingFileService,
     IInvoiceDetailsService invoiceDetailsService,
     ILogger<CalculatorNewController> logger,
-    ICalculationRunService calculationRunService
+    ICalculationRunService calculationRunService,
+    IFileExportService fileExportService
 ) : ControllerBase
 {
     [HttpPut]
@@ -148,5 +157,19 @@ public class CalculatorNewController(
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }
+    }
+
+    [HttpGet]
+    [Route("downloadResultCsv/{runId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DownloadResultCsv(int runId, CancellationToken cancellationToken = default)
+    {
+        var export = await fileExportService.Export(runId, RunType.Calculator, FileExportType.Csv, cancellationToken);
+
+        if (export is null)
+            return NotFound();
+
+        return File(export.Content, "text/csv", export.FileName);
     }
 }
