@@ -1,9 +1,11 @@
 using EPR.Calculator.API.BackgroundService.Constants;
+using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ScaledupProducers;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Utils;
 using Microsoft.EntityFrameworkCore;
+using EPR.Calculator.API.BackgroundService.Builder.ScaledupProducers;
 
 namespace EPR.Calculator.API.BackgroundService.Services
 {
@@ -25,7 +27,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
         Task<ImmutableList<CalcResultCancelledProducer>> ReadCancelledProducers(int runId, CancellationToken cancellationToken);
     }
 
-    public class CalcResultReader(ApplicationDBContext dbContext) : ICalcResultReader
+    public class CalcResultReader(ApplicationDBContext dbContext, IMaterialService materialService) : ICalcResultReader
     {
         [ActivityTrace]
         public async Task<ImmutableList<CalcResultH1ProjectedProducer>> ReadH1ProjectedData(int runId, CancellationToken cancellationToken)
@@ -107,6 +109,10 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .ThenBy(p => p.SubsidiaryId)
                         .ThenBy(p => p.SubmissionPeriodCode)
                         .ToImmutableList();
+
+            var materials = await materialService.GetMaterials();
+            foreach (var producer in scaledupProducers)
+                producer.ScaledupProducerTonnageByMaterial = CalcResultScaledupProducersBuilder.GetTonnages(producer.PomData, materials);
 
             return scaledupProducers;
         }
