@@ -113,30 +113,37 @@ public class CreateDefaultParameterDataValidator(ApplicationDBContext context) :
 
     private static string OutOfRangeValues(DefaultParameterTemplateMaster master)
     {
-        var id   = master.ParameterUniqueReferenceId;
-        var from = master.ValidRangeFrom;
-        var to   = master.ValidRangeTo;
+        var id  = master.ParameterUniqueReferenceId;
 
         if (IsTonnage(master))
         {
-            return $"The parameter {id} must be between {decimal.Truncate(from)} and {Math.Round(to, 3, MidpointRounding.ToZero)} tons.";
-
+            var min = decimal.Truncate(master.ValidRangeFrom);
+            var max = Math.Round(master.ValidRangeTo, 3, MidpointRounding.ToZero).ToString("N3");
+            return $"The parameter {id} must be between {min} and {max} tons.";
         }
         else if (IsBadDebt(master) || IsPercentageIncrease(master))
         {
-            return $"The parameter {id} must be between {decimal.Truncate(from)}% and {Math.Round(to, 2, MidpointRounding.ToZero)}%.";
+            var min = decimal.Truncate(master.ValidRangeFrom);
+            var max = Math.Round(master.ValidRangeTo, 2, MidpointRounding.ToZero);
+            return $"The parameter {id} must be between {min}% and {max}%.";
         }
         else if (IsPercentageDecrease(master))
         {
-            return $"The parameter {id} must be between {Math.Round(from, 2, MidpointRounding.ToZero)}% and {decimal.Truncate(to)}%.";
+            var min = Math.Round(master.ValidRangeFrom, 2, MidpointRounding.ToZero);
+            var max = decimal.Truncate(master.ValidRangeTo);
+            return $"The parameter {id} must be between {min}% and {max}%.";
         }
         else if (IsFactor(master))
         {
-            return $"The parameter {id} must be between {Math.Round(from, 3, MidpointRounding.ToZero)} and {Math.Round(to, 3, MidpointRounding.ToZero)}.";
+            var min = Math.Round(master.ValidRangeFrom, 3, MidpointRounding.ToZero);
+            var max = Math.Round(master.ValidRangeTo  , 3, MidpointRounding.ToZero);
+            return $"The parameter {id} must be between {min} and {max}.";
         }
         else
         {
-            return $"The parameter {id} must be between £{Math.Round(from, 2, MidpointRounding.ToZero)} and £{Math.Round(to, 2, MidpointRounding.ToZero)}.";
+            var min = Math.Round(master.ValidRangeFrom, 2, MidpointRounding.ToZero).ToString("C");
+            var max = Math.Round(master.ValidRangeTo  , 2, MidpointRounding.ToZero).ToString("C");
+            return $"The parameter {id} must be between {min} and {max}.";
         }
     }
 

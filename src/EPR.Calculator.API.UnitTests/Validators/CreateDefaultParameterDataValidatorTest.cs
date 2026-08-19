@@ -220,14 +220,14 @@ namespace EPR.Calculator.API.UnitTests.Validators
                 new[]
                 {
 
-                    "The parameter COMC-AL must be between £0 and £999999999.99.",
+                    "The parameter COMC-AL must be between £0.00 and £999,999,999.99.",
                     "The parameter BADEBT-P must be between 0% and 999.99%.",
-                    "The parameter MATT-AD must be between £-999999999.99 and £0.",
+                    "The parameter MATT-AD must be between -£999,999,999.99 and £0.00.",
                     "The parameter MATT-PI must be between 0% and 999.99%.",
                     "The parameter MATT-PD must be between -999.99% and 0%.",
-                    "The parameter TONT-AI must be between £0 and £999999999.99.",
+                    "The parameter TONT-AI must be between £0.00 and £999,999,999.99.",
                     "The parameter REDM-RF must be between 1.000 and 2.000.",
-                    "The parameter LRET-AL must be between 0 and 999999999.999 tons."
+                    "The parameter LRET-AL must be between 0 and 999,999,999.999 tons."
                 },
                 Validator.Validate(dto).Errors.Select(x => x.Message).ToList());
         }
