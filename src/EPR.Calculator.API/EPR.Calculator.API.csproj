@@ -34,11 +34,11 @@
     <PackageReference Include="Microsoft.Identity.Web" Version="4.14.2"/>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0"/>
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.17.0"/>
+    <PackageReference Include="Scalar.AspNetCore" Version="2.16.19"/>
     <PackageReference Include="SonarAnalyzer.CSharp" Version="10.32.0.713">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3"/>
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0"/>
     <PackageReference Include="Serilog.Expressions" Version="5.0.0"/>
     <PackageReference Include="Serilog.Sinks.Console" Version="6.*"/>

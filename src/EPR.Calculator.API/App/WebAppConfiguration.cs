@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Extensions;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
 
@@ -34,9 +35,11 @@ public static class WebAppConfiguration
 
         public WebApplication UsePayCalApiExplorer()
         {
+            // Shows scalar UI for local/dev environments.
             if (app.Environment.IsDevelopment() || app.Environment.IsLocal())
             {
-                app.UseSwagger().UseSwaggerUI();
+                app.MapOpenApi().AllowAnonymous();
+                app.MapScalarApiReference().AllowAnonymous();
             }
 
             return app;
