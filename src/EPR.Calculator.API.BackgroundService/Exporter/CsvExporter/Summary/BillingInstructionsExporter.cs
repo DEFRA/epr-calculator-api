@@ -2,7 +2,6 @@ using System.Text;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Enums;
 using EPR.Calculator.API.BackgroundService.Misc;
-using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Utils;
 using EPR.Calculator.API.Data.DataModels;
 

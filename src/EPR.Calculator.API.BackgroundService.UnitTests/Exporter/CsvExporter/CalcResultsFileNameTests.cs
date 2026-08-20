@@ -1,9 +1,9 @@
 using System.Reflection;
 using System.Text;
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Fixtures;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter
 {

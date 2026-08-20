@@ -23,7 +23,7 @@ public class CalcResultErrorReportBuilderTests : TestsFor<CalcResultErrorReportB
         var testErrorCode = "Test Error code";
 
         dbContext.ErrorReports.AddRange(
-            new API.Data.DataModels.ErrorReport
+            new Data.DataModels.ErrorReport
             {
                 Id = 1,
                 CalculatorRunId = runContext.RunId,
@@ -33,7 +33,7 @@ public class CalcResultErrorReportBuilderTests : TestsFor<CalcResultErrorReportB
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = "Test user"
             },
-            new API.Data.DataModels.ErrorReport
+            new Data.DataModels.ErrorReport
             {
                 Id = 2,
                 CalculatorRunId = runContext.RunId,
@@ -43,7 +43,7 @@ public class CalcResultErrorReportBuilderTests : TestsFor<CalcResultErrorReportB
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = "Test user"
             },
-            new API.Data.DataModels.ErrorReport
+            new Data.DataModels.ErrorReport
             {
                 Id = 3,
                 CalculatorRunId = runContext.RunId,
@@ -53,7 +53,7 @@ public class CalcResultErrorReportBuilderTests : TestsFor<CalcResultErrorReportB
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = "Test user"
             },
-            new API.Data.DataModels.ErrorReport
+            new Data.DataModels.ErrorReport
             {
                 Id = 5,
                 CalculatorRunId = runContext.RunId,
@@ -63,7 +63,7 @@ public class CalcResultErrorReportBuilderTests : TestsFor<CalcResultErrorReportB
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = "Test user"
             },
-            new API.Data.DataModels.ErrorReport
+            new Data.DataModels.ErrorReport
             {
                 Id = 6,
                 CalculatorRunId = 2,
@@ -73,7 +73,7 @@ public class CalcResultErrorReportBuilderTests : TestsFor<CalcResultErrorReportB
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = "Test user"
             },
-            new API.Data.DataModels.ErrorReport
+            new Data.DataModels.ErrorReport
             {
                 Id = 7,
                 CalculatorRunId = 2,
@@ -83,7 +83,7 @@ public class CalcResultErrorReportBuilderTests : TestsFor<CalcResultErrorReportB
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = "Test user"
             },
-            new API.Data.DataModels.ErrorReport
+            new Data.DataModels.ErrorReport
             {
                 Id = 8,
                 CalculatorRunId = 2,
@@ -93,7 +93,7 @@ public class CalcResultErrorReportBuilderTests : TestsFor<CalcResultErrorReportB
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = "Test user"
             },
-            new API.Data.DataModels.ErrorReport
+            new Data.DataModels.ErrorReport
             {
                 Id = 9,
                 CalculatorRunId = runContext.RunId,
@@ -156,7 +156,7 @@ public class CalcResultErrorReportBuilderTests : TestsFor<CalcResultErrorReportB
     public async Task ConstructAsync_NullSubsidiaryId_MapsToEmptyString()
     {
         // Arrange
-        dbContext.ErrorReports.Add(new API.Data.DataModels.ErrorReport
+        dbContext.ErrorReports.Add(new Data.DataModels.ErrorReport
         {
             Id = 1,
             CalculatorRunId = runContext.RunId,
@@ -187,7 +187,7 @@ public class CalcResultErrorReportBuilderTests : TestsFor<CalcResultErrorReportB
     public async Task ConstructAsync_ReturnsProducerNameMappedErrorReport()
     {
         // Arrange
-        dbContext.ErrorReports.Add(new API.Data.DataModels.ErrorReport
+        dbContext.ErrorReports.Add(new Data.DataModels.ErrorReport
         {
             Id = 1,
             CalculatorRunId = runContext.RunId,
@@ -218,7 +218,7 @@ public class CalcResultErrorReportBuilderTests : TestsFor<CalcResultErrorReportB
     public async Task ConstructAsync_WhenNoOrganisationDetailExists_ReturnsHyphens()
     {
         // Arrange
-        dbContext.ErrorReports.Add(new API.Data.DataModels.ErrorReport
+        dbContext.ErrorReports.Add(new Data.DataModels.ErrorReport
         {
             Id = 999,
             CalculatorRunId = runContext.RunId,

@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-namespace EPR.Calculator.API.Data.DataModels;
+﻿namespace EPR.Calculator.API.Data.DataModels;
 
 public class DefaultParameterSettingDetail
 {

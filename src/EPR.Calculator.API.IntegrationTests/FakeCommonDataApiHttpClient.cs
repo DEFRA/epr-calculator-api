@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
-using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
+using EPR.Calculator.API.Data.DataTypes;
 
 namespace EPR.Calculator.API.IntegrationTests;
 

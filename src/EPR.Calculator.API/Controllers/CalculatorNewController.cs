@@ -7,7 +7,6 @@ using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Web;
 
 namespace EPR.Calculator.API.Controllers;
 

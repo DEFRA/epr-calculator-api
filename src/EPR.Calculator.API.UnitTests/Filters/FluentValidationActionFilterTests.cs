@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Options;
 using MsOptions = Microsoft.Extensions.Options.Options;
 
 namespace EPR.Calculator.API.UnitTests.Filters;

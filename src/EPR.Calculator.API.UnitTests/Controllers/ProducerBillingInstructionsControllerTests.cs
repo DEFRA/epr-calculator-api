@@ -3,7 +3,6 @@ using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {

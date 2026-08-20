@@ -1,8 +1,6 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Utils;
 
-using EPR.Calculator.API.BackgroundService.Utils;
-
 namespace EPR.Calculator.API.BackgroundService.Models
 {
     public class CalcResultPartialObligationTonnage
