@@ -13,7 +13,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CancelledPro
 
     public class CalcResultCancelledProducersExporter : ICalcResultCancelledProducersExporter
     {
-
+        [ActivityTrace]
         public void Export(IReadOnlyList<CalcResultCancelledProducer> calcResultCancelledProducers, IImmutableList<MaterialDetail> materials, StringBuilder csvContent)
         {
             // Add empty lines

@@ -1,12 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Builder.Summary.Common;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
-using EPR.Calculator.API.BackgroundService.Utils;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Utils;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,6 +26,7 @@ public class ProducerFeesBuilder(
     IInvoicedProducerService invoicedProducerService)
     : IProducerFeesBuilder
 {
+    [ActivityTrace]
     public async Task<ProducerFees> ConstructAsync(
         RunContext runContext,
         IImmutableList<MaterialDetail> materialDetails,

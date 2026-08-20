@@ -1,8 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using EPR.Calculator.API.BackgroundService.Logging;
 using EPR.Calculator.API.Extensions;
 using Serilog;
-using Serilog.Filters;
 using Serilog.Formatting.Compact;
 
 namespace EPR.Calculator.API.App;
@@ -21,29 +19,16 @@ public static class HostConfiguration
 
             builder.Host.UseSerilog((ctx, services, logger) =>
             {
-                var telemetrySource = Matching.FromSource(typeof(LoggerTelemetryClient).FullName!);
-
                 logger.ReadFrom.Configuration(ctx.Configuration)
                     .ReadFrom.Services(services)
                     .Enrich.FromLogContext();
 
                 if (ctx.HostingEnvironment.IsLocal())
-                {
-                    // Use human readable DevConsole for local envs
-                    logger
-                        .WriteTo.Logger(lc => lc
-                            .Filter.ByExcluding(telemetrySource)
-                            .WriteTo.Console(DevConsole.Logger()))
-                        .WriteTo.Logger(lc => lc
-                            .Filter.ByIncludingOnly(telemetrySource)
-                            .MinimumLevel.Verbose()
-                            .WriteTo.Console(DevConsole.Telemetry()));
-                }
+                    // DevConsole provides nice debugging experience when running locally
+                    logger.WriteTo.LocalDevConsole();
                 else
-                {
-                    // Other envs should still log to console (for live log sessions, etc)
+                    // Other envs should log to console in an appropriate format (for live log sessions, etc.)
                     logger.WriteTo.Console(new RenderedCompactJsonFormatter());
-                }
             }, writeToProviders: true);
 
             return builder;

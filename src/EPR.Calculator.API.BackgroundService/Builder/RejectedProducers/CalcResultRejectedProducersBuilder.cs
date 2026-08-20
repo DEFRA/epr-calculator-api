@@ -1,14 +1,14 @@
-﻿using EPR.Calculator.API.Data;
-using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Constants;
+﻿using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
+using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Builder.RejectedProducers
 {
     public interface ICalcResultRejectedProducersBuilder
     {
-        public Task<IEnumerable<CalcResultRejectedProducer>> ConstructAsync(RunContext runContext);
+        public Task<IEnumerable<CalcResultRejectedProducer>> ConstructAsync(RunContext runContext, CancellationToken cancellationToken);
     }
 
     public class CalcResultRejectedProducersBuilder : ICalcResultRejectedProducersBuilder
@@ -20,7 +20,8 @@ namespace EPR.Calculator.API.BackgroundService.Builder.RejectedProducers
             this.dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<CalcResultRejectedProducer>> ConstructAsync(RunContext runContext)
+        [ActivityTrace]
+        public async Task<IEnumerable<CalcResultRejectedProducer>> ConstructAsync(RunContext runContext, CancellationToken cancellationToken)
         {
             var billingInstructionsQuery =
                 from prsbi in dbContext.ProducerResultFileSuggestedBillingInstruction
@@ -91,7 +92,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.RejectedProducers
                     ReasonForRejection = b.ReasonForRejection
                 };
 
-            return await rejectedProducersQuery.AsNoTracking().Distinct().ToListAsync();
+            return await rejectedProducersQuery.AsNoTracking().Distinct().ToListAsync(cancellationToken);
         }
     }
 }

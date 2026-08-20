@@ -1,10 +1,10 @@
-﻿using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.BackgroundService.Builder;
+﻿using EPR.Calculator.API.BackgroundService.Builder;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 
@@ -17,9 +17,10 @@ public class BillingRunProcessor(
     IBillingBuilder resultBuilder,
     IBillingFileGenerator fileGenerator,
     IBillingRunFinalizer finalizer,
-    ILogger<BillingRunProcessor> logger)
-    : IBillingRunProcessor
+    ILogger<BillingRunProcessor> logger
+) : IBillingRunProcessor
 {
+    [ActivityMetric(nameof(Metrics.TotalDuration), threshold: "00:15:00")]
     public async Task<RunResult> Process(BillingRunContext runContext, CancellationToken cancellationToken)
     {
         try
@@ -62,19 +63,15 @@ public class BillingRunProcessor(
     private static CalcResult GetFilteredCalcResult(CalcResult calcResult, BillingRunContext runContext)
     {
         ImmutableList<T> FilterAccepted<T>(IEnumerable<T> producers, Func<T, int> producerId) =>
-                producers.Where(producer => runContext.AcceptedProducerIds.Contains(producerId(producer))).ToImmutableList();
+            producers.Where(producer => runContext.AcceptedProducerIds.Contains(producerId(producer))).ToImmutableList();
 
         var rejectedProducerIds = calcResult.CalcResultRejectedProducers.Select(r => r.ProducerId).ToHashSet();
 
         return calcResult with
         {
-            CalcResultProjectedProducers = calcResult.CalcResultProjectedProducers with
-            {
-                H1ProjectedProducers = FilterAccepted(calcResult.CalcResultProjectedProducers.H1ProjectedProducers, p => p.ProducerId),
-                H2ProjectedProducers = FilterAccepted(calcResult.CalcResultProjectedProducers.H2ProjectedProducers, p => p.ProducerId)
-            },
-            CalcResultScaledupProducers = calcResult.CalcResultScaledupProducers with { ScaledupProducers = FilterAccepted(calcResult.CalcResultScaledupProducers.ScaledupProducers, p => p.ProducerId) },
-            CalcResultPartialObligations = calcResult.CalcResultPartialObligations with { PartialObligations = FilterAccepted(calcResult.CalcResultPartialObligations.PartialObligations, p => p.ProducerId) },
+            CalcResultProjectedProducers = new CalcResultProjectedProducers { H1ProjectedProducers = FilterAccepted(calcResult.CalcResultProjectedProducers.H1ProjectedProducers, p => p.ProducerId), H2ProjectedProducers = FilterAccepted(calcResult.CalcResultProjectedProducers.H2ProjectedProducers, p => p.ProducerId) },
+            CalcResultScaledupProducers  = new CalcResultScaledupProducers  { ScaledupProducers    = FilterAccepted(calcResult.CalcResultScaledupProducers.ScaledupProducers, p => p.ProducerId) },
+            CalcResultPartialObligations = new CalcResultPartialObligations { PartialObligations   = FilterAccepted(calcResult.CalcResultPartialObligations.PartialObligations, p => p.ProducerId) },
             ProducerFees = new ProducerFees
             {
                 CalculatorRunId = runContext.RunId,

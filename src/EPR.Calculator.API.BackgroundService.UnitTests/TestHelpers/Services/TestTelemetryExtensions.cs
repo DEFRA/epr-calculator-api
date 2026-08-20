@@ -2,7 +2,7 @@
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Services;
 
-public static class TestLoggingExtensions
+public static class TestTelemetryExtensions
 {
     public static void VerifyLogContains<T>(this Mock<ILogger<T>> logger, LogLevel level, string fragment)
     {

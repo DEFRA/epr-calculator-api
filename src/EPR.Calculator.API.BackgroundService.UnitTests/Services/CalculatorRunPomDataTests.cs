@@ -1,11 +1,10 @@
+using EPR.Calculator.API.BackgroundService.Services;
+using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.BackgroundService.Services;
-using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
 {
@@ -72,7 +71,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             var runContext1 = TestDataHelper.CalculatorRun2024;
             var runContext2 = runContext1 with { RunId = runContext1.RunId + 1 };
             var cancellationToken = CancellationToken.None;
-            var service = new CalculatorRunPomData(context, new Mock<ILogger<CalculatorRunPomData>>().Object);
+            var service = new CalculatorRunPomData(context);
             var (relativeYear, classification, pomData) = await SeedData();
 
             //Run 1
@@ -80,7 +79,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             context.CalculatorRuns.Add(run);
             await context.SaveChangesAsync();
 
-            await service.LoadPomDataForCalcRun(runContext1, cancellationToken);
+            await service.LoadData(runContext1, cancellationToken);
 
             var masterRecords = await context.CalculatorRunPomDataMaster.ToListAsync();
             Assert.AreEqual(1, masterRecords.Count);
@@ -104,7 +103,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             context.CalculatorRuns.Add(run2);
             await context.SaveChangesAsync();
 
-            await service.LoadPomDataForCalcRun(runContext2, cancellationToken);
+            await service.LoadData(runContext2, cancellationToken);
 
             var updatedMasterRecords = await context.CalculatorRunPomDataMaster.ToListAsync();
             Assert.AreEqual(2, updatedMasterRecords.Count);

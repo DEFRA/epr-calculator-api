@@ -1,8 +1,7 @@
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Models;
-using EPR.Calculator.API.BackgroundService.Utils;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Utils;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +9,10 @@ namespace EPR.Calculator.API.BackgroundService.Services
 {
     public interface ICalcResultReader
     {
-        Task<IReadOnlyList<CalcResultH1ProjectedProducer>> ReadH1ProjectedData(int runId, CancellationToken cancellationToken);
-        Task<IReadOnlyList<CalcResultH2ProjectedProducer>> ReadH2ProjectedData(int runId, CancellationToken cancellationToken);
-        Task<IReadOnlyList<CalcResultScaledupProducer>> ReadScaledData(int runId, CancellationToken cancellationToken);
-        Task<IReadOnlyList<CalcResultPartialObligation>> ReadPartialData(int runId, CancellationToken cancellationToken);
+        Task<ImmutableList<CalcResultH1ProjectedProducer>> ReadH1ProjectedData(int runId, CancellationToken cancellationToken);
+        Task<ImmutableList<CalcResultH2ProjectedProducer>> ReadH2ProjectedData(int runId, CancellationToken cancellationToken);
+        Task<ImmutableList<CalcResultScaledupProducer>> ReadScaledData(int runId, CancellationToken cancellationToken);
+        Task<ImmutableList<CalcResultPartialObligation>> ReadPartialData(int runId, CancellationToken cancellationToken);
         Task<ProducerFees> ReadProducerFees(int runId, CancellationToken cancellationToken);
         Task<SelfManagedConsumerWaste> ReadSmcw(int runId, CancellationToken cancellationToken);
         Task<ModulationResult> ReadModulationResult(int runId, CancellationToken cancellationToken);
@@ -23,12 +22,13 @@ namespace EPR.Calculator.API.BackgroundService.Services
         Task<CalcResultParameterOtherCost> ReadParameterOtherCost(int runId, CancellationToken cancellationToken);
         Task<CalcResultOnePlusFourApportionment> ReadOnePlusFourApportionment(int runId, CancellationToken cancellationToken);
         Task<CalcResultLaDisposalCostData> ReadLaDisposalCostData(int runId, CancellationToken cancellationToken);
-        Task<IReadOnlyList<CalcResultCancelledProducer>> ReadCancelledProducers(int runId, CancellationToken cancellationToken);
+        Task<ImmutableList<CalcResultCancelledProducer>> ReadCancelledProducers(int runId, CancellationToken cancellationToken);
     }
 
     public class CalcResultReader(ApplicationDBContext dbContext) : ICalcResultReader
     {
-        public async Task<IReadOnlyList<CalcResultH1ProjectedProducer>> ReadH1ProjectedData(int runId, CancellationToken cancellationToken)
+        [ActivityTrace]
+        public async Task<ImmutableList<CalcResultH1ProjectedProducer>> ReadH1ProjectedData(int runId, CancellationToken cancellationToken)
         {
             return await dbContext.TransformProjectedH1
                         .Where(p => p.CalculatorRunId == runId)
@@ -47,7 +47,8 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .ToImmutableListAsync(cancellationToken);
         }
 
-        public async Task<IReadOnlyList<CalcResultH2ProjectedProducer>> ReadH2ProjectedData(int runId, CancellationToken cancellationToken)
+        [ActivityTrace]
+        public async Task<ImmutableList<CalcResultH2ProjectedProducer>> ReadH2ProjectedData(int runId, CancellationToken cancellationToken)
         {
             return await dbContext.TransformProjectedH2
                         .Where(p => p.CalculatorRunId == runId)
@@ -66,7 +67,8 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .ToImmutableListAsync(cancellationToken);
         }
 
-        public async Task<IReadOnlyList<CalcResultScaledupProducer>> ReadScaledData(int runId, CancellationToken cancellationToken)
+        [ActivityTrace]
+        public async Task<ImmutableList<CalcResultScaledupProducer>> ReadScaledData(int runId, CancellationToken cancellationToken)
         {
             return await dbContext.TransformScaled
                         .Where(p => p.CalculatorRunId == runId)
@@ -95,7 +97,8 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .ToImmutableListAsync(cancellationToken);
         }
 
-        public async Task<IReadOnlyList<CalcResultPartialObligation>> ReadPartialData(int runId, CancellationToken cancellationToken){
+        [ActivityTrace]
+        public async Task<ImmutableList<CalcResultPartialObligation>> ReadPartialData(int runId, CancellationToken cancellationToken){
             return await dbContext.TransformPartial
                         .Where(p => p.CalculatorRunId == runId)
                         .GroupBy(p => new { p.ProducerId, p.SubsidiaryId, p.ProducerName, p.TradingName, p.SubmissionYear, p.Level, p.DaysInSubmissionYear, p.JoiningDate, p.DaysObligated, p.ObligatedFactor })
@@ -121,6 +124,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .ToImmutableListAsync(cancellationToken);
         }
 
+        [ActivityTrace]
         public async Task<ProducerFees> ReadProducerFees(int runId, CancellationToken cancellationToken)
         {
             return await dbContext.ProducerDisposalFee
@@ -129,6 +133,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .SingleAsync(cancellationToken);
         }
 
+        [ActivityTrace]
         public async Task<SelfManagedConsumerWaste> ReadSmcw(int runId, CancellationToken cancellationToken) =>
             await dbContext.SelfManagedConsumerWaste
                     .Include(s => s.ProducerTotals)
@@ -136,11 +141,13 @@ namespace EPR.Calculator.API.BackgroundService.Services
                     .SingleAsync(cancellationToken);
 
 
+        [ActivityTrace]
         public async Task<ModulationResult> ReadModulationResult(int runId, CancellationToken cancellationToken) =>
             await dbContext.ModulationResult
                     .Where(p => p.CalculatorRunId == runId)
                     .SingleAsync(cancellationToken);
 
+        [ActivityTrace]
         public async Task<CalcResultLapcapData> ReadLapcapData(int runId, CancellationToken cancellationToken) =>
             await dbContext.LapcapData
                     .AsNoTracking()
@@ -148,6 +155,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
                     .Select(x => x.LapcapData)
                     .SingleAsync(cancellationToken);
 
+        [ActivityTrace]
         public async Task<CalcResultCommsCost> ReadCommsCost(int runId, CancellationToken cancellationToken) =>
             await dbContext.CommCost
                     .AsNoTracking()
@@ -155,6 +163,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
                     .Select(x => x.CommsCost)
                     .SingleAsync(cancellationToken);
 
+        [ActivityTrace]
         public async Task<CalcResultLateReportingTonnage> ReadLateReportingTonnage(int runId, CancellationToken cancellationToken) =>
             await dbContext.LateReportingTonnage
                     .AsNoTracking()
@@ -162,6 +171,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
                     .Select(x => x.LateReportingTonnage)
                     .SingleAsync(cancellationToken);
 
+        [ActivityTrace]
         public async Task<CalcResultParameterOtherCost> ReadParameterOtherCost(int runId, CancellationToken cancellationToken) =>
             await dbContext.ParameterOtherCost
                     .AsNoTracking()
@@ -169,6 +179,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
                     .Select(x => x.ParameterOtherCost)
                     .SingleAsync(cancellationToken);
 
+        [ActivityTrace]
         public async Task<CalcResultOnePlusFourApportionment> ReadOnePlusFourApportionment(int runId, CancellationToken cancellationToken) =>
             await dbContext.OnePlusFourApportionment
                     .AsNoTracking()
@@ -176,6 +187,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
                     .Select(x => x.OnePlusFourApportionment)
                     .SingleAsync(cancellationToken);
 
+        [ActivityTrace]
         public async Task<CalcResultLaDisposalCostData> ReadLaDisposalCostData(int runId, CancellationToken cancellationToken) =>
             await dbContext.LaDisposalCostData
                     .AsNoTracking()
@@ -183,7 +195,8 @@ namespace EPR.Calculator.API.BackgroundService.Services
                     .Select(x => x.LaDisposalCost)
                     .SingleAsync(cancellationToken);
 
-        public async Task<IReadOnlyList<CalcResultCancelledProducer>> ReadCancelledProducers(int runId, CancellationToken cancellationToken) =>
+        [ActivityTrace]
+        public async Task<ImmutableList<CalcResultCancelledProducer>> ReadCancelledProducers(int runId, CancellationToken cancellationToken) =>
             await dbContext.CancelledProducers
                     .AsNoTracking()
                     .Where(p => p.CalculatorRunId == runId)

@@ -19,16 +19,26 @@
     "MinimumLevel": {
       "Default": "Warning",
       "Override": {
-        "EPR.Calculator": "Debug",
-        "EPR.Calculator.API.BackgroundService": "Debug",
-        "Microsoft.AspNetCore.Authentication": "Warning",
-        "Microsoft.AspNetCore.Hosting.Diagnostics": "Information",
+        "EPR.Calculator": "Verbose",
+        "EPR.Calculator.Metrics": "Information", // Only effective when TelemetryLoggingHost is enabled.
+        "EPR.Calculator.API.BackgroundService": "Verbose",
+        "Microsoft.AspNetCore.Authentication": "Information",
         "Microsoft.EntityFrameworkCore": "Warning",
         "Microsoft.Hosting.Lifetime": "Information",
-        "Microsoft.IdentityModel": "Warning"
+        "Serilog.AspNetCore": "Information"
       }
     }
   },
+
+  // This is required, but setting InstrumentationKey to an empty GUID effectively
+  // disables it.
+  "AzureMonitor": {
+    "ConnectionString": "InstrumentationKey=00000000-0000-0000-0000-000000000000"
+  },
+
+  // This is an outdated (but still supported) alternative to AzureMonitor.
+  // Either version may be used.
+  // "APPLICATIONINSIGHTS_CONNECTION_STRING": "InstrumentationKey=00000000-0000-0000-0000-000000000000",
 
   "AzureAd": {
     "Instance": "https://login.microsoftonline.com/",

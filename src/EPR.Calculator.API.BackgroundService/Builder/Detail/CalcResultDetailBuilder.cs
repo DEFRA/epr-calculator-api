@@ -1,28 +1,28 @@
-﻿using EPR.Calculator.API.Data;
-using EPR.Calculator.API.BackgroundService.Constants;
+﻿using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
-using EPR.Calculator.API.BackgroundService.Utils;
+using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Builder.Detail
 {
     public interface ICalcResultDetailBuilder
     {
-        Task<CalcResultDetail> ConstructAsync(RunContext runContext);
+        Task<CalcResultDetail> ConstructAsync(RunContext runContext, CancellationToken cancellationToken);
     }
 
     public class CalcResultDetailBuilder(ApplicationDBContext dbContext)
         : ICalcResultDetailBuilder
     {
-        public async Task<CalcResultDetail> ConstructAsync(RunContext runContext)
+        [ActivityTrace]
+        public async Task<CalcResultDetail> ConstructAsync(RunContext runContext, CancellationToken cancellationToken)
         {
             var calculatorRun = await dbContext.CalculatorRuns
                 .Include(o => o.CalculatorRunOrganisationDataMaster)
                 .Include(o => o.CalculatorRunPomDataMaster)
                 .Include(o => o.DefaultParameterSettingMaster)
                 .Include(x => x.LapcapDataMaster)
-                .SingleAsync(x => x.Id == runContext.RunId);
+                .SingleAsync(x => x.Id == runContext.RunId, cancellationToken: cancellationToken);
 
             var results = new CalcResultDetail
             {

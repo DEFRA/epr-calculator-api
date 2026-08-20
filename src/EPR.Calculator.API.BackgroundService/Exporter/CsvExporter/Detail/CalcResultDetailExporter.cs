@@ -24,6 +24,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Detail
         private const string ParametersFile = "Parameters File";
         private const string CountryApportionmentFile = "Country Apportionment File";
 
+        [ActivityTrace]
         public void Export(CalcResultDetail calcResultDetail, StringBuilder stringBuilder)
         {
             AppendCsvLine(stringBuilder, RunName, calcResultDetail.RunName);

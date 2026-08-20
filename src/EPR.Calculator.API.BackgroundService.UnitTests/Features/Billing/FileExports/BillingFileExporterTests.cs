@@ -62,11 +62,10 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
 
         // Assert
         storageUploadService.Verify(x => x.UploadFileContentAsync(
-            It.Is<IStorageUploadService.Request>(args =>
-                args.Content == "csv-content"
-                && args.ContainerName == "csv-container"
-                && args.Overwrite
-                && args.UseUtf8Bom),
+            It.Is<IStorageUploadService.Request>(request =>
+                request.Content == "csv-content"
+                && request.ContainerName == "csv-container"
+                && request.Overwrite),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -78,11 +77,10 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
 
         // Assert
         storageUploadService.Verify(x => x.UploadFileContentAsync(
-            It.Is<IStorageUploadService.Request>(args =>
-                args.Content == "json-content"
-                && args.ContainerName == "json-container"
-                && args.Overwrite
-                && !args.UseUtf8Bom),
+            It.Is<IStorageUploadService.Request>(request =>
+                request.Content == "json-content"
+                && request.ContainerName == "json-container"
+                && request.Overwrite),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

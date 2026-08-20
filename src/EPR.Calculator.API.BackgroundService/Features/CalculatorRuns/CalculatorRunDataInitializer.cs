@@ -1,8 +1,8 @@
-﻿using EPR.Calculator.API.Data;
-using EPR.Calculator.API.BackgroundService.Exceptions;
+﻿using EPR.Calculator.API.BackgroundService.Exceptions;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Services.DataLoading;
+using EPR.Calculator.API.Data;
 
 namespace EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
 
@@ -17,30 +17,34 @@ public class CalculatorRunDataInitializer(
     ICalculatorRunOrgData calculatorRunOrgData,
     ICalculatorRunPomData calculatorRunPomData,
     IProducerDataTransposer transposer,
-    ITelemetryClient telemetry,
     ILogger<CalculatorRunDataInitializer> logger)
     : ICalculatorRunDataInitializer
 {
-    public async Task Initialize(CalculatorRunContext runContext, CancellationToken cancellationToken) =>
-        await telemetry.TrackDuration("CalculatorRunDataInitialize", async () =>
+    [ActivityTrace]
+    public async Task Initialize(CalculatorRunContext runContext, CancellationToken cancellationToken)
+    {
+        // DataLoader handles its own transactions and telemetry
+        await dataLoader.LoadData(runContext, cancellationToken);
+        await TransposeData(runContext, cancellationToken);
+    }
+
+    [ActivityMetric(nameof(Metrics.DataDuration), threshold: "00:00:30")]
+    private async Task TransposeData(CalculatorRunContext runContext, CancellationToken cancellationToken)
+    {
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        try
         {
-            // DataLoader handles its own dbContexts and transactions
-            await dataLoader.LoadData(runContext, cancellationToken);
-
-            await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
-
-            try
-            {
-                await calculatorRunOrgData.LoadOrgDataForCalcRun(runContext, cancellationToken);
-                await calculatorRunPomData.LoadPomDataForCalcRun(runContext, cancellationToken);
-                await transposer.Transpose(runContext, cancellationToken);
-                await transaction.CommitAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                logger.LogDebug(ex, "Rolling back transaction");
-                await transaction.RollbackAsync(CancellationToken.None);
-                throw new RunDataInitializeException(runContext.RunType, runContext.RunId, ex);
-            }
-        });
+            await calculatorRunOrgData.LoadData(runContext, cancellationToken);
+            await calculatorRunPomData.LoadData(runContext, cancellationToken);
+            await transposer.Transpose(runContext, cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogDebug(ex, "Rolling back transaction");
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw new RunDataInitializeException(runContext.RunType, runContext.RunId, ex);
+        }
+    }
 }

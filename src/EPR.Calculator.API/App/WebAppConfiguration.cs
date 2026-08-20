@@ -9,7 +9,7 @@ namespace EPR.Calculator.API.App;
 [ExcludeFromCodeCoverage]
 public static class WebAppConfiguration
 {
-    private const string HealthCheckPath = "/admin/health";
+    public const string HealthCheckPath = "/admin/health";
 
     extension(WebApplication app)
     {

@@ -1,10 +1,10 @@
-﻿using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
+﻿using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
 using EPR.Calculator.API.BackgroundService.Enums;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Helpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Builder;
 
@@ -69,7 +69,7 @@ public class CalcResultLapcapDataBuilderTest : TestsFor<CalcResultLapcapDataBuil
         dbContext.CalculatorRuns.Add(run);
         await dbContext.SaveChangesAsync();
 
-        var lapcapResults = await testSubject.ConstructAsync(runContext, materials.ToDetails());
+        var lapcapResults = await testSubject.ConstructAsync(runContext, materials.ToDetails(), CancellationToken.None);
 
 
         Assert.IsNotNull(lapcapResults);

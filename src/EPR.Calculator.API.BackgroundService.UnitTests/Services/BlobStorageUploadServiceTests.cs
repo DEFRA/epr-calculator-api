@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
@@ -13,6 +13,7 @@ public class BlobStorageServiceTests
 {
     private IFixture fixture = null!;
     private Mock<BlobClient> mockBlobClient = null!;
+    private Mock<BlobContainerClient> mockBlobContainerClient = null!;
     private BlobStorageUploadService sut = null!;
 
     [TestInitialize]
@@ -22,7 +23,9 @@ public class BlobStorageServiceTests
 
         mockBlobClient = fixture.Freeze<Mock<BlobClient>>();
 
-        var mockBlobContainerClient = new Mock<BlobContainerClient>();
+        mockBlobContainerClient = new Mock<BlobContainerClient>();
+        mockBlobContainerClient.Setup(x => x.ExistsAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Response.FromValue(value: true, Mock.Of<Response>()));
         mockBlobContainerClient.Setup(x => x.GetBlobClient(It.IsAny<string>()))
             .Returns(mockBlobClient.Object);
 

@@ -1,9 +1,9 @@
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Builder;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Features.Common;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
@@ -22,14 +22,16 @@ public class CalculatorRunProcessor(
     ILogger<CalculatorRunProcessor> logger)
     : ICalculatorRunProcessor
 {
+    [ActivityMetric(nameof(Metrics.TotalDuration), threshold: "00:15:00")]
     public async Task<RunResult> Process(CalculatorRunContext runContext, CancellationToken cancellationToken)
     {
         try
         {
-            await SaveRunningRunStatus(runContext, cancellationToken);
-
             // ⚠️ Database mutations can happen throughout many of these calls
             // This behaviour is different to BillingRunProcessor (which only does so in the finalizer).
+            await SaveRunningRunStatus(runContext, cancellationToken);
+
+            // This streams required data from the common data API and transposes it into the paycal database.
             await dataInitializer.Initialize(runContext, cancellationToken);
 
             // This reads the required data to memory and builds the CalcResult object.

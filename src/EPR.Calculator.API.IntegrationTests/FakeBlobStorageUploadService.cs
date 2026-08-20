@@ -6,8 +6,7 @@ public class FakeBlobStorageUploadService : IStorageUploadService
 {
     private readonly Dictionary<string, string> store = new();
 
-    public Task<string> UploadFileContentAsync(
-        IStorageUploadService.Request request, CancellationToken cancellationToken = default)
+    public Task<string> UploadFileContentAsync(IStorageUploadService.Request request, CancellationToken cancellationToken)
     {
         store[request.FileName] = request.Content;
         return Task.FromResult(request.FileName);

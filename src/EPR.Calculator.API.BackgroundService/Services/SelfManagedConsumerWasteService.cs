@@ -1,9 +1,9 @@
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Builder.Summary.Common;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Services
@@ -25,6 +25,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
             this.context = context;
         }
 
+        [ActivityTrace]
         public async Task<SelfManagedConsumerWaste> Calculate(
             RunContext runContext,
             IEnumerable<MaterialDetail> materialDetails

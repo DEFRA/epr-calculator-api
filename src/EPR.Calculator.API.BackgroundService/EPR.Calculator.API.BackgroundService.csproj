@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="EPR.Calculator.API.BackgroundService.UnitTests"/>
+    <InternalsVisibleTo Include="EPR.Calculator.API.IntegrationTests"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -22,8 +23,10 @@
     <PackageReference Include="EFCore.BulkExtensions" Version="10.0.1"/>
     <PackageReference Include="FluentValidation" Version="12.1.1"/>
     <PackageReference Include="JetBrains.Annotations" Version="*" PrivateAssets="All"/>
+    <PackageReference Include="Metalama.Framework" Version="2026.1.24" PrivateAssets="All"/>
     <PackageReference Include="Microsoft.ApplicationInsights" Version="3.1.2"/>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.11"/>
+    <PackageReference Include="OpenTelemetry" Version="1.17.0"/>
   </ItemGroup>
 
   <ItemGroup>

@@ -1,42 +1,41 @@
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Exceptions;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
-using EPR.Calculator.API.BackgroundService.Logging;
 using EPR.Calculator.API.BackgroundService.Models;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Services;
 
 public interface IProducerInvoiceNetTonnageService
 {
-    Task CreateProducerInvoiceNetTonnage(CalculatorRunContext runContext, CalcResult calcResult);
+    Task CreateProducerInvoiceNetTonnage(CalculatorRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken);
 }
 
 public class ProducerInvoiceNetTonnageService(
     ApplicationDBContext dbContext,
     IBulkOperations bulkOps,
     IMaterialService materialService,
-    ILogger<ProducerInvoiceNetTonnageService> logger)
-    : IProducerInvoiceNetTonnageService
+    ILogger<ProducerInvoiceNetTonnageService> logger
+) : IProducerInvoiceNetTonnageService
 {
-    public Task CreateProducerInvoiceNetTonnage(CalculatorRunContext runContext, CalcResult calcResult) =>
-        logger.LogDuration(async () =>
+    [ActivityTrace]
+    public async Task CreateProducerInvoiceNetTonnage(CalculatorRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken)
+    {
+        try
         {
-            try
-            {
-                var materials = await materialService.GetMaterials();
-                var producerInvoicedNetTonnage = GetInvoicedMaterialNetTonnage(calcResult, materials);
+            var materials = await materialService.GetMaterials();
+            var producerInvoicedNetTonnage = GetInvoicedMaterialNetTonnage(calcResult, materials);
 
-                await bulkOps.BulkInsertAsync(dbContext, producerInvoicedNetTonnage);
+            await bulkOps.BulkInsertAsync(dbContext, producerInvoicedNetTonnage, cancellationToken);
 
-                logger.LogInformation("Inserted {ProducerInvoicedNetTonnageCount} invoiced net tonnages", producerInvoicedNetTonnage.Count);
-            }
-            catch (Exception exception)
-            {
-                throw new RunProcessingException(runContext, "Error occurred while generating invoiced net tonnages, see inner exception for details.", exception);
-            }
-        });
+            logger.LogInformation("Inserted {ProducerInvoicedNetTonnageCount} invoiced net tonnages", producerInvoicedNetTonnage.Count);
+        }
+        catch (Exception exception)
+        {
+            throw new RunProcessingException(runContext, "Error occurred while generating invoiced net tonnages, see inner exception for details.", exception);
+        }
+    }
 
     private static ImmutableList<ProducerInvoicedMaterialNetTonnage> GetInvoicedMaterialNetTonnage(CalcResult calcResult, IReadOnlyList<MaterialDetail> materials)
     {

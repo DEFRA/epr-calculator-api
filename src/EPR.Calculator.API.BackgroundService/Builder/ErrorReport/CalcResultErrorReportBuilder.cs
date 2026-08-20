@@ -1,8 +1,8 @@
-﻿using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.BackgroundService.Constants;
+﻿using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Builder.ErrorReport
@@ -21,6 +21,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ErrorReport
             this.context = context;
         }
 
+        [ActivityTrace]
         public IEnumerable<CalcResultErrorReport> Construct(RunContext runContext)
         {
             var baseQuery =
