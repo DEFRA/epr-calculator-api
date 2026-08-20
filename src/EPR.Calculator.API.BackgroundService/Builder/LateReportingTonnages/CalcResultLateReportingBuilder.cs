@@ -1,5 +1,5 @@
-﻿using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.BackgroundService.Features.Common;
+﻿using EPR.Calculator.API.BackgroundService.Features.Common;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages
 {
@@ -11,6 +11,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.LateReportingTonnages
     public class CalcResultLateReportingBuilder()
         : ICalcResultLateReportingBuilder
     {
+        [ActivityTrace]
         public CalcResultLateReportingTonnage Construct(RunContext runContext, IImmutableList<MaterialDetail> materials)
         {
             var tonnageDetails = materials

@@ -1,10 +1,9 @@
-using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.BackgroundService.Exceptions;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Services;
 
@@ -19,7 +18,7 @@ public class BillingInstructionServiceTests : TestsFor<BillingInstructionService
         var calcResult = TestDataHelper.GetCalcResult();
 
         // Act & Assert
-        await Should.NotThrowAsync(testSubject.CreateBillingInstructions(runContext, calcResult));
+        await Should.NotThrowAsync(testSubject.CreateBillingInstructions(runContext, calcResult, CancellationToken.None));
     }
 
     [TestMethod]
@@ -85,55 +84,6 @@ public class BillingInstructionServiceTests : TestsFor<BillingInstructionService
         };
 
         // Act & Assert
-        await Should.NotThrowAsync(testSubject.CreateBillingInstructions(runContext, calcResult));
-    }
-
-    [TestMethod]
-    public async Task Should_throw_when_no_producers()
-    {
-        // Arrange
-        var runContext = TestDataHelper.CalculatorRun2025;
-        var calcResult = new CalcResult
-        {
-            CalcResultScaledupProducers = new CalcResultScaledupProducers
-            {
-                ScaledupProducers = ImmutableList<CalcResultScaledupProducer>.Empty
-            },
-            CalcResultPartialObligations = new CalcResultPartialObligations
-            {
-                PartialObligations = ImmutableList<CalcResultPartialObligation>.Empty
-            },
-            CalcResultDetail = new CalcResultDetail
-            {
-                RunId = 4,
-                RunDate = DateTime.UtcNow,
-                RunName = "RunName",
-                RelativeYear = new RelativeYear(2024)
-            },
-            CalcResultLapcapData = new CalcResultLapcapData
-            {
-                ByMaterial = new Dictionary<string, ByCountryCost>()
-            },
-            CalcResultParameterOtherCost = new CalcResultParameterOtherCost
-            {
-                SchemeSetupCost = ByCountryCost.Empty
-            },
-            CalcResultLateReportingTonnageData = new CalcResultLateReportingTonnage
-            {
-                ByMaterial = new Dictionary<string, CalcResultLateReportingTonnageDetail>()
-            },
-            ProducerFees = new ProducerFees {
-                CalculatorRunId = 0,
-                Details = null!,
-                Total = new() { ProducerId = 0, SubsidiaryId = string.Empty, ProducerName = string.Empty }
-            },
-            CalcResultProjectedProducers = new CalcResultProjectedProducers(){
-                H1ProjectedProducers = ImmutableList<CalcResultH1ProjectedProducer>.Empty,
-                H2ProjectedProducers = ImmutableList<CalcResultH2ProjectedProducer>.Empty
-            }
-        };
-
-        // Act & Assert
-        await Should.ThrowAsync<RunProcessingException>(testSubject.CreateBillingInstructions(runContext, calcResult));
+        await Should.NotThrowAsync(testSubject.CreateBillingInstructions(runContext, calcResult, CancellationToken.None));
     }
 }

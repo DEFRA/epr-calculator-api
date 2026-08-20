@@ -1,14 +1,12 @@
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Builder;
-using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Outputs;
-using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
+using EPR.Calculator.API.Data.DataModels;
 using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Features.Billing;
@@ -33,7 +31,7 @@ public class BillingRunProcessorTests : TestsFor<BillingRunProcessor>
         finalizer = fixture.Freeze<Mock<IBillingRunFinalizer>>();
         logger = fixture.Freeze<Mock<ILogger<BillingRunProcessor>>>();
 
-        builder.Setup(b => b.BuildAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()))
+        builder.Setup(b => b.BuildAsync(It.IsAny<BillingRunContext>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(TestDataHelper.GetCalcResult());
     }
 
@@ -49,7 +47,7 @@ public class BillingRunProcessorTests : TestsFor<BillingRunProcessor>
     public async Task Should_handle_cancelled()
     {
         var exception = new OperationCanceledException("Test cancelled");
-        builder.Setup(b => b.BuildAsync(It.IsAny<RunContext>(), CancellationToken.None)).ThrowsAsync(exception);
+        builder.Setup(b => b.BuildAsync(It.IsAny<BillingRunContext>(), CancellationToken.None)).ThrowsAsync(exception);
 
         var result = await testSubject.Process(runContext, CancellationToken.None);
 
@@ -61,7 +59,7 @@ public class BillingRunProcessorTests : TestsFor<BillingRunProcessor>
     public async Task Should_handle_failure()
     {
         var exception = new Exception("Test failure");
-        builder.Setup(b => b.BuildAsync(It.IsAny<RunContext>(), CancellationToken.None)).ThrowsAsync(exception);
+        builder.Setup(b => b.BuildAsync(It.IsAny<BillingRunContext>(), CancellationToken.None)).ThrowsAsync(exception);
 
         var result = await testSubject.Process(runContext, CancellationToken.None);
 
@@ -72,7 +70,7 @@ public class BillingRunProcessorTests : TestsFor<BillingRunProcessor>
     [TestMethod]
     public async Task Should_filter_accepted_producers()
     {
-        builder.Setup(b => b.BuildAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()))
+        builder.Setup(b => b.BuildAsync(It.IsAny<BillingRunContext>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildCalcResult());
 
         CalcResult? exported = null;
@@ -100,7 +98,7 @@ public class BillingRunProcessorTests : TestsFor<BillingRunProcessor>
     [TestMethod]
     public async Task Should_filter_rejected_producers()
     {
-        builder.Setup(b => b.BuildAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()))
+        builder.Setup(b => b.BuildAsync(It.IsAny<BillingRunContext>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(BuildCalcResult());
 
         CalcResult? exported = null;

@@ -1,19 +1,20 @@
 using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.BackgroundService.Enums;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
-using EPR.Calculator.API.BackgroundService.Utils;
+using EPR.Calculator.API.BackgroundService.Telemetry;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Data.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.IntegrationTests;
 
@@ -108,12 +109,19 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         await using var scope = Provider.CreateAsyncScope();
         var builder   = scope.ServiceProvider.GetRequiredService<ICalculatorRunContextBuilder>();
         var processor = scope.ServiceProvider.GetRequiredService<ICalculatorRunProcessor>();
+        var logger    = scope.ServiceProvider.GetRequiredService<ILogger<CalculatorRunIntegrationTests>>();
+        var telemetry = scope.ServiceProvider.GetRequiredService<ITelemetry<CalculatorRunIntegrationTests>>();
 
         var runContext = await builder.Build(runId, user, CancellationToken.None);
-        var runResult = await processor.Process(runContext, CancellationToken.None);
-        runResult.Succeeded.ShouldBeTrue();
 
-        return (CalculatorRunResult) runResult;
+        using (logger.BeginRunScope(runContext))
+        using (telemetry.BeginRunScope(runContext))
+        {
+            var runResult = await processor.Process(runContext, CancellationToken.None);
+            runResult.Succeeded.ShouldBeTrue();
+
+            return (CalculatorRunResult) runResult;
+        }
     }
 
     private static async Task<BillingRunResult> PerformBillingRun(ApplicationDBContext dbContext, int runId, string user)
@@ -128,12 +136,19 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         await using var scope = Provider.CreateAsyncScope();
         var builder   = scope.ServiceProvider.GetRequiredService<IBillingRunContextBuilder>();
         var processor = scope.ServiceProvider.GetRequiredService<IBillingRunProcessor>();
+        var logger    = scope.ServiceProvider.GetRequiredService<ILogger<CalculatorRunIntegrationTests>>();
+        var telemetry = scope.ServiceProvider.GetRequiredService<ITelemetry<CalculatorRunIntegrationTests>>();
 
         var runContext = await builder.Build(runId, user, CancellationToken.None);
-        var runResult = await processor.Process(runContext, CancellationToken.None);
-        runResult.Succeeded.ShouldBeTrue();
 
-        return (BillingRunResult) runResult;
+        using (logger.BeginRunScope(runContext))
+        using (telemetry.BeginRunScope(runContext))
+        {
+            var runResult = await processor.Process(runContext, CancellationToken.None);
+            runResult.Succeeded.ShouldBeTrue();
+
+            return (BillingRunResult) runResult;
+        }
     }
 
     private static CsvReader SlurpCsv(string csvPath) =>

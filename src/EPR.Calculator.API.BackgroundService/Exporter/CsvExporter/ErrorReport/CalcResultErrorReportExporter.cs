@@ -7,6 +7,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ErrorReport
 {
     public class CalcResultErrorReportExporter : ICalcResultErrorReportExporter
     {
+        [ActivityTrace]
         public void Export(IEnumerable<CalcResultErrorReport> errorReport, StringBuilder csvContent)
         {
             csvContent.AppendLine();

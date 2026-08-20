@@ -1,11 +1,11 @@
 using System.Net;
 using System.Text;
-using EPR.Calculator.API.Data;
 using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Services.DataLoading;
-using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Services;
+using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
+using EPR.Calculator.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -31,7 +31,6 @@ public class CommonDataApiLoaderTests
     private static readonly DateTimeOffset FixedTime = new(2024, 6, 15, 12, 0, 0, TimeSpan.Zero);
 
     private Mock<IDbContextFactory<ApplicationDBContext>> mockDbFactory = null!;
-    private TestTelemetryClient mockTelemetry = null!;
     private Mock<ILogger<CommonDataApiLoader>> mockLogger = null!;
     private Mock<TimeProvider> mockTimeProvider = null!;
 
@@ -39,7 +38,6 @@ public class CommonDataApiLoaderTests
     public void SetUp()
     {
         mockDbFactory = new Mock<IDbContextFactory<ApplicationDBContext>>();
-        mockTelemetry = new TestTelemetryClient();
         mockLogger = new Mock<ILogger<CommonDataApiLoader>>();
         mockTimeProvider = new Mock<TimeProvider>();
         mockTimeProvider.Setup(t => t.GetUtcNow()).Returns(FixedTime);
@@ -192,8 +190,8 @@ public class CommonDataApiLoaderTests
             mockDbFactory.Object,
             httpClient,
             mockTimeProvider.Object,
-            mockTelemetry,
-            mockLogger.Object);
+            mockLogger.Object,
+            new Telemetry<CommonDataApiLoader>());
     }
 
     private static HttpResponseMessage OkNdJson(string content) =>

@@ -20,11 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.6.0"/>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.29.1"/>
     <PackageReference Include="FluentValidation" Version="12.1.1"/>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1"/>
     <PackageReference Include="JetBrains.Annotations" Version="*" PrivateAssets="All"/>
-    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="3.1.2"/>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.11">
       <PrivateAssets>all</PrivateAssets>
@@ -33,6 +33,7 @@
     <PackageReference Include="Microsoft.Extensions.Azure" Version="1.14.1"/>
     <PackageReference Include="Microsoft.Identity.Web" Version="4.14.2"/>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0"/>
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.17.0"/>
     <PackageReference Include="SonarAnalyzer.CSharp" Version="10.32.0.713">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -40,7 +41,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3"/>
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0"/>
     <PackageReference Include="Serilog.Expressions" Version="5.0.0"/>
-    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="5.0.1"/>
     <PackageReference Include="Serilog.Sinks.Console" Version="6.*"/>
   </ItemGroup>
 

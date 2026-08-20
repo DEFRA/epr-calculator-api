@@ -7,6 +7,7 @@ CultureInfo.DefaultThreadCurrentCulture = enGb;
 CultureInfo.DefaultThreadCurrentUICulture = enGb;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Configuration
     .AddUserSecrets(Assembly.GetExecutingAssembly(), optional: true)
     .AddEnvironmentVariables();
@@ -18,7 +19,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
 
 builder.Services
-    .AddPayCalTelemetry(builder.Configuration, builder.Environment)
+    .AddPayCalTelemetry(builder.Environment)
     .AddPayCalProblemDetails(builder.Environment)
     .AddPayCalAuthentication(builder.Configuration, builder.Environment)
     .AddPayCalAuthorization()

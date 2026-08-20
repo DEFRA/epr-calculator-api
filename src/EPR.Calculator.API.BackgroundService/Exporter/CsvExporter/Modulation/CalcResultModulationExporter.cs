@@ -1,10 +1,8 @@
 ﻿using System.Text;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Enums;
 using EPR.Calculator.API.BackgroundService.Misc;
-using EPR.Calculator.API.BackgroundService.Models;
-using EPR.Calculator.API.BackgroundService.Services;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Modulation
 {
@@ -20,6 +18,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Modulation
 
     public class CalcResultModulationExporter : ICalcResultModulationExporter
     {
+        [ActivityTrace]
         public void Export(
             CalcResultLaDisposalCostData laDisposalCostData,
             SelfManagedConsumerWaste smcw,

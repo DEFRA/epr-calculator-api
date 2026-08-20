@@ -8,6 +8,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.RejectedProd
 {
     public class CalcResultRejectedProducersExporter : ICalcResultRejectedProducersExporter
     {
+        [ActivityTrace]
         public void Export(IEnumerable<CalcResultRejectedProducer> rejectedProducers, StringBuilder csvContent)
         {
             // Add empty lines

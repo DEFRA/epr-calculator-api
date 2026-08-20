@@ -43,6 +43,8 @@ using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Services.DataLoading;
+using EPR.Calculator.API.BackgroundService.Telemetry;
+using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using FluentValidation;
 
 namespace EPR.Calculator.API.App;
@@ -54,6 +56,9 @@ public static class BackgroundServiceConfiguration
     {
         public IServiceCollection AddPayCalBackgroundServices()
         {
+            // Register Telemetry - ITelemetry<T> resolves for any T without per-type registration.
+            services.AddSingleton(typeof(ITelemetry<>), typeof(Telemetry<>));
+
             // Register BlobStorageUpload
             services
                 .AddOptions<BlobStorageUploadOptions>()

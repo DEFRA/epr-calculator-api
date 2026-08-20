@@ -1,43 +1,42 @@
-﻿using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.BackgroundService.Constants;
+﻿using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Exceptions;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Constants;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
-using EPR.Calculator.API.BackgroundService.Logging;
 using EPR.Calculator.API.BackgroundService.Misc;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Utils;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Services;
 
 public interface IBillingInstructionService
 {
-    Task CreateBillingInstructions(CalculatorRunContext runContext, CalcResult calcResult);
+    Task CreateBillingInstructions(CalculatorRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken);
 }
 
 public class BillingInstructionService(
     ApplicationDBContext dbContext,
     IBulkOperations bulkOps,
-    ILogger<BillingInstructionService> logger)
-    : IBillingInstructionService
+    ILogger<BillingInstructionService> logger
+) : IBillingInstructionService
 {
-    public Task CreateBillingInstructions(CalculatorRunContext runContext, CalcResult calcResult) =>
-        logger.LogDuration(async () =>
+    [ActivityTrace]
+    public async Task CreateBillingInstructions(CalculatorRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken)
+    {
+        try
         {
-            try
-            {
-                var billingInstructions = GetBillingInstructions(calcResult);
+            var billingInstructions = GetBillingInstructions(calcResult);
 
-                await bulkOps.BulkInsertAsync(dbContext, billingInstructions);
+            await bulkOps.BulkInsertAsync(dbContext, billingInstructions, cancellationToken);
 
-                logger.LogInformation("Inserted {BillingInstructionsCount} billing instructions", billingInstructions.Count);
-            }
-            catch (Exception exception)
-            {
-                throw new RunProcessingException(runContext, "Error occurred while generating billing instructions, see inner exception for details.", exception);
-            }
-        });
+            logger.LogInformation("Inserted {BillingInstructionsCount} billing instructions", billingInstructions.Count);
+        }
+        catch (Exception exception)
+        {
+            throw new RunProcessingException(runContext, "Error occurred while generating billing instructions, see inner exception for details.", exception);
+        }
+    }
 
     private static ImmutableList<ProducerResultFileSuggestedBillingInstruction> GetBillingInstructions(CalcResult calcResult)
     {

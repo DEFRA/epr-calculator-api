@@ -1,7 +1,7 @@
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Builder.Detail;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Builder;
 
@@ -43,7 +43,7 @@ public class CalcResultDetailBuilderTests : TestsFor<CalcResultDetailBuilder>
         await dbContext.SaveChangesAsync();
 
 
-        var result = await testSubject.ConstructAsync(runContext);
+        var result = await testSubject.ConstructAsync(runContext, CancellationToken.None);
 
         Assert.AreEqual(runContext.RunId, result.RunId);
         Assert.AreEqual(runContext.RunName, result.RunName);
@@ -73,7 +73,7 @@ public class CalcResultDetailBuilderTests : TestsFor<CalcResultDetailBuilder>
         dbContext.CalculatorRuns.Add(calculatorRun);
         await dbContext.SaveChangesAsync();
 
-        var result = await testSubject.ConstructAsync(runContext);
+        var result = await testSubject.ConstructAsync(runContext, CancellationToken.None);
 
         Assert.AreEqual(runContext.RunId, result.RunId);
         Assert.AreEqual(runContext.RunName, result.RunName);

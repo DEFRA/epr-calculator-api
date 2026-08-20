@@ -1,10 +1,8 @@
-﻿using EPR.Calculator.API.Data;
+﻿using EPR.Calculator.API.BackgroundService.Constants;
+using EPR.Calculator.API.BackgroundService.Features.Common;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Utils;
-using EPR.Calculator.API.BackgroundService.Constants;
-using EPR.Calculator.API.BackgroundService.Features.Common;
-using EPR.Calculator.API.BackgroundService.Models;
-using EPR.Calculator.API.BackgroundService.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Builder.CommsCost;
@@ -25,6 +23,7 @@ public class CalcResultCommsCostBuilder(ApplicationDBContext context)
     public const string TwoCCommsCostByCountry = "2c Comms Costs - by Country";
     public const string TwoBCommsCostUkWide = "2b Comms Costs - UK wide";
 
+    [ActivityTrace]
     public async Task<CalcResultCommsCost> ConstructAsync(
         RunContext runContext,
         IImmutableList<MaterialDetail> materialDetails,

@@ -1,4 +1,3 @@
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Builder;
 using EPR.Calculator.API.BackgroundService.Builder.CancelledProducers;
 using EPR.Calculator.API.BackgroundService.Builder.CommsCost;
@@ -17,6 +16,7 @@ using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Builder;
 
@@ -85,11 +85,11 @@ public class ResultBuilderTests : TestsFor<ResultBuilder>
         var mockProducerFees = new Mock<ProducerFees>();
         var mockCancelledProducers = new Mock<List<CalcResultCancelledProducer>>();
 
-        mockCalcResultDetailBuilder.Setup(m => m.ConstructAsync(runContext))
+        mockCalcResultDetailBuilder.Setup(m => m.ConstructAsync(runContext, It.IsAny<CancellationToken>()))
             .ReturnsAsync(mockResultDetail.Object);
         mockCalcResultCancelledProducersBuilder.Setup(m => m.ConstructAsync(runContext, It.IsAny<IReadOnlyCollection<MaterialDetail>>()))
             .ReturnsAsync(mockCancelledProducers.Object);
-        mockLapcapBuilder.Setup(m => m.ConstructAsync(runContext, It.IsAny<IEnumerable<MaterialDetail>>()))
+        mockLapcapBuilder.Setup(m => m.ConstructAsync(runContext, It.IsAny<IReadOnlyCollection<MaterialDetail>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mockLapcapData.Object);
         mockCalcResultParameterOtherCostBuilder.Setup(m => m.ConstructAsync(runContext))
             .ReturnsAsync(mockOtherParams.Object);

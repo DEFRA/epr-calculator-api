@@ -1,11 +1,10 @@
 using System.Text;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Enums;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Misc;
 using EPR.Calculator.API.BackgroundService.Models;
-using NetTopologySuite.Index.HPRtree;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.PartialObligations
 {
@@ -20,6 +19,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.PartialOblig
 
     public class CalcResultPartialObligationsExporter : ICalcResultPartialObligationsExporter
     {
+        [ActivityTrace]
         public void Export(RunContext runContext,
             CalcResultPartialObligations calcResultPartialObligations,
             IImmutableList<MaterialDetail> materials,

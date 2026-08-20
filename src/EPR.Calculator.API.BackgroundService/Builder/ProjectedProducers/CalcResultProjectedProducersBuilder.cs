@@ -1,9 +1,9 @@
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Builder.PartialObligations;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers
 {
@@ -18,6 +18,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers
 
     public class CalcResultProjectedProducersBuilder : ICalcResultProjectedProducersBuilder
     {
+        [ActivityTrace]
         public (List<L1Producer>, CalcResultProjectedProducers) Construct(
             RunContext runContext,
             IImmutableList<MaterialDetail> materialDetails,

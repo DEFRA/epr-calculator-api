@@ -17,6 +17,7 @@ public interface ICalcResultValidationExporter
 
 public class CalcResultValidationExporter(IValidator<CalcResult> validator) : ICalcResultValidationExporter
 {
+    [ActivityTrace]
     public void ExportWarnings(CalcResult calcResult, StringBuilder csvContent)
     {
         var validationResult = validator.Validate(calcResult);

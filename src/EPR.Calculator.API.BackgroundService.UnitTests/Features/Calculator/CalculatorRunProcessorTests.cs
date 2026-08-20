@@ -1,10 +1,9 @@
-﻿using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.BackgroundService.Builder;
+﻿using EPR.Calculator.API.BackgroundService.Builder;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
-using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Services;
+using EPR.Calculator.API.Data.DataModels;
 using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Features.Calculator;
@@ -45,7 +44,7 @@ public class CalculatorRunProcessorTests : TestsFor<CalculatorRunProcessor>
     public async Task Should_handle_cancelled()
     {
         var exception = new OperationCanceledException("Test cancelled");
-        builder.Setup(b => b.BuildAsync(It.IsAny<RunContext>(), CancellationToken.None)).ThrowsAsync(exception);
+        builder.Setup(b => b.BuildAsync(It.IsAny<CalculatorRunContext>(), CancellationToken.None)).ThrowsAsync(exception);
 
         var result = await testSubject.Process(runContext, CancellationToken.None);
 
@@ -57,7 +56,7 @@ public class CalculatorRunProcessorTests : TestsFor<CalculatorRunProcessor>
     public async Task Should_handle_failure()
     {
         var exception = new Exception("Test failure");
-        builder.Setup(b => b.BuildAsync(It.IsAny<RunContext>(), CancellationToken.None)).ThrowsAsync(exception);
+        builder.Setup(b => b.BuildAsync(It.IsAny<CalculatorRunContext>(), CancellationToken.None)).ThrowsAsync(exception);
 
         var result = await testSubject.Process(runContext, CancellationToken.None);
 

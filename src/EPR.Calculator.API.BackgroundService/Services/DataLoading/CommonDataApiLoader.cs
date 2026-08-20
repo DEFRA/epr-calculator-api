@@ -1,13 +1,11 @@
 using System.Data;
 using EFCore.BulkExtensions;
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.Common;
-using EPR.Calculator.API.BackgroundService.Logging;
 using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
-using EPR.Calculator.API.BackgroundService.Utils;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
@@ -36,10 +34,12 @@ public class CommonDataApiLoader(
     IDbContextFactory<ApplicationDBContext> dbContextFactory,
     ICommonDataApiClient httpClient,
     TimeProvider timeProvider,
-    ITelemetryClient telemetry,
-    ILogger<CommonDataApiLoader> logger)
-    : IDataLoader
+    ILogger<CommonDataApiLoader> logger,
+    ITelemetry<CommonDataApiLoader> telemetry
+) : IDataLoader
 {
+    private static readonly TimeSpan StreamDelayThreshold = TimeSpan.FromMinutes(5);
+
     /// <inheritdoc />
     public async Task LoadData(CalculatorRunContext runContext, CancellationToken cancellationToken = default)
     {
@@ -51,11 +51,11 @@ public class CommonDataApiLoader(
             return;
         }
 
-        await telemetry.TrackDuration("DataStream", () => Run(runContext, timeProvider.GetUtcNow(), cancellationToken));
+        await LoadData(runContext, timeProvider.GetUtcNow(), cancellationToken);
     }
 
-    private async Task<(long totalPoms, long totalOrgs)> Run(
-        RunContext runContext, DateTimeOffset loadTime, CancellationToken cancellationToken)
+    [ActivityTrace]
+    private async Task LoadData(RunContext runContext, DateTimeOffset loadTime, CancellationToken cancellationToken)
     {
         // If either stream fails, both should cancel.
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -64,7 +64,7 @@ public class CommonDataApiLoader(
 
         try
         {
-            return await UpdateDatabase(pomStream, orgStream, linkedCt);
+            await UpdateDatabase(pomStream, orgStream, linkedCt);
         }
         catch when (!linkedCt.IsCancellationRequested)
         {
@@ -95,12 +95,13 @@ public class CommonDataApiLoader(
         {
             // Await the arrival of the first element in both streams before proceeding.
             // Avoids holding locks during network delays, since both are (currently) highly variable.
-            var pomStarted = TrackStreamDelay(pomStream);
-            var orgStarted = TrackStreamDelay(orgStream);
+            var pomStarted = telemetry.Metric(Metrics.PomStreamDelay, () => pomStream.MoveNextAsync().AsTask(), StreamDelayThreshold, nameof(Metrics.PomStreamDelay));
+            var orgStarted = telemetry.Metric(Metrics.OrgStreamDelay, () => orgStream.MoveNextAsync().AsTask(), StreamDelayThreshold, nameof(Metrics.OrgStreamDelay));
 
             await Task.WhenAll(pomStarted, orgStarted);
-            return (new InitialisedStream<PomData>(pomStream, !pomStarted.Result),
-                new InitialisedStream<OrganisationData>(orgStream, !orgStarted.Result));
+
+            return (new InitialisedStream<PomData>("Pom", pomStream, !pomStarted.Result),
+                new InitialisedStream<OrganisationData>("Org", orgStream, !orgStarted.Result));
         }
         catch
         {
@@ -108,13 +109,12 @@ public class CommonDataApiLoader(
             await orgStream.DisposeAsync();
             throw;
         }
-
-        Task<bool> TrackStreamDelay<T>(IAsyncEnumerator<IEnumerable<T>> stream) =>
-            telemetry.TrackDuration($"{typeof(T).Name}StreamDelayMs", () => stream.MoveNextAsync().AsTask());
     }
 
-    private async Task<(long totalPoms, long totalOrgs)> UpdateDatabase(InitialisedStream<PomData> pomStream,
-        InitialisedStream<OrganisationData> orgStream, CancellationToken linkedCt)
+    private async Task UpdateDatabase(
+        InitialisedStream<PomData> pomStream,
+        InitialisedStream<OrganisationData> orgStream,
+        CancellationToken linkedCt)
     {
         // Each stream needs its own DbContext as it is not thread-safe.
         await using var pomDb = await dbContextFactory.CreateDbContextAsync(linkedCt);
@@ -134,7 +134,7 @@ public class CommonDataApiLoader(
             await pomTxn.CommitAsync(linkedCt);
             await orgTxn.CommitAsync(linkedCt);
 
-            return (totalPoms, totalOrgs);
+            logger.LogTrace("Inserted {TotalPoms} POMs and {TotalOrgs} organisations", totalPoms, totalOrgs);
         }
         finally
         {
@@ -145,22 +145,22 @@ public class CommonDataApiLoader(
         }
     }
 
-    private async Task<(IDbContextTransaction transaction, long total)> BulkInsert<TEntity>(
+    private Task<(IDbContextTransaction transaction, long total)> BulkInsert<TEntity>(
         ApplicationDBContext dbContext,
         InitialisedStream<TEntity> stream,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
         where TEntity : class
     {
-        return await logger.LogDuration(async () =>
+        return telemetry.Activity(async () =>
         {
-            var txn = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, ct);
+            var txn = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
             long total = 0;
             var batchNumber = 0;
 
             try
             {
                 // Clears all existing data - the underlying tables are only used for this data loading process.
-                await dbContext.Set<TEntity>().ExecuteDeleteAsync(ct);
+                await dbContext.Set<TEntity>().ExecuteDeleteAsync(cancellationToken);
 
                 if (stream.IsEmpty)
                 {
@@ -173,7 +173,7 @@ public class CommonDataApiLoader(
                 do
                 {
                     var batch = stream.Enumerator.Current;
-                    await dbContext.BulkInsertAsync(batch, cancellationToken: ct);
+                    await dbContext.BulkInsertAsync(batch, cancellationToken: cancellationToken);
                     total += batch.Count;
                     batchNumber++;
 
@@ -191,8 +191,8 @@ public class CommonDataApiLoader(
                 await txn.DisposeAsync();
                 throw;
             }
-        }, typeof(TEntity).Name);
+        }, null, $"{stream.Type}StreamInsert");
     }
 
-    private sealed record InitialisedStream<T>(IAsyncEnumerator<IList<T>> Enumerator, bool IsEmpty);
+    private sealed record InitialisedStream<T>(string Type, IAsyncEnumerator<IList<T>> Enumerator, bool IsEmpty);
 }

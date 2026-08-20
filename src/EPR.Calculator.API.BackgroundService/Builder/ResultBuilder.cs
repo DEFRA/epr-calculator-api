@@ -13,8 +13,7 @@ using EPR.Calculator.API.BackgroundService.Builder.PartialObligations;
 using EPR.Calculator.API.BackgroundService.Builder.ProjectedProducers;
 using EPR.Calculator.API.BackgroundService.Builder.ScaledupProducers;
 using EPR.Calculator.API.BackgroundService.Builder.Summary;
-using EPR.Calculator.API.BackgroundService.Features.Common;
-using EPR.Calculator.API.BackgroundService.Logging;
+using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
 
@@ -22,7 +21,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder;
 
 public interface IResultBuilder
 {
-    Task<CalcResult> BuildAsync(RunContext runContext, CancellationToken cancellationToken);
+    Task<CalcResult> BuildAsync(CalculatorRunContext runContext, CancellationToken cancellationToken);
 }
 
 [SuppressMessage("Major Code Smell", "S107:Methods should not have too many parameters", Justification = "This is suppressed for now and will be refactored later.")]
@@ -44,149 +43,70 @@ public class ResultBuilder(
     ISelfManagedConsumerWasteService selfManagedConsumerWasteService,
     ICalcResultModulationBuilder modulationBuilder,
     ICalcResultWriter calcResultWriter,
-    IMaterialService materialService,
-    ITelemetryClient telemetryClient,
-    ILogger<ResultBuilder> logger
+    IMaterialService materialService
 )  : IResultBuilder
 {
-    public Task<CalcResult> BuildAsync(RunContext runContext, CancellationToken cancellationToken) =>
-        telemetryClient.TrackDuration(nameof(ResultBuilder), () => BuildResult(runContext, cancellationToken));
-
-    private async Task<CalcResult> BuildResult(RunContext runContext, CancellationToken cancellationToken)
+    [ActivityMetric(nameof(Metrics.CalcDuration), threshold: "00:00:30")]
+    public async Task<CalcResult> BuildAsync(CalculatorRunContext runContext, CancellationToken cancellationToken)
     {
         var result = CalcResult.Empty;
         var materials = await materialService.GetMaterials();
 
-        result.CalcResultDetail = await logger.LogDuration(
-            () => calcResultDetailBuilder.ConstructAsync(runContext),
-            nameof(calcResultDetailBuilder));
+        result.CalcResultDetail = await calcResultDetailBuilder.ConstructAsync(runContext, cancellationToken);
 
-        result.CalcResultLapcapData = await logger.LogDuration(
-            () => lapcapDataBuilder.ConstructAsync(runContext, materials),
-            nameof(lapcapDataBuilder));
+        result.CalcResultLapcapData = await lapcapDataBuilder.ConstructAsync(runContext, materials, cancellationToken);
+        await calcResultWriter.StoreLapcapData(runContext.RunId, result.CalcResultLapcapData, cancellationToken);
 
-        await logger.LogDuration(
-            () => calcResultWriter.StoreLapcapData(runContext.RunId, result.CalcResultLapcapData, cancellationToken),
-            nameof(calcResultWriter.StoreLapcapData));
+        result.CalcResultLateReportingTonnageData = lateReportingTonnageBuilder.Construct(runContext, materials);
+        await calcResultWriter.StoreLateReportingTonnage(runContext.RunId, result.CalcResultLateReportingTonnageData, cancellationToken);
 
-        result.CalcResultLateReportingTonnageData = logger.LogDuration(
-            () => lateReportingTonnageBuilder.Construct(runContext, materials),
-            nameof(lateReportingTonnageBuilder));
+        result.CalcResultParameterOtherCost = await otherCostsBuilder.ConstructAsync(runContext);
+        await calcResultWriter.StoreParameterOtherCost(runContext.RunId, result.CalcResultParameterOtherCost, cancellationToken);
 
-        await logger.LogDuration(
-            () => calcResultWriter.StoreLateReportingTonnage(runContext.RunId, result.CalcResultLateReportingTonnageData, cancellationToken),
-            nameof(calcResultWriter.StoreLateReportingTonnage));
+        result.CalcResultOnePlusFourApportionment = onePlusFourApportionmentBuilder.Construct(result);
+        await calcResultWriter.StoreOnePlusFourApportionment(runContext.RunId, result.CalcResultOnePlusFourApportionment, cancellationToken);
 
-        result.CalcResultParameterOtherCost = await logger.LogDuration(
-            () => otherCostsBuilder.ConstructAsync(runContext),
-            nameof(otherCostsBuilder));
-
-        await logger.LogDuration(
-            () => calcResultWriter.StoreParameterOtherCost(runContext.RunId, result.CalcResultParameterOtherCost, cancellationToken),
-            nameof(calcResultWriter.StoreParameterOtherCost));
-
-        result.CalcResultOnePlusFourApportionment = logger.LogDuration(
-            () => onePlusFourApportionmentBuilder.Construct(result),
-            nameof(onePlusFourApportionmentBuilder));
-
-        await logger.LogDuration(
-            () => calcResultWriter.StoreOnePlusFourApportionment(runContext.RunId, result.CalcResultOnePlusFourApportionment, cancellationToken),
-            nameof(calcResultWriter.StoreOnePlusFourApportionment));
-
-        result.CalcResultCancelledProducers = await logger.LogDuration(
-            () => cancelledProducersBuilder.ConstructAsync(runContext, materials),
-            nameof(cancelledProducersBuilder));
-
-        await logger.LogDuration(
-            () => calcResultWriter.StoreCancelledProducers(runContext.RunId, result.CalcResultCancelledProducers, cancellationToken),
-            nameof(calcResultWriter.StoreCancelledProducers));
+        result.CalcResultCancelledProducers = await cancelledProducersBuilder.ConstructAsync(runContext, materials);
+        await calcResultWriter.StoreCancelledProducers(runContext.RunId, result.CalcResultCancelledProducers, cancellationToken);
 
         var producers = await reportedProducersService.GetProducers(runContext);
 
         if (runContext.RequiresModulation)
         {
-            (producers, result.CalcResultProjectedProducers) = logger.LogDuration(
-                () => projectedProducersBuilder.Construct(runContext, materials, producers),
-                nameof(projectedProducersBuilder));
-
-            await logger.LogDuration(
-                () => calcResultWriter.StoreProjectedH1Data(runContext.RunId, result.CalcResultProjectedProducers.H1ProjectedProducers, cancellationToken),
-                nameof(calcResultWriter.StoreProjectedH1Data));
-
-            await logger.LogDuration(
-                () => calcResultWriter.StoreProjectedH2Data(runContext.RunId, result.CalcResultProjectedProducers.H2ProjectedProducers, cancellationToken),
-                nameof(calcResultWriter.StoreProjectedH2Data));
+            (producers, result.CalcResultProjectedProducers) = projectedProducersBuilder.Construct(runContext, materials, producers);
+            await calcResultWriter.StoreProjectedH1Data(runContext.RunId, result.CalcResultProjectedProducers.H1ProjectedProducers, cancellationToken);
+            await calcResultWriter.StoreProjectedH2Data(runContext.RunId, result.CalcResultProjectedProducers.H2ProjectedProducers, cancellationToken);
         }
 
         if (runContext.RequiresScaling)
         {
-            (producers, result.CalcResultScaledupProducers) = await logger.LogDuration(
-                () => scaledUpProducersBuilder.ConstructAsync(runContext, materials, producers),
-                nameof(scaledUpProducersBuilder));
-
-            await logger.LogDuration(
-                () => calcResultWriter.StoreScaledData(runContext.RunId, result.CalcResultScaledupProducers.ScaledupProducers, cancellationToken),
-                nameof(calcResultWriter.StoreScaledData));
+            (producers, result.CalcResultScaledupProducers) = await scaledUpProducersBuilder.ConstructAsync(runContext, materials, producers);
+            await calcResultWriter.StoreScaledData(runContext.RunId, result.CalcResultScaledupProducers.ScaledupProducers, cancellationToken);
         }
 
-        (producers, result.CalcResultPartialObligations) = await logger.LogDuration(
-            () => partialObligationsBuilder.ConstructAsync(runContext, materials, producers),
-            nameof(partialObligationsBuilder));
+        (producers, result.CalcResultPartialObligations) = await partialObligationsBuilder.ConstructAsync(runContext, materials, producers);
+        await calcResultWriter.StorePartialData(runContext.RunId, result.CalcResultPartialObligations.PartialObligations, cancellationToken);
+        await calcResultWriter.StoreProducerMaterialPackaging(producers, cancellationToken);
 
-        await logger.LogDuration(
-            () => calcResultWriter.StorePartialData(runContext.RunId, result.CalcResultPartialObligations.PartialObligations, cancellationToken),
-            nameof(calcResultWriter.StorePartialData));
+        result.Smcw = await selfManagedConsumerWasteService.Calculate(runContext, materials);
+        await calcResultWriter.StoreSmcw(runContext.RunId, result.Smcw, cancellationToken);
 
-        await logger.LogDuration(
-            () => calcResultWriter.StoreProducerMaterialPackaging(producers, cancellationToken),
-            nameof(calcResultWriter.StoreProducerMaterialPackaging));
+        result.CalcResultLaDisposalCostData = await laDisposalCostsBuilder.ConstructAsync(runContext, materials, result.CalcResultLapcapData, result.CalcResultLateReportingTonnageData, result.Smcw);
+        await calcResultWriter.StoreLaDisposalCostData(runContext.RunId, result.CalcResultLaDisposalCostData, cancellationToken);
 
-        result.Smcw = await logger.LogDuration(
-            () => selfManagedConsumerWasteService.Calculate(runContext, materials),
-            nameof(selfManagedConsumerWasteService));
-
-        await logger.LogDuration(
-            () => calcResultWriter.StoreSmcw(runContext.RunId, result.Smcw, cancellationToken),
-            nameof(calcResultWriter.StoreSmcw));
-
-        result.CalcResultLaDisposalCostData = await logger.LogDuration(
-            () => laDisposalCostsBuilder.ConstructAsync(runContext, materials, result.CalcResultLapcapData, result.CalcResultLateReportingTonnageData, result.Smcw),
-            nameof(laDisposalCostsBuilder));
-
-        await logger.LogDuration(
-            () => calcResultWriter.StoreLaDisposalCostData(runContext.RunId, result.CalcResultLaDisposalCostData, cancellationToken),
-            nameof(calcResultWriter.StoreLaDisposalCostData));
-
-        result.CalcResultCommsCostReportDetail = await logger.LogDuration(
-            () => commsCostsBuilder.ConstructAsync(runContext, materials, result.CalcResultOnePlusFourApportionment, result.CalcResultLateReportingTonnageData),
-            nameof(commsCostsBuilder));
-
-        await logger.LogDuration(
-            () => calcResultWriter.StoreCommsCost(runContext.RunId, result.CalcResultCommsCostReportDetail, cancellationToken),
-            nameof(calcResultWriter.StoreCommsCost));
+        result.CalcResultCommsCostReportDetail = await commsCostsBuilder.ConstructAsync(runContext, materials, result.CalcResultOnePlusFourApportionment, result.CalcResultLateReportingTonnageData);
+        await calcResultWriter.StoreCommsCost(runContext.RunId, result.CalcResultCommsCostReportDetail, cancellationToken);
 
         if (runContext.RequiresModulation)
         {
-            result.CalcResultModulation = await logger.LogDuration(
-                () => modulationBuilder.ConstructAsync(runContext, materials, result.CalcResultLaDisposalCostData, result.Smcw),
-                nameof(modulationBuilder));
-
-            await logger.LogDuration(
-                () => calcResultWriter.StoreModulationResult(runContext.RunId, result.CalcResultModulation, cancellationToken),
-                nameof(calcResultWriter.StoreModulationResult));
+            result.CalcResultModulation = await modulationBuilder.ConstructAsync(runContext, materials, result.CalcResultLaDisposalCostData, result.Smcw);
+            await calcResultWriter.StoreModulationResult(runContext.RunId, result.CalcResultModulation, cancellationToken);
         }
 
-        result.ProducerFees = await logger.LogDuration(
-            () => producerFeesBuilder.ConstructAsync(runContext, materials, result, result.Smcw),
-            nameof(producerFeesBuilder));
+        result.ProducerFees = await producerFeesBuilder.ConstructAsync(runContext, materials, result, result.Smcw);
+        await calcResultWriter.StoreProducerFees(runContext.RunId, result.ProducerFees, cancellationToken);
 
-        await logger.LogDuration(
-            () => calcResultWriter.StoreProducerFees(runContext.RunId, result.ProducerFees, cancellationToken),
-            nameof(calcResultWriter.StoreProducerFees));
-
-        result.CalcResultErrorReports = logger.LogDuration(
-            () => errorReportBuilder.Construct(runContext),
-            nameof(errorReportBuilder));
+        result.CalcResultErrorReports = errorReportBuilder.Construct(runContext);
 
         return result;
     }

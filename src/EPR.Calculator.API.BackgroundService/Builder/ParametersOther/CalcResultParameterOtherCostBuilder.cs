@@ -1,9 +1,8 @@
-﻿using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.BackgroundService.Features.Common;
+﻿using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Services;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace EPR.Calculator.API.BackgroundService.Builder.ParametersOther
 {
@@ -17,6 +16,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ParametersOther
         ICalcCountryApportionmentService calcCountryApportionmentService)
         : ICalcResultParameterOtherCostBuilder
     {
+        [ActivityTrace]
         public async Task<CalcResultParameterOtherCost> ConstructAsync(RunContext runContext)
         {
             var dp        = runContext.DefaultParameters;

@@ -1,8 +1,8 @@
-﻿using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.BackgroundService.Builder.RejectedProducers;
+﻿using EPR.Calculator.API.BackgroundService.Builder.RejectedProducers;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Constants;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Builder.RejectedProducers;
 
@@ -99,7 +99,7 @@ public class CalcResultRejectedProducersBuilderTests : TestsFor<CalcResultReject
         await dbContext.SaveChangesAsync();
 
         // Act
-        var result = (await testSubject.ConstructAsync(runContextOld)).ToList();
+        var result = (await testSubject.ConstructAsync(runContextOld, CancellationToken.None)).ToList();
 
         // Assert
         Assert.AreEqual(1, result.Count);

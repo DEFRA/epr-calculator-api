@@ -7,8 +7,6 @@ using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.Common;
-using EPR.Calculator.API.BackgroundService.Logging;
-using EPR.Calculator.API.BackgroundService.Telemetry.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using BackgroundServiceBase = Microsoft.Extensions.Hosting.BackgroundService;
 
@@ -53,8 +51,8 @@ public class CalculatorRunState
 public class MessageProcessingBackgroundService(
     IBackgroundTaskQueue backgroundTaskQueue,
     IServiceScopeFactory scopeFactory,
-    ITelemetryClient telemetry,
-    ILogger<MessageProcessingBackgroundService> logger)
+    ILogger<MessageProcessingBackgroundService> logger,
+    ITelemetry<MessageProcessingBackgroundService> telemetry)
     : BackgroundServiceBase
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -63,7 +61,6 @@ public class MessageProcessingBackgroundService(
         {
             var message = await backgroundTaskQueue.DequeueAsync(stoppingToken);
 
-            using var activity = new Activity("EPR.Calculator.API.BackgroundService.RunProcessing").Start();
             try
             {
                 var startTime = Stopwatch.GetTimestamp();
@@ -88,7 +85,6 @@ public class MessageProcessingBackgroundService(
         try
         {
             logger.LogInformation("Run initializing for message: '{Message}'", message);
-            telemetry.TrackEvent(TelemetryEvents.RunInit());
 
             return message.MessageType switch
             {
@@ -100,7 +96,6 @@ public class MessageProcessingBackgroundService(
         catch (RunContextException ex)
         {
             logger.LogError(ex, "Run initialization failed for: '{Message}'", message);
-            telemetry.TrackEvent(TelemetryEvents.RunInitFailed(message.ToString()));
             return null;
         }
     }
@@ -108,38 +103,24 @@ public class MessageProcessingBackgroundService(
     private async Task ProcessRun(IServiceProvider serviceProvider, RunContext runContext, long startTime, CancellationToken ct)
     {
         using (logger.BeginRunScope(runContext))
+        using (telemetry.BeginRunScope(runContext))
         {
-            telemetry.TrackEvent(TelemetryEvents.RunStarted(runContext));
+            var result = await DoProcessing();
+            var duration = Stopwatch.GetElapsedTime(startTime);
 
-            var processingTask = runContext switch
+            if (result.Succeeded)
+                logger.LogInformation("Run succeeded. Duration: {Duration}", duration);
+            else
+                logger.LogError("Run FAILED. Duration: {Duration}", duration);
+        }
+
+        Task<RunResult> DoProcessing() =>
+            runContext switch
             {
                 CalculatorRunContext calculatorRunContext => serviceProvider.GetRequiredService<ICalculatorRunProcessor>().Process(calculatorRunContext, ct),
                 BillingRunContext billingRunContext => serviceProvider.GetRequiredService<IBillingRunProcessor>().Process(billingRunContext, ct),
                 _ => throw new ArgumentException("Invalid runContext type: " + runContext.GetType().Name)
             };
-
-            var result = await processingTask;
-            var duration = Stopwatch.GetElapsedTime(startTime);
-
-            if (result.Succeeded)
-                HandleSucceeded(duration);
-            else
-                HandleFailed(duration, (BadResult)result);
-        }
-
-        void HandleSucceeded(TimeSpan duration)
-        {
-            logger.LogInformation("Run succeeded. Duration: {Duration}", duration);
-            telemetry.TrackEvent(TelemetryEvents.RunSucceeded(runContext, duration));
-            telemetry.TrackDuration($"{runContext.RunType}Run", duration);
-        }
-
-        void HandleFailed(TimeSpan duration, BadResult result)
-        {
-            logger.LogError("Run FAILED. Duration: {Duration}", duration);
-            telemetry.TrackEvent(TelemetryEvents.RunFailed(runContext, duration, result.Exception is OperationCanceledException ? "Cancelled" : "ProcessingFailed"));
-            telemetry.TrackDuration($"{runContext.RunType}Run", duration);
-        }
     }
 }
 
