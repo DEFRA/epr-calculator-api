@@ -3,9 +3,9 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
+using EPR.Calculator.API.Data.DataTypes;
 using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.CommonDataApi

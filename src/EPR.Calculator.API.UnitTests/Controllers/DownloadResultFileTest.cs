@@ -7,7 +7,6 @@ using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Configuration;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {

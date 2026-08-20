@@ -1,7 +1,7 @@
-﻿using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.BackgroundService.Enums;
+﻿using EPR.Calculator.API.BackgroundService.Enums;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
+using EPR.Calculator.API.Data.DataModels;
 using FluentValidation.TestHelper;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Features.Calculator.Contexts;

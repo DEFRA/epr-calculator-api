@@ -1,5 +1,4 @@
 using EPR.Calculator.API.Data.DataModels;
-﻿using EPR.Calculator.API.BackgroundService.Models;
 
 namespace EPR.Calculator.API.BackgroundService.Builder.Summary;
 

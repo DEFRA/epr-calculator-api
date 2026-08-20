@@ -1,8 +1,7 @@
 using System.Text;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Summary;
 using EPR.Calculator.API.BackgroundService.Misc;
-using EPR.Calculator.API.BackgroundService.Models;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter.Summary;
 

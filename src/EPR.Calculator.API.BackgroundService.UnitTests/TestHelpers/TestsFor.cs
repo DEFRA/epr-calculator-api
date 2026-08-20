@@ -1,5 +1,5 @@
-﻿using EPR.Calculator.API.Data;
-using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Fixtures;
+﻿using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Fixtures;
+using EPR.Calculator.API.Data;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 

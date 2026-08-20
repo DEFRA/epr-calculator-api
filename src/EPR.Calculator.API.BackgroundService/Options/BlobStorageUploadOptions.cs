@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using EPR.Calculator.API.BackgroundService.Services;
 
 namespace EPR.Calculator.API.BackgroundService.Options;
 
