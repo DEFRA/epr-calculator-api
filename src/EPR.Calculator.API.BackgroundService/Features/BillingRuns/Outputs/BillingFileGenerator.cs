@@ -48,12 +48,15 @@ public class BillingFileGenerator(
         var csvFilename = new CalcResultsAndBillingFileName(runContext.RunId, runContext.RunName, runContext.ProcessingStartedAt.UtcDateTime, true);
         var csvContent = await exporter.Export(runContext, calcResults);
 
-        var csvBlobUri = await storageUploadService.UploadFileContentAsync((
-            FileName: csvFilename,
-            Content: csvContent,
-            runContext.RunName,
-            ContainerName: blobStorageUploadOptions.Value.BillingFileCsvContainer,
-            Overwrite: true), ct);
+        var request = new IStorageUploadService.Request
+        {
+            FileName = csvFilename,
+            Content = csvContent,
+            ContainerName = blobStorageUploadOptions.Value.BillingFileCsvContainer,
+            Overwrite = true
+        };
+
+        var csvBlobUri = await storageUploadService.UploadFileContentAsync(request, ct);
 
         return new CalculatorRunCsvFileMetadata
         {
@@ -72,12 +75,16 @@ public class BillingFileGenerator(
         var jsonFilename = new CalcResultsAndBillingFileName(runContext.RunId);
         var jsonContent = await jsonWriter.WriteToString(runContext, calcResults);
 
-        await storageUploadService.UploadFileContentAsync((
-            FileName: jsonFilename,
-            Content: jsonContent,
-            runContext.RunName,
-            ContainerName: blobStorageUploadOptions.Value.BillingFileJsonContainer,
-            Overwrite: true), ct);
+        var request = new IStorageUploadService.Request
+        {
+            FileName = jsonFilename,
+            Content = jsonContent,
+            ContainerName = blobStorageUploadOptions.Value.BillingFileJsonContainer,
+            Overwrite = true,
+            UseUtf8Bom = false
+        };
+
+        await storageUploadService.UploadFileContentAsync(request, ct);
 
         return new CalculatorRunBillingFileMetadata
         {

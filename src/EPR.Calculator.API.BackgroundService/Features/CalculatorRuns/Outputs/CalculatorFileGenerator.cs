@@ -36,19 +36,21 @@ public class CalculatorFileGenerator(
 
     public async Task<CalculatorRunCsvFileMetadata> HandleCsvFile(CalculatorRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken)
     {
-        var content = await csvWriter.Export(runContext, calcResult);
+        var csvContent = await csvWriter.Export(runContext, calcResult);
 
         var csvFilename = new CalcResultsAndBillingFileName(
             calcResult.CalcResultDetail.RunId,
             calcResult.CalcResultDetail.RunName,
             calcResult.CalcResultDetail.RunDate);
 
-        var csvBlobUri = await storageUploadService.UploadFileContentAsync(
-            (FileName: csvFilename,
-                Content: content,
-                runContext.RunName,
-                ContainerName: blobStorageUploadOptions.Value.ResultFileCsvContainer,
-                Overwrite: false), cancellationToken);
+        var request = new IStorageUploadService.Request
+        {
+            FileName = csvFilename,
+            Content = csvContent,
+            ContainerName = blobStorageUploadOptions.Value.ResultFileCsvContainer
+        };
+
+        var csvBlobUri = await storageUploadService.UploadFileContentAsync(request, cancellationToken);
 
         return new CalculatorRunCsvFileMetadata
         {
