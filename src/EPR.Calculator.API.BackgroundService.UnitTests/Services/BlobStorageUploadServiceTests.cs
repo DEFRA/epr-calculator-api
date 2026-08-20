@@ -1,4 +1,5 @@
-﻿using Azure;
+﻿using System.Text;
+using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using EPR.Calculator.API.BackgroundService.Services;
@@ -38,24 +39,22 @@ public class BlobStorageServiceTests
     public async Task UploadResultFileContentAsync_ReturnsTrue_WhenUploadSucceeds()
     {
         // Arrange
-        var fileName = "test.txt";
-        var content = "test content";
-        var runName = "test";
-        var containerName = fixture.Create<string>();
+        var request = new IStorageUploadService.Request
+        {
+            FileName = "test.txt",
+            Content = "test content",
+            ContainerName = fixture.Create<string>(),
+        };
+
         var expectedUri = new Uri("https://example.com/test.txt");
 
-        mockBlobClient.Setup(x => x.UploadAsync(It.IsAny<BinaryData>(), true, default))
+        mockBlobClient.Setup(x => x.UploadAsync(It.IsAny<BinaryData>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Mock<Response<BlobContentInfo>>().Object);
         mockBlobClient.Setup(x => x.Uri)
             .Returns(expectedUri);
 
         // Act
-        var result = await sut.UploadFileContentAsync(
-            (FileName: fileName,
-                Content: content,
-                RunName: runName,
-                ContainerName: containerName,
-                Overwrite: true), CancellationToken.None);
+        var result = await sut.UploadFileContentAsync(request, CancellationToken.None);
 
         // Assert
         Assert.AreEqual(result, expectedUri.ToString());
@@ -65,20 +64,74 @@ public class BlobStorageServiceTests
     public async Task UploadResultFileContentAsync_ShouldReturnFalse_WhenUploadFails()
     {
         // Arrange
-        var fileName = "test.txt";
-        var content = "test content";
-        var runName = "test";
-        var containerName = fixture.Create<string>();
+        var request = new IStorageUploadService.Request
+        {
+            FileName = "test.txt",
+            Content = "test content",
+            ContainerName = fixture.Create<string>(),
+        };
 
         mockBlobClient.Setup(x => x.UploadAsync(It.IsAny<BinaryData>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new TestException());
 
         // Act & Assert
         await Should.ThrowAsync<TestException>(async () => await sut.UploadFileContentAsync(
-            (FileName: fileName,
-                Content: content,
-                RunName: runName,
-                ContainerName: containerName,
-                Overwrite: true), CancellationToken.None));
+            request, CancellationToken.None));
+    }
+
+    [TestMethod]
+    public async Task UploadFileContentAsync_WritesUtf8Bom_WhenUseUtf8BomIsTrue()
+    {
+        // Arrange
+        var request = new IStorageUploadService.Request
+        {
+            FileName = "test.txt",
+            Content = "test content",
+            ContainerName = fixture.Create<string>(),
+            UseUtf8Bom = true
+        };
+
+        BinaryData? uploadedContent = null;
+
+        mockBlobClient.Setup(x => x.UploadAsync(It.IsAny<BinaryData>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Callback<BinaryData, bool, CancellationToken>((data, _, _) => uploadedContent = data)
+            .ReturnsAsync(new Mock<Response<BlobContentInfo>>().Object);
+        mockBlobClient.Setup(x => x.Uri)
+            .Returns(new Uri("https://example.com/test.csv"));
+
+        // Act
+        await sut.UploadFileContentAsync(request, CancellationToken.None);
+
+        // Assert
+        var bytes = uploadedContent!.ToArray();
+        bytes.Take(3).ShouldBe(new byte[] { 0xEF, 0xBB, 0xBF });
+        bytes.Skip(3).ShouldBe(Encoding.UTF8.GetBytes("test content"));
+    }
+
+    [TestMethod]
+    public async Task UploadFileContentAsync_DoesNotWriteUtf8Bom_WhenUseUtf8BomIsFalse()
+    {
+        // Arrange
+        var request = new IStorageUploadService.Request
+        {
+            FileName = "test.txt",
+            Content = "test content",
+            ContainerName = fixture.Create<string>(),
+            UseUtf8Bom = false
+        };
+        BinaryData? uploadedContent = null;
+
+        mockBlobClient.Setup(x => x.UploadAsync(It.IsAny<BinaryData>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .Callback<BinaryData, bool, CancellationToken>((data, _, _) => uploadedContent = data)
+            .ReturnsAsync(new Mock<Response<BlobContentInfo>>().Object);
+        mockBlobClient.Setup(x => x.Uri)
+            .Returns(new Uri("https://example.com/test.json"));
+
+        // Act
+        await sut.UploadFileContentAsync(request, CancellationToken.None);
+
+        // Assert
+        var bytes = uploadedContent!.ToArray();
+        bytes.ShouldBe(Encoding.UTF8.GetBytes("test content"));
     }
 }
