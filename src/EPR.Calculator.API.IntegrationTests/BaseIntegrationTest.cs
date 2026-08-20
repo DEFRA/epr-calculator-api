@@ -1,11 +1,15 @@
+using EPR.Calculator.API.App;
+using EPR.Calculator.API.BackgroundService.Logging;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
+using EPR.Calculator.API.BackgroundService.Telemetry;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Testcontainers.MsSql;
@@ -73,16 +77,13 @@ public abstract class BaseIntegrationTest
                 x.SetMinimumLevel(LogLevel.Trace);
                 x.AddSerilog(Log.Logger, dispose: true);
             })
-            .AddTelemetry()
-            .AddPayCalAuthentication(configuration)
-            .AddPayCalAuthorization()
-            .AddDatabase()
-            .AddBlobStorage()
-            .AddRequestValidation()
+            .AddPayCalDatabase()
+            .AddPayCalBlobStorage()
             .AddPayCalServices()
-            .AddBackgroundServices()
+            .AddPayCalBackgroundServices()
             .AddDbContextFactory<ApplicationDBContext>(options => { options.UseSqlServer(SqlContainer.GetConnectionString()); })
             .RemoveAll<CommonDataApiHttpClient>()
+            .AddSingleton<ITelemetryClient, LoggerTelemetryClient>()
             .AddSingleton<FakeCommonDataApiClient>()
             .AddSingleton<ICommonDataApiClient>(sp => sp.GetRequiredService<FakeCommonDataApiClient>())
             .RemoveAll<IStorageUploadService>()
