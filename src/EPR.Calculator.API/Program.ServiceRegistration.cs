@@ -17,7 +17,6 @@ using EPR.Calculator.API.BackgroundService.Telemetry;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
-using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter;
 using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
@@ -26,7 +25,6 @@ using EPR.Calculator.API.BackgroundService.Logging;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 using EPR.Calculator.API.BackgroundService.Builder;
-using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Exporter.JsonExporter;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Builder.Detail;
@@ -178,7 +176,6 @@ public static class ServiceRegistration
         services.AddTransient<ICalculatorRunProcessor, CalculatorRunProcessor>();
         services.AddTransient<ICalculatorRunDataInitializer, CalculatorRunDataInitializer>();
         services.AddTransient<ICalculatorRunFinalizer, CalculatorRunFinalizer>();
-        services.AddTransient<ICalculatorFileGenerator, CalculatorFileGenerator>();
         services.AddTransient<ICalcResultsExporter, CalcResultsExporter>();
 
         // Register CommonDataApi
@@ -205,8 +202,6 @@ public static class ServiceRegistration
         services.AddTransient<IBillingRunContextBuilder, BillingRunContextBuilder>();
         services.AddTransient<IBillingRunProcessor, BillingRunProcessor>();
         services.AddTransient<IBillingRunFinalizer, BillingRunFinalizer>();
-        services.AddTransient<IBillingBuilder, BillingBuilder>();
-        services.AddTransient<IBillingFileGenerator, BillingFileGenerator>();
         services.AddTransient<IBillingFileExporter, BillingFileExporter>();
         services.AddTransient<IBillingFileJsonWriter, BillingFileJsonWriter>();
 

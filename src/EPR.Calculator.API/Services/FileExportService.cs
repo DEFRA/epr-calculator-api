@@ -60,6 +60,8 @@ public class FileExportService(
         RunClassificationStatusIds.DELETEDID
     ];
 
+    private static byte[] ToUtf8WithBom(string content) => [.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(content)];
+
     public async Task<FileExportResult> Export(int runId, RunType runType, FileExportType fileType, CancellationToken cancellationToken) =>
         await telemetryClient.TrackDuration(nameof(FileExportService),
             () => runType switch
@@ -83,7 +85,7 @@ public class FileExportService(
             return new FileExportResult.NotCached();
 
         var content = await resultsFileExporter.Export(runContext, result);
-        return new FileExportResult.Exported(Encoding.UTF8.GetBytes(content), $"{runContext.RunName}.csv");
+        return new FileExportResult.Exported(ToUtf8WithBom(content), $"{runContext.RunName}.csv");
     }
 
     private async Task<FileExportResult> ExportBilling(int runId, FileExportType billingFileType, CancellationToken cancellationToken)
@@ -102,7 +104,7 @@ public class FileExportService(
         return billingFileType switch
         {
             FileExportType.Csv => new FileExportResult.Exported(
-                Encoding.UTF8.GetBytes(await billingFileExporter.Export(runContext, filteredResult)),
+                ToUtf8WithBom(await billingFileExporter.Export(runContext, filteredResult)),
                 $"{runContext.RunName}.csv"
             ),
             FileExportType.Json => new FileExportResult.Exported(

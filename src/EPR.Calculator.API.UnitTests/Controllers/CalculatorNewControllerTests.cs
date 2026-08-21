@@ -22,7 +22,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     {
         private const int CalculatorRunId = 1;
 
-        private Mock<IBillingFileService> mockBillingFileService = null!;
         private ApplicationDBContext context = null!;
         private CalculatorNewController controller = null!;
 
@@ -36,12 +35,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             context = new ApplicationDBContext(dbContextOptions);
             context.Database.EnsureCreated();
 
-            mockBillingFileService = new Mock<IBillingFileService>();
-
             controller = new CalculatorNewController(
                 context,
                 Mock.Of<ICalculatorRunStatusDataValidator>(),
-                mockBillingFileService.Object,
                 Mock.Of<IInvoiceDetailsService>(),
                 Mock.Of<ILogger<CalculatorNewController>>(),
                 Mock.Of<ICalculationRunService>())
@@ -69,9 +65,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public async Task PrepareBillingFileSendToFSS_Returns_Accepted_When_Successful()
         {
             // Arrange
-            mockBillingFileService
-                .Setup(x => x.MoveBillingJsonFile(CalculatorRunId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(true);
             AddBillingFileMetadata(CalculatorRunId);
 
             // Act
@@ -86,9 +79,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public async Task PrepareBillingFileSendToFSS_Returns_UnprocessableEntity_When_BillingFile_Outdated()
         {
             // Arrange
-            mockBillingFileService
-                .Setup(x => x.MoveBillingJsonFile(CalculatorRunId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(true);
 
             context.ProducerResultFileSuggestedBillingInstruction.Add(new ProducerResultFileSuggestedBillingInstruction
             {
@@ -120,24 +110,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task PrepareBillingFileSendToFSS_Returns_UnprocessableEntity_When_MoveBillingJsonFile_Fails()
-        {
-            // Arrange
-            mockBillingFileService
-                .Setup(x => x.MoveBillingJsonFile(CalculatorRunId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(false);
-            AddBillingFileMetadata(CalculatorRunId);
-
-            // Act
-            var result = await controller.PrepareBillingFileSendToFSS(CalculatorRunId, CancellationToken.None) as ObjectResult;
-
-            // Assert
-            result.ShouldNotBeNull();
-            result.StatusCode.ShouldBe(StatusCodes.Status422UnprocessableEntity);
-            result.Value.ShouldBe(string.Format(CommonResources.UnableToMoveBillingFile, CalculatorRunId));
-        }
-
-        [TestMethod]
         [DataRow(RunClassification.INITIAL_RUN, RunClassification.INITIAL_RUN_COMPLETED)]
         [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED)]
         [DataRow(RunClassification.FINAL_RECALCULATION_RUN, RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
@@ -150,9 +122,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             var calculatorRun = context.CalculatorRuns.Single(run => run.Id == CalculatorRunId);
             calculatorRun.CalculatorRunClassificationId = (int)initialValue;
 
-            mockBillingFileService
-                .Setup(x => x.MoveBillingJsonFile(CalculatorRunId, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(true);
             AddBillingFileMetadata(CalculatorRunId);
 
             // Act
