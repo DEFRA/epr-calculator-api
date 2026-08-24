@@ -35,7 +35,7 @@ public class CalculatorFileGeneratorTests : TestsFor<CalculatorFileGenerator>
 
         storageUploadService = fixture.Freeze<Mock<IStorageUploadService>>();
         storageUploadService.Setup(m => m.UploadFileContentAsync(
-                It.Is<(string, string, string, string, bool)>(a => a.Item4 == "results-container"),
+                It.Is<IStorageUploadService.Request>(a => a.ContainerName == "results-container"),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync("https://results.uri");
 
@@ -51,11 +51,11 @@ public class CalculatorFileGeneratorTests : TestsFor<CalculatorFileGenerator>
 
         // Assert
         storageUploadService.Verify(x => x.UploadFileContentAsync(
-            It.Is<(string FileName, string Content, string RunName, string ContainerName, bool Overwrite)>(args =>
+            It.Is<IStorageUploadService.Request>(args =>
                 args.Content == "results-content"
-                && args.RunName == runContext.RunName
                 && args.ContainerName == "results-container"
-                && !args.Overwrite),
+                && !args.Overwrite
+                && args.UseUtf8Bom),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

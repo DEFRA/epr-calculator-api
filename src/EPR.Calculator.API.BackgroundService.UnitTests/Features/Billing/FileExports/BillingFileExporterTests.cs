@@ -42,11 +42,11 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
 
         storageUploadService = fixture.Freeze<Mock<IStorageUploadService>>();
         storageUploadService.Setup(m => m.UploadFileContentAsync(
-                It.Is<(string, string, string, string, bool)>(a => a.Item4 == "csv-container"),
+                It.Is<IStorageUploadService.Request>(a => a.ContainerName == "csv-container"),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync("https://csv.uri");
         storageUploadService.Setup(m => m.UploadFileContentAsync(
-                It.Is<(string, string, string, string, bool)>(a => a.Item4 == "json-container"),
+                It.Is<IStorageUploadService.Request>(a => a.ContainerName == "json-container"),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync("https://json.uri");
 
@@ -62,11 +62,11 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
 
         // Assert
         storageUploadService.Verify(x => x.UploadFileContentAsync(
-            It.Is<(string FileName, string Content, string RunName, string ContainerName, bool Overwrite)>(args =>
+            It.Is<IStorageUploadService.Request>(args =>
                 args.Content == "csv-content"
-                && args.RunName == runContext.RunName
                 && args.ContainerName == "csv-container"
-                && args.Overwrite),
+                && args.Overwrite
+                && args.UseUtf8Bom),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -78,11 +78,11 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
 
         // Assert
         storageUploadService.Verify(x => x.UploadFileContentAsync(
-            It.Is<(string FileName, string Content, string RunName, string ContainerName, bool Overwrite)>(args =>
+            It.Is<IStorageUploadService.Request>(args =>
                 args.Content == "json-content"
-                && args.RunName == runContext.RunName
                 && args.ContainerName == "json-container"
-                && args.Overwrite),
+                && args.Overwrite
+                && !args.UseUtf8Bom),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

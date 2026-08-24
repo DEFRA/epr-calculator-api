@@ -16,7 +16,6 @@ public class BlobStorageServiceTests
     private const string BillingJsonContainerName = "billing-json";
     private const string FssContainerName = "fss";
     private const string TestFilename = "test-file.csv";
-    private static readonly UnicodeEncoding Utf16 = new(bigEndian: false, byteOrderMark: true);
     private Mock<BlobContainerClient> billingCsvContainer = null!;
     private Mock<BlobContainerClient> billingJsonContainer = null!;
 
@@ -56,90 +55,11 @@ public class BlobStorageServiceTests
         service = new BlobStorageService(blobServiceClient.Object, options, logger.Object);
     }
 
-    // ── Re-encoding behaviour (via OpenResultCsvStream) ─────────────────────
-
-    [TestMethod]
-    public async Task OpenResultCsvStream_ReturnsUtf16WithBom_WhenBlobIsUtf8()
-    {
-        // Arrange
-        const string content = "hello, world";
-        SetupBlobClientWithBytes(resultCsvContainer, TestFilename, Encoding.UTF8.GetBytes(content));
-
-        // Act
-        var result = await service.OpenResultCsvStream(TestFilename, CancellationToken.None);
-
-        // Assert
-        result.ShouldNotBeNull();
-        AssertIsUtf16WithBom(await ReadBytesAsync(result), content);
-    }
-
-    [TestMethod]
-    public async Task OpenResultCsvStream_ReturnsUtf16WithBom_WhenBlobIsUtf8WithBom()
-    {
-        // Arrange
-        const string content = "test content with UTF-8 BOM";
-        var utf8Bom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
-        var bytes = utf8Bom.GetPreamble().Concat(utf8Bom.GetBytes(content)).ToArray();
-        SetupBlobClientWithBytes(resultCsvContainer, TestFilename, bytes);
-
-        // Act
-        var result = await service.OpenResultCsvStream(TestFilename, CancellationToken.None);
-
-        // Assert
-        result.ShouldNotBeNull();
-        AssertIsUtf16WithBom(await ReadBytesAsync(result), content);
-    }
-
-    [TestMethod]
-    public async Task OpenResultCsvStream_IsIdempotent_WhenBlobIsAlreadyUtf16()
-    {
-        // Arrange
-        const string content = "already UTF-16";
-        var bytes = Utf16.GetPreamble().Concat(Utf16.GetBytes(content)).ToArray();
-        SetupBlobClientWithBytes(resultCsvContainer, TestFilename, bytes);
-
-        // Act
-        var result = await service.OpenResultCsvStream(TestFilename, CancellationToken.None);
-
-        // Assert
-        result.ShouldNotBeNull();
-        AssertIsUtf16WithBom(await ReadBytesAsync(result), content);
-    }
-
-    [TestMethod]
-    public async Task OpenResultCsvStream_ReturnsUtf16WithBom_WhenBlobIsEmpty()
-    {
-        // Arrange
-        SetupBlobClientWithBytes(resultCsvContainer, TestFilename, []);
-
-        // Act
-        var result = await service.OpenResultCsvStream(TestFilename, CancellationToken.None);
-
-        // Assert
-        result.ShouldNotBeNull();
-        AssertIsUtf16WithBom(await ReadBytesAsync(result), string.Empty);
-    }
-
-    [TestMethod]
-    public async Task OpenResultCsvStream_PreservesMultibyteUnicodeCharacters()
-    {
-        // Arrange
-        const string content = "H\u00e9llo W\u00f6rld \U0001f30d";
-        SetupBlobClientWithBytes(resultCsvContainer, TestFilename, Encoding.UTF8.GetBytes(content));
-
-        // Act
-        var result = await service.OpenResultCsvStream(TestFilename, CancellationToken.None);
-
-        // Assert
-        result.ShouldNotBeNull();
-        AssertIsUtf16WithBom(await ReadBytesAsync(result), content);
-    }
-
     [TestMethod]
     public async Task OpenResultCsvStream_ReturnsStreamPositionedAtStart()
     {
         // Arrange
-        SetupBlobClientWithBytes(resultCsvContainer, TestFilename, Encoding.UTF8.GetBytes("position check"));
+        SetupBlobClientWithBytes(resultCsvContainer, TestFilename, "position check"u8.ToArray());
 
         // Act
         var result = await service.OpenResultCsvStream(TestFilename, CancellationToken.None);
@@ -372,28 +292,11 @@ public class BlobStorageServiceTests
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
 
-    private static async Task<byte[]> ReadBytesAsync(Stream stream)
-    {
-        using var ms = new MemoryStream();
-        await stream.CopyToAsync(ms);
-        return ms.ToArray();
-    }
-
     private static async Task<string> ReadContentAsync(Stream stream)
     {
         // detectEncodingFromByteOrderMarks reads the UTF-16 LE BOM written by ReEncodeAsUtf16Async
         // and decodes the stream correctly, returning the original string content.
         using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
         return await reader.ReadToEndAsync();
-    }
-
-    private static void AssertIsUtf16WithBom(byte[] bytes, string expectedContent)
-    {
-        var bom = Utf16.GetPreamble();
-        bytes.Length.ShouldBeGreaterThanOrEqualTo(bom.Length);
-        bytes[..bom.Length].ShouldBe(bom, "Expected UTF-16 LE byte-order mark");
-
-        var decoded = Utf16.GetString(bytes, bom.Length, bytes.Length - bom.Length);
-        decoded.ShouldBe(expectedContent);
     }
 }
