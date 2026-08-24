@@ -16,7 +16,6 @@ namespace EPR.Calculator.API.Controllers;
 public class CalculatorNewController(
     ApplicationDBContext dbContext,
     ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
-    IBillingFileService billingFileService,
     IInvoiceDetailsService invoiceDetailsService,
     ILogger<CalculatorNewController> logger,
     ICalculationRunService calculationRunService
@@ -133,11 +132,6 @@ public class CalculatorNewController(
 
             dbContext.CalculatorRuns.Update(calculatorRun);
             await dbContext.SaveChangesAsync(cancellationToken);
-
-            var result = await billingFileService.MoveBillingJsonFile(runId, cancellationToken);
-
-            if (!result)
-                return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format(CommonResources.UnableToMoveBillingFile, runId));
 
             await transaction.CommitAsync(cancellationToken);
 
