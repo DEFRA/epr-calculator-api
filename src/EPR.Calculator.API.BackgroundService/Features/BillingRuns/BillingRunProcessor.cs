@@ -1,11 +1,6 @@
-﻿using EPR.Calculator.API.BackgroundService.Builder;
-using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
-using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Features.Common;
-using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,8 +13,6 @@ public interface IBillingRunProcessor
 
 public class BillingRunProcessor(
     ApplicationDBContext dbContext,
-    IBillingBuilder resultBuilder,
-    IBillingFileGenerator fileGenerator,
     IBillingRunFinalizer finalizer,
     ILogger<BillingRunProcessor> logger
 ) : IBillingRunProcessor
@@ -31,24 +24,15 @@ public class BillingRunProcessor(
         {
             await SetStartedStatus(runContext, cancellationToken);
 
-            // This reads the required data to memory and builds the CalcResult object.
-            // For BillingRunContext, it does not cause any external state mutations.
-            var calcResult = await resultBuilder.BuildAsync(runContext, cancellationToken);
+            var producerFees = dbContext.ProducerDisposalFee.SingleOrDefault(f => f.CalculatorRunId == runContext.RunId);
 
-            // Filter by accepted/rejected producer ids
-            var filteredCalcResult = GetFilteredCalcResult(calcResult, runContext);
-
-            // This writes the CSV/JSON files to blob storage.
-            // It does not mutate the database state (handled in the finalizer).
-            var exportResult = await fileGenerator.SerializeAndExport(runContext, filteredCalcResult, cancellationToken);
+            if(producerFees is null)
+                throw new InvalidOperationException("ProducerFees cannot be null for billing file run");
 
             // This mutates the state of various database entities to reflect the completed run.
-            await finalizer.FinalizeAsCompleted(runContext, filteredCalcResult, exportResult, cancellationToken);
+            await finalizer.FinalizeAsCompleted(runContext, producerFees, cancellationToken);
 
-            return new BillingRunResult
-            {
-                ExportResult = exportResult
-            };
+            return new BillingRunResult();
         }
         catch (Exception ex)
         {
@@ -76,48 +60,4 @@ public class BillingRunProcessor(
                 s.SetProperty(r => r.BillingRunStartedAt, runContext.ProcessingStartedAt.UtcDateTime);
             }, cancellationToken);
     }
-
-    private static CalcResult GetFilteredCalcResult(CalcResult calcResult, BillingRunContext runContext)
-    {
-        ImmutableList<T> FilterAccepted<T>(IEnumerable<T> producers, Func<T, int> producerId) =>
-            producers.Where(producer => runContext.AcceptedProducerIds.Contains(producerId(producer))).ToImmutableList();
-
-        var rejectedProducerIds = calcResult.CalcResultRejectedProducers.Select(r => r.ProducerId).ToHashSet();
-
-        return calcResult with
-        {
-            CalcResultProjectedProducers = new CalcResultProjectedProducers { H1ProjectedProducers = FilterAccepted(calcResult.CalcResultProjectedProducers.H1ProjectedProducers, p => p.ProducerId), H2ProjectedProducers = FilterAccepted(calcResult.CalcResultProjectedProducers.H2ProjectedProducers, p => p.ProducerId) },
-            CalcResultScaledupProducers  = new CalcResultScaledupProducers  { ScaledupProducers    = FilterAccepted(calcResult.CalcResultScaledupProducers.ScaledupProducers, p => p.ProducerId) },
-            CalcResultPartialObligations = new CalcResultPartialObligations { PartialObligations   = FilterAccepted(calcResult.CalcResultPartialObligations.PartialObligations, p => p.ProducerId) },
-            ProducerFees = new ProducerFees
-            {
-                CalculatorRunId = runContext.RunId,
-                Details         = FilterAccepted(calcResult.ProducerFees.Details, p => p.FeeDetail.ProducerId),
-                Total           = BillingTotal(calcResult.ProducerFees.Total)
-            },
-            CalcResultCancelledProducers = calcResult.CalcResultCancelledProducers.Where(p => !rejectedProducerIds.Contains(p.ProducerId)).ToList()
-        };
-    }
-
-    private static FeeDetail BillingTotal(FeeDetail total) => new()
-    {
-        ProducerId                               = 0,
-        SubsidiaryId                             = string.Empty,
-        ProducerName                             = string.Empty,
-        TradingName                              = string.Empty,
-        StatusCode                               = string.Empty,
-        JoinerDate                               = string.Empty,
-        LeaverDate                               = CommonConstants.Totals,
-        TonnageChangeCount                       = string.Empty,
-        TonnageChangeAdvice                      = string.Empty,
-        BillingInstruction                       = new BillingInstruction { SuggestedBillingInstruction = string.Empty },
-        LADisposalCostsSection1                  = total.LADisposalCostsSection1,
-        CommsCostsSection2a                      = total.CommsCostsSection2a,
-        CommsCostsSection2b                      = total.CommsCostsSection2b,
-        CommsCostsSection2c                      = total.CommsCostsSection2c,
-        SaOperatingCostsSection3                 = total.SaOperatingCostsSection3,
-        LaDataPrepSection4                       = total.LaDataPrepSection4,
-        SaSetupCostsSection5                     = total.SaSetupCostsSection5,
-        TotalOnePlus2A2B2CWithBadDebtPercentage  = total.TotalOnePlus2A2B2CWithBadDebtPercentage
-    };
 }
