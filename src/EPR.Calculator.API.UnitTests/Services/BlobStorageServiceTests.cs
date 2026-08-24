@@ -21,7 +21,6 @@ public class BlobStorageServiceTests
 
     private Mock<BlobServiceClient> blobServiceClient = null!;
     private Mock<BlobContainerClient> fssContainer = null!;
-    private Mock<ILogger<BlobStorageService>> logger = null!;
     private Mock<BlobContainerClient> resultCsvContainer = null!;
     private BlobStorageService service = null!;
 
@@ -41,8 +40,6 @@ public class BlobStorageServiceTests
         blobServiceClient.Setup(x => x.GetBlobContainerClient(BillingJsonContainerName)).Returns(billingJsonContainer.Object);
         blobServiceClient.Setup(x => x.GetBlobContainerClient(FssContainerName)).Returns(fssContainer.Object);
 
-        logger = new Mock<ILogger<BlobStorageService>>();
-
         var options = Microsoft.Extensions.Options.Options.Create(new BlobStorageOptions
         {
             ConnectionString = "UseDevelopmentStorage=true",
@@ -52,7 +49,7 @@ public class BlobStorageServiceTests
             FssContainer = FssContainerName
         });
 
-        service = new BlobStorageService(blobServiceClient.Object, options, logger.Object);
+        service = new BlobStorageService(blobServiceClient.Object, options);
     }
 
     [TestMethod]
@@ -140,65 +137,51 @@ public class BlobStorageServiceTests
         result.ShouldBeNull();
     }
 
-    // ── MoveBillingJsonToFss ──────────────────────────────────────────────────
+    // ── OpenBillingJsonStream ─────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task MoveBillingJsonToFss_ReturnsFalse_WhenSourceBlobDoesNotExist()
+    public async Task OpenBillingJsonStream_ReturnsReEncodedContent_WhenBlobExists()
     {
         // Arrange
-        var sourceBlobClient = new Mock<BlobClient>();
-        sourceBlobClient.Setup(x => x.ExistsAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Response.FromValue(value: false, Mock.Of<Response>()));
-        billingJsonContainer.Setup(x => x.GetBlobClient(TestFilename)).Returns(sourceBlobClient.Object);
+        const string content = "{\"billing\":true}";
+        SetupBlobClientWithContent(billingJsonContainer, TestFilename, content);
 
         // Act
-        var result = await service.MoveBillingJsonToFss(TestFilename, CancellationToken.None);
+        var result = await service.OpenBillingJsonStream(TestFilename, CancellationToken.None);
 
         // Assert
-        result.ShouldBeFalse();
+        result.ShouldNotBeNull();
+        (await ReadContentAsync(result)).ShouldBe(content);
     }
 
     [TestMethod]
-    public async Task MoveBillingJsonToFss_ReturnsTrue_WhenCopyAndDeleteSucceed()
+    public async Task OpenBillingJsonStream_FallsBackToFss_WhenBlobNotFoundInBillingJsonContainer()
     {
         // Arrange
-        var sourceBlobClient = SetupCopyScenario(throwOnCopy: false);
-        SetupDeleteReturns(sourceBlobClient, succeeds: true);
+        SetupBlobClientWith404(billingJsonContainer, TestFilename);
+        const string content = "{\"fromFss\":true}";
+        SetupBlobClientWithContent(fssContainer, TestFilename, content);
 
         // Act
-        var result = await service.MoveBillingJsonToFss(TestFilename, CancellationToken.None);
+        var result = await service.OpenBillingJsonStream(TestFilename, CancellationToken.None);
 
         // Assert
-        result.ShouldBeTrue();
+        result.ShouldNotBeNull();
+        (await ReadContentAsync(result)).ShouldBe(content);
     }
 
     [TestMethod]
-    public async Task MoveBillingJsonToFss_ReturnsFalse_WhenCopyThrowsRequestFailedException()
+    public async Task OpenBillingJsonStream_ReturnsNull_WhenBlobNotFoundInEitherContainer()
     {
         // Arrange
-        SetupCopyScenario(throwOnCopy: true);
+        SetupBlobClientWith404(billingJsonContainer, TestFilename);
+        SetupBlobClientWith404(fssContainer, TestFilename);
 
         // Act
-        var result = await service.MoveBillingJsonToFss(TestFilename, CancellationToken.None);
+        var result = await service.OpenBillingJsonStream(TestFilename, CancellationToken.None);
 
         // Assert
-        result.ShouldBeFalse();
-        VerifyLoggedOnce(LogLevel.Error);
-    }
-
-    [TestMethod]
-    public async Task MoveBillingJsonToFss_ReturnsTrue_WhenCopySucceedsButDeleteFails()
-    {
-        // Arrange
-        var sourceBlobClient = SetupCopyScenario(throwOnCopy: false);
-        SetupDeleteReturns(sourceBlobClient, succeeds: false);
-
-        // Act
-        var result = await service.MoveBillingJsonToFss(TestFilename, CancellationToken.None);
-
-        // Assert
-        result.ShouldBeTrue();
-        VerifyLoggedOnce(LogLevel.Warning);
+        result.ShouldBeNull();
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -222,75 +205,6 @@ public class BlobStorageServiceTests
             .ThrowsAsync(new RequestFailedException(status: 404, "BlobNotFound"));
         container.Setup(x => x.GetBlobClient(filename)).Returns(blobClient.Object);
     }
-
-    private Mock<BlobClient> SetupCopyScenario(bool throwOnCopy)
-    {
-        var sourceBlobClient = new Mock<BlobClient>();
-        sourceBlobClient.Setup(x => x.ExistsAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Response.FromValue(value: true, Mock.Of<Response>()));
-        sourceBlobClient.SetupGet(x => x.Uri)
-            .Returns(new Uri("https://test.blob.core.windows.net/billing-json/test-file.csv"));
-        billingJsonContainer.Setup(x => x.GetBlobClient(TestFilename)).Returns(sourceBlobClient.Object);
-
-        fssContainer.Setup(x => x.CreateIfNotExistsAsync(
-                It.IsAny<PublicAccessType>(),
-                It.IsAny<IDictionary<string, string>>(),
-                It.IsAny<BlobContainerEncryptionScopeOptions>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Response<BlobContainerInfo>?)null);
-
-        var destBlobClient = new Mock<BlobClient>();
-        fssContainer.Setup(x => x.GetBlobClient(TestFilename)).Returns(destBlobClient.Object);
-
-        if (throwOnCopy)
-        {
-            destBlobClient.Setup(x => x.StartCopyFromUriAsync(
-                    It.IsAny<Uri>(),
-                    It.IsAny<IDictionary<string, string>>(),
-                    It.IsAny<AccessTier?>(),
-                    It.IsAny<BlobRequestConditions>(),
-                    It.IsAny<BlobRequestConditions>(),
-                    It.IsAny<RehydratePriority?>(),
-                    It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new RequestFailedException(status: 500, "InternalServerError"));
-        }
-        else
-        {
-            var copyOp = new Mock<CopyFromUriOperation>();
-            copyOp.Setup(x => x.WaitForCompletionAsync(It.IsAny<CancellationToken>()))
-                .Returns(ValueTask.FromResult(Response.FromValue(value: 0L, Mock.Of<Response>())));
-            destBlobClient.Setup(x => x.StartCopyFromUriAsync(
-                    It.IsAny<Uri>(),
-                    It.IsAny<IDictionary<string, string>>(),
-                    It.IsAny<AccessTier?>(),
-                    It.IsAny<BlobRequestConditions>(),
-                    It.IsAny<BlobRequestConditions>(),
-                    It.IsAny<RehydratePriority?>(),
-                    It.IsAny<CancellationToken>()))
-                .ReturnsAsync(copyOp.Object);
-        }
-
-        return sourceBlobClient;
-    }
-
-    private static void SetupDeleteReturns(Mock<BlobClient> sourceBlobClient, bool succeeds)
-    {
-        sourceBlobClient.Setup(x => x.DeleteIfExistsAsync(
-                It.IsAny<DeleteSnapshotsOption>(),
-                It.IsAny<BlobRequestConditions?>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Response.FromValue(succeeds, Mock.Of<Response>()));
-    }
-
-    private void VerifyLoggedOnce(LogLevel level) =>
-        logger.Verify(
-            x => x.Log(
-                level,
-                It.IsAny<EventId>(),
-                It.IsAny<It.IsAnyType>(),
-                It.IsAny<Exception?>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            Times.Once);
 
     private static async Task<string> ReadContentAsync(Stream stream)
     {
