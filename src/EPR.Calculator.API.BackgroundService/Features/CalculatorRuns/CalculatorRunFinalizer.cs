@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.BackgroundService.Exceptions;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
-using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.Data;
@@ -16,7 +15,7 @@ public interface ICalculatorRunFinalizer
     ///     Persists any required state changes to the database, then marks the calculator run as
     ///     <see cref="RunClassification.Unclassified" />.
     /// </summary>
-    Task FinalizeAsCompleted(CalculatorRunContext runContext, CalcResult calcResult, CalculatorFileResult exportResult, CancellationToken cancellationToken);
+    Task FinalizeAsCompleted(CalculatorRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken);
 
     /// <summary>
     ///     Marks the calculator run as <see cref="RunClassification.Errored" />.
@@ -33,7 +32,7 @@ public class CalculatorRunFinalizer(
     : ICalculatorRunFinalizer
 {
     [ActivityTrace]
-    public async Task FinalizeAsCompleted(CalculatorRunContext runContext, CalcResult calcResult, CalculatorFileResult exportResult, CancellationToken cancellationToken)
+    public async Task FinalizeAsCompleted(CalculatorRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken)
     {
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
@@ -41,7 +40,6 @@ public class CalculatorRunFinalizer(
         {
             await billingInstructionService.CreateBillingInstructions(runContext, calcResult, cancellationToken);
             await producerInvoiceNetTonnageService.CreateProducerInvoiceNetTonnage(runContext, calcResult, cancellationToken);
-            await SaveExportMetadata(exportResult, cancellationToken);
             await SaveCompletedRunStatus(runContext, cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
@@ -70,13 +68,6 @@ public class CalculatorRunFinalizer(
         {
             logger.LogError(ex, "Failed to mark calculation run as failed");
         }
-    }
-
-    private async Task SaveExportMetadata(CalculatorFileResult exportResult, CancellationToken cancellationToken)
-    {
-        dbContext.CalculatorRunCsvFileMetadata.Add(exportResult.CsvMetadata);
-
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private async Task SaveCompletedRunStatus(CalculatorRunContext runContext, CancellationToken cancellationToken)

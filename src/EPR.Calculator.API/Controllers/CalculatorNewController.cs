@@ -108,11 +108,6 @@ public class CalculatorNewController(
             dbContext.CalculatorRuns.Update(calculatorRun);
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            var result = await billingFileService.MoveBillingJsonFile(runId, cancellationToken);
-
-            if (!result)
-                return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format(CommonResources.UnableToMoveBillingFile, runId));
-
             await transaction.CommitAsync(cancellationToken);
 
             return StatusCode(StatusCodes.Status202Accepted);
