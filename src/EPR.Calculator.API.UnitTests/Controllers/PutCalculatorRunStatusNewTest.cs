@@ -22,7 +22,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     public class PutCalculatorRunStatusNewTest
     {
         private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
-        private readonly Mock<IBillingFileService> mockBillingFileService;
         private readonly Mock<IInvoiceDetailsService> mockInvoiceDetailsService;
         private readonly Mock<ICalculationRunService> mockCalculationRunService;
         private readonly ApplicationDBContext context;
@@ -39,7 +38,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.context.Database.EnsureCreated();
 
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
-            this.mockBillingFileService = new Mock<IBillingFileService>();
             this.mockInvoiceDetailsService = new Mock<IInvoiceDetailsService>();
             this.mockCalculationRunService = new Mock<ICalculationRunService>();
 
@@ -47,7 +45,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.calculatorNewControllerUnderTest = new CalculatorNewController(
                 this.context,
                 this.mockValidator.Object,
-                this.mockBillingFileService.Object,
                 this.mockInvoiceDetailsService.Object,
                 Mock.Of<ILogger<CalculatorNewController>>(),
                 this.mockCalculationRunService.Object);
