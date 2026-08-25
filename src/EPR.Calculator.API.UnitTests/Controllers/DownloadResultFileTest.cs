@@ -86,11 +86,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task DownloadResultCsv_NotCached_ReturnsCsvFile_WhenMetadataAndBlobExist()
+        public async Task DownloadResultCsv_Legacy_ReturnsCsvFile_WhenMetadataAndBlobExist()
         {
             fileExportServiceMock
                 .Setup(x => x.Export(RunId, RunType.Calculator, FileExportType.Csv, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new FileExportResult.NotCached());
+                .ReturnsAsync(new FileExportResult.Legacy());
                 
             this.AddResultsFileMetadata();
             using var stream = new MemoryStream();
@@ -106,11 +106,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task DownloadResultCsv_NotCached_ReturnsNotFound_WhenMetadataMissing()
+        public async Task DownloadResultCsv_Legacy_ReturnsNotFound_WhenMetadataMissing()
         {
             fileExportServiceMock
                 .Setup(x => x.Export(RunId, RunType.Calculator, FileExportType.Csv, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new FileExportResult.NotCached());
+                .ReturnsAsync(new FileExportResult.Legacy());
 
             // Arrange - no CSV file metadata is seeded for the run.
 
@@ -123,11 +123,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public async Task DownloadResultCsv_NotCached_ReturnsNotFound_WhenBlobStreamMissing()
+        public async Task DownloadResultCsv_Legacy_ReturnsNotFound_WhenBlobStreamMissing()
         {
             fileExportServiceMock
                 .Setup(x => x.Export(RunId, RunType.Calculator, FileExportType.Csv, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new FileExportResult.NotCached());
+                .ReturnsAsync(new FileExportResult.Legacy());
 
             // Arrange
             this.AddResultsFileMetadata();

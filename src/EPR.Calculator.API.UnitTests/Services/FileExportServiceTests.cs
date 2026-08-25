@@ -329,15 +329,15 @@ public class FileExportServiceTests
     }
 
     [TestMethod]
-    public async Task Export_ResultCsv_ReturnsNotCached_WhenCalculatorRunHasNoCachedData()
+    public async Task Export_ResultCsv_ReturnsLegacy_WhenCalculatorRunHasNoProducerFeeData()
     {
         AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.None, RunName);
         var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
-        result.ShouldBeOfType<FileExportResult.NotCached>();
+        result.ShouldBeOfType<FileExportResult.Legacy>();
     }
 
     [TestMethod]
-    public async Task Export_Billing_ReturnsNotCached_WhenBillingRunHasNoProducerFeeData()
+    public async Task Export_Billing_ReturnsLegacy_WhenBillingRunHasNoProducerFeeData()
     {
         AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.Completed, RunName);
         AddBillingFileMetadata(RunId);
@@ -345,8 +345,8 @@ public class FileExportServiceTests
         var csvResult = await service.Export(RunId, RunType.Billing, FileExportType.Csv, CancellationToken.None);
         var jsonResult = await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None);
 
-        csvResult.ShouldBeOfType<FileExportResult.NotCached>();
-        jsonResult.ShouldBeOfType<FileExportResult.NotCached>();
+        csvResult.ShouldBeOfType<FileExportResult.Legacy>();
+        jsonResult.ShouldBeOfType<FileExportResult.Legacy>();
     }
 
     private void AddCalculatorRun(

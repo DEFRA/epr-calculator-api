@@ -35,7 +35,7 @@ public abstract record FileExportResult
     private FileExportResult() { }
     public sealed record Exported(byte[] Content, string FileName) : FileExportResult;
     public sealed record NotFound() : FileExportResult;
-    public sealed record NotCached() : FileExportResult;
+    public sealed record Legacy() : FileExportResult;
 }
 
 [SuppressMessage("Major Code Smell", "S107:Methods should not have too many parameters", Justification = "This is suppressed for now and will be refactored later.")]
@@ -82,7 +82,7 @@ public class FileExportService(
         var result = await GetResult(runContext, cancellationToken);
 
         if (result is null)
-            return new FileExportResult.NotCached();
+            return new FileExportResult.Legacy();
 
         var content = await resultsFileExporter.Export(runContext, result);
         return new FileExportResult.Exported(ToUtf8WithBom(content), $"{runContext.RunName}.csv");
@@ -98,7 +98,7 @@ public class FileExportService(
         var result = await GetResult(runContext, cancellationToken);
 
         if (result is null)
-            return new FileExportResult.NotCached();
+            return new FileExportResult.Legacy();
 
         var filteredResult = FilterResult(runId, result, runContext.AcceptedProducerIds);
         return billingFileType switch

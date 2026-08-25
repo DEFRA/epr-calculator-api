@@ -177,7 +177,7 @@ public class CalculatorController(
         {
             FileExportResult.Exported s => File(s.Content, "text/csv", s.FileName),
             FileExportResult.NotFound _ => NotFound(),
-            FileExportResult.NotCached _ => await DownloadResultCsvFromBlobStorage(runId),
+            FileExportResult.Legacy _ => await DownloadResultCsvFromBlobStorage(runId),
             _ => throw new InvalidOperationException($"Unexpected {nameof(FileExportResult)}")
         };
     }
