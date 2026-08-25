@@ -26,7 +26,7 @@ public class BillingFileController(
         {
             FileExportResult.Exported s => File(s.Content, "text/csv", s.FileName),
             FileExportResult.NotFound _ => NotFound(),
-            FileExportResult.NotCached _ => await DownloadBillingCsvFromBlobStorage(runId),
+            FileExportResult.Legacy _ => await DownloadBillingCsvFromBlobStorage(runId),
             _ => throw new InvalidOperationException($"Unexpected {nameof(FileExportResult)}")
         };
     }
@@ -42,7 +42,7 @@ public class BillingFileController(
         {
             FileExportResult.Exported s => File(s.Content, "application/json", s.FileName),
             FileExportResult.NotFound _ => NotFound(),
-            FileExportResult.NotCached _ => await DownloadBillingJsonFromBlobStorage(runId),
+            FileExportResult.Legacy _ => await DownloadBillingJsonFromBlobStorage(runId),
             _ => throw new InvalidOperationException($"Unexpected {nameof(FileExportResult)}")
         };
     }
