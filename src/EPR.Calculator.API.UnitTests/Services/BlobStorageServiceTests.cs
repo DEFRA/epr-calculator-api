@@ -4,7 +4,6 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
-using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.UnitTests.Services;
 
@@ -13,12 +12,9 @@ public class BlobStorageServiceTests
 {
     private const string ResultCsvContainerName = "result-csv";
     private const string BillingCsvContainerName = "billing-csv";
-    private const string BillingJsonContainerName = "billing-json";
     private const string FssContainerName = "fss";
     private const string TestFilename = "test-file.csv";
     private Mock<BlobContainerClient> billingCsvContainer = null!;
-    private Mock<BlobContainerClient> billingJsonContainer = null!;
-
     private Mock<BlobServiceClient> blobServiceClient = null!;
     private Mock<BlobContainerClient> fssContainer = null!;
     private Mock<BlobContainerClient> resultCsvContainer = null!;
@@ -29,15 +25,12 @@ public class BlobStorageServiceTests
     {
         resultCsvContainer = new Mock<BlobContainerClient>();
         billingCsvContainer = new Mock<BlobContainerClient>();
-        billingJsonContainer = new Mock<BlobContainerClient>();
         fssContainer = new Mock<BlobContainerClient>();
-        billingJsonContainer.SetupGet(x => x.Name).Returns(BillingJsonContainerName);
         fssContainer.SetupGet(x => x.Name).Returns(FssContainerName);
 
         blobServiceClient = new Mock<BlobServiceClient>();
         blobServiceClient.Setup(x => x.GetBlobContainerClient(ResultCsvContainerName)).Returns(resultCsvContainer.Object);
         blobServiceClient.Setup(x => x.GetBlobContainerClient(BillingCsvContainerName)).Returns(billingCsvContainer.Object);
-        blobServiceClient.Setup(x => x.GetBlobContainerClient(BillingJsonContainerName)).Returns(billingJsonContainer.Object);
         blobServiceClient.Setup(x => x.GetBlobContainerClient(FssContainerName)).Returns(fssContainer.Object);
 
         var options = Microsoft.Extensions.Options.Options.Create(new BlobStorageOptions
@@ -45,7 +38,6 @@ public class BlobStorageServiceTests
             ConnectionString = "UseDevelopmentStorage=true",
             ResultFileCsvContainer = ResultCsvContainerName,
             BillingFileCsvContainer = BillingCsvContainerName,
-            BillingFileJsonContainer = BillingJsonContainerName,
             FssContainer = FssContainerName
         });
 
@@ -73,14 +65,13 @@ public class BlobStorageServiceTests
     {
         blobServiceClient.Verify(x => x.GetBlobContainerClient(ResultCsvContainerName), Times.Once);
         blobServiceClient.Verify(x => x.GetBlobContainerClient(BillingCsvContainerName), Times.Once);
-        blobServiceClient.Verify(x => x.GetBlobContainerClient(BillingJsonContainerName), Times.Once);
         blobServiceClient.Verify(x => x.GetBlobContainerClient(FssContainerName), Times.Once);
     }
 
     // ── OpenResultCsvStream ───────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task OpenResultCsvStream_ReturnsReEncodedContent_WhenBlobExists()
+    public async Task OpenResultCsvStream_WhenBlobExists()
     {
         // Arrange
         const string content = "col1,col2\nval1,val2";
@@ -110,7 +101,7 @@ public class BlobStorageServiceTests
     // ── OpenBillingCsvStream ──────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task OpenBillingCsvStream_ReturnsReEncodedContent_WhenBlobExists()
+    public async Task OpenBillingCsvStream_WhenBlobExists()
     {
         // Arrange
         const string content = "billing,data\n1,2";
@@ -140,26 +131,10 @@ public class BlobStorageServiceTests
     // ── OpenBillingJsonStream ─────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task OpenBillingJsonStream_ReturnsReEncodedContent_WhenBlobExists()
+    public async Task OpenBillingJsonStream_WhenBlobExists()
     {
         // Arrange
         const string content = "{\"billing\":true}";
-        SetupBlobClientWithContent(billingJsonContainer, TestFilename, content);
-
-        // Act
-        var result = await service.OpenBillingJsonStream(TestFilename, CancellationToken.None);
-
-        // Assert
-        result.ShouldNotBeNull();
-        (await ReadContentAsync(result)).ShouldBe(content);
-    }
-
-    [TestMethod]
-    public async Task OpenBillingJsonStream_FallsBackToFss_WhenBlobNotFoundInBillingJsonContainer()
-    {
-        // Arrange
-        SetupBlobClientWith404(billingJsonContainer, TestFilename);
-        const string content = "{\"fromFss\":true}";
         SetupBlobClientWithContent(fssContainer, TestFilename, content);
 
         // Act
@@ -171,10 +146,9 @@ public class BlobStorageServiceTests
     }
 
     [TestMethod]
-    public async Task OpenBillingJsonStream_ReturnsNull_WhenBlobNotFoundInEitherContainer()
+    public async Task OpenBillingJsonStream_ReturnsNull_WhenBlobNotFound()
     {
         // Arrange
-        SetupBlobClientWith404(billingJsonContainer, TestFilename);
         SetupBlobClientWith404(fssContainer, TestFilename);
 
         // Act
