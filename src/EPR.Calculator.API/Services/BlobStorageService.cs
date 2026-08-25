@@ -15,7 +15,6 @@ public interface IBlobStorageService
 public class BlobStorageService : IBlobStorageService
 {
     private readonly BlobContainerClient billingCsvContainer;
-    private readonly BlobContainerClient billingJsonContainer;
     private readonly BlobContainerClient fssContainer;
     private readonly BlobContainerClient resultCsvContainer;
 
@@ -26,7 +25,6 @@ public class BlobStorageService : IBlobStorageService
         var o = options.Value;
         resultCsvContainer   = blobServiceClient.GetBlobContainerClient(o.ResultFileCsvContainer);
         billingCsvContainer  = blobServiceClient.GetBlobContainerClient(o.BillingFileCsvContainer);
-        billingJsonContainer = blobServiceClient.GetBlobContainerClient(o.BillingFileJsonContainer);
         fssContainer         = blobServiceClient.GetBlobContainerClient(o.FssContainer);
     }
 
@@ -37,8 +35,7 @@ public class BlobStorageService : IBlobStorageService
         OpenBlobStream(billingCsvContainer, filename, cancellationToken);    
     
     public async Task<Stream?> OpenBillingJsonStream(string filename, CancellationToken cancellationToken = default) =>
-        await OpenBlobStream(billingJsonContainer, filename, cancellationToken)
-        ?? await OpenBlobStream(fssContainer, filename, cancellationToken);
+        await OpenBlobStream(fssContainer, filename, cancellationToken);
 
     private static async Task<Stream?> OpenBlobStream(BlobContainerClient container, string blobName, CancellationToken cancellationToken)
     {
