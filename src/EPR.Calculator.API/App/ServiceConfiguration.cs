@@ -188,5 +188,14 @@ public static class ServiceConfiguration
 
             return services;
         }
+
+        public IServiceCollection AddPayCalFeatureFlags()
+        {
+            services
+                .AddOptions<FeatureFlagOptions>()
+                .BindConfiguration(FeatureFlagOptions.SectionKey);
+
+            return services;
+        }
     }
 }
