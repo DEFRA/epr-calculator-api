@@ -15,4 +15,5 @@ public record BlobStorageOptions
     [Required(AllowEmptyStrings = false)] public string ResultFileCsvContainer { get; init; } = null!;
     [Required(AllowEmptyStrings = false)] public string BillingFileCsvContainer { get; init; } = null!;
     [Required(AllowEmptyStrings = false)] public string FssContainer { get; init; } = null!;
+    [Required(AllowEmptyStrings = false)] public string BillingFileJsonContainer { get; init; } = null!;
 }
