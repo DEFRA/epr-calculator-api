@@ -4,7 +4,7 @@ namespace EPR.Calculator.API.IntegrationTests;
 
 public class FakeBlobStorageUploadService : IStorageUploadService
 {
-    private readonly Dictionary<string, string> store = new();
+    private readonly Dictionary<string, byte[]> store = new();
 
     public Task<string> UploadFileContentAsync(IStorageUploadService.Request request, CancellationToken cancellationToken)
     {
@@ -12,7 +12,7 @@ public class FakeBlobStorageUploadService : IStorageUploadService
         return Task.FromResult(request.FileName);
     }
 
-    public string Get(string fileName)
+    public byte[] Get(string fileName)
     {
         return store.TryGetValue(fileName, out var content)
             ? content
