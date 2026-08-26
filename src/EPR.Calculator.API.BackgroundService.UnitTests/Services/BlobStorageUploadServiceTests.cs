@@ -42,7 +42,7 @@ public class BlobStorageServiceTests
         var request = new IStorageUploadService.Request
         {
             FileName = "test.txt",
-            Content = "test content",
+            Content = Encoding.UTF8.GetBytes("test content"),
             ContainerName = fixture.Create<string>(),
         };
 
@@ -67,7 +67,7 @@ public class BlobStorageServiceTests
         var request = new IStorageUploadService.Request
         {
             FileName = "test.txt",
-            Content = "test content",
+            Content = Encoding.UTF8.GetBytes("test content"),
             ContainerName = fixture.Create<string>(),
         };
 
@@ -80,15 +80,15 @@ public class BlobStorageServiceTests
     }
 
     [TestMethod]
-    public async Task UploadFileContentAsync_WritesUtf8Bom_WhenUseUtf8BomIsTrue()
+    public async Task UploadFileContentAsync_UploadsContentBytesUnmodified()
     {
         // Arrange
+        var content = Encoding.UTF8.GetBytes("test content");
         var request = new IStorageUploadService.Request
         {
             FileName = "test.txt",
-            Content = "test content",
+            Content = content,
             ContainerName = fixture.Create<string>(),
-            UseUtf8Bom = true
         };
 
         BinaryData? uploadedContent = null;
@@ -97,41 +97,12 @@ public class BlobStorageServiceTests
             .Callback<BinaryData, bool, CancellationToken>((data, _, _) => uploadedContent = data)
             .ReturnsAsync(new Mock<Response<BlobContentInfo>>().Object);
         mockBlobClient.Setup(x => x.Uri)
-            .Returns(new Uri("https://example.com/test.csv"));
+            .Returns(new Uri("https://example.com/test.txt"));
 
         // Act
         await sut.UploadFileContentAsync(request, CancellationToken.None);
 
         // Assert
-        var bytes = uploadedContent!.ToArray();
-        bytes.Take(3).ShouldBe(new byte[] { 0xEF, 0xBB, 0xBF });
-        bytes.Skip(3).ShouldBe(Encoding.UTF8.GetBytes("test content"));
-    }
-
-    [TestMethod]
-    public async Task UploadFileContentAsync_DoesNotWriteUtf8Bom_WhenUseUtf8BomIsFalse()
-    {
-        // Arrange
-        var request = new IStorageUploadService.Request
-        {
-            FileName = "test.txt",
-            Content = "test content",
-            ContainerName = fixture.Create<string>(),
-            UseUtf8Bom = false
-        };
-        BinaryData? uploadedContent = null;
-
-        mockBlobClient.Setup(x => x.UploadAsync(It.IsAny<BinaryData>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
-            .Callback<BinaryData, bool, CancellationToken>((data, _, _) => uploadedContent = data)
-            .ReturnsAsync(new Mock<Response<BlobContentInfo>>().Object);
-        mockBlobClient.Setup(x => x.Uri)
-            .Returns(new Uri("https://example.com/test.json"));
-
-        // Act
-        await sut.UploadFileContentAsync(request, CancellationToken.None);
-
-        // Assert
-        var bytes = uploadedContent!.ToArray();
-        bytes.ShouldBe(Encoding.UTF8.GetBytes("test content"));
+        uploadedContent!.ToArray().ShouldBe(content);
     }
 }

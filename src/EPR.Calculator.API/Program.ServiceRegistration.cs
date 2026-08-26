@@ -104,6 +104,15 @@ public static class ServiceRegistration
         return services;
     }
 
+    public static IServiceCollection AddFeatureFlags(this IServiceCollection services)
+    {
+        services
+            .AddOptions<FeatureFlagOptions>()
+            .BindConfiguration(FeatureFlagOptions.SectionKey);
+
+        return services;
+    }
+
     public static IServiceCollection AddBlobStorage(this IServiceCollection services)
     {
         services

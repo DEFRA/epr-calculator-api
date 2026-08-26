@@ -80,6 +80,7 @@ builder.Services
     .AddPayCalAuthentication(builder.Configuration)
     .AddPayCalAuthorization()
     .AddDatabase()
+    .AddFeatureFlags()
     .AddBlobStorage()
     .AddRequestValidation()
     .AddPayCalServices()
