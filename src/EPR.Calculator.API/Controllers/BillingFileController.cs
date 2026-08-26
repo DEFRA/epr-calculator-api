@@ -34,6 +34,7 @@ public class BillingFileController(
 
     [HttpGet]
     [Route("downloadBillingJson/{runId}")]
+    [Authorize(Roles = "FssApiPolicy,SASuperUser")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

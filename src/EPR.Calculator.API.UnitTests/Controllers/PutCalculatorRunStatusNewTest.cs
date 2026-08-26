@@ -1,10 +1,12 @@
 ﻿using System.Security.Claims;
 using System.Security.Principal;
+using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
+using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
@@ -39,7 +41,18 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 this.mockValidator.Object,
                 Mock.Of<IBillingFileService>(),
                 Mock.Of<IInvoiceDetailsService>(),
-                Mock.Of<ILogger<CalculatorNewController>>());
+                Mock.Of<ILogger<CalculatorNewController>>(),
+                Mock.Of<IFileExportService>(),
+                Mock.Of<IBlobStorageService>(),
+                Mock.Of<IStorageUploadService>(),
+                Microsoft.Extensions.Options.Options.Create(new BlobStorageOptions
+                {
+                    ConnectionString = "UseDevelopmentStorage=true",
+                    ResultFileCsvContainer = "result-csv",
+                    BillingFileCsvContainer = "billing-csv",
+                    FssContainer = "fss",
+                }),
+                Microsoft.Extensions.Options.Options.Create(new FeatureFlagOptions()));
 
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
