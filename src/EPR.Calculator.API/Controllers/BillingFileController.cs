@@ -1,6 +1,7 @@
 ﻿using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,6 +34,7 @@ public class BillingFileController(
 
     [HttpGet]
     [Route("downloadBillingJson/{runId}")]
+    [Authorize(Roles = "FssApiPolicy,SASuperUser")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
