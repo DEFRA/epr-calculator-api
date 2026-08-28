@@ -1,12 +1,7 @@
-using System.Globalization;
-using System.Security.Claims;
-using CsvHelper;
-using CsvHelper.Configuration;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.Data.Utils;
 using EPR.Calculator.API.Dtos;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 using Microsoft.AspNetCore.Http;
@@ -15,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 using System.Text.Json;
-using EPR.Calculator.API.BackgroundService.Enums;
 namespace EPR.Calculator.API.IntegrationTests;
 
 [TestCategory("IntegrationTests")]
@@ -25,12 +19,14 @@ namespace EPR.Calculator.API.IntegrationTests;
 public class CalculatorRunIntegrationTests : BaseIntegrationTest
 {
     [TestMethod]
-    public async Task IntegrationTest_2025() => await RunTest($"test2025-{Guid.NewGuid():N}", new RelativeYear(2025), "some-user");
+    public async Task IntegrationTest_2025() =>
+        await RunTestAsync($"test2025-{Guid.NewGuid():N}", new RelativeYear(2025), "some-user");
 
     [TestMethod]
-    public async Task IntegrationTest_2026() => await RunTest($"test2026-{Guid.NewGuid():N}", new RelativeYear(2026), "some-user");
+    public async Task IntegrationTest_2026() =>
+        await RunTestAsync($"test2026-{Guid.NewGuid():N}", new RelativeYear(2026), "some-user");
 
-    private async static Task RunTest(string name, RelativeYear relativeYear, String rundBy)
+    private static async Task RunTestAsync(string name, RelativeYear relativeYear, string rundBy)
     {
         await using var scope = Provider.CreateAsyncScope();
         var services = scope.ServiceProvider;
@@ -38,7 +34,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         await using var db = await services.GetRequiredService<IDbContextFactory<ApplicationDBContext>>()
             .CreateDbContextAsync();
 
-        await SeedCalculatorData(db, relativeYear, "TestData/defaultParams.csv", "TestData/lapcap.csv");
+        await SeedCalculatorDataAsync(db, relativeYear, "TestData/defaultParams.csv", "TestData/lapcap.csv");
 
         var fakeOrganisationsStream = Provider.GetRequiredService<FakeStreamOrganisationsRequestHandler>();
         fakeOrganisationsStream.Organisations = Organisations($"TestData/{relativeYear}-organisation-data.csv");
@@ -62,23 +58,10 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
             .Select(x => x.Id)
             .SingleAsync();
 
-        await WaitUntil(
-            async () =>
-            {
-                var status = await db.CalculatorRuns
-                    .AsNoTracking()
-                    .Where(x => x.Id == runId)
-                    .Select(x => x.CalculatorRunClassificationId)
-                    .SingleAsync();
+        await WaitForCalculatorRunAsync(db, runId);
 
-                return status == RunClassificationStatusIds.ERRORID
-                    ? throw new Exception($"Calculator run {runId} entered Errored state.")
-                    : status == RunClassificationStatusIds.UNCLASSIFIEDID;
-            },
-            $"Calculator run {runId} did not complete.");
-
-        await AssertCsv(
-            actualContents: await ExecuteFileResult(await calculatorController.DownloadResultCsv(runId), services),
+        await AssertFile(
+            actualContents: GetFileContentAsString(await calculatorController.DownloadResultCsv(runId), expectUtf8Bom: true),
             expectedPath: $"ExpectedData/{relativeYear}-results.csv",
             ignoreLines: [1, 2, 3, 7, 8, 9],
             label: "Results CSV");
@@ -108,42 +91,29 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
             throw new Exception($"Controller returned: {JsonSerializer.Serialize(setBillingClassificationResult.ShouldBeOfType<ObjectResult>().Value)}");
         }
 
-        await SeedAcceptOrRejectProducers(db, runId, rundBy, $"TestData/{relativeYear}-accept-or-reject-producers.csv");
+        await SeedAcceptOrRejectProducersAsync(db, runId, rundBy, $"TestData/{relativeYear}-accept-or-reject-producers.csv");
 
         var startBillingResult = (await producerBillingFileController.ProducerBillingInstructions(runId))
             .ShouldBeOfType<ObjectResult>();
 
         startBillingResult.StatusCode.ShouldBe(StatusCodes.Status200OK, $"Controller returned: {JsonSerializer.Serialize(startBillingResult.Value)}");
 
-        await WaitUntil(
-            async () =>
-            {
-                var status = await db.CalculatorRuns
-                    .AsNoTracking()
-                    .Where(x => x.Id == runId)
-                    .Select(x => x.BillingRunStatus)
-                    .SingleAsync();
+        await WaitForBillingRunAsync(db, runId);
 
-                return status == BillingRunStatus.Errored
-                    ? throw new Exception($"Billing run for calculator run {runId} entered Errored state.")
-                    : status == BillingRunStatus.Completed;
-            },
-            $"Billing run for calculator run {runId} did not complete.");
-
-        await AssertCsv(
-            actualContents: await ExecuteFileResult(await billingFileController.DownloadBillingCsv(runId), services),
+        await AssertFile(
+            actualContents: GetFileContentAsString(await billingFileController.DownloadBillingCsv(runId), expectUtf8Bom: true),
             expectedPath: $"ExpectedData/{relativeYear}-billing.csv",
             ignoreLines: [1, 2, 3, 7, 8, 9],
             label: "Billing CSV");
 
-        await AssertCsv(
-            actualContents: await ExecuteFileResult(await billingFileController.DownloadBillingJson(runId), services),
+        await AssertFile(
+            actualContents: GetFileContentAsString(await billingFileController.DownloadBillingJson(runId), expectUtf8Bom: false),
             expectedPath: $"ExpectedData/{relativeYear}-billing.json",
             ignoreLines: [3, 4, 5, 9, 11, 13, 16],
             label: "Billing JSON");
     }
 
-    private static async Task AssertCsv(string actualContents, string expectedPath, List<int> ignoreLines, string label)
+    private static async Task AssertFile(string actualContents, string expectedPath, List<int> ignoreLines, string label)
     {
         static string DisplayFullContents(string contents) =>
             $"Full contents:\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n{contents}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
@@ -173,113 +143,14 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         }
     }
 
-    private static T CreateController<T>(IServiceProvider services)
-        where T : ControllerBase
+    private static string GetFileContentAsString(IActionResult result, bool expectUtf8Bom)
     {
-        var scope = services.CreateAsyncScope();
+        var fileContents = result.ShouldBeOfType<FileContentResult>().FileContents;
 
-        var controller = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider);
-
-        controller.ControllerContext = new ControllerContext
+        if (expectUtf8Bom)
         {
-            HttpContext = new DefaultHttpContext
-            {
-                RequestServices = scope.ServiceProvider,
-                User = new ClaimsPrincipal(new ClaimsIdentity(
-                    [
-                        new Claim(ClaimTypes.Name, "some-user"),
-                        new Claim(ClaimTypes.NameIdentifier, "some-user")
-                    ],
-                    authenticationType: "IntegrationTest"))
-            }
-        };
-
-        controller.HttpContext.Response.RegisterForDispose(scope);
-
-        return controller;
-    }
-
-    private static async Task WaitUntil(Func<Task<bool>> condition, string failureMessage, TimeSpan? timeout = null)
-    {
-        var until = DateTime.UtcNow + (timeout ?? TimeSpan.FromSeconds(30));
-        while (DateTime.UtcNow < until)
-        {
-            if (await condition())
-                return;
-
-            await Task.Delay(100);
+            fileContents.Take(3).ShouldBe([0xEF, 0xBB, 0xBF]);
         }
-
-        throw new TimeoutException(failureMessage);
-    }
-
-    private static Task<string> ExecuteFileResult(IActionResult result, IServiceProvider services) =>
-        Task.FromResult(Encoding.UTF8.GetString(result.ShouldBeOfType<FileContentResult>().FileContents));
-
-    private static CsvReader SlurpCsv(string csvPath) =>
-        new(new StreamReader(csvPath), new CsvConfiguration(CultureInfo.InvariantCulture)
-        {
-            HeaderValidated = null,
-            MissingFieldFound = null
-        });
-
-    private async static Task SeedCalculatorData(ApplicationDBContext db, RelativeYear relativeYear, String defaultParamsPath, String lapcapPath)
-    {
-        var oldDefaultSettings = await db.DefaultParameterSettings
-            .Where(x => x.EffectiveTo == null && x.RelativeYear == relativeYear)
-            .ToListAsync();
-
-        oldDefaultSettings.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // side effecting db update
-
-        var parameterMaster = new DefaultParameterSettingMaster
-        {
-            RelativeYear = relativeYear,
-            EffectiveFrom = Now,
-            EffectiveTo = null
-        };
-
-        db.DefaultParameterSettings.Add(parameterMaster);
-        await db.SaveChangesAsync();
-        db.DefaultParameterSettingDetail.AddRange(DefaultParameterSettingDetails(defaultParamsPath, parameterMaster.Id));
-        await db.SaveChangesAsync();
-
-        var oldLapcapSettings = await db.LapcapDataMaster
-            .Where(x => x.EffectiveTo == null && x.RelativeYear == relativeYear)
-            .ToListAsync();
-
-        oldLapcapSettings.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // side effecting db update
-
-        var lapcap = new LapcapDataMaster
-        {
-            RelativeYear  = relativeYear,
-            EffectiveFrom = Now,
-            EffectiveTo   = null
-        };
-        db.LapcapDataMaster.Add(lapcap);
-        await db.SaveChangesAsync();
-        var templates = await db.LapcapDataTemplateMaster.ToImmutableListAsync();
-        db.LapcapDataDetail.AddRange(LapcapDataDetails(lapcapPath, lapcap, templates));
-        await db.SaveChangesAsync();
-    }
-
-    private static async Task SeedAcceptOrRejectProducers(ApplicationDBContext db, int calculatorRunId, string modifiedBy, string csvPath)
-    {
-        var csvRows     = SlurpCsv(csvPath).GetRecords<dynamic>().ToImmutableList();
-        var producerIds = csvRows.Select(x => int.Parse(x.producer_id)).ToHashSet();
-        var dbRows      = await db.ProducerResultFileSuggestedBillingInstruction
-                            .Where(x => x.CalculatorRunId == calculatorRunId && producerIds.Contains(x.ProducerId))
-                            .ToListAsync();
-
-        foreach (var dbRow in dbRows)
-        {
-            var csvRow = csvRows.Single(x => int.Parse(x.producer_id) == dbRow.ProducerId);
-
-            dbRow.BillingInstructionAcceptReject = csvRow.billing_status;
-            dbRow.ReasonForRejection             = csvRow.rejected_reason == "NULL" ? null : csvRow.rejected_reason;
-            dbRow.LastModifiedAcceptReject       = Now;
-            dbRow.LastModifiedAcceptRejectBy     = modifiedBy;
-        }
-
-        await db.SaveChangesAsync();
+        return Encoding.UTF8.GetString(fileContents);
     }
 }
