@@ -189,5 +189,5 @@ Parameters File,"",,"08/07/2026 16:21",,"",
 
 Error Table
 "Producer ID","Subsidiary ID","Producer / Subsidiary Name","Trading Name","Leaver Code","Error Code Text",
-"41000","-","-","-","","Missing Registration Data",
+"410000","-","Missing reg Ltd - different submitter","-","","Missing Registration Data",
 "510000","-","Error 1 Ltd","-","Some status code","Some error code",
