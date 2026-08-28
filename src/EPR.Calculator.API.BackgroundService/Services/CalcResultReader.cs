@@ -1,5 +1,4 @@
 using EPR.Calculator.API.BackgroundService.Constants;
-using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ScaledupProducers;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -34,6 +33,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
         {
             // Group in memory, not SQL: EF's GroupBy+ToList() per group can misattribute rows under some query plans.
             var rows = await dbContext.TransformProjectedH1
+                        .AsNoTracking()
                         .Where(p => p.CalculatorRunId == runId)
                         .ToListAsync(cancellationToken);
 
@@ -58,6 +58,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
         {
             // Group in memory, not SQL: EF's GroupBy+ToList() per group can misattribute rows under some query plans.
             var rows = await dbContext.TransformProjectedH2
+                        .AsNoTracking()
                         .Where(p => p.CalculatorRunId == runId)
                         .ToListAsync(cancellationToken);
 
@@ -82,6 +83,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
         {
             // Group in memory, not SQL: EF's GroupBy+ToList() per group can misattribute rows under some query plans.
             var rows = await dbContext.TransformScaled
+                        .AsNoTracking()
                         .Where(p => p.CalculatorRunId == runId)
                         .ToListAsync(cancellationToken);
 
@@ -118,9 +120,11 @@ namespace EPR.Calculator.API.BackgroundService.Services
         }
 
         [ActivityTrace]
-        public async Task<ImmutableList<CalcResultPartialObligation>> ReadPartialData(int runId, CancellationToken cancellationToken){
+        public async Task<ImmutableList<CalcResultPartialObligation>> ReadPartialData(int runId, CancellationToken cancellationToken)
+        {
             // Group in memory, not SQL: EF's GroupBy+ToList() per group can misattribute rows under some query plans.
             var rows = await dbContext.TransformPartial
+                        .AsNoTracking()
                         .Where(p => p.CalculatorRunId == runId)
                         .ToListAsync(cancellationToken);
 
