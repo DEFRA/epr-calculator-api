@@ -32,7 +32,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
     {
         public async Task<IReadOnlyList<CalcResultH1ProjectedProducer>> ReadH1ProjectedData(int runId, CancellationToken cancellationToken)
         {
-            return await dbContext.TransformProjectedH1
+            return await dbContext.TransformProjectedH1 // Select projection means adding AsNoTracking() does not aid performance
                         .Where(p => p.CalculatorRunId == runId)
                         .GroupBy(p => new { p.ProducerId, p.SubsidiaryId, p.SubmissionPeriodCode, p.Level })
                         .Select(g => new CalcResultH1ProjectedProducer
@@ -51,7 +51,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
 
         public async Task<IReadOnlyList<CalcResultH2ProjectedProducer>> ReadH2ProjectedData(int runId, CancellationToken cancellationToken)
         {
-            return await dbContext.TransformProjectedH2
+            return await dbContext.TransformProjectedH2 // Select projection means adding AsNoTracking() does not aid performance
                         .Where(p => p.CalculatorRunId == runId)
                         .GroupBy(p => new { p.ProducerId, p.SubsidiaryId, p.SubmissionPeriodCode, p.Level })
                         .Select(g => new CalcResultH2ProjectedProducer
@@ -70,7 +70,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
 
         public async Task<IReadOnlyList<CalcResultScaledupProducer>> ReadScaledData(int runId, CancellationToken cancellationToken)
         {
-            var scaledupProducers = await dbContext.TransformScaled
+            var scaledupProducers = await dbContext.TransformScaled // Select projection means adding AsNoTracking() does not aid performance
                         .Where(p => p.CalculatorRunId == runId)
                         .GroupBy(p => new { p.ProducerId, p.SubsidiaryId, p.ProducerName, p.TradingName, p.SubmissionPeriodCode, p.Level, p.IsSubTotal, p.DaysInSubmissionPeriod, p.DaysInWholePeriod, p.ScaleupFactor })
                         .Select(g =>
@@ -104,7 +104,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
         }
 
         public async Task<IReadOnlyList<CalcResultPartialObligation>> ReadPartialData(int runId, CancellationToken cancellationToken){
-            return await dbContext.TransformPartial
+            return await dbContext.TransformPartial // Select projection means adding AsNoTracking() does not aid performance
                         .Where(p => p.CalculatorRunId == runId)
                         .GroupBy(p => new { p.ProducerId, p.SubsidiaryId, p.ProducerName, p.TradingName, p.SubmissionYear, p.Level, p.DaysInSubmissionYear, p.JoiningDate, p.DaysObligated, p.ObligatedFactor })
                         .Select(g =>
@@ -132,6 +132,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
         public async Task<ProducerFees> ReadProducerFees(int runId, CancellationToken cancellationToken)
         {
             return await dbContext.ProducerDisposalFee
+                        .AsNoTracking()
                         .Include(p => p.Details)
                         .Where(p => p.CalculatorRunId == runId)
                         .SingleAsync(cancellationToken);
@@ -139,6 +140,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
 
         public async Task<SelfManagedConsumerWaste> ReadSmcw(int runId, CancellationToken cancellationToken) =>
             await dbContext.SelfManagedConsumerWaste
+                    .AsNoTracking()
                     .Include(s => s.ProducerTotals)
                     .Where(p => p.CalculatorRunId == runId)
                     .SingleAsync(cancellationToken);
@@ -146,6 +148,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
 
         public async Task<ModulationResult> ReadModulationResult(int runId, CancellationToken cancellationToken) =>
             await dbContext.ModulationResult
+                    .AsNoTracking()
                     .Where(p => p.CalculatorRunId == runId)
                     .SingleAsync(cancellationToken);
 
