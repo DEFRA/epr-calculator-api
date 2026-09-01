@@ -55,7 +55,6 @@
         }
       }
     },
-    "modulationResults": { "type": "null" },
     "calculationResults": {
       "type": "object",
       "required": ["producerCalculationResults"],
@@ -110,8 +109,7 @@
                         "selfManagedConsumerWasteTonnage": { "type": "number" },
                         "netTonnage": { "type": "number" },
                         "pricePerTonne": { "$ref": "#/$defs/currency4dp" },
-                        "producerDisposalFeeWithoutBadDebtProvision": { "$ref": "#/$defs/currency2dp" },
-                        "actionedSelfManagedConsumerWasteTonnage": { "type": "null" }
+                        "producerDisposalFeeWithoutBadDebtProvision": { "$ref": "#/$defs/currency2dp" }
                       }
                     }
                   }
