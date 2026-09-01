@@ -43,6 +43,7 @@ public class BillingFileJson
     [JsonPropertyName("scaleUpProducers")]
     public CalcResultScaledupProducersJson? ScaleUpProducers { get; set; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     [JsonPropertyName("modulationResults")]
     public CalcResultModulationResults? ModulationResults { get; set; }
 
