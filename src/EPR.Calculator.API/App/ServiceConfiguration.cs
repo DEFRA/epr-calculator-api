@@ -13,6 +13,7 @@ using EPR.Calculator.API.Validators;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
 using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
+using EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -176,6 +177,7 @@ public static class ServiceConfiguration
             services.AddTransient<IStreamOrganisationsRequestHandler, StreamOrganisationsRequestHandler>();
             services.AddTransient<IStreamPomsRequestHandler, StreamPomsRequestHandler>();
             services.AddTransient<IProducerPomAligner, ProducerPomAligner>();
+            services.AddTransient<IProducerObligationDeterminer, ProducerObligationDeterminer>();
 
             return services;
         }

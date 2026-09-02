@@ -1,5 +1,6 @@
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
 
 namespace EPR.Calculator.API.IntegrationTests;
 
@@ -31,4 +32,15 @@ public class FakeStreamPomsRequestHandler : IStreamPomsRequestHandler
             await Task.Yield();
         }
     }
+}
+
+/// <summary>
+///     Test fixtures seed <see cref="PayCalOrganisation" /> rows with ObligationStatus/ErrorCode/
+///     NumDaysObligated already resolved (a snapshot of already-determined data, not the raw multi-row
+///     registrations a real determiner needs), so the real <see cref="IProducerObligationDeterminer" />
+///     is bypassed in favour of this pass-through in integration tests.
+/// </summary>
+public class PassthroughProducerObligationDeterminer : IProducerObligationDeterminer
+{
+    public IReadOnlyList<PayCalOrganisation> Determine(IReadOnlyList<PayCalOrganisation> organisations) => organisations;
 }

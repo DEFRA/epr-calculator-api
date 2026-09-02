@@ -4,6 +4,7 @@ using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Extensions;
 using EPR.CommonDataService.DataApi.CommonDataApi;
+using EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -104,6 +105,8 @@ public abstract class BaseIntegrationTest
             .RemoveAll<IStreamPomsRequestHandler>()
             .AddSingleton<FakeStreamPomsRequestHandler>()
             .AddSingleton<IStreamPomsRequestHandler>(sp => sp.GetRequiredService<FakeStreamPomsRequestHandler>())
+            .RemoveAll<IProducerObligationDeterminer>()
+            .AddSingleton<IProducerObligationDeterminer, PassthroughProducerObligationDeterminer>()
             .RemoveAll<IStorageUploadService>()
             .AddSingleton<FakeBlobStorageUploadService>()
             .AddSingleton<IStorageUploadService>(sp => sp.GetRequiredService<FakeBlobStorageUploadService>());
