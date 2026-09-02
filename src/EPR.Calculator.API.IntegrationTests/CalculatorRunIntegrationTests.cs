@@ -35,9 +35,11 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
 
         await SeedCalculatorDataAsync(db, relativeYear, "TestData/defaultParams.csv", "TestData/lapcap.csv");
 
-        var fakeCommonDataApi                   = Provider.GetRequiredService<FakeCommonDataApiClient>();
-        fakeCommonDataApi.OrganisationResponses = OrganisationResponses($"TestData/{relativeYear}-organisation-data.csv");
-        fakeCommonDataApi.PomResponses          = PomResponses($"TestData/{relativeYear}-pom-data.csv");
+        var fakeOrganisationsStream = Provider.GetRequiredService<FakeStreamOrganisationsRequestHandler>();
+        fakeOrganisationsStream.Organisations = Organisations($"TestData/{relativeYear}-organisation-data.csv");
+
+        var fakePomsStream = Provider.GetRequiredService<FakeStreamPomsRequestHandler>();
+        fakePomsStream.Poms = Poms($"TestData/{relativeYear}-pom-data.csv");
 
         var calculatorController          = CreateController<CalculatorController>(services);
         var calculatorNewController       = CreateController<CalculatorNewController>(services);

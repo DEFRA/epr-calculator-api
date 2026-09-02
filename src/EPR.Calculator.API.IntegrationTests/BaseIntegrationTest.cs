@@ -4,13 +4,14 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using EPR.Calculator.API.App;
 using EPR.Calculator.API.BackgroundService.Services;
-using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Data.Utils;
 using EPR.Calculator.API.Extensions;
+using EPR.CommonDataService.DataApi.CommonDataApi;
+using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -95,7 +96,8 @@ public abstract class BaseIntegrationTest
             .AddJsonFile("appsettings.integration.json")
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Database:ConnectionString"] = connectionString
+                ["Database:ConnectionString"] = connectionString,
+                ["Synapse:ConnectionString"] = connectionString
             })
             .Build();
 
@@ -124,14 +126,18 @@ public abstract class BaseIntegrationTest
                 x.AddSerilog(Log.Logger, dispose: true);
             })
             .AddPayCalDatabase()
+            .AddPayCalDataApi()
             .AddPayCalBlobStorage()
             .AddPayCalServices()
             .AddPayCalBackgroundServices()
             .AddPayCalRequestValidation()
             .AddDbContextFactory<ApplicationDBContext>(options => { options.UseSqlServer(connectionString); })
-            .RemoveAll<CommonDataApiHttpClient>()
-            .AddSingleton<FakeCommonDataApiClient>()
-            .AddSingleton<ICommonDataApiClient>(sp => sp.GetRequiredService<FakeCommonDataApiClient>())
+            .RemoveAll<IStreamOrganisationsRequestHandler>()
+            .AddSingleton<FakeStreamOrganisationsRequestHandler>()
+            .AddSingleton<IStreamOrganisationsRequestHandler>(sp => sp.GetRequiredService<FakeStreamOrganisationsRequestHandler>())
+            .RemoveAll<IStreamPomsRequestHandler>()
+            .AddSingleton<FakeStreamPomsRequestHandler>()
+            .AddSingleton<IStreamPomsRequestHandler>(sp => sp.GetRequiredService<FakeStreamPomsRequestHandler>())
             .RemoveAll<IStorageUploadService>()
             .AddSingleton<FakeBlobStorageUploadService>()
             .AddSingleton<IStorageUploadService>(sp => sp.GetRequiredService<FakeBlobStorageUploadService>());
@@ -299,10 +305,10 @@ public abstract class BaseIntegrationTest
                 LapcapDataMaster   = master // TODO make virtual?
             }).ToImmutableList();
 
-    protected static ImmutableList<OrganisationResponse> OrganisationResponses(string organisationsPath) =>
+    protected static ImmutableList<PayCalOrganisation> Organisations(string organisationsPath) =>
         SlurpCsv(organisationsPath)
             .GetRecords<dynamic>()
-            .Select(row => new OrganisationResponse
+            .Select(row => new PayCalOrganisation
             {
                 OrganisationId   = int.Parse(row.organisation_id),
                 SubsidiaryId     = Nullable(row.subsidiary_id),
@@ -319,10 +325,10 @@ public abstract class BaseIntegrationTest
                 HasH2            = row.has_h2 == "1"
             }).ToImmutableList();
 
-    protected static ImmutableList<PomResponse> PomResponses(string pomsPath) =>
+    protected static ImmutableList<PayCalPom> Poms(string pomsPath) =>
         SlurpCsv(pomsPath)
             .GetRecords<dynamic>()
-            .Select(row => new PomResponse
+            .Select(row => new PayCalPom
             {
                 OrganisationId              = int.Parse(row.organisation_id),
                 SubsidiaryId                = Nullable(row.subsidiary_id),

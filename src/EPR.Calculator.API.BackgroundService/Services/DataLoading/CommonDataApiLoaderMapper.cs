@@ -1,17 +1,17 @@
-using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Enums;
+using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 
 namespace EPR.Calculator.API.BackgroundService.Services.DataLoading
 {
     internal static class CommonDataApiLoaderMapper
     {
         /// <summary>
-        ///     Creates a mapper function to convert PomResponse API objects to PomData database entities.
+        ///     Creates a mapper function to convert PayCalPom entities to PomData database entities.
         /// </summary>
         /// <param name="loadTime">The timestamp to apply to all mapped entities.</param>
         /// <returns>A mapper function that throws FormatException if SubmitterId is invalid.</returns>
-        internal static Func<PomResponse, PomData> MapPom(DateTimeOffset loadTime, ILogger logger)
+        internal static Func<PayCalPom, PomData> MapPom(DateTimeOffset loadTime, ILogger logger)
         {
             return r => new PomData
             {
@@ -29,13 +29,13 @@ namespace EPR.Calculator.API.BackgroundService.Services.DataLoading
                 SubmitterId = Guid.TryParse(r.SubmitterId, out var guid)
                     ? guid
                     : throw new FormatException(
-                        $"Invalid {nameof(PomResponse)}.{nameof(PomResponse.SubmitterId)}: {r.SubmitterId}"),
+                        $"Invalid {nameof(PayCalPom)}.{nameof(PayCalPom.SubmitterId)}: {r.SubmitterId}"),
                 LoadTimeStamp = loadTime.UtcDateTime
             };
         }
 
 
-        private static string? SafeParseRamRagRating(PomResponse pom, ILogger logger)
+        private static string? SafeParseRamRagRating(PayCalPom pom, ILogger logger)
         {
             try
             {
@@ -60,31 +60,31 @@ namespace EPR.Calculator.API.BackgroundService.Services.DataLoading
 
 
         /// <summary>
-        ///     Creates a mapper function to convert OrganisationResponse API objects to OrganisationData database entities.
+        ///     Creates a mapper function to convert PayCalOrganisation entities to OrganisationData database entities.
         /// </summary>
         /// <param name="loadTime">The timestamp to apply to all mapped entities.</param>
         /// <returns>A mapper function that throws FormatException if required fields are null or invalid.</returns>
-        internal static Func<OrganisationResponse, OrganisationData> MapOrganisation(DateTimeOffset loadTime)
+        internal static Func<PayCalOrganisation, OrganisationData> MapOrganisation(DateTimeOffset loadTime)
         {
             return r => new OrganisationData
             {
                 OrganisationId = r.OrganisationId ?? throw new FormatException(
-                    $"Invalid {nameof(OrganisationResponse)}.{nameof(OrganisationResponse.OrganisationId)}: {r.OrganisationId}"),
+                    $"Invalid {nameof(PayCalOrganisation)}.{nameof(PayCalOrganisation.OrganisationId)}: {r.OrganisationId}"),
                 SubsidiaryId = r.SubsidiaryId,
                 OrganisationName = r.OrganisationName ?? throw new FormatException(
-                    $"Invalid {nameof(OrganisationResponse)}.{nameof(OrganisationResponse.OrganisationName)}: {r.OrganisationName}"),
+                    $"Invalid {nameof(PayCalOrganisation)}.{nameof(PayCalOrganisation.OrganisationName)}: {r.OrganisationName}"),
                 TradingName = r.TradingName,
                 StatusCode = r.StatusCode,
                 ErrorCode = r.ErrorCode,
                 JoinerDate = r.JoinerDate,
                 LeaverDate = r.LeaverDate,
                 ObligationStatus = r.ObligationStatus ?? throw new FormatException(
-                    $"Invalid {nameof(OrganisationResponse)}.{nameof(OrganisationResponse.ObligationStatus)}: {r.ObligationStatus}"),
+                    $"Invalid {nameof(PayCalOrganisation)}.{nameof(PayCalOrganisation.ObligationStatus)}: {r.ObligationStatus}"),
                 DaysObligated = r.NumDaysObligated,
                 SubmitterId = Guid.TryParse(r.SubmitterId, out var guid)
                     ? guid
                     : throw new FormatException(
-                        $"Invalid {nameof(OrganisationResponse)}.{nameof(OrganisationResponse.SubmitterId)}: {r.SubmitterId}"),
+                        $"Invalid {nameof(PayCalOrganisation)}.{nameof(PayCalOrganisation.SubmitterId)}: {r.SubmitterId}"),
                 HasH1 = r.HasH1,
                 HasH2 = r.HasH2,
                 LoadTimestamp = loadTime.UtcDateTime

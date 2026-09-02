@@ -1,11 +1,11 @@
-using System.Net;
-using System.Text;
+using System.Runtime.CompilerServices;
 using EPR.Calculator.API.BackgroundService.Options;
-using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Services.DataLoading;
 using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using EPR.Calculator.API.Data;
+using EPR.CommonDataService.DataApi.CommonDataApi;
+using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -21,7 +21,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading;
 ///     </para>
 ///     <para>
 ///         Tests focus on the observable behaviour of the non-excluded code paths:
-///         the disabled guard, logging, the time-provider call, and HTTP stream
+///         the disabled guard, logging, the time-provider call, and stream
 ///         initialisation / error handling inside <c>GetStreams</c> and <c>Run</c>.
 ///     </para>
 /// </summary>
@@ -52,94 +52,92 @@ public class CommonDataApiLoaderTests
     public async Task LoadData_WhenDisabled_DoesNotRun()
     {
         // Arrange
-        var httpCallCount = 0;
-        var handler = new TrackingHandler(() =>
-        {
-            httpCallCount++;
-            return OkNdJson(string.Empty);
-        });
-        var loader = CreateLoader(false, handler);
+        var mockOrgHandler = new Mock<IStreamOrganisationsRequestHandler>();
+        var mockPomHandler = new Mock<IStreamPomsRequestHandler>();
+        var loader = CreateLoader(false, mockOrgHandler, mockPomHandler);
 
         // Act
         await loader.LoadData(TestDataHelper.CalculatorRun2024);
 
         // Assert
         VerifyLogContains(LogLevel.Information, "Disabled", Times.Once(), "Logger should record it is disabled.");
-        Assert.AreEqual(0, httpCallCount, "HTTP client should not be called when disabled.");
+        mockOrgHandler.Verify(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()), Times.Never, "Organisation stream should not be requested when disabled.");
+        mockPomHandler.Verify(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()), Times.Never, "POM stream should not be requested when disabled.");
         mockDbFactory.Verify(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()), Times.Never, "DB Context should not be created when disabled.");
     }
 
-    // ─────────────────────────── LoadData – enabled path, HTTP stream failures ───────────────────────────
+    // ─────────────────────────── LoadData – enabled path, stream failures ───────────────────────────
 
     /// <summary>
-    ///     When both HTTP streams return server errors, <see cref="HttpRequestException" />
-    ///     must propagate out of <see cref="CommonDataApiLoader.LoadData" />.
+    ///     When both streams fail, the exception must propagate out of <see cref="CommonDataApiLoader.LoadData" />.
     /// </summary>
     [TestMethod]
-    public async Task LoadData_WhenBothHttpStreamsFail_ThrowsHttpRequestException()
+    public async Task LoadData_WhenBothStreamsFail_ThrowsException()
     {
         // Arrange
-        var loader = CreateLoader(true, ServerErrorHandler());
+        var loader = CreateLoader(
+            true,
+            organisations: ThrowingAsyncEnumerable<PayCalOrganisation>(new InvalidOperationException("org stream failed")),
+            poms: ThrowingAsyncEnumerable<PayCalPom>(new InvalidOperationException("pom stream failed")));
 
         // Act & Assert
-        await Should.ThrowAsync<HttpRequestException>(async () => await loader.LoadData(TestDataHelper.CalculatorRun2024));
+        await Should.ThrowAsync<InvalidOperationException>(async () => await loader.LoadData(TestDataHelper.CalculatorRun2024));
     }
 
     /// <summary>
-    ///     When the POM HTTP stream returns a server error (while the organisation stream is
-    ///     empty), <see cref="HttpRequestException" /> must propagate and the organisation
-    ///     enumerator must be disposed.
+    ///     When the POM stream fails (while the organisation stream is empty), the exception must
+    ///     propagate and the organisation enumerator must be disposed.
     /// </summary>
     [TestMethod]
-    public async Task LoadData_WhenPomStreamFails_ThrowsHttpRequestException()
+    public async Task LoadData_WhenPomStreamFails_ThrowsException()
     {
         // Arrange
-        var handler = new UrlDispatchHandler(url =>
-            url.Contains("poms")
-                ? new HttpResponseMessage(HttpStatusCode.InternalServerError)
-                : OkNdJson(string.Empty));
-        var loader = CreateLoader(true, handler);
+        var loader = CreateLoader(
+            true,
+            organisations: EmptyAsyncEnumerable<PayCalOrganisation>(),
+            poms: ThrowingAsyncEnumerable<PayCalPom>(new InvalidOperationException("pom stream failed")));
 
         // Act & Assert
-        await Should.ThrowAsync<HttpRequestException>(async () => await loader.LoadData(TestDataHelper.CalculatorRun2024));
+        await Should.ThrowAsync<InvalidOperationException>(async () => await loader.LoadData(TestDataHelper.CalculatorRun2024));
     }
 
     /// <summary>
-    ///     When the organisation HTTP stream returns a server error (while the POM stream is
-    ///     empty), <see cref="HttpRequestException" /> must propagate and the POM enumerator
-    ///     must be disposed.
+    ///     When the organisation stream fails (while the POM stream is empty), the exception must
+    ///     propagate and the POM enumerator must be disposed.
     /// </summary>
     [TestMethod]
-    public async Task LoadData_WhenOrgStreamFails_ThrowsHttpRequestException()
+    public async Task LoadData_WhenOrgStreamFails_ThrowsException()
     {
         // Arrange
-        var handler = new UrlDispatchHandler(url =>
-            url.Contains("organisations")
-                ? new HttpResponseMessage(HttpStatusCode.InternalServerError)
-                : OkNdJson(string.Empty));
-        var loader = CreateLoader(true, handler);
+        var loader = CreateLoader(
+            true,
+            organisations: ThrowingAsyncEnumerable<PayCalOrganisation>(new InvalidOperationException("org stream failed")),
+            poms: EmptyAsyncEnumerable<PayCalPom>());
 
         // Act & Assert
-        await Should.ThrowAsync<HttpRequestException>(async () => await loader.LoadData(TestDataHelper.CalculatorRun2024));
+        await Should.ThrowAsync<InvalidOperationException>(async () => await loader.LoadData(TestDataHelper.CalculatorRun2024));
     }
 
     // ─────────────────────────── LoadData – cancellation ───────────────────────────
 
     /// <summary>
     ///     When the supplied cancellation token is already cancelled before the streams are
-    ///     initialised, a <see cref="TaskCanceledException" /> must propagate.
+    ///     initialised, an <see cref="OperationCanceledException" /> must propagate.
     /// </summary>
     [TestMethod]
     public async Task LoadData_WhenAlreadyCancelled_Throws()
     {
-        // Arrange – handler throws on a cancelled token so we don't race the HTTP call
-        var loader = CreateLoader(true, new CancellationRespectingHandler());
+        // Arrange
+        var loader = CreateLoader(
+            true,
+            organisations: EmptyAsyncEnumerable<PayCalOrganisation>(),
+            poms: EmptyAsyncEnumerable<PayCalPom>());
 
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
 
         // Act & Assert
-        await Should.ThrowAsync<TaskCanceledException>(async () => await loader.LoadData(TestDataHelper.CalculatorRun2024, cts.Token));
+        await Should.ThrowAsync<OperationCanceledException>(async () => await loader.LoadData(TestDataHelper.CalculatorRun2024, cts.Token));
     }
 
     // ─────────────────────────── Run – try-catch-finally ───────────────────────────
@@ -153,13 +151,16 @@ public class CommonDataApiLoaderTests
     [TestMethod]
     public async Task LoadData_WhenDbContextCreationFails_ExceptionPropagates()
     {
-        // Arrange – both HTTP streams return empty bodies so GetStreams succeeds.
+        // Arrange – both streams are empty so GetStreams succeeds.
         // The DB factory then throws, causing UpdateDatabase to fail.
         mockDbFactory
             .Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("DB unavailable"));
 
-        var loader = CreateLoader(true, new UrlDispatchHandler(_ => OkNdJson(string.Empty)));
+        var loader = CreateLoader(
+            true,
+            organisations: EmptyAsyncEnumerable<PayCalOrganisation>(),
+            poms: EmptyAsyncEnumerable<PayCalPom>());
 
         // Act & Assert
         await Should.ThrowAsync<InvalidOperationException>(async () => await loader.LoadData(TestDataHelper.CalculatorRun2024));
@@ -167,7 +168,12 @@ public class CommonDataApiLoaderTests
 
     // ─────────────────────────── Helpers ───────────────────────────
 
-    private CommonDataApiLoader CreateLoader(bool enabled, HttpMessageHandler httpHandler)
+    private CommonDataApiLoader CreateLoader(
+        bool enabled,
+        Mock<IStreamOrganisationsRequestHandler>? organisationsHandler = null,
+        Mock<IStreamPomsRequestHandler>? pomsHandler = null,
+        IAsyncEnumerable<PayCalOrganisation>? organisations = null,
+        IAsyncEnumerable<PayCalPom>? poms = null)
     {
         var loaderOptions = new OptionsWrapper<CommonDataApiLoaderOptions>(new CommonDataApiLoaderOptions
         {
@@ -176,32 +182,25 @@ public class CommonDataApiLoaderTests
             OrganisationBatchSize = 100
         });
 
-        var httpClientOptions = new OptionsWrapper<CommonDataApiHttpClientOptions>(new CommonDataApiHttpClientOptions
-        {
-            BaseUrl = "https://test-api.example.com",
-            CompressionEnabled = false,
-            StreamStartTimeout = TimeSpan.FromSeconds(30)
-        });
+        organisationsHandler ??= new Mock<IStreamOrganisationsRequestHandler>();
+        organisationsHandler
+            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()))
+            .Returns(organisations ?? EmptyAsyncEnumerable<PayCalOrganisation>());
 
-        var httpClient = new CommonDataApiHttpClient(new HttpClient(httpHandler), httpClientOptions);
+        pomsHandler ??= new Mock<IStreamPomsRequestHandler>();
+        pomsHandler
+            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()))
+            .Returns(poms ?? EmptyAsyncEnumerable<PayCalPom>());
 
         return new CommonDataApiLoader(
             loaderOptions,
             mockDbFactory.Object,
-            httpClient,
+            organisationsHandler.Object,
+            pomsHandler.Object,
             mockTimeProvider.Object,
             mockLogger.Object,
             new Telemetry<CommonDataApiLoader>());
     }
-
-    private static HttpResponseMessage OkNdJson(string content) =>
-        new(HttpStatusCode.OK)
-        {
-            Content = new StringContent(content, Encoding.UTF8, "application/x-ndjson")
-        };
-
-    private static UrlDispatchHandler ServerErrorHandler() =>
-        new(_ => new HttpResponseMessage(HttpStatusCode.InternalServerError));
 
     /// <summary>
     ///     Verifies that the mock logger received a log entry at the given level whose message contains
@@ -220,40 +219,26 @@ public class CommonDataApiLoaderTests
             failMessage ?? $"Log message should contain '{text}'.");
     }
 
-    // ─────────────────────────── Mock HTTP handlers ───────────────────────────
+    // ─────────────────────────── Fake async streams ───────────────────────────
 
-    /// <summary>
-    ///     Calls a factory function and increments a counter so callers can assert whether
-    ///     the HTTP client was invoked.
-    /// </summary>
-    private sealed class TrackingHandler(Func<HttpResponseMessage> responseFactory) : HttpMessageHandler
+    private static async IAsyncEnumerable<T> EmptyAsyncEnumerable<T>(
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        protected override Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request, CancellationToken cancellationToken) =>
-            Task.FromResult(responseFactory());
+        await Task.Yield();
+        cancellationToken.ThrowIfCancellationRequested();
+
+        yield break;
     }
 
-    /// <summary>
-    ///     Dispatches responses based on the request URL path and query string.
-    /// </summary>
-    private sealed class UrlDispatchHandler(Func<string, HttpResponseMessage> responseFactory) : HttpMessageHandler
+    private static async IAsyncEnumerable<T> ThrowingAsyncEnumerable<T>(
+        Exception exception,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        protected override Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request, CancellationToken cancellationToken) =>
-            Task.FromResult(responseFactory(request.RequestUri?.PathAndQuery ?? string.Empty));
-    }
+        await Task.Yield();
+        cancellationToken.ThrowIfCancellationRequested();
 
-    /// <summary>
-    ///     Throws <see cref="OperationCanceledException" /> when the cancellation token is
-    ///     already signalled, mirroring the behaviour of a real HTTP call with a cancelled token.
-    /// </summary>
-    private sealed class CancellationRespectingHandler : HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(
-            HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            return Task.FromResult(OkNdJson(string.Empty));
-        }
+        if (exception != null) throw exception;
+
+        yield break;
     }
 }

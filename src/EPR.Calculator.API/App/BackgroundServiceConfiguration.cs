@@ -39,7 +39,6 @@ using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services;
-using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Services.DataLoading;
 using EPR.Calculator.API.BackgroundService.Telemetry;
 using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
@@ -76,14 +75,6 @@ public static class BackgroundServiceConfiguration
             services.AddTransient<ICalcResultsExporter, CalcResultsExporter>();
 
             // Register CommonDataApi
-            services
-                .AddOptions<CommonDataApiHttpClientOptions>()
-                .BindConfiguration(CommonDataApiHttpClientOptions.SectionKey)
-                .ValidateDataAnnotations()
-                .ValidateOnStart();
-
-            services.AddHttpClient<ICommonDataApiClient, CommonDataApiHttpClient>();
-
             services
                 .AddOptions<CommonDataApiLoaderOptions>()
                 .BindConfiguration(CommonDataApiLoaderOptions.SectionKey)

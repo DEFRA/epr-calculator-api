@@ -1,5 +1,5 @@
-using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Services.DataLoading;
+using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
@@ -23,7 +23,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
         public void PomMapper_WithValidResponse_MapsAllFieldsCorrectly()
         {
             // Arrange
-            var response = new PomResponse
+            var response = new PayCalPom
             {
                 SubmissionPeriod = "2024-Q1",
                 SubmissionPeriodDescription = "Quarter 1 2024",
@@ -76,7 +76,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
             string? expected)
         {
             // Arrange
-            var response = new PomResponse
+            var response = new PayCalPom
             {
                 OrganisationId = 42,
                 PackagingType = "HH",
@@ -104,7 +104,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
         [TestMethod]
         public void PomMapper_WithInvalidSubmitterId_ThrowsFormatException()
         {
-            var response = new PomResponse
+            var response = new PayCalPom
             {
                 SubmissionPeriod = "2024-Q1",
                 OrganisationId = 1,
@@ -128,7 +128,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
         public void OrganisationMapper_WithValidResponse_MapsAllFieldsCorrectly()
         {
             // Arrange
-            var response = new OrganisationResponse
+            var response = new PayCalOrganisation
             {
                 OrganisationId = 99,
                 SubsidiaryId = "SUB-002",
@@ -175,7 +175,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
         [TestMethod]
         public void OrganisationMapper_WithInvalidSubmitterId_ThrowsFormatException()
         {
-            var response = new OrganisationResponse
+            var response = new PayCalOrganisation
             {
                 OrganisationId = 1,
                 OrganisationName = "Test Org",
@@ -194,7 +194,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
         [TestMethod]
         public void OrganisationMapper_WithNullOrganisationName_ThrowsFormatException()
         {
-            var response = new OrganisationResponse
+            var response = new PayCalOrganisation
             {
                 OrganisationId = 1,
                 OrganisationName = null,
@@ -213,7 +213,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
         [TestMethod]
         public void OrganisationMapper_WithNullOrganisationId_ThrowsFormatException()
         {
-            var response = new OrganisationResponse
+            var response = new PayCalOrganisation
             {
                 OrganisationId = null,
                 OrganisationName = "Test Org",
@@ -232,7 +232,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
         [TestMethod]
         public void OrganisationMapper_WithNullObligationStatus_ThrowsFormatException()
         {
-            var response = new OrganisationResponse
+            var response = new PayCalOrganisation
             {
                 OrganisationId = 1,
                 OrganisationName = "Test Org",
