@@ -12,6 +12,7 @@ using EPR.Calculator.API.Data.Utils;
 using EPR.Calculator.API.Extensions;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -138,6 +139,8 @@ public abstract class BaseIntegrationTest
             .RemoveAll<IStreamPomsRequestHandler>()
             .AddSingleton<FakeStreamPomsRequestHandler>()
             .AddSingleton<IStreamPomsRequestHandler>(sp => sp.GetRequiredService<FakeStreamPomsRequestHandler>())
+            .RemoveAll<IProducerObligationDeterminer>()
+            .AddSingleton<IProducerObligationDeterminer, PassthroughProducerObligationDeterminer>()
             .RemoveAll<IStorageUploadService>()
             .AddSingleton<FakeBlobStorageUploadService>()
             .AddSingleton<IStorageUploadService>(sp => sp.GetRequiredService<FakeBlobStorageUploadService>());

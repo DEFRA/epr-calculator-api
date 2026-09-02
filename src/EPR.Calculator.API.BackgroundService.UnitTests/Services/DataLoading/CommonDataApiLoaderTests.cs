@@ -5,6 +5,7 @@ using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -89,6 +90,55 @@ public class CommonDataApiLoaderTests
         organisations[0].OrganisationName.ShouldBe("Org Co");
         poms.Count.ShouldBe(1);
         poms[0].PackagingMaterial.ShouldBe("PL");
+    }
+
+    /// <summary>
+    ///     Obligation determination runs over the whole streamed organisation list before mapping - the
+    ///     mapped result must reflect what the determiner returns, not the raw streamed input.
+    /// </summary>
+    [TestMethod]
+    public async Task LoadData_WhenEnabled_DeterminesObligationBeforeMapping()
+    {
+        // Arrange
+        var submitterId = Guid.NewGuid().ToString();
+        var rawOrganisation = new PayCalOrganisation
+        {
+            OrganisationId = 1,
+            OrganisationName = "Org Co",
+            SubmitterId = submitterId
+        };
+
+        var mockOrganisationsHandler = new Mock<IStreamOrganisationsRequestHandler>();
+        var mockDeterminer = new Mock<IProducerObligationDeterminer>();
+        mockDeterminer
+            .Setup(d => d.Determine(It.Is<IReadOnlyList<PayCalOrganisation>>(l => l.Count == 1 && l[0] == rawOrganisation)))
+            .Returns([rawOrganisation with { ObligationStatus = "O", NumDaysObligated = 42 }]);
+
+        var loaderOptions = new OptionsWrapper<CommonDataApiLoaderOptions>(new CommonDataApiLoaderOptions { Enabled = true });
+        mockOrganisationsHandler
+            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()))
+            .Returns(ToAsyncEnumerable(rawOrganisation));
+        var mockPomsHandler = new Mock<IStreamPomsRequestHandler>();
+        mockPomsHandler
+            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()))
+            .Returns(EmptyAsyncEnumerable<PayCalPom>());
+
+        var loader = new CommonDataApiLoader(
+            loaderOptions,
+            mockOrganisationsHandler.Object,
+            mockPomsHandler.Object,
+            mockDeterminer.Object,
+            mockLogger.Object,
+            new Telemetry<CommonDataApiLoader>());
+
+        // Act
+        var (organisations, _) = await loader.LoadData(TestDataHelper.CalculatorRun2024);
+
+        // Assert
+        organisations.Count.ShouldBe(1);
+        organisations[0].ObligationStatus.ShouldBe("O");
+        organisations[0].DaysObligated.ShouldBe((short)42);
+        mockDeterminer.VerifyAll();
     }
 
     // ─────────────────────────── LoadData – enabled path, stream failures ───────────────────────────
@@ -187,10 +237,16 @@ public class CommonDataApiLoaderTests
             .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()))
             .Returns(poms ?? EmptyAsyncEnumerable<PayCalPom>());
 
+        var mockObligationDeterminer = new Mock<IProducerObligationDeterminer>();
+        mockObligationDeterminer
+            .Setup(d => d.Determine(It.IsAny<IReadOnlyList<PayCalOrganisation>>()))
+            .Returns((IReadOnlyList<PayCalOrganisation> organisations) => organisations);
+
         return new CommonDataApiLoader(
             loaderOptions,
             organisationsHandler.Object,
             pomsHandler.Object,
+            mockObligationDeterminer.Object,
             mockLogger.Object,
             new Telemetry<CommonDataApiLoader>());
     }
