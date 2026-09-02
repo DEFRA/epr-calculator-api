@@ -68,28 +68,28 @@ public class ProducerFeesBuilder(
         // per-producer percentage lookups instead of paying O(producers) per call.
         var totalPackagingTonnage = new TotalPackagingTonnageIndex(GetTotalPackagingTonnagePerRun(runProducerMaterialDetails, materialDetails, runContext.RunId));
 
-        var organisations = await (
+        // The registered holding company (SubsidiaryId is null) may not submit its own POM data - its
+        // subsidiaries may report on its behalf - so it's looked up independently of producerDetails,
+        // which is driven off POM data.
+        var parentOrganisations = await (
             from run in context.CalculatorRuns
-            join crodm in context.CalculatorRunOrganisationDataMaster on run.CalculatorRunOrganisationDataMasterId equals crodm.Id
-            join crodd in context.CalculatorRunOrganisationDataDetails on crodm.Id equals crodd.CalculatorRunOrganisationDataMasterId
-            where run.Id == runContext.RunId && crodd.ObligationStatus == ObligationStates.Obligated
+            join org in context.CalculatorRunOrganisations on run.Id equals org.CalculatorRunId
+            where run.Id == runContext.RunId && org.ObligationStatus == ObligationStates.Obligated && org.SubsidiaryId == null
             select new Organisation
             {
-                OrganisationId   = crodd.OrganisationId,
-                SubsidiaryId     = crodd.SubsidiaryId,
-                OrganisationName = crodd.OrganisationName,
-                TradingName      = crodd.TradingName,
-                StatusCode       = crodd.StatusCode,
-                JoinerDate       = crodd.JoinerDate,
-                LeaverDate       = crodd.LeaverDate
+                OrganisationId   = org.OrganisationId,
+                SubsidiaryId     = org.SubsidiaryId,
+                OrganisationName = org.OrganisationName,
+                TradingName      = org.TradingName,
+                StatusCode       = org.StatusCode,
+                JoinerDate       = org.JoinerDate,
+                LeaverDate       = org.LeaverDate
             })
             .Distinct()
             .ToImmutableListAsync();
 
-        var parentOrganisations = organisations.Where(o => o.SubsidiaryId == null).ToImmutableList();
-
         // PERF: Replace per-row FirstOrDefault scans with O(1) dictionary lookups.
-        var organisationsByKey = BuildOrganisationsByKey(organisations);
+        var organisationsByKey = BuildOrganisationsByKey(producerDetails);
         var parentOrganisationsById = BuildParentOrganisationsById(parentOrganisations);
 
         var rowBuilder = new ProducerRowBuilder(
@@ -124,12 +124,21 @@ public class ProducerFeesBuilder(
     }
 
     private static ImmutableDictionary<(int, string?), Organisation> BuildOrganisationsByKey(
-        IReadOnlyList<Organisation> organisations)
+        IReadOnlyList<ProducerDetail> producerDetails)
     {
         var builder = ImmutableDictionary.CreateBuilder<(int, string?), Organisation>();
-        foreach (var org in organisations)
+        foreach (var pd in producerDetails)
         {
-            builder.TryAdd((org.OrganisationId, org.SubsidiaryId), org);
+            builder.TryAdd((pd.ProducerId, pd.SubsidiaryId), new Organisation
+            {
+                OrganisationId   = pd.ProducerId,
+                SubsidiaryId     = pd.SubsidiaryId,
+                OrganisationName = pd.ProducerName,
+                TradingName      = pd.TradingName,
+                StatusCode       = pd.StatusCode,
+                JoinerDate       = pd.JoinerDate,
+                LeaverDate       = pd.LeaverDate
+            });
         }
         return builder.ToImmutable();
     }

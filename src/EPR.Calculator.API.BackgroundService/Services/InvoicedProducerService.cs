@@ -219,26 +219,26 @@ public class InvoicedProducerService(
 
     private IQueryable<InvoicedProducerProjection.PreferredOrgDetail> GetPreferredOrgDetailsProjection()
     {
-        var eligible = dbContext.CalculatorRunOrganisationDataDetails
-            .Where(detail => string.IsNullOrEmpty(detail.SubsidiaryId));
+        var eligible = dbContext.CalculatorRunOrganisations
+            .Where(org => string.IsNullOrEmpty(org.SubsidiaryId));
 
         return
             from
-                eligibleId in (from detail in eligible select detail.OrganisationId).Distinct()
+                eligibleId in (from org in eligible select org.OrganisationId).Distinct()
             from preferred in (
                 from
-                    detail in eligible
+                    org in eligible
                 where
-                    detail.OrganisationId == eligibleId
+                    org.OrganisationId == eligibleId
                 orderby
-                    detail.CalculatorRunOrganisationDataMasterId descending,
-                    detail.ObligationStatus == ObligationStates.Obligated ? 0 : 1,
-                    detail.Id
-                select detail).Take(1)
+                    org.CalculatorRunId descending,
+                    org.ObligationStatus == ObligationStates.Obligated ? 0 : 1,
+                    org.Id
+                select org).Take(1)
             select new InvoicedProducerProjection.PreferredOrgDetail
             {
                 ProducerId = preferred.OrganisationId,
-                MasterId = preferred.CalculatorRunOrganisationDataMasterId,
+                RunId = preferred.CalculatorRunId,
                 ProducerName = preferred.OrganisationName,
                 TradingName = preferred.TradingName
             };
@@ -256,7 +256,7 @@ public class InvoicedProducerService(
 
         public sealed record PreferredOrgDetail
         {
-            public required int MasterId { get; init; }
+            public required int RunId { get; init; }
             public required int ProducerId { get; init; }
             public required string ProducerName { get; init; }
             public required string? TradingName { get; init; }

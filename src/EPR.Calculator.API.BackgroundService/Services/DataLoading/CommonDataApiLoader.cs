@@ -1,13 +1,9 @@
-using System.Data;
-using EFCore.BulkExtensions;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Options;
-using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.CommonDataService.DataApi.CommonDataApi;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
+using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
 using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.BackgroundService.Services.DataLoading;
@@ -18,186 +14,112 @@ namespace EPR.Calculator.API.BackgroundService.Services.DataLoading;
 public interface IDataLoader
 {
     /// <summary>
-    /// Loads data for the specified calculator run.
+    ///     Loads data for the specified calculator run.
     /// </summary>
     /// <param name="runContext">The context of the calculator run containing relevant data and parameters.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>A task that represents the asynchronous data loading operation.</returns>
-    Task LoadData(CalculatorRunContext runContext, CancellationToken cancellationToken = default);
+    /// <returns>
+    ///     The organisations and POMs streamed for this run. Empty lists if the loader is disabled.
+    /// </returns>
+    Task<(IReadOnlyList<CalculatorRunOrganisation> Organisations, IReadOnlyList<AlignmentPom> Poms)> LoadData(
+        CalculatorRunContext runContext, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
-///     Loads POM and Organisation data by streaming from the Common Data API and bulk-inserting into the database.
+///     Loads POM and Organisation data by streaming it from the Common Data API into memory. Performs
+///     no database access - persisting the data is the caller's responsibility.
 /// </summary>
 public class CommonDataApiLoader(
     IOptions<CommonDataApiLoaderOptions> options,
-    IDbContextFactory<ApplicationDBContext> dbContextFactory,
     IStreamOrganisationsRequestHandler organisationsHandler,
     IStreamPomsRequestHandler pomsHandler,
-    TimeProvider timeProvider,
     ILogger<CommonDataApiLoader> logger,
     ITelemetry<CommonDataApiLoader> telemetry
 ) : IDataLoader
 {
     private static readonly TimeSpan StreamDelayThreshold = TimeSpan.FromMinutes(5);
+    private static readonly (IReadOnlyList<CalculatorRunOrganisation>, IReadOnlyList<AlignmentPom>) Empty = ([], []);
 
     /// <inheritdoc />
-    public async Task LoadData(CalculatorRunContext runContext, CancellationToken cancellationToken = default)
+    public async Task<(IReadOnlyList<CalculatorRunOrganisation> Organisations, IReadOnlyList<AlignmentPom> Poms)> LoadData(
+        CalculatorRunContext runContext, CancellationToken cancellationToken = default)
     {
-        var opts = options.Value;
-
-        if (!opts.Enabled)
+        if (!options.Value.Enabled)
         {
             logger.LogInformation("Disabled, skipping load");
-            return;
+            return Empty;
         }
 
-        await LoadData(runContext, timeProvider.GetUtcNow(), cancellationToken);
+        return await LoadDataCore(runContext, cancellationToken);
     }
 
     [ActivityTrace]
-    private async Task LoadData(RunContext runContext, DateTimeOffset loadTime, CancellationToken cancellationToken)
+    private async Task<(IReadOnlyList<CalculatorRunOrganisation>, IReadOnlyList<AlignmentPom>)> LoadDataCore(
+        RunContext runContext, CancellationToken cancellationToken)
     {
+        var cutOffDate = runContext.DefaultParameters.CutOffDate is { } d
+            ? new DateTimeOffset(DateTime.SpecifyKind(d, DateTimeKind.Utc))
+            : (DateTimeOffset?)null;
+
         // If either stream fails, both should cancel.
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var linkedCt = linkedCts.Token;
-        var (pomStream, orgStream) = await GetStreams(runContext, loadTime, linkedCt);
 
         try
         {
-            await UpdateDatabase(pomStream, orgStream, linkedCt);
+            var orgsTask = StreamOrganisations(runContext.RelativeYear, cutOffDate, linkedCt);
+            var pomsTask = StreamPoms(runContext.RelativeYear, cutOffDate, linkedCt);
+
+            await Task.WhenAll(orgsTask, pomsTask);
+
+            logger.LogTrace("Streamed {TotalOrgs} organisations and {TotalPoms} POMs", orgsTask.Result.Count, pomsTask.Result.Count);
+
+            return (orgsTask.Result, pomsTask.Result);
         }
         catch when (!linkedCt.IsCancellationRequested)
         {
             await linkedCts.CancelAsync();
             throw;
         }
-        finally
-        {
-            await pomStream.Enumerator.DisposeAsync();
-            await orgStream.Enumerator.DisposeAsync();
-        }
     }
 
-    private async Task<(InitialisedStream<PomData> pomStream, InitialisedStream<OrganisationData> orgStream)>
-        GetStreams(RunContext runContext, DateTimeOffset loadTime, CancellationToken linkedCt)
-    {
-        var cutOffDate = runContext.DefaultParameters.CutOffDate is { } d
-            ? new DateTimeOffset(DateTime.SpecifyKind(d, DateTimeKind.Utc))
-            : (DateTimeOffset?)null;
-
-        var pomStream = pomsHandler.Handle(runContext.RelativeYear, cutOffDate)
-            .Select(CommonDataApiLoaderMapper.MapPom(loadTime, logger))
-            .Chunk(options.Value.PomBatchSize)
-            .GetAsyncEnumerator(linkedCt);
-
-        var orgStream = organisationsHandler.Handle(runContext.RelativeYear, cutOffDate)
-            .Select(CommonDataApiLoaderMapper.MapOrganisation(loadTime))
-            .Chunk(options.Value.OrganisationBatchSize)
-            .GetAsyncEnumerator(linkedCt);
-
-        try
+    private Task<List<CalculatorRunOrganisation>> StreamOrganisations(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken) =>
+        telemetry.Activity(async () =>
         {
-            // Await the arrival of the first element in both streams before proceeding.
-            // Avoids holding locks during network delays, since both are (currently) highly variable.
-            var pomStarted = telemetry.Metric(Metrics.PomStreamDelay, () => pomStream.MoveNextAsync().AsTask(), StreamDelayThreshold, nameof(Metrics.PomStreamDelay));
-            var orgStarted = telemetry.Metric(Metrics.OrgStreamDelay, () => orgStream.MoveNextAsync().AsTask(), StreamDelayThreshold, nameof(Metrics.OrgStreamDelay));
+            var mapper = CommonDataApiLoaderMapper.MapOrganisation();
 
-            await Task.WhenAll(pomStarted, orgStarted);
+            await using var enumerator = organisationsHandler.Handle(relativeYear, cutOffDate).GetAsyncEnumerator(cancellationToken);
 
-            return (new InitialisedStream<PomData>("Pom", pomStream, !pomStarted.Result),
-                new InitialisedStream<OrganisationData>("Org", orgStream, !orgStarted.Result));
-        }
-        catch
-        {
-            await pomStream.DisposeAsync();
-            await orgStream.DisposeAsync();
-            throw;
-        }
-    }
+            var hasFirst = await telemetry.Metric(Metrics.OrgStreamDelay, () => enumerator.MoveNextAsync().AsTask(), StreamDelayThreshold, nameof(Metrics.OrgStreamDelay));
 
-    private async Task UpdateDatabase(
-        InitialisedStream<PomData> pomStream,
-        InitialisedStream<OrganisationData> orgStream,
-        CancellationToken linkedCt)
-    {
-        // Each stream needs its own DbContext as it is not thread-safe.
-        await using var pomDb = await dbContextFactory.CreateDbContextAsync(linkedCt);
-        await using var orgDb = await dbContextFactory.CreateDbContextAsync(linkedCt);
+            var organisations = new List<CalculatorRunOrganisation>();
 
-        var pomsInserted = BulkInsert(pomDb, pomStream, linkedCt);
-        var orgsInserted = BulkInsert(orgDb, orgStream, linkedCt);
-
-        try
-        {
-            await Task.WhenAll(pomsInserted, orgsInserted);
-
-            var (pomTxn, totalPoms) = pomsInserted.Result;
-            var (orgTxn, totalOrgs) = orgsInserted.Result;
-
-            // Note that if orgTxn throws we'll have already committed pomTxn and end up with a mixed state...
-            await pomTxn.CommitAsync(linkedCt);
-            await orgTxn.CommitAsync(linkedCt);
-
-            logger.LogTrace("Inserted {TotalPoms} POMs and {TotalOrgs} organisations", totalPoms, totalOrgs);
-        }
-        finally
-        {
-            // Handles scenarios where one or both BulkInsert tasks have errored.
-            // Note that transactions are rolled back by EF if they are disposed without being committed.
-            if (pomsInserted.IsCompletedSuccessfully) await pomsInserted.Result.transaction.DisposeAsync();
-            if (orgsInserted.IsCompletedSuccessfully) await orgsInserted.Result.transaction.DisposeAsync();
-        }
-    }
-
-    private Task<(IDbContextTransaction transaction, long total)> BulkInsert<TEntity>(
-        ApplicationDBContext dbContext,
-        InitialisedStream<TEntity> stream,
-        CancellationToken cancellationToken)
-        where TEntity : class
-    {
-        return telemetry.Activity(async () =>
-        {
-            var txn = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
-            long total = 0;
-            var batchNumber = 0;
-
-            try
+            while (hasFirst)
             {
-                // Clears all existing data - the underlying tables are only used for this data loading process.
-                await dbContext.Set<TEntity>().ExecuteDeleteAsync(cancellationToken);
-
-                if (stream.IsEmpty)
-                {
-                    logger.LogWarning("{StreamType}: Stream ended without receiving any records",
-                        typeof(TEntity).Name);
-
-                    return (txn, total);
-                }
-
-                do
-                {
-                    var batch = stream.Enumerator.Current;
-                    await dbContext.BulkInsertAsync(batch, cancellationToken: cancellationToken);
-                    total += batch.Count;
-                    batchNumber++;
-
-                    logger.LogTrace("{StreamType}: Inserted {Count} entities for batch {BatchNumber}",
-                        typeof(TEntity).Name, batch.Count, batchNumber);
-                } while (await stream.Enumerator.MoveNextAsync());
-
-                logger.LogDebug("{StreamType}: Inserted {Total} total entities",
-                    typeof(TEntity).Name, total);
-
-                return (txn, total);
+                organisations.Add(mapper(enumerator.Current));
+                hasFirst = await enumerator.MoveNextAsync();
             }
-            catch
+
+            return organisations;
+        }, null, "OrgStream");
+
+    private Task<List<AlignmentPom>> StreamPoms(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken) =>
+        telemetry.Activity(async () =>
+        {
+            var mapper = CommonDataApiLoaderMapper.MapPom(logger);
+
+            await using var enumerator = pomsHandler.Handle(relativeYear, cutOffDate).GetAsyncEnumerator(cancellationToken);
+
+            var hasFirst = await telemetry.Metric(Metrics.PomStreamDelay, () => enumerator.MoveNextAsync().AsTask(), StreamDelayThreshold, nameof(Metrics.PomStreamDelay));
+
+            var poms = new List<AlignmentPom>();
+
+            while (hasFirst)
             {
-                await txn.DisposeAsync();
-                throw;
+                poms.Add(mapper(enumerator.Current));
+                hasFirst = await enumerator.MoveNextAsync();
             }
-        }, null, $"{stream.Type}StreamInsert");
-    }
 
-    private sealed record InitialisedStream<T>(string Type, IAsyncEnumerator<IList<T>> Enumerator, bool IsEmpty);
+            return poms;
+        }, null, "PomStream");
 }

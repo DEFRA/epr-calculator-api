@@ -1627,8 +1627,6 @@ public static partial class TestDataHelper
                 RelativeYear = new RelativeYear(204),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = "Test user",
-                CalculatorRunOrganisationDataMasterId = 1,
-                CalculatorRunPomDataMasterId = 1,
                 DefaultParameterSettingMasterId = 1,
                 LapcapDataMasterId = 1
             },
@@ -1640,98 +1638,88 @@ public static partial class TestDataHelper
                 RelativeYear = new RelativeYear(204),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = "Test user",
-                CalculatorRunOrganisationDataMasterId = 2,
-                CalculatorRunPomDataMasterId = 2,
                 DefaultParameterSettingMasterId = 1,
                 LapcapDataMasterId = 1
             }
         ];
     }
 
-    public static ImmutableList<CalculatorRunOrganisationDataDetail> GetCalculatorRunOrganisationDataDetails(CalculatorRunOrganisationDataMaster? master = null)
+    public static ImmutableList<CalculatorRunOrganisation> GetCalculatorRunOrganisations(int calculatorRunId = 1)
     {
-        master ??= GetCalculatorRunOrganisationDataMaster()[0];
         var submitterId1 = Guid.NewGuid();
 
         return
         [
-            new CalculatorRunOrganisationDataDetail
+            new CalculatorRunOrganisation
             {
                 Id = 1,
                 OrganisationId = 1,
                 SubsidiaryId = null,
                 OrganisationName = "Allied Packaging",
                 TradingName = "Allied Trading",
-                LoadTimeStamp = DateTime.UtcNow,
                 ObligationStatus = ObligationStates.Obligated,
                 SubmitterId = submitterId1,
-                CalculatorRunOrganisationDataMasterId = master.Id
+                CalculatorRunId = calculatorRunId
             },
-            new CalculatorRunOrganisationDataDetail
+            new CalculatorRunOrganisation
             {
                 Id = 2,
                 OrganisationId = 1,
                 SubsidiaryId = "901",
                 OrganisationName = "Allied Subsidiary",
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMasterId = master.Id
+                CalculatorRunId = calculatorRunId
             },
-            new CalculatorRunOrganisationDataDetail
+            new CalculatorRunOrganisation
             {
                 Id = 3,
                 OrganisationId = 2,
                 SubsidiaryId = null,
                 OrganisationName = "",
                 TradingName = "",
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMasterId = master.Id
+                CalculatorRunId = calculatorRunId
             },
-            new CalculatorRunOrganisationDataDetail
+            new CalculatorRunOrganisation
             {
                 Id = 4,
                 OrganisationId = 2,
                 SubsidiaryId = "Sub 2",
                 OrganisationName = "",
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMasterId = master.Id
+                CalculatorRunId = calculatorRunId
             },
-            new CalculatorRunOrganisationDataDetail
+            new CalculatorRunOrganisation
             {
                 Id = 5,
                 OrganisationId = 1,
                 SubsidiaryId = "Sub 1",
                 OrganisationName = "Allied Packaging sub 1",
                 TradingName = "Allied Trading sub 1",
-                LoadTimeStamp = DateTime.UtcNow,
                 ObligationStatus = ObligationStates.Obligated,
                 SubmitterId = submitterId1,
-                CalculatorRunOrganisationDataMasterId = master.Id
+                CalculatorRunId = calculatorRunId
             },
-            new CalculatorRunOrganisationDataDetail
+            new CalculatorRunOrganisation
             {
                 Id = 6,
                 OrganisationId = 1,
                 SubsidiaryId = "Sub 2",
                 OrganisationName = "Allied Packaging sub 2",
                 TradingName = "Allied Trading sub 2",
-                LoadTimeStamp = DateTime.UtcNow,
                 ObligationStatus = ObligationStates.Obligated,
                 SubmitterId = submitterId1,
-                CalculatorRunOrganisationDataMasterId = master.Id
+                CalculatorRunId = calculatorRunId
             },
-            new CalculatorRunOrganisationDataDetail
+            new CalculatorRunOrganisation
             {
                 Id = 7,
                 OrganisationId = 1,
                 SubsidiaryId = null,
                 OrganisationName = "Allied Packaging",
                 TradingName = "Allied Trading - Old Compliance Scheme",
-                LoadTimeStamp = DateTime.UtcNow,
                 ObligationStatus = ObligationStates.NotObligated,
-                CalculatorRunOrganisationDataMasterId = master.Id,
-                SubmitterId = submitterId1
+                SubmitterId = submitterId1,
+                CalculatorRunId = calculatorRunId
             },
-            new CalculatorRunOrganisationDataDetail
+            new CalculatorRunOrganisation
             {
                 Id = 8,
                 OrganisationId = 1,
@@ -1739,11 +1727,10 @@ public static partial class TestDataHelper
                 OrganisationName = "Allied Packaging sub 1 - Old Compliance Scheme",
                 TradingName = "Allied Trading",
                 ObligationStatus = ObligationStates.NotObligated,
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMasterId = master.Id,
-                SubmitterId = submitterId1
+                SubmitterId = submitterId1,
+                CalculatorRunId = calculatorRunId
             },
-            new CalculatorRunOrganisationDataDetail
+            new CalculatorRunOrganisation
             {
                 Id = 9,
                 OrganisationId = 1,
@@ -1751,35 +1738,7 @@ public static partial class TestDataHelper
                 OrganisationName = "Allied Packaging sub 2 - Old Compliance Scheme",
                 TradingName = "Allied Trading",
                 ObligationStatus = ObligationStates.NotObligated,
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMasterId = master.Id
-            }
-        ];
-    }
-
-    public static ImmutableList<CalculatorRunOrganisationDataMaster> GetCalculatorRunOrganisationDataMaster(RelativeYear relativeYear = default)
-    {
-        relativeYear = relativeYear == default ? new RelativeYear(2024) : relativeYear;
-
-        return
-        [
-            new CalculatorRunOrganisationDataMaster
-            {
-                Id = 1,
-                RelativeYear = relativeYear,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = DateTime.UtcNow,
-                CreatedAt = DateTime.UtcNow,
-                CreatedBy = "Test user"
-            },
-            new CalculatorRunOrganisationDataMaster
-            {
-                Id = 2,
-                RelativeYear = relativeYear,
-                EffectiveFrom = DateTime.UtcNow,
-                EffectiveTo = DateTime.UtcNow,
-                CreatedAt = DateTime.UtcNow,
-                CreatedBy = "Test user"
+                CalculatorRunId = calculatorRunId
             }
         ];
     }
@@ -1792,18 +1751,15 @@ public static partial class TestDataHelper
                 new CalculatorRunRelativeYear { Value = new RelativeYear(2024) },
                 new CalculatorRunRelativeYear { Value = new RelativeYear(2025) });
 
-        var dataMasters = GetCalculatorRunOrganisationDataMaster();
-        dbContext.CalculatorRunOrganisationDataMaster.AddRange(dataMasters);
-
-        var dataDetails = GetCalculatorRunOrganisationDataDetails(dataMasters[0]);
-        dbContext.CalculatorRunOrganisationDataDetails.AddRange(dataDetails);
-
         List<CalculatorRun> runs =
         [
-            new() { Id = runContext.RunId,     RelativeYear = runContext.RelativeYear, CalculatorRunClassificationId = 7, Name = "CalculatorRunTest1", CalculatorRunOrganisationDataMaster = dataMasters[0] },
-            new() { Id = runContext.RunId + 1, RelativeYear = runContext.RelativeYear, CalculatorRunClassificationId = 2, Name = "CalculatorRunTest2", CalculatorRunOrganisationDataMaster = dataMasters[0] }
+            new() { Id = runContext.RunId,     RelativeYear = runContext.RelativeYear, CalculatorRunClassificationId = 7, Name = "CalculatorRunTest1" },
+            new() { Id = runContext.RunId + 1, RelativeYear = runContext.RelativeYear, CalculatorRunClassificationId = 2, Name = "CalculatorRunTest2" }
         ];
         dbContext.CalculatorRuns.AddRange(runs);
+
+        var organisations = GetCalculatorRunOrganisations(runs[0].Id);
+        dbContext.CalculatorRunOrganisations.AddRange(organisations);
 
         List<ProducerDetail> producerDetails =
         [

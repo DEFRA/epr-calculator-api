@@ -127,12 +127,10 @@ namespace EPR.Calculator.API.BackgroundService.Builder.PartialObligations
         {
             return await (
                 from run in dbContext.CalculatorRuns.AsNoTracking()
-                join crodm in dbContext.CalculatorRunOrganisationDataMaster.AsNoTracking() on run.CalculatorRunOrganisationDataMasterId equals crodm.Id
-                join crodd in dbContext.CalculatorRunOrganisationDataDetails.AsNoTracking() on crodm.Id equals crodd.CalculatorRunOrganisationDataMasterId
-                join pd in dbContext.ProducerDetail.AsNoTracking() on crodd.OrganisationId equals pd.ProducerId
-                where run.Id == runId && crodd.ObligationStatus == ObligationStates.Obligated && crodd.DaysObligated != null && crodd.SubsidiaryId == pd.SubsidiaryId && pd.CalculatorRunId == runId
-                let daysInYear = DateTime.IsLeapYear(crodm.RelativeYear) ? 366 : 365
-                let partialAmount = crodd.DaysObligated != null ? (decimal)crodd.DaysObligated! / daysInYear : 1
+                join pd in dbContext.ProducerDetail.AsNoTracking() on run.Id equals pd.CalculatorRunId
+                where run.Id == runId && pd.ObligationStatus == ObligationStates.Obligated && pd.DaysObligated != null
+                let daysInYear = DateTime.IsLeapYear(run.RelativeYear) ? 366 : 365
+                let partialAmount = pd.DaysObligated != null ? (decimal)pd.DaysObligated! / daysInYear : 1
                 select new CalcResultPartialObligation
                 {
                     ProducerId           = pd.ProducerId,
@@ -140,10 +138,10 @@ namespace EPR.Calculator.API.BackgroundService.Builder.PartialObligations
                     ProducerName         = pd.ProducerName,
                     TradingName          = pd.TradingName,
                     Level                = pd.SubsidiaryId != null ? CommonConstants.LevelTwo.ToString() : CommonConstants.LevelOne.ToString(),
-                    SubmissionYear       = crodm.RelativeYear,
+                    SubmissionYear       = run.RelativeYear,
                     DaysInSubmissionYear = daysInYear,
-                    JoiningDate          = crodd.JoinerDate,
-                    DaysObligated        = crodd.DaysObligated,
+                    JoiningDate          = pd.JoinerDate,
+                    DaysObligated        = pd.DaysObligated,
                     ObligatedFactor      = partialAmount
                 }
             ).ToListAsync();

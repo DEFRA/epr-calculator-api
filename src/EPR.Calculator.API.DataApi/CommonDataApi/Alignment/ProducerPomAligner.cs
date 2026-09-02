@@ -3,11 +3,18 @@ namespace EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
 public interface IProducerPomAligner
 {
     /// <summary>
-    ///     Aligns organisation and POM data into producers and their reported materials: filters to
-    ///     obligated organisations, dedupes multiple registrations per organisation/subsidiary/submitter,
-    ///     matches POMs to their organisation, and aggregates reported weights by material and RAG rating.
+    ///     Dedupes multiple registrations per organisation/subsidiary/submitter down to one row each,
+    ///     preferring the row with <see cref="AlignmentOrganisation.HasH2" /> set. Applies no other
+    ///     filtering - the result includes every organisation regardless of obligation status.
     /// </summary>
-    /// <param name="organisations">Organisation rows to align.</param>
+    IReadOnlyList<AlignmentOrganisation> DedupeOrganisations(IReadOnlyCollection<AlignmentOrganisation> organisations);
+
+    /// <summary>
+    ///     Aligns organisation and POM data into producers and their reported materials: filters to
+    ///     obligated organisations, matches POMs to their organisation, and aggregates reported
+    ///     weights by material and RAG rating.
+    /// </summary>
+    /// <param name="organisations">Deduped organisation rows (see <see cref="DedupeOrganisations" />) to align.</param>
     /// <param name="poms">POM rows to align.</param>
     /// <param name="materialCodes">
     ///     The known material codes, in the order reported materials should be produced.
@@ -22,17 +29,20 @@ public sealed class ProducerPomAligner : IProducerPomAligner
 {
     private const string ObligatedStatus = "O";
 
+    public IReadOnlyList<AlignmentOrganisation> DedupeOrganisations(IReadOnlyCollection<AlignmentOrganisation> organisations) =>
+        organisations
+            .GroupBy(o => (o.OrganisationId, o.SubsidiaryId, o.SubmitterId))
+            // PERF: MaxBy is O(n) and avoids the OrderByDescending(...).First() O(n log n) sort + allocation per group.
+            .Select(grp => grp.MaxBy(o => o.HasH2)!)
+            .ToImmutableList();
+
     public IEnumerable<AlignedProducer> Align(
         IReadOnlyCollection<AlignmentOrganisation> organisations,
         IReadOnlyCollection<AlignmentPom> poms,
         IReadOnlyList<string> materialCodes)
     {
-        var dedupedOrganisations = organisations
-            .Where(o => o.ObligationStatus == ObligatedStatus && !string.IsNullOrWhiteSpace(o.OrganisationName))
-            .GroupBy(o => (o.OrganisationId, o.SubsidiaryId, o.SubmitterId))
-            // PERF: MaxBy is O(n) and avoids the OrderByDescending(...).First() O(n log n) sort + allocation per group.
-            .Select(grp => grp.MaxBy(o => o.HasH2)!)
-            .ToImmutableList();
+        var obligatedOrganisations = organisations
+            .Where(o => o.ObligationStatus == ObligatedStatus && !string.IsNullOrWhiteSpace(o.OrganisationName));
 
         // PERF: pre-build an O(1) lookup of POMs keyed by (OrganisationId, SubsidiaryId, SubmitterId).
         // We also pre-apply the PackagingType / OrganisationId.HasValue filters here so each per-organisation
@@ -41,7 +51,7 @@ public sealed class ProducerPomAligner : IProducerPomAligner
             .Where(p => p is { PackagingType: not null, OrganisationId: not null })
             .ToLookup(p => (OrganisationId: p.OrganisationId!.Value, p.SubsidiaryId, p.SubmitterId));
 
-        foreach (var organisation in dedupedOrganisations)
+        foreach (var organisation in obligatedOrganisations)
         {
             var orgPoms = pomsByOrgSubSubmitter[(organisation.OrganisationId, organisation.SubsidiaryId, organisation.SubmitterId)];
 
@@ -58,8 +68,14 @@ public sealed class ProducerPomAligner : IProducerPomAligner
             {
                 OrganisationId = organisation.OrganisationId,
                 SubsidiaryId = organisation.SubsidiaryId,
+                SubmitterId = organisation.SubmitterId,
                 TradingName = organisation.TradingName,
                 ProducerName = organisation.OrganisationName,
+                ObligationStatus = organisation.ObligationStatus,
+                DaysObligated = organisation.DaysObligated,
+                JoinerDate = organisation.JoinerDate,
+                LeaverDate = organisation.LeaverDate,
+                StatusCode = organisation.StatusCode,
                 ReportedMaterials = GetReportedMaterials(materialCodes, pomsByMaterial).ToImmutableList()
             };
         }
