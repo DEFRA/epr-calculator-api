@@ -3,6 +3,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Utils;
+using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Services;
@@ -19,6 +20,7 @@ public class ProducerDataTransposer(
     ApplicationDBContext dbContext,
     IBulkOperations bulkOps,
     IErrorReportService errorReportService,
+    IProducerPomAligner aligner,
     ILogger<ProducerDataTransposer> logger
 ) : IProducerDataTransposer
 {
@@ -63,54 +65,35 @@ public class ProducerDataTransposer(
             })
             .ToImmutableList();
 
-        var organisationDataDetails = calculatorRunOrgDataDetails
-            .Where(odd => ObligationStates.IsObligated(odd.ObligationStatus)
-                          && !string.IsNullOrWhiteSpace(odd.OrganisationName))
-            .GroupBy(odd => new { odd.OrganisationId, odd.SubsidiaryId, odd.SubmitterId })
-            // PERF: MaxBy is O(n) and avoids the OrderByDescending(...).First() O(n log n) sort + allocation per group.
-            .Select(grp => grp.MaxBy(o => o.HasH2)!)
-            .ToImmutableList();
+        var materialCodes = materials.Select(m => m.Code).ToImmutableList();
+        var materialsByCode = materials.ToImmutableDictionary(m => m.Code, StringComparer.OrdinalIgnoreCase);
 
-        // PERF: pre-build an O(1) lookup of POMs keyed by (OrganisationId, SubsidiaryId, SubmitterId).
-        // We also pre-apply the PackagingType / OrganisationId.HasValue filters here so each per-organisation
-        // slice is ready to group by material code directly.
-        var pomsByOrgSubSubmitter = calculatorRunPomDataDetails
-            .Where(pdd => pdd is { PackagingType: not null, OrganisationId: not null })
-            .ToLookup(pdd => (OrganisationId: pdd.OrganisationId!.Value, pdd.SubsidiaryId, pdd.SubmitterId));
+        var alignedProducers = aligner.Align(
+            calculatorRunOrgDataDetails.Select(ToAlignmentOrganisation).ToImmutableList(),
+            calculatorRunPomDataDetails.Select(ToAlignmentPom).ToImmutableList(),
+            materialCodes);
 
-        // PERF: pre-size to avoid repeated List<T> internal-array reallocations as we Add per organisation.
-        var newProducerDetails = new List<ProducerDetail>(organisationDataDetails.Count);
-
-        foreach (var organisation in organisationDataDetails)
-        {
-            var orgPoms = pomsByOrgSubSubmitter[(organisation.OrganisationId, organisation.SubsidiaryId, organisation.SubmitterId)];
-
-            var subsidiaryPomsByMaterial = orgPoms
-                .GroupBy(pdd => pdd.PackagingMaterial!)
-                .ToImmutableDictionary(grp => grp.Key,
-                    grp => grp.ToImmutableList(),
-                    StringComparer.OrdinalIgnoreCase);
-
-            if (subsidiaryPomsByMaterial.Count == 0)
-                continue;
-
-            // ⚠️ Only set scalar FK columns (e.g. CalculatorRunId, MaterialId) on the entities below.
-            // Navigation properties to existing rows (CalculatorRun, Material) are intentionally left
-            // unset so that the IncludeGraph bulk insert below does not try to re-insert them.
-            var producerDetail = new ProducerDetail
+        // ⚠️ Only set scalar FK columns (e.g. CalculatorRunId, MaterialId) on the entities below.
+        // Navigation properties to existing rows (CalculatorRun, Material) are intentionally left
+        // unset so that the IncludeGraph bulk insert below does not try to re-insert them.
+        var newProducerDetails = alignedProducers
+            .Select(producer =>
             {
-                CalculatorRunId = calculatorRun.Id,
-                ProducerId = organisation.OrganisationId,
-                TradingName = organisation.TradingName,
-                SubsidiaryId = organisation.SubsidiaryId,
-                ProducerName = organisation.OrganisationName
-            };
+                var producerDetail = new ProducerDetail
+                {
+                    CalculatorRunId = calculatorRun.Id,
+                    ProducerId = producer.OrganisationId,
+                    TradingName = producer.TradingName,
+                    SubsidiaryId = producer.SubsidiaryId,
+                    ProducerName = producer.ProducerName
+                };
 
-            foreach (var reportedMaterial in GetProducerReportedMaterials(materials, subsidiaryPomsByMaterial))
-                producerDetail.ProducerReportedMaterials.Add(reportedMaterial);
+                foreach (var reportedMaterial in producer.ReportedMaterials)
+                    producerDetail.ProducerReportedMaterials.Add(ToProducerReportedMaterial(reportedMaterial, materialsByCode[reportedMaterial.MaterialCode]));
 
-            newProducerDetails.Add(producerDetail);
-        }
+                return producerDetail;
+            })
+            .ToList();
 
         var totalReportedMaterials = newProducerDetails.Sum(p => p.ProducerReportedMaterials.Count);
 
@@ -128,55 +111,40 @@ public class ProducerDataTransposer(
         }, cancellationToken);
     }
 
-    private static IEnumerable<ProducerReportedMaterial> GetProducerReportedMaterials(ImmutableList<Material> materials, ImmutableDictionary<string, ImmutableList<CalculatorRunPomDataDetail>> pomsByMaterial)
+    private static AlignmentOrganisation ToAlignmentOrganisation(CalculatorRunOrganisationDataDetail o) => new()
     {
-        foreach (var material in materials)
-        {
-            if (!pomsByMaterial.TryGetValue(material.Code, out var subsidiaryPomsForMaterial))
-                continue;
+        OrganisationId = o.OrganisationId,
+        SubsidiaryId = o.SubsidiaryId,
+        SubmitterId = o.SubmitterId,
+        OrganisationName = o.OrganisationName,
+        TradingName = o.TradingName,
+        ObligationStatus = o.ObligationStatus,
+        HasH2 = o.HasH2
+    };
 
-            // PERF: ValueTuple key avoids the anonymous-type allocation per group.
-            foreach (var poms in subsidiaryPomsForMaterial.GroupBy(p => (p.SubmissionPeriod, p.PackagingType)))
-            {
-                // PERF: single pass over the group computing every tonnage breakdown
-                double total = 0d,
-                    red = 0d,
-                    amber = 0d,
-                    green = 0d,
-                    redMedical = 0d,
-                    amberMedical = 0d,
-                    greenMedical = 0d;
+    private static AlignmentPom ToAlignmentPom(CalculatorRunPomDataDetail p) => new()
+    {
+        OrganisationId = p.OrganisationId,
+        SubsidiaryId = p.SubsidiaryId,
+        SubmitterId = p.SubmitterId,
+        PackagingMaterial = p.PackagingMaterial,
+        PackagingType = p.PackagingType,
+        SubmissionPeriod = p.SubmissionPeriod,
+        PackagingMaterialWeight = p.PackagingMaterialWeight,
+        RamRagRating = p.RamRagRating?.ToDbValue()
+    };
 
-                foreach (var pom in poms)
-                {
-                    var weight = pom.PackagingMaterialWeight ?? 0d;
-                    total += weight;
-
-                    switch (pom.RamRagRating)
-                    {
-                        case RagRating.Red: red += weight; break;
-                        case RagRating.Amber: amber += weight; break;
-                        case RagRating.Green: green += weight; break;
-                        case RagRating.RedMedical: redMedical += weight; break;
-                        case RagRating.AmberMedical: amberMedical += weight; break;
-                        case RagRating.GreenMedical: greenMedical += weight; break;
-                    }
-                }
-
-                yield return new ProducerReportedMaterial
-                {
-                    MaterialId = material.Id,
-                    PackagingType = poms.Key.PackagingType!,
-                    SubmissionPeriod = poms.Key.SubmissionPeriod!,
-                    PackagingTonnage = MathUtils.RoundAwayFromZero((decimal)total / 1000m, decimals: 3),
-                    PackagingTonnageRed = MathUtils.RoundAwayFromZero((decimal)red / 1000m, decimals: 3),
-                    PackagingTonnageAmber = MathUtils.RoundAwayFromZero((decimal)amber / 1000m, decimals: 3),
-                    PackagingTonnageGreen = MathUtils.RoundAwayFromZero((decimal)green / 1000m, decimals: 3),
-                    PackagingTonnageRedMedical = MathUtils.RoundAwayFromZero((decimal)redMedical / 1000m, decimals: 3),
-                    PackagingTonnageAmberMedical = MathUtils.RoundAwayFromZero((decimal)amberMedical / 1000m, decimals: 3),
-                    PackagingTonnageGreenMedical = MathUtils.RoundAwayFromZero((decimal)greenMedical / 1000m, decimals: 3)
-                };
-            }
-        }
-    }
+    private static ProducerReportedMaterial ToProducerReportedMaterial(AlignedReportedMaterial reportedMaterial, Material material) => new()
+    {
+        MaterialId = material.Id,
+        PackagingType = reportedMaterial.PackagingType,
+        SubmissionPeriod = reportedMaterial.SubmissionPeriod,
+        PackagingTonnage = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.TotalWeight / 1000m, decimals: 3),
+        PackagingTonnageRed = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.RedWeight / 1000m, decimals: 3),
+        PackagingTonnageAmber = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.AmberWeight / 1000m, decimals: 3),
+        PackagingTonnageGreen = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.GreenWeight / 1000m, decimals: 3),
+        PackagingTonnageRedMedical = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.RedMedicalWeight / 1000m, decimals: 3),
+        PackagingTonnageAmberMedical = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.AmberMedicalWeight / 1000m, decimals: 3),
+        PackagingTonnageGreenMedical = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.GreenMedicalWeight / 1000m, decimals: 3)
+    };
 }
