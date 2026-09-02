@@ -1,15 +1,14 @@
-﻿using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.BackgroundService.Features.Common;
-using EPR.Calculator.API.BackgroundService.Models;
+﻿using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Services;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Builder.Lapcap
 {
     public interface ICalcResultLapcapDataBuilder
     {
-        Task<CalcResultLapcapData> ConstructAsync(RunContext runContext, IEnumerable<MaterialDetail> materialDetails);
+        Task<CalcResultLapcapData> ConstructAsync(RunContext runContext, IReadOnlyCollection<MaterialDetail> materialDetails, CancellationToken cancellationToken);
     }
 
     public class CalcResultLapcapDataBuilder : ICalcResultLapcapDataBuilder
@@ -25,9 +24,11 @@ namespace EPR.Calculator.API.BackgroundService.Builder.Lapcap
         }
 
 #pragma warning disable S1854
+        [ActivityTrace]
         public async Task<CalcResultLapcapData> ConstructAsync(
             RunContext runContext,
-            IEnumerable<MaterialDetail> materialDetails
+            IReadOnlyCollection<MaterialDetail> materialDetails,
+            CancellationToken cancellationToken
         )
         {
             var results = await (
@@ -42,11 +43,11 @@ namespace EPR.Calculator.API.BackgroundService.Builder.Lapcap
                     Country   = lapcapTemplate.Country,
                     TotalCost = lapcapDetail.TotalCost,
                 }
-            ).ToListAsync();
+            ).ToListAsync(cancellationToken);
 
-            var countries = await dbContext.Country.ToListAsync();
+            var countries = await dbContext.Country.ToListAsync(cancellationToken);
 
-            var costType = await dbContext.CostType.SingleAsync(x => x.Name == "Fee for LA Disposal Costs");
+            var costType = await dbContext.CostType.SingleAsync(x => x.Name == "Fee for LA Disposal Costs", cancellationToken);
             var costTypeId = costType.Id;
 
             var data = materialDetails.Select(material =>

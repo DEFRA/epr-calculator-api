@@ -5,12 +5,10 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -76,7 +74,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             var httpContext = new DefaultHttpContext { User = principal };
 
-            var controller = new LapcapDataController(dbContext, Mock.Of<ILogger<LapcapDataController>>())
+            var controller = new LapcapDataController(dbContext)
             {
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };

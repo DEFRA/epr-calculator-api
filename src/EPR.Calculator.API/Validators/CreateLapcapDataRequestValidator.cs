@@ -34,11 +34,11 @@ public class CreateLapcapDataRequestValidator : AbstractValidator<CreateLapcapDa
             .NotEmpty()
             .DependentRules(() =>
             {
-                RuleFor(r => r.Values)
-                    .Custom(MustNotHaveDuplicates!)
-                    .Custom(AllMasterCombinationsMustBePresent!)
-                    .Custom(CountriesMustNotBeNegative!)
-                    .Custom(MaterialsMustNotBeNegative!);
+                RuleFor(r => r.Values!)
+                    .Custom(MustNotHaveDuplicates)
+                    .Custom(AllMasterCombinationsMustBePresent)
+                    .Custom(CountriesMustNotBeNegative)
+                    .Custom(MaterialsMustNotBeNegative);
 
                 RuleForEach(r => r.Values)
                     .SetValidator(new LapcapValueValidator(() => masterTemplate));

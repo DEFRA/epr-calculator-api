@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using EPR.Calculator.API.Data.Utils;
 
 namespace EPR.Calculator.API.Data.DataModels;

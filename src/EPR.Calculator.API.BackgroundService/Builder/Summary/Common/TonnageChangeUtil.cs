@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Constants;
-using EPR.Calculator.API.BackgroundService.Models;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Builder.Summary.Common
 {

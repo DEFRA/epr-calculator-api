@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Constants;
-using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Utils;
+using EPR.Calculator.API.Data.DataModels;
 
-namespace EPR.Calculator.API.BackgroundService.JsonExporter.Model;
+namespace EPR.Calculator.API.BackgroundService.Exporter.JsonExporter.Model;
 
 public class CalcResultCommsCostJson
 {

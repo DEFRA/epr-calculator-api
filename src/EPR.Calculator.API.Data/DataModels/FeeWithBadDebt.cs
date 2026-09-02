@@ -1,18 +1,16 @@
 ﻿namespace EPR.Calculator.API.Data.DataModels;
 
-public class FeeWithBadDebt
+public record FeeWithBadDebt
 {
-    public decimal FeeWithoutBadDebt { get; set; }
-
-    public decimal BadDebt { get; set; }
-
-    public required ByCountryCost ByCountry { get; set; }
+    public decimal FeeWithoutBadDebt { get; init; }
+    public decimal BadDebt { get; init; }
+    public required ByCountryCost ByCountry { get; init; }
 
     public static FeeWithBadDebt Empty => new()
     {
         FeeWithoutBadDebt = 0,
         BadDebt           = 0,
-        ByCountry    = ByCountryCost.Empty
+        ByCountry         = ByCountryCost.Empty
     };
 
     public static FeeWithBadDebt operator +(FeeWithBadDebt a, FeeWithBadDebt b) =>
@@ -20,7 +18,7 @@ public class FeeWithBadDebt
         {
             FeeWithoutBadDebt = a.FeeWithoutBadDebt + b.FeeWithoutBadDebt,
             BadDebt           = a.BadDebt           + b.BadDebt,
-            ByCountry      = a.ByCountry      + b.ByCountry,
+            ByCountry         = a.ByCountry         + b.ByCountry
         };
 }
 

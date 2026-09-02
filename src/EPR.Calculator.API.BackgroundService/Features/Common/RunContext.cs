@@ -1,6 +1,6 @@
-﻿using EPR.Calculator.API.Data.DataModels;
+﻿using EPR.Calculator.API.BackgroundService.Services;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.BackgroundService.Services;
 
 namespace EPR.Calculator.API.BackgroundService.Features.Common;
 

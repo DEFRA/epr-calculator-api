@@ -1,14 +1,18 @@
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Extensions;
+using EPR.Calculator.API.App;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
+using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Testcontainers.MsSql;
+using TelemetryLoggingHost = EPR.Calculator.API.BackgroundService.Telemetry.Internals.TelemetryLoggingHost;
 
 namespace EPR.Calculator.API.IntegrationTests;
 
@@ -30,6 +34,12 @@ public abstract class BaseIntegrationTest
         ConfigureServices(services);
         Provider = services.BuildServiceProvider();
 
+        // Nothing here runs a Host, so hosted services (OpenTelemetry's TelemetryHostedService,
+        // which builds TracerProvider/MeterProvider, and MetricLogging) must be started manually -
+        // otherwise ActivityLogging/MetricLogging are silently never wired up.
+        foreach (var hostedService in Provider.GetServices<IHostedService>())
+            await hostedService.StartAsync(CancellationToken.None);
+
         using var scope = Provider.CreateScope();
         var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ApplicationDBContext>>();
         await using var db = await factory.CreateDbContextAsync();
@@ -39,8 +49,11 @@ public abstract class BaseIntegrationTest
 
     public static async Task CleanupAsync()
     {
+        foreach (var hostedService in Provider.GetServices<IHostedService>())
+            await hostedService.StopAsync(CancellationToken.None);
+
         await Provider.DisposeAsync();
-        Log.CloseAndFlush();
+        await Log.CloseAndFlushAsync();
     }
 
     private static void ConfigureServices(IServiceCollection services)
@@ -57,9 +70,14 @@ public abstract class BaseIntegrationTest
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(configuration)
             .Enrich.FromLogContext()
-            .WriteTo.Console(
-                DevConsole.Logger())
+            .WriteTo.LocalDevConsole()
             .CreateLogger();
+
+        services.AddOpenTelemetry()
+            .WithTracing(tracing => tracing.AddSource(Telemetry.RootScope))
+            .WithMetrics(metrics => metrics.AddMeter(Telemetry.RootScope));
+
+        services.AddHostedService<TelemetryLoggingHost>();
 
         services
             .AddSingleton<IConfiguration>(configuration)
@@ -73,14 +91,10 @@ public abstract class BaseIntegrationTest
                 x.SetMinimumLevel(LogLevel.Trace);
                 x.AddSerilog(Log.Logger, dispose: true);
             })
-            .AddTelemetry()
-            .AddPayCalAuthentication(configuration)
-            .AddPayCalAuthorization()
-            .AddDatabase()
-            .AddBlobStorage()
-            .AddRequestValidation()
+            .AddPayCalDatabase()
+            .AddPayCalBlobStorage()
             .AddPayCalServices()
-            .AddBackgroundServices()
+            .AddPayCalBackgroundServices()
             .AddDbContextFactory<ApplicationDBContext>(options => { options.UseSqlServer(SqlContainer.GetConnectionString()); })
             .RemoveAll<CommonDataApiHttpClient>()
             .AddSingleton<FakeCommonDataApiClient>()

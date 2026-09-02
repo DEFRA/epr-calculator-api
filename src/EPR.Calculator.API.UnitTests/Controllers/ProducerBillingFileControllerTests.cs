@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Security.Principal;
 using EPR.Calculator.API.BackgroundService;
 using EPR.Calculator.API.Controllers;
-using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

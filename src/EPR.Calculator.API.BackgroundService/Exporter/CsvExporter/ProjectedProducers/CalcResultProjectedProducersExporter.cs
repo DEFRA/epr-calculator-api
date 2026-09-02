@@ -1,8 +1,8 @@
 using System.Text;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Misc;
 using EPR.Calculator.API.BackgroundService.Models;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ProjectedProducers
 {
@@ -13,6 +13,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ProjectedPro
 
     public class CalcResultProjectedProducersExporter : ICalcResultProjectedProducersExporter
     {
+        [ActivityTrace]
         public void Export(CalcResultProjectedProducers calcResultProjectedProducers, IImmutableList<MaterialDetail> materials, StringBuilder stringBuilder)
         {
             var allH2 = calcResultProjectedProducers.H2ProjectedProducers ?? ImmutableList<CalcResultH2ProjectedProducer>.Empty;

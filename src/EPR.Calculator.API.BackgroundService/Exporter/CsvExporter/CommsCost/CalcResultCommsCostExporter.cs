@@ -1,9 +1,8 @@
 ﻿using System.Text;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Enums;
 using EPR.Calculator.API.BackgroundService.Misc;
-using EPR.Calculator.API.BackgroundService.Models;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CommsCost
 {
@@ -20,6 +19,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CommsCost
         /// <summary>
         /// Exports the communication cost details to the provided StringBuilder in CSV format.
         /// </summary>
+        [ActivityTrace]
         public void Export(CalcResultCommsCost communicationCost, IImmutableList<MaterialDetail> materials, StringBuilder csvContent)
         {
             csvContent.AppendLine();

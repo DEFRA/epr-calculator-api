@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Text;
+﻿using System.Text;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CancelledProducers;
 using EPR.Calculator.API.Data.DataModels;
 

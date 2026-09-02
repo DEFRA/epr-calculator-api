@@ -1,9 +1,8 @@
 ﻿using EntityFrameworkCore.AutoFixture.InMemory;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Services;
-using EPR.Calculator.API.BackgroundService.Telemetry;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Fixtures.Customizations;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Services;
+using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Time.Testing;
 
@@ -18,6 +17,7 @@ public static class TestFixtures
     {
         var fixture = new Fixture()
             .Customize(new AutoFreezeMoqCustomization())
+            .Customize(new TelemetryCustomization())
             .Customize(new ImmutableCollectionsCustomization())
             .Customize(new IgnoreVirtualMembersCustomization())
             .Customize(new RelativeYearCustomization())
@@ -34,7 +34,6 @@ public static class TestFixtures
         fixture.Customize<ProducerFees>(c => c.Without(x => x.Details));
 
         fixture.Register<TimeProvider>(() => new FakeTimeProvider());
-        fixture.Register<ITelemetryClient>(() => new TestTelemetryClient());
         fixture.Register<IBulkOperations>(() => new TestBulkOps());
 
         return fixture;

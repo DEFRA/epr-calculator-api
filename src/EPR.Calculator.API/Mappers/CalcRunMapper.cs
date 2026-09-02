@@ -37,8 +37,8 @@ public static class CalcRunMapper
                     IsLatest = run.ProducerResultFileSuggestedBillingInstruction
                         .Where(x => x.LastModifiedAcceptReject != null)
                         .All(x => x.LastModifiedAcceptReject <= m.BillingFileCreatedDate),
-                    CsvFileName = m.BillingCsvFileName!,
-                    JsonFileName = m.BillingJsonFileName!,
+                    CsvFileName = m.BillingCsvFileName,
+                    JsonFileName = m.BillingJsonFileName,
                     CreatedAt = m.BillingFileCreatedDate,
                     CreatedBy = m.BillingFileCreatedBy,
                     HasBeenSentToFss = SentToFssClassifications.Contains(run.CalculatorRunClassificationId),

@@ -1,8 +1,7 @@
 ﻿using System.Text;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Enums;
 using EPR.Calculator.API.BackgroundService.Misc;
-using EPR.Calculator.API.BackgroundService.Models;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter
 {
@@ -19,6 +18,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter
     /// </summary>
     public class CalcResultLateReportingExporter : ICalcResultLateReportingExporter
     {
+        [ActivityTrace]
         public void Export(
             CalcResultLateReportingTonnage? calcResultLateReportingData,
             IImmutableList<MaterialDetail> materials,

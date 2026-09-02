@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Builder.CancelledProducers;
 
@@ -16,6 +16,7 @@ public interface ICalcResultCancelledProducersBuilder
 public class CalcResultCancelledProducersBuilder(IInvoicedProducerService invoicedProducerService)
     : ICalcResultCancelledProducersBuilder
 {
+    [ActivityTrace]
     public async Task<IReadOnlyList<CalcResultCancelledProducer>> ConstructAsync(RunContext runContext, IReadOnlyCollection<MaterialDetail> materialDetails)
     {
         var lookup = await GetMissingAcceptedCancelledInvoicedProducersLookup(runContext);

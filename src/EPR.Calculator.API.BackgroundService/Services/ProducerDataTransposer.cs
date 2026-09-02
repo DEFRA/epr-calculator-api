@@ -1,9 +1,8 @@
+using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Utils;
-using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
-using EPR.Calculator.API.BackgroundService.Logging;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Services;
@@ -20,114 +19,114 @@ public class ProducerDataTransposer(
     ApplicationDBContext dbContext,
     IBulkOperations bulkOps,
     IErrorReportService errorReportService,
-    ILogger<ProducerDataTransposer> logger)
-    : IProducerDataTransposer
+    ILogger<ProducerDataTransposer> logger
+) : IProducerDataTransposer
 {
-    public async Task Transpose(CalculatorRunContext runContext, CancellationToken cancellationToken) =>
-        await logger.LogDuration(async () =>
+    [ActivityTrace]
+    public async Task Transpose(CalculatorRunContext runContext, CancellationToken cancellationToken)
+    {
+        var calculatorRun = await dbContext.CalculatorRuns
+            .AsNoTracking()
+            .Where(x => x.Id == runContext.RunId
+                        && x.CalculatorRunOrganisationDataMaster != null
+                        && x.CalculatorRunPomDataMaster != null)
+            .SingleAsync(cancellationToken);
+
+        var materials = await dbContext.Material
+            .AsNoTracking()
+            .ToImmutableListAsync(cancellationToken);
+
+        var calculatorRunOrgDataDetails = await dbContext.CalculatorRunOrganisationDataDetails
+            .AsNoTracking()
+            .Where(x => x.CalculatorRunOrganisationDataMasterId == calculatorRun.CalculatorRunOrganisationDataMasterId)
+            .ToImmutableListAsync(cancellationToken);
+
+        var calculatorRunPomDataDetails = await dbContext.CalculatorRunPomDataDetails
+            .AsNoTracking()
+            .Where(x => x.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId)
+            .ToImmutableListAsync(cancellationToken);
+
+        var unmatchedSet = await errorReportService.HandleErrors(
+            calculatorRunPomDataDetails,
+            calculatorRunOrgDataDetails,
+            calculatorRun.Id,
+            calculatorRun.CreatedBy,
+            calculatorRun.RelativeYear,
+            cancellationToken);
+
+        calculatorRunPomDataDetails = calculatorRunPomDataDetails
+            .Where(p =>
+            {
+                var orgId = p.OrganisationId.GetValueOrDefault();
+                var subId = p.SubsidiaryId;
+                return !unmatchedSet.Contains((orgId, subId));
+            })
+            .ToImmutableList();
+
+        var organisationDataDetails = calculatorRunOrgDataDetails
+            .Where(odd => ObligationStates.IsObligated(odd.ObligationStatus)
+                          && !string.IsNullOrWhiteSpace(odd.OrganisationName))
+            .GroupBy(odd => new { odd.OrganisationId, odd.SubsidiaryId, odd.SubmitterId })
+            // PERF: MaxBy is O(n) and avoids the OrderByDescending(...).First() O(n log n) sort + allocation per group.
+            .Select(grp => grp.MaxBy(o => o.HasH2)!)
+            .ToImmutableList();
+
+        // PERF: pre-build an O(1) lookup of POMs keyed by (OrganisationId, SubsidiaryId, SubmitterId).
+        // We also pre-apply the PackagingType / OrganisationId.HasValue filters here so each per-organisation
+        // slice is ready to group by material code directly.
+        var pomsByOrgSubSubmitter = calculatorRunPomDataDetails
+            .Where(pdd => pdd is { PackagingType: not null, OrganisationId: not null })
+            .ToLookup(pdd => (OrganisationId: pdd.OrganisationId!.Value, pdd.SubsidiaryId, pdd.SubmitterId));
+
+        // PERF: pre-size to avoid repeated List<T> internal-array reallocations as we Add per organisation.
+        var newProducerDetails = new List<ProducerDetail>(organisationDataDetails.Count);
+
+        foreach (var organisation in organisationDataDetails)
         {
-            var calculatorRun = await dbContext.CalculatorRuns
-                .AsNoTracking()
-                .Where(x => x.Id == runContext.RunId
-                            && x.CalculatorRunOrganisationDataMaster != null
-                            && x.CalculatorRunPomDataMaster != null)
-                .SingleAsync(cancellationToken);
+            var orgPoms = pomsByOrgSubSubmitter[(organisation.OrganisationId, organisation.SubsidiaryId, organisation.SubmitterId)];
 
-            var materials = await dbContext.Material
-                .AsNoTracking()
-                .ToImmutableListAsync(cancellationToken);
+            var subsidiaryPomsByMaterial = orgPoms
+                .GroupBy(pdd => pdd.PackagingMaterial!)
+                .ToImmutableDictionary(grp => grp.Key,
+                    grp => grp.ToImmutableList(),
+                    StringComparer.OrdinalIgnoreCase);
 
-            var calculatorRunOrgDataDetails = await dbContext.CalculatorRunOrganisationDataDetails
-                .AsNoTracking()
-                .Where(x => x.CalculatorRunOrganisationDataMasterId == calculatorRun.CalculatorRunOrganisationDataMasterId)
-                .ToImmutableListAsync(cancellationToken);
+            if (subsidiaryPomsByMaterial.Count == 0)
+                continue;
 
-            var calculatorRunPomDataDetails = await dbContext.CalculatorRunPomDataDetails
-                .AsNoTracking()
-                .Where(x => x.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId)
-                .ToImmutableListAsync(cancellationToken);
-
-            var unmatchedSet = await errorReportService.HandleErrors(
-                calculatorRunPomDataDetails,
-                calculatorRunOrgDataDetails,
-                calculatorRun.Id,
-                calculatorRun.CreatedBy,
-                calculatorRun.RelativeYear,
-                cancellationToken);
-
-            calculatorRunPomDataDetails = calculatorRunPomDataDetails
-                .Where(p =>
-                {
-                    var orgId = p.OrganisationId.GetValueOrDefault();
-                    var subId = p.SubsidiaryId;
-                    return !unmatchedSet.Contains((orgId, subId));
-                })
-                .ToImmutableList();
-
-            var organisationDataDetails = calculatorRunOrgDataDetails
-                .Where(odd => ObligationStates.IsObligated(odd.ObligationStatus)
-                              && !string.IsNullOrWhiteSpace(odd.OrganisationName))
-                .GroupBy(odd => new { odd.OrganisationId, odd.SubsidiaryId, odd.SubmitterId })
-                // PERF: MaxBy is O(n) and avoids the OrderByDescending(...).First() O(n log n) sort + allocation per group.
-                .Select(grp => grp.MaxBy(o => o.HasH2)!)
-                .ToImmutableList();
-
-            // PERF: pre-build an O(1) lookup of POMs keyed by (OrganisationId, SubsidiaryId, SubmitterId).
-            // We also pre-apply the PackagingType / OrganisationId.HasValue filters here so each per-organisation
-            // slice is ready to group by material code directly.
-            var pomsByOrgSubSubmitter = calculatorRunPomDataDetails
-                .Where(pdd => pdd is { PackagingType: not null, OrganisationId: not null })
-                .ToLookup(pdd => (OrganisationId: pdd.OrganisationId!.Value, pdd.SubsidiaryId, pdd.SubmitterId));
-
-            // PERF: pre-size to avoid repeated List<T> internal-array reallocations as we Add per organisation.
-            var newProducerDetails = new List<ProducerDetail>(organisationDataDetails.Count);
-
-            foreach (var organisation in organisationDataDetails)
+            // ⚠️ Only set scalar FK columns (e.g. CalculatorRunId, MaterialId) on the entities below.
+            // Navigation properties to existing rows (CalculatorRun, Material) are intentionally left
+            // unset so that the IncludeGraph bulk insert below does not try to re-insert them.
+            var producerDetail = new ProducerDetail
             {
-                var orgPoms = pomsByOrgSubSubmitter[(organisation.OrganisationId, organisation.SubsidiaryId, organisation.SubmitterId)];
+                CalculatorRunId = calculatorRun.Id,
+                ProducerId = organisation.OrganisationId,
+                TradingName = organisation.TradingName,
+                SubsidiaryId = organisation.SubsidiaryId,
+                ProducerName = organisation.OrganisationName
+            };
 
-                var subsidiaryPomsByMaterial = orgPoms
-                    .GroupBy(pdd => pdd.PackagingMaterial!)
-                    .ToImmutableDictionary(grp => grp.Key,
-                        grp => grp.ToImmutableList(),
-                        StringComparer.OrdinalIgnoreCase);
+            foreach (var reportedMaterial in GetProducerReportedMaterials(materials, subsidiaryPomsByMaterial))
+                producerDetail.ProducerReportedMaterials.Add(reportedMaterial);
 
-                if (subsidiaryPomsByMaterial.Count == 0)
-                    continue;
+            newProducerDetails.Add(producerDetail);
+        }
 
-                // ⚠️ Only set scalar FK columns (e.g. CalculatorRunId, MaterialId) on the entities below.
-                // Navigation properties to existing rows (CalculatorRun, Material) are intentionally left
-                // unset so that the IncludeGraph bulk insert below does not try to re-insert them.
-                var producerDetail = new ProducerDetail
-                {
-                    CalculatorRunId = calculatorRun.Id,
-                    ProducerId = organisation.OrganisationId,
-                    TradingName = organisation.TradingName,
-                    SubsidiaryId = organisation.SubsidiaryId,
-                    ProducerName = organisation.OrganisationName
-                };
+        var totalReportedMaterials = newProducerDetails.Sum(p => p.ProducerReportedMaterials.Count);
 
-                foreach (var reportedMaterial in GetProducerReportedMaterials(materials, subsidiaryPomsByMaterial))
-                    producerDetail.ProducerReportedMaterials.Add(reportedMaterial);
+        logger.LogInformation("Transpose produced {ProducerDetailCount} producer details and {ReportedMaterialCount} reported materials",
+            newProducerDetails.Count, totalReportedMaterials);
 
-                newProducerDetails.Add(producerDetail);
-            }
+        await bulkOps.BulkInsertAsync(dbContext, newProducerDetails, cfg =>
+        {
+            // Must set IncludeGraph for EF navigational properties to be correctly set on the inserted entities.
+            cfg.IncludeGraph = true;
 
-            var totalReportedMaterials = newProducerDetails.Sum(p => p.ProducerReportedMaterials.Count);
-
-            logger.LogInformation("Transpose produced {ProducerDetailCount} producer details and {ReportedMaterialCount} reported materials",
-                newProducerDetails.Count, totalReportedMaterials);
-
-            await bulkOps.BulkInsertAsync(dbContext, newProducerDetails, cfg =>
-            {
-                // Must set IncludeGraph for EF navigational properties to be correctly set on the inserted entities.
-                cfg.IncludeGraph = true;
-
-                // When IncludeGraph is true, the bulk insert creates/drops tables before a final MERGE.
-                // Set UseTempDB to use temp tables instead of 'proper' tables since they don't require permissions.
-                cfg.UseTempDB = true;
-            }, cancellationToken);
-        });
+            // When IncludeGraph is true, the bulk insert creates/drops tables before a final MERGE.
+            // Set UseTempDB to use temp tables instead of 'proper' tables since they don't require permissions.
+            cfg.UseTempDB = true;
+        }, cancellationToken);
+    }
 
     private static IEnumerable<ProducerReportedMaterial> GetProducerReportedMaterials(ImmutableList<Material> materials, ImmutableDictionary<string, ImmutableList<CalculatorRunPomDataDetail>> pomsByMaterial)
     {
@@ -169,13 +168,13 @@ public class ProducerDataTransposer(
                     MaterialId = material.Id,
                     PackagingType = poms.Key.PackagingType!,
                     SubmissionPeriod = poms.Key.SubmissionPeriod!,
-                    PackagingTonnage = MathUtils.RoundAwayFromZero((decimal)total / 1000m, 3),
-                    PackagingTonnageRed = MathUtils.RoundAwayFromZero((decimal)red / 1000m, 3),
-                    PackagingTonnageAmber = MathUtils.RoundAwayFromZero((decimal)amber / 1000m, 3),
-                    PackagingTonnageGreen = MathUtils.RoundAwayFromZero((decimal)green / 1000m, 3),
-                    PackagingTonnageRedMedical = MathUtils.RoundAwayFromZero((decimal)redMedical / 1000m, 3),
-                    PackagingTonnageAmberMedical = MathUtils.RoundAwayFromZero((decimal)amberMedical / 1000m, 3),
-                    PackagingTonnageGreenMedical = MathUtils.RoundAwayFromZero((decimal)greenMedical / 1000m, 3)
+                    PackagingTonnage = MathUtils.RoundAwayFromZero((decimal)total / 1000m, decimals: 3),
+                    PackagingTonnageRed = MathUtils.RoundAwayFromZero((decimal)red / 1000m, decimals: 3),
+                    PackagingTonnageAmber = MathUtils.RoundAwayFromZero((decimal)amber / 1000m, decimals: 3),
+                    PackagingTonnageGreen = MathUtils.RoundAwayFromZero((decimal)green / 1000m, decimals: 3),
+                    PackagingTonnageRedMedical = MathUtils.RoundAwayFromZero((decimal)redMedical / 1000m, decimals: 3),
+                    PackagingTonnageAmberMedical = MathUtils.RoundAwayFromZero((decimal)amberMedical / 1000m, decimals: 3),
+                    PackagingTonnageGreenMedical = MathUtils.RoundAwayFromZero((decimal)greenMedical / 1000m, decimals: 3)
                 };
             }
         }

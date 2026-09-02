@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Utils;
 using EPR.Calculator.API.BackgroundService.Builder.PartialObligations;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
-using EPR.Calculator.API.BackgroundService.Utils;
+using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Builder.ScaledupProducers;
@@ -80,6 +79,7 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
         return displayRows;
     }
 
+    [ActivityTrace]
     [SuppressMessage(
         "Critical Code Smell",
         "S3776:Cognitive Complexity of methods should not be too high",

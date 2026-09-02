@@ -1,10 +1,6 @@
-﻿using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Enums;
+﻿using EPR.Calculator.API.BackgroundService.Features.Common;
+using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Utils;
-using EPR.Calculator.API.BackgroundService.Features.Common;
-using EPR.Calculator.API.BackgroundService.Models;
-using EPR.Calculator.API.BackgroundService.Services;
-using EPR.Calculator.API.BackgroundService.Utils;
 
 namespace EPR.Calculator.API.BackgroundService.Builder.Modulation
 {
@@ -20,6 +16,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.Modulation
 
     public class CalcResultModulationBuilder : ICalcResultModulationBuilder
     {
+        [ActivityTrace]
         public Task<ModulationResult> ConstructAsync(
             RunContext runContext,
             IImmutableList<MaterialDetail> materials,

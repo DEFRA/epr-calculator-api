@@ -1,10 +1,6 @@
-using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.BackgroundService.Exceptions;
-using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
-using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Services;
 
@@ -19,6 +15,6 @@ public class ProducerInvoiceNetTonnageServiceTests : TestsFor<ProducerInvoiceNet
         var calcResult = TestDataHelper.GetCalcResult();
 
         // Act & Assert
-        await Should.NotThrowAsync(testSubject.CreateProducerInvoiceNetTonnage(runContext, calcResult));
+        await Should.NotThrowAsync(testSubject.CreateProducerInvoiceNetTonnage(runContext, calcResult, CancellationToken.None));
     }
 }

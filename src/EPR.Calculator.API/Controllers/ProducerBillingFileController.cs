@@ -1,10 +1,8 @@
 ﻿using System.Net;
 using EPR.Calculator.API.BackgroundService;
 using EPR.Calculator.API.Extensions;
-using EPR.Calculator.API.Models;
 using EPR.Calculator.API.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Web;
 
 namespace EPR.Calculator.API.Controllers;
 

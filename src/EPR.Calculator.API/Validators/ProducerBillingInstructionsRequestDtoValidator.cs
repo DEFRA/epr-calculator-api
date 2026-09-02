@@ -16,8 +16,7 @@ namespace EPR.Calculator.API.Validators
                 .WithMessage(CommonResources.PageSizeGreaterThan1);
 
             this.RuleFor(x => x.SearchQuery)
-                .SetValidator(new ProducerBillingInstructionsSearchQueryDtoValidator()!)
-                .When(x => x.SearchQuery != null);
+                .SetValidator(new ProducerBillingInstructionsSearchQueryDtoValidator());
         }
     }
 }
