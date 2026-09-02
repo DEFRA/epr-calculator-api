@@ -6,12 +6,12 @@ using EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
-using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Telemetry;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Data.Utils;
+using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -42,9 +42,11 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
 
         var calculatorRunId = await SeedCalculatorRun(db, name, relativeYear, "TestData/defaultParams.csv", "TestData/lapcap.csv");
 
-        var fakeCommonDataApi                   = Provider.GetRequiredService<FakeCommonDataApiClient>();
-        fakeCommonDataApi.OrganisationResponses = OrganisationResponses($"TestData/{relativeYear}-organisation-data.csv");
-        fakeCommonDataApi.PomResponses          = PomResponses($"TestData/{relativeYear}-pom-data.csv");
+        var fakeOrganisationsStream = Provider.GetRequiredService<FakeStreamOrganisationsRequestHandler>();
+        fakeOrganisationsStream.Organisations = Organisations($"TestData/{relativeYear}-organisation-data.csv");
+
+        var fakePomsStream = Provider.GetRequiredService<FakeStreamPomsRequestHandler>();
+        fakePomsStream.Poms = Poms($"TestData/{relativeYear}-pom-data.csv");
 
         var fakeBlobStorageUploadService = Provider.GetRequiredService<FakeBlobStorageUploadService>();
 
@@ -277,10 +279,10 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
                 LapcapDataMaster   = master // TODO make virtual?
             }).ToImmutableList();
 
-    private static ImmutableList<OrganisationResponse> OrganisationResponses(string organisationsPath) =>
+    private static ImmutableList<PayCalOrganisation> Organisations(string organisationsPath) =>
         SlurpCsv(organisationsPath)
             .GetRecords<dynamic>()
-            .Select(row => new OrganisationResponse
+            .Select(row => new PayCalOrganisation
             {
                 OrganisationId   = int.Parse(row.organisation_id),
                 SubsidiaryId     = Nullable(row.subsidiary_id),
@@ -297,10 +299,10 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
                 HasH2            = row.has_h2 == "1"
             }).ToImmutableList();
 
-    private static ImmutableList<PomResponse> PomResponses(string pomsPath) =>
+    private static ImmutableList<PayCalPom> Poms(string pomsPath) =>
         SlurpCsv(pomsPath)
             .GetRecords<dynamic>()
-            .Select(row => new PomResponse
+            .Select(row => new PayCalPom
             {
                 OrganisationId              = int.Parse(row.organisation_id),
                 SubsidiaryId                = Nullable(row.subsidiary_id),

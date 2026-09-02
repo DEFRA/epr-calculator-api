@@ -10,6 +10,8 @@ using EPR.Calculator.API.Filters;
 using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
+using EPR.CommonDataService.DataApi.CommonDataApi;
+using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -147,6 +149,31 @@ public static class ServiceConfiguration
             });
 
             services.AddSingleton<IBulkOperations, BulkOperationsWrapper>();
+
+            return services;
+        }
+
+        public IServiceCollection AddPayCalDataApi()
+        {
+            services
+                .AddOptions<SynapseOptions>()
+                .BindConfiguration(SynapseOptions.SectionKey)
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
+            services.AddDbContext<SynapseContext>((provider, builder) =>
+            {
+                var synapseOptions = provider
+                    .GetRequiredService<IOptions<SynapseOptions>>()
+                    .Value;
+
+                builder
+                    .UseSqlServer(synapseOptions.ConnectionString)
+                    .AddInterceptors(new TimeoutInterceptor());
+            });
+
+            services.AddTransient<IStreamOrganisationsRequestHandler, StreamOrganisationsRequestHandler>();
+            services.AddTransient<IStreamPomsRequestHandler, StreamPomsRequestHandler>();
 
             return services;
         }

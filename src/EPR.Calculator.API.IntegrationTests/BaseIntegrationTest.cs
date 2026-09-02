@@ -1,9 +1,9 @@
 using EPR.Calculator.API.App;
 using EPR.Calculator.API.BackgroundService.Services;
-using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Extensions;
+using EPR.CommonDataService.DataApi.CommonDataApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,7 +63,8 @@ public abstract class BaseIntegrationTest
             .AddJsonFile("appsettings.integration.json")
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Database:ConnectionString"] = SqlContainer.GetConnectionString()
+                ["Database:ConnectionString"] = SqlContainer.GetConnectionString(),
+                ["Synapse:ConnectionString"] = SqlContainer.GetConnectionString()
             })
             .Build();
 
@@ -92,13 +93,17 @@ public abstract class BaseIntegrationTest
                 x.AddSerilog(Log.Logger, dispose: true);
             })
             .AddPayCalDatabase()
+            .AddPayCalDataApi()
             .AddPayCalBlobStorage()
             .AddPayCalServices()
             .AddPayCalBackgroundServices()
             .AddDbContextFactory<ApplicationDBContext>(options => { options.UseSqlServer(SqlContainer.GetConnectionString()); })
-            .RemoveAll<CommonDataApiHttpClient>()
-            .AddSingleton<FakeCommonDataApiClient>()
-            .AddSingleton<ICommonDataApiClient>(sp => sp.GetRequiredService<FakeCommonDataApiClient>())
+            .RemoveAll<IStreamOrganisationsRequestHandler>()
+            .AddSingleton<FakeStreamOrganisationsRequestHandler>()
+            .AddSingleton<IStreamOrganisationsRequestHandler>(sp => sp.GetRequiredService<FakeStreamOrganisationsRequestHandler>())
+            .RemoveAll<IStreamPomsRequestHandler>()
+            .AddSingleton<FakeStreamPomsRequestHandler>()
+            .AddSingleton<IStreamPomsRequestHandler>(sp => sp.GetRequiredService<FakeStreamPomsRequestHandler>())
             .RemoveAll<IStorageUploadService>()
             .AddSingleton<FakeBlobStorageUploadService>()
             .AddSingleton<IStorageUploadService>(sp => sp.GetRequiredService<FakeBlobStorageUploadService>());

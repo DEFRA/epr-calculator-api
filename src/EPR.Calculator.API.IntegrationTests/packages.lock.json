@@ -1493,6 +1493,7 @@
           "Azure.Storage.Blobs": "[12.29.1, )",
           "EPR.Calculator.API.BackgroundService": "[1.0.0, )",
           "EPR.Calculator.API.Data": "[1.0.0, )",
+          "EPR.Calculator.API.DataApi": "[1.0.0, )",
           "FluentValidation": "[12.1.1, )",
           "FluentValidation.DependencyInjectionExtensions": "[12.1.1, )",
           "Microsoft.AspNetCore.OpenApi": "[10.0.11, )",
@@ -1512,6 +1513,7 @@
           "Azure.Storage.Blobs": "[12.29.1, )",
           "EFCore.BulkExtensions": "[10.0.1, )",
           "EPR.Calculator.API.Data": "[1.0.0, )",
+          "EPR.Calculator.API.DataApi": "[1.0.0, )",
           "FluentValidation": "[12.1.1, )",
           "Microsoft.ApplicationInsights": "[3.1.2, )",
           "Microsoft.Extensions.Hosting": "[10.0.11, )",
@@ -1519,6 +1521,12 @@
         }
       },
       "epr.calculator.api.data": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.SqlServer": "[10.0.11, )"
+        }
+      },
+      "epr.calculator.api.dataapi": {
         "type": "Project",
         "dependencies": {
           "Microsoft.EntityFrameworkCore.SqlServer": "[10.0.11, )"

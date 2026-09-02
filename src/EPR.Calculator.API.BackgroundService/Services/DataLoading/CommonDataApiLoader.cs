@@ -3,9 +3,9 @@ using EFCore.BulkExtensions;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Options;
-using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.CommonDataService.DataApi.CommonDataApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
@@ -32,7 +32,8 @@ public interface IDataLoader
 public class CommonDataApiLoader(
     IOptions<CommonDataApiLoaderOptions> options,
     IDbContextFactory<ApplicationDBContext> dbContextFactory,
-    ICommonDataApiClient httpClient,
+    IStreamOrganisationsRequestHandler organisationsHandler,
+    IStreamPomsRequestHandler pomsHandler,
     TimeProvider timeProvider,
     ILogger<CommonDataApiLoader> logger,
     ITelemetry<CommonDataApiLoader> telemetry
@@ -81,12 +82,16 @@ public class CommonDataApiLoader(
     private async Task<(InitialisedStream<PomData> pomStream, InitialisedStream<OrganisationData> orgStream)>
         GetStreams(RunContext runContext, DateTimeOffset loadTime, CancellationToken linkedCt)
     {
-        var pomStream = httpClient.StreamPoms(runContext.RelativeYear, runContext.DefaultParameters.CutOffDate, linkedCt)
+        var cutOffDate = runContext.DefaultParameters.CutOffDate is { } d
+            ? new DateTimeOffset(DateTime.SpecifyKind(d, DateTimeKind.Utc))
+            : (DateTimeOffset?)null;
+
+        var pomStream = pomsHandler.Handle(runContext.RelativeYear, cutOffDate)
             .Select(CommonDataApiLoaderMapper.MapPom(loadTime, logger))
             .Chunk(options.Value.PomBatchSize)
             .GetAsyncEnumerator(linkedCt);
 
-        var orgStream = httpClient.StreamOrganisations(runContext.RelativeYear, runContext.DefaultParameters.CutOffDate, linkedCt)
+        var orgStream = organisationsHandler.Handle(runContext.RelativeYear, cutOffDate)
             .Select(CommonDataApiLoaderMapper.MapOrganisation(loadTime))
             .Chunk(options.Value.OrganisationBatchSize)
             .GetAsyncEnumerator(linkedCt);

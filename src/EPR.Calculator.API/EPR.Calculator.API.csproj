@@ -47,6 +47,7 @@
   <ItemGroup>
     <ProjectReference Include="..\EPR.Calculator.API.Data\EPR.Calculator.API.Data.csproj"/>
     <ProjectReference Include="..\EPR.Calculator.API.BackgroundService\EPR.Calculator.API.BackgroundService.csproj"/>
+    <ProjectReference Include="..\EPR.Calculator.API.DataApi\EPR.Calculator.API.DataApi.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
