@@ -33,6 +33,7 @@ public static class ServiceConfiguration
             services.AddOpenTelemetry()
                 .WithTracing(tracing => tracing
                     .AddProcessor<EndpointProbeActivityFilter>()
+                    .AddSqlClientInstrumentation()
                     .AddSource(Telemetry.RootScope))
                 .WithMetrics(metrics => metrics
                     .AddMeter(Telemetry.RootScope))
