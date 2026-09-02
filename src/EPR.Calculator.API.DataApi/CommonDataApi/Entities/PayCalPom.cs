@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace EPR.CommonDataService.Data.Entities;
+namespace EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 
 [ExcludeFromCodeCoverage]
 public record PayCalPom
