@@ -4,7 +4,6 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using EPR.Calculator.API.App;
 using EPR.Calculator.API.BackgroundService.Services;
-using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -12,6 +11,8 @@ using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Data.Utils;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Services;
+using EPR.CommonDataService.DataApi.CommonDataApi;
+using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -96,7 +97,8 @@ public abstract class BaseIntegrationTest
             .AddJsonFile("appsettings.integration.json")
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Database:ConnectionString"] = connectionString
+                ["Database:ConnectionString"] = connectionString,
+                ["Synapse:ConnectionString"] = connectionString
             })
             .Build();
 
@@ -127,14 +129,18 @@ public abstract class BaseIntegrationTest
                 x.AddSerilog(Log.Logger, dispose: true);
             })
             .AddPayCalDatabase()
+            .AddPayCalDataApi()
             .AddPayCalBlobStorage()
             .AddPayCalServices()
             .AddPayCalBackgroundServices()
             .AddPayCalRequestValidation()
             .AddDbContextFactory<ApplicationDBContext>(options => { options.UseSqlServer(connectionString); })
-            .RemoveAll<CommonDataApiHttpClient>()
-            .AddSingleton<FakeCommonDataApiClient>()
-            .AddSingleton<ICommonDataApiClient>(sp => sp.GetRequiredService<FakeCommonDataApiClient>())
+            .RemoveAll<IStreamOrganisationsRequestHandler>()
+            .AddSingleton<FakeStreamOrganisationsRequestHandler>()
+            .AddSingleton<IStreamOrganisationsRequestHandler>(sp => sp.GetRequiredService<FakeStreamOrganisationsRequestHandler>())
+            .RemoveAll<IStreamPomsRequestHandler>()
+            .AddSingleton<FakeStreamPomsRequestHandler>()
+            .AddSingleton<IStreamPomsRequestHandler>(sp => sp.GetRequiredService<FakeStreamPomsRequestHandler>())
             .RemoveAll<IStorageUploadService>()
             .RemoveAll<IBlobStorageService>()
             .AddSingleton<FakeBlobStorageUploadService>()
@@ -331,67 +337,44 @@ public abstract class BaseIntegrationTest
                 LapcapDataMaster   = master // TODO make virtual?
             }).ToImmutableList();
 
-    protected static ImmutableList<OrganisationResponse> OrganisationResponses(string organisationsPath)
-    {
-        using var csv = SlurpCsv(organisationsPath);
-        csv.Read();
-        csv.ReadHeader();
-
-        var organisations = ImmutableList.CreateBuilder<OrganisationResponse>();
-        while (csv.Read())
-        {
-            organisations.Add(new OrganisationResponse
+    protected static ImmutableList<PayCalOrganisation> Organisations(string organisationsPath) =>
+        SlurpCsv(organisationsPath)
+            .GetRecords<dynamic>()
+            .Select(row => new PayCalOrganisation
             {
-                OrganisationId   = int.Parse(Field(csv, "organisation_id")!),
-                SubsidiaryId     = Field(csv, "subsidiary_id"),
-                OrganisationName = Field(csv, "organisation_name"),
-                TradingName      = Field(csv, "trading_name"),
-                ObligationStatus = Field(csv, "obligation_status"),
-                SubmitterId      = Field(csv, "submitter_id"),
-                ErrorCode        = Field(csv, "error_code"),
-                StatusCode       = Field(csv, "status_code"),
-                NumDaysObligated = Field(csv, "num_days_obligated") is { } d ? short.Parse(d) : null,
-                JoinerDate       = Field(csv, "joiner_date"),
-                LeaverDate       = Field(csv, "leaver_date"),
-                HasH1            = Field(csv, "has_h1") == "1",
-                HasH2            = Field(csv, "has_h2") == "1"
-            });
-        }
+                OrganisationId   = int.Parse(row.organisation_id),
+                SubsidiaryId     = Nullable(row.subsidiary_id),
+                OrganisationName = row.organisation_name,
+                TradingName      = row.trading_name,
+                ObligationStatus = row.obligation_status,
+                SubmitterId      = row.submitter_id,
+                ErrorCode        = Nullable(row.error_code),
+                StatusCode       = Nullable(row.status_code),
+                NumDaysObligated = Nullable((string)row.num_days_obligated, short.Parse),
+                JoinerDate       = Nullable(row.joiner_date),
+                LeaverDate       = Nullable(row.leaver_date),
+                HasH1            = row.has_h1 == "1",
+                HasH2            = row.has_h2 == "1"
+            }).ToImmutableList();
 
-        return organisations.ToImmutable();
-    }
-
-    // Streams the POM CSV field-by-field off the reader - a fresh CsvReader per call, one PomResponse
-    // at a time, no per-row dynamic object - so a multi-million-row file costs only the row it is on.
-    protected static IEnumerable<PomResponse> StreamPoms(string pomsPath)
-    {
-        using var csv = SlurpCsv(pomsPath);
-        csv.Read();
-        csv.ReadHeader();
-
-        while (csv.Read())
-        {
-            yield return new PomResponse
+    protected static ImmutableList<PayCalPom> Poms(string pomsPath) =>
+        SlurpCsv(pomsPath)
+            .GetRecords<dynamic>()
+            .Select(row => new PayCalPom
             {
-                OrganisationId              = int.Parse(Field(csv, "organisation_id")!),
-                SubsidiaryId                = Field(csv, "subsidiary_id"),
-                SubmissionPeriod            = Field(csv, "submission_period"),
-                PackagingActivity           = Field(csv, "packaging_activity"),
-                PackagingType               = Field(csv, "packaging_type"),
-                PackagingClass              = Field(csv, "packaging_class"),
-                PackagingMaterial           = Field(csv, "packaging_material"),
-                PackagingMaterialWeight     = Field(csv, "packaging_material_weight") is { } w ? double.Parse(w) : null,
-                SubmissionPeriodDescription = Field(csv, "submission_period_desc"),
-                SubmitterId                 = Field(csv, "submitter_id"),
-                PackagingMaterialSubtype    = Field(csv, "packaging_material_subtype"),
-                RamRagRating                = Field(csv, "ram_rag_rating")
-            };
-        }
-    }
-
-    // A CSV cell as a nullable string: an absent column or the literal "NULL" both read as null.
-    private static string? Field(CsvReader csv, string name) =>
-        csv.TryGetField<string>(name, out var value) ? Nullable(value ?? "NULL") : null;
+                OrganisationId              = int.Parse(row.organisation_id),
+                SubsidiaryId                = Nullable(row.subsidiary_id),
+                SubmissionPeriod            = row.submission_period,
+                PackagingActivity           = row.packaging_activity,
+                PackagingType               = row.packaging_type,
+                PackagingClass              = row.packaging_class,
+                PackagingMaterial           = row.packaging_material,
+                PackagingMaterialWeight     = Nullable((string)row.packaging_material_weight, double.Parse),
+                SubmissionPeriodDescription = row.submission_period_desc,
+                SubmitterId                 = row.submitter_id,
+                PackagingMaterialSubtype    = Nullable(row.packaging_material_subtype),
+                RamRagRating                = Nullable(row.ram_rag_rating)
+            }).ToImmutableList();
 
     private  static async Task WaitUntilAsync(Func<Task<bool>> condition, string failureMessage, TimeSpan? timeout = null)
     {
@@ -418,6 +401,11 @@ public abstract class BaseIntegrationTest
         value.Equals("NULL", StringComparison.OrdinalIgnoreCase)
             ? null
             : value;
+
+    private static T? Nullable<T>(string value, Func<string, T> parser) where T : struct =>
+        value.Equals("NULL", StringComparison.OrdinalIgnoreCase)
+            ? null
+            : parser(value);
 }
 
 [TestClass]

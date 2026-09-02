@@ -55,9 +55,11 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
 
         await SeedCalculatorDataAsync(db, relativeYear, "TestData/defaultParams.csv", "TestData/lapcap.csv");
 
-        var fakeCommonDataApi                   = Provider.GetRequiredService<FakeCommonDataApiClient>();
-        fakeCommonDataApi.OrganisationResponses = OrganisationResponses(organisationPath);
-        fakeCommonDataApi.Poms                  = () => StreamPoms(pomPath);
+        var fakeOrganisationsStream = Provider.GetRequiredService<FakeStreamOrganisationsRequestHandler>();
+        fakeOrganisationsStream.Organisations = Organisations(organisationPath);
+
+        var fakePomsStream = Provider.GetRequiredService<FakeStreamPomsRequestHandler>();
+        fakePomsStream.Poms = Poms(pomPath);
 
         var fakeBlobStorage = Provider.GetRequiredService<FakeBlobStorageUploadService>();
 
@@ -68,7 +70,7 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
         var billingJsonTimings    = new List<TimeSpan>();
         var calculatorAllocations = new List<long>(); // managed bytes allocated (process-wide) during the Results section
 
-        Console.WriteLine($"Performance test data: {fakeCommonDataApi.OrganisationResponses.Count:N0} organisations, {generatedPomCount:N0} POMs");
+        Console.WriteLine($"Performance test data: {fakeOrganisationsStream.Organisations.Count:N0} organisations, {generatedPomCount:N0} POMs");
         Console.WriteLine($"Database: {db.Database.GetConnectionString()}");
         WriteGcCeiling(GC.GetGCMemoryInfo().TotalAvailableMemoryBytes);
 
@@ -171,7 +173,7 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
                 throw new Exception($"Controller returned: {JsonSerializer.Serialize(setBillingClassificationResult.ShouldBeOfType<ObjectResult>().Value)}");
             }
 
-            await SeedAllProducersAsAcceptedAsync(db, runId, "some-user", fakeCommonDataApi.OrganisationResponses.Select(x => x.OrganisationId!.Value));
+            await SeedAllProducersAsAcceptedAsync(db, runId, "some-user", fakeOrganisationsStream.Organisations.Select(x => x.OrganisationId!.Value));
             var startBillingResult = (await CallController<ProducerBillingFileController, IActionResult>(services, c => c.ProducerBillingInstructions(runId))).ShouldBeOfType<ObjectResult>();
             startBillingResult.StatusCode.ShouldBe(StatusCodes.Status200OK, $"Controller returned: {JsonSerializer.Serialize(startBillingResult.Value)}");
             await WaitForBillingRunAsync(db, runId);
@@ -201,7 +203,7 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
         }
 
         Console.WriteLine();
-        Console.WriteLine($"Performance test data: {fakeCommonDataApi.OrganisationResponses.Count:N0} organisations, {generatedPomCount:N0} POMs");
+        Console.WriteLine($"Performance test data: {fakeOrganisationsStream.Organisations.Count:N0} organisations, {generatedPomCount:N0} POMs");
         Console.WriteLine($"Database: {db.Database.GetConnectionString()}");
         Console.WriteLine($"Output: {outputDirectory}");
         Console.WriteLine();
