@@ -33,6 +33,7 @@ public class SynapseContext : DbContext
             entity.Property(e => e.StatusCode).HasColumnName("status_code").HasMaxLength(4000);
             entity.Property(e => e.LeaverDate).HasColumnName("leaver_date").HasMaxLength(4000);
             entity.Property(e => e.JoinerDate).HasColumnName("joiner_date").HasMaxLength(4000);
+            entity.Property(e => e.RegulatorStatus).HasColumnName("regulator_status").HasMaxLength(4000);
             entity.Property(e => e.ObligationStatus).HasColumnName("obligation_status").HasMaxLength(1).IsFixedLength();
             entity.Property(e => e.NumDaysObligated).HasColumnName("num_days_obligated");
             entity.Property(e => e.ErrorCode).HasColumnName("error_code").HasMaxLength(4000);

@@ -4,6 +4,8 @@ using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
+using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
 using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.BackgroundService.Services.DataLoading;
@@ -33,6 +35,7 @@ public class CommonDataApiLoader(
     IOptions<CommonDataApiLoaderOptions> options,
     IStreamOrganisationsRequestHandler organisationsHandler,
     IStreamPomsRequestHandler pomsHandler,
+    IProducerObligationDeterminer obligationDeterminer,
     ILogger<CommonDataApiLoader> logger,
     ITelemetry<CommonDataApiLoader> telemetry
 ) : IDataLoader
@@ -86,21 +89,24 @@ public class CommonDataApiLoader(
     private Task<List<CalculatorRunOrganisation>> StreamOrganisations(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken) =>
         telemetry.Activity(async () =>
         {
-            var mapper = CommonDataApiLoaderMapper.MapOrganisation();
-
             await using var enumerator = organisationsHandler.Handle(relativeYear, cutOffDate).GetAsyncEnumerator(cancellationToken);
 
             var hasFirst = await telemetry.Metric(Metrics.OrgStreamDelay, () => enumerator.MoveNextAsync().AsTask(), StreamDelayThreshold, nameof(Metrics.OrgStreamDelay));
 
-            var organisations = new List<CalculatorRunOrganisation>();
+            var rawOrganisations = new List<PayCalOrganisation>();
 
             while (hasFirst)
             {
-                organisations.Add(mapper(enumerator.Current));
+                rawOrganisations.Add(enumerator.Current);
                 hasFirst = await enumerator.MoveNextAsync();
             }
 
-            return organisations;
+            // Obligation determination needs every row for the run up front - it aggregates across
+            // rows (per producer/submission period) rather than deciding a row in isolation.
+            var determinedOrganisations = obligationDeterminer.Determine(rawOrganisations);
+
+            var mapper = CommonDataApiLoaderMapper.MapOrganisation();
+            return determinedOrganisations.Select(mapper).ToList();
         }, null, "OrgStream");
 
     private Task<List<AlignmentPom>> StreamPoms(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken) =>

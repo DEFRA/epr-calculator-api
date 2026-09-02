@@ -13,6 +13,7 @@ public record PayCalOrganisation
     public string? StatusCode { get; init; }
     public string? LeaverDate { get; init; }
     public string? JoinerDate { get; init; }
+    public string? RegulatorStatus { get; init; }
     public string? ObligationStatus { get; init; }
     public short? NumDaysObligated { get; init; }
     public string? ErrorCode { get; init; }

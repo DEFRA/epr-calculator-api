@@ -17,6 +17,61 @@ BEGIN
   BEGIN
 
     WITH
+    -- latest_accepted_registration_files: join source tables, deduplicate, keep most recent per org/submitter/year.
+    -- Selection only - no obligation decision (leaver code, status, days obligated). That decision is now
+    -- made in C# (see IProducerObligationDeterminer) from the raw columns selected below - @RelativeYear
+    -- is still applied at the end, same as before.
+    larf_base AS (
+      SELECT DISTINCT
+          cd.FileName,
+          cd.organisation_id,
+          sofs.SubmissionPeriodYear                                AS submission_period_year,
+          COALESCE(sofs.ComplianceSchemeId, o.ExternalId)          AS submitter_id,
+          sofs.CreatedDateTime,
+          sofs.Regulator_Status
+      FROM rpd.CompanyDetails cd
+      INNER JOIN rpd.Organisations o
+          ON o.ReferenceNumber = cd.organisation_id
+      INNER JOIN dbo.t_submitted_pom_org_file_status sofs
+          ON sofs.FileName = cd.FileName
+         AND sofs.FileType = 'CompanyDetails'
+         AND sofs.Regulator_Status IN ('Granted', 'Accepted', 'Cancelled')
+      WHERE o.IsDeleted = 0
+        AND (sofs.IsResubmission_identifier = 0 OR @CutOffDate IS NULL OR sofs.CreatedDateTime <= @CutOffDate)
+    ),
+    latest_accepted_registration_files AS (
+      SELECT FileName, organisation_id, submission_period_year, submitter_id, CreatedDateTime, Regulator_Status
+      FROM (
+          SELECT *,
+              ROW_NUMBER() OVER (
+                  PARTITION BY organisation_id, submitter_id, submission_period_year
+                  ORDER BY CreatedDateTime DESC
+              ) AS rn
+          FROM larf_base
+      ) t
+      WHERE rn = 1
+    ),
+    -- latest_accepted_registrations: join back to CompanyDetails, filter large orgs
+    latest_accepted_registrations AS (
+      SELECT
+          larf.organisation_id,
+          cd.subsidiary_id,
+          larf.submitter_id,
+          cd.organisation_name,
+          cd.trading_name,
+          cd.leaver_code AS status_code,
+          cd.joiner_date,
+          cd.leaver_date,
+          larf.submission_period_year,
+          larf.Regulator_Status AS regulator_status
+      FROM latest_accepted_registration_files larf
+      INNER JOIN rpd.CompanyDetails cd
+          ON  cd.organisation_id = larf.organisation_id
+          AND cd.FileName = larf.FileName
+      WHERE cd.organisation_size = 'L'
+        AND cd.organisation_id IS NOT NULL
+        AND cd.organisation_name IS NOT NULL
+    ),
     latest_accepted_pom AS (
       SELECT
         a.organisation_id
@@ -81,13 +136,11 @@ BEGIN
       , ob.status_code
       , ob.leaver_date
       , ob.joiner_date
-      , ob.obligation_status
-      , ob.num_days_obligated
-      , ob.error_code
+      , ob.regulator_status
       , ob.submission_period_year
       , CAST(COALESCE(opf.has_h1, 0) AS BIT) AS has_h1
       , CAST(COALESCE(opf.has_h2, 0) AS BIT) AS has_h2
-    FROM dbo.fn_ProducerObligationDetermination(@CutOffDate) ob
+    FROM latest_accepted_registrations ob
     LEFT JOIN organisation_period_flags opf
       ON  opf.organisation_id            = ob.organisation_id
       AND ISNULL(opf.subsidiary_id, '')  = ISNULL(ob.subsidiary_id, '')
