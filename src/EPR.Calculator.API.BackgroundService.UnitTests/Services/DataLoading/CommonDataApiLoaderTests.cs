@@ -3,10 +3,8 @@ using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services.DataLoading;
 using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
-using EPR.Calculator.API.Data;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -15,38 +13,27 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading;
 /// <summary>
 ///     Unit tests for <see cref="CommonDataApiLoader" />.
 ///     <para>
-///         The database context factory is mocked (no SQLite/InMemory) because the bulk-insert
-///         and transaction behaviour in <c>UpdateDatabase</c>/<c>BulkInsert</c> is incompatible
-///         with those providers.
-///     </para>
-///     <para>
-///         Tests focus on the observable behaviour of the non-excluded code paths:
-///         the disabled guard, logging, the time-provider call, and stream
-///         initialisation / error handling inside <c>GetStreams</c> and <c>Run</c>.
+///         The loader performs no database access at all - it streams organisations and POMs from
+///         DataApi into memory and returns them. Tests focus on: the disabled guard, stream failure
+///         propagation, cancellation, and that streamed items are correctly mapped and returned.
 ///     </para>
 /// </summary>
 [TestClass]
 public class CommonDataApiLoaderTests
 {
-    private static readonly DateTimeOffset FixedTime = new(2024, 6, 15, 12, 0, 0, TimeSpan.Zero);
-
-    private Mock<IDbContextFactory<ApplicationDBContext>> mockDbFactory = null!;
     private Mock<ILogger<CommonDataApiLoader>> mockLogger = null!;
-    private Mock<TimeProvider> mockTimeProvider = null!;
 
     [TestInitialize]
     public void SetUp()
     {
-        mockDbFactory = new Mock<IDbContextFactory<ApplicationDBContext>>();
         mockLogger = new Mock<ILogger<CommonDataApiLoader>>();
-        mockTimeProvider = new Mock<TimeProvider>();
-        mockTimeProvider.Setup(t => t.GetUtcNow()).Returns(FixedTime);
     }
 
     // ─────────────────────────── LoadData – disabled path ───────────────────────────
 
     /// <summary>
-    ///     When the loader is disabled the only thing it should do is log that information.
+    ///     When the loader is disabled the only thing it should do is log that information and
+    ///     return empty results.
     /// </summary>
     [TestMethod]
     public async Task LoadData_WhenDisabled_DoesNotRun()
@@ -57,13 +44,51 @@ public class CommonDataApiLoaderTests
         var loader = CreateLoader(false, mockOrgHandler, mockPomHandler);
 
         // Act
-        await loader.LoadData(TestDataHelper.CalculatorRun2024);
+        var (organisations, poms) = await loader.LoadData(TestDataHelper.CalculatorRun2024);
 
         // Assert
         VerifyLogContains(LogLevel.Information, "Disabled", Times.Once(), "Logger should record it is disabled.");
+        organisations.ShouldBeEmpty();
+        poms.ShouldBeEmpty();
         mockOrgHandler.Verify(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()), Times.Never, "Organisation stream should not be requested when disabled.");
         mockPomHandler.Verify(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()), Times.Never, "POM stream should not be requested when disabled.");
-        mockDbFactory.Verify(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()), Times.Never, "DB Context should not be created when disabled.");
+    }
+
+    // ─────────────────────────── LoadData – enabled path, happy path ───────────────────────────
+
+    /// <summary>
+    ///     When enabled, streamed organisations/POMs are mapped and returned.
+    /// </summary>
+    [TestMethod]
+    public async Task LoadData_WhenEnabled_ReturnsMappedOrganisationsAndPoms()
+    {
+        // Arrange
+        var submitterId = Guid.NewGuid().ToString();
+        var loader = CreateLoader(
+            true,
+            organisations: ToAsyncEnumerable(new PayCalOrganisation
+            {
+                OrganisationId = 1,
+                OrganisationName = "Org Co",
+                ObligationStatus = "O",
+                SubmitterId = submitterId
+            }),
+            poms: ToAsyncEnumerable(new PayCalPom
+            {
+                OrganisationId = 1,
+                SubmitterId = submitterId,
+                PackagingMaterial = "PL"
+            }));
+
+        // Act
+        var (organisations, poms) = await loader.LoadData(TestDataHelper.CalculatorRun2024);
+
+        // Assert
+        organisations.Count.ShouldBe(1);
+        organisations[0].OrganisationId.ShouldBe(1);
+        organisations[0].OrganisationName.ShouldBe("Org Co");
+        poms.Count.ShouldBe(1);
+        poms[0].PackagingMaterial.ShouldBe("PL");
     }
 
     // ─────────────────────────── LoadData – enabled path, stream failures ───────────────────────────
@@ -85,8 +110,7 @@ public class CommonDataApiLoaderTests
     }
 
     /// <summary>
-    ///     When the POM stream fails (while the organisation stream is empty), the exception must
-    ///     propagate and the organisation enumerator must be disposed.
+    ///     When the POM stream fails (while the organisation stream is empty), the exception must propagate.
     /// </summary>
     [TestMethod]
     public async Task LoadData_WhenPomStreamFails_ThrowsException()
@@ -102,8 +126,7 @@ public class CommonDataApiLoaderTests
     }
 
     /// <summary>
-    ///     When the organisation stream fails (while the POM stream is empty), the exception must
-    ///     propagate and the POM enumerator must be disposed.
+    ///     When the organisation stream fails (while the POM stream is empty), the exception must propagate.
     /// </summary>
     [TestMethod]
     public async Task LoadData_WhenOrgStreamFails_ThrowsException()
@@ -140,32 +163,6 @@ public class CommonDataApiLoaderTests
         await Should.ThrowAsync<OperationCanceledException>(async () => await loader.LoadData(TestDataHelper.CalculatorRun2024, cts.Token));
     }
 
-    // ─────────────────────────── Run – try-catch-finally ───────────────────────────
-
-    /// <summary>
-    ///     When stream initialisation succeeds but the DB context factory throws, the
-    ///     exception must propagate through the <c>catch when</c> / <c>finally</c> block
-    ///     inside <c>Run</c>, exercising the linked-cancellation-token cancellation and
-    ///     stream-enumerator disposal paths.
-    /// </summary>
-    [TestMethod]
-    public async Task LoadData_WhenDbContextCreationFails_ExceptionPropagates()
-    {
-        // Arrange – both streams are empty so GetStreams succeeds.
-        // The DB factory then throws, causing UpdateDatabase to fail.
-        mockDbFactory
-            .Setup(f => f.CreateDbContextAsync(It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new InvalidOperationException("DB unavailable"));
-
-        var loader = CreateLoader(
-            true,
-            organisations: EmptyAsyncEnumerable<PayCalOrganisation>(),
-            poms: EmptyAsyncEnumerable<PayCalPom>());
-
-        // Act & Assert
-        await Should.ThrowAsync<InvalidOperationException>(async () => await loader.LoadData(TestDataHelper.CalculatorRun2024));
-    }
-
     // ─────────────────────────── Helpers ───────────────────────────
 
     private CommonDataApiLoader CreateLoader(
@@ -177,9 +174,7 @@ public class CommonDataApiLoaderTests
     {
         var loaderOptions = new OptionsWrapper<CommonDataApiLoaderOptions>(new CommonDataApiLoaderOptions
         {
-            Enabled = enabled,
-            PomBatchSize = 100,
-            OrganisationBatchSize = 100
+            Enabled = enabled
         });
 
         organisationsHandler ??= new Mock<IStreamOrganisationsRequestHandler>();
@@ -194,10 +189,8 @@ public class CommonDataApiLoaderTests
 
         return new CommonDataApiLoader(
             loaderOptions,
-            mockDbFactory.Object,
             organisationsHandler.Object,
             pomsHandler.Object,
-            mockTimeProvider.Object,
             mockLogger.Object,
             new Telemetry<CommonDataApiLoader>());
     }
@@ -220,6 +213,15 @@ public class CommonDataApiLoaderTests
     }
 
     // ─────────────────────────── Fake async streams ───────────────────────────
+
+    private static async IAsyncEnumerable<T> ToAsyncEnumerable<T>(params T[] items)
+    {
+        foreach (var item in items)
+        {
+            yield return item;
+            await Task.Yield();
+        }
+    }
 
     private static async IAsyncEnumerable<T> EmptyAsyncEnumerable<T>(
         [EnumeratorCancellation] CancellationToken cancellationToken = default)

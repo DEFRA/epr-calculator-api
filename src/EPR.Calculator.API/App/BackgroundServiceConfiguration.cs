@@ -85,8 +85,6 @@ public static class BackgroundServiceConfiguration
                 .ValidateOnStart();
 
             services.AddTransient<IDataLoader, CommonDataApiLoader>();
-            services.AddTransient<ICalculatorRunOrgData, CalculatorRunOrgData>();
-            services.AddTransient<ICalculatorRunPomData, CalculatorRunPomData>();
             services.AddTransient<IProducerDataTransposer, ProducerDataTransposer>();
 
             // Register BillingRunDependencies

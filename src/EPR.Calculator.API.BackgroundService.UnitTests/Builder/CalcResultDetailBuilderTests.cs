@@ -21,8 +21,7 @@ public class CalcResultDetailBuilderTests : TestsFor<CalcResultDetailBuilder>
             CreatedBy = runContext.User,
             CreatedAt = new DateTime(2023, 1, 1),
             RelativeYear = runContext.RelativeYear,
-            CalculatorRunOrganisationDataMaster = new CalculatorRunOrganisationDataMaster { CreatedBy = "", RelativeYear = runContext.RelativeYear, EffectiveFrom = new DateTime(2023, 1, 1), CreatedAt = new DateTime(2023, 1, 1) },
-            CalculatorRunPomDataMaster = new CalculatorRunPomDataMaster { CreatedBy = "", RelativeYear = runContext.RelativeYear, EffectiveFrom = new DateTime(2023, 1, 1), CreatedAt = new DateTime(2023, 1, 1) },
+            OrgPomDataLoadedAt = new DateTime(2023, 1, 1),
             LapcapDataMaster = new LapcapDataMaster
             {
                 LapcapFileName = "LapcapFile.csv",

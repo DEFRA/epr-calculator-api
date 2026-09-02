@@ -2,6 +2,7 @@
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
 using EPR.Calculator.API.Data.DataTypes;
 
 namespace EPR.Calculator.API.BackgroundService.Services;
@@ -9,8 +10,8 @@ namespace EPR.Calculator.API.BackgroundService.Services;
 public interface IErrorReportService
 {
     Task<HashSet<(int OrgId, string? SubId)>> HandleErrors(
-        IReadOnlyList<CalculatorRunPomDataDetail> pomDetails,
-        IReadOnlyList<CalculatorRunOrganisationDataDetail> orgDetails,
+        IReadOnlyList<AlignmentPom> pomDetails,
+        IReadOnlyList<CalculatorRunOrganisation> orgDetails,
         int calculatorRunId,
         string createdBy,
         RelativeYear relativeYear,
@@ -24,8 +25,8 @@ public class ErrorReportService(
     : IErrorReportService
 {
     public async Task<HashSet<(int OrgId, string? SubId)>> HandleErrors(
-        IReadOnlyList<CalculatorRunPomDataDetail> pomDetails,
-        IReadOnlyList<CalculatorRunOrganisationDataDetail> orgDetails,
+        IReadOnlyList<AlignmentPom> pomDetails,
+        IReadOnlyList<CalculatorRunOrganisation> orgDetails,
         int calculatorRunId,
         string createdBy,
         RelativeYear relativeYear,
@@ -59,8 +60,8 @@ public class ErrorReportService(
     }
 
     public static List<ErrorReport> HandleMissingRegistrationData(
-        IReadOnlyList<CalculatorRunPomDataDetail> pomDetails,
-        IReadOnlyList<CalculatorRunOrganisationDataDetail> orgDetails,
+        IReadOnlyList<AlignmentPom> pomDetails,
+        IReadOnlyList<CalculatorRunOrganisation> orgDetails,
         int calculatorRunId,
         string createdBy)
     {
@@ -79,7 +80,7 @@ public class ErrorReportService(
             .ToList();
     }
 
-    public static List<ErrorReport> HandleMissingPomData(IReadOnlyList<CalculatorRunPomDataDetail> pomDetails, IReadOnlyList<CalculatorRunOrganisationDataDetail> orgDetails, int calculatorRunId, string createdBy)
+    public static List<ErrorReport> HandleMissingPomData(IReadOnlyList<AlignmentPom> pomDetails, IReadOnlyList<CalculatorRunOrganisation> orgDetails, int calculatorRunId, string createdBy)
     {
         // Pre-compute the set of POM keys (subsidiary id, falling back to org id) so the
         // membership check below is O(1) per orgDetail rather than O(P) per orgDetail.
@@ -100,7 +101,7 @@ public class ErrorReportService(
             .ToList();
     }
 
-    public static List<ErrorReport> HandleObligatedErrors(IReadOnlyList<CalculatorRunPomDataDetail> pomDetails, IReadOnlyList<CalculatorRunOrganisationDataDetail> orgDetails, IReadOnlyList<InvoicedProducer> invoicedDetailsForFY, int calculatorRunId, string createdBy)
+    public static List<ErrorReport> HandleObligatedErrors(IReadOnlyList<AlignmentPom> pomDetails, IReadOnlyList<CalculatorRunOrganisation> orgDetails, IReadOnlyList<InvoicedProducer> invoicedDetailsForFY, int calculatorRunId, string createdBy)
     {
         return orgDetails
             .Where(x => x.ObligationStatus == ObligationStates.Error)
@@ -113,7 +114,7 @@ public class ErrorReportService(
     }
 
 
-    public static List<ErrorReport> HandleObligatedWarnings(IReadOnlyList<CalculatorRunPomDataDetail> pomDetails, IReadOnlyList<CalculatorRunOrganisationDataDetail> orgDetails, IReadOnlyList<InvoicedProducer> invoicedDetailsForFY, int calculatorRunId, string createdBy)
+    public static List<ErrorReport> HandleObligatedWarnings(IReadOnlyList<AlignmentPom> pomDetails, IReadOnlyList<CalculatorRunOrganisation> orgDetails, IReadOnlyList<InvoicedProducer> invoicedDetailsForFY, int calculatorRunId, string createdBy)
     {
         return orgDetails
             .Where(x => x.ObligationStatus == ObligationStates.Obligated && !string.IsNullOrEmpty(x.ErrorCode))

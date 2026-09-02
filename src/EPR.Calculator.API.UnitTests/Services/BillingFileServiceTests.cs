@@ -273,24 +273,15 @@ namespace EPR.Calculator.API.UnitTests.Services
             // from an earlier run's organisation snapshot for the same relative year.
             const int missingProducerId = 999;
 
-            var organisationSnapshot = new CalculatorRunOrganisationDataMaster
-            {
-                RelativeYear = new RelativeYear(2024),
-                EffectiveFrom = DateTime.UtcNow.AddDays(-5),
-                CreatedBy = "test",
-                CreatedAt = DateTime.UtcNow.AddDays(-5),
-            };
             var previousRun = CreateRun(2, name: "Previous Run Snapshot");
-            previousRun.CalculatorRunOrganisationDataMaster = organisationSnapshot;
 
             await SeedAsync(
                 CreateRun(1, RunClassification.INTERIM_RECALCULATION_RUN, "Current Run"),
                 CreateBillingInstruction(producerId: missingProducerId, runId: 1, suggestedInstruction: "Initial", suggestedInvoiceAmount: 100, acceptRejectStatus: "Pending"),
-                organisationSnapshot,
                 previousRun,
-                new CalculatorRunOrganisationDataDetail
+                new CalculatorRunOrganisation
                 {
-                    CalculatorRunOrganisationDataMaster = organisationSnapshot,
+                    CalculatorRunId = previousRun.Id,
                     OrganisationId = missingProducerId,
                     OrganisationName = "Fallback Producer Name",
                 });

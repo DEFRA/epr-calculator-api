@@ -29,20 +29,18 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ErrorReport
                 where run.Id == runContext.RunId
 
                 join er in context.ErrorReports on run.Id equals er.CalculatorRunId
-                join odm in context.CalculatorRunOrganisationDataMaster
-                    on run.CalculatorRunOrganisationDataMasterId equals odm.Id
 
-                // LEFT JOIN to find a subsidiary-specific detail: match ProdId + SubsId
-                join subOdd in context.CalculatorRunOrganisationDataDetails
-                    on new { OrgId = er.ProducerId, MasterId = odm.Id, SubsId = er.SubsidiaryId }
-                    equals new { OrgId = subOdd.OrganisationId, MasterId = subOdd.CalculatorRunOrganisationDataMasterId, SubsId = subOdd.SubsidiaryId }
+                // LEFT JOIN to find a subsidiary-specific organisation record: match ProdId + SubsId
+                join subOrg in context.CalculatorRunOrganisations
+                    on new { OrgId = er.ProducerId, RunId = run.Id, SubsId = er.SubsidiaryId }
+                    equals new { OrgId = subOrg.OrganisationId, RunId = subOrg.CalculatorRunId, SubsId = subOrg.SubsidiaryId }
                     into subGroup
                 from subLeft in subGroup.DefaultIfEmpty()
 
-                    // LEFT JOIN to find a producer-level detail (SubsidiaryId null) as fallback
-                join prodOdd in context.CalculatorRunOrganisationDataDetails
-                    on new { OrgId = er.ProducerId, MasterId = odm.Id, SubsId = (string?)null }
-                    equals new { OrgId = prodOdd.OrganisationId, MasterId = prodOdd.CalculatorRunOrganisationDataMasterId, SubsId = prodOdd.SubsidiaryId }
+                    // LEFT JOIN to find a producer-level organisation record (SubsidiaryId null) as fallback
+                join prodOrg in context.CalculatorRunOrganisations
+                    on new { OrgId = er.ProducerId, RunId = run.Id, SubsId = (string?)null }
+                    equals new { OrgId = prodOrg.OrganisationId, RunId = prodOrg.CalculatorRunId, SubsId = prodOrg.SubsidiaryId }
                     into prodGroup
                 from prodLeft in prodGroup.DefaultIfEmpty()
 
@@ -75,12 +73,12 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ErrorReport
             return results;
         }
 
-        private static string GetProducerName(CalculatorRunOrganisationDataDetail? prodLeft) =>
+        private static string GetProducerName(CalculatorRunOrganisation? prodLeft) =>
             prodLeft is null || string.IsNullOrWhiteSpace(prodLeft.OrganisationName) || prodLeft.SubsidiaryId == null
                 ? CommonConstants.Hyphen
                 : prodLeft.OrganisationName;
 
-        private static string GetTradingName(CalculatorRunOrganisationDataDetail? prodLeft) =>
+        private static string GetTradingName(CalculatorRunOrganisation? prodLeft) =>
             prodLeft is null || string.IsNullOrWhiteSpace(prodLeft.OrganisationName) || prodLeft.SubsidiaryId == null
                 ? CommonConstants.Hyphen
                 : GetFormatedTradingName(prodLeft.TradingName);
@@ -90,7 +88,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ErrorReport
                 ? CommonConstants.Hyphen
                 : tradingName;
 
-        private static bool IsSubsidary(CalculatorRunOrganisationDataDetail? subLeft) =>
+        private static bool IsSubsidary(CalculatorRunOrganisation? subLeft) =>
             subLeft != null && !string.IsNullOrWhiteSpace(subLeft.OrganisationName);
     }
 }

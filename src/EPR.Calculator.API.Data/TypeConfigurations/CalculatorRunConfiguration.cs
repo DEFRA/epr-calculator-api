@@ -60,11 +60,8 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
         builder.Property(p => p.UpdatedAt)
             .HasColumnName("updated_at");
 
-        builder.Property(p => p.CalculatorRunPomDataMasterId)
-            .HasColumnName("calculator_run_pom_data_master_id");
-
-        builder.Property(p => p.CalculatorRunOrganisationDataMasterId)
-            .HasColumnName("calculator_run_organization_data_master_id");
+        builder.Property(p => p.OrgPomDataLoadedAt)
+            .HasColumnName("org_pom_data_loaded_at");
 
         builder.Property(p => p.LapcapDataMasterId)
             .HasColumnName("lapcap_data_master_id");
@@ -81,6 +78,10 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
             .HasForeignKey(e => e.CalculatorRunId);
 
         builder.HasMany(e => e.ProducerDetails)
+            .WithOne(e => e.CalculatorRun)
+            .HasForeignKey(e => e.CalculatorRunId);
+
+        builder.HasMany(e => e.CalculatorRunOrganisations)
             .WithOne(e => e.CalculatorRun)
             .HasForeignKey(e => e.CalculatorRunId);
 

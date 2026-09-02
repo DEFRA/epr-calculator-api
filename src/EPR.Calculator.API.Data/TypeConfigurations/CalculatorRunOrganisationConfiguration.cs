@@ -1,18 +1,22 @@
-﻿using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EPR.Calculator.API.Data.TypeConfigurations;
 
-public class OrganisationDataConfiguration : IEntityTypeConfiguration<OrganisationData>
+public class CalculatorRunOrganisationConfiguration : IEntityTypeConfiguration<CalculatorRunOrganisation>
 {
-    // Ensure fields names match CalculatorRunOrganisationDataDetailConfiguration for bulk insert https://github.com/DEFRA/epr-calculator-service/blob/main/src/EPR.Calculator.API.BackgroundService/Services/CalculatorRunOrgData.cs
-    /// <inheritdoc />
-    public void Configure(EntityTypeBuilder<OrganisationData> builder)
+    public void Configure(EntityTypeBuilder<CalculatorRunOrganisation> builder)
     {
-        builder.ToTable("organisation_data");
+        builder.ToTable("calculator_run_organisation");
 
-        builder.HasNoKey();
+        builder.Property(p => p.Id)
+            .HasColumnName("id")
+            .IsRequired();
+
+        builder.Property(p => p.CalculatorRunId)
+            .HasColumnName("calculator_run_id")
+            .IsRequired();
 
         builder.Property(p => p.OrganisationId)
             .HasColumnName("organisation_id");
@@ -20,6 +24,9 @@ public class OrganisationDataConfiguration : IEntityTypeConfiguration<Organisati
         builder.Property(p => p.SubsidiaryId)
             .HasColumnName("subsidiary_id")
             .HasMaxLength(400);
+
+        builder.Property(p => p.SubmitterId)
+            .HasColumnName("submitter_id");
 
         builder.Property(p => p.OrganisationName)
             .HasColumnName("organisation_name")
@@ -29,24 +36,12 @@ public class OrganisationDataConfiguration : IEntityTypeConfiguration<Organisati
             .HasColumnName("trading_name")
             .HasMaxLength(400);
 
-        builder.Property(p => p.LoadTimestamp)
-            .HasColumnName("load_ts");
-
         builder.Property(p => p.ObligationStatus)
             .HasColumnName("obligation_status")
             .HasMaxLength(10);
 
-        builder.Property(p => p.SubmitterId)
-            .HasColumnName("submitter_id");
-
-        builder.Property(p => p.StatusCode)
-            .HasColumnName("status_code");
-
         builder.Property(p => p.DaysObligated)
             .HasColumnName("num_days_obligated");
-
-        builder.Property(p => p.ErrorCode)
-            .HasColumnName("error_code");
 
         builder.Property(p => p.JoinerDate)
             .HasColumnName("joiner_date")
@@ -55,6 +50,12 @@ public class OrganisationDataConfiguration : IEntityTypeConfiguration<Organisati
         builder.Property(p => p.LeaverDate)
             .HasColumnName("leaver_date")
             .HasMaxLength(50);
+
+        builder.Property(p => p.StatusCode)
+            .HasColumnName("status_code");
+
+        builder.Property(p => p.ErrorCode)
+            .HasColumnName("error_code");
 
         builder.Property(p => p.HasH1)
             .HasColumnName("has_h1");

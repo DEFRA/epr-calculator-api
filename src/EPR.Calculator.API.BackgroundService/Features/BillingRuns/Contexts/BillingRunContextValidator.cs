@@ -51,15 +51,9 @@ public class BillingRunContextValidator : AbstractValidator<BillingRunContextBui
                 .GreaterThan(0)
                 .WithMessage($"Run is missing {nameof(LapcapDataMaster)}");
 
-            RuleFor(run => run.CalculatorRunOrganisationDataMasterId)
+            RuleFor(run => run.OrgPomDataLoadedAt)
                 .NotEmpty()
-                .GreaterThan(0)
-                .WithMessage($"Run is missing {nameof(CalculatorRunOrganisationDataMaster)}");
-
-            RuleFor(run => run.CalculatorRunPomDataMasterId)
-                .NotEmpty()
-                .GreaterThan(0)
-                .WithMessage($"Run is missing {nameof(CalculatorRunPomDataMaster)}");
+                .WithMessage("Run is missing organisation/POM data");
 
             RuleFor(run => run.CalculatorRunClassificationId)
                 .Must(classification => ValidClassifications.Contains(classification))
