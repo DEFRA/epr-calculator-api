@@ -135,19 +135,29 @@ public class FileExportService(
         var run = await dbContext
             .CalculatorRuns
             .AsNoTracking()
-            .Include(r => r.ProducerResultFileSuggestedBillingInstruction)
-            .Include(r => r.CalculatorRunBillingFileMetadata)
             .SingleOrDefaultAsync(r => r.Id == runId, cancellationToken);
 
         if (run is null || run.BillingRunStatus != BillingRunStatus.Completed || run.CalculatorRunClassificationId == RunClassificationStatusIds.DELETEDID)
             return null;
 
-        var billingFileMetadata = run.CalculatorRunBillingFileMetadata
+        var billingFileMetadata = await dbContext.CalculatorRunBillingFileMetadata
+            .AsNoTracking()
+            .Where(m => m.CalculatorRunId == runId)
             .OrderByDescending(m => m.BillingFileCreatedDate)
-            .FirstOrDefault();
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (billingFileMetadata is null)
             return null;
+
+        var acceptedProducerIds = await dbContext.ProducerResultFileSuggestedBillingInstruction
+            .AsNoTracking()
+            .Where(p =>
+                p.CalculatorRunId == runId
+                && p.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
+                && p.SuggestedBillingInstruction != BillingConstants.Suggestion.Cancel)
+            .Select(p => p.ProducerId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
 
         return new BillingRunContext
         {
@@ -156,13 +166,7 @@ public class FileExportService(
             ProcessingStartedAt = new DateTimeOffset(DateTime.SpecifyKind(billingFileMetadata.BillingFileCreatedDate, DateTimeKind.Utc)),
             RelativeYear = run.RelativeYear,
             User = billingFileMetadata.BillingFileCreatedBy,
-            AcceptedProducerIds = run.ProducerResultFileSuggestedBillingInstruction
-                                    .Where(p =>
-                                        p.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
-                                        && p.SuggestedBillingInstruction != BillingConstants.Suggestion.Cancel)
-                                    .Select(p => p.ProducerId)
-                                    .Distinct()
-                                    .ToImmutableHashSet(),
+            AcceptedProducerIds = acceptedProducerIds.ToImmutableHashSet(),
             DefaultParameters = await parameterService.GetDefaultParameters(run.Id)
         };
     }
