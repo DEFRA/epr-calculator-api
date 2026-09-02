@@ -215,27 +215,21 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
     private async Task<(List<CalcResultScaledupProducer> Producers, Dictionary<int, Organisation> ParentOrganisations)> GetScaledUpDataAsync(int runId)
     {
         var scaledProducerIds = await (
-            from run in dbContext.CalculatorRuns.AsNoTracking()
-            join crpdd in dbContext.CalculatorRunPomDataDetails.AsNoTracking() on run.CalculatorRunPomDataMasterId equals crpdd.CalculatorRunPomDataMasterId
-            join spl in dbContext.SubmissionPeriodLookup.AsNoTracking() on crpdd.SubmissionPeriod equals spl.SubmissionPeriod
-            where run.Id == runId && spl.ScaleupFactor > NormalScaleup
-            select crpdd.OrganisationId
+            from pd in dbContext.ProducerDetail.AsNoTracking()
+            join prm in dbContext.ProducerReportedMaterial.AsNoTracking() on pd.Id equals prm.ProducerDetailId
+            join spl in dbContext.SubmissionPeriodLookup.AsNoTracking() on prm.SubmissionPeriod equals spl.SubmissionPeriod
+            where pd.CalculatorRunId == runId && spl.ScaleupFactor > NormalScaleup
+            select pd.ProducerId
         ).Distinct().ToListAsync();
 
         if (scaledProducerIds.Count == 0)
             return ([], []);
 
         var rows = await (
-            from run in dbContext.CalculatorRuns.AsNoTracking()
-            join crpdd in dbContext.CalculatorRunPomDataDetails.AsNoTracking() on run.CalculatorRunPomDataMasterId equals crpdd.CalculatorRunPomDataMasterId
-            join spl in dbContext.SubmissionPeriodLookup.AsNoTracking() on crpdd.SubmissionPeriod equals spl.SubmissionPeriod
-            join pd in dbContext.ProducerDetail.AsNoTracking() on crpdd.OrganisationId equals pd.ProducerId
-            join crodm in dbContext.CalculatorRunOrganisationDataMaster.AsNoTracking() on run.CalculatorRunOrganisationDataMasterId equals crodm.Id
-            join org in dbContext.CalculatorRunOrganisationDataDetails.AsNoTracking()
-              on new { crodm.Id, pd.ProducerId, pd.SubsidiaryId, crpdd.SubmitterId }
-                equals new { Id = org.CalculatorRunOrganisationDataMasterId, ProducerId = org.OrganisationId, org.SubsidiaryId, org.SubmitterId }
-            where run.Id == runId && scaledProducerIds.Contains(crpdd.OrganisationId)
-              && pd.CalculatorRunId == runId && org.ObligationStatus == ObligationStates.Obligated
+            from pd in dbContext.ProducerDetail.AsNoTracking()
+            join prm in dbContext.ProducerReportedMaterial.AsNoTracking() on pd.Id equals prm.ProducerDetailId
+            join spl in dbContext.SubmissionPeriodLookup.AsNoTracking() on prm.SubmissionPeriod equals spl.SubmissionPeriod
+            where pd.CalculatorRunId == runId && scaledProducerIds.Contains(pd.ProducerId)
             select new
             {
                 ProducerId             = pd.ProducerId,
@@ -253,10 +247,8 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
         // its subsidiaries may report on its behalf - so this is looked up independently of `rows`
         // above, which is driven off ProducerDetail (POM) data.
         var parentOrganisations = await (
-            from run in dbContext.CalculatorRuns.AsNoTracking()
-            join crodm in dbContext.CalculatorRunOrganisationDataMaster.AsNoTracking() on run.CalculatorRunOrganisationDataMasterId equals crodm.Id
-            join org in dbContext.CalculatorRunOrganisationDataDetails.AsNoTracking() on crodm.Id equals org.CalculatorRunOrganisationDataMasterId
-            where run.Id == runId && scaledProducerIds.Contains(org.OrganisationId)
+            from org in dbContext.CalculatorRunOrganisations.AsNoTracking()
+            where org.CalculatorRunId == runId && scaledProducerIds.Contains(org.OrganisationId)
               && org.SubsidiaryId == null && org.ObligationStatus == ObligationStates.Obligated
             select new Organisation
             {

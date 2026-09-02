@@ -26,12 +26,7 @@ public class ApplicationDBContext : DbContext
     public DbSet<LapcapDataTemplateMaster> LapcapDataTemplateMaster { get; set; }
     public DbSet<LapcapDataMaster> LapcapDataMaster { get; set; }
     public DbSet<LapcapDataDetail> LapcapDataDetail { get; set; }
-    public DbSet<CalculatorRunOrganisationDataDetail> CalculatorRunOrganisationDataDetails { get; set; }
-    public DbSet<CalculatorRunOrganisationDataMaster> CalculatorRunOrganisationDataMaster { get; set; }
-    public DbSet<CalculatorRunPomDataDetail> CalculatorRunPomDataDetails { get; set; }
-    public DbSet<CalculatorRunPomDataMaster> CalculatorRunPomDataMaster { get; set; }
-    public DbSet<OrganisationData> OrganisationData { get; set; }
-    public DbSet<PomData> PomData { get; set; }
+    public DbSet<CalculatorRunOrganisation> CalculatorRunOrganisations { get; set; }
     public DbSet<Material> Material { get; set; }
     public DbSet<ProducerDetail> ProducerDetail { get; set; }
     public DbSet<CountryApportionment> CountryApportionment { get; set; }

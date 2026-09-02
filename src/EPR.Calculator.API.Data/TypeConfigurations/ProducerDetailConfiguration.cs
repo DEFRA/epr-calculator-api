@@ -33,6 +33,28 @@ public class ProducerDetailConfiguration : IEntityTypeConfiguration<ProducerDeta
         builder.Property(p => p.CalculatorRunId)
             .HasColumnName("calculator_run_id");
 
+        builder.Property(p => p.SubmitterId)
+            .HasColumnName("submitter_id");
+
+        builder.Property(p => p.ObligationStatus)
+            .HasColumnName("obligation_status")
+            .HasMaxLength(10);
+
+        builder.Property(p => p.DaysObligated)
+            .HasColumnName("num_days_obligated");
+
+        builder.Property(p => p.JoinerDate)
+            .HasColumnName("joiner_date")
+            .HasMaxLength(50);
+
+        builder.Property(p => p.LeaverDate)
+            .HasColumnName("leaver_date")
+            .HasMaxLength(50);
+
+        builder.Property(p => p.StatusCode)
+            .HasColumnName("status_code")
+            .HasMaxLength(400);
+
         builder.HasMany(e => e.ProducerReportedMaterials)
             .WithOne(e => e.ProducerDetail)
             .HasForeignKey(e => e.ProducerDetailId);

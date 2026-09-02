@@ -11,13 +11,12 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
     [TestClass]
     public class CommonDataApiLoaderMapperTests
     {
-        private static readonly DateTimeOffset FixedUtcNow = new(2024, 6, 15, 12, 0, 0, TimeSpan.Zero);
         private static readonly string ValidGuid = "11111111-1111-1111-1111-111111111111";
 
         // ───────────────────────── POM mapper – field mapping ─────────────────────────
 
         /// <summary>
-        ///     Verifies that POM entity fields are mapped correctly from the API response.
+        ///     Verifies that POM fields are mapped correctly from the API response.
         /// </summary>
         [TestMethod]
         public void PomMapper_WithValidResponse_MapsAllFieldsCorrectly()
@@ -26,38 +25,29 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
             var response = new PayCalPom
             {
                 SubmissionPeriod = "2024-Q1",
-                SubmissionPeriodDescription = "Quarter 1 2024",
                 OrganisationId = 42,
                 SubsidiaryId = "SUB-001",
                 PackagingType = "HH",
                 PackagingMaterial = "PL",
-                PackagingMaterialSubtype = "ST-01",
                 PackagingMaterialWeight = 250.75,
-                PackagingClass = "P1",
-                PackagingActivity = "PAC",
                 RamRagRating = "G",
                 SubmitterId = ValidGuid
             };
 
-            var mapper = CommonDataApiLoaderMapper.MapPom(FixedUtcNow, NullLogger.Instance);
+            var mapper = CommonDataApiLoaderMapper.MapPom(NullLogger.Instance);
 
             // Act
             var pom = mapper(response);
 
             // Assert
             Assert.AreEqual("2024-Q1", pom.SubmissionPeriod);
-            Assert.AreEqual("Quarter 1 2024", pom.SubmissionPeriodDesc);
             Assert.AreEqual(42, pom.OrganisationId);
             Assert.AreEqual("SUB-001", pom.SubsidiaryId);
             Assert.AreEqual("HH", pom.PackagingType);
             Assert.AreEqual("PL", pom.PackagingMaterial);
-            Assert.AreEqual("ST-01", pom.PackagingMaterialSubtype);
             Assert.AreEqual(250.75, pom.PackagingMaterialWeight);
-            Assert.AreEqual("P1", pom.PackagingClass);
-            Assert.AreEqual("PAC", pom.PackagingActivity);
             Assert.AreEqual("G", pom.RamRagRating);
             Assert.AreEqual(Guid.Parse(ValidGuid), pom.SubmitterId);
-            Assert.AreEqual(FixedUtcNow.DateTime, pom.LoadTimeStamp);
         }
 
         /// <summary>
@@ -86,7 +76,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
                 SubmitterId = ValidGuid
             };
 
-            var mapper = CommonDataApiLoaderMapper.MapPom(FixedUtcNow, NullLogger.Instance);
+            var mapper = CommonDataApiLoaderMapper.MapPom(NullLogger.Instance);
 
             // Act
             var pom = mapper(response);
@@ -114,7 +104,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
                 SubmitterId = "not-a-guid"
             };
 
-            var mapper = CommonDataApiLoaderMapper.MapPom(FixedUtcNow, NullLogger.Instance);
+            var mapper = CommonDataApiLoaderMapper.MapPom(NullLogger.Instance);
 
             Should.Throw<FormatException>(() => mapper(response));
         }
@@ -122,7 +112,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
         // ───────────────────── Organisation mapper – field mapping ─────────────────────
 
         /// <summary>
-        ///     Verifies that Organisation entity fields are mapped correctly from the API response.
+        ///     Verifies that Organisation fields are mapped correctly from the API response.
         /// </summary>
         [TestMethod]
         public void OrganisationMapper_WithValidResponse_MapsAllFieldsCorrectly()
@@ -145,7 +135,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
                 HasH2 = false
             };
 
-            var mapper = CommonDataApiLoaderMapper.MapOrganisation(FixedUtcNow);
+            var mapper = CommonDataApiLoaderMapper.MapOrganisation();
 
             // Act
             var org = mapper(response);
@@ -164,7 +154,6 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
             Assert.AreEqual(Guid.Parse(ValidGuid), org.SubmitterId);
             Assert.IsTrue(org.HasH1);
             Assert.IsFalse(org.HasH2);
-            Assert.AreEqual(FixedUtcNow.DateTime, org.LoadTimestamp);
         }
 
         // ───────────────────── Organisation mapper – validation ─────────────────────
@@ -183,7 +172,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
                 SubmitterId = "not-a-guid"
             };
 
-            var mapper = CommonDataApiLoaderMapper.MapOrganisation(FixedUtcNow);
+            var mapper = CommonDataApiLoaderMapper.MapOrganisation();
 
             Should.Throw<FormatException>(() => mapper(response));
         }
@@ -202,7 +191,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
                 SubmitterId = ValidGuid
             };
 
-            var mapper = CommonDataApiLoaderMapper.MapOrganisation(FixedUtcNow);
+            var mapper = CommonDataApiLoaderMapper.MapOrganisation();
 
             Should.Throw<FormatException>(() => mapper(response));
         }
@@ -221,7 +210,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
                 SubmitterId = ValidGuid
             };
 
-            var mapper = CommonDataApiLoaderMapper.MapOrganisation(FixedUtcNow);
+            var mapper = CommonDataApiLoaderMapper.MapOrganisation();
 
             Should.Throw<FormatException>(() => mapper(response));
         }
@@ -240,7 +229,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading
                 SubmitterId = ValidGuid
             };
 
-            var mapper = CommonDataApiLoaderMapper.MapOrganisation(FixedUtcNow);
+            var mapper = CommonDataApiLoaderMapper.MapOrganisation();
 
             Should.Throw<FormatException>(() => mapper(response));
         }

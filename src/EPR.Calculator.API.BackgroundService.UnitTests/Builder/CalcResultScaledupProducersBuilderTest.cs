@@ -17,41 +17,17 @@ using static CalcRunLaDisposalCostBuilderTests;
 [TestClass]
 public class CalcResultScaledupProducersBuilderTest : TestsFor<CalcResultScaledupProducersBuilder>
 {
-    private CalculatorRunOrganisationDataMaster calcRunOrganisationDataMaster = null!;
-    private CalculatorRunPomDataMaster calcRunPomDataMaster = null!;
     private IImmutableList<MaterialDetail> materialDetails = null!;
     private int pcId;
     private readonly RunContext runContext = TestDataHelper.CalculatorRun2024;
 
     protected override void TestInitialize()
     {
-        calcRunPomDataMaster = new CalculatorRunPomDataMaster
-        {
-            Id = 1,
-            RelativeYear = new RelativeYear(2024),
-            EffectiveFrom = DateTime.UtcNow,
-            CreatedAt = DateTime.UtcNow,
-            CreatedBy = "Test User"
-        };
-        dbContext.CalculatorRunPomDataMaster.Add(calcRunPomDataMaster);
-
-        calcRunOrganisationDataMaster = new CalculatorRunOrganisationDataMaster
-        {
-            Id = 11,
-            RelativeYear = new RelativeYear(2025),
-            EffectiveFrom = DateTime.UtcNow,
-            CreatedAt = DateTime.UtcNow,
-            CreatedBy = "Test User"
-        };
-        dbContext.CalculatorRunOrganisationDataMaster.Add(calcRunOrganisationDataMaster);
-
         dbContext.CalculatorRuns.Add(new CalculatorRun
         {
             Id = runContext.RunId,
             RelativeYear = runContext.RelativeYear,
-            Name = runContext.RunName,
-            CalculatorRunOrganisationDataMaster = calcRunOrganisationDataMaster,
-            CalculatorRunPomDataMaster = calcRunPomDataMaster
+            Name = runContext.RunName
         });
 
         pcId = 4;
@@ -136,40 +112,16 @@ public class CalcResultScaledupProducersBuilderTest : TestsFor<CalcResultScaledu
             });
         }
 
-        dbContext.CalculatorRunOrganisationDataDetails.AddRange(
-            new CalculatorRunOrganisationDataDetail
+        dbContext.CalculatorRunOrganisations.AddRange(
+            new CalculatorRunOrganisation
             {
-                Id = 1,
                 OrganisationId = 11,
                 SubsidiaryId = null,
                 OrganisationName = "Allied Packaging",
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMaster = calcRunOrganisationDataMaster,
+                CalculatorRunId = runContext.RunId,
                 ObligationStatus = ObligationStates.Obligated
             }
         );
-
-        dbContext.CalculatorRunPomDataDetails.Add(
-            new CalculatorRunPomDataDetail
-            {
-                LoadTimeStamp = DateTime.UtcNow,
-                SubmissionPeriod = "2024-P1",
-                SubmissionPeriodDesc = "desc",
-                CalculatorRunPomDataMaster = calcRunPomDataMaster,
-                OrganisationId = 10
-            });
-
-        dbContext.SubmissionPeriodLookup.Add(
-            new SubmissionPeriodLookup
-            {
-                DaysInSubmissionPeriod = 0,
-                DaysInWholePeriod = 0,
-                EndDate = DateTime.UtcNow,
-                StartDate = DateTime.UtcNow,
-                ScaleupFactor = 1,
-                SubmissionPeriod = "2024-P1",
-                SubmissionPeriodDesc = string.Empty
-            });
 
         dbContext.CalculatorRuns.Add(
             new CalculatorRun
@@ -205,35 +157,14 @@ public class CalcResultScaledupProducersBuilderTest : TestsFor<CalcResultScaledu
 
     private List<L1Producer> PrepareScaledUpProducer()
     {
-        dbContext.CalculatorRunOrganisationDataDetails.AddRange(
-            new CalculatorRunOrganisationDataDetail
+        dbContext.CalculatorRunOrganisations.AddRange(
+            new CalculatorRunOrganisation
             {
-                Id = 2,
                 OrganisationId = 12,
                 SubsidiaryId = null,
                 OrganisationName = "Allied Packaging 2",
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMaster = calcRunOrganisationDataMaster,
+                CalculatorRunId = runContext.RunId,
                 ObligationStatus = ObligationStates.Obligated
-            }
-        );
-
-        dbContext.CalculatorRunPomDataDetails.AddRange(
-            new CalculatorRunPomDataDetail
-            {
-                LoadTimeStamp = DateTime.UtcNow,
-                SubmissionPeriod = "2024-P2",
-                SubmissionPeriodDesc = "desc",
-                CalculatorRunPomDataMaster = dbContext.CalculatorRunPomDataMaster.First(),
-                OrganisationId = 12
-            },
-            new CalculatorRunPomDataDetail
-            {
-                LoadTimeStamp = DateTime.UtcNow,
-                SubmissionPeriod = "2024-P2",
-                SubmissionPeriodDesc = "desc",
-                CalculatorRunPomDataMaster = dbContext.CalculatorRunPomDataMaster.First(),
-                OrganisationId = 12
             }
         );
 
@@ -304,13 +235,14 @@ public class CalcResultScaledupProducersBuilderTest : TestsFor<CalcResultScaledu
         // Arrange - producer 12 with one scaled period ("2024-P2") and one normal period ("2024-P3")
         var producers = PrepareScaledUpProducer();
 
-        dbContext.CalculatorRunPomDataDetails.Add(new CalculatorRunPomDataDetail
+        var producerDetail = producers[0].Producers[0];
+        producerDetail.ProducerReportedMaterials.Add(new ProducerReportedMaterial
         {
-            LoadTimeStamp = DateTime.UtcNow,
+            PackagingType = "HH",
+            ProducerDetail = producerDetail,
             SubmissionPeriod = "2024-P3",
-            SubmissionPeriodDesc = "desc",
-            CalculatorRunPomDataMaster = dbContext.CalculatorRunPomDataMaster.First(),
-            OrganisationId = 12
+            MaterialId = 4,
+            PackagingTonnage = 1m
         });
         dbContext.SubmissionPeriodLookup.Add(new SubmissionPeriodLookup
         {
@@ -445,32 +377,21 @@ public class CalcResultScaledupProducersBuilderTest : TestsFor<CalcResultScaledu
             EndDate = DateTime.UtcNow
         });
 
-        dbContext.CalculatorRunPomDataDetails.Add(new CalculatorRunPomDataDetail
-        {
-            LoadTimeStamp = DateTime.UtcNow,
-            SubmissionPeriod = submissionPeriod,
-            SubmissionPeriodDesc = "desc",
-            CalculatorRunPomDataMaster = calcRunPomDataMaster,
-            OrganisationId = producerId
-        });
-
-        dbContext.CalculatorRunOrganisationDataDetails.AddRange(
-            new CalculatorRunOrganisationDataDetail
+        dbContext.CalculatorRunOrganisations.AddRange(
+            new CalculatorRunOrganisation
             {
                 OrganisationId = producerId,
                 SubsidiaryId = null,
                 OrganisationName = "Holdco Ltd",
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMaster = calcRunOrganisationDataMaster,
+                CalculatorRunId = runContext.RunId,
                 ObligationStatus = ObligationStates.Obligated
             },
-            new CalculatorRunOrganisationDataDetail
+            new CalculatorRunOrganisation
             {
                 OrganisationId = producerId,
                 SubsidiaryId = subsidiaryId,
                 OrganisationName = "Sub Corp",
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMaster = calcRunOrganisationDataMaster,
+                CalculatorRunId = runContext.RunId,
                 ObligationStatus = ObligationStates.Obligated
             }
         );
@@ -516,32 +437,21 @@ public class CalcResultScaledupProducersBuilderTest : TestsFor<CalcResultScaledu
             EndDate = DateTime.UtcNow
         });
 
-        dbContext.CalculatorRunPomDataDetails.Add(new CalculatorRunPomDataDetail
-        {
-            LoadTimeStamp = DateTime.UtcNow,
-            SubmissionPeriod = submissionPeriod,
-            SubmissionPeriodDesc = "desc",
-            CalculatorRunPomDataMaster = calcRunPomDataMaster,
-            OrganisationId = producerId
-        });
-
-        dbContext.CalculatorRunOrganisationDataDetails.AddRange(
-            new CalculatorRunOrganisationDataDetail
+        dbContext.CalculatorRunOrganisations.AddRange(
+            new CalculatorRunOrganisation
             {
                 OrganisationId = producerId,
                 SubsidiaryId = null,
                 OrganisationName = "Parent Corp",
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMaster = calcRunOrganisationDataMaster,
+                CalculatorRunId = runContext.RunId,
                 ObligationStatus = ObligationStates.Obligated
             },
-            new CalculatorRunOrganisationDataDetail
+            new CalculatorRunOrganisation
             {
                 OrganisationId = producerId,
                 SubsidiaryId = subsidiaryId,
                 OrganisationName = "Sub Corp",
-                LoadTimeStamp = DateTime.UtcNow,
-                CalculatorRunOrganisationDataMaster = calcRunOrganisationDataMaster,
+                CalculatorRunId = runContext.RunId,
                 ObligationStatus = ObligationStates.Obligated
             }
         );

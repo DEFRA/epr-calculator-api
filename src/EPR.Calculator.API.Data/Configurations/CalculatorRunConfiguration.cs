@@ -17,8 +17,6 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
                 e.CreatedAt,
                 e.UpdatedBy,
                 e.UpdatedAt,
-                e.CalculatorRunOrganisationDataMasterId,
-                e.CalculatorRunPomDataMasterId,
                 e.DefaultParameterSettingMasterId,
                 e.LapcapDataMasterId
             })

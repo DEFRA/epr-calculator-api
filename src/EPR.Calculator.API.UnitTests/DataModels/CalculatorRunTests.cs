@@ -121,29 +121,16 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         }
 
         [TestMethod]
-        public void CanSetAndGetCalculatorRunPomDataMasterId()
+        public void CanSetAndGetOrgPomDataLoadedAt()
         {
             // Arrange
-            var testValue = this.Fixture.Create<int?>();
+            var testValue = this.Fixture.Create<DateTime?>();
 
             // Act
-            this.TestClass.CalculatorRunPomDataMasterId = testValue;
+            this.TestClass.OrgPomDataLoadedAt = testValue;
 
             // Assert
-            Assert.AreEqual(testValue, this.TestClass.CalculatorRunPomDataMasterId);
-        }
-
-        [TestMethod]
-        public void CanSetAndGetCalculatorRunOrganisationDataMasterId()
-        {
-            // Arrange
-            var testValue = this.Fixture.Create<int?>();
-
-            // Act
-            this.TestClass.CalculatorRunOrganisationDataMasterId = testValue;
-
-            // Assert
-            Assert.AreEqual(testValue, this.TestClass.CalculatorRunOrganisationDataMasterId);
+            Assert.AreEqual(testValue, this.TestClass.OrgPomDataLoadedAt);
         }
 
         [TestMethod]
@@ -170,32 +157,6 @@ namespace EPR.Calculator.API.UnitTests.DataModels
 
             // Assert
             Assert.AreEqual(testValue, this.TestClass.DefaultParameterSettingMasterId);
-        }
-
-        [TestMethod]
-        public void CanSetAndGetCalculatorRunPomDataMaster()
-        {
-            // Arrange
-            var testValue = this.Fixture.Create<CalculatorRunPomDataMaster>();
-
-            // Act
-            this.TestClass.CalculatorRunPomDataMaster = testValue;
-
-            // Assert
-            Assert.AreSame(testValue, this.TestClass.CalculatorRunPomDataMaster);
-        }
-
-        [TestMethod]
-        public void CanSetAndGetCalculatorRunOrganisationDataMaster()
-        {
-            // Arrange
-            var testValue = this.Fixture.Create<CalculatorRunOrganisationDataMaster>();
-
-            // Act
-            this.TestClass.CalculatorRunOrganisationDataMaster = testValue;
-
-            // Assert
-            Assert.AreSame(testValue, this.TestClass.CalculatorRunOrganisationDataMaster);
         }
 
         [TestMethod]
@@ -236,6 +197,13 @@ namespace EPR.Calculator.API.UnitTests.DataModels
         {
             // Assert
             Assert.IsInstanceOfType(this.TestClass.CountryApportionments, typeof(ICollection<CountryApportionment>));
+        }
+
+        [TestMethod]
+        public void CanGetCalculatorRunOrganisations()
+        {
+            // Assert
+            Assert.IsInstanceOfType(this.TestClass.CalculatorRunOrganisations, typeof(ICollection<CalculatorRunOrganisation>));
         }
     }
 }

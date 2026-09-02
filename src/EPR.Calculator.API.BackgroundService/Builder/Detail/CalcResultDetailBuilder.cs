@@ -19,11 +19,11 @@ namespace EPR.Calculator.API.BackgroundService.Builder.Detail
         {
             var calculatorRun = await dbContext.CalculatorRuns
                 .AsNoTracking()
-                .Include(o => o.CalculatorRunOrganisationDataMaster)
-                .Include(o => o.CalculatorRunPomDataMaster)
                 .Include(o => o.DefaultParameterSettingMaster)
                 .Include(x => x.LapcapDataMaster)
                 .SingleAsync(x => x.Id == runContext.RunId, cancellationToken: cancellationToken);
+
+            var orgPomFileDate = calculatorRun.OrgPomDataLoadedAt?.ToString(CalculationResults.DateFormat) ?? string.Empty;
 
             var results = new CalcResultDetail
             {
@@ -33,12 +33,8 @@ namespace EPR.Calculator.API.BackgroundService.Builder.Detail
                 RunDate = calculatorRun.CreatedAt,
                 RelativeYear = calculatorRun.RelativeYear,
                 CutOffDate = runContext.DefaultParameters.CutOffDate,
-                RpdFileORG = calculatorRun.CalculatorRunOrganisationDataMaster != null
-                                ? calculatorRun.CalculatorRunOrganisationDataMaster.CreatedAt.ToString(CalculationResults.DateFormat)
-                                : string.Empty,
-                RpdFilePOM = calculatorRun.CalculatorRunPomDataMaster != null
-                                ? calculatorRun.CalculatorRunPomDataMaster.CreatedAt.ToString(CalculationResults.DateFormat)
-                                : string.Empty,
+                RpdFileORG = orgPomFileDate,
+                RpdFilePOM = orgPomFileDate,
                 LapcapFile = calculatorRun.LapcapDataMaster != null
                                 ? FormatFileData(
                                     calculatorRun.LapcapDataMaster.LapcapFileName,

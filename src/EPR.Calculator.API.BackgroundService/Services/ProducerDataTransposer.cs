@@ -1,7 +1,6 @@
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Utils;
 using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
 using Microsoft.EntityFrameworkCore;
@@ -11,9 +10,14 @@ namespace EPR.Calculator.API.BackgroundService.Services;
 public interface IProducerDataTransposer
 {
     /// <summary>
-    ///     Transposes POM and organisation data for a given calculator run into ProducerDetails and ProducerReportedMaterials.
+    ///     Persists a calculator run's streamed organisation data, and transposes it (together with the
+    ///     streamed POM data) into ProducerDetails and ProducerReportedMaterials.
     /// </summary>
-    Task Transpose(CalculatorRunContext runContext, CancellationToken cancellationToken);
+    Task Transpose(
+        CalculatorRunContext runContext,
+        IReadOnlyList<CalculatorRunOrganisation> organisations,
+        IReadOnlyList<AlignmentPom> poms,
+        CancellationToken cancellationToken);
 }
 
 public class ProducerDataTransposer(
@@ -21,42 +25,33 @@ public class ProducerDataTransposer(
     IBulkOperations bulkOps,
     IErrorReportService errorReportService,
     IProducerPomAligner aligner,
+    TimeProvider timeProvider,
     ILogger<ProducerDataTransposer> logger
 ) : IProducerDataTransposer
 {
     [ActivityTrace]
-    public async Task Transpose(CalculatorRunContext runContext, CancellationToken cancellationToken)
+    public async Task Transpose(
+        CalculatorRunContext runContext,
+        IReadOnlyList<CalculatorRunOrganisation> organisations,
+        IReadOnlyList<AlignmentPom> poms,
+        CancellationToken cancellationToken)
     {
         var calculatorRun = await dbContext.CalculatorRuns
-            .AsNoTracking()
-            .Where(x => x.Id == runContext.RunId
-                        && x.CalculatorRunOrganisationDataMaster != null
-                        && x.CalculatorRunPomDataMaster != null)
-            .SingleAsync(cancellationToken);
+            .SingleAsync(x => x.Id == runContext.RunId, cancellationToken);
 
         var materials = await dbContext.Material
             .AsNoTracking()
             .ToImmutableListAsync(cancellationToken);
 
-        var calculatorRunOrgDataDetails = await dbContext.CalculatorRunOrganisationDataDetails
-            .AsNoTracking()
-            .Where(x => x.CalculatorRunOrganisationDataMasterId == calculatorRun.CalculatorRunOrganisationDataMasterId)
-            .ToImmutableListAsync(cancellationToken);
-
-        var calculatorRunPomDataDetails = await dbContext.CalculatorRunPomDataDetails
-            .AsNoTracking()
-            .Where(x => x.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId)
-            .ToImmutableListAsync(cancellationToken);
-
         var unmatchedSet = await errorReportService.HandleErrors(
-            calculatorRunPomDataDetails,
-            calculatorRunOrgDataDetails,
+            poms,
+            organisations,
             calculatorRun.Id,
             calculatorRun.CreatedBy,
             calculatorRun.RelativeYear,
             cancellationToken);
 
-        calculatorRunPomDataDetails = calculatorRunPomDataDetails
+        var matchedPoms = poms
             .Where(p =>
             {
                 var orgId = p.OrganisationId.GetValueOrDefault();
@@ -68,10 +63,9 @@ public class ProducerDataTransposer(
         var materialCodes = materials.Select(m => m.Code).ToImmutableList();
         var materialsByCode = materials.ToImmutableDictionary(m => m.Code, StringComparer.OrdinalIgnoreCase);
 
-        var alignedProducers = aligner.Align(
-            calculatorRunOrgDataDetails.Select(ToAlignmentOrganisation).ToImmutableList(),
-            calculatorRunPomDataDetails.Select(ToAlignmentPom).ToImmutableList(),
-            materialCodes);
+        var dedupedOrganisations = aligner.DedupeOrganisations(organisations.Select(ToAlignmentOrganisation).ToImmutableList());
+
+        var alignedProducers = aligner.Align(dedupedOrganisations, matchedPoms, materialCodes);
 
         // ⚠️ Only set scalar FK columns (e.g. CalculatorRunId, MaterialId) on the entities below.
         // Navigation properties to existing rows (CalculatorRun, Material) are intentionally left
@@ -85,7 +79,13 @@ public class ProducerDataTransposer(
                     ProducerId = producer.OrganisationId,
                     TradingName = producer.TradingName,
                     SubsidiaryId = producer.SubsidiaryId,
-                    ProducerName = producer.ProducerName
+                    ProducerName = producer.ProducerName,
+                    SubmitterId = producer.SubmitterId,
+                    ObligationStatus = producer.ObligationStatus,
+                    DaysObligated = producer.DaysObligated,
+                    JoinerDate = producer.JoinerDate,
+                    LeaverDate = producer.LeaverDate,
+                    StatusCode = producer.StatusCode
                 };
 
                 foreach (var reportedMaterial in producer.ReportedMaterials)
@@ -95,10 +95,18 @@ public class ProducerDataTransposer(
             })
             .ToList();
 
+        // ⚠️ Only set the scalar CalculatorRunId FK - the CalculatorRun navigation is intentionally
+        // left unset so the bulk insert below does not try to re-insert it.
+        foreach (var organisation in organisations)
+            organisation.CalculatorRunId = calculatorRun.Id;
+
         var totalReportedMaterials = newProducerDetails.Sum(p => p.ProducerReportedMaterials.Count);
 
-        logger.LogInformation("Transpose produced {ProducerDetailCount} producer details and {ReportedMaterialCount} reported materials",
-            newProducerDetails.Count, totalReportedMaterials);
+        logger.LogInformation(
+            "Transpose produced {OrganisationCount} organisations, {ProducerDetailCount} producer details and {ReportedMaterialCount} reported materials",
+            organisations.Count, newProducerDetails.Count, totalReportedMaterials);
+
+        await bulkOps.BulkInsertAsync(dbContext, organisations, cancellationToken);
 
         await bulkOps.BulkInsertAsync(dbContext, newProducerDetails, cfg =>
         {
@@ -109,9 +117,12 @@ public class ProducerDataTransposer(
             // Set UseTempDB to use temp tables instead of 'proper' tables since they don't require permissions.
             cfg.UseTempDB = true;
         }, cancellationToken);
+
+        calculatorRun.OrgPomDataLoadedAt = timeProvider.GetUtcNow().UtcDateTime;
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private static AlignmentOrganisation ToAlignmentOrganisation(CalculatorRunOrganisationDataDetail o) => new()
+    private static AlignmentOrganisation ToAlignmentOrganisation(CalculatorRunOrganisation o) => new()
     {
         OrganisationId = o.OrganisationId,
         SubsidiaryId = o.SubsidiaryId,
@@ -119,19 +130,13 @@ public class ProducerDataTransposer(
         OrganisationName = o.OrganisationName,
         TradingName = o.TradingName,
         ObligationStatus = o.ObligationStatus,
+        DaysObligated = o.DaysObligated,
+        JoinerDate = o.JoinerDate,
+        LeaverDate = o.LeaverDate,
+        StatusCode = o.StatusCode,
+        ErrorCode = o.ErrorCode,
+        HasH1 = o.HasH1,
         HasH2 = o.HasH2
-    };
-
-    private static AlignmentPom ToAlignmentPom(CalculatorRunPomDataDetail p) => new()
-    {
-        OrganisationId = p.OrganisationId,
-        SubsidiaryId = p.SubsidiaryId,
-        SubmitterId = p.SubmitterId,
-        PackagingMaterial = p.PackagingMaterial,
-        PackagingType = p.PackagingType,
-        SubmissionPeriod = p.SubmissionPeriod,
-        PackagingMaterialWeight = p.PackagingMaterialWeight,
-        RamRagRating = p.RamRagRating?.ToDbValue()
     };
 
     private static ProducerReportedMaterial ToProducerReportedMaterial(AlignedReportedMaterial reportedMaterial, Material material) => new()

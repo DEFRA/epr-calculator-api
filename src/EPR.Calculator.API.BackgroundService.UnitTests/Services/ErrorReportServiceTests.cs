@@ -5,6 +5,7 @@ using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Fixtures;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
 {
@@ -34,35 +35,29 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
 
             var pomDetails = new[]
             {
-                new CalculatorRunPomDataDetail
+                new AlignmentPom
                 {
                     OrganisationId = 1,
                     SubsidiaryId = "11",
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = DateTime.UtcNow,
-                    SubmissionPeriodDesc = "July to December 2023"
                 },
-                new CalculatorRunPomDataDetail
+                new AlignmentPom
                 {
                     OrganisationId = 2,
                     SubsidiaryId = "22",
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = DateTime.UtcNow,
-                    SubmissionPeriodDesc = "July to December 2023"
                 },
-                new CalculatorRunPomDataDetail
+                new AlignmentPom
                 {
                     OrganisationId = 3,
                     SubsidiaryId = "33",
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = DateTime.UtcNow,
-                    SubmissionPeriodDesc = "July to December 2023"
                 }
             };
 
             var orgDetails = new[]
             {
-                new CalculatorRunOrganisationDataDetail
+                new CalculatorRunOrganisation
                 {
                     OrganisationId = 1,
                     OrganisationName = "Test"
@@ -96,33 +91,27 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
 
             var pomDetails = new[]
             {
-                new CalculatorRunPomDataDetail
+                new AlignmentPom
                 {
                     OrganisationId = 10,
                     SubsidiaryId = "101",
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = DateTime.UtcNow,
-                    SubmissionPeriodDesc = "July to December 2023"
                 },
-                new CalculatorRunPomDataDetail
+                new AlignmentPom
                 {
                     OrganisationId = 10,
                     SubsidiaryId = "101",
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = DateTime.UtcNow,
-                    SubmissionPeriodDesc = "July to December 2023"
                 },
-                new CalculatorRunPomDataDetail
+                new AlignmentPom
                 {
                     OrganisationId = 10,
                     SubsidiaryId = "102",
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = DateTime.UtcNow,
-                    SubmissionPeriodDesc = "July to December 2023"
                 }
             };
 
-            var orgDetails = Array.Empty<CalculatorRunOrganisationDataDetail>();
+            var orgDetails = Array.Empty<CalculatorRunOrganisation>();
 
             // Act
             IEnumerable<ErrorReport> reportsList = ErrorReportService.HandleMissingRegistrationData(pomDetails, orgDetails, runId, createdBy);
@@ -142,33 +131,29 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
 
             var pomDetails = new[]
             {
-                new CalculatorRunPomDataDetail
+                new AlignmentPom
                 {
                     OrganisationId = 1,
                     SubsidiaryId = "101",
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = DateTime.UtcNow,
-                    SubmissionPeriodDesc = "July to December 2023"
                 },
-                new CalculatorRunPomDataDetail
+                new AlignmentPom
                 {
                     OrganisationId = 2,
                     SubsidiaryId = "102",
                      SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = DateTime.UtcNow,
-                    SubmissionPeriodDesc = "July to December 2023"
                 }
             };
 
             var orgDetails = new[]
             {
-                new CalculatorRunOrganisationDataDetail
+                new CalculatorRunOrganisation
                 {
                     OrganisationId = 1,
                     SubsidiaryId = "101",
                     OrganisationName = "Test"
                 },
-                new CalculatorRunOrganisationDataDetail
+                new CalculatorRunOrganisation
                 {
                     OrganisationId = 2,
                     SubsidiaryId = "102",
@@ -192,18 +177,16 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
 
             // Simulate 41 POMs for the same Org/Sub which does NOT exist in org table
             var pomDetails = Enumerable.Range(1, 41)
-                .Select(i => new CalculatorRunPomDataDetail
+                .Select(i => new AlignmentPom
                 {
                     OrganisationId = 100,
                     SubsidiaryId = "200",
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = DateTime.UtcNow,
-                    SubmissionPeriodDesc = "July to December 2023"
                 })
                 .ToArray();
 
             // Org table is empty → all POMs are unmatched
-            var orgDetails = Array.Empty<CalculatorRunOrganisationDataDetail>();
+            var orgDetails = Array.Empty<CalculatorRunOrganisation>();
 
             // Act
             IEnumerable<ErrorReport> reportsList = ErrorReportService.HandleMissingRegistrationData(pomDetails, orgDetails, runId, createdBy);
@@ -229,33 +212,29 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
 
             var pomDetails = new[]
             {
-                new CalculatorRunPomDataDetail
+                new AlignmentPom
                 {
                     OrganisationId = 1,
                     SubsidiaryId = "101",
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = DateTime.UtcNow,
-                    SubmissionPeriodDesc = "July to December 2023"
                 },
-                new CalculatorRunPomDataDetail
+                new AlignmentPom
                 {
                     OrganisationId = 2,
                     SubsidiaryId = "202",
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = DateTime.UtcNow,
-                    SubmissionPeriodDesc = "July to December 2023"
                 }
             };
 
             var orgDetails = new[]
             {
-                new CalculatorRunOrganisationDataDetail
+                new CalculatorRunOrganisation
                 {
                     OrganisationId = 1,
                     SubsidiaryId = "101",
                     OrganisationName = "Test"
                 },
-                new CalculatorRunOrganisationDataDetail
+                new CalculatorRunOrganisation
                 {
                     OrganisationId = 2,
                     SubsidiaryId = "202",
@@ -276,53 +255,44 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             // Arrange
             var runId = 500;
             var createdBy = "no unmatched test";
-            var timestamp = DateTime.UtcNow;
 
             var pomDetails = new[]
             {
-                new CalculatorRunPomDataDetail
+                new AlignmentPom
                 {
                     OrganisationId = 1,
                     SubsidiaryId = null,
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = timestamp,
-                    SubmissionPeriodDesc = "July to December 2023"
                 },
-                new CalculatorRunPomDataDetail
+                new AlignmentPom
                 {
                     OrganisationId = 1,
                     SubsidiaryId = "101",
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = timestamp,
-                    SubmissionPeriodDesc = "July to December 2023"
                 },
-                new CalculatorRunPomDataDetail
+                new AlignmentPom
                 {
                     OrganisationId = 1,
                     SubsidiaryId = "202",
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = timestamp,
-                    SubmissionPeriodDesc = "July to December 2023"
                 },
-                new CalculatorRunPomDataDetail
+                new AlignmentPom
                 {
                     OrganisationId = 2,
                     SubsidiaryId = "303",
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = timestamp,
-                    SubmissionPeriodDesc = "July to December 2023"
                 }
             };
 
             var orgDetails = new[]
             {
-                new CalculatorRunOrganisationDataDetail
+                new CalculatorRunOrganisation
                 {
                     OrganisationId = 1,
                     SubsidiaryId = "101",
                     OrganisationName = "Test"
                 },
-                new CalculatorRunOrganisationDataDetail
+                new CalculatorRunOrganisation
                 {
                     OrganisationId = 2,
                     SubsidiaryId = "303",
@@ -352,7 +322,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         public void HandleMissingRegistrationData_Throws_WhenPomDetailsNull()
         {
             // Arrange
-            var orgDetails = new[] { new CalculatorRunOrganisationDataDetail
+            var orgDetails = new[] { new CalculatorRunOrganisation
                 {
                     OrganisationId = 1,
                     OrganisationName="Test1"
@@ -368,13 +338,11 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         public void HandleMissingRegistrationData_Throws_WhenOrgDetailsNull()
         {
             // Arrange
-            var pomDetails = new[] { new CalculatorRunPomDataDetail
+            var pomDetails = new[] { new AlignmentPom
                 {
                     OrganisationId = 1,
                     SubsidiaryId = "11",
                     SubmissionPeriod = "2023-P2",
-                    LoadTimeStamp = DateTime.UtcNow,
-                    SubmissionPeriodDesc = "July to December 2023"
                 },
             };
 
@@ -812,14 +780,12 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             Assert.IsTrue(reportsList.Any(p => p.OrgId == producer6 && p.SubId == null));
         }
 
-        private static CalculatorRunPomDataDetail CreatePomData(int orgId, string submissionPeriod, Guid submitterId, string packagingType, string packagingMaterial, int packagingMaterialWeight, string submissionPeriodDesc = "Jan to December 2025", string? subsidiaryId = null)
+        private static AlignmentPom CreatePomData(int orgId, string submissionPeriod, Guid submitterId, string packagingType, string packagingMaterial, int packagingMaterialWeight, string submissionPeriodDesc = "Jan to December 2025", string? subsidiaryId = null)
         {
-            return new CalculatorRunPomDataDetail
+            return new AlignmentPom
             {
                 OrganisationId = orgId,
                 SubmissionPeriod = submissionPeriod,
-                LoadTimeStamp = DateTime.UtcNow,
-                SubmissionPeriodDesc = submissionPeriodDesc,
                 SubmitterId = submitterId,
                 PackagingType = packagingType,
                 PackagingMaterial = packagingMaterial,
@@ -828,9 +794,9 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             };
         }
 
-        private static CalculatorRunOrganisationDataDetail CreateOrganisationData(int orgId, string? subId, string orgName, Guid submitterId, string obligationStatus = "O", string statusCode = "", string submissionPeriodDesc = "Jan to December 2025", string? errorCode = null, bool hasH1 = true, bool hasH2 = true)
+        private static CalculatorRunOrganisation CreateOrganisationData(int orgId, string? subId, string orgName, Guid submitterId, string obligationStatus = "O", string statusCode = "", string submissionPeriodDesc = "Jan to December 2025", string? errorCode = null, bool hasH1 = true, bool hasH2 = true)
         {
-            return new CalculatorRunOrganisationDataDetail
+            return new CalculatorRunOrganisation
             {
                 OrganisationId = orgId,
                 SubsidiaryId = subId,
