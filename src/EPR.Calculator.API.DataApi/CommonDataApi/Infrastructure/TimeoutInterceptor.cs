@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace EPR.CommonDataService.Data.Infrastructure;
+namespace EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
 
 /// <summary>
 ///     Intercepts database commands. If the command text contains a matching comment, it will override the timeout for

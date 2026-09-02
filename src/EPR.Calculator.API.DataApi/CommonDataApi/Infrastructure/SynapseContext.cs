@@ -1,8 +1,8 @@
-using EPR.CommonDataService.Data.Entities;
+using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 
-namespace EPR.CommonDataService.Data.Infrastructure;
+namespace EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
 
 [ExcludeFromCodeCoverage]
 public class SynapseContext : DbContext
