@@ -14,6 +14,7 @@ using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
 using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
 using EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
+using EPR.CommonDataService.DataApi.CommonDataApi.PomEligibility;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -179,6 +180,7 @@ public static class ServiceConfiguration
             services.AddTransient<IStreamPomsRequestHandler, StreamPomsRequestHandler>();
             services.AddTransient<IProducerPomAligner, ProducerPomAligner>();
             services.AddTransient<IProducerObligationDeterminer, ProducerObligationDeterminer>();
+            services.AddTransient<IPomEligibilityFilter, PomEligibilityFilter>();
 
             return services;
         }
