@@ -6,6 +6,7 @@ using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 using EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
+using EPR.CommonDataService.DataApi.CommonDataApi.PomEligibility;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -123,11 +124,17 @@ public class CommonDataApiLoaderTests
             .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()))
             .Returns(EmptyAsyncEnumerable<PayCalPom>());
 
+        var mockPomEligibilityFilter = new Mock<IPomEligibilityFilter>();
+        mockPomEligibilityFilter
+            .Setup(f => f.Filter(It.IsAny<IReadOnlyList<PayCalPom>>(), It.IsAny<IReadOnlyCollection<int>>()))
+            .Returns((IReadOnlyList<PayCalPom> poms, IReadOnlyCollection<int> _) => poms);
+
         var loader = new CommonDataApiLoader(
             loaderOptions,
             mockOrganisationsHandler.Object,
             mockPomsHandler.Object,
             mockDeterminer.Object,
+            mockPomEligibilityFilter.Object,
             mockLogger.Object,
             new Telemetry<CommonDataApiLoader>());
 
@@ -242,11 +249,17 @@ public class CommonDataApiLoaderTests
             .Setup(d => d.Determine(It.IsAny<IReadOnlyList<PayCalOrganisation>>()))
             .Returns((IReadOnlyList<PayCalOrganisation> organisations) => organisations);
 
+        var mockPomEligibilityFilter = new Mock<IPomEligibilityFilter>();
+        mockPomEligibilityFilter
+            .Setup(f => f.Filter(It.IsAny<IReadOnlyList<PayCalPom>>(), It.IsAny<IReadOnlyCollection<int>>()))
+            .Returns((IReadOnlyList<PayCalPom> poms, IReadOnlyCollection<int> _) => poms);
+
         return new CommonDataApiLoader(
             loaderOptions,
             organisationsHandler.Object,
             pomsHandler.Object,
             mockObligationDeterminer.Object,
+            mockPomEligibilityFilter.Object,
             mockLogger.Object,
             new Telemetry<CommonDataApiLoader>());
     }
