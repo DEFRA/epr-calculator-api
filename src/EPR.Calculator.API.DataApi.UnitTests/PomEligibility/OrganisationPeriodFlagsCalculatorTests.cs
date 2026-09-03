@@ -1,7 +1,7 @@
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.CommonDataApi.PomEligibility;
+using EPR.CommonDataService.DataApi.PomEligibility;
 
-namespace EPR.Calculator.API.DataApi.UnitTests.CommonDataApi.PomEligibility;
+namespace EPR.Calculator.API.DataApi.UnitTests.PomEligibility;
 
 [TestClass]
 public class OrganisationPeriodFlagsCalculatorTests

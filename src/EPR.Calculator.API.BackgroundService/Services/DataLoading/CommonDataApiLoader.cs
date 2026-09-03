@@ -3,10 +3,10 @@ using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.CommonDataService.DataApi.CommonDataApi;
-using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
+using EPR.CommonDataService.DataApi.Alignment;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
-using EPR.CommonDataService.DataApi.CommonDataApi.PomEligibility;
+using EPR.CommonDataService.DataApi.ObligationDetermination;
+using EPR.CommonDataService.DataApi.PomEligibility;
 using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.BackgroundService.Services.DataLoading;
