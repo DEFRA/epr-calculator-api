@@ -1,4 +1,3 @@
-using System.Globalization;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 
 namespace EPR.CommonDataService.DataApi.CommonDataApi.PomEligibility;
@@ -27,9 +26,11 @@ public sealed class PomEligibilityFilter : IPomEligibilityFilter
         var registeredOrganisationIds = organisationIdsWithRegistration as HashSet<int> ?? organisationIdsWithRegistration.ToHashSet();
 
         var eligiblePeriods = poms
-            .Where(p => p.OrganisationId is not null && TryParseYear(p.SubmissionPeriod, out _))
+            .Where(p => p.OrganisationId is not null && SubmissionPeriodClassification.TryParseYear(p.SubmissionPeriod, out _))
             .GroupBy(p => (p.OrganisationId!.Value, p.SubmitterId, Year: ParseYear(p.SubmissionPeriod!)))
-            .Where(g => g.Any(p => IsH1(p.SubmissionPeriod!, g.Key.Year)) && g.Any(p => IsH2(p.SubmissionPeriod!, g.Key.Year)))
+            .Where(g =>
+                g.Any(p => SubmissionPeriodClassification.IsH1(p.SubmissionPeriod!, g.Key.Year)) &&
+                g.Any(p => SubmissionPeriodClassification.IsH2(p.SubmissionPeriod!, g.Key.Year)))
             .Select(g => g.Key)
             .ToHashSet();
 
@@ -37,29 +38,14 @@ public sealed class PomEligibilityFilter : IPomEligibilityFilter
             .Where(p =>
                 p.OrganisationId is not null &&
                 registeredOrganisationIds.Contains(p.OrganisationId.Value) &&
-                TryParseYear(p.SubmissionPeriod, out var year) &&
+                SubmissionPeriodClassification.TryParseYear(p.SubmissionPeriod, out var year) &&
                 eligiblePeriods.Contains((p.OrganisationId.Value, p.SubmitterId, year)))
             .ToList();
     }
 
-    private static bool TryParseYear(string? submissionPeriod, out int year)
-    {
-        year = 0;
-        return submissionPeriod is { Length: >= 4 } &&
-               int.TryParse(submissionPeriod.AsSpan(0, 4), NumberStyles.Integer, CultureInfo.InvariantCulture, out year);
-    }
-
     private static int ParseYear(string submissionPeriod)
     {
-        TryParseYear(submissionPeriod, out var year);
+        SubmissionPeriodClassification.TryParseYear(submissionPeriod, out var year);
         return year;
     }
-
-    private static bool IsH1(string submissionPeriod, int year) =>
-        (year > 2024 && submissionPeriod.EndsWith("-H1", StringComparison.Ordinal)) ||
-        submissionPeriod is "2024-P1" or "2024-P2" or "2024-P3";
-
-    private static bool IsH2(string submissionPeriod, int year) =>
-        (year > 2024 && submissionPeriod.EndsWith("-H2", StringComparison.Ordinal)) ||
-        submissionPeriod == "2024-P4";
 }

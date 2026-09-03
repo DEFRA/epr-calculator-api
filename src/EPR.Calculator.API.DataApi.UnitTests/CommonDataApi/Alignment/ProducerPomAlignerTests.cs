@@ -163,6 +163,53 @@ public class ProducerPomAlignerTests
     }
 
     [TestMethod]
+    [DataRow("HH")]
+    [DataRow("CW")]
+    [DataRow("PB")]
+    public void Align_WithReportablePackagingType_IncludesPom(string packagingType)
+    {
+        var organisations = new[] { Organisation() };
+        var poms = new[] { Pom() with { PackagingType = packagingType } };
+
+        var result = aligner.Align(organisations, poms, ["PL"]).ToList();
+
+        result[0].ReportedMaterials.ShouldNotBeEmpty();
+    }
+
+    [TestMethod]
+    public void Align_WithUnreportablePackagingType_ExcludesPom()
+    {
+        var organisations = new[] { Organisation() };
+        var poms = new[] { Pom() with { PackagingType = "NH" } };
+
+        var result = aligner.Align(organisations, poms, ["PL"]).ToList();
+
+        result.ShouldBeEmpty();
+    }
+
+    [TestMethod]
+    public void Align_WithHouseholdDrinksContainersAndGlassMaterial_IncludesPom()
+    {
+        var organisations = new[] { Organisation() };
+        var poms = new[] { Pom() with { PackagingType = "HDC", PackagingMaterial = "GL" } };
+
+        var result = aligner.Align(organisations, poms, ["GL"]).ToList();
+
+        result[0].ReportedMaterials.ShouldNotBeEmpty();
+    }
+
+    [TestMethod]
+    public void Align_WithHouseholdDrinksContainersAndNonGlassMaterial_ExcludesPom()
+    {
+        var organisations = new[] { Organisation() };
+        var poms = new[] { Pom() with { PackagingType = "HDC", PackagingMaterial = "PL" } };
+
+        var result = aligner.Align(organisations, poms, ["PL"]).ToList();
+
+        result.ShouldBeEmpty();
+    }
+
+    [TestMethod]
     public void Align_WithMaterialCodeNotInKnownList_ExcludesMaterial_ButKeepsProducer()
     {
         var organisations = new[] { Organisation() };
@@ -200,7 +247,7 @@ public class ProducerPomAlignerTests
         {
             Pom() with { SubmissionPeriod = "2024-P1", PackagingMaterialWeight = 100d },
             Pom() with { SubmissionPeriod = "2024-P2", PackagingMaterialWeight = 200d },
-            Pom() with { PackagingType = "NH", PackagingMaterialWeight = 50d }
+            Pom() with { PackagingType = "CW", PackagingMaterialWeight = 50d }
         };
 
         var result = aligner.Align(organisations, poms, ["PL"]).ToList();
