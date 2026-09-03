@@ -4,7 +4,7 @@ using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Extensions;
 using EPR.CommonDataService.DataApi.CommonDataApi;
-using EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
+using EPR.CommonDataService.DataApi.ObligationDetermination;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

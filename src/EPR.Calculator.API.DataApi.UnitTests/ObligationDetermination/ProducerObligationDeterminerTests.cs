@@ -1,6 +1,6 @@
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 
-namespace EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination.UnitTests;
+namespace EPR.CommonDataService.DataApi.ObligationDetermination.UnitTests;
 
 /// <summary>
 ///     Validates <see cref="ProducerObligationDeterminer" /> against the shared business-rule scenarios

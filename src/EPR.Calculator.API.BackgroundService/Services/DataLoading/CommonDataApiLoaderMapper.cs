@@ -1,6 +1,6 @@
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Enums;
-using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
+using EPR.CommonDataService.DataApi.Alignment;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 
 namespace EPR.Calculator.API.BackgroundService.Services.DataLoading

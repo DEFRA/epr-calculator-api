@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
+namespace EPR.CommonDataService.DataApi;
 
 /// <summary>
 ///     Reports each DataApi step as an activity on the "epr.paycal" source, which both the OpenTelemetry

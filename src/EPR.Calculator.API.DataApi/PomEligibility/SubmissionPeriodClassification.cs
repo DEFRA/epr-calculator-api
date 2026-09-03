@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace EPR.CommonDataService.DataApi.CommonDataApi.PomEligibility;
+namespace EPR.CommonDataService.DataApi.PomEligibility;
 
 /// <summary>
 ///     Classifies a POM submission_period string ("2024-P1".."2024-P4", or "&lt;year&gt;-H1"/"-H2" for

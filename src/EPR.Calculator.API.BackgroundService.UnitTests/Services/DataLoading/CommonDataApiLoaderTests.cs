@@ -5,8 +5,8 @@ using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
-using EPR.CommonDataService.DataApi.CommonDataApi.PomEligibility;
+using EPR.CommonDataService.DataApi.ObligationDetermination;
+using EPR.CommonDataService.DataApi.PomEligibility;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

@@ -1,6 +1,4 @@
-using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
-
-namespace EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
+namespace EPR.CommonDataService.DataApi.Alignment;
 
 public interface IProducerPomAligner
 {

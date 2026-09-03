@@ -2,7 +2,7 @@ using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Utils;
-using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
+using EPR.CommonDataService.DataApi.Alignment;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Services;

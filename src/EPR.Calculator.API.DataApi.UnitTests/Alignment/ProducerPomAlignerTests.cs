@@ -1,6 +1,6 @@
-using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
+using EPR.CommonDataService.DataApi.Alignment;
 
-namespace EPR.Calculator.API.DataApi.UnitTests.CommonDataApi.Alignment;
+namespace EPR.Calculator.API.DataApi.UnitTests.Alignment;
 
 [TestClass]
 public class ProducerPomAlignerTests
