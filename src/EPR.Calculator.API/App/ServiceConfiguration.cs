@@ -10,6 +10,7 @@ using EPR.Calculator.API.Filters;
 using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
+using EPR.CommonDataService.DataApi.AcceptedFileSelection;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.Alignment;
 using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
@@ -178,6 +179,7 @@ public static class ServiceConfiguration
 
             services.AddTransient<IStreamOrganisationsRequestHandler, StreamOrganisationsRequestHandler>();
             services.AddTransient<IStreamPomsRequestHandler, StreamPomsRequestHandler>();
+            services.AddTransient<IAcceptedFileSelector, AcceptedFileSelector>();
             services.AddTransient<IProducerPomAligner, ProducerPomAligner>();
             services.AddTransient<IProducerObligationDeterminer, ProducerObligationDeterminer>();
             services.AddTransient<IPomEligibilityFilter, PomEligibilityFilter>();

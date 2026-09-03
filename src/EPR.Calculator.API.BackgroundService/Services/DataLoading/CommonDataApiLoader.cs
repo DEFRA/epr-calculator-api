@@ -3,6 +3,7 @@ using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.CommonDataService.DataApi.CommonDataApi;
+using EPR.CommonDataService.DataApi.AcceptedFileSelection;
 using EPR.CommonDataService.DataApi.Alignment;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 using EPR.CommonDataService.DataApi.ObligationDetermination;
@@ -36,6 +37,7 @@ public class CommonDataApiLoader(
     IOptions<CommonDataApiLoaderOptions> options,
     IStreamOrganisationsRequestHandler organisationsHandler,
     IStreamPomsRequestHandler pomsHandler,
+    IAcceptedFileSelector acceptedFileSelector,
     IProducerObligationDeterminer obligationDeterminer,
     IPomEligibilityFilter pomEligibilityFilter,
     IOrganisationPeriodFlagsCalculator organisationPeriodFlagsCalculator,
@@ -107,7 +109,7 @@ public class CommonDataApiLoader(
 
     private async Task<List<PayCalOrganisation>> StreamOrganisations(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
     {
-        await using var enumerator = organisationsHandler.Handle(relativeYear, cutOffDate, cancellationToken).GetAsyncEnumerator(cancellationToken);
+        await using var enumerator = organisationsHandler.Handle(relativeYear, cancellationToken).GetAsyncEnumerator(cancellationToken);
 
         var hasFirst = await telemetry.Metric(Metrics.OrgStreamDelay, () => enumerator.MoveNextAsync().AsTask(), StreamDelayThreshold, nameof(Metrics.OrgStreamDelay));
 
@@ -119,14 +121,17 @@ public class CommonDataApiLoader(
             hasFirst = await enumerator.MoveNextAsync();
         }
 
-        // Obligation determination needs every row for the run up front - it aggregates across
-        // rows (per producer/submission period) rather than deciding a row in isolation.
-        return obligationDeterminer.Determine(rawOrganisations).ToList();
+        // Every candidate accepted file is streamed unfiltered - pick the winning file per
+        // org/submitter/period (honouring the cut-off date) before obligation determination, which
+        // needs every row for the run up front since it aggregates across rows (per producer/submission
+        // period) rather than deciding a row in isolation.
+        var latestOrganisations = acceptedFileSelector.SelectLatestOrganisationFiles(rawOrganisations, cutOffDate);
+        return obligationDeterminer.Determine(latestOrganisations).ToList();
     }
 
     private async Task<List<PayCalPom>> StreamPoms(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
     {
-        await using var enumerator = pomsHandler.Handle(relativeYear, cutOffDate, cancellationToken).GetAsyncEnumerator(cancellationToken);
+        await using var enumerator = pomsHandler.Handle(relativeYear, cancellationToken).GetAsyncEnumerator(cancellationToken);
 
         var hasFirst = await telemetry.Metric(Metrics.PomStreamDelay, () => enumerator.MoveNextAsync().AsTask(), StreamDelayThreshold, nameof(Metrics.PomStreamDelay));
 
@@ -138,6 +143,6 @@ public class CommonDataApiLoader(
             hasFirst = await enumerator.MoveNextAsync();
         }
 
-        return poms;
+        return acceptedFileSelector.SelectLatestPomFiles(poms, cutOffDate).ToList();
     }
 }

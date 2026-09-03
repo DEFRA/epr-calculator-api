@@ -82,22 +82,46 @@ Partway through stage 5's clean-up, a teammate (Nicholas Featch) pushed `ECV-730
 
 ---
 
+## 7. Cutoff-date/resubmission file selection moved to C# (uncommitted)
+
+Follow-on request, after stage 6's SQL inlining: move the cutoff-date logic still embedded in both handlers' SQL — "a resubmission created after the cut-off date doesn't count; fall back to the latest still-eligible file" — into C#, exposing whether a candidate file is an initial submission or a resubmission. Scoped explicitly with the user via `AskUserQuestion`: preserve the existing "fall back to an earlier eligible file" behaviour exactly (rather than a simpler but behaviour-changing alternative), which requires the SQL to stop ranking/deduping altogether and hand C# the *full* candidate-file list per org/submitter/period.
+
+**Entities** (`DataApi/CommonDataApi/Entities/{PayCalOrganisation,PayCalPom}.cs`): each gained `FileName`, `IsResubmission`, `CreatedDateTime` — file-selection inputs only, explicitly commented as not carried past that stage (nothing downstream reads them). Mapped to `file_name`/`is_resubmission`/`created_date_time` columns in `SynapseContext.cs`.
+
+**SQL rewritten in both handlers** to stop selecting a winner at all — they now return every accepted-status candidate file unfiltered (no `ROW_NUMBER()`/dedup, no cut-off filtering, `Handle(...)` lost its `cutOffDate` parameter entirely):
+- `StreamPomsRequestHandler.cs`: the `latest_accepted_pom` CTE (which used `ROW_NUMBER() ... PARTITION BY org/submitter/period ORDER BY CreatedDateTime DESC` plus the cut-off `WHERE`) became `candidate_pom_files`, with `SELECT DISTINCT` added — necessary because the old `ROW_NUMBER()` was incidentally collapsing `rpd.Pom`'s per-line-item duplication down to one row before the outer re-expansion join; removing it without adding `DISTINCT` would have caused row multiplication in the outer join to `rpd.POM`.
+- `StreamOrganisationsRequestHandler.cs`: same shape change (`larf_base`/`latest_accepted_registration_files` → single `candidate_registration_files` CTE, `DISTINCT`, no ranking, no cut-off `WHERE`). Initially left as two CTEs (an intermediate `candidate_registrations` re-joining to `CompanyDetails`), then collapsed into the single-CTE-plus-main-`SELECT` shape to match `StreamPomsRequestHandler` — the middle CTE wasn't doing anything the outer `SELECT`'s join/`WHERE` couldn't do directly.
+
+**New component:** `IAcceptedFileSelector` / `AcceptedFileSelector` (`DataApi/AcceptedFileSelection/`) — one generic algorithm shared by both entity types via delegates (group-key selector, file-name/`IsResubmission`/`CreatedDateTime` selectors). Per group: filter to eligible candidates (not a resubmission, or no cut-off, or created on/before the cut-off), pick the latest by `CreatedDateTime` as the winner, keep every row belonging to the winning file, and drop groups with no eligible candidate at all.
+
+**Wiring:** `CommonDataApiLoader` applies the selector to the raw organisation stream before `IProducerObligationDeterminer.Determine` (which needs the winner already decided, since its own aggregation is per producer/period) and to the raw POM stream before returning. Registered in DI (`ServiceConfiguration.cs`). `FakeCommonDataApiStreams.cs` and `CommonDataApiLoaderTests.cs` updated to match the simplified `Handle(...)` signature and the new dependency (mocked as pass-through, since neither fake did cut-off filtering to begin with).
+
+**Test coverage:** new `AcceptedFileSelectorTests.cs` (`DataApi.UnitTests/AcceptedFileSelection/`) — 12 scenarios ported directly from `epr-data`'s `test_paycal_orgdata_sql.py`/`test_paycal_pomdata_sql.py` reference cases (Initial/Resub/Resub2 chains, before/after cut-off), restricted to the subset actually relevant to this component — regulator-status filtering (Pending exclusion, POM's `Regulator_Status = 'Accepted'` filter) remains SQL's job and never reaches the selector — plus 4 hand-written edge cases (no eligible candidate in a group, `cutOffDate: null` disabling the cut-off entirely, grouping isolation across org/submitter/year, and a winning file's line items all surviving together). 16 tests total, all passing.
+
+**Known caveat:** same as stage 6 — the SQL text changes are unexecuted/unverified against a real Synapse warehouse in this environment (integration tests exercise the fakes, not this SQL). Needs review by someone with warehouse access before deployment.
+
+**Status:** implemented and fully green (see Verification status below) but not yet committed — sitting on top of the namespace-restructure commit (`126019d`).
+
+---
+
 ## Files changed this session
 
-**New C# components** (`EPR.Calculator.API.DataApi/CommonDataApi/`):
-- `ObligationDetermination/ProducerObligationDeterminer.cs`
-- `PomEligibility/PomEligibilityFilter.cs`
-- `PomEligibility/OrganisationPeriodFlagsCalculator.cs`
-- `PomEligibility/SubmissionPeriodClassification.cs`
+**New C# components** (`EPR.Calculator.API.DataApi/`):
+- `CommonDataApi/ObligationDetermination/ProducerObligationDeterminer.cs`
+- `CommonDataApi/PomEligibility/PomEligibilityFilter.cs`
+- `CommonDataApi/PomEligibility/OrganisationPeriodFlagsCalculator.cs`
+- `CommonDataApi/PomEligibility/SubmissionPeriodClassification.cs`
+- `AcceptedFileSelection/AcceptedFileSelector.cs` (stage 7)
 
 **Modified product code:**
-- `DataApi/CommonDataApi/Entities/PayCalOrganisation.cs` (added `RegulatorStatus`)
-- `DataApi/CommonDataApi/Infrastructure/SynapseContext.cs` (unmapped C#-computed fields)
+- `DataApi/CommonDataApi/Entities/PayCalOrganisation.cs` (added `RegulatorStatus`; stage 7 added `FileName`/`IsResubmission`/`CreatedDateTime`)
+- `DataApi/CommonDataApi/Entities/PayCalPom.cs` (stage 7 added `FileName`/`IsResubmission`/`CreatedDateTime`)
+- `DataApi/CommonDataApi/Infrastructure/SynapseContext.cs` (unmapped C#-computed fields; stage 7 mapped the three new file-selection columns on both entities)
 - `DataApi/CommonDataApi/Alignment/ProducerPomAligner.cs` (packaging-type filter)
-- `DataApi/StoredProcs/sp_GetPaycalOrgData.sql` (thinned twice by this session: obligation logic, then H1/H2; then deleted entirely in stage 6, inlined into `StreamOrganisationsRequestHandler.cs`)
-- `DataApi/StoredProcs/sp_GetPaycalPomData.sql` (thinned twice by this session: eligibility gates, then packaging type; then deleted entirely in stage 6, inlined into `StreamPomsRequestHandler.cs`)
+- `DataApi/StoredProcs/sp_GetPaycalOrgData.sql` (thinned twice by this session: obligation logic, then H1/H2; then deleted entirely in stage 6, inlined into `StreamOrganisationsRequestHandler.cs`; stage 7 dropped its ranking/cut-off logic entirely)
+- `DataApi/StoredProcs/sp_GetPaycalPomData.sql` (thinned twice by this session: eligibility gates, then packaging type; then deleted entirely in stage 6, inlined into `StreamPomsRequestHandler.cs`; stage 7 dropped its ranking/cut-off logic entirely)
 - `DataApi/StoredProcs/fn_ProducerObligationDetermination.sql` (deleted in stage 1)
-- `BackgroundService/Services/DataLoading/CommonDataApiLoader.cs` (restructured pipeline three times across the three moves)
+- `BackgroundService/Services/DataLoading/CommonDataApiLoader.cs` (restructured pipeline three times across the three moves; stage 7 wired in `IAcceptedFileSelector`)
 - `EPR.Calculator.API/App/ServiceConfiguration.cs` (DI registrations)
 
 **New test coverage:**
@@ -106,6 +130,7 @@ Partway through stage 5's clean-up, a teammate (Nicholas Featch) pushed `ECV-730
 - `DataApi.UnitTests/TestData/myc-obligation-determination-test-cases.csv` (ported from `epr-data`)
 - Extended `DataApi.UnitTests/CommonDataApi/Alignment/ProducerPomAlignerTests.cs`
 - Extended `BackgroundService.UnitTests/Services/DataLoading/CommonDataApiLoaderTests.cs`
+- `DataApi.UnitTests/AcceptedFileSelection/AcceptedFileSelectorTests.cs` (stage 7)
 
 **Integration test fixtures:**
 - `IntegrationTests/TestData/{2025,2026}-pom-data.csv` (added complementary H1/H2 periods for the eligibility gate)
@@ -118,10 +143,10 @@ Partway through stage 5's clean-up, a teammate (Nicholas Featch) pushed `ECV-730
 
 ## Verification status
 
-- **`DataApi.UnitTests`**: 131 tests, all passing (includes ~100 ported obligation-determination scenarios, new eligibility/flags/alignment tests).
+- **`DataApi.UnitTests`**: 147 tests, all passing (includes ~100 ported obligation-determination scenarios, eligibility/flags/alignment tests, and stage 7's 16 `AcceptedFileSelector` tests).
 - **`BackgroundService.UnitTests`**: 479 tests, all passing.
 - **`EPR.Calculator.API.UnitTests`**: 346 tests, all passing.
-- **`IntegrationTests`**: 2 tests (`IntegrationTest_2025`/`2026`), passing — confirmed stable across repeated runs against a freshly-created `Testcontainers` SQL Server instance (not the long-lived, potentially-stale one used for most of this session's debugging).
+- **`IntegrationTests`**: 2 tests (`IntegrationTest_2025`/`2026`), passing — confirmed stable across repeated runs against a freshly-created `Testcontainers` SQL Server instance (not the long-lived, potentially-stale one used for most of this session's debugging). Stage 7's output was byte-identical to the pre-change baseline, confirming the existing fixtures (single candidate file per group, `IsResubmission` defaulting `false`) flow through the new selector unchanged.
 
 ## Known caveats for whoever picks this branch up next
 

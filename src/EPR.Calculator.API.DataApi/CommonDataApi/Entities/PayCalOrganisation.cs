@@ -20,4 +20,9 @@ public record PayCalOrganisation
     public int? SubmissionPeriodYear { get; init; }
     public bool HasH1 { get; init; }
     public bool HasH2 { get; init; }
+
+    // File-selection inputs only (see IAcceptedFileSelector) - not carried past that stage.
+    public string? FileName { get; init; }
+    public bool IsResubmission { get; init; }
+    public DateTimeOffset? CreatedDateTime { get; init; }
 }
