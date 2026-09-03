@@ -1,5 +1,6 @@
 using System.Globalization;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
 
 namespace EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
 
@@ -33,29 +34,30 @@ public sealed class ProducerObligationDeterminer : IProducerObligationDeterminer
     private static readonly HashSet<string> NotObligatedLeaverCodes = ["07", "09", "13", "14", "16", "18", "21"];
     private static readonly HashSet<string> DateSensitiveLeaverCodes = ["02", "03"];
 
-    public IReadOnlyList<PayCalOrganisation> Determine(IReadOnlyList<PayCalOrganisation> organisations)
-    {
-        var rows = organisations.Select(o => new Row(o, ComputeProducerId(o))).ToList();
+    public IReadOnlyList<PayCalOrganisation> Determine(IReadOnlyList<PayCalOrganisation> organisations) =>
+        DataApiTelemetry.Trace(typeof(ProducerObligationDeterminer), nameof(Determine), () =>
+        {
+            var rows = organisations.Select(o => new Row(o, ComputeProducerId(o))).ToList();
 
-        ComputeRawObligationStatus(rows);
-        ApplyStatusInheritance(rows);
+            ComputeRawObligationStatus(rows);
+            ApplyStatusInheritance(rows);
 
-        var pivotCounts = PivotRawObligation(rows);
+            var pivotCounts = PivotRawObligation(rows);
 
-        ApplyDecisionTree(rows, pivotCounts);
-        ApplyRule11And12(rows);
-        ApplyRule13And14(rows);
-        ApplyRule16(rows);
+            ApplyDecisionTree(rows, pivotCounts);
+            ApplyRule11And12(rows);
+            ApplyRule13And14(rows);
+            ApplyRule16(rows);
 
-        return rows
-            .Select(r => r.Source with
-            {
-                ObligationStatus = r.ObligationStatus,
-                NumDaysObligated = r.NumDaysObligated,
-                ErrorCode = r.ErrorCode
-            })
-            .ToList();
-    }
+            return rows
+                .Select(r => r.Source with
+                {
+                    ObligationStatus = r.ObligationStatus,
+                    NumDaysObligated = r.NumDaysObligated,
+                    ErrorCode = r.ErrorCode
+                })
+                .ToList();
+        });
 
     private static int? ComputeProducerId(PayCalOrganisation o) =>
         int.TryParse(o.SubsidiaryId, out var subsidiaryId) ? subsidiaryId : o.OrganisationId;
