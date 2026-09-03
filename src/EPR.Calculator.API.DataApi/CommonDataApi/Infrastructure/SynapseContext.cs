@@ -35,6 +35,9 @@ public class SynapseContext : DbContext
             entity.Property(e => e.JoinerDate).HasColumnName("joiner_date").HasMaxLength(4000);
             entity.Property(e => e.RegulatorStatus).HasColumnName("regulator_status").HasMaxLength(4000);
             entity.Property(e => e.SubmissionPeriodYear).HasColumnName("submission_period_year");
+            entity.Property(e => e.FileName).HasColumnName("file_name").HasMaxLength(4000);
+            entity.Property(e => e.IsResubmission).HasColumnName("is_resubmission");
+            entity.Property(e => e.CreatedDateTime).HasColumnName("created_date_time");
 
             // ObligationStatus/NumDaysObligated/ErrorCode (IProducerObligationDeterminer) and
             // HasH1/HasH2 (see IOrganisationPeriodFlagsCalculator) are computed in C# from the raw
@@ -63,6 +66,9 @@ public class SynapseContext : DbContext
             entity.Property(e => e.PackagingMaterialSubtype).HasColumnName("packaging_material_subtype").HasMaxLength(4000);
             entity.Property(e => e.PackagingMaterialWeight).HasColumnName("packaging_material_weight");
             entity.Property(e => e.RamRagRating).HasColumnName("ram_rag_rating").HasMaxLength(4000);
+            entity.Property(e => e.FileName).HasColumnName("file_name").HasMaxLength(4000);
+            entity.Property(e => e.IsResubmission).HasColumnName("is_resubmission");
+            entity.Property(e => e.CreatedDateTime).HasColumnName("created_date_time");
         });
     }
 }

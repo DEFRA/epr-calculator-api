@@ -3,6 +3,7 @@ using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services.DataLoading;
 using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
+using EPR.CommonDataService.DataApi.AcceptedFileSelection;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 using EPR.CommonDataService.DataApi.ObligationDetermination;
@@ -52,8 +53,8 @@ public class CommonDataApiLoaderTests
         VerifyLogContains(LogLevel.Information, "Disabled", Times.Once(), "Logger should record it is disabled.");
         organisations.ShouldBeEmpty();
         poms.ShouldBeEmpty();
-        mockOrgHandler.Verify(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<CancellationToken>()), Times.Never, "Organisation stream should not be requested when disabled.");
-        mockPomHandler.Verify(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<CancellationToken>()), Times.Never, "POM stream should not be requested when disabled.");
+        mockOrgHandler.Verify(h => h.Handle(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never, "Organisation stream should not be requested when disabled.");
+        mockPomHandler.Verify(h => h.Handle(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never, "POM stream should not be requested when disabled.");
     }
 
     // ─────────────────────────── LoadData – enabled path, happy path ───────────────────────────
@@ -117,11 +118,11 @@ public class CommonDataApiLoaderTests
 
         var loaderOptions = new OptionsWrapper<CommonDataApiLoaderOptions>(new CommonDataApiLoaderOptions { Enabled = true });
         mockOrganisationsHandler
-            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<CancellationToken>()))
+            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Returns(ToAsyncEnumerable(rawOrganisation));
         var mockPomsHandler = new Mock<IStreamPomsRequestHandler>();
         mockPomsHandler
-            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<CancellationToken>()))
+            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Returns(EmptyAsyncEnumerable<PayCalPom>());
 
         var mockPomEligibilityFilter = new Mock<IPomEligibilityFilter>();
@@ -134,10 +135,19 @@ public class CommonDataApiLoaderTests
             .Setup(c => c.ApplyPeriodFlags(It.IsAny<IReadOnlyList<PayCalOrganisation>>(), It.IsAny<IReadOnlyList<PayCalPom>>()))
             .Returns((IReadOnlyList<PayCalOrganisation> organisations, IReadOnlyList<PayCalPom> _) => organisations);
 
+        var mockAcceptedFileSelector = new Mock<IAcceptedFileSelector>();
+        mockAcceptedFileSelector
+            .Setup(s => s.SelectLatestOrganisationFiles(It.IsAny<IReadOnlyList<PayCalOrganisation>>(), It.IsAny<DateTimeOffset?>()))
+            .Returns((IReadOnlyList<PayCalOrganisation> organisations, DateTimeOffset? _) => organisations);
+        mockAcceptedFileSelector
+            .Setup(s => s.SelectLatestPomFiles(It.IsAny<IReadOnlyList<PayCalPom>>(), It.IsAny<DateTimeOffset?>()))
+            .Returns((IReadOnlyList<PayCalPom> poms, DateTimeOffset? _) => poms);
+
         var loader = new CommonDataApiLoader(
             loaderOptions,
             mockOrganisationsHandler.Object,
             mockPomsHandler.Object,
+            mockAcceptedFileSelector.Object,
             mockDeterminer.Object,
             mockPomEligibilityFilter.Object,
             mockPeriodFlagsCalculator.Object,
@@ -242,13 +252,21 @@ public class CommonDataApiLoaderTests
 
         organisationsHandler ??= new Mock<IStreamOrganisationsRequestHandler>();
         organisationsHandler
-            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<CancellationToken>()))
+            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Returns(organisations ?? EmptyAsyncEnumerable<PayCalOrganisation>());
 
         pomsHandler ??= new Mock<IStreamPomsRequestHandler>();
         pomsHandler
-            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<CancellationToken>()))
+            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .Returns(poms ?? EmptyAsyncEnumerable<PayCalPom>());
+
+        var mockAcceptedFileSelector = new Mock<IAcceptedFileSelector>();
+        mockAcceptedFileSelector
+            .Setup(s => s.SelectLatestOrganisationFiles(It.IsAny<IReadOnlyList<PayCalOrganisation>>(), It.IsAny<DateTimeOffset?>()))
+            .Returns((IReadOnlyList<PayCalOrganisation> organisations, DateTimeOffset? _) => organisations);
+        mockAcceptedFileSelector
+            .Setup(s => s.SelectLatestPomFiles(It.IsAny<IReadOnlyList<PayCalPom>>(), It.IsAny<DateTimeOffset?>()))
+            .Returns((IReadOnlyList<PayCalPom> poms, DateTimeOffset? _) => poms);
 
         var mockObligationDeterminer = new Mock<IProducerObligationDeterminer>();
         mockObligationDeterminer
@@ -269,6 +287,7 @@ public class CommonDataApiLoaderTests
             loaderOptions,
             organisationsHandler.Object,
             pomsHandler.Object,
+            mockAcceptedFileSelector.Object,
             mockObligationDeterminer.Object,
             mockPomEligibilityFilter.Object,
             mockPeriodFlagsCalculator.Object,
