@@ -6,6 +6,7 @@ using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
 using EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
+using EPR.CommonDataService.DataApi.CommonDataApi.PomEligibility;
 using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.BackgroundService.Services.DataLoading;
@@ -36,6 +37,7 @@ public class CommonDataApiLoader(
     IStreamOrganisationsRequestHandler organisationsHandler,
     IStreamPomsRequestHandler pomsHandler,
     IProducerObligationDeterminer obligationDeterminer,
+    IPomEligibilityFilter pomEligibilityFilter,
     ILogger<CommonDataApiLoader> logger,
     ITelemetry<CommonDataApiLoader> telemetry
 ) : IDataLoader
@@ -75,9 +77,23 @@ public class CommonDataApiLoader(
 
             await Task.WhenAll(orgsTask, pomsTask);
 
-            logger.LogTrace("Streamed {TotalOrgs} organisations and {TotalPoms} POMs", orgsTask.Result.Count, pomsTask.Result.Count);
+            var organisations = orgsTask.Result;
+            var poms = pomsTask.Result;
 
-            return (orgsTask.Result, pomsTask.Result);
+            logger.LogTrace("Streamed {TotalOrgs} organisations and {TotalPoms} POMs", organisations.Count, poms.Count);
+
+            // POM eligibility (both H1 and H2 submitted, a registration exists) depends on the
+            // organisation stream, so it can only run once both streams have finished.
+            var organisationIds = organisations
+                .Where(o => o.OrganisationId is not null)
+                .Select(o => o.OrganisationId!.Value)
+                .ToHashSet();
+            var eligiblePoms = pomEligibilityFilter.Filter(poms, organisationIds);
+
+            var orgMapper = CommonDataApiLoaderMapper.MapOrganisation();
+            var pomMapper = CommonDataApiLoaderMapper.MapPom(logger);
+
+            return (organisations.Select(orgMapper).ToList(), eligiblePoms.Select(pomMapper).ToList());
         }
         catch when (!linkedCt.IsCancellationRequested)
         {
@@ -86,7 +102,7 @@ public class CommonDataApiLoader(
         }
     }
 
-    private Task<List<CalculatorRunOrganisation>> StreamOrganisations(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken) =>
+    private Task<List<PayCalOrganisation>> StreamOrganisations(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken) =>
         telemetry.Activity(async () =>
         {
             await using var enumerator = organisationsHandler.Handle(relativeYear, cutOffDate).GetAsyncEnumerator(cancellationToken);
@@ -103,26 +119,21 @@ public class CommonDataApiLoader(
 
             // Obligation determination needs every row for the run up front - it aggregates across
             // rows (per producer/submission period) rather than deciding a row in isolation.
-            var determinedOrganisations = obligationDeterminer.Determine(rawOrganisations);
-
-            var mapper = CommonDataApiLoaderMapper.MapOrganisation();
-            return determinedOrganisations.Select(mapper).ToList();
+            return obligationDeterminer.Determine(rawOrganisations).ToList();
         }, null, "OrgStream");
 
-    private Task<List<AlignmentPom>> StreamPoms(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken) =>
+    private Task<List<PayCalPom>> StreamPoms(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken) =>
         telemetry.Activity(async () =>
         {
-            var mapper = CommonDataApiLoaderMapper.MapPom(logger);
-
             await using var enumerator = pomsHandler.Handle(relativeYear, cutOffDate).GetAsyncEnumerator(cancellationToken);
 
             var hasFirst = await telemetry.Metric(Metrics.PomStreamDelay, () => enumerator.MoveNextAsync().AsTask(), StreamDelayThreshold, nameof(Metrics.PomStreamDelay));
 
-            var poms = new List<AlignmentPom>();
+            var poms = new List<PayCalPom>();
 
             while (hasFirst)
             {
-                poms.Add(mapper(enumerator.Current));
+                poms.Add(enumerator.Current);
                 hasFirst = await enumerator.MoveNextAsync();
             }
 
