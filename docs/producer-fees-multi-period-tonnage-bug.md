@@ -2,6 +2,18 @@
 
 ## Status
 
+**Correction (2026-09-03):** This bug does **not** reproduce on `main`. The original "Status" line below was a mistaken inference — the fee-calculation files (`ProducerFeesUtil.cs`, `ProducerRowBuilder.cs`, `ReportedProducerService.cs`, `CalcResultProjectedProducersBuilder.cs`) were correctly confirmed byte-identical between `main` and `ECV-730-CF`, but the reproduction recipe below was never actually run against `main`'s code to confirm the bug manifests there.
+
+It was run since: the exact repro (producer 210000/210001, adding a second `2024-P4` POM row alongside the existing `2024-P1` row, same weight, both bug preconditions satisfied — fully obligated, `ScaleupFactor = 1`) was applied to `main`'s `EPR.Calculator.API.IntegrationTests` fixtures and the test executed against a real MSSQL instance (via Testcontainers). Result: **every tonnage/fee figure summed correctly** — the producer's own row, its group total, material aggregates, and file-wide totals all increased by exactly the expected delta. `ProducerFeesUtil.GetTonnage` sums via a plain LINQ `.Sum()` filtered only by material/packaging type (not by submission period), so on `main` it inherently sums across periods correctly.
+
+**The bug is real, but scoped to the `ECV-730-CF` branch**, not `main`. That branch already has this exact fixture row committed (`git show ECV-730-CF:src/EPR.Calculator.API.IntegrationTests/TestData/2025-pom-data.csv`), and its `ExpectedData/2025-results.csv` currently encodes the buggy (under-summed) value as "expected" — i.e. its own integration test passes while silently asserting the wrong output. The mechanism most likely lives in `ECV-730-CF`'s rewritten `ProducerDataTransposer.cs`, which (unlike `main`) delegates to `IProducerPomAligner.Align`/`DedupeOrganisations` from the new `EPR.CommonDataService.DataApi` package — that alignment/dedupe step is the prime suspect for where a period gets dropped, but this hasn't been traced to a root cause yet.
+
+**Next step for whoever picks this up on `ECV-730-CF`:** update `ExpectedData/2025-results.csv` (and cascading billing CSV/JSON if affected) to the correct summed values so the existing test goes red, then trace `IProducerPomAligner.Align`/`DedupeOrganisations` and `ProducerDataTransposer.cs` to find where the period is lost.
+
+---
+
+### Original status (superseded, kept for context)
+
 Confirmed present on `main` (verified against commit `de831cb0`, pre-dating the `ECV-730-CF` branch). Not introduced or affected by any of the `ECV-730-CF` work (DataApi extraction, obligation determination, POM eligibility). Not fixed as part of that branch — needs its own ticket.
 
 ## Summary
@@ -34,6 +46,12 @@ So the sum is computed correctly in memory, then something between that computat
 
 ## Where the trace stopped
 
+**Correction (2026-09-03):** the "DB round-trip" hypothesis below is contradicted by the code and should be dropped. `CalcResultWriter.StoreProducerFees` is a plain `dbContext.ProducerDisposalFee.Add(...)` + `SaveChangesAsync` — a side-effecting persist, not an independent read-back. The CSV exporter consumes the exact same in-memory `ProducerFees`/`FeeDetail` object graph that `ProducerFeesBuilder`/`ProducerRowBuilder` built, in the same call chain (`ResultBuilder.BuildAsync` → `CalcResultsExporter` → `ProducerFeesExporter.Export(runContext, calcResult.ProducerFees, ...)`, iterating `producerFees.Details` directly). There is no re-read from the database anywhere in this path.
+
+On `main`, `ProducerFeesUtil.GetTonnage` sums correctly regardless (see corrected Status above), so this doesn't matter there. On `ECV-730-CF`, the more likely suspect is upstream of `ProducerFeesUtil` entirely — in how `ProducerReportedMaterial`/`ProducerMaterialPackaging` rows get built in the first place via the new `IProducerPomAligner.Align`/`DedupeOrganisations` (`ProducerDataTransposer.cs`), possibly collapsing multiple periods into one row (or one `ProducerDetail` per period instead of per producer, then something like a `.DistinctBy` elsewhere picking only one) before `ProducerFeesUtil.GetTonnage` ever sees them. This hasn't been confirmed — it's a lead, not a finding.
+
+The original (pre-correction) investigation below stopped at `FeeDetail`/`Section1MaterialsExporter`, on the mistaken assumption of a DB round-trip; kept for context:
+
 The CSV column traces back to `Section1MaterialsExporter.AppendProducerDisposalFeesByMaterial`, which reads from `producer.FeeDetail.DisposalFeesByMaterial` — a `[NotMapped]` property on the `FeeDetail` **EF entity** (`EPR.Calculator.API.Data/DataModels/FeeDetail.cs`), cached from its `MaterialFees` navigation collection. `FeeDetail` is persisted via `calcResultWriter.StoreProducerFees` and (presumably) re-read from the database before/during CSV export, rather than the CSV exporter using the in-memory object built by `ProducerRowBuilder` directly.
 
 The investigation did not go further than this — it's not yet established whether:
@@ -41,7 +59,7 @@ The investigation did not go further than this — it's not yet established whet
 - there's an earlier aggregation step between `ProducerRowBuilder.GetProducerRow` (which correctly computes the summed tonnage into `materialFeeSummary`/`FeesByMaterial`) and `FeeDetail` being persisted, or
 - something else entirely.
 
-**Suggested next step for whoever picks this up**: instrument (or step through) `ProducerRowBuilder.GetProducerRow`'s `result.FeeDetail.FeesByMaterial = materialFeeSummary` assignment (line ~298) to confirm the correct summed value is present there, then follow it through `calcResultWriter.StoreProducerFees` and back out through whatever query the CSV exporter (or `producerFeesBuilder`'s row list) uses to obtain `ProducerFeeExportRow`/`FeeDetail` instances for export. That's the next unexamined segment of the pipe.
+**Suggested next step for whoever picks this up**: on `ECV-730-CF`, instrument (or step through) `IProducerPomAligner.Align`/`DedupeOrganisations` and `ProducerDataTransposer.cs` to see whether multi-period rows for the same producer/material/packaging type are being collapsed before they ever reach `ProducerFeesUtil.GetTonnage` — that's the next unexamined segment of the pipe, superseding the `FeeDetail`/CSV-exporter lead above.
 
 ## Why it was never caught before
 
