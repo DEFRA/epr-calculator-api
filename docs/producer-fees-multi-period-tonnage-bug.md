@@ -1,78 +1,34 @@
 # Bug: "Calculation Result" fee report only reflects one submission period's tonnage for normal (non-scaled, non-partial) producers
 
-## Status
+## Status: Resolved (2026-09-03) — turned out not to be a code bug at all
 
-**Correction (2026-09-03):** This bug does **not** reproduce on `main`. The original "Status" line below was a mistaken inference — the fee-calculation files (`ProducerFeesUtil.cs`, `ProducerRowBuilder.cs`, `ReportedProducerService.cs`, `CalcResultProjectedProducersBuilder.cs`) were correctly confirmed byte-identical between `main` and `ECV-730-CF`, but the reproduction recipe below was never actually run against `main`'s code to confirm the bug manifests there.
+**There was no bug in `ProducerFeesUtil`/`ProducerRowBuilder`/`Section1MaterialsExporter` on either `main` or `ECV-730-CF`.** Every step of the fee-calculation and CSV-export pipeline was instrumented directly (`ProducerRowBuilder.GetProducerRow`'s `materialFeeSummary` assignment, `Section1MaterialsExporter.AppendRow`, and the exact CSV-write call in `AppendProducerDisposalFeesByMaterial`) and all three showed the **correct summed tonnage** (e.g. 866.848 for two 433.424 periods) at every point, on `ECV-730-CF`.
 
-It was run since: the exact repro (producer 210000/210001, adding a second `2024-P4` POM row alongside the existing `2024-P1` row, same weight, both bug preconditions satisfied — fully obligated, `ScaleupFactor = 1`) was applied to `main`'s `EPR.Calculator.API.IntegrationTests` fixtures and the test executed against a real MSSQL instance (via Testcontainers). Result: **every tonnage/fee figure summed correctly** — the producer's own row, its group total, material aggregates, and file-wide totals all increased by exactly the expected delta. `ProducerFeesUtil.GetTonnage` sums via a plain LINQ `.Sum()` filtered only by material/packaging type (not by submission period), so on `main` it inherently sums across periods correctly.
+The apparent bug — `ExpectedData/2025-results.csv` (and the other five `ExpectedData/*` files) showing an under-summed value as "expected", with the integration test passing anyway — was caused by a **test-harness bug**, not a product bug:
 
-**The bug is real, but scoped to the `ECV-730-CF` branch**, not `main`. That branch already has this exact fixture row committed (`git show ECV-730-CF:src/EPR.Calculator.API.IntegrationTests/TestData/2025-pom-data.csv`), and its `ExpectedData/2025-results.csv` currently encodes the buggy (under-summed) value as "expected" — i.e. its own integration test passes while silently asserting the wrong output. The mechanism most likely lives in `ECV-730-CF`'s rewritten `ProducerDataTransposer.cs`, which (unlike `main`) delegates to `IProducerPomAligner.Align`/`DedupeOrganisations` from the new `EPR.CommonDataService.DataApi` package — that alignment/dedupe step is the prime suspect for where a period gets dropped, but this hasn't been traced to a root cause yet.
+`CalculatorRunIntegrationTests.RunTest`'s `RECORD_EXPECTED=1` regeneration mode wrote to the *relative* path `ExpectedData/{relativeYear}-results.csv`. Under `dotnet test`, the working directory is the build output folder (`bin/Debug/net10.0/`), not the source tree — so every "regeneration" done this way (across this session, and apparently before it too) was writing to `bin/Debug/net10.0/ExpectedData/*`, a copy that the next `dotnet build` silently overwrites from the (stale, unchanged) source `ExpectedData/*` files via the project's `CopyToOutputDirectory` setting. The source-tree `ExpectedData/*.csv`/`*.json` files themselves were never actually updated by any of these "regenerations" — they stayed frozen at whatever they were minted from, well before the `ECV-730-CF` work being done in this session.
 
-**Next step for whoever picks this up on `ECV-730-CF`:** update `ExpectedData/2025-results.csv` (and cascading billing CSV/JSON if affected) to the correct summed values so the existing test goes red, then trace `IProducerPomAligner.Align`/`DedupeOrganisations` and `ProducerDataTransposer.cs` to find where the period is lost.
+A second, compounding factor: this session's `EPR.Calculator.API.IntegrationTests` runs share one long-lived `Testcontainers` SQL Server container (`WithReuse(true)`), reused across many hours of ad-hoc debugging (absurd placeholder weights, repeated seeding, etc.). At least one investigation this session ran against that polluted container and got a false "matches" result — the real fix required tearing the container down (`docker rm -f`) to get a trustworthy read.
+
+### Resolution
+
+1. Fixed `CalculatorRunIntegrationTests.RunTest`'s `RECORD_EXPECTED` mode to write to the actual source `ExpectedData/` path, not the CWD-relative one (kept as ad-hoc local scaffolding during investigation, reverted afterwards — it isn't meant to be a permanent test-code feature).
+2. Removed the stale, long-lived reused SQL container and regenerated all six `ExpectedData/*` files (`2025`/`2026` × `results.csv`/`billing.csv`/`billing.json`) against a genuinely fresh container.
+3. Manually reviewed every changed row before trusting the regeneration: confirmed already-correct producers (e.g. 110000, which is scaled-up and was never affected) kept their own tonnage figures unchanged, with only run-wide percentage-derived fields shifting (expected, since other producers' correctly-summed tonnage now contributes more to the total pool); confirmed no negative values or NaN anywhere in the diff; confirmed the newly-appearing `410000` "Missing Registration Data"/"Missing POM Data" rows are the intended output of that fixture's "different submitter" scenario (from the `IOrganisationPeriodFlagsCalculator` work done earlier in this branch).
+4. Re-ran the full suite (`DataApi.UnitTests`, `BackgroundService.UnitTests`, `API.UnitTests`, `IntegrationTests`) twice against a fresh container to confirm stable green.
+
+### Why the earlier investigation reached the wrong conclusion
+
+The original write-up (below, kept for context) correctly found that `main`'s code sums multi-period tonnage fine, and initially inferred the opposite for `ECV-730-CF` from a `ProducerReportedMaterial`/`ProducerMaterialPackaging`/`GetTonnage` trace that *did* show the correct summed value at every point it checked — the same conclusion reached here. The mistake was in interpreting *why* the final exported `ExpectedData` file still showed the old value: it was assumed to reflect current, correct code behaviour being asserted as "expected" (a real regression), rather than a frozen, stale fixture that the test harness had a bug preventing from ever being refreshed.
 
 ---
 
-### Original status (superseded, kept for context)
+## Original investigation (superseded, kept for context)
 
-Confirmed present on `main` (verified against commit `de831cb0`, pre-dating the `ECV-730-CF` branch). Not introduced or affected by any of the `ECV-730-CF` work (DataApi extraction, obligation determination, POM eligibility). Not fixed as part of that branch — needs its own ticket.
+A producer with more than one `ProducerReportedMaterial` row for the same material/packaging type (i.e. they reported in more than one submission period, e.g. both an H1 and H2 return) appeared to only have **one** of those periods' tonnage reflected in the "Calculation Result" section of the exported results CSV. Extensive tracing (`ProducerReportedMaterial` → `ProducerMaterialPackaging` → `ProducerFeesBuilder`'s join → `ProducerFeesUtil.GetTonnage` → `ProducerRowBuilder.GetProducerRow`'s `FeesByMaterial` assignment → `Section1MaterialsExporter.AppendRow` → the exact CSV-write call) confirmed the correct summed value present at **every single step**, on `ECV-730-CF`. The unresolved mystery was how the value could be correct at the write call yet still show the old value in the file on disk — which is exactly what the test-harness bug above explains: the "old value in the file on disk" was never actually written by any of these correct runs; it was a stale file left over from before this branch's work, never overwritten due to the CWD/build-output mixup.
 
-## Summary
+## Reproduction (for reference — no longer indicates a bug)
 
-A producer with more than one `ProducerReportedMaterial` row for the same material/packaging type (i.e. they reported in more than one submission period, e.g. both an H1 and H2 return) only has **one** of those periods' tonnage reflected in the "Calculation Result" section of the exported results CSV (`Section1MaterialsExporter` / the "Household Tonnage" / "Total Tonnage" / "Net Tonnage" columns and the fees derived from them). The other period's reported weight is silently dropped from this specific report section — it is not summed in.
-
-This only affects producers that are:
-- **Obligated for the full year** (no `DaysObligated`, so `CalcResultPartialObligationBuilder` skips them), and
-- **Not scaled-up** (none of their submission periods have `SubmissionPeriodLookup.ScaleupFactor > 1`, so `CalcResultScaledupProducersBuilder` skips them).
-
-Producers that *are* scaled-up or partial-obligation are unaffected, because both of those builders explicitly iterate and rewrite every entry in `ProducerDetail.ProducerReportedMaterials` — that incidentally exercises the correct "sum every row" path. A plain full-year, non-scaled producer with multiple periods never goes through either rewrite, and hits whatever is dropping the extra period(s) instead.
-
-## How this was found
-
-Working on `ECV-730-CF` (porting `sp_GetPaycalPomData`'s "must have submitted both H1 and H2" business rule from SQL into C#, see `IPomEligibilityFilter`), the existing integration test fixtures (`2025-pom-data.csv` / `2026-pom-data.csv`) needed extra rows added so several test producers would satisfy the new gate (previously this rule lived only in SQL and was never exercised by the integration tests, which bypass the real stored procs). Producer `210000/210001` ("Non Partial P1 L1 Ltd") had its H2 (`2024-P4`) row added with a large placeholder weight to make the effect obvious — and the exported CSV's "Household Tonnage" figure for that producer did not change at all when the placeholder weight was changed from realistic to an absurd value (`9999999`), which is what exposed the bug.
-
-## Confirmed facts (traced end-to-end)
-
-1. **`ProducerReportedMaterial`** (populated by the data-load phase, per submission period): has both rows correctly — verified by direct query, e.g. for producer 210001:
-   ```
-   2024-P1, HH, 433.424
-   2024-P4, HH, 9999.999
-   ```
-2. **`ProducerMaterialPackaging`** (written by `ResultBuilder`/`CalcResultWriter.StoreProducerMaterialPackaging`, from the in-memory `producers` list just before the fees stage): also has both rows correctly, with the same values. This confirms nothing upstream of the fees calculation (data load, obligation determination, POM eligibility, scaling, partial-obligation) drops or merges the extra period.
-3. **`ProducerFeesBuilder`'s join** (`ProducerDetail` ⋈ `ProducerMaterialPackaging` by `pd.Id == prm.ProducerDetailId`, filtered to the run): reproduced this exact query directly against the DB and confirmed it returns both rows for producer 210001.
-4. **`ProducerFeesUtil.GetTonnage`** (the function that sums `ProducerMaterialPackaging` rows for a given producer/material/packaging type): instrumented directly and confirmed `projectedMaterialsLookup[(producer.ProducerId, producer.SubsidiaryId)]` contains **both** rows at this call site, and `prms.Sum(p => p.PackagingTonnage)` correctly computes **10433.423** (433.424 + 9999.999).
-5. **Yet the exported CSV's "Household Tonnage" column for this producer shows only `433.424`** — the P1-only value, not the correctly-computed sum from step 4.
-
-So the sum is computed correctly in memory, then something between that computation and the CSV write reduces it back to a single period's value.
-
-## Where the trace stopped
-
-**Correction (2026-09-03):** the "DB round-trip" hypothesis below is contradicted by the code and should be dropped. `CalcResultWriter.StoreProducerFees` is a plain `dbContext.ProducerDisposalFee.Add(...)` + `SaveChangesAsync` — a side-effecting persist, not an independent read-back. The CSV exporter consumes the exact same in-memory `ProducerFees`/`FeeDetail` object graph that `ProducerFeesBuilder`/`ProducerRowBuilder` built, in the same call chain (`ResultBuilder.BuildAsync` → `CalcResultsExporter` → `ProducerFeesExporter.Export(runContext, calcResult.ProducerFees, ...)`, iterating `producerFees.Details` directly). There is no re-read from the database anywhere in this path.
-
-On `main`, `ProducerFeesUtil.GetTonnage` sums correctly regardless (see corrected Status above), so this doesn't matter there. On `ECV-730-CF`, the more likely suspect is upstream of `ProducerFeesUtil` entirely — in how `ProducerReportedMaterial`/`ProducerMaterialPackaging` rows get built in the first place via the new `IProducerPomAligner.Align`/`DedupeOrganisations` (`ProducerDataTransposer.cs`), possibly collapsing multiple periods into one row (or one `ProducerDetail` per period instead of per producer, then something like a `.DistinctBy` elsewhere picking only one) before `ProducerFeesUtil.GetTonnage` ever sees them. This hasn't been confirmed — it's a lead, not a finding.
-
-The original (pre-correction) investigation below stopped at `FeeDetail`/`Section1MaterialsExporter`, on the mistaken assumption of a DB round-trip; kept for context:
-
-The CSV column traces back to `Section1MaterialsExporter.AppendProducerDisposalFeesByMaterial`, which reads from `producer.FeeDetail.DisposalFeesByMaterial` — a `[NotMapped]` property on the `FeeDetail` **EF entity** (`EPR.Calculator.API.Data/DataModels/FeeDetail.cs`), cached from its `MaterialFees` navigation collection. `FeeDetail` is persisted via `calcResultWriter.StoreProducerFees` and (presumably) re-read from the database before/during CSV export, rather than the CSV exporter using the in-memory object built by `ProducerRowBuilder` directly.
-
-The investigation did not go further than this — it's not yet established whether:
-- the DB round-trip (write via `StoreProducerFees` / `MaterialFees` navigation, then re-read) is where the extra period is lost, or
-- there's an earlier aggregation step between `ProducerRowBuilder.GetProducerRow` (which correctly computes the summed tonnage into `materialFeeSummary`/`FeesByMaterial`) and `FeeDetail` being persisted, or
-- something else entirely.
-
-**Suggested next step for whoever picks this up**: on `ECV-730-CF`, instrument (or step through) `IProducerPomAligner.Align`/`DedupeOrganisations` and `ProducerDataTransposer.cs` to see whether multi-period rows for the same producer/material/packaging type are being collapsed before they ever reach `ProducerFeesUtil.GetTonnage` — that's the next unexamined segment of the pipe, superseding the `FeeDetail`/CSV-exporter lead above.
-
-## Why it was never caught before
-
-- The bug requires a producer with **multiple reported periods** that is **neither scaled-up nor partial-obligation**. No pre-existing integration test fixture (on `main` or `ECV-730-CF`, prior to this investigation) had such a producer.
-- `ProducerDataTransposer.GetProducerReportedMaterials` on `main` (the pre-`ECV-730-CF` equivalent of today's `ProducerPomAligner.GetReportedMaterials`) already grouped POM rows by `(SubmissionPeriod, PackagingType)`, producing one `ProducerReportedMaterial` row per period — this has never been summed into a single row at write time, on `main` or since. There is no unique constraint on the table forcing a merge either.
-- `ProducerFeesUtil.cs`, `ProducerRowBuilder.cs`, `ReportedProducerService.cs`, and `CalcResultProjectedProducersBuilder.cs` are byte-identical between `main` and `ECV-730-CF` (`git diff de831cb HEAD -- <these files>` is empty) — confirming this is not a regression introduced by the `ECV-730-CF` work.
-
-## Reproduction
-
-1. Seed two `ProducerReportedMaterial`/`ProducerMaterialPackaging` rows for the same producer/material/packaging type but different `SubmissionPeriod` (e.g. an H1 and an H2 period), where the producer is fully obligated (`DaysObligated == null`) and not on any `SubmissionPeriodLookup` row with `ScaleupFactor > 1`.
+1. Seed two `ProducerReportedMaterial`/`ProducerMaterialPackaging` rows for the same producer/material/packaging type but different `SubmissionPeriod`, where the producer is fully obligated and not scaled-up.
 2. Run a calculator run and export the results CSV.
-3. Observe: the "Household Tonnage" (and derived "Total Tonnage" / "Net Tonnage" / fee) columns for that producer reflect only one period's tonnage, not the sum of both.
-
-## Impact
-
-Understated reported tonnage (and therefore understated disposal/comms fees) in the "Calculation Result" section of the results CSV for any producer who submits more than one period's worth of data in a year without being flagged as scaled-up or partial-obligation. Given `SubmissionPeriodLookup`'s legacy 2024 quarterly codes (P1–P4) and the ongoing H1/H2 half-yearly codes, this is plausible for real producers (e.g. someone submitting a correction/resubmission for a different period than their original return, or genuinely reporting per-quarter). The scale of real-world impact hasn't been assessed — this write-up only establishes the mechanism and confirms it's reproducible.
+3. Observe: the tonnage/fee columns correctly reflect the sum of both periods (confirmed via direct instrumentation and via a from-scratch `ExpectedData` regeneration against a fresh container).
