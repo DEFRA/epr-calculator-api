@@ -3,14 +3,15 @@ namespace EPR.CommonDataService.DataApi.Alignment;
 public sealed record ProducerErrorDetectionResult
 {
     /// <summary>
-    ///     Every error/warning row, including holding-company roll-ups - the full set to persist.
+    ///     Every error/warning row. For a row with <see cref="ProducerCalculationError.HasPomMatch" />
+    ///     false, the caller decides whether it's still worth surfacing (e.g. because the organisation
+    ///     was invoiced in a previous run) - DataApi has no visibility into billing history.
     /// </summary>
     public required IReadOnlyList<ProducerCalculationError> Errors { get; init; }
 
     /// <summary>
     ///     Org/subsidiary keys with a hard (non-warning) error - these should be excluded from
-    ///     downstream alignment. Deliberately excludes holding-company roll-ups (which would otherwise
-    ///     incorrectly exclude a holding-level POM row for a producer whose error is subsidiary-scoped).
+    ///     downstream alignment, regardless of whether the caller ultimately chooses to display them.
     /// </summary>
     public required IReadOnlySet<(int OrganisationId, string? SubsidiaryId)> UnmatchedKeys { get; init; }
 }
@@ -18,20 +19,17 @@ public sealed record ProducerErrorDetectionResult
 public interface IProducerErrorDetector
 {
     /// <summary>
-    ///     Runs every error/warning rule against the (pre-dedup) organisation and POM populations, and
-    ///     rolls up a holding-company-level error for any producer whose own errors are all
-    ///     subsidiary-scoped.
+    ///     Runs every error/warning rule against the (pre-dedup) organisation and POM populations.
+    ///     Doesn't decide whether a no-POM-match error/warning should be shown - that depends on billing
+    ///     history DataApi doesn't have, so it's surfaced via <see cref="ProducerCalculationError.HasPomMatch" />
+    ///     for the caller to decide. For the same reason, holding-company roll-ups aren't computed here
+    ///     either - they depend on which of a producer's errors the caller keeps.
     /// </summary>
     /// <param name="organisations">The full, non-deduped organisation population for the run.</param>
     /// <param name="poms">The full POM population for the run.</param>
-    /// <param name="invoicedOrganisationIds">
-    ///     Organisation ids invoiced in a previous run this financial year - obligated-error/warning rows
-    ///     are only raised for a producer with no POM match if they were previously invoiced.
-    /// </param>
     ProducerErrorDetectionResult Detect(
         IReadOnlyCollection<AlignmentOrganisation> organisations,
-        IReadOnlyCollection<AlignmentPom> poms,
-        IReadOnlyCollection<int> invoicedOrganisationIds);
+        IReadOnlyCollection<AlignmentPom> poms);
 }
 
 public sealed class ProducerErrorDetector : IProducerErrorDetector
@@ -41,12 +39,11 @@ public sealed class ProducerErrorDetector : IProducerErrorDetector
 
     public ProducerErrorDetectionResult Detect(
         IReadOnlyCollection<AlignmentOrganisation> organisations,
-        IReadOnlyCollection<AlignmentPom> poms,
-        IReadOnlyCollection<int> invoicedOrganisationIds)
+        IReadOnlyCollection<AlignmentPom> poms)
     {
-        var obligatedErrors = HandleObligatedErrors(poms, organisations, invoicedOrganisationIds);
+        var obligatedErrors = HandleObligatedErrors(poms, organisations);
         var missingRegErrors = HandleMissingRegistrationData(poms, organisations);
-        var obligatedWarnings = HandleObligatedWarnings(poms, organisations, invoicedOrganisationIds);
+        var obligatedWarnings = HandleObligatedWarnings(poms, organisations);
         var missingPomErrors = HandleMissingPomData(poms, organisations);
 
         var calcErrors = obligatedErrors
@@ -55,23 +52,9 @@ public sealed class ProducerErrorDetector : IProducerErrorDetector
             .Concat(missingPomErrors)
             .ToImmutableList();
 
-        // Roll up a holding-company-level error for any producer whose errors are all subsidiary-scoped,
-        // so the holding company itself also shows up in the error report.
-        var holdingRegErrors = calcErrors
-            .GroupBy(x => x.OrganisationId)
-            .Where(x => !x.Any(y => string.IsNullOrEmpty(y.SubsidiaryId)))
-            .Select(x => new ProducerCalculationError
-            {
-                OrganisationId = x.Key,
-                SubsidiaryId = null,
-                ErrorCode = ProducerErrorCodes.Empty,
-                LeaverCode = ProducerErrorCodes.Empty,
-                IsWarning = false
-            })
-            .ToImmutableList();
-
-        // Warnings are kept in calculation (they still get POM data), so they're excluded from the
-        // unmatched set - only hard errors exclude an org/subsidiary from alignment.
+        // A hard error always excludes its org/subsidiary from alignment, regardless of HasPomMatch -
+        // an "E"-status organisation's POM data should never enter the calculation. Warnings are kept
+        // in calculation (they still get POM data), so they're excluded from the unmatched set.
         var unmatchedKeys = calcErrors
             .Where(e => !e.IsWarning)
             .Select(e => (e.OrganisationId, e.SubsidiaryId))
@@ -79,7 +62,7 @@ public sealed class ProducerErrorDetector : IProducerErrorDetector
 
         return new ProducerErrorDetectionResult
         {
-            Errors = calcErrors.Concat(holdingRegErrors).ToImmutableList(),
+            Errors = calcErrors,
             UnmatchedKeys = unmatchedKeys
         };
     }
@@ -96,8 +79,9 @@ public sealed class ProducerErrorDetector : IProducerErrorDetector
                 var reg = organisations.Where(o => o.OrganisationId == group.Key);
                 var missing = group.Any(p => !reg.Any(o => o.SubsidiaryId == p.SubsidiaryId && o.SubmitterId == p.SubmitterId));
 
+                // Always POM-driven by definition - there's no invoiced-history question here.
                 return missing
-                    ? group.Select(p => CreateError(p.OrganisationId ?? 0, p.SubsidiaryId, ProducerErrorCodes.MissingRegistrationData, null, isWarning: false))
+                    ? group.Select(p => CreateError(p.OrganisationId ?? 0, p.SubsidiaryId, ProducerErrorCodes.MissingRegistrationData, null, isWarning: false, hasPomMatch: true))
                     : [];
             })
             .ToList();
@@ -121,48 +105,42 @@ public sealed class ProducerErrorDetector : IProducerErrorDetector
             // Only raise errors for missing POM when they previously had POM data submitted to avoid loads of errors
             .Where(o => pomKeys.Contains(o.SubsidiaryId ?? o.OrganisationId.ToString()))
             .Where(o => o is not { HasH1: true, HasH2: true })
-            .Select(o => CreateError(o.OrganisationId, o.SubsidiaryId, ProducerErrorCodes.MissingPOMData, o.StatusCode, isWarning: false))
+            // Always POM-driven by definition (matched via pomKeys above).
+            .Select(o => CreateError(o.OrganisationId, o.SubsidiaryId, ProducerErrorCodes.MissingPOMData, o.StatusCode, isWarning: false, hasPomMatch: true))
             .ToList();
     }
 
     public static IReadOnlyList<ProducerCalculationError> HandleObligatedErrors(
         IReadOnlyCollection<AlignmentPom> poms,
-        IReadOnlyCollection<AlignmentOrganisation> organisations,
-        IReadOnlyCollection<int> invoicedOrganisationIds)
+        IReadOnlyCollection<AlignmentOrganisation> organisations)
     {
         return organisations
             .Where(x => x.ObligationStatus == ErrorStatus)
-            .Where(o => HasPomOrWasInvoiced(o, poms, invoicedOrganisationIds))
-            .Select(x => CreateError(x.OrganisationId, x.SubsidiaryId, x.ErrorCode, x.StatusCode, isWarning: false))
+            .Select(x => CreateError(x.OrganisationId, x.SubsidiaryId, x.ErrorCode, x.StatusCode, isWarning: false, hasPomMatch: HasPomMatch(x, poms)))
             .ToList();
     }
 
     public static IReadOnlyList<ProducerCalculationError> HandleObligatedWarnings(
         IReadOnlyCollection<AlignmentPom> poms,
-        IReadOnlyCollection<AlignmentOrganisation> organisations,
-        IReadOnlyCollection<int> invoicedOrganisationIds)
+        IReadOnlyCollection<AlignmentOrganisation> organisations)
     {
         return organisations
             .Where(x => x.ObligationStatus == ObligatedStatus && !string.IsNullOrEmpty(x.ErrorCode))
-            .Where(o => HasPomOrWasInvoiced(o, poms, invoicedOrganisationIds))
-            .Select(x => CreateError(x.OrganisationId, x.SubsidiaryId, x.ErrorCode, x.StatusCode, isWarning: true))
+            .Select(x => CreateError(x.OrganisationId, x.SubsidiaryId, x.ErrorCode, x.StatusCode, isWarning: true, hasPomMatch: HasPomMatch(x, poms)))
             .ToList();
     }
 
-    private static bool HasPomOrWasInvoiced(
-        AlignmentOrganisation o,
-        IReadOnlyCollection<AlignmentPom> poms,
-        IReadOnlyCollection<int> invoicedOrganisationIds) =>
-        poms.Any(p => new { OrgId = p.OrganisationId, p.SubsidiaryId, p.SubmitterId }.Equals(new { OrgId = (int?)o.OrganisationId, o.SubsidiaryId, o.SubmitterId }))
-        || invoicedOrganisationIds.Contains(o.OrganisationId);
+    private static bool HasPomMatch(AlignmentOrganisation o, IReadOnlyCollection<AlignmentPom> poms) =>
+        poms.Any(p => new { OrgId = p.OrganisationId, p.SubsidiaryId, p.SubmitterId }.Equals(new { OrgId = (int?)o.OrganisationId, o.SubsidiaryId, o.SubmitterId }));
 
-    private static ProducerCalculationError CreateError(int orgId, string? subId, string? errorCode, string? leaverCode, bool isWarning) =>
+    private static ProducerCalculationError CreateError(int orgId, string? subId, string? errorCode, string? leaverCode, bool isWarning, bool hasPomMatch) =>
         new()
         {
             OrganisationId = orgId,
             SubsidiaryId = subId,
             ErrorCode = errorCode ?? string.Empty,
             LeaverCode = leaverCode ?? string.Empty,
-            IsWarning = isWarning
+            IsWarning = isWarning,
+            HasPomMatch = hasPomMatch
         };
 }

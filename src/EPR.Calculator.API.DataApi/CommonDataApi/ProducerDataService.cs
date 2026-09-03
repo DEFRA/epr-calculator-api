@@ -20,7 +20,6 @@ public interface IProducerDataService
         int relativeYear,
         DateTimeOffset? cutOffDate,
         IReadOnlyList<string> materialCodes,
-        IReadOnlyCollection<int> invoicedOrganisationIds,
         CancellationToken cancellationToken = default);
 }
 
@@ -41,7 +40,6 @@ public sealed class ProducerDataService(
         int relativeYear,
         DateTimeOffset? cutOffDate,
         IReadOnlyList<string> materialCodes,
-        IReadOnlyCollection<int> invoicedOrganisationIds,
         CancellationToken cancellationToken = default)
     {
         using var activity = DataApiTelemetry.StartActivity(typeof(ProducerDataService), nameof(GetProducerData));
@@ -52,7 +50,7 @@ public sealed class ProducerDataService(
 
         try
         {
-            var result = await GetProducerDataCore(relativeYear, cutOffDate, materialCodes, invoicedOrganisationIds, linkedCt);
+            var result = await GetProducerDataCore(relativeYear, cutOffDate, materialCodes, linkedCt);
             activity?.SetStatus(ActivityStatusCode.Ok);
             return result;
         }
@@ -73,7 +71,6 @@ public sealed class ProducerDataService(
         int relativeYear,
         DateTimeOffset? cutOffDate,
         IReadOnlyList<string> materialCodes,
-        IReadOnlyCollection<int> invoicedOrganisationIds,
         CancellationToken cancellationToken)
     {
         var orgsTask = StreamOrganisations(relativeYear, cutOffDate, cancellationToken);
@@ -97,7 +94,7 @@ public sealed class ProducerDataService(
         var organisations = organisationsWithPeriodFlags.Select(MapOrganisation).ToImmutableList();
         var poms = eligiblePoms.Select(MapPom).ToImmutableList();
 
-        var detection = errorDetector.Detect(organisations, poms, invoicedOrganisationIds);
+        var detection = errorDetector.Detect(organisations, poms);
 
         var matchedPoms = poms
             .Where(p => !detection.UnmatchedKeys.Contains((p.OrganisationId.GetValueOrDefault(), p.SubsidiaryId)))

@@ -27,7 +27,6 @@ public class CommonDataApiLoader(
     IOptions<CommonDataApiLoaderOptions> options,
     IProducerDataService producerDataService,
     IMaterialService materialService,
-    IInvoicedProducerService invoicedProducerService,
     ILogger<CommonDataApiLoader> logger
 ) : IDataLoader
 {
@@ -56,14 +55,10 @@ public class CommonDataApiLoader(
         var materials = await materialService.GetMaterials();
         var materialCodes = materials.Select(m => m.Code).ToImmutableList();
 
-        var invoicedProducers = await invoicedProducerService.GetInvoicedProducers(runContext.RelativeYear, cancellationToken: cancellationToken);
-        var invoicedOrganisationIds = invoicedProducers.Select(i => i.ProducerId).ToHashSet();
-
         var data = await producerDataService.GetProducerData(
             runContext.RelativeYear,
             cutOffDate,
             materialCodes,
-            invoicedOrganisationIds,
             cancellationToken);
 
         logger.LogTrace(
