@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
+using EPR.CommonDataService.DataApi.ObligationDetermination;
 
 namespace EPR.Calculator.API.IntegrationTests;
 

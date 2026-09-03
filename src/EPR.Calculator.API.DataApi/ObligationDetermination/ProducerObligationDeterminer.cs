@@ -1,8 +1,7 @@
 using System.Globalization;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
 
-namespace EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
+namespace EPR.CommonDataService.DataApi.ObligationDetermination;
 
 /// <summary>
 ///     Classifies producer registrations as Obligated (O) / Not Obligated (N) / Error (E), ported from

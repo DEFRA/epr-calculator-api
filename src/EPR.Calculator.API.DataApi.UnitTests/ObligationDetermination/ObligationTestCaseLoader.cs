@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination.UnitTests;
+namespace EPR.CommonDataService.DataApi.ObligationDetermination.UnitTests;
 
 /// <summary>
 ///     Parses the shared business-rule scenario CSV from epr-data's epr-obligation-determination test

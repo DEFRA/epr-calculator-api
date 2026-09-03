@@ -12,7 +12,7 @@ using EPR.Calculator.API.Data.Utils;
 using EPR.Calculator.API.Extensions;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.CommonDataApi.ObligationDetermination;
+using EPR.CommonDataService.DataApi.ObligationDetermination;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;

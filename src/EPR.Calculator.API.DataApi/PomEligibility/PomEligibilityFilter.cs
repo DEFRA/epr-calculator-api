@@ -1,7 +1,6 @@
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
 
-namespace EPR.CommonDataService.DataApi.CommonDataApi.PomEligibility;
+namespace EPR.CommonDataService.DataApi.PomEligibility;
 
 /// <summary>
 ///     Filters raw POM rows down to those eligible for alignment, ported from the eligibility CTEs

@@ -5,7 +5,7 @@ using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Fixtures;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
+using EPR.CommonDataService.DataApi.Alignment;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
 {

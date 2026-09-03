@@ -1,4 +1,4 @@
-namespace EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
+namespace EPR.CommonDataService.DataApi.Alignment;
 
 public sealed record AlignmentPom
 {

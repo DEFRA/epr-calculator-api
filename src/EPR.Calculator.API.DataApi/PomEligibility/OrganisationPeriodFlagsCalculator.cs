@@ -1,7 +1,6 @@
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
 
-namespace EPR.CommonDataService.DataApi.CommonDataApi.PomEligibility;
+namespace EPR.CommonDataService.DataApi.PomEligibility;
 
 /// <summary>
 ///     Computes each organisation/subsidiary's HasH1/HasH2 flags (whether it submitted a POM for each

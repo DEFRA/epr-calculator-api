@@ -1,4 +1,4 @@
-namespace EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
+namespace EPR.CommonDataService.DataApi.Alignment;
 
 /// <summary>
 ///     A material reported by a producer for a submission period, aggregated across RAG ratings.

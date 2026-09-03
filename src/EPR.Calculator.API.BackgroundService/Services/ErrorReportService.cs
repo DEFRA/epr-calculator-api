@@ -2,7 +2,7 @@
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
+using EPR.CommonDataService.DataApi.Alignment;
 using EPR.Calculator.API.Data.DataTypes;
 
 namespace EPR.Calculator.API.BackgroundService.Services;
