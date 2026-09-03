@@ -15,7 +15,7 @@ namespace EPR.Calculator.API.BackgroundService.Telemetry;
 /// </remarks>
 [ExcludeFromCodeCoverage]
 [AttributeUsage(AttributeTargets.Method)]
-internal sealed class ActivityTraceAttribute : BaseActivityAttribute
+public sealed class ActivityTraceAttribute : BaseActivityAttribute
 {
     /// <param name="activityName">
     ///     The name of the associated activity as shown in traces. Will default to the target method name.
