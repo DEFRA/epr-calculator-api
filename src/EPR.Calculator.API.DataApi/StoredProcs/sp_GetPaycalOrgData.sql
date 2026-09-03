@@ -71,62 +71,11 @@ BEGIN
       WHERE cd.organisation_size = 'L'
         AND cd.organisation_id IS NOT NULL
         AND cd.organisation_name IS NOT NULL
-    ),
-    latest_accepted_pom AS (
-      SELECT
-        a.organisation_id
-      , a.subsidiary_id
-      , a.submission_period
-      , a.submission_period_year
-      , a.submitter_id
-      FROM (
-        SELECT
-          p.organisation_id
-        , NULLIF(p.subsidiary_id, '') AS subsidiary_id
-        , p.submission_period
-        , ROW_NUMBER() OVER (
-            PARTITION BY p.organisation_id, p.subsidiary_id, COALESCE(sofs.ComplianceSchemeId, o.ExternalId), sofs.SubmissionPeriod
-            ORDER BY sofs.CreatedDateTime DESC
-          ) AS latest_producer_accepted_record_per_SP
-        , sofs.SubmissionPeriodYear AS submission_period_year
-        , COALESCE(sofs.ComplianceSchemeId, o.ExternalId) AS submitter_id
-        FROM rpd.Pom p
-        INNER JOIN rpd.Organisations o
-          ON  o.ReferenceNumber         = p.organisation_id
-          AND o.IsDeleted               = 0
-        INNER JOIN dbo.t_submitted_pom_org_file_status sofs
-          ON  sofs.filetype             =  'Pom'
-          AND sofs.FileName             =  p.FileName
-          AND sofs.Regulator_Status     =  'Accepted'
-          AND sofs.SubmissionPeriodYear =  @RelativeYear - 1
-          AND (sofs.Is_resubmitted_POM_identifier = 0 OR sofs.CreatedDateTime <= @CutOffDate)
-      ) a
-      WHERE a.latest_producer_accepted_record_per_SP = 1
-    ),
-    organisation_period_flags AS (
-      SELECT
-        organisation_id
-      , subsidiary_id
-      , submitter_id
-      , submission_period_year
-      , MAX(CASE
-              WHEN CAST(submission_period_year AS INT) > 2024 AND RIGHT(submission_period, 3) = '-H1' THEN 1
-              WHEN submission_period in ('2024-P1', '2024-P2', '2024-P3') THEN 1
-              ELSE 0
-            END) AS has_h1
-      , MAX(CASE
-              WHEN CAST(submission_period_year AS INT) > 2024 AND RIGHT(submission_period, 3) = '-H2' THEN 1
-              WHEN submission_period = '2024-P4' THEN 1
-              ELSE 0
-            END) AS has_h2
-      FROM latest_accepted_pom
-      GROUP BY
-        organisation_id
-      , subsidiary_id
-      , submitter_id
-      , submission_period_year
     )
 
+    -- has_h1/has_h2 (whether this org/subsidiary submitted a POM for each half of the prior year)
+    -- are no longer computed here - see IOrganisationPeriodFlagsCalculator, which derives them in C#
+    -- from the same POM stream sp_GetPaycalPomData already returns.
     SELECT
         ob.organisation_id
       , ob.subsidiary_id
@@ -138,14 +87,7 @@ BEGIN
       , ob.joiner_date
       , ob.regulator_status
       , ob.submission_period_year
-      , CAST(COALESCE(opf.has_h1, 0) AS BIT) AS has_h1
-      , CAST(COALESCE(opf.has_h2, 0) AS BIT) AS has_h2
     FROM latest_accepted_registrations ob
-    LEFT JOIN organisation_period_flags opf
-      ON  opf.organisation_id            = ob.organisation_id
-      AND ISNULL(opf.subsidiary_id, '')  = ISNULL(ob.subsidiary_id, '')
-      AND ISNULL(opf.submitter_id, '')   = ISNULL(ob.submitter_id, '')
-      AND opf.submission_period_year + 1 = ob.submission_period_year
     WHERE ob.submission_period_year = @RelativeYear;
 
   END

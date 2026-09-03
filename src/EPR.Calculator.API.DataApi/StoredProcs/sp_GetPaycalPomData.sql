@@ -68,12 +68,10 @@ BEGIN
     INNER JOIN latest_accepted_pom lap
       ON  trim(p.FileName)    = trim(lap.FileName)
       AND lap.organisation_id = p.organisation_id
-    WHERE (
-      p.packaging_type IN ('HH','CW','PB')
-      -- HDC packaging_type - specifically restricted to just GL (Glass) materials--
-      or (p.packaging_type = 'HDC' and p.packaging_material = 'GL')
-    )
-      and p.organisation_size = 'L'
+    -- packaging_type/packaging_material selection (which packaging types count as reportable
+    -- material) moved to C# - see ProducerPomAligner.Align. Everything below is still "accepted
+    -- data only" selection.
+    WHERE p.organisation_size = 'L'
       AND (p.to_country IS NULL OR trim(p.to_country) = '')
       AND p.organisation_id IS NOT NULL
       AND LEFT(p.submission_period,4) = (@RelativeYear - 1)

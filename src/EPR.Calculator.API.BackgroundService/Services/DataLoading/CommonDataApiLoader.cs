@@ -38,6 +38,7 @@ public class CommonDataApiLoader(
     IStreamPomsRequestHandler pomsHandler,
     IProducerObligationDeterminer obligationDeterminer,
     IPomEligibilityFilter pomEligibilityFilter,
+    IOrganisationPeriodFlagsCalculator organisationPeriodFlagsCalculator,
     ILogger<CommonDataApiLoader> logger,
     ITelemetry<CommonDataApiLoader> telemetry
 ) : IDataLoader
@@ -82,18 +83,20 @@ public class CommonDataApiLoader(
 
             logger.LogTrace("Streamed {TotalOrgs} organisations and {TotalPoms} POMs", organisations.Count, poms.Count);
 
-            // POM eligibility (both H1 and H2 submitted, a registration exists) depends on the
-            // organisation stream, so it can only run once both streams have finished.
+            // POM eligibility (both H1 and H2 submitted, a registration exists) and each organisation's
+            // own HasH1/HasH2 flags both depend on the POM stream, so they can only run once both
+            // streams have finished.
             var organisationIds = organisations
                 .Where(o => o.OrganisationId is not null)
                 .Select(o => o.OrganisationId!.Value)
                 .ToHashSet();
             var eligiblePoms = pomEligibilityFilter.Filter(poms, organisationIds);
+            var organisationsWithPeriodFlags = organisationPeriodFlagsCalculator.ApplyPeriodFlags(organisations, poms);
 
             var orgMapper = CommonDataApiLoaderMapper.MapOrganisation();
             var pomMapper = CommonDataApiLoaderMapper.MapPom(logger);
 
-            return (organisations.Select(orgMapper).ToList(), eligiblePoms.Select(pomMapper).ToList());
+            return (organisationsWithPeriodFlags.Select(orgMapper).ToList(), eligiblePoms.Select(pomMapper).ToList());
         }
         catch when (!linkedCt.IsCancellationRequested)
         {
