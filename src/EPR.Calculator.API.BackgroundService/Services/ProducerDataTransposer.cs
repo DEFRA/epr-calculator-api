@@ -3,6 +3,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Utils;
 using EPR.CommonDataService.DataApi.Alignment;
+using EPR.CommonDataService.DataApi.CommonDataApi;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Services;
@@ -10,13 +11,12 @@ namespace EPR.Calculator.API.BackgroundService.Services;
 public interface IProducerDataTransposer
 {
     /// <summary>
-    ///     Persists a calculator run's streamed organisation data, and transposes it (together with the
-    ///     streamed POM data) into ProducerDetails and ProducerReportedMaterials.
+    ///     Persists a calculator run's organisations, producer details/reported materials, and any
+    ///     errors/warnings raised while calculating them.
     /// </summary>
     Task Transpose(
         CalculatorRunContext runContext,
-        IReadOnlyList<CalculatorRunOrganisation> organisations,
-        IReadOnlyList<AlignmentPom> poms,
+        ProducerCalculationData data,
         CancellationToken cancellationToken);
 }
 
@@ -24,7 +24,6 @@ public class ProducerDataTransposer(
     ApplicationDBContext dbContext,
     IBulkOperations bulkOps,
     IErrorReportService errorReportService,
-    IProducerPomAligner aligner,
     TimeProvider timeProvider,
     ILogger<ProducerDataTransposer> logger
 ) : IProducerDataTransposer
@@ -32,8 +31,7 @@ public class ProducerDataTransposer(
     [ActivityTrace]
     public async Task Transpose(
         CalculatorRunContext runContext,
-        IReadOnlyList<CalculatorRunOrganisation> organisations,
-        IReadOnlyList<AlignmentPom> poms,
+        ProducerCalculationData data,
         CancellationToken cancellationToken)
     {
         var calculatorRun = await dbContext.CalculatorRuns
@@ -43,34 +41,12 @@ public class ProducerDataTransposer(
             .AsNoTracking()
             .ToImmutableListAsync(cancellationToken);
 
-        var unmatchedSet = await errorReportService.HandleErrors(
-            poms,
-            organisations,
-            calculatorRun.Id,
-            calculatorRun.CreatedBy,
-            calculatorRun.RelativeYear,
-            cancellationToken);
-
-        var matchedPoms = poms
-            .Where(p =>
-            {
-                var orgId = p.OrganisationId.GetValueOrDefault();
-                var subId = p.SubsidiaryId;
-                return !unmatchedSet.Contains((orgId, subId));
-            })
-            .ToImmutableList();
-
-        var materialCodes = materials.Select(m => m.Code).ToImmutableList();
         var materialsByCode = materials.ToImmutableDictionary(m => m.Code, StringComparer.OrdinalIgnoreCase);
-
-        var dedupedOrganisations = aligner.DedupeOrganisations(organisations.Select(ToAlignmentOrganisation).ToImmutableList());
-
-        var alignedProducers = aligner.Align(dedupedOrganisations, matchedPoms, materialCodes);
 
         // ⚠️ Only set scalar FK columns (e.g. CalculatorRunId, MaterialId) on the entities below.
         // Navigation properties to existing rows (CalculatorRun, Material) are intentionally left
         // unset so that the IncludeGraph bulk insert below does not try to re-insert them.
-        var newProducerDetails = alignedProducers
+        var newProducerDetails = data.Producers
             .Select(producer =>
             {
                 var producerDetail = new ProducerDetail
@@ -97,8 +73,9 @@ public class ProducerDataTransposer(
 
         // ⚠️ Only set the scalar CalculatorRunId FK - the CalculatorRun navigation is intentionally
         // left unset so the bulk insert below does not try to re-insert it.
-        foreach (var organisation in organisations)
-            organisation.CalculatorRunId = calculatorRun.Id;
+        var organisations = data.Organisations
+            .Select(o => ToCalculatorRunOrganisation(o, calculatorRun.Id))
+            .ToList();
 
         var totalReportedMaterials = newProducerDetails.Sum(p => p.ProducerReportedMaterials.Count);
 
@@ -118,12 +95,15 @@ public class ProducerDataTransposer(
             cfg.UseTempDB = true;
         }, cancellationToken);
 
+        await errorReportService.PersistErrors(data.Errors, calculatorRun.Id, calculatorRun.CreatedBy, cancellationToken);
+
         calculatorRun.OrgPomDataLoadedAt = timeProvider.GetUtcNow().UtcDateTime;
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private static AlignmentOrganisation ToAlignmentOrganisation(CalculatorRunOrganisation o) => new()
+    private static CalculatorRunOrganisation ToCalculatorRunOrganisation(AlignmentOrganisation o, int calculatorRunId) => new()
     {
+        CalculatorRunId = calculatorRunId,
         OrganisationId = o.OrganisationId,
         SubsidiaryId = o.SubsidiaryId,
         SubmitterId = o.SubmitterId,

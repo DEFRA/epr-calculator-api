@@ -165,7 +165,7 @@ public static class ServiceConfiguration
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
-            // Factory, not a scoped context: the org and POM streams query concurrently (CommonDataApiLoader).
+            // Factory, not a scoped context: the org and POM streams query concurrently (ProducerDataService).
             services.AddDbContextFactory<SynapseContext>((provider, builder) =>
             {
                 var synapseOptions = provider
@@ -184,6 +184,8 @@ public static class ServiceConfiguration
             services.AddTransient<IProducerObligationDeterminer, ProducerObligationDeterminer>();
             services.AddTransient<IPomEligibilityFilter, PomEligibilityFilter>();
             services.AddTransient<IOrganisationPeriodFlagsCalculator, OrganisationPeriodFlagsCalculator>();
+            services.AddTransient<IProducerErrorDetector, ProducerErrorDetector>();
+            services.AddTransient<IProducerDataService, ProducerDataService>();
 
             return services;
         }
