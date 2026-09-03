@@ -164,7 +164,8 @@ public static class ServiceConfiguration
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
-            services.AddDbContext<SynapseContext>((provider, builder) =>
+            // Factory, not a scoped context: the org and POM streams query concurrently (CommonDataApiLoader).
+            services.AddDbContextFactory<SynapseContext>((provider, builder) =>
             {
                 var synapseOptions = provider
                     .GetRequiredService<IOptions<SynapseOptions>>()

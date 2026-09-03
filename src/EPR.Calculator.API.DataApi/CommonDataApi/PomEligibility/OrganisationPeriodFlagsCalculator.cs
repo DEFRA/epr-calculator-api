@@ -1,4 +1,5 @@
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
 
 namespace EPR.CommonDataService.DataApi.CommonDataApi.PomEligibility;
 
@@ -20,30 +21,31 @@ public interface IOrganisationPeriodFlagsCalculator
 
 public sealed class OrganisationPeriodFlagsCalculator : IOrganisationPeriodFlagsCalculator
 {
-    public IReadOnlyList<PayCalOrganisation> ApplyPeriodFlags(IReadOnlyList<PayCalOrganisation> organisations, IReadOnlyList<PayCalPom> poms)
-    {
-        var flagsByOrgSubSubmitter = poms
-            .Where(p => p.OrganisationId is not null && SubmissionPeriodClassification.TryParseYear(p.SubmissionPeriod, out _))
-            .GroupBy(p => (p.OrganisationId!.Value, p.SubsidiaryId, p.SubmitterId))
-            .ToDictionary(
-                g => g.Key,
-                g => (
-                    HasH1: g.Any(p => IsH1(p.SubmissionPeriod!)),
-                    HasH2: g.Any(p => IsH2(p.SubmissionPeriod!))));
+    public IReadOnlyList<PayCalOrganisation> ApplyPeriodFlags(IReadOnlyList<PayCalOrganisation> organisations, IReadOnlyList<PayCalPom> poms) =>
+        DataApiTelemetry.Trace(typeof(OrganisationPeriodFlagsCalculator), nameof(ApplyPeriodFlags), () =>
+        {
+            var flagsByOrgSubSubmitter = poms
+                .Where(p => p.OrganisationId is not null && SubmissionPeriodClassification.TryParseYear(p.SubmissionPeriod, out _))
+                .GroupBy(p => (p.OrganisationId!.Value, p.SubsidiaryId, p.SubmitterId))
+                .ToDictionary(
+                    g => g.Key,
+                    g => (
+                        HasH1: g.Any(p => IsH1(p.SubmissionPeriod!)),
+                        HasH2: g.Any(p => IsH2(p.SubmissionPeriod!))));
 
-        return organisations
-            .Select(o =>
-            {
-                if (o.OrganisationId is null ||
-                    !flagsByOrgSubSubmitter.TryGetValue((o.OrganisationId.Value, o.SubsidiaryId, o.SubmitterId), out var flags))
+            return organisations
+                .Select(o =>
                 {
-                    return o with { HasH1 = false, HasH2 = false };
-                }
+                    if (o.OrganisationId is null ||
+                        !flagsByOrgSubSubmitter.TryGetValue((o.OrganisationId.Value, o.SubsidiaryId, o.SubmitterId), out var flags))
+                    {
+                        return o with { HasH1 = false, HasH2 = false };
+                    }
 
-                return o with { HasH1 = flags.HasH1, HasH2 = flags.HasH2 };
-            })
-            .ToList();
-    }
+                    return o with { HasH1 = flags.HasH1, HasH2 = flags.HasH2 };
+                })
+                .ToList();
+        });
 
     private static bool IsH1(string submissionPeriod)
     {

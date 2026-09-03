@@ -23,7 +23,7 @@ public class SynapseContext : DbContext
     {
         modelBuilder.Entity<PayCalOrganisation>(entity =>
         {
-            // The data source for this entity is a stored procedure - sp_GetPaycalOrgData
+            // The data source for this entity is the inline query in StreamOrganisationsRequestHandler
             entity.HasNoKey();
             entity.Property(e => e.OrganisationId).HasColumnName("organisation_id");
             entity.Property(e => e.SubsidiaryId).HasColumnName("subsidiary_id").HasMaxLength(4000);
@@ -38,8 +38,8 @@ public class SynapseContext : DbContext
 
             // ObligationStatus/NumDaysObligated/ErrorCode (IProducerObligationDeterminer) and
             // HasH1/HasH2 (see IOrganisationPeriodFlagsCalculator) are computed in C# from the raw
-            // columns above and the POM stream - sp_GetPaycalOrgData no longer selects them, so they
-            // must not be mapped to a column here (FromSqlInterpolated would fail looking for it).
+            // columns above and the POM stream - the organisations query no longer selects them, so
+            // they must not be mapped to a column here (FromSqlInterpolated would fail looking for it).
             entity.Ignore(e => e.ObligationStatus);
             entity.Ignore(e => e.NumDaysObligated);
             entity.Ignore(e => e.ErrorCode);
@@ -49,7 +49,7 @@ public class SynapseContext : DbContext
 
         modelBuilder.Entity<PayCalPom>(entity =>
         {
-            // The data source for this entity is a stored procedure - sp_GetPaycalPomData
+            // The data source for this entity is the inline query in StreamPomsRequestHandler
             entity.HasNoKey();
             entity.Property(e => e.OrganisationId).HasColumnName("organisation_id");
             entity.Property(e => e.SubsidiaryId).HasColumnName("subsidiary_id").HasMaxLength(4000);
