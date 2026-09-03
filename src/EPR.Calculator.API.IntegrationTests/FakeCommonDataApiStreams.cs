@@ -9,7 +9,7 @@ public class FakeStreamOrganisationsRequestHandler : IStreamOrganisationsRequest
 {
     public ImmutableList<PayCalOrganisation> Organisations { get; set; } = [];
 
-    public async IAsyncEnumerable<PayCalOrganisation> Handle(int relativeYear, DateTimeOffset? cutOffDate,
+    public async IAsyncEnumerable<PayCalOrganisation> Handle(int relativeYear,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         foreach (var organisation in Organisations)
@@ -25,7 +25,7 @@ public class FakeStreamPomsRequestHandler : IStreamPomsRequestHandler
 {
     public ImmutableList<PayCalPom> Poms { get; set; } = [];
 
-    public async IAsyncEnumerable<PayCalPom> Handle(int relativeYear, DateTimeOffset? cutOffDate,
+    public async IAsyncEnumerable<PayCalPom> Handle(int relativeYear,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         foreach (var pom in Poms)

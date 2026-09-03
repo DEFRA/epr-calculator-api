@@ -8,14 +8,13 @@ namespace EPR.CommonDataService.DataApi.CommonDataApi;
 
 public interface IStreamPomsRequestHandler
 {
-    IAsyncEnumerable<PayCalPom> Handle(int relativeYear, DateTimeOffset? cutOffDate,
-        CancellationToken cancellationToken = default);
+    IAsyncEnumerable<PayCalPom> Handle(int relativeYear, CancellationToken cancellationToken = default);
 }
 
 public sealed class StreamPomsRequestHandler(IDbContextFactory<SynapseContext> dbContextFactory)
     : IStreamPomsRequestHandler
 {
-    public async IAsyncEnumerable<PayCalPom> Handle(int relativeYear, DateTimeOffset? cutOffDate,
+    public async IAsyncEnumerable<PayCalPom> Handle(int relativeYear,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var activity = DataApiTelemetry.StartActivity(typeof(StreamPomsRequestHandler), nameof(Handle));
@@ -23,43 +22,37 @@ public sealed class StreamPomsRequestHandler(IDbContextFactory<SynapseContext> d
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         // Previously sourced from the stored procedure dbo.sp_GetPaycalPomData. This is selection only
-        // ("accepted data only"): the eligibility decision (whether both H1 and H2 were submitted,
+        // ("accepted data only"): every accepted POM file is returned (no dedup, no cut-off filtering) -
+        // which file "wins" per org/submitter/period, honouring the cut-off date, is decided in C# (see
+        // IAcceptedFileSelector). The eligibility decision (whether both H1 and H2 were submitted,
         // whether a matching registration exists) is made in C# (see IPomEligibilityFilter), and the
         // reportable packaging_type/packaging_material selection is made in C# (see ProducerPomAligner.Align).
-        // A NULL cutOffDate means "no cut-off" (include everything).
         var poms = dbContext
             .PayCalPoms
             .FromSqlInterpolated($"""
-                -- latest_accepted_pom: latest accepted POM file with data submitted for a given organisation.
-                WITH latest_accepted_pom AS (
-                    SELECT * FROM (
-                        SELECT
-                          p.organisation_id
-                        , sofs.FileName
-                        , p.submission_period
-                        , sofs.submissionperiod AS submission_period_desc
-                        -- ST005 latest accepted file submission with data for a given organisation
-                        , ROW_NUMBER() OVER (
-                            PARTITION BY p.organisation_id, COALESCE(sofs.ComplianceSchemeId, o.ExternalId), sofs.SubmissionPeriod
-                            ORDER BY sofs.CreatedDateTime DESC
-                          ) AS latest_producer_accepted_record_per_SP
-                        , sofs.SubmissionPeriodYear AS Submission_Period_Year
-                        , COALESCE(sofs.ComplianceSchemeId, o.ExternalId) AS submitter_id
-                        FROM rpd.Pom p
-                        INNER JOIN rpd.Organisations o
-                          ON  o.ReferenceNumber = p.organisation_id
-                          -- Excluding soft deleted organisations
-                          AND o.IsDeleted = 0
-                        INNER JOIN dbo.t_submitted_pom_org_file_status sofs
-                          ON  sofs.filetype         = 'Pom'
-                          AND sofs.FileName         = p.FileName
-                          AND sofs.Regulator_Status = 'Accepted'
-                          AND sofs.SubmissionPeriodYear = {relativeYear} - 1
-                          AND (sofs.Is_resubmitted_POM_identifier = 0
-                               OR {cutOffDate} IS NULL
-                               OR sofs.CreatedDateTime <= {cutOffDate})
-                    ) a
-                    WHERE latest_producer_accepted_record_per_SP = 1
+                -- candidate_pom_files: accepted POM files submitted for a given organisation/submitter/period.
+                -- DISTINCT collapses rpd.Pom's per-line-item rows down to one row per file (every selected
+                -- column here is a per-file attribute, not a per-line-item one).
+                WITH candidate_pom_files AS (
+                    SELECT DISTINCT
+                      p.organisation_id
+                    , sofs.FileName
+                    , p.submission_period
+                    , sofs.submissionperiod AS submission_period_desc
+                    , sofs.SubmissionPeriodYear AS Submission_Period_Year
+                    , COALESCE(sofs.ComplianceSchemeId, o.ExternalId) AS submitter_id
+                    , sofs.CreatedDateTime
+                    , sofs.Is_resubmitted_POM_identifier
+                    FROM rpd.Pom p
+                    INNER JOIN rpd.Organisations o
+                      ON  o.ReferenceNumber = p.organisation_id
+                      -- Excluding soft deleted organisations
+                      AND o.IsDeleted = 0
+                    INNER JOIN dbo.t_submitted_pom_org_file_status sofs
+                      ON  sofs.filetype         = 'Pom'
+                      AND sofs.FileName         = p.FileName
+                      AND sofs.Regulator_Status = 'Accepted'
+                      AND sofs.SubmissionPeriodYear = {relativeYear} - 1
                 )
                 -- Main selection of data
                 SELECT
@@ -73,12 +66,15 @@ public sealed class StreamPomsRequestHandler(IDbContextFactory<SynapseContext> d
                 , p.packaging_material_weight
                 , p.ram_rag_rating
                 , p.packaging_material_subtype
-                , lap.submission_period_desc
-                , lap.submitter_id
+                , cpf.submission_period_desc
+                , cpf.submitter_id
+                , cpf.FileName AS file_name
+                , cpf.CreatedDateTime AS created_date_time
+                , cpf.Is_resubmitted_POM_identifier AS is_resubmission
                 FROM rpd.POM p
-                INNER JOIN latest_accepted_pom lap
-                  ON  TRIM(p.FileName)    = TRIM(lap.FileName)
-                  AND lap.organisation_id = p.organisation_id
+                INNER JOIN candidate_pom_files cpf
+                  ON  TRIM(p.FileName)    = TRIM(cpf.FileName)
+                  AND cpf.organisation_id = p.organisation_id
                 WHERE p.organisation_size = 'L'
                   AND (p.to_country IS NULL OR TRIM(p.to_country) = '')
                   AND p.organisation_id IS NOT NULL
