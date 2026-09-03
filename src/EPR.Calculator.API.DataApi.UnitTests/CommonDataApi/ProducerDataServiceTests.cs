@@ -46,7 +46,7 @@ public class ProducerDataServiceTests
 
         var service = CreateService(orgs: [org], poms: [pom]);
 
-        var result = await service.GetProducerData(2024, cutOffDate: null, materialCodes: ["PL"], invoicedOrganisationIds: []);
+        var result = await service.GetProducerData(2024, cutOffDate: null, materialCodes: ["PL"]);
 
         result.Organisations.Count.ShouldBe(1);
         result.Organisations[0].OrganisationId.ShouldBe(1);
@@ -72,7 +72,7 @@ public class ProducerDataServiceTests
 
         var service = CreateService(orgs: [rawOrganisation], poms: [], determiner: mockDeterminer.Object);
 
-        var result = await service.GetProducerData(2024, null, [], []);
+        var result = await service.GetProducerData(2024, null, []);
 
         result.Organisations.Count.ShouldBe(1);
         result.Organisations[0].ObligationStatus.ShouldBe("O");
@@ -106,7 +106,7 @@ public class ProducerDataServiceTests
 
         var service = CreateService(orgs: [org], poms: [pom]);
 
-        var result = await service.GetProducerData(2024, null, ["PL"], []);
+        var result = await service.GetProducerData(2024, null, ["PL"]);
 
         // The org is obligation-status "E" and has a matching POM, so it's a hard error - it should
         // never reach Align, even though a matching POM exists.
@@ -115,6 +115,32 @@ public class ProducerDataServiceTests
         result.Errors[0].OrganisationId.ShouldBe(1);
         result.Errors[0].ErrorCode.ShouldBe("some synapse error");
         result.Errors[0].IsWarning.ShouldBeFalse();
+        result.Errors[0].HasPomMatch.ShouldBeTrue();
+    }
+
+    [TestMethod]
+    public async Task GetProducerData_HardErroredOrganisation_WithNoPomMatch_IsStillReturnedAsError()
+    {
+        // DataApi can't see billing history, so it can't decide whether a no-POM-match error is still
+        // worth surfacing (e.g. the organisation was invoiced in a previous run) - it always includes
+        // it, flagged with HasPomMatch = false, and leaves that decision to the caller.
+        var org = new PayCalOrganisation
+        {
+            OrganisationId = 1,
+            OrganisationName = "Org Co",
+            ObligationStatus = "E",
+            ErrorCode = "some synapse error",
+            SubmitterId = Guid.NewGuid().ToString()
+        };
+
+        var service = CreateService(orgs: [org], poms: []);
+
+        var result = await service.GetProducerData(2024, null, []);
+
+        result.Producers.ShouldBeEmpty();
+        result.Errors.Count.ShouldBe(1);
+        result.Errors[0].OrganisationId.ShouldBe(1);
+        result.Errors[0].HasPomMatch.ShouldBeFalse();
     }
 
     [TestMethod]
@@ -145,7 +171,7 @@ public class ProducerDataServiceTests
 
         var service = CreateService(orgs: [org], poms: [pom]);
 
-        var result = await service.GetProducerData(2024, null, ["PL"], []);
+        var result = await service.GetProducerData(2024, null, ["PL"]);
 
         // A warning is kept in calculation - the org/sub should get both its POM data (via Producers)
         // and the warning (via Errors).
@@ -155,6 +181,7 @@ public class ProducerDataServiceTests
         result.Errors.Count.ShouldBe(1);
         result.Errors[0].IsWarning.ShouldBeTrue();
         result.Errors[0].ErrorCode.ShouldBe("some warning");
+        result.Errors[0].HasPomMatch.ShouldBeTrue();
     }
 
     [TestMethod]
@@ -164,7 +191,7 @@ public class ProducerDataServiceTests
             orgsStream: ThrowingAsyncEnumerable<PayCalOrganisation>(new InvalidOperationException("org stream failed")),
             pomsStream: ThrowingAsyncEnumerable<PayCalPom>(new InvalidOperationException("pom stream failed")));
 
-        await Should.ThrowAsync<InvalidOperationException>(async () => await service.GetProducerData(2024, null, [], []));
+        await Should.ThrowAsync<InvalidOperationException>(async () => await service.GetProducerData(2024, null, []));
     }
 
     [TestMethod]
@@ -175,7 +202,7 @@ public class ProducerDataServiceTests
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
 
-        await Should.ThrowAsync<OperationCanceledException>(async () => await service.GetProducerData(2024, null, [], [], cts.Token));
+        await Should.ThrowAsync<OperationCanceledException>(async () => await service.GetProducerData(2024, null, [], cts.Token));
     }
 
     private static ProducerDataService CreateService(

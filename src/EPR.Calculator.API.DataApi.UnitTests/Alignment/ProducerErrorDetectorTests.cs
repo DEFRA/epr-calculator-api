@@ -291,13 +291,14 @@ public class ProducerErrorDetectorTests
             CreatePom(producer2, submitterId2, "2024-P1", "HH", "PL", 3500, "100101")
         };
 
-        var result = ProducerErrorDetector.HandleObligatedErrors(poms, orgs, []);
+        var result = ProducerErrorDetector.HandleObligatedErrors(poms, orgs);
 
         Assert.AreEqual(3, result.Count, "Expected 3 unmatched records to be returned.");
         Assert.IsTrue(result.Any(p => p.OrganisationId == 100101 && p.SubsidiaryId == null && p.ErrorCode == error1 && p.LeaverCode == ""));
         Assert.IsTrue(result.Any(p => p.OrganisationId == 200202 && p.SubsidiaryId == "100500" && p.ErrorCode == error2 && p.LeaverCode == "some status code"));
         Assert.IsTrue(result.Any(p => p.OrganisationId == 200202 && p.SubsidiaryId == "100101" && p.ErrorCode == ProducerErrorCodes.Empty && p.LeaverCode == ""));
         Assert.IsTrue(result.All(r => !r.IsWarning));
+        Assert.IsTrue(result.All(r => r.HasPomMatch), "Every organisation here has a matching POM.");
     }
 
     [TestMethod]
@@ -324,18 +325,21 @@ public class ProducerErrorDetectorTests
             CreatePom(producer2, submitterId2, "2024-P1", "HH", "PL", 3500, "100101")
         };
 
-        var result = ProducerErrorDetector.HandleObligatedErrors(poms, orgs, []);
+        var result = ProducerErrorDetector.HandleObligatedErrors(poms, orgs);
 
         Assert.AreEqual(0, result.Count, "Expected 0 unmatched records to be returned.");
     }
 
     [TestMethod]
-    public void HandleObligatedErrors_DontShowErrorsWithNoPomAndNoInvoice()
+    public void HandleObligatedErrors_AlwaysIncludesEveryErrorStatusOrganisation_WithAccurateHasPomMatch()
     {
-        var producer1 = 100101; // No pom and previously invoiced
-        var producer2 = 200202; // Has pom and previously invoiced
-        var producer3 = 300303; // Has pom and not previously invoiced
-        var producer4 = 400404; // No pom and not previously invoiced
+        // DataApi has no visibility into billing history, so it no longer decides whether a no-POM-match
+        // error is worth surfacing - it always includes every "E"-status organisation and flags whether
+        // it found a matching POM, leaving the "should this still show" call to the caller.
+        var producer1 = 100101; // No pom
+        var producer2 = 200202; // Has pom
+        var producer3 = 300303; // Has pom
+        var producer4 = 400404; // No pom
         var submitterId1 = Guid.NewGuid();
         var submitterId2 = Guid.NewGuid();
         var error1 = "Some warning";
@@ -359,15 +363,14 @@ public class ProducerErrorDetectorTests
             CreatePom(producer3, submitterId1, "2024-P1", "HH", "PL", 5000)
         };
 
-        var invoicedOrganisationIds = new[] { producer1, producer2 };
+        var result = ProducerErrorDetector.HandleObligatedErrors(poms, orgs);
 
-        var result = ProducerErrorDetector.HandleObligatedErrors(poms, orgs, invoicedOrganisationIds);
-
-        Assert.AreEqual(4, result.Count, "Expected 4 unmatched records to be returned.");
-        Assert.IsTrue(result.Any(p => p.OrganisationId == producer1 && p.SubsidiaryId == null && p.ErrorCode == error1));
-        Assert.IsTrue(result.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == "100500" && p.ErrorCode == error2 && p.LeaverCode == "some status code"));
-        Assert.IsTrue(result.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == "100101" && p.ErrorCode == ProducerErrorCodes.Empty && p.LeaverCode == ""));
-        Assert.IsTrue(result.Any(p => p.OrganisationId == producer3 && p.SubsidiaryId == null && p.ErrorCode == error1));
+        Assert.AreEqual(5, result.Count, "Expected all 5 \"E\"-status organisation rows, regardless of POM match.");
+        Assert.IsTrue(result.Any(p => p.OrganisationId == producer1 && p.SubsidiaryId == null && p.ErrorCode == error1 && !p.HasPomMatch));
+        Assert.IsTrue(result.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == "100500" && p.ErrorCode == error2 && p.LeaverCode == "some status code" && p.HasPomMatch));
+        Assert.IsTrue(result.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == "100101" && p.ErrorCode == ProducerErrorCodes.Empty && p.LeaverCode == "" && p.HasPomMatch));
+        Assert.IsTrue(result.Any(p => p.OrganisationId == producer3 && p.SubsidiaryId == null && p.ErrorCode == error1 && p.HasPomMatch));
+        Assert.IsTrue(result.Any(p => p.OrganisationId == producer4 && p.SubsidiaryId == null && p.ErrorCode == error1 && !p.HasPomMatch));
     }
 
     [TestMethod]
@@ -396,21 +399,22 @@ public class ProducerErrorDetectorTests
             CreatePom(producer2, submitterId2, "2024-P1", "HH", "PL", 3500, "100101")
         };
 
-        var result = ProducerErrorDetector.HandleObligatedWarnings(poms, orgs, []);
+        var result = ProducerErrorDetector.HandleObligatedWarnings(poms, orgs);
 
         Assert.AreEqual(2, result.Count, "Expected 2 unmatched records to be returned.");
         Assert.IsTrue(result.Any(p => p.OrganisationId == producer1 && p.SubsidiaryId == null && p.ErrorCode == error1 && p.LeaverCode == "some status code"));
         Assert.IsTrue(result.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == "100500" && p.ErrorCode == error2 && p.LeaverCode == ""));
         Assert.IsTrue(result.All(r => r.IsWarning));
+        Assert.IsTrue(result.All(r => r.HasPomMatch), "Every organisation here has a matching POM.");
     }
 
     [TestMethod]
-    public void HandleObligatedWarnings_DontShowWarningsWithNoPomAndNoInvoice()
+    public void HandleObligatedWarnings_AlwaysIncludesEveryQualifyingOrganisation_WithAccurateHasPomMatch()
     {
-        var producer1 = 100101; // No pom, previously invoiced
-        var producer2 = 200202; // Has pom, previously invoiced
-        var producer3 = 300303; // Has pom, not previously invoiced
-        var producer4 = 400404; // No pom, not previously invoiced
+        var producer1 = 100101; // No pom
+        var producer2 = 200202; // Has pom
+        var producer3 = 300303; // Has pom
+        var producer4 = 400404; // No pom
         var submitterId1 = Guid.NewGuid();
         var submitterId2 = Guid.NewGuid();
         var error1 = "Some error";
@@ -434,19 +438,21 @@ public class ProducerErrorDetectorTests
             CreatePom(producer3, submitterId1, "2024-P1", "HH", "PL", 5000)
         };
 
-        var invoicedOrganisationIds = new[] { producer1, producer2 };
+        var result = ProducerErrorDetector.HandleObligatedWarnings(poms, orgs);
 
-        var result = ProducerErrorDetector.HandleObligatedWarnings(poms, orgs, invoicedOrganisationIds);
-
-        Assert.AreEqual(3, result.Count, "Expected 3 unmatched records to be returned.");
-        Assert.IsTrue(result.Any(p => p.OrganisationId == producer1 && p.SubsidiaryId == null && p.ErrorCode == error1 && p.LeaverCode == "some status code"));
-        Assert.IsTrue(result.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == "100500" && p.ErrorCode == error2 && p.LeaverCode == ""));
-        Assert.IsTrue(result.Any(p => p.OrganisationId == producer3 && p.SubsidiaryId == null && p.ErrorCode == error1));
+        Assert.AreEqual(4, result.Count, "Expected all 4 qualifying organisation rows, regardless of POM match.");
+        Assert.IsTrue(result.Any(p => p.OrganisationId == producer1 && p.SubsidiaryId == null && p.ErrorCode == error1 && !p.HasPomMatch));
+        Assert.IsTrue(result.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == "100500" && p.ErrorCode == error2 && p.LeaverCode == "" && p.HasPomMatch));
+        Assert.IsTrue(result.Any(p => p.OrganisationId == producer3 && p.SubsidiaryId == null && p.ErrorCode == error1 && p.HasPomMatch));
+        Assert.IsTrue(result.Any(p => p.OrganisationId == producer4 && p.SubsidiaryId == null && p.ErrorCode == error1 && !p.HasPomMatch));
     }
 
     [TestMethod]
     public void Detect_AllTypes()
     {
+        // Detect doesn't know about billing history and doesn't compute holding-company roll-ups
+        // (both are the caller's job - see ErrorReportServiceTests) - it returns the flat set of
+        // individual error/warning rows, unconditionally, each flagged with whether it found a POM match.
         var producer1 = 100101;
         var producer2 = 200202;
         var producer3 = 300303;
@@ -467,9 +473,9 @@ public class ProducerErrorDetectorTests
             CreateOrg(producer2, "100101", "ECOLTD", submitterId2, "O", "01", hasH1: false, hasH2: false),
             CreateOrg(producer3, null, "ECOLTD", submitterId3, "O", "01", errorCode: "some warning"),
             CreateOrg(producer4, "404", "Tea and cakes", submitterId3, "E", "01", errorCode: "some synapse error"),
-            CreateOrg(producer6, null, "Pear", submitterId3, "E", "16", errorCode: "some synapse error"), // No pom but was invoiced - should show as error
-            CreateOrg(producer7, null, "Kiwi", submitterId3, "O", "16", errorCode: "some warning"), // Has pom - should show as warning
-            CreateOrg(producer8, null, "Banana", submitterId3, "O", "16", errorCode: "some warning") // No pom, not invoiced - shouldn't show
+            CreateOrg(producer6, null, "Pear", submitterId3, "E", "16", errorCode: "some synapse error"), // No pom - included, HasPomMatch false
+            CreateOrg(producer7, null, "Kiwi", submitterId3, "O", "16", errorCode: "some warning"), // Has pom - included, HasPomMatch true
+            CreateOrg(producer8, null, "Banana", submitterId3, "O", "16", errorCode: "some warning") // No pom - included, HasPomMatch false
         };
 
         var poms = new[]
@@ -491,23 +497,20 @@ public class ProducerErrorDetectorTests
             CreatePom(producer7, submitterId3, "2024-P1", "HH", "ST", 5000)
         };
 
-        var invoicedOrganisationIds = new[] { producer6 };
-
         var detector = new ProducerErrorDetector();
-        var result = detector.Detect(orgs, poms, invoicedOrganisationIds);
+        var result = detector.Detect(orgs, poms);
 
-        Assert.AreEqual(8, result.Errors.Count, "Expected 8 error/warning records (including holding roll-ups).");
-        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer5 && p.SubsidiaryId == null && p.ErrorCode == ProducerErrorCodes.MissingRegistrationData));
-        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == null && p.ErrorCode == ProducerErrorCodes.Empty));
-        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == "100101" && p.ErrorCode == ProducerErrorCodes.MissingPOMData && p.LeaverCode == "01"));
-        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer3 && p.SubsidiaryId == null && p.ErrorCode == "some warning" && p.IsWarning));
-        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer4 && p.SubsidiaryId == null && p.ErrorCode == ProducerErrorCodes.Empty));
-        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer4 && p.SubsidiaryId == "404" && p.ErrorCode == "some synapse error" && !p.IsWarning));
-        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer6 && p.SubsidiaryId == null && p.ErrorCode == "some synapse error"));
-        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer7 && p.SubsidiaryId == null && p.ErrorCode == "some warning" && p.IsWarning));
-        Assert.IsFalse(result.Errors.Any(p => p.OrganisationId == producer8));
+        Assert.AreEqual(7, result.Errors.Count, "Expected 7 individual error/warning rows - no holding roll-ups.");
+        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer5 && p.SubsidiaryId == null && p.ErrorCode == ProducerErrorCodes.MissingRegistrationData && p.HasPomMatch));
+        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == "100101" && p.ErrorCode == ProducerErrorCodes.MissingPOMData && p.LeaverCode == "01" && p.HasPomMatch));
+        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer3 && p.SubsidiaryId == null && p.ErrorCode == "some warning" && p.IsWarning && p.HasPomMatch));
+        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer4 && p.SubsidiaryId == "404" && p.ErrorCode == "some synapse error" && !p.IsWarning && p.HasPomMatch));
+        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer6 && p.SubsidiaryId == null && p.ErrorCode == "some synapse error" && !p.IsWarning && !p.HasPomMatch));
+        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer7 && p.SubsidiaryId == null && p.ErrorCode == "some warning" && p.IsWarning && p.HasPomMatch));
+        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer8 && p.SubsidiaryId == null && p.ErrorCode == "some warning" && p.IsWarning && !p.HasPomMatch));
+        Assert.IsFalse(result.Errors.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == null), "No holding roll-up - that's the caller's job now.");
 
-        Assert.AreEqual(4, result.UnmatchedKeys.Count, "Expected 4 unmatched keys - warnings and empty-code holding roll-ups excluded.");
+        Assert.AreEqual(4, result.UnmatchedKeys.Count, "Expected 4 unmatched keys - warnings excluded.");
         Assert.IsTrue(result.UnmatchedKeys.Contains((producer5, null)));
         Assert.IsTrue(result.UnmatchedKeys.Contains((producer2, "100101")));
         Assert.IsTrue(result.UnmatchedKeys.Contains((producer4, "404")));

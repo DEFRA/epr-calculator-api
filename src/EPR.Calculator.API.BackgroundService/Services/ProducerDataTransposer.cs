@@ -95,7 +95,7 @@ public class ProducerDataTransposer(
             cfg.UseTempDB = true;
         }, cancellationToken);
 
-        await errorReportService.PersistErrors(data.Errors, calculatorRun.Id, calculatorRun.CreatedBy, cancellationToken);
+        await errorReportService.PersistErrors(data.Errors, calculatorRun.Id, calculatorRun.CreatedBy, runContext.RelativeYear, cancellationToken);
 
         calculatorRun.OrgPomDataLoadedAt = timeProvider.GetUtcNow().UtcDateTime;
         await dbContext.SaveChangesAsync(cancellationToken);
