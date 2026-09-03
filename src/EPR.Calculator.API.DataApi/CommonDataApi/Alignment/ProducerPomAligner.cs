@@ -1,3 +1,5 @@
+using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
+
 namespace EPR.CommonDataService.DataApi.CommonDataApi.Alignment;
 
 public interface IProducerPomAligner
@@ -29,8 +31,8 @@ public sealed class ProducerPomAligner : IProducerPomAligner
 {
     private const string ObligatedStatus = "O";
 
-    // Which packaging types count as reportable material, ported from sp_GetPaycalPomData.sql's final
-    // WHERE clause: household, consumer waste, and public bin count regardless of material; household
+    // Which packaging types count as reportable material, ported from the Paycal POM stored procedure's
+    // final WHERE clause: household, consumer waste, and public bin count regardless of material; household
     // drinks containers count only for glass.
     private static readonly HashSet<string> ReportablePackagingTypes = ["HH", "CW", "PB"];
     private const string HouseholdDrinksContainersType = "HDC";
@@ -44,6 +46,13 @@ public sealed class ProducerPomAligner : IProducerPomAligner
             .ToImmutableList();
 
     public IEnumerable<AlignedProducer> Align(
+        IReadOnlyCollection<AlignmentOrganisation> organisations,
+        IReadOnlyCollection<AlignmentPom> poms,
+        IReadOnlyList<string> materialCodes) =>
+        DataApiTelemetry.Trace(typeof(ProducerPomAligner), nameof(Align),
+            () => AlignCore(organisations, poms, materialCodes).ToList());
+
+    private static IEnumerable<AlignedProducer> AlignCore(
         IReadOnlyCollection<AlignmentOrganisation> organisations,
         IReadOnlyCollection<AlignmentPom> poms,
         IReadOnlyList<string> materialCodes)

@@ -5,7 +5,7 @@ namespace EPR.CommonDataService.DataApi.CommonDataApi.PomEligibility;
 /// <summary>
 ///     Classifies a POM submission_period string ("2024-P1".."2024-P4", or "&lt;year&gt;-H1"/"-H2" for
 ///     years after 2024) into the half of the year it counts towards, ported from the has_h1/has_h2
-///     CASE expressions shared by dbo.sp_GetPaycalOrgData.sql and dbo.sp_GetPaycalPomData.sql.
+///     CASE expressions that previously lived in the Paycal org/POM stored procedures.
 /// </summary>
 internal static class SubmissionPeriodClassification
 {

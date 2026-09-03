@@ -105,41 +105,39 @@ public class CommonDataApiLoader(
         }
     }
 
-    private Task<List<PayCalOrganisation>> StreamOrganisations(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken) =>
-        telemetry.Activity(async () =>
+    private async Task<List<PayCalOrganisation>> StreamOrganisations(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
+    {
+        await using var enumerator = organisationsHandler.Handle(relativeYear, cutOffDate, cancellationToken).GetAsyncEnumerator(cancellationToken);
+
+        var hasFirst = await telemetry.Metric(Metrics.OrgStreamDelay, () => enumerator.MoveNextAsync().AsTask(), StreamDelayThreshold, nameof(Metrics.OrgStreamDelay));
+
+        var rawOrganisations = new List<PayCalOrganisation>();
+
+        while (hasFirst)
         {
-            await using var enumerator = organisationsHandler.Handle(relativeYear, cutOffDate).GetAsyncEnumerator(cancellationToken);
+            rawOrganisations.Add(enumerator.Current);
+            hasFirst = await enumerator.MoveNextAsync();
+        }
 
-            var hasFirst = await telemetry.Metric(Metrics.OrgStreamDelay, () => enumerator.MoveNextAsync().AsTask(), StreamDelayThreshold, nameof(Metrics.OrgStreamDelay));
+        // Obligation determination needs every row for the run up front - it aggregates across
+        // rows (per producer/submission period) rather than deciding a row in isolation.
+        return obligationDeterminer.Determine(rawOrganisations).ToList();
+    }
 
-            var rawOrganisations = new List<PayCalOrganisation>();
+    private async Task<List<PayCalPom>> StreamPoms(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
+    {
+        await using var enumerator = pomsHandler.Handle(relativeYear, cutOffDate, cancellationToken).GetAsyncEnumerator(cancellationToken);
 
-            while (hasFirst)
-            {
-                rawOrganisations.Add(enumerator.Current);
-                hasFirst = await enumerator.MoveNextAsync();
-            }
+        var hasFirst = await telemetry.Metric(Metrics.PomStreamDelay, () => enumerator.MoveNextAsync().AsTask(), StreamDelayThreshold, nameof(Metrics.PomStreamDelay));
 
-            // Obligation determination needs every row for the run up front - it aggregates across
-            // rows (per producer/submission period) rather than deciding a row in isolation.
-            return obligationDeterminer.Determine(rawOrganisations).ToList();
-        }, null, "OrgStream");
+        var poms = new List<PayCalPom>();
 
-    private Task<List<PayCalPom>> StreamPoms(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken) =>
-        telemetry.Activity(async () =>
+        while (hasFirst)
         {
-            await using var enumerator = pomsHandler.Handle(relativeYear, cutOffDate).GetAsyncEnumerator(cancellationToken);
+            poms.Add(enumerator.Current);
+            hasFirst = await enumerator.MoveNextAsync();
+        }
 
-            var hasFirst = await telemetry.Metric(Metrics.PomStreamDelay, () => enumerator.MoveNextAsync().AsTask(), StreamDelayThreshold, nameof(Metrics.PomStreamDelay));
-
-            var poms = new List<PayCalPom>();
-
-            while (hasFirst)
-            {
-                poms.Add(enumerator.Current);
-                hasFirst = await enumerator.MoveNextAsync();
-            }
-
-            return poms;
-        }, null, "PomStream");
+        return poms;
+    }
 }

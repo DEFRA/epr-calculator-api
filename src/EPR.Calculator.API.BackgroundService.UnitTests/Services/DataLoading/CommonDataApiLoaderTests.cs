@@ -52,8 +52,8 @@ public class CommonDataApiLoaderTests
         VerifyLogContains(LogLevel.Information, "Disabled", Times.Once(), "Logger should record it is disabled.");
         organisations.ShouldBeEmpty();
         poms.ShouldBeEmpty();
-        mockOrgHandler.Verify(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()), Times.Never, "Organisation stream should not be requested when disabled.");
-        mockPomHandler.Verify(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()), Times.Never, "POM stream should not be requested when disabled.");
+        mockOrgHandler.Verify(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<CancellationToken>()), Times.Never, "Organisation stream should not be requested when disabled.");
+        mockPomHandler.Verify(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<CancellationToken>()), Times.Never, "POM stream should not be requested when disabled.");
     }
 
     // ─────────────────────────── LoadData – enabled path, happy path ───────────────────────────
@@ -117,11 +117,11 @@ public class CommonDataApiLoaderTests
 
         var loaderOptions = new OptionsWrapper<CommonDataApiLoaderOptions>(new CommonDataApiLoaderOptions { Enabled = true });
         mockOrganisationsHandler
-            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()))
+            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<CancellationToken>()))
             .Returns(ToAsyncEnumerable(rawOrganisation));
         var mockPomsHandler = new Mock<IStreamPomsRequestHandler>();
         mockPomsHandler
-            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()))
+            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<CancellationToken>()))
             .Returns(EmptyAsyncEnumerable<PayCalPom>());
 
         var mockPomEligibilityFilter = new Mock<IPomEligibilityFilter>();
@@ -242,12 +242,12 @@ public class CommonDataApiLoaderTests
 
         organisationsHandler ??= new Mock<IStreamOrganisationsRequestHandler>();
         organisationsHandler
-            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()))
+            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<CancellationToken>()))
             .Returns(organisations ?? EmptyAsyncEnumerable<PayCalOrganisation>());
 
         pomsHandler ??= new Mock<IStreamPomsRequestHandler>();
         pomsHandler
-            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>()))
+            .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<CancellationToken>()))
             .Returns(poms ?? EmptyAsyncEnumerable<PayCalPom>());
 
         var mockObligationDeterminer = new Mock<IProducerObligationDeterminer>();
