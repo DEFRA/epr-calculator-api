@@ -180,6 +180,7 @@ public static class ServiceConfiguration
             services.AddTransient<IProducerPomAligner, ProducerPomAligner>();
             services.AddTransient<IProducerObligationDeterminer, ProducerObligationDeterminer>();
             services.AddTransient<IPomEligibilityFilter, PomEligibilityFilter>();
+            services.AddTransient<IOrganisationPeriodFlagsCalculator, OrganisationPeriodFlagsCalculator>();
 
             return services;
         }

@@ -129,12 +129,18 @@ public class CommonDataApiLoaderTests
             .Setup(f => f.Filter(It.IsAny<IReadOnlyList<PayCalPom>>(), It.IsAny<IReadOnlyCollection<int>>()))
             .Returns((IReadOnlyList<PayCalPom> poms, IReadOnlyCollection<int> _) => poms);
 
+        var mockPeriodFlagsCalculator = new Mock<IOrganisationPeriodFlagsCalculator>();
+        mockPeriodFlagsCalculator
+            .Setup(c => c.ApplyPeriodFlags(It.IsAny<IReadOnlyList<PayCalOrganisation>>(), It.IsAny<IReadOnlyList<PayCalPom>>()))
+            .Returns((IReadOnlyList<PayCalOrganisation> organisations, IReadOnlyList<PayCalPom> _) => organisations);
+
         var loader = new CommonDataApiLoader(
             loaderOptions,
             mockOrganisationsHandler.Object,
             mockPomsHandler.Object,
             mockDeterminer.Object,
             mockPomEligibilityFilter.Object,
+            mockPeriodFlagsCalculator.Object,
             mockLogger.Object,
             new Telemetry<CommonDataApiLoader>());
 
@@ -254,12 +260,18 @@ public class CommonDataApiLoaderTests
             .Setup(f => f.Filter(It.IsAny<IReadOnlyList<PayCalPom>>(), It.IsAny<IReadOnlyCollection<int>>()))
             .Returns((IReadOnlyList<PayCalPom> poms, IReadOnlyCollection<int> _) => poms);
 
+        var mockPeriodFlagsCalculator = new Mock<IOrganisationPeriodFlagsCalculator>();
+        mockPeriodFlagsCalculator
+            .Setup(c => c.ApplyPeriodFlags(It.IsAny<IReadOnlyList<PayCalOrganisation>>(), It.IsAny<IReadOnlyList<PayCalPom>>()))
+            .Returns((IReadOnlyList<PayCalOrganisation> organisations, IReadOnlyList<PayCalPom> _) => organisations);
+
         return new CommonDataApiLoader(
             loaderOptions,
             organisationsHandler.Object,
             pomsHandler.Object,
             mockObligationDeterminer.Object,
             mockPomEligibilityFilter.Object,
+            mockPeriodFlagsCalculator.Object,
             mockLogger.Object,
             new Telemetry<CommonDataApiLoader>());
     }

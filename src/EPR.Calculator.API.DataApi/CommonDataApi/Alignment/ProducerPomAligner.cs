@@ -29,6 +29,13 @@ public sealed class ProducerPomAligner : IProducerPomAligner
 {
     private const string ObligatedStatus = "O";
 
+    // Which packaging types count as reportable material, ported from sp_GetPaycalPomData.sql's final
+    // WHERE clause: household, consumer waste, and public bin count regardless of material; household
+    // drinks containers count only for glass.
+    private static readonly HashSet<string> ReportablePackagingTypes = ["HH", "CW", "PB"];
+    private const string HouseholdDrinksContainersType = "HDC";
+    private const string GlassMaterial = "GL";
+
     public IReadOnlyList<AlignmentOrganisation> DedupeOrganisations(IReadOnlyCollection<AlignmentOrganisation> organisations) =>
         organisations
             .GroupBy(o => (o.OrganisationId, o.SubsidiaryId, o.SubmitterId))
@@ -48,7 +55,7 @@ public sealed class ProducerPomAligner : IProducerPomAligner
         // We also pre-apply the PackagingType / OrganisationId.HasValue filters here so each per-organisation
         // slice is ready to group by material code directly.
         var pomsByOrgSubSubmitter = poms
-            .Where(p => p is { PackagingType: not null, OrganisationId: not null })
+            .Where(p => p is { PackagingType: not null, OrganisationId: not null } && IsReportablePackaging(p))
             .ToLookup(p => (OrganisationId: p.OrganisationId!.Value, p.SubsidiaryId, p.SubmitterId));
 
         foreach (var organisation in obligatedOrganisations)
@@ -80,6 +87,10 @@ public sealed class ProducerPomAligner : IProducerPomAligner
             };
         }
     }
+
+    private static bool IsReportablePackaging(AlignmentPom pom) =>
+        ReportablePackagingTypes.Contains(pom.PackagingType!) ||
+        (pom.PackagingType == HouseholdDrinksContainersType && pom.PackagingMaterial == GlassMaterial);
 
     private static IEnumerable<AlignedReportedMaterial> GetReportedMaterials(
         IReadOnlyList<string> materialCodes,
