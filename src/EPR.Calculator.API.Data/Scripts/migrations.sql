@@ -9,8 +9,6 @@ END;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240730085820_AddInitialMigration'
@@ -26,7 +24,6 @@ BEGIN
         CONSTRAINT [PK_default_parameter_setting_master] PRIMARY KEY ([Id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -42,7 +39,6 @@ BEGIN
         CONSTRAINT [PK_default_parameter_template_master] PRIMARY KEY ([parameter_unique_ref])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -59,7 +55,6 @@ BEGIN
         CONSTRAINT [FK_default_parameter_setting_detail_default_parameter_template_master_parameter_unique_ref] FOREIGN KEY ([parameter_unique_ref]) REFERENCES [default_parameter_template_master] ([parameter_unique_ref]) ON DELETE CASCADE
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -113,7 +108,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -122,7 +116,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_default_parameter_setting_detail_default_parameter_setting_master_id] ON [default_parameter_setting_detail] ([default_parameter_setting_master_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -131,7 +124,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_default_parameter_setting_detail_parameter_unique_ref] ON [default_parameter_setting_detail] ([parameter_unique_ref]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -139,16 +131,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240730085820_AddInitialMigration', N'8.0.13');
+    VALUES (N'20240730085820_AddInitialMigration', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240731130652_202407311405_UpdateTemplateMaster'
@@ -178,7 +167,6 @@ BEGIN
                     END
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -191,7 +179,6 @@ BEGIN
                     WHERE [parameter_unique_ref] = 'TONT-DI';
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -203,7 +190,6 @@ BEGIN
                     WHERE [parameter_unique_ref] = 'TONT-DI';
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -211,16 +197,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240731130652_202407311405_UpdateTemplateMaster', N'8.0.13');
+    VALUES (N'20240731130652_202407311405_UpdateTemplateMaster', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240731135218_202407311451_UpdateTemplateMasterValues'
@@ -230,7 +213,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''MATT-PD'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -241,7 +223,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''MATT-PD'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -252,7 +233,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''TONT-PD'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -263,7 +243,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''TONT-PD'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -271,16 +250,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240731135218_202407311451_UpdateTemplateMasterValues', N'8.0.13');
+    VALUES (N'20240731135218_202407311451_UpdateTemplateMasterValues', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240731140140_202407311501_UpdateTemplateMasterType'
@@ -290,7 +266,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-FC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -301,7 +276,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-GL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -312,7 +286,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-OT'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -323,7 +296,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-PC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -334,7 +306,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-PL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -345,7 +316,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-ST'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -356,7 +326,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-WD'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -364,16 +333,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240731140140_202407311501_UpdateTemplateMasterType', N'8.0.13');
+    VALUES (N'20240731140140_202407311501_UpdateTemplateMasterType', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240808120743_UpdateTemplateMaster'
@@ -381,7 +347,6 @@ IF NOT EXISTS (
 BEGIN
     delete dbo.default_parameter_setting_detail where 1=1
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -390,7 +355,6 @@ IF NOT EXISTS (
 BEGIN
     delete dbo.default_parameter_setting_master where 1=1
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -399,7 +363,6 @@ IF NOT EXISTS (
 BEGIN
     delete dbo.default_parameter_template_master where 1=1
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -453,7 +416,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -461,60 +423,54 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240808120743_UpdateTemplateMaster', N'8.0.13');
+    VALUES (N'20240808120743_UpdateTemplateMaster', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240809123714_decimalPrecision'
 )
 BEGIN
-    DECLARE @var0 sysname;
-    SELECT @var0 = [d].[name]
+    DECLARE @var nvarchar(max);
+    SELECT @var = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[default_parameter_template_master]') AND [c].[name] = N'valid_Range_to');
-    IF @var0 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_template_master] DROP CONSTRAINT [' + @var0 + '];');
+    IF @var IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_template_master] DROP CONSTRAINT ' + @var + ';');
     ALTER TABLE [default_parameter_template_master] ALTER COLUMN [valid_Range_to] decimal(18,3) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240809123714_decimalPrecision'
 )
 BEGIN
-    DECLARE @var1 sysname;
-    SELECT @var1 = [d].[name]
+    DECLARE @var1 nvarchar(max);
+    SELECT @var1 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[default_parameter_template_master]') AND [c].[name] = N'valid_Range_from');
-    IF @var1 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_template_master] DROP CONSTRAINT [' + @var1 + '];');
+    IF @var1 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_template_master] DROP CONSTRAINT ' + @var1 + ';');
     ALTER TABLE [default_parameter_template_master] ALTER COLUMN [valid_Range_from] decimal(18,3) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240809123714_decimalPrecision'
 )
 BEGIN
-    DECLARE @var2 sysname;
-    SELECT @var2 = [d].[name]
+    DECLARE @var2 nvarchar(max);
+    SELECT @var2 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[default_parameter_setting_detail]') AND [c].[name] = N'parameter_value');
-    IF @var2 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_setting_detail] DROP CONSTRAINT [' + @var2 + '];');
+    IF @var2 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_setting_detail] DROP CONSTRAINT ' + @var2 + ';');
     ALTER TABLE [default_parameter_setting_detail] ALTER COLUMN [parameter_value] decimal(18,3) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -522,16 +478,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240809123714_decimalPrecision', N'8.0.13');
+    VALUES (N'20240809123714_decimalPrecision', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240809131657_UpdateTemplateMasterData'
@@ -539,7 +492,6 @@ IF NOT EXISTS (
 BEGIN
     delete dbo.default_parameter_setting_detail where 1=1
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -548,7 +500,6 @@ IF NOT EXISTS (
 BEGIN
     delete dbo.default_parameter_setting_master where 1=1
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -557,7 +508,6 @@ IF NOT EXISTS (
 BEGIN
     delete dbo.default_parameter_template_master where 1=1
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -611,7 +561,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -619,16 +568,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240809131657_UpdateTemplateMasterData', N'8.0.13');
+    VALUES (N'20240809131657_UpdateTemplateMasterData', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240814103125_UpdateBadDebtInTemplateMaster'
@@ -640,7 +586,6 @@ BEGIN
     where parameter_type like '%Bad debt provision percentage%'
 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -648,16 +593,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240814103125_UpdateBadDebtInTemplateMaster', N'8.0.13');
+    VALUES (N'20240814103125_UpdateBadDebtInTemplateMaster', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240902153316_AddCalcRunTables'
@@ -671,7 +613,6 @@ BEGIN
         CONSTRAINT [PK_calculator_run_classification] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -691,7 +632,6 @@ BEGIN
         CONSTRAINT [FK_calculator_run_calculator_run_classification_calculator_run_classification_id] FOREIGN KEY ([calculator_run_classification_id]) REFERENCES [calculator_run_classification] ([id]) ON DELETE CASCADE
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -709,7 +649,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'created_at', N'created_by', N'status') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
         SET IDENTITY_INSERT [calculator_run_classification] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -718,7 +657,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calculator_run_calculator_run_classification_id] ON [calculator_run] ([calculator_run_classification_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -726,16 +664,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240902153316_AddCalcRunTables', N'8.0.13');
+    VALUES (N'20240902153316_AddCalcRunTables', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240905110503_LapcapData'
@@ -751,7 +686,6 @@ BEGIN
         CONSTRAINT [PK_lapcap_data_master] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -767,7 +701,6 @@ BEGIN
         CONSTRAINT [PK_lapcap_data_template_master] PRIMARY KEY ([unique_ref])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -784,7 +717,6 @@ BEGIN
         CONSTRAINT [FK_lapcap_data_detail_lapcap_data_template_master_lapcap_data_template_master_unique_ref] FOREIGN KEY ([lapcap_data_template_master_unique_ref]) REFERENCES [lapcap_data_template_master] ([unique_ref]) ON DELETE CASCADE
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -795,7 +727,6 @@ BEGIN
     WHERE [id] = 1;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -806,7 +737,6 @@ BEGIN
     WHERE [id] = 2;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -817,7 +747,6 @@ BEGIN
     WHERE [id] = 3;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -828,7 +757,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -839,7 +767,6 @@ BEGIN
     WHERE [id] = 5;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -848,7 +775,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_lapcap_data_detail_lapcap_data_master_id] ON [lapcap_data_detail] ([lapcap_data_master_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -857,7 +783,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE UNIQUE INDEX [IX_lapcap_data_detail_lapcap_data_template_master_unique_ref] ON [lapcap_data_detail] ([lapcap_data_template_master_unique_ref]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -865,16 +790,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240905110503_LapcapData', N'8.0.13');
+    VALUES (N'20240905110503_LapcapData', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240905121521_LapcapDataSeed'
@@ -884,7 +806,6 @@ BEGIN
     WHERE [id] = 1;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -895,7 +816,6 @@ BEGIN
     WHERE [id] = 2;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -906,7 +826,6 @@ BEGIN
     WHERE [id] = 3;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -917,7 +836,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -928,7 +846,6 @@ BEGIN
     WHERE [id] = 5;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -973,7 +890,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'unique_ref', N'country', N'material', N'total_cost_from', N'total_cost_to') AND [object_id] = OBJECT_ID(N'[lapcap_data_template_master]'))
         SET IDENTITY_INSERT [lapcap_data_template_master] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -981,16 +897,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240905121521_LapcapDataSeed', N'8.0.13');
+    VALUES (N'20240905121521_LapcapDataSeed', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240909095829_LapcapRelationship'
@@ -998,7 +911,6 @@ IF NOT EXISTS (
 BEGIN
     DROP INDEX [IX_lapcap_data_detail_lapcap_data_template_master_unique_ref] ON [lapcap_data_detail];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1009,7 +921,6 @@ BEGIN
     WHERE [id] = 1;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1020,7 +931,6 @@ BEGIN
     WHERE [id] = 2;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1031,7 +941,6 @@ BEGIN
     WHERE [id] = 3;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1042,7 +951,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1053,7 +961,6 @@ BEGIN
     WHERE [id] = 5;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1062,7 +969,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_lapcap_data_detail_lapcap_data_template_master_unique_ref] ON [lapcap_data_detail] ([lapcap_data_template_master_unique_ref]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1070,16 +976,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240909095829_LapcapRelationship', N'8.0.13');
+    VALUES (N'20240909095829_LapcapRelationship', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240924094510_DeleteLevyFromDefaultParamaterMaster'
@@ -1091,7 +994,6 @@ BEGIN
     where m.parameter_type = 'Levy'
 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1100,7 +1002,6 @@ IF NOT EXISTS (
 BEGIN
     delete from dbo.default_parameter_template_master where parameter_type = 'Levy'
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1108,16 +1009,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240924094510_DeleteLevyFromDefaultParamaterMaster', N'8.0.13');
+    VALUES (N'20240924094510_DeleteLevyFromDefaultParamaterMaster', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240924110427_AddCommunicationCostsDefaultParamaterMaster'
@@ -1134,7 +1032,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1146,7 +1043,6 @@ BEGIN
     where parameter_type = 'Communication costs'
 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1154,24 +1050,20 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240924110427_AddCommunicationCostsDefaultParamaterMaster', N'8.0.13');
+    VALUES (N'20240924110427_AddCommunicationCostsDefaultParamaterMaster', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20240924194409_UpdateLapcapDataMasterYearColumnName'
 )
 BEGIN
-    EXEC sp_rename N'[dbo].[lapcap_data_master].[year]', N'projection_year', N'COLUMN';
+    EXEC sp_rename N'[dbo].[lapcap_data_master].[year]', N'projection_year', 'COLUMN';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1179,16 +1071,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20240924194409_UpdateLapcapDataMasterYearColumnName', N'8.0.13');
+    VALUES (N'20240924194409_UpdateLapcapDataMasterYearColumnName', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241004134649_CalcRunTables'
@@ -1196,7 +1085,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD [calculator_run_organization_data_master_id] int NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1205,7 +1093,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD [calculator_run_pom_data_master_id] int NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1214,7 +1101,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD [default_parameter_setting_master_id] int NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1223,7 +1109,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD [lapcap_data_master_id] int NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1240,7 +1125,6 @@ BEGIN
         CONSTRAINT [PK_calculator_run_organization_data_master] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1257,7 +1141,6 @@ BEGIN
         CONSTRAINT [PK_calculator_run_pom_data_master] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1272,7 +1155,6 @@ BEGIN
         CONSTRAINT [PK_organization_data] PRIMARY KEY ([organisation_id], [subsidiary_id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1292,7 +1174,6 @@ BEGIN
         CONSTRAINT [PK_pom_data] PRIMARY KEY ([organisation_id], [subsidiary_id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1309,7 +1190,6 @@ BEGIN
         CONSTRAINT [FK_calculator_run_organization_data_detail_calculator_run_organization_data_master_calculator_run_organization_data_master_id] FOREIGN KEY ([calculator_run_organization_data_master_id]) REFERENCES [calculator_run_organization_data_master] ([id]) ON DELETE CASCADE
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1331,7 +1211,6 @@ BEGIN
         CONSTRAINT [FK_calculator_run_pom_data_detail_calculator_run_pom_data_master_calculator_run_pom_data_master_id] FOREIGN KEY ([calculator_run_pom_data_master_id]) REFERENCES [calculator_run_pom_data_master] ([id]) ON DELETE CASCADE
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1342,7 +1221,6 @@ BEGIN
     WHERE [id] = 1;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1353,7 +1231,6 @@ BEGIN
     WHERE [id] = 2;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1364,7 +1241,6 @@ BEGIN
     WHERE [id] = 3;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1375,7 +1251,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1386,7 +1261,6 @@ BEGIN
     WHERE [id] = 5;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1395,7 +1269,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calculator_run_calculator_run_organization_data_master_id] ON [calculator_run] ([calculator_run_organization_data_master_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1404,7 +1277,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calculator_run_calculator_run_pom_data_master_id] ON [calculator_run] ([calculator_run_pom_data_master_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1413,7 +1285,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calculator_run_default_parameter_setting_master_id] ON [calculator_run] ([default_parameter_setting_master_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1422,7 +1293,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calculator_run_lapcap_data_master_id] ON [calculator_run] ([lapcap_data_master_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1431,7 +1301,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calculator_run_organization_data_detail_calculator_run_organization_data_master_id] ON [calculator_run_organization_data_detail] ([calculator_run_organization_data_master_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1440,7 +1309,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calculator_run_pom_data_detail_calculator_run_pom_data_master_id] ON [calculator_run_pom_data_detail] ([calculator_run_pom_data_master_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1449,7 +1317,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD CONSTRAINT [FK_calculator_run_calculator_run_organization_data_master_calculator_run_organization_data_master_id] FOREIGN KEY ([calculator_run_organization_data_master_id]) REFERENCES [calculator_run_organization_data_master] ([id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1458,7 +1325,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD CONSTRAINT [FK_calculator_run_calculator_run_pom_data_master_calculator_run_pom_data_master_id] FOREIGN KEY ([calculator_run_pom_data_master_id]) REFERENCES [calculator_run_pom_data_master] ([id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1467,7 +1333,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD CONSTRAINT [FK_calculator_run_default_parameter_setting_master_default_parameter_setting_master_id] FOREIGN KEY ([default_parameter_setting_master_id]) REFERENCES [default_parameter_setting_master] ([Id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1476,7 +1341,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD CONSTRAINT [FK_calculator_run_lapcap_data_master_lapcap_data_master_id] FOREIGN KEY ([lapcap_data_master_id]) REFERENCES [lapcap_data_master] ([id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1484,16 +1348,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241004134649_CalcRunTables', N'8.0.13');
+    VALUES (N'20241004134649_CalcRunTables', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241007082551_CalcRunMinorChanges'
@@ -1503,7 +1364,6 @@ BEGIN
     WHERE [id] = 1;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1514,7 +1374,6 @@ BEGIN
     WHERE [id] = 2;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1525,7 +1384,6 @@ BEGIN
     WHERE [id] = 3;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1536,7 +1394,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1547,7 +1404,6 @@ BEGIN
     WHERE [id] = 5;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1555,16 +1411,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241007082551_CalcRunMinorChanges', N'8.0.13');
+    VALUES (N'20241007082551_CalcRunMinorChanges', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241018110438_OrganisationAndPomChanges'
@@ -1572,7 +1425,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [pom_data] DROP CONSTRAINT [PK_pom_data];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1581,76 +1433,70 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [organization_data] DROP CONSTRAINT [PK_organization_data];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241018110438_OrganisationAndPomChanges'
 )
 BEGIN
-    EXEC sp_rename N'[organization_data]', N'organisation_data';
+    EXEC sp_rename N'[organization_data]', N'organisation_data', 'OBJECT';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241018110438_OrganisationAndPomChanges'
 )
 BEGIN
-    DECLARE @var3 sysname;
-    SELECT @var3 = [d].[name]
+    DECLARE @var3 nvarchar(max);
+    SELECT @var3 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[pom_data]') AND [c].[name] = N'subsidiary_id');
-    IF @var3 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT [' + @var3 + '];');
+    IF @var3 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT ' + @var3 + ';');
     ALTER TABLE [pom_data] ALTER COLUMN [subsidiary_id] nvarchar(400) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241018110438_OrganisationAndPomChanges'
 )
 BEGIN
-    DECLARE @var4 sysname;
-    SELECT @var4 = [d].[name]
+    DECLARE @var4 nvarchar(max);
+    SELECT @var4 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[pom_data]') AND [c].[name] = N'organisation_id');
-    IF @var4 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT [' + @var4 + '];');
+    IF @var4 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT ' + @var4 + ';');
     ALTER TABLE [pom_data] ALTER COLUMN [organisation_id] nvarchar(400) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241018110438_OrganisationAndPomChanges'
 )
 BEGIN
-    DECLARE @var5 sysname;
-    SELECT @var5 = [d].[name]
+    DECLARE @var5 nvarchar(max);
+    SELECT @var5 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[organisation_data]') AND [c].[name] = N'subsidiary_id');
-    IF @var5 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT [' + @var5 + '];');
+    IF @var5 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT ' + @var5 + ';');
     ALTER TABLE [organisation_data] ALTER COLUMN [subsidiary_id] nvarchar(400) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241018110438_OrganisationAndPomChanges'
 )
 BEGIN
-    DECLARE @var6 sysname;
-    SELECT @var6 = [d].[name]
+    DECLARE @var6 nvarchar(max);
+    SELECT @var6 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[organisation_data]') AND [c].[name] = N'organisation_id');
-    IF @var6 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT [' + @var6 + '];');
+    IF @var6 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT ' + @var6 + ';');
     ALTER TABLE [organisation_data] ALTER COLUMN [organisation_id] nvarchar(400) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1661,7 +1507,6 @@ BEGIN
     WHERE [id] = 1;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1672,7 +1517,6 @@ BEGIN
     WHERE [id] = 2;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1683,7 +1527,6 @@ BEGIN
     WHERE [id] = 3;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1694,7 +1537,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1705,7 +1547,6 @@ BEGIN
     WHERE [id] = 5;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1713,16 +1554,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241018110438_OrganisationAndPomChanges', N'8.0.13');
+    VALUES (N'20241018110438_OrganisationAndPomChanges', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241018130224_UpdateOtherMaterialsDefaultParameterMaster'
@@ -1732,7 +1570,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''COMC-OT'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1740,16 +1577,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241018130224_UpdateOtherMaterialsDefaultParameterMaster', N'8.0.13');
+    VALUES (N'20241018130224_UpdateOtherMaterialsDefaultParameterMaster', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241021102314_UpdateOtherMaterialsLateReportingTonnage'
@@ -1759,7 +1593,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-OT'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1767,16 +1600,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241021102314_UpdateOtherMaterialsLateReportingTonnage', N'8.0.13');
+    VALUES (N'20241021102314_UpdateOtherMaterialsLateReportingTonnage', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241021110702_CalcRunPomAndOrganisationRemoveKeys'
@@ -1784,7 +1614,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT [PK_calculator_run_pom_data_detail];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1793,7 +1622,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT [PK_calculator_run_organization_data_detail];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1802,7 +1630,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_pom_data_detail] ADD [Id] int NOT NULL IDENTITY;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1811,7 +1638,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] ADD [Id] int NOT NULL IDENTITY;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1820,7 +1646,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_pom_data_detail] ADD CONSTRAINT [PK_calculator_run_pom_data_detail] PRIMARY KEY ([Id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1829,7 +1654,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] ADD CONSTRAINT [PK_calculator_run_organization_data_detail] PRIMARY KEY ([Id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1840,7 +1664,6 @@ BEGIN
     WHERE [id] = 1;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1851,7 +1674,6 @@ BEGIN
     WHERE [id] = 2;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1862,7 +1684,6 @@ BEGIN
     WHERE [id] = 3;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1873,7 +1694,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1884,7 +1704,6 @@ BEGIN
     WHERE [id] = 5;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1892,75 +1711,68 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241021110702_CalcRunPomAndOrganisationRemoveKeys', N'8.0.13');
+    VALUES (N'20241021110702_CalcRunPomAndOrganisationRemoveKeys', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241021130056_OrganisationIdAndSubsidaryIdNullable'
 )
 BEGIN
-    DECLARE @var7 sysname;
-    SELECT @var7 = [d].[name]
+    DECLARE @var7 nvarchar(max);
+    SELECT @var7 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_pom_data_detail]') AND [c].[name] = N'subsidiary_id');
-    IF @var7 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT [' + @var7 + '];');
+    IF @var7 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT ' + @var7 + ';');
     ALTER TABLE [calculator_run_pom_data_detail] ALTER COLUMN [subsidiary_id] nvarchar(400) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241021130056_OrganisationIdAndSubsidaryIdNullable'
 )
 BEGIN
-    DECLARE @var8 sysname;
-    SELECT @var8 = [d].[name]
+    DECLARE @var8 nvarchar(max);
+    SELECT @var8 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_pom_data_detail]') AND [c].[name] = N'organisation_id');
-    IF @var8 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT [' + @var8 + '];');
+    IF @var8 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT ' + @var8 + ';');
     ALTER TABLE [calculator_run_pom_data_detail] ALTER COLUMN [organisation_id] nvarchar(400) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241021130056_OrganisationIdAndSubsidaryIdNullable'
 )
 BEGIN
-    DECLARE @var9 sysname;
-    SELECT @var9 = [d].[name]
+    DECLARE @var9 nvarchar(max);
+    SELECT @var9 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organization_data_detail]') AND [c].[name] = N'subsidiary_id');
-    IF @var9 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT [' + @var9 + '];');
+    IF @var9 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT ' + @var9 + ';');
     ALTER TABLE [calculator_run_organization_data_detail] ALTER COLUMN [subsidiary_id] nvarchar(400) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241021130056_OrganisationIdAndSubsidaryIdNullable'
 )
 BEGIN
-    DECLARE @var10 sysname;
-    SELECT @var10 = [d].[name]
+    DECLARE @var10 nvarchar(max);
+    SELECT @var10 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organization_data_detail]') AND [c].[name] = N'organisation_id');
-    IF @var10 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT [' + @var10 + '];');
+    IF @var10 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT ' + @var10 + ';');
     ALTER TABLE [calculator_run_organization_data_detail] ALTER COLUMN [organisation_id] nvarchar(400) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1971,7 +1783,6 @@ BEGIN
     WHERE [id] = 1;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1982,7 +1793,6 @@ BEGIN
     WHERE [id] = 2;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -1993,7 +1803,6 @@ BEGIN
     WHERE [id] = 3;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2004,7 +1813,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2015,7 +1823,6 @@ BEGIN
     WHERE [id] = 5;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2023,75 +1830,68 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241021130056_OrganisationIdAndSubsidaryIdNullable', N'8.0.13');
+    VALUES (N'20241021130056_OrganisationIdAndSubsidaryIdNullable', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241024125526_OrganisationIDToInt'
 )
 BEGIN
-    DECLARE @var11 sysname;
-    SELECT @var11 = [d].[name]
+    DECLARE @var11 nvarchar(max);
+    SELECT @var11 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[pom_data]') AND [c].[name] = N'organisation_id');
-    IF @var11 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT [' + @var11 + '];');
+    IF @var11 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT ' + @var11 + ';');
     ALTER TABLE [pom_data] ALTER COLUMN [organisation_id] int NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241024125526_OrganisationIDToInt'
 )
 BEGIN
-    DECLARE @var12 sysname;
-    SELECT @var12 = [d].[name]
+    DECLARE @var12 nvarchar(max);
+    SELECT @var12 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[organisation_data]') AND [c].[name] = N'organisation_id');
-    IF @var12 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT [' + @var12 + '];');
+    IF @var12 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT ' + @var12 + ';');
     ALTER TABLE [organisation_data] ALTER COLUMN [organisation_id] int NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241024125526_OrganisationIDToInt'
 )
 BEGIN
-    DECLARE @var13 sysname;
-    SELECT @var13 = [d].[name]
+    DECLARE @var13 nvarchar(max);
+    SELECT @var13 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_pom_data_detail]') AND [c].[name] = N'organisation_id');
-    IF @var13 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT [' + @var13 + '];');
+    IF @var13 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT ' + @var13 + ';');
     ALTER TABLE [calculator_run_pom_data_detail] ALTER COLUMN [organisation_id] int NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241024125526_OrganisationIDToInt'
 )
 BEGIN
-    DECLARE @var14 sysname;
-    SELECT @var14 = [d].[name]
+    DECLARE @var14 nvarchar(max);
+    SELECT @var14 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organization_data_detail]') AND [c].[name] = N'organisation_id');
-    IF @var14 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT [' + @var14 + '];');
+    IF @var14 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT ' + @var14 + ';');
     ALTER TABLE [calculator_run_organization_data_detail] ALTER COLUMN [organisation_id] int NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2102,7 +1902,6 @@ BEGIN
     WHERE [id] = 1;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2113,7 +1912,6 @@ BEGIN
     WHERE [id] = 2;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2124,7 +1922,6 @@ BEGIN
     WHERE [id] = 3;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2135,7 +1932,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2146,7 +1942,6 @@ BEGIN
     WHERE [id] = 5;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2154,60 +1949,54 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241024125526_OrganisationIDToInt', N'8.0.13');
+    VALUES (N'20241024125526_OrganisationIDToInt', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241024134320_PackagingMaterialWeightToDouble'
 )
 BEGIN
-    DECLARE @var15 sysname;
-    SELECT @var15 = [d].[name]
+    DECLARE @var15 nvarchar(max);
+    SELECT @var15 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[pom_data]') AND [c].[name] = N'packaging_material_weight');
-    IF @var15 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT [' + @var15 + '];');
+    IF @var15 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT ' + @var15 + ';');
     ALTER TABLE [pom_data] ALTER COLUMN [packaging_material_weight] float NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241024134320_PackagingMaterialWeightToDouble'
 )
 BEGIN
-    DECLARE @var16 sysname;
-    SELECT @var16 = [d].[name]
+    DECLARE @var16 nvarchar(max);
+    SELECT @var16 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[pom_data]') AND [c].[name] = N'packaging_material');
-    IF @var16 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT [' + @var16 + '];');
+    IF @var16 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT ' + @var16 + ';');
     ALTER TABLE [pom_data] ALTER COLUMN [packaging_material] nvarchar(max) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241024134320_PackagingMaterialWeightToDouble'
 )
 BEGIN
-    DECLARE @var17 sysname;
-    SELECT @var17 = [d].[name]
+    DECLARE @var17 nvarchar(max);
+    SELECT @var17 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_pom_data_detail]') AND [c].[name] = N'packaging_material_weight');
-    IF @var17 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT [' + @var17 + '];');
+    IF @var17 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT ' + @var17 + ';');
     ALTER TABLE [calculator_run_pom_data_detail] ALTER COLUMN [packaging_material_weight] float NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2218,7 +2007,6 @@ BEGIN
     WHERE [id] = 1;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2229,7 +2017,6 @@ BEGIN
     WHERE [id] = 2;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2240,7 +2027,6 @@ BEGIN
     WHERE [id] = 3;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2251,7 +2037,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2262,7 +2047,6 @@ BEGIN
     WHERE [id] = 5;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2270,16 +2054,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241024134320_PackagingMaterialWeightToDouble', N'8.0.13');
+    VALUES (N'20241024134320_PackagingMaterialWeightToDouble', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241025140420_CalculationResultsTables'
@@ -2293,7 +2074,6 @@ BEGIN
         CONSTRAINT [PK_cost_type] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2308,7 +2088,6 @@ BEGIN
         CONSTRAINT [PK_country] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2323,7 +2102,6 @@ BEGIN
         CONSTRAINT [PK_material] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2340,7 +2118,6 @@ BEGIN
         CONSTRAINT [FK_producer_detail_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2359,7 +2136,6 @@ BEGIN
         CONSTRAINT [FK_country_apportionment_country_country_id] FOREIGN KEY ([country_id]) REFERENCES [country] ([id]) ON DELETE CASCADE
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2377,7 +2153,6 @@ BEGIN
         CONSTRAINT [FK_producer_reported_material_producer_detail_producer_detail_id] FOREIGN KEY ([producer_detail_id]) REFERENCES [producer_detail] ([id]) ON DELETE CASCADE
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2388,7 +2163,6 @@ BEGIN
     WHERE [id] = 1;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2399,7 +2173,6 @@ BEGIN
     WHERE [id] = 2;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2410,7 +2183,6 @@ BEGIN
     WHERE [id] = 3;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2421,7 +2193,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2432,7 +2203,6 @@ BEGIN
     WHERE [id] = 5;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2441,7 +2211,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_country_apportionment_calculator_run_id] ON [country_apportionment] ([calculator_run_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2450,7 +2219,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_country_apportionment_cost_type_id] ON [country_apportionment] ([cost_type_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2459,7 +2227,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_country_apportionment_country_id] ON [country_apportionment] ([country_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2468,7 +2235,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_producer_detail_calculator_run_id] ON [producer_detail] ([calculator_run_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2477,7 +2243,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_producer_reported_material_material_id] ON [producer_reported_material] ([material_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2486,7 +2251,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_producer_reported_material_producer_detail_id] ON [producer_reported_material] ([producer_detail_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2494,16 +2258,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241025140420_CalculationResultsTables', N'8.0.13');
+    VALUES (N'20241025140420_CalculationResultsTables', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241028092305_CreateMasterDataForCalcResultsTables'
@@ -2517,7 +2278,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'code', N'name', N'description') AND [object_id] = OBJECT_ID(N'[cost_type]'))
         SET IDENTITY_INSERT [cost_type] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2534,7 +2294,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'code', N'name', N'description') AND [object_id] = OBJECT_ID(N'[country]'))
         SET IDENTITY_INSERT [country] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2555,7 +2314,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'code', N'name', N'description') AND [object_id] = OBJECT_ID(N'[material]'))
         SET IDENTITY_INSERT [material] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2563,16 +2321,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241028092305_CreateMasterDataForCalcResultsTables', N'8.0.13');
+    VALUES (N'20241028092305_CreateMasterDataForCalcResultsTables', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables'
@@ -2580,7 +2335,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [pom_data] ADD [submission_period_desc] nvarchar(max) NOT NULL DEFAULT N'';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2589,7 +2343,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [organisation_data] ADD [submission_period_desc] nvarchar(max) NOT NULL DEFAULT N'';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2598,7 +2351,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_pom_data_detail] ADD [submission_period_desc] nvarchar(max) NOT NULL DEFAULT N'';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2607,7 +2359,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] ADD [submission_period_desc] nvarchar(max) NOT NULL DEFAULT N'';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2618,7 +2369,6 @@ BEGIN
     WHERE [id] = 1;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2629,7 +2379,6 @@ BEGIN
     WHERE [id] = 2;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2640,7 +2389,6 @@ BEGIN
     WHERE [id] = 3;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2651,7 +2399,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2662,7 +2409,6 @@ BEGIN
     WHERE [id] = 5;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2670,16 +2416,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables', N'8.0.13');
+    VALUES (N'20241028114313_AddNewColumnSubmissionPeriodDescToPomAndOrganisationTables', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241029110303_AddNewColumnParameterFileNameToDefaultParamSettingMasterTable'
@@ -2687,7 +2430,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [default_parameter_setting_master] ADD [parameter_filename] nvarchar(256) NOT NULL DEFAULT N'';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2698,7 +2440,6 @@ BEGIN
     WHERE [id] = 1;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2709,7 +2450,6 @@ BEGIN
     WHERE [id] = 2;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2720,7 +2460,6 @@ BEGIN
     WHERE [id] = 3;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2731,7 +2470,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2742,7 +2480,6 @@ BEGIN
     WHERE [id] = 5;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2750,16 +2487,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241029110303_AddNewColumnParameterFileNameToDefaultParamSettingMasterTable', N'8.0.13');
+    VALUES (N'20241029110303_AddNewColumnParameterFileNameToDefaultParamSettingMasterTable', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241104130025_AddNewColumnLapcapFileNameToLapcapDataMaster'
@@ -2767,7 +2501,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [lapcap_data_master] ADD [lapcap_filename] nvarchar(256) NOT NULL DEFAULT N'';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2778,7 +2511,6 @@ BEGIN
     WHERE [id] = 1;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2789,7 +2521,6 @@ BEGIN
     WHERE [id] = 2;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2800,7 +2531,6 @@ BEGIN
     WHERE [id] = 3;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2811,7 +2541,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2822,7 +2551,6 @@ BEGIN
     WHERE [id] = 5;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2830,30 +2558,26 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241104130025_AddNewColumnLapcapFileNameToLapcapDataMaster', N'8.0.13');
+    VALUES (N'20241104130025_AddNewColumnLapcapFileNameToLapcapDataMaster', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241114200611_RemoveCreateAtCalculatorRunClassification'
 )
 BEGIN
-    DECLARE @var18 sysname;
-    SELECT @var18 = [d].[name]
+    DECLARE @var18 nvarchar(max);
+    SELECT @var18 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_classification]') AND [c].[name] = N'created_at');
-    IF @var18 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_classification] DROP CONSTRAINT [' + @var18 + '];');
+    IF @var18 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_classification] DROP CONSTRAINT ' + @var18 + ';');
     ALTER TABLE [calculator_run_classification] DROP COLUMN [created_at];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2861,16 +2585,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241114200611_RemoveCreateAtCalculatorRunClassification', N'8.0.13');
+    VALUES (N'20241114200611_RemoveCreateAtCalculatorRunClassification', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241114200729_UpdateOtherParamLapcap'
@@ -2881,7 +2602,6 @@ BEGIN
     where material like 'Other'
 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2889,30 +2609,26 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241114200729_UpdateOtherParamLapcap', N'8.0.13');
+    VALUES (N'20241114200729_UpdateOtherParamLapcap', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241115161403_AddPackagingTonnagePrecision'
 )
 BEGIN
-    DECLARE @var19 sysname;
-    SELECT @var19 = [d].[name]
+    DECLARE @var19 nvarchar(max);
+    SELECT @var19 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_reported_material]') AND [c].[name] = N'packaging_tonnage');
-    IF @var19 IS NOT NULL EXEC(N'ALTER TABLE [producer_reported_material] DROP CONSTRAINT [' + @var19 + '];');
+    IF @var19 IS NOT NULL EXEC(N'ALTER TABLE [producer_reported_material] DROP CONSTRAINT ' + @var19 + ';');
     ALTER TABLE [producer_reported_material] ALTER COLUMN [packaging_tonnage] decimal(18,3) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2920,16 +2636,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241115161403_AddPackagingTonnagePrecision', N'8.0.13');
+    VALUES (N'20241115161403_AddPackagingTonnagePrecision', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241120130054_LapCapNorthernIrelandRename'
@@ -2939,7 +2652,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-AL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2950,7 +2662,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-FC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2961,7 +2672,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-GL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2972,7 +2682,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-OT'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2983,7 +2692,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-PC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -2994,7 +2702,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-PL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3005,7 +2712,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-ST'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3016,7 +2722,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-WD'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3024,16 +2729,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241120130054_LapCapNorthernIrelandRename', N'8.0.13');
+    VALUES (N'20241120130054_LapCapNorthernIrelandRename', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20241129145454_AddNewClassficationStatus'
@@ -3046,7 +2748,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'status', N'created_by') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
         SET IDENTITY_INSERT [calculator_run_classification] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3054,90 +2755,82 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20241129145454_AddNewClassficationStatus', N'8.0.13');
+    VALUES (N'20241129145454_AddNewClassficationStatus', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250117164554_AllowNullSubmissionPeriodForPom'
 )
 BEGIN
-    DECLARE @var20 sysname;
-    SELECT @var20 = [d].[name]
+    DECLARE @var20 nvarchar(max);
+    SELECT @var20 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[pom_data]') AND [c].[name] = N'submission_period_desc');
-    IF @var20 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT [' + @var20 + '];');
+    IF @var20 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT ' + @var20 + ';');
     ALTER TABLE [pom_data] ALTER COLUMN [submission_period_desc] nvarchar(max) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250117164554_AllowNullSubmissionPeriodForPom'
 )
 BEGIN
-    DECLARE @var21 sysname;
-    SELECT @var21 = [d].[name]
+    DECLARE @var21 nvarchar(max);
+    SELECT @var21 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[pom_data]') AND [c].[name] = N'submission_period');
-    IF @var21 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT [' + @var21 + '];');
+    IF @var21 IS NOT NULL EXEC(N'ALTER TABLE [pom_data] DROP CONSTRAINT ' + @var21 + ';');
     ALTER TABLE [pom_data] ALTER COLUMN [submission_period] nvarchar(400) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250117164554_AllowNullSubmissionPeriodForPom'
 )
 BEGIN
-    DECLARE @var22 sysname;
-    SELECT @var22 = [d].[name]
+    DECLARE @var22 nvarchar(max);
+    SELECT @var22 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_pom_data_detail]') AND [c].[name] = N'submission_period_desc');
-    IF @var22 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT [' + @var22 + '];');
+    IF @var22 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT ' + @var22 + ';');
     ALTER TABLE [calculator_run_pom_data_detail] ALTER COLUMN [submission_period_desc] nvarchar(max) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250117164554_AllowNullSubmissionPeriodForPom'
 )
 BEGIN
-    DECLARE @var23 sysname;
-    SELECT @var23 = [d].[name]
+    DECLARE @var23 nvarchar(max);
+    SELECT @var23 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_pom_data_detail]') AND [c].[name] = N'submission_period');
-    IF @var23 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT [' + @var23 + '];');
+    IF @var23 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_detail] DROP CONSTRAINT ' + @var23 + ';');
     ALTER TABLE [calculator_run_pom_data_detail] ALTER COLUMN [submission_period] nvarchar(400) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250117164554_AllowNullSubmissionPeriodForPom'
 )
 BEGIN
-    DECLARE @var24 sysname;
-    SELECT @var24 = [d].[name]
+    DECLARE @var24 nvarchar(max);
+    SELECT @var24 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organization_data_detail]') AND [c].[name] = N'submission_period_desc');
-    IF @var24 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT [' + @var24 + '];');
+    IF @var24 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT ' + @var24 + ';');
     ALTER TABLE [calculator_run_organization_data_detail] ALTER COLUMN [submission_period_desc] nvarchar(max) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3145,16 +2838,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250117164554_AllowNullSubmissionPeriodForPom', N'8.0.13');
+    VALUES (N'20250117164554_AllowNullSubmissionPeriodForPom', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250122092344_PomAndOrganisationProcedures'
@@ -3220,7 +2910,6 @@ BEGIN
     END'
     EXEC(@Sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3279,7 +2968,6 @@ BEGIN
         END'
     EXEC(@Sql) 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3287,16 +2975,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250122092344_PomAndOrganisationProcedures', N'8.0.13');
+    VALUES (N'20250122092344_PomAndOrganisationProcedures', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250123134310_AddCalculatorRunCsvFileMetadata'
@@ -3311,7 +2996,6 @@ BEGIN
         CONSTRAINT [FK_calculator_run_csvfile_metadata_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3320,7 +3004,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calculator_run_csvfile_metadata_calculator_run_id] ON [calculator_run_csvfile_metadata] ([calculator_run_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3328,16 +3011,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250123134310_AddCalculatorRunCsvFileMetadata', N'8.0.13');
+    VALUES (N'20250123134310_AddCalculatorRunCsvFileMetadata', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250205150405_AddSubmissionPeriodLookup'
@@ -3354,7 +3034,6 @@ BEGIN
         CONSTRAINT [PK_submission_period_lookup] PRIMARY KEY ([submission_period])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3371,7 +3050,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3379,60 +3057,54 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250205150405_AddSubmissionPeriodLookup', N'8.0.13');
+    VALUES (N'20250205150405_AddSubmissionPeriodLookup', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
 )
 BEGIN
-    DECLARE @var25 sysname;
-    SELECT @var25 = [d].[name]
+    DECLARE @var25 nvarchar(max);
+    SELECT @var25 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[lapcap_data_master]') AND [c].[name] = N'projection_year');
-    IF @var25 IS NOT NULL EXEC(N'ALTER TABLE [lapcap_data_master] DROP CONSTRAINT [' + @var25 + '];');
+    IF @var25 IS NOT NULL EXEC(N'ALTER TABLE [lapcap_data_master] DROP CONSTRAINT ' + @var25 + ';');
     ALTER TABLE [lapcap_data_master] ALTER COLUMN [projection_year] nvarchar(450) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
 )
 BEGIN
-    DECLARE @var26 sysname;
-    SELECT @var26 = [d].[name]
+    DECLARE @var26 nvarchar(max);
+    SELECT @var26 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[default_parameter_setting_master]') AND [c].[name] = N'parameter_year');
-    IF @var26 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_setting_master] DROP CONSTRAINT [' + @var26 + '];');
+    IF @var26 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_setting_master] DROP CONSTRAINT ' + @var26 + ';');
     ALTER TABLE [default_parameter_setting_master] ALTER COLUMN [parameter_year] nvarchar(450) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250318112342_AddFinancialYearTable'
 )
 BEGIN
-    DECLARE @var27 sysname;
-    SELECT @var27 = [d].[name]
+    DECLARE @var27 nvarchar(max);
+    SELECT @var27 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'financial_year');
-    IF @var27 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT [' + @var27 + '];');
+    IF @var27 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT ' + @var27 + ';');
     ALTER TABLE [calculator_run] ALTER COLUMN [financial_year] nvarchar(450) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3445,7 +3117,6 @@ BEGIN
         CONSTRAINT [PK_calculator_run_financial_years] PRIMARY KEY ([financial_Year])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3454,7 +3125,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_lapcap_data_master_projection_year] ON [lapcap_data_master] ([projection_year]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3463,7 +3133,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_default_parameter_setting_master_parameter_year] ON [default_parameter_setting_master] ([parameter_year]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3472,7 +3141,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calculator_run_financial_year] ON [calculator_run] ([financial_year]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3480,16 +3148,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250318112342_AddFinancialYearTable', N'8.0.13');
+    VALUES (N'20250318112342_AddFinancialYearTable', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250318130352_FinancialYearMigrations'
@@ -3502,7 +3167,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
         SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3516,7 +3180,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
         SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3530,7 +3193,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
         SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3544,7 +3206,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
         SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3558,7 +3219,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
         SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3572,7 +3232,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
         SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3586,7 +3245,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
         SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3600,7 +3258,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year', N'description') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
         SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3608,16 +3265,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250318130352_FinancialYearMigrations', N'8.0.13');
+    VALUES (N'20250318130352_FinancialYearMigrations', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250319095159_AddFinancialYearForeignKeys'
@@ -3625,7 +3279,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD CONSTRAINT [FK_calculator_run_calculator_run_financial_years_financial_year] FOREIGN KEY ([financial_year]) REFERENCES [calculator_run_financial_years] ([financial_Year]) ON DELETE CASCADE;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3634,7 +3287,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [default_parameter_setting_master] ADD CONSTRAINT [FK_default_parameter_setting_master_calculator_run_financial_years_parameter_year] FOREIGN KEY ([parameter_year]) REFERENCES [calculator_run_financial_years] ([financial_Year]) ON DELETE CASCADE;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3643,7 +3295,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [lapcap_data_master] ADD CONSTRAINT [FK_lapcap_data_master_calculator_run_financial_years_projection_year] FOREIGN KEY ([projection_year]) REFERENCES [calculator_run_financial_years] ([financial_Year]) ON DELETE CASCADE;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3651,16 +3302,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250319095159_AddFinancialYearForeignKeys', N'8.0.13');
+    VALUES (N'20250319095159_AddFinancialYearForeignKeys', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250424155648_AddingHasBillingFileGeneratedColumn'
@@ -3668,7 +3316,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD [HasBillingFileGenerated] bit NOT NULL DEFAULT CAST(0 AS bit);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3676,16 +3323,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250424155648_AddingHasBillingFileGeneratedColumn', N'8.0.13');
+    VALUES (N'20250424155648_AddingHasBillingFileGeneratedColumn', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250427142501_AddNewRunClassification'
@@ -3698,7 +3342,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'status', N'created_by') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
         SET IDENTITY_INSERT [calculator_run_classification] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3706,16 +3349,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250427142501_AddNewRunClassification', N'8.0.13');
+    VALUES (N'20250427142501_AddNewRunClassification', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250428101935_AddNewRunClassifications'
@@ -3731,7 +3371,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'status', N'created_by') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
         SET IDENTITY_INSERT [calculator_run_classification] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3742,7 +3381,6 @@ BEGIN
     WHERE [id] = 4;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3750,16 +3388,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250428101935_AddNewRunClassifications', N'8.0.13');
+    VALUES (N'20250428101935_AddNewRunClassifications', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250507155935_AddCalculatorRunBillingFileMetadataTable'
@@ -3778,7 +3413,6 @@ BEGIN
         CONSTRAINT [FK_calculator_run_billing_file_metadata_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3787,7 +3421,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calculator_run_billing_file_metadata_calculator_run_id] ON [calculator_run_billing_file_metadata] ([calculator_run_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3795,16 +3428,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250507155935_AddCalculatorRunBillingFileMetadataTable', N'8.0.13');
+    VALUES (N'20250507155935_AddCalculatorRunBillingFileMetadataTable', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250509113737_AddTradingName'
@@ -3812,7 +3442,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [organisation_data] ADD [trading_name] nvarchar(400) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3821,7 +3450,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] ADD [trading_name] nvarchar(400) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3829,16 +3457,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250509113737_AddTradingName', N'8.0.13');
+    VALUES (N'20250509113737_AddTradingName', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250516101138_AddTradingNameToProducerDetail'
@@ -3846,7 +3471,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [producer_detail] ADD [trading_name] nvarchar(4000) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3854,16 +3478,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250516101138_AddTradingNameToProducerDetail', N'8.0.13');
+    VALUES (N'20250516101138_AddTradingNameToProducerDetail', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250516101257_UpdateOrganisationSproc'
@@ -3873,7 +3494,6 @@ BEGIN
                     IF OBJECT_ID(N'[dbo].[CreateRunOrganization]', N'P') IS NOT NULL
                         DROP PROCEDURE [dbo].[CreateRunOrganization]
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3933,7 +3553,6 @@ BEGIN
                     END'
                     EXEC(@Sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3941,16 +3560,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250516101257_UpdateOrganisationSproc', N'8.0.13');
+    VALUES (N'20250516101257_UpdateOrganisationSproc', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250521145003_AddProducerInvoicedMaterialNetTonnage'
@@ -3965,7 +3581,6 @@ BEGIN
         CONSTRAINT [PK_producer_invoiced_material_net_tonnage] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -3973,16 +3588,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250521145003_AddProducerInvoicedMaterialNetTonnage', N'8.0.13');
+    VALUES (N'20250521145003_AddProducerInvoicedMaterialNetTonnage', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250521145147_AddProducerDesignatedRunInvoiceInstruction'
@@ -4001,7 +3613,6 @@ BEGIN
         CONSTRAINT [PK_producer_designated_run_invoice_instruction] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4009,16 +3620,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250521145147_AddProducerDesignatedRunInvoiceInstruction', N'8.0.13');
+    VALUES (N'20250521145147_AddProducerDesignatedRunInvoiceInstruction', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250521145341_AddProducerResultFileSuggestedBillingInstruction'
@@ -4046,7 +3654,6 @@ BEGIN
         CONSTRAINT [PK_producer_resultfile_suggested_billing_instruction] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4054,16 +3661,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250521145341_AddProducerResultFileSuggestedBillingInstruction', N'8.0.13');
+    VALUES (N'20250521145341_AddProducerResultFileSuggestedBillingInstruction', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250522093001_AddProducerDesignatedRunHistoryRelationships'
@@ -4071,7 +3675,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_producer_resultfile_suggested_billing_instruction_calculator_run_id] ON [producer_resultfile_suggested_billing_instruction] ([calculator_run_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4080,7 +3683,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_producer_invoiced_material_net_tonnage_calculator_run_id] ON [producer_invoiced_material_net_tonnage] ([calculator_run_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4089,7 +3691,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_producer_invoiced_material_net_tonnage_material_id] ON [producer_invoiced_material_net_tonnage] ([material_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4098,7 +3699,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_producer_designated_run_invoice_instruction_calculator_run_id] ON [producer_designated_run_invoice_instruction] ([calculator_run_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4107,7 +3707,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [producer_designated_run_invoice_instruction] ADD CONSTRAINT [FK_producer_designated_run_invoice_instruction_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4116,7 +3715,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [producer_invoiced_material_net_tonnage] ADD CONSTRAINT [FK_producer_invoiced_material_net_tonnage_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4125,7 +3723,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [producer_invoiced_material_net_tonnage] ADD CONSTRAINT [FK_producer_invoiced_material_net_tonnage_material_material_id] FOREIGN KEY ([material_id]) REFERENCES [material] ([id]) ON DELETE CASCADE;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4134,7 +3731,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [producer_resultfile_suggested_billing_instruction] ADD CONSTRAINT [FK_producer_resultfile_suggested_billing_instruction_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4142,16 +3738,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250522093001_AddProducerDesignatedRunHistoryRelationships', N'8.0.13');
+    VALUES (N'20250522093001_AddProducerDesignatedRunHistoryRelationships', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250620144219_AddNewColumnIsBillingFileGenerating'
@@ -4159,7 +3752,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD [is_billing_file_generating] bit NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4167,30 +3759,26 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250620144219_AddNewColumnIsBillingFileGenerating', N'8.0.13');
+    VALUES (N'20250620144219_AddNewColumnIsBillingFileGenerating', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250709123908_RemoveColumnHasBillingFileGenerated'
 )
 BEGIN
-    DECLARE @var28 sysname;
-    SELECT @var28 = [d].[name]
+    DECLARE @var28 nvarchar(max);
+    SELECT @var28 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'HasBillingFileGenerated');
-    IF @var28 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT [' + @var28 + '];');
+    IF @var28 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT ' + @var28 + ';');
     ALTER TABLE [calculator_run] DROP COLUMN [HasBillingFileGenerated];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4198,16 +3786,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250709123908_RemoveColumnHasBillingFileGenerated', N'8.0.13');
+    VALUES (N'20250709123908_RemoveColumnHasBillingFileGenerated', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250717154431_DeleteFinancialYearsData'
@@ -4217,7 +3802,6 @@ BEGIN
     WHERE [financial_Year] = N''2026-27'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4228,7 +3812,6 @@ BEGIN
     WHERE [financial_Year] = N''2027-28'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4239,7 +3822,6 @@ BEGIN
     WHERE [financial_Year] = N''2028-29'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4250,7 +3832,6 @@ BEGIN
     WHERE [financial_Year] = N''2029-30'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4261,7 +3842,6 @@ BEGIN
     WHERE [financial_Year] = N''2030-31'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4269,16 +3849,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250717154431_DeleteFinancialYearsData', N'8.0.13');
+    VALUES (N'20250717154431_DeleteFinancialYearsData', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250721090348_AddNewPostInitialStatuses'
@@ -4293,7 +3870,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'created_by', N'status') AND [object_id] = OBJECT_ID(N'[calculator_run_classification]'))
         SET IDENTITY_INSERT [calculator_run_classification] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4301,16 +3877,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250721090348_AddNewPostInitialStatuses', N'8.0.13');
+    VALUES (N'20250721090348_AddNewPostInitialStatuses', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250721154526_AddFunctionGetInvoiceAmount'
@@ -4319,7 +3892,6 @@ BEGIN
     IF OBJECT_ID(N'[dbo].[GetInvoiceAmount]', 'FN') IS NOT NULL
         DROP FUNCTION [dbo].[GetInvoiceAmount]
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4350,7 +3922,6 @@ BEGIN
 
     EXEC(@sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4358,16 +3929,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250721154526_AddFunctionGetInvoiceAmount', N'8.0.13');
+    VALUES (N'20250721154526_AddFunctionGetInvoiceAmount', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250721161113_GetCurrentYearInvoicedTotalAfterThisRun'
@@ -4376,7 +3944,6 @@ BEGIN
     IF OBJECT_ID(N'[dbo].[GetCurrentYearInvoicedTotalAfterThisRun]', 'FN') IS NOT NULL  
     DROP FUNCTION [dbo].GetCurrentYearInvoicedTotalAfterThisRun
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4410,7 +3977,6 @@ BEGIN
     END'
     EXEC(@sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4418,16 +3984,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250721161113_GetCurrentYearInvoicedTotalAfterThisRun', N'8.0.13');
+    VALUES (N'20250721161113_GetCurrentYearInvoicedTotalAfterThisRun', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250721161345_GetOutstandingBalance'
@@ -4436,7 +3999,6 @@ BEGIN
     IF OBJECT_ID(N'[dbo].[GetOutstandingBalance]', 'FN') IS NOT NULL  
     DROP FUNCTION [dbo].GetOutstandingBalance
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4466,7 +4028,6 @@ BEGIN
     END'
     EXEC(@sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4474,16 +4035,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250721161345_GetOutstandingBalance', N'8.0.13');
+    VALUES (N'20250721161345_GetOutstandingBalance', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250721161415_GetInvoiceDetailsAtProducerLevel'
@@ -4492,7 +4050,6 @@ BEGIN
     IF OBJECT_ID(N'[dbo].[InsertInvoiceDetailsAtProducerLevel]', 'P') IS NOT NULL  
     DROP PROCEDURE [dbo].[InsertInvoiceDetailsAtProducerLevel];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4582,7 +4139,6 @@ BEGIN
     END'
     EXEC(@sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4590,16 +4146,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250721161415_GetInvoiceDetailsAtProducerLevel', N'8.0.13');
+    VALUES (N'20250721161415_GetInvoiceDetailsAtProducerLevel', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250723131102_MarkInitialRunsAsDeleted'
@@ -4607,7 +4160,6 @@ IF NOT EXISTS (
 BEGIN
     update dbo.calculator_run SET calculator_run_classification_id  = 6 where calculator_run_classification_id in (7,8)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4615,30 +4167,26 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250723131102_MarkInitialRunsAsDeleted', N'8.0.13');
+    VALUES (N'20250723131102_MarkInitialRunsAsDeleted', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250723132540_UpdateInvoiceNetTonnageColumnPrecision'
 )
 BEGIN
-    DECLARE @var29 sysname;
-    SELECT @var29 = [d].[name]
+    DECLARE @var29 nvarchar(max);
+    SELECT @var29 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_invoiced_material_net_tonnage]') AND [c].[name] = N'invoiced_net_tonnage');
-    IF @var29 IS NOT NULL EXEC(N'ALTER TABLE [producer_invoiced_material_net_tonnage] DROP CONSTRAINT [' + @var29 + '];');
+    IF @var29 IS NOT NULL EXEC(N'ALTER TABLE [producer_invoiced_material_net_tonnage] DROP CONSTRAINT ' + @var29 + ';');
     ALTER TABLE [producer_invoiced_material_net_tonnage] ALTER COLUMN [invoiced_net_tonnage] decimal(18,3) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4646,16 +4194,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250723132540_UpdateInvoiceNetTonnageColumnPrecision', N'8.0.13');
+    VALUES (N'20250723132540_UpdateInvoiceNetTonnageColumnPrecision', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250723143822_AddFinancialYears'
@@ -4668,7 +4213,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
         SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4682,7 +4226,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
         SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4696,7 +4239,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
         SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4710,7 +4252,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
         SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4724,7 +4265,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'financial_Year') AND [object_id] = OBJECT_ID(N'[calculator_run_financial_years]'))
         SET IDENTITY_INSERT [calculator_run_financial_years] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4732,30 +4272,26 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250723143822_AddFinancialYears', N'8.0.13');
+    VALUES (N'20250723143822_AddFinancialYears', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250724153138_UpdateNetTonnagePrecision'
 )
 BEGIN
-    DECLARE @var30 sysname;
-    SELECT @var30 = [d].[name]
+    DECLARE @var30 nvarchar(max);
+    SELECT @var30 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_invoiced_material_net_tonnage]') AND [c].[name] = N'invoiced_net_tonnage');
-    IF @var30 IS NOT NULL EXEC(N'ALTER TABLE [producer_invoiced_material_net_tonnage] DROP CONSTRAINT [' + @var30 + '];');
+    IF @var30 IS NOT NULL EXEC(N'ALTER TABLE [producer_invoiced_material_net_tonnage] DROP CONSTRAINT ' + @var30 + ';');
     ALTER TABLE [producer_invoiced_material_net_tonnage] ALTER COLUMN [invoiced_net_tonnage] decimal(18,3) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4763,16 +4299,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250724153138_UpdateNetTonnagePrecision', N'8.0.13');
+    VALUES (N'20250724153138_UpdateNetTonnagePrecision', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250725133129_AlterInsertInvoiceDetails'
@@ -4781,7 +4314,6 @@ BEGIN
     IF OBJECT_ID(N'[dbo].[InsertInvoiceDetailsAtProducerLevel]', 'P') IS NOT NULL  
     DROP PROCEDURE [dbo].[InsertInvoiceDetailsAtProducerLevel];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4871,7 +4403,6 @@ BEGIN
         END'
     EXEC(@sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4879,16 +4410,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250725133129_AlterInsertInvoiceDetails', N'8.0.13');
+    VALUES (N'20250725133129_AlterInsertInvoiceDetails', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250728083102_UpdateBillingInstructionId'
@@ -4897,7 +4425,6 @@ BEGIN
     IF OBJECT_ID(N'[dbo].[InsertInvoiceDetailsAtProducerLevel]', 'P') IS NOT NULL  
     DROP PROCEDURE [dbo].[InsertInvoiceDetailsAtProducerLevel];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4987,7 +4514,6 @@ BEGIN
         END'
     EXEC(@sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -4995,16 +4521,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250728083102_UpdateBillingInstructionId', N'8.0.13');
+    VALUES (N'20250728083102_UpdateBillingInstructionId', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250814125052_AlterCreateRunPomProcedure'
@@ -5077,7 +4600,6 @@ BEGIN
     END'
     EXEC(@Sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5085,16 +4607,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250814125052_AlterCreateRunPomProcedure', N'8.0.13');
+    VALUES (N'20250814125052_AlterCreateRunPomProcedure', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250814130248_AlterCreateRunOrganisationProcedure'
@@ -5158,7 +4677,6 @@ BEGIN
                     END'
     EXEC(@Sql) 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5166,16 +4684,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250814130248_AlterCreateRunOrganisationProcedure', N'8.0.13');
+    VALUES (N'20250814130248_AlterCreateRunOrganisationProcedure', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250815134048_AddProducerIdIndex'
@@ -5183,7 +4698,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_producer_resultfile_suggested_billing_instruction_producer_id] ON [producer_resultfile_suggested_billing_instruction] ([producer_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5192,7 +4706,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_producer_detail_producer_id] ON [producer_detail] ([producer_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5200,45 +4713,40 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250815134048_AddProducerIdIndex', N'8.0.13');
+    VALUES (N'20250815134048_AddProducerIdIndex', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250909091510_UpdateProducerSuggestedBilling'
 )
 BEGIN
-    DECLARE @var31 sysname;
-    SELECT @var31 = [d].[name]
+    DECLARE @var31 nvarchar(max);
+    SELECT @var31 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_resultfile_suggested_billing_instruction]') AND [c].[name] = N'total_producer_bill_with_bad_debt');
-    IF @var31 IS NOT NULL EXEC(N'ALTER TABLE [producer_resultfile_suggested_billing_instruction] DROP CONSTRAINT [' + @var31 + '];');
+    IF @var31 IS NOT NULL EXEC(N'ALTER TABLE [producer_resultfile_suggested_billing_instruction] DROP CONSTRAINT ' + @var31 + ';');
     ALTER TABLE [producer_resultfile_suggested_billing_instruction] ALTER COLUMN [total_producer_bill_with_bad_debt] decimal(18,2) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250909091510_UpdateProducerSuggestedBilling'
 )
 BEGIN
-    DECLARE @var32 sysname;
-    SELECT @var32 = [d].[name]
+    DECLARE @var32 nvarchar(max);
+    SELECT @var32 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_resultfile_suggested_billing_instruction]') AND [c].[name] = N'suggested_invoice_amount');
-    IF @var32 IS NOT NULL EXEC(N'ALTER TABLE [producer_resultfile_suggested_billing_instruction] DROP CONSTRAINT [' + @var32 + '];');
+    IF @var32 IS NOT NULL EXEC(N'ALTER TABLE [producer_resultfile_suggested_billing_instruction] DROP CONSTRAINT ' + @var32 + ';');
     ALTER TABLE [producer_resultfile_suggested_billing_instruction] ALTER COLUMN [suggested_invoice_amount] decimal(18,2) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5246,32 +4754,26 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250909091510_UpdateProducerSuggestedBilling', N'8.0.13');
+    VALUES (N'20250909091510_UpdateProducerSuggestedBilling', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20250911160340_CorrectMigration'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20250911160340_CorrectMigration', N'8.0.13');
+    VALUES (N'20250911160340_CorrectMigration', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251003125307_AlterGetCurrentYearInvoicedTotalAfterThisRunFunction'
@@ -5280,7 +4782,6 @@ BEGIN
     IF OBJECT_ID(N'[dbo].[GetCurrentYearInvoicedTotalAfterThisRun]', 'FN') IS NOT NULL  
     DROP FUNCTION [dbo].GetCurrentYearInvoicedTotalAfterThisRun
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5318,7 +4819,6 @@ BEGIN
     END'
     EXEC(@sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5326,16 +4826,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251003125307_AlterGetCurrentYearInvoicedTotalAfterThisRunFunction', N'8.0.13');
+    VALUES (N'20251003125307_AlterGetCurrentYearInvoicedTotalAfterThisRunFunction', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251023100303_AddErrorTables'
@@ -5348,7 +4845,6 @@ BEGIN
         CONSTRAINT [PK_error_type] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5369,7 +4865,6 @@ BEGIN
         CONSTRAINT [FK_error_report_error_type_error_type_id] FOREIGN KEY ([error_type_id]) REFERENCES [error_type] ([id]) ON DELETE CASCADE
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5378,7 +4873,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_error_report_calculator_run_id] ON [error_report] ([calculator_run_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5387,7 +4881,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_error_report_error_type_id] ON [error_report] ([error_type_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5396,7 +4889,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE UNIQUE INDEX [IX_error_type_name] ON [error_type] ([name]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5404,16 +4896,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251023100303_AddErrorTables', N'8.0.13');
+    VALUES (N'20251023100303_AddErrorTables', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251023123530_AddNonClusteredIndexes'
@@ -5421,7 +4910,6 @@ IF NOT EXISTS (
 BEGIN
     DROP INDEX [IX_producer_designated_run_invoice_instruction_calculator_run_id] ON [producer_designated_run_invoice_instruction];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5430,7 +4918,6 @@ IF NOT EXISTS (
 BEGIN
     DROP INDEX [IX_calculator_run_calculator_run_classification_id] ON [calculator_run];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5439,7 +4926,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE NONCLUSTERED INDEX [IX_index_producer_invoiced_material_net_tonnage] ON [producer_invoiced_material_net_tonnage] ([producer_id], [calculator_run_id], [id]) INCLUDE ([material_id], [invoiced_net_tonnage]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5448,7 +4934,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE NONCLUSTERED INDEX [IX_index_producer_designated_run_invoice] ON [producer_designated_run_invoice_instruction] ([calculator_run_id], [producer_id], [id]) INCLUDE ([current_year_invoiced_total_after_this_run], [invoice_amount], [outstanding_balance], [billing_instruction_id], [instruction_confirmed_date], [instruction_confirmed_by]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5457,7 +4942,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE NONCLUSTERED INDEX [IX_index_calculator_run] ON [calculator_run] ([calculator_run_classification_id], [financial_year], [is_billing_file_generating], [id]) INCLUDE ([name], [created_by], [created_at], [updated_by], [updated_at], [calculator_run_organization_data_master_id], [calculator_run_pom_data_master_id], [default_parameter_setting_master_id], [lapcap_data_master_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5465,16 +4949,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251023123530_AddNonClusteredIndexes', N'8.0.13');
+    VALUES (N'20251023123530_AddNonClusteredIndexes', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251024094126_AddErrorTypesReferenceData'
@@ -5482,7 +4963,6 @@ IF NOT EXISTS (
 BEGIN
     DROP INDEX [IX_error_type_name] ON [error_type];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5504,7 +4984,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'description', N'name') AND [object_id] = OBJECT_ID(N'[error_type]'))
         SET IDENTITY_INSERT [error_type] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5512,16 +4991,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251024094126_AddErrorTypesReferenceData', N'8.0.13');
+    VALUES (N'20251024094126_AddErrorTypesReferenceData', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251029132348_UpdateErrorTypesSeedDataReplaceUnknownType'
@@ -5531,7 +5007,6 @@ BEGIN
     WHERE [id] = 9;
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5545,7 +5020,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'description', N'name') AND [object_id] = OBJECT_ID(N'[error_type]'))
         SET IDENTITY_INSERT [error_type] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5553,30 +5027,26 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251029132348_UpdateErrorTypesSeedDataReplaceUnknownType', N'8.0.13');
+    VALUES (N'20251029132348_UpdateErrorTypesSeedDataReplaceUnknownType', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251031131142_RemoveErrorTypeDescriptionColumnAndSeedData'
 )
 BEGIN
-    DECLARE @var33 sysname;
-    SELECT @var33 = [d].[name]
+    DECLARE @var33 nvarchar(max);
+    SELECT @var33 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[error_type]') AND [c].[name] = N'description');
-    IF @var33 IS NOT NULL EXEC(N'ALTER TABLE [error_type] DROP CONSTRAINT [' + @var33 + '];');
+    IF @var33 IS NOT NULL EXEC(N'ALTER TABLE [error_type] DROP CONSTRAINT ' + @var33 + ';');
     ALTER TABLE [error_type] DROP COLUMN [description];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5585,7 +5055,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE UNIQUE INDEX [IX_error_type_name] ON [error_type] ([name]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5593,16 +5062,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251031131142_RemoveErrorTypeDescriptionColumnAndSeedData', N'8.0.13');
+    VALUES (N'20251031131142_RemoveErrorTypeDescriptionColumnAndSeedData', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251117125358_AddSubmitterIdObligationStatusInPOMandOrg'
@@ -5610,7 +5076,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [pom_data] ADD [submitter_id] uniqueidentifier NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5619,7 +5084,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [organisation_data] ADD [obligation_status] nvarchar(max) NOT NULL DEFAULT N'';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5628,7 +5092,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [organisation_data] ADD [submitter_id] uniqueidentifier NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5637,7 +5100,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_pom_data_detail] ADD [submitter_id] uniqueidentifier NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5646,7 +5108,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] ADD [obligation_status] nvarchar(max) NOT NULL DEFAULT N'';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5655,7 +5116,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] ADD [submitter_id] uniqueidentifier NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5663,16 +5123,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251117125358_AddSubmitterIdObligationStatusInPOMandOrg', N'8.0.13');
+    VALUES (N'20251117125358_AddSubmitterIdObligationStatusInPOMandOrg', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251117130042_ModifyCreateRunOrgAndCreateRunPOMSprocs'
@@ -5721,7 +5178,6 @@ BEGIN
     					END'
     				EXEC(@Sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5797,7 +5253,6 @@ BEGIN
     		END'
     		EXEC(@Sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5805,16 +5260,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251117130042_ModifyCreateRunOrgAndCreateRunPOMSprocs', N'8.0.13');
+    VALUES (N'20251117130042_ModifyCreateRunOrgAndCreateRunPOMSprocs', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
@@ -5822,7 +5274,6 @@ IF NOT EXISTS (
 BEGIN
     UPDATE organisation_data SET organisation_id = 0 WHERE organisation_id IS NULL
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5831,61 +5282,56 @@ IF NOT EXISTS (
 BEGIN
     UPDATE calculator_run_pom_data_detail SET organisation_id = 0 WHERE organisation_id IS NULL
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
-    DECLARE @var34 sysname;
-    SELECT @var34 = [d].[name]
+    DECLARE @var34 nvarchar(max);
+    SELECT @var34 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[organisation_data]') AND [c].[name] = N'submission_period_desc');
-    IF @var34 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT [' + @var34 + '];');
+    IF @var34 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT ' + @var34 + ';');
     ALTER TABLE [organisation_data] DROP COLUMN [submission_period_desc];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
-    EXEC sp_rename N'[calculator_run_organization_data_detail].[submission_period_desc]', N'status_code', N'COLUMN';
+    EXEC sp_rename N'[calculator_run_organization_data_detail].[submission_period_desc]', N'status_code', 'COLUMN';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
-    DECLARE @var35 sysname;
-    SELECT @var35 = [d].[name]
+    DECLARE @var35 nvarchar(max);
+    SELECT @var35 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[organisation_data]') AND [c].[name] = N'organisation_id');
-    IF @var35 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT [' + @var35 + '];');
+    IF @var35 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT ' + @var35 + ';');
     ALTER TABLE [organisation_data] ALTER COLUMN [organisation_id] int NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
-    DECLARE @var36 sysname;
-    SELECT @var36 = [d].[name]
+    DECLARE @var36 nvarchar(max);
+    SELECT @var36 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[organisation_data]') AND [c].[name] = N'obligation_status');
-    IF @var36 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT [' + @var36 + '];');
+    IF @var36 IS NOT NULL EXEC(N'ALTER TABLE [organisation_data] DROP CONSTRAINT ' + @var36 + ';');
     ALTER TABLE [organisation_data] ALTER COLUMN [obligation_status] nvarchar(10) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5894,7 +5340,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [organisation_data] ADD [error_code] nvarchar(max) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5903,7 +5348,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [organisation_data] ADD [num_days_obligated] int NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5912,37 +5356,34 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [organisation_data] ADD [status_code] nvarchar(max) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
-    DECLARE @var37 sysname;
-    SELECT @var37 = [d].[name]
+    DECLARE @var37 nvarchar(max);
+    SELECT @var37 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organization_data_detail]') AND [c].[name] = N'organisation_id');
-    IF @var37 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT [' + @var37 + '];');
+    IF @var37 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT ' + @var37 + ';');
     ALTER TABLE [calculator_run_organization_data_detail] ALTER COLUMN [organisation_id] int NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251204164331_AddColumnsToOrgDetailAndModifySproc'
 )
 BEGIN
-    DECLARE @var38 sysname;
-    SELECT @var38 = [d].[name]
+    DECLARE @var38 nvarchar(max);
+    SELECT @var38 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organization_data_detail]') AND [c].[name] = N'obligation_status');
-    IF @var38 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT [' + @var38 + '];');
+    IF @var38 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_detail] DROP CONSTRAINT ' + @var38 + ';');
     ALTER TABLE [calculator_run_organization_data_detail] ALTER COLUMN [obligation_status] nvarchar(10) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5951,7 +5392,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] ADD [error_code] nvarchar(max) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5960,7 +5400,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] ADD [num_days_obligated] int NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -5974,7 +5413,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'id', N'name') AND [object_id] = OBJECT_ID(N'[error_type]'))
         SET IDENTITY_INSERT [error_type] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6028,7 +5466,6 @@ BEGIN
     					END'
     				EXEC(@Sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6037,7 +5474,6 @@ IF NOT EXISTS (
 BEGIN
     GRANT EXEC ON [dbo].[InsertInvoiceDetailsAtProducerLevel] TO PUBLIC;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6046,7 +5482,6 @@ IF NOT EXISTS (
 BEGIN
     GRANT EXEC ON [dbo].[CreateRunPom] TO PUBLIC;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6055,7 +5490,6 @@ IF NOT EXISTS (
 BEGIN
     GRANT EXEC ON [dbo].[CreateRunOrganization] TO PUBLIC;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6063,16 +5497,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251204164331_AddColumnsToOrgDetailAndModifySproc', N'8.0.13');
+    VALUES (N'20251204164331_AddColumnsToOrgDetailAndModifySproc', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251209101514_GrantPermissions'
@@ -6080,7 +5511,6 @@ IF NOT EXISTS (
 BEGIN
     GRANT EXEC ON [dbo].[InsertInvoiceDetailsAtProducerLevel] TO PUBLIC;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6089,7 +5519,6 @@ IF NOT EXISTS (
 BEGIN
     GRANT EXEC ON [dbo].[CreateRunPom] TO PUBLIC;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6098,7 +5527,6 @@ IF NOT EXISTS (
 BEGIN
     GRANT EXEC ON [dbo].[CreateRunOrganization] TO PUBLIC;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6106,16 +5534,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251209101514_GrantPermissions', N'8.0.13');
+    VALUES (N'20251209101514_GrantPermissions', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251209164843_AmendErrorReport'
@@ -6123,7 +5548,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [error_report] DROP CONSTRAINT [FK_error_report_error_type_error_type_id];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6132,7 +5556,6 @@ IF NOT EXISTS (
 BEGIN
     DROP TABLE [error_type];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6141,22 +5564,20 @@ IF NOT EXISTS (
 BEGIN
     DROP INDEX [IX_error_report_error_type_id] ON [error_report];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251209164843_AmendErrorReport'
 )
 BEGIN
-    DECLARE @var39 sysname;
-    SELECT @var39 = [d].[name]
+    DECLARE @var39 nvarchar(max);
+    SELECT @var39 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[error_report]') AND [c].[name] = N'error_type_id');
-    IF @var39 IS NOT NULL EXEC(N'ALTER TABLE [error_report] DROP CONSTRAINT [' + @var39 + '];');
+    IF @var39 IS NOT NULL EXEC(N'ALTER TABLE [error_report] DROP CONSTRAINT ' + @var39 + ';');
     ALTER TABLE [error_report] DROP COLUMN [error_type_id];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6165,7 +5586,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [error_report] ADD [error_code] nvarchar(100) NOT NULL DEFAULT N'';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6173,16 +5593,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251209164843_AmendErrorReport', N'8.0.13');
+    VALUES (N'20251209164843_AmendErrorReport', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20251217120330_JoinerLeaverDatesOrg'
@@ -6190,7 +5607,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [organisation_data] ADD [joiner_date] nvarchar(50) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6199,7 +5615,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [organisation_data] ADD [leaver_date] nvarchar(50) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6208,7 +5623,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] ADD [joiner_date] nvarchar(50) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6217,7 +5631,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] ADD [leaver_date] nvarchar(50) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6275,7 +5688,6 @@ BEGIN
                         END'
                     EXEC(@Sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6284,7 +5696,6 @@ IF NOT EXISTS (
 BEGIN
     GRANT EXEC ON [dbo].[CreateRunOrganization] TO PUBLIC;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6292,16 +5703,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20251217120330_JoinerLeaverDatesOrg', N'8.0.13');
+    VALUES (N'20251217120330_JoinerLeaverDatesOrg', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260107144455_AddFutureSubmissionPeriods'
@@ -6315,7 +5723,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6330,7 +5737,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6345,7 +5751,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6360,7 +5765,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6375,7 +5779,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6390,7 +5793,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'submission_period', N'submission_period_desc', N'start_date', N'end_date', N'days_in_submission_period', N'days_in_whole_period', N'scaleup_factor') AND [object_id] = OBJECT_ID(N'[submission_period_lookup]'))
         SET IDENTITY_INSERT [submission_period_lookup] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6398,16 +5800,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260107144455_AddFutureSubmissionPeriods', N'8.0.13');
+    VALUES (N'20260107144455_AddFutureSubmissionPeriods', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260218155412_UpdateGetCurrentYearInvoicedTotalAfterThisRun'
@@ -6417,7 +5816,6 @@ BEGIN
                     IF OBJECT_ID(N'[dbo].[GetCurrentYearInvoicedTotalAfterThisRun]', 'FN') IS NOT NULL
                         DROP FUNCTION [dbo].GetCurrentYearInvoicedTotalAfterThisRun
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6459,7 +5857,6 @@ BEGIN
                     END'
                     EXEC(@sql)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6468,7 +5865,6 @@ IF NOT EXISTS (
 BEGIN
     GRANT EXEC ON [dbo].[GetCurrentYearInvoicedTotalAfterThisRun] TO PUBLIC;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6476,16 +5872,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260218155412_UpdateGetCurrentYearInvoicedTotalAfterThisRun', N'8.0.13');
+    VALUES (N'20260218155412_UpdateGetCurrentYearInvoicedTotalAfterThisRun', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260220163836_RemoveStoredProcsAndFuncs'
@@ -6493,7 +5886,6 @@ IF NOT EXISTS (
 BEGIN
     DROP PROCEDURE IF EXISTS dbo.CreateRunOrganization
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6502,7 +5894,6 @@ IF NOT EXISTS (
 BEGIN
     DROP PROCEDURE IF EXISTS dbo.CreateRunPom
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6511,7 +5902,6 @@ IF NOT EXISTS (
 BEGIN
     DROP PROCEDURE IF EXISTS dbo.InsertInvoiceDetailsAtProducerLevel
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6520,7 +5910,6 @@ IF NOT EXISTS (
 BEGIN
     DROP FUNCTION IF EXISTS dbo.GetCurrentYearInvoicedTotalAfterThisRun
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6529,7 +5918,6 @@ IF NOT EXISTS (
 BEGIN
     DROP FUNCTION IF EXISTS dbo.GetInvoiceAmount
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6538,7 +5926,6 @@ IF NOT EXISTS (
 BEGIN
     DROP FUNCTION IF EXISTS dbo.GetOutstandingBalance
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6546,16 +5933,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260220163836_RemoveStoredProcsAndFuncs', N'8.0.13');
+    VALUES (N'20260220163836_RemoveStoredProcsAndFuncs', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
@@ -6563,7 +5947,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] DROP CONSTRAINT [FK_calculator_run_calculator_run_financial_years_financial_year];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6572,7 +5955,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [default_parameter_setting_master] DROP CONSTRAINT [FK_default_parameter_setting_master_calculator_run_financial_years_parameter_year];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6581,7 +5963,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [lapcap_data_master] DROP CONSTRAINT [FK_lapcap_data_master_calculator_run_financial_years_projection_year];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6590,7 +5971,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_financial_years] DROP CONSTRAINT [PK_calculator_run_financial_years];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6599,7 +5979,6 @@ IF NOT EXISTS (
 BEGIN
     DROP INDEX [IX_lapcap_data_master_projection_year] ON [lapcap_data_master];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6608,7 +5987,6 @@ IF NOT EXISTS (
 BEGIN
     DROP INDEX [IX_default_parameter_setting_master_parameter_year] ON [default_parameter_setting_master];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6617,7 +5995,6 @@ IF NOT EXISTS (
 BEGIN
     DROP INDEX [IX_calculator_run_financial_year] ON [calculator_run];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6626,16 +6003,14 @@ IF NOT EXISTS (
 BEGIN
     DROP INDEX [IX_index_calculator_run] ON [calculator_run];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    EXEC sp_rename N'[calculator_run_financial_years]', N'calculator_run_relative_years';
+    EXEC sp_rename N'[calculator_run_financial_years]', N'calculator_run_relative_years', 'OBJECT';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6644,7 +6019,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [lapcap_data_master] ADD [relative_year] int NOT NULL DEFAULT 0;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6653,7 +6027,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [default_parameter_setting_master] ADD [relative_year] int NOT NULL DEFAULT 0;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6662,7 +6035,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_pom_data_master] ADD [relative_year] int NOT NULL DEFAULT 0;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6671,7 +6043,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_master] ADD [relative_year] int NOT NULL DEFAULT 0;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6680,7 +6051,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_relative_years] ADD [relative_year] int NOT NULL DEFAULT 0;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6689,7 +6059,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD [relative_year] int NOT NULL DEFAULT 0;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6698,7 +6067,6 @@ IF NOT EXISTS (
 BEGIN
     EXEC(N'UPDATE lapcap_data_master                      SET relative_year = CAST(LEFT(projection_year, 4) AS INT)')
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6707,7 +6075,6 @@ IF NOT EXISTS (
 BEGIN
     EXEC(N'UPDATE default_parameter_setting_master        SET relative_year = CAST(LEFT(parameter_year, 4) AS INT)')
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6716,7 +6083,6 @@ IF NOT EXISTS (
 BEGIN
     EXEC(N'UPDATE calculator_run_pom_data_master          SET relative_year = COALESCE(TRY_CAST(LEFT(calendar_year, 4) AS INT) + 1, 2025)')
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6725,7 +6091,6 @@ IF NOT EXISTS (
 BEGIN
     EXEC(N'UPDATE calculator_run_organization_data_master SET relative_year = COALESCE(TRY_CAST(LEFT(calendar_year, 4) AS INT) + 1, 2025)')
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6734,7 +6099,6 @@ IF NOT EXISTS (
 BEGIN
     EXEC(N'UPDATE calculator_run_relative_years           SET relative_year = CAST(LEFT(financial_Year, 4) AS INT)')
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6743,97 +6107,90 @@ IF NOT EXISTS (
 BEGIN
     EXEC(N'UPDATE calculator_run                          SET relative_year = CAST(LEFT(financial_Year, 4) AS INT)')
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    DECLARE @var40 sysname;
-    SELECT @var40 = [d].[name]
+    DECLARE @var40 nvarchar(max);
+    SELECT @var40 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[lapcap_data_master]') AND [c].[name] = N'projection_year');
-    IF @var40 IS NOT NULL EXEC(N'ALTER TABLE [lapcap_data_master] DROP CONSTRAINT [' + @var40 + '];');
+    IF @var40 IS NOT NULL EXEC(N'ALTER TABLE [lapcap_data_master] DROP CONSTRAINT ' + @var40 + ';');
     ALTER TABLE [lapcap_data_master] DROP COLUMN [projection_year];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    DECLARE @var41 sysname;
-    SELECT @var41 = [d].[name]
+    DECLARE @var41 nvarchar(max);
+    SELECT @var41 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[default_parameter_setting_master]') AND [c].[name] = N'parameter_year');
-    IF @var41 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_setting_master] DROP CONSTRAINT [' + @var41 + '];');
+    IF @var41 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_setting_master] DROP CONSTRAINT ' + @var41 + ';');
     ALTER TABLE [default_parameter_setting_master] DROP COLUMN [parameter_year];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    DECLARE @var42 sysname;
-    SELECT @var42 = [d].[name]
+    DECLARE @var42 nvarchar(max);
+    SELECT @var42 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_pom_data_master]') AND [c].[name] = N'calendar_year');
-    IF @var42 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_master] DROP CONSTRAINT [' + @var42 + '];');
+    IF @var42 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_pom_data_master] DROP CONSTRAINT ' + @var42 + ';');
     ALTER TABLE [calculator_run_pom_data_master] DROP COLUMN [calendar_year];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    DECLARE @var43 sysname;
-    SELECT @var43 = [d].[name]
+    DECLARE @var43 nvarchar(max);
+    SELECT @var43 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organization_data_master]') AND [c].[name] = N'calendar_year');
-    IF @var43 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_master] DROP CONSTRAINT [' + @var43 + '];');
+    IF @var43 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organization_data_master] DROP CONSTRAINT ' + @var43 + ';');
     ALTER TABLE [calculator_run_organization_data_master] DROP COLUMN [calendar_year];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    DECLARE @var44 sysname;
-    SELECT @var44 = [d].[name]
+    DECLARE @var44 nvarchar(max);
+    SELECT @var44 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_relative_years]') AND [c].[name] = N'financial_Year');
-    IF @var44 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_relative_years] DROP CONSTRAINT [' + @var44 + '];');
+    IF @var44 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_relative_years] DROP CONSTRAINT ' + @var44 + ';');
     ALTER TABLE [calculator_run_relative_years] DROP COLUMN [financial_Year];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260224105304_UseRelativeYear'
 )
 BEGIN
-    DECLARE @var45 sysname;
-    SELECT @var45 = [d].[name]
+    DECLARE @var45 nvarchar(max);
+    SELECT @var45 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'financial_year');
-    IF @var45 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT [' + @var45 + '];');
+    IF @var45 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT ' + @var45 + ';');
     ALTER TABLE [calculator_run] DROP COLUMN [financial_year];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6842,7 +6199,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_relative_years] ADD CONSTRAINT [PK_calculator_run_relative_years] PRIMARY KEY ([relative_year]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6851,7 +6207,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_lapcap_data_master_relative_year] ON [lapcap_data_master] ([relative_year]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6860,7 +6215,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_default_parameter_setting_master_relative_year] ON [default_parameter_setting_master] ([relative_year]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6869,7 +6223,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calculator_run_pom_data_master_relative_year] ON [calculator_run_pom_data_master] ([relative_year]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6878,7 +6231,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calculator_run_organization_data_master_relative_year] ON [calculator_run_organization_data_master] ([relative_year]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6887,7 +6239,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calculator_run_relative_year] ON [calculator_run] ([relative_year]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6896,7 +6247,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE NONCLUSTERED INDEX [IX_index_calculator_run] ON [calculator_run] ([calculator_run_classification_id], [relative_year], [is_billing_file_generating], [id]) INCLUDE ([name], [created_by], [created_at], [updated_by], [updated_at], [calculator_run_organization_data_master_id], [calculator_run_pom_data_master_id], [default_parameter_setting_master_id], [lapcap_data_master_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6905,7 +6255,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD CONSTRAINT [FK_calculator_run_calculator_run_relative_years_relative_year] FOREIGN KEY ([relative_year]) REFERENCES [calculator_run_relative_years] ([relative_year]) ON DELETE NO ACTION;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6914,7 +6263,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_master] ADD CONSTRAINT [FK_calculator_run_organization_data_master_calculator_run_relative_years_relative_year] FOREIGN KEY ([relative_year]) REFERENCES [calculator_run_relative_years] ([relative_year]) ON DELETE NO ACTION;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6923,7 +6271,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_pom_data_master] ADD CONSTRAINT [FK_calculator_run_pom_data_master_calculator_run_relative_years_relative_year] FOREIGN KEY ([relative_year]) REFERENCES [calculator_run_relative_years] ([relative_year]) ON DELETE NO ACTION;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6932,7 +6279,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [default_parameter_setting_master] ADD CONSTRAINT [FK_default_parameter_setting_master_calculator_run_relative_years_relative_year] FOREIGN KEY ([relative_year]) REFERENCES [calculator_run_relative_years] ([relative_year]) ON DELETE NO ACTION;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6941,7 +6287,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [lapcap_data_master] ADD CONSTRAINT [FK_lapcap_data_master_calculator_run_relative_years_relative_year] FOREIGN KEY ([relative_year]) REFERENCES [calculator_run_relative_years] ([relative_year]) ON DELETE NO ACTION;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6949,16 +6294,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260224105304_UseRelativeYear', N'8.0.13');
+    VALUES (N'20260224105304_UseRelativeYear', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260303000000_FixRecreatePomOrgDataTables'
@@ -6966,7 +6308,6 @@ IF NOT EXISTS (
 BEGIN
     DROP TABLE [organisation_data];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6990,7 +6331,6 @@ BEGIN
                     ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
                     
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -6999,7 +6339,6 @@ IF NOT EXISTS (
 BEGIN
     DROP TABLE [pom_data];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7022,7 +6361,6 @@ BEGIN
                     ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
                     
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7030,16 +6368,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260303000000_FixRecreatePomOrgDataTables', N'8.0.13');
+    VALUES (N'20260303000000_FixRecreatePomOrgDataTables', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260311141533_AddModulationDefaultParameters'
@@ -7049,7 +6384,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-AL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7060,7 +6394,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-FC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7071,7 +6404,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-GL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7082,7 +6414,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-OT'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7093,7 +6424,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-PC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7104,7 +6434,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-PL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7115,7 +6444,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-ST'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7126,7 +6454,6 @@ BEGIN
     WHERE [parameter_unique_ref] = N''LRET-WD'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7156,7 +6483,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7187,7 +6513,6 @@ BEGIN
                     ('REDM-RF', 1.000)
                     ) v(paramId, paramValue);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7195,16 +6520,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260311141533_AddModulationDefaultParameters', N'8.0.13');
+    VALUES (N'20260311141533_AddModulationDefaultParameters', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260316112551_AddModulationFields'
@@ -7212,7 +6534,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [producer_reported_material] ADD [packaging_tonnage_amber] decimal(18,3) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7221,7 +6542,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [producer_reported_material] ADD [packaging_tonnage_amber_medical] decimal(18,3) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7230,7 +6550,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [producer_reported_material] ADD [packaging_tonnage_green] decimal(18,3) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7239,7 +6558,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [producer_reported_material] ADD [packaging_tonnage_green_medical] decimal(18,3) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7248,7 +6566,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [producer_reported_material] ADD [packaging_tonnage_red] decimal(18,3) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7257,7 +6574,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [producer_reported_material] ADD [packaging_tonnage_red_medical] decimal(18,3) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7266,7 +6582,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [pom_data] ADD [packaging_material_subtype] nvarchar(max) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7275,7 +6590,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [pom_data] ADD [ram_rag_rating] nvarchar(max) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7284,7 +6598,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_pom_data_detail] ADD [packaging_material_subtype] nvarchar(max) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7293,7 +6606,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_pom_data_detail] ADD [ram_rag_rating] nvarchar(max) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7301,16 +6613,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260316112551_AddModulationFields', N'8.0.13');
+    VALUES (N'20260316112551_AddModulationFields', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260319164244_AddHasH1AndHasH2OrganisationData'
@@ -7318,7 +6627,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [organisation_data] ADD [has_h1] bit NOT NULL DEFAULT CAST(0 AS bit);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7327,7 +6635,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [organisation_data] ADD [has_h2] bit NOT NULL DEFAULT CAST(0 AS bit);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7336,7 +6643,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] ADD [has_h1] bit NOT NULL DEFAULT CAST(0 AS bit);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7345,7 +6651,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run_organization_data_detail] ADD [has_h2] bit NOT NULL DEFAULT CAST(0 AS bit);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7353,16 +6658,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260319164244_AddHasH1AndHasH2OrganisationData', N'8.0.13');
+    VALUES (N'20260319164244_AddHasH1AndHasH2OrganisationData', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260401135019_AddSubmissionPeriodProducerReportedMaterialAndProjectedTable'
@@ -7370,7 +6672,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [producer_reported_material] ADD [submission_period] nvarchar(400) NOT NULL DEFAULT N'';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7395,7 +6696,6 @@ BEGIN
         CONSTRAINT [FK_producer_reported_material_projected_producer_detail_producer_detail_id] FOREIGN KEY ([producer_detail_id]) REFERENCES [producer_detail] ([id]) ON DELETE CASCADE
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7404,7 +6704,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_producer_reported_material_projected_material_id] ON [producer_reported_material_projected] ([material_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7413,7 +6712,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_producer_reported_material_projected_producer_detail_id] ON [producer_reported_material_projected] ([producer_detail_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7421,16 +6719,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260401135019_AddSubmissionPeriodProducerReportedMaterialAndProjectedTable', N'8.0.13');
+    VALUES (N'20260401135019_AddSubmissionPeriodProducerReportedMaterialAndProjectedTable', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260416083412_RemoveUnsupportedRelativeYears'
@@ -7440,7 +6735,6 @@ BEGIN
                     delete from calculator_run_billing_file_metadata where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7451,7 +6745,6 @@ BEGIN
                     delete from calculator_run_csvfile_metadata where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7462,7 +6755,6 @@ BEGIN
                     delete from country_apportionment where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7473,7 +6765,6 @@ BEGIN
                     delete from error_report where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7484,7 +6775,6 @@ BEGIN
                     delete from producer_designated_run_invoice_instruction where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7495,7 +6785,6 @@ BEGIN
                     delete from producer_detail where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7506,7 +6795,6 @@ BEGIN
                     delete from producer_invoiced_material_net_tonnage where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7517,7 +6805,6 @@ BEGIN
                     delete from producer_resultfile_suggested_billing_instruction where calculator_run_id in (select id from calculator_run where relative_year in (2023, 2024));
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7528,7 +6815,6 @@ BEGIN
                     DELETE FROM calculator_run WHERE relative_year IN (2023, 2024);
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7539,7 +6825,6 @@ BEGIN
                     delete from calculator_run_organization_data_master where relative_year in (2023, 2024);
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7550,7 +6835,6 @@ BEGIN
                     delete from calculator_run_pom_data_master where relative_year in (2023, 2024);
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7561,7 +6845,6 @@ BEGIN
                     delete from lapcap_data_detail where lapcap_data_master_id in (select id from lapcap_data_master where relative_year in (2023, 2024));
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7572,7 +6855,6 @@ BEGIN
                     delete from lapcap_data_master where relative_year in (2023, 2024);
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7583,7 +6865,6 @@ BEGIN
                     delete from default_parameter_setting_detail where default_parameter_setting_master_id in (select id from default_parameter_setting_master where relative_year in (2023, 2024));
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7594,7 +6875,6 @@ BEGIN
                     delete from default_parameter_setting_master where relative_year in (2023, 2024);
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7605,7 +6885,6 @@ BEGIN
                     delete from calculator_run_relative_years where relative_year in (2023, 2024);
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7613,30 +6892,26 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260416083412_RemoveUnsupportedRelativeYears', N'8.0.13');
+    VALUES (N'20260416083412_RemoveUnsupportedRelativeYears', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260602101250_AddTransformTables'
 )
 BEGIN
-    DECLARE @var46 sysname;
-    SELECT @var46 = [d].[name]
+    DECLARE @var46 nvarchar(max);
+    SELECT @var46 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[lapcap_data_detail]') AND [c].[name] = N'total_cost');
-    IF @var46 IS NOT NULL EXEC(N'ALTER TABLE [lapcap_data_detail] DROP CONSTRAINT [' + @var46 + '];');
+    IF @var46 IS NOT NULL EXEC(N'ALTER TABLE [lapcap_data_detail] DROP CONSTRAINT ' + @var46 + ';');
     ALTER TABLE [lapcap_data_detail] ALTER COLUMN [total_cost] decimal(18,3) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7682,7 +6957,6 @@ BEGIN
         CONSTRAINT [PK_transform_partial] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7751,7 +7025,6 @@ BEGIN
         CONSTRAINT [PK_transform_projected_h1] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7814,7 +7087,6 @@ BEGIN
         CONSTRAINT [PK_transform_projected_h2] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7841,7 +7113,6 @@ BEGIN
         CONSTRAINT [PK_transform_scaled] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7850,7 +7121,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_transform_partial_calculator_run_id] ON [transform_partial] ([calculator_run_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7859,7 +7129,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_transform_projected_h1_calculator_run_id] ON [transform_projected_h1] ([calculator_run_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7868,7 +7137,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_transform_projected_h2_calculator_run_id] ON [transform_projected_h2] ([calculator_run_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7877,7 +7145,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_transform_scaled_calculator_run_id] ON [transform_scaled] ([calculator_run_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7885,16 +7152,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260602101250_AddTransformTables', N'8.0.13');
+    VALUES (N'20260602101250_AddTransformTables', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
@@ -7905,37 +7169,34 @@ BEGIN
     WHERE
     	billing_csv_filename IS NULL OR billing_json_filename IS NULL
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
 )
 BEGIN
-    DECLARE @var47 sysname;
-    SELECT @var47 = [d].[name]
+    DECLARE @var47 nvarchar(max);
+    SELECT @var47 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_billing_file_metadata]') AND [c].[name] = N'billing_json_filename');
-    IF @var47 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_billing_file_metadata] DROP CONSTRAINT [' + @var47 + '];');
+    IF @var47 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_billing_file_metadata] DROP CONSTRAINT ' + @var47 + ';');
     ALTER TABLE [calculator_run_billing_file_metadata] ALTER COLUMN [billing_json_filename] nvarchar(400) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
 )
 BEGIN
-    DECLARE @var48 sysname;
-    SELECT @var48 = [d].[name]
+    DECLARE @var48 nvarchar(max);
+    SELECT @var48 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_billing_file_metadata]') AND [c].[name] = N'billing_csv_filename');
-    IF @var48 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_billing_file_metadata] DROP CONSTRAINT [' + @var48 + '];');
+    IF @var48 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_billing_file_metadata] DROP CONSTRAINT ' + @var48 + ';');
     ALTER TABLE [calculator_run_billing_file_metadata] ALTER COLUMN [billing_csv_filename] nvarchar(400) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7954,7 +7215,6 @@ BEGIN
     DELETE FROM ranked
     WHERE rn > 1
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7963,7 +7223,6 @@ IF NOT EXISTS (
 BEGIN
     DROP INDEX [IX_index_calculator_run] ON [calculator_run];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7972,7 +7231,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD [billing_run_started_at] datetime2 NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -7981,7 +7239,6 @@ IF NOT EXISTS (
 BEGIN
     ALTER TABLE [calculator_run] ADD [billing_run_status] varchar(50) NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8001,7 +7258,6 @@ BEGIN
     WHERE
         run.billing_run_status IS NULL
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8014,7 +7270,6 @@ BEGIN
     WHERE run.billing_run_status IS NULL
     AND run.is_billing_file_generating = 1')
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8031,7 +7286,6 @@ BEGIN
         run.billing_run_status IS NULL AND
         run.calculator_run_classification_id in (1,2,3,4,5,6)
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8047,37 +7301,34 @@ BEGIN
     WHERE
         run.billing_run_status IS NULL
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
 )
 BEGIN
-    DECLARE @var49 sysname;
-    SELECT @var49 = [d].[name]
+    DECLARE @var49 nvarchar(max);
+    SELECT @var49 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'billing_run_status');
-    IF @var49 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT [' + @var49 + '];');
+    IF @var49 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT ' + @var49 + ';');
     ALTER TABLE [calculator_run] ALTER COLUMN [billing_run_status] varchar(50) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260603161538_BillingRunStatus'
 )
 BEGIN
-    DECLARE @var50 sysname;
-    SELECT @var50 = [d].[name]
+    DECLARE @var50 nvarchar(max);
+    SELECT @var50 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'is_billing_file_generating');
-    IF @var50 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT [' + @var50 + '];');
+    IF @var50 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT ' + @var50 + ';');
     ALTER TABLE [calculator_run] DROP COLUMN [is_billing_file_generating];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8086,7 +7337,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE NONCLUSTERED INDEX [IX_index_calculator_run] ON [calculator_run] ([calculator_run_classification_id], [relative_year], [billing_run_status], [id]) INCLUDE ([name], [created_by], [created_at], [updated_by], [updated_at], [calculator_run_organization_data_master_id], [calculator_run_pom_data_master_id], [default_parameter_setting_master_id], [lapcap_data_master_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8094,105 +7344,96 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260603161538_BillingRunStatus', N'8.0.13');
+    VALUES (N'20260603161538_BillingRunStatus', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
 )
 BEGIN
-    DECLARE @var51 sysname;
-    SELECT @var51 = [d].[name]
+    DECLARE @var51 nvarchar(max);
+    SELECT @var51 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_red_medical');
-    IF @var51 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var51 + '];');
+    IF @var51 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT ' + @var51 + ';');
     ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_red_medical] decimal(8,6) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
 )
 BEGIN
-    DECLARE @var52 sysname;
-    SELECT @var52 = [d].[name]
+    DECLARE @var52 nvarchar(max);
+    SELECT @var52 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_red');
-    IF @var52 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var52 + '];');
+    IF @var52 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT ' + @var52 + ';');
     ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_red] decimal(8,6) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
 )
 BEGIN
-    DECLARE @var53 sysname;
-    SELECT @var53 = [d].[name]
+    DECLARE @var53 nvarchar(max);
+    SELECT @var53 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_green_medical');
-    IF @var53 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var53 + '];');
+    IF @var53 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT ' + @var53 + ';');
     ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_green_medical] decimal(8,6) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
 )
 BEGIN
-    DECLARE @var54 sysname;
-    SELECT @var54 = [d].[name]
+    DECLARE @var54 nvarchar(max);
+    SELECT @var54 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_green');
-    IF @var54 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var54 + '];');
+    IF @var54 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT ' + @var54 + ';');
     ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_green] decimal(8,6) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
 )
 BEGIN
-    DECLARE @var55 sysname;
-    SELECT @var55 = [d].[name]
+    DECLARE @var55 nvarchar(max);
+    SELECT @var55 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_amber_medical');
-    IF @var55 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var55 + '];');
+    IF @var55 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT ' + @var55 + ';');
     ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_amber_medical] decimal(8,6) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260604163323_AmendTransformProjectedH1'
 )
 BEGIN
-    DECLARE @var56 sysname;
-    SELECT @var56 = [d].[name]
+    DECLARE @var56 nvarchar(max);
+    SELECT @var56 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[transform_projected_h1]') AND [c].[name] = N'h2_ram_proportions_amber');
-    IF @var56 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT [' + @var56 + '];');
+    IF @var56 IS NOT NULL EXEC(N'ALTER TABLE [transform_projected_h1] DROP CONSTRAINT ' + @var56 + ';');
     ALTER TABLE [transform_projected_h1] ALTER COLUMN [h2_ram_proportions_amber] decimal(8,6) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8200,16 +7441,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260604163323_AmendTransformProjectedH1', N'8.0.13');
+    VALUES (N'20260604163323_AmendTransformProjectedH1', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260608135126_AllowNegativeLapCap'
@@ -8219,7 +7457,6 @@ BEGIN
     WHERE [unique_ref] = N''ENG-AL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8230,7 +7467,6 @@ BEGIN
     WHERE [unique_ref] = N''ENG-FC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8241,7 +7477,6 @@ BEGIN
     WHERE [unique_ref] = N''ENG-GL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8252,7 +7487,6 @@ BEGIN
     WHERE [unique_ref] = N''ENG-OT'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8263,7 +7497,6 @@ BEGIN
     WHERE [unique_ref] = N''ENG-PC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8274,7 +7507,6 @@ BEGIN
     WHERE [unique_ref] = N''ENG-PL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8285,7 +7517,6 @@ BEGIN
     WHERE [unique_ref] = N''ENG-ST'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8296,7 +7527,6 @@ BEGIN
     WHERE [unique_ref] = N''ENG-WD'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8307,7 +7537,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-AL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8318,7 +7547,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-FC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8329,7 +7557,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-GL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8340,7 +7567,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-OT'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8351,7 +7577,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-PC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8362,7 +7587,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-PL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8373,7 +7597,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-ST'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8384,7 +7607,6 @@ BEGIN
     WHERE [unique_ref] = N''NI-WD'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8395,7 +7617,6 @@ BEGIN
     WHERE [unique_ref] = N''SCT-AL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8406,7 +7627,6 @@ BEGIN
     WHERE [unique_ref] = N''SCT-FC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8417,7 +7637,6 @@ BEGIN
     WHERE [unique_ref] = N''SCT-GL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8428,7 +7647,6 @@ BEGIN
     WHERE [unique_ref] = N''SCT-OT'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8439,7 +7657,6 @@ BEGIN
     WHERE [unique_ref] = N''SCT-PC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8450,7 +7667,6 @@ BEGIN
     WHERE [unique_ref] = N''SCT-PL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8461,7 +7677,6 @@ BEGIN
     WHERE [unique_ref] = N''SCT-ST'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8472,7 +7687,6 @@ BEGIN
     WHERE [unique_ref] = N''SCT-WD'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8483,7 +7697,6 @@ BEGIN
     WHERE [unique_ref] = N''WLS-AL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8494,7 +7707,6 @@ BEGIN
     WHERE [unique_ref] = N''WLS-FC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8505,7 +7717,6 @@ BEGIN
     WHERE [unique_ref] = N''WLS-GL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8516,7 +7727,6 @@ BEGIN
     WHERE [unique_ref] = N''WLS-OT'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8527,7 +7737,6 @@ BEGIN
     WHERE [unique_ref] = N''WLS-PC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8538,7 +7747,6 @@ BEGIN
     WHERE [unique_ref] = N''WLS-PL'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8549,7 +7757,6 @@ BEGIN
     WHERE [unique_ref] = N''WLS-ST'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8560,7 +7767,6 @@ BEGIN
     WHERE [unique_ref] = N''WLS-WD'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8568,16 +7774,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260608135126_AllowNegativeLapCap', N'8.0.13');
+    VALUES (N'20260608135126_AllowNegativeLapCap', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260616144420_AddActiveDefaultParameterAndLapcapConstraint'
@@ -8585,7 +7788,6 @@ IF NOT EXISTS (
 BEGIN
     DROP INDEX [IX_lapcap_data_master_relative_year] ON [lapcap_data_master];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8594,7 +7796,6 @@ IF NOT EXISTS (
 BEGIN
     DROP INDEX [IX_default_parameter_setting_master_relative_year] ON [default_parameter_setting_master];
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8603,7 +7804,6 @@ IF NOT EXISTS (
 BEGIN
     EXEC(N'CREATE UNIQUE INDEX [UX_lapcap_data_master_active_relative_year] ON [lapcap_data_master] ([relative_year]) WHERE effective_to IS NULL');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8612,7 +7812,6 @@ IF NOT EXISTS (
 BEGIN
     EXEC(N'CREATE UNIQUE INDEX [UX_default_parameter_setting_master_active_relative_year] ON [default_parameter_setting_master] ([relative_year]) WHERE effective_to IS NULL');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8620,30 +7819,26 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260616144420_AddActiveDefaultParameterAndLapcapConstraint', N'8.0.13');
+    VALUES (N'20260616144420_AddActiveDefaultParameterAndLapcapConstraint', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260715154551_AddCutOffDateDefaultParameter'
 )
 BEGIN
-    DECLARE @var57 sysname;
-    SELECT @var57 = [d].[name]
+    DECLARE @var57 nvarchar(max);
+    SELECT @var57 = QUOTENAME([d].[name])
     FROM [sys].[default_constraints] [d]
     INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
     WHERE ([d].[parent_object_id] = OBJECT_ID(N'[default_parameter_setting_detail]') AND [c].[name] = N'parameter_value');
-    IF @var57 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_setting_detail] DROP CONSTRAINT [' + @var57 + '];');
+    IF @var57 IS NOT NULL EXEC(N'ALTER TABLE [default_parameter_setting_detail] DROP CONSTRAINT ' + @var57 + ';');
     ALTER TABLE [default_parameter_setting_detail] ALTER COLUMN [parameter_value] nvarchar(max) NOT NULL;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8657,7 +7852,6 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'parameter_unique_ref', N'parameter_category', N'parameter_type', N'valid_Range_from', N'valid_Range_to') AND [object_id] = OBJECT_ID(N'[default_parameter_template_master]'))
         SET IDENTITY_INSERT [default_parameter_template_master] OFF;
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8685,7 +7879,6 @@ BEGIN
                     );
                 
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8693,42 +7886,36 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260715154551_AddCutOffDateDefaultParameter', N'8.0.13');
+    VALUES (N'20260715154551_AddCutOffDateDefaultParameter', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260716130437_AddProducerFeeTables'
+)
+BEGIN
+    EXEC sp_rename N'[producer_reported_material_projected]', N'producer_material_packaging', 'OBJECT';
+END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260716130437_AddProducerFeeTables'
 )
 BEGIN
-    EXEC sp_rename N'[producer_reported_material_projected]', N'producer_material_packaging';
+    EXEC sp_rename N'[producer_material_packaging].[IX_producer_reported_material_projected_material_id]', N'IX_producer_material_packaging_material_id', 'INDEX';
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260716130437_AddProducerFeeTables'
 )
 BEGIN
-    EXEC sp_rename N'[producer_material_packaging].[IX_producer_reported_material_projected_material_id]', N'IX_producer_material_packaging_material_id', N'INDEX';
+    EXEC sp_rename N'[producer_material_packaging].[IX_producer_reported_material_projected_producer_detail_id]', N'IX_producer_material_packaging_producer_detail_id', 'INDEX';
 END;
-GO
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260716130437_AddProducerFeeTables'
-)
-BEGIN
-    EXEC sp_rename N'[producer_material_packaging].[IX_producer_reported_material_projected_producer_detail_id]', N'IX_producer_material_packaging_producer_detail_id', N'INDEX';
-END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8742,7 +7929,6 @@ BEGIN
         CONSTRAINT [PK_calc_result_producer_fees] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8757,7 +7943,6 @@ BEGIN
         CONSTRAINT [FK_calc_result_producer_fee_detail_calc_result_producer_fees_producer_fees_id] FOREIGN KEY ([producer_fees_id]) REFERENCES [calc_result_producer_fees] ([id]) ON DELETE CASCADE
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8766,7 +7951,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calc_result_producer_fee_detail_producer_fees_id] ON [calc_result_producer_fee_detail] ([producer_fees_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8774,16 +7958,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260716130437_AddProducerFeeTables', N'8.0.13');
+    VALUES (N'20260716130437_AddProducerFeeTables', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260717111524_AddModulationAndSmcw'
@@ -8798,7 +7979,6 @@ BEGIN
         CONSTRAINT [PK_calc_result_modulation] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8812,7 +7992,6 @@ BEGIN
         CONSTRAINT [PK_calc_result_smcw] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8830,7 +8009,6 @@ BEGIN
         CONSTRAINT [FK_calc_result_smcw_producer_calc_result_smcw_smcw_id] FOREIGN KEY ([smcw_id]) REFERENCES [calc_result_smcw] ([id]) ON DELETE CASCADE
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8839,7 +8017,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calc_result_smcw_producer_smcw_id] ON [calc_result_smcw_producer] ([smcw_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8847,16 +8024,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260717111524_AddModulationAndSmcw', N'8.0.13');
+    VALUES (N'20260717111524_AddModulationAndSmcw', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260722145707_AddCostDataAndCancelledProducerTables'
@@ -8869,7 +8043,6 @@ BEGIN
         CONSTRAINT [PK_calc_result_cancelled_producer] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8883,7 +8056,6 @@ BEGIN
         CONSTRAINT [PK_calc_result_comms_cost] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8897,7 +8069,6 @@ BEGIN
         CONSTRAINT [PK_calc_result_la_disposal_cost] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8911,7 +8082,6 @@ BEGIN
         CONSTRAINT [PK_calc_result_lapcap_data] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8925,7 +8095,6 @@ BEGIN
         CONSTRAINT [PK_calc_result_late_reporting_tonnage] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8939,7 +8108,6 @@ BEGIN
         CONSTRAINT [PK_calc_result_one_plus_four_apportionment] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8953,7 +8121,6 @@ BEGIN
         CONSTRAINT [PK_calc_result_parameter_other_cost] PRIMARY KEY ([id])
     );
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8962,7 +8129,6 @@ IF NOT EXISTS (
 BEGIN
     CREATE INDEX [IX_calc_result_cancelled_producer_calculator_run_id] ON [calc_result_cancelled_producer] ([calculator_run_id]);
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -8970,16 +8136,13 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260722145707_AddCostDataAndCancelledProducerTables', N'8.0.13');
+    VALUES (N'20260722145707_AddCostDataAndCancelledProducerTables', N'10.0.11');
 END;
-GO
 
 COMMIT;
 GO
 
 BEGIN TRANSACTION;
-GO
-
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
     WHERE [MigrationId] = N'20260810155245_UpdateMaterialName'
@@ -8989,7 +8152,6 @@ BEGIN
     WHERE [code] = N''FC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -9000,7 +8162,6 @@ BEGIN
     WHERE [code] = N''PC'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -9011,7 +8172,6 @@ BEGIN
     WHERE [code] = N''OT'';
     SELECT @@ROWCOUNT');
 END;
-GO
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
@@ -9019,9 +8179,290 @@ IF NOT EXISTS (
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260810155245_UpdateMaterialName', N'8.0.13');
+    VALUES (N'20260810155245_UpdateMaterialName', N'10.0.11');
 END;
+
+COMMIT;
 GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [joiner_date] nvarchar(50) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [leaver_date] nvarchar(50) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [num_days_obligated] int NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [obligation_status] nvarchar(10) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [status_code] nvarchar(400) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    ALTER TABLE [producer_detail] ADD [submitter_id] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    ALTER TABLE [calculator_run] ADD [org_pom_data_loaded_at] datetime2 NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    CREATE TABLE [calculator_run_organisation] (
+        [id] int NOT NULL IDENTITY,
+        [calculator_run_id] int NOT NULL,
+        [organisation_id] int NOT NULL,
+        [subsidiary_id] nvarchar(400) NULL,
+        [submitter_id] uniqueidentifier NULL,
+        [organisation_name] nvarchar(400) NOT NULL,
+        [trading_name] nvarchar(400) NULL,
+        [obligation_status] nvarchar(10) NOT NULL,
+        [num_days_obligated] int NULL,
+        [joiner_date] nvarchar(50) NULL,
+        [leaver_date] nvarchar(50) NULL,
+        [status_code] nvarchar(max) NULL,
+        [error_code] nvarchar(max) NULL,
+        [has_h1] bit NOT NULL,
+        [has_h2] bit NOT NULL,
+        CONSTRAINT [PK_calculator_run_organisation] PRIMARY KEY ([id]),
+        CONSTRAINT [FK_calculator_run_organisation_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE
+    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    CREATE INDEX [IX_calculator_run_organisation_calculator_run_id] ON [calculator_run_organisation] ([calculator_run_id]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+
+                    UPDATE r
+                    SET org_pom_data_loaded_at = m.created_at
+                    FROM calculator_run r
+                    INNER JOIN calculator_run_organization_data_master m
+                        ON m.id = r.calculator_run_organization_data_master_id;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+
+                    INSERT INTO calculator_run_organisation
+                        (calculator_run_id, organisation_id, subsidiary_id, submitter_id, organisation_name,
+                         trading_name, obligation_status, num_days_obligated, joiner_date, leaver_date,
+                         status_code, error_code, has_h1, has_h2)
+                    SELECT
+                        r.id, d.organisation_id, d.subsidiary_id, d.submitter_id, d.organisation_name,
+                        d.trading_name, ISNULL(d.obligation_status, ''), d.num_days_obligated, d.joiner_date, d.leaver_date,
+                        d.status_code, d.error_code, d.has_h1, d.has_h2
+                    FROM calculator_run_organization_data_detail d
+                    INNER JOIN calculator_run r
+                        ON r.calculator_run_organization_data_master_id = d.calculator_run_organization_data_master_id;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+
+                    UPDATE pd
+                    SET obligation_status = d.obligation_status,
+                        num_days_obligated = d.num_days_obligated,
+                        status_code = d.status_code,
+                        submitter_id = d.submitter_id,
+                        joiner_date = d.joiner_date,
+                        leaver_date = d.leaver_date
+                    FROM producer_detail pd
+                    INNER JOIN calculator_run r
+                        ON r.id = pd.calculator_run_id
+                    INNER JOIN calculator_run_organization_data_detail d
+                        ON d.calculator_run_organization_data_master_id = r.calculator_run_organization_data_master_id
+                       AND d.organisation_id = pd.producer_id
+                       AND ISNULL(d.subsidiary_id, '') = ISNULL(pd.subsidiary_id, '')
+                    WHERE pd.obligation_status IS NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    ALTER TABLE [calculator_run] DROP CONSTRAINT [FK_calculator_run_calculator_run_organization_data_master_calculator_run_organization_data_master_id];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    ALTER TABLE [calculator_run] DROP CONSTRAINT [FK_calculator_run_calculator_run_pom_data_master_calculator_run_pom_data_master_id];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    DROP TABLE [calculator_run_organization_data_detail];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    DROP TABLE [calculator_run_pom_data_detail];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    DROP TABLE [organisation_data];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    DROP TABLE [pom_data];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    DROP TABLE [calculator_run_organization_data_master];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    DROP TABLE [calculator_run_pom_data_master];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    DROP INDEX [IX_calculator_run_calculator_run_organization_data_master_id] ON [calculator_run];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    DROP INDEX [IX_calculator_run_calculator_run_pom_data_master_id] ON [calculator_run];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    DROP INDEX [IX_index_calculator_run] ON [calculator_run];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    DECLARE @var58 nvarchar(max);
+    SELECT @var58 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'calculator_run_organization_data_master_id');
+    IF @var58 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT ' + @var58 + ';');
+    ALTER TABLE [calculator_run] DROP COLUMN [calculator_run_organization_data_master_id];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    DECLARE @var59 nvarchar(max);
+    SELECT @var59 = QUOTENAME([d].[name])
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run]') AND [c].[name] = N'calculator_run_pom_data_master_id');
+    IF @var59 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run] DROP CONSTRAINT ' + @var59 + ';');
+    ALTER TABLE [calculator_run] DROP COLUMN [calculator_run_pom_data_master_id];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX [IX_index_calculator_run] ON [calculator_run] ([calculator_run_classification_id], [relative_year], [billing_run_status], [id]) INCLUDE ([name], [created_by], [created_at], [updated_by], [updated_at], [default_parameter_setting_master_id], [lapcap_data_master_id]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation', N'10.0.11');
+END;
 
 COMMIT;
 GO
