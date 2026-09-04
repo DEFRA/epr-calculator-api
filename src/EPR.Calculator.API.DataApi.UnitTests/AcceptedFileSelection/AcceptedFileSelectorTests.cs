@@ -15,10 +15,10 @@ namespace EPR.Calculator.API.DataApi.UnitTests.AcceptedFileSelection;
 public class AcceptedFileSelectorTests
 {
     private static readonly DateTimeOffset CutOffDate = new(2025, 6, 1, 0, 0, 0, TimeSpan.Zero);
-    private static readonly DateTimeOffset T0 = new(2025, 1, 1, 0, 0, 0, TimeSpan.Zero);
-    private static readonly DateTimeOffset T1 = new(2025, 2, 1, 0, 0, 0, TimeSpan.Zero);
-    private static readonly DateTimeOffset T2 = new(2025, 3, 1, 0, 0, 0, TimeSpan.Zero);
-    private static readonly DateTimeOffset After = new(2025, 9, 1, 0, 0, 0, TimeSpan.Zero);
+    private static readonly DateTime T0 = new(2025, 1, 1);
+    private static readonly DateTime T1 = new(2025, 2, 1);
+    private static readonly DateTime T2 = new(2025, 3, 1);
+    private static readonly DateTime After = new(2025, 9, 1);
 
     private readonly AcceptedFileSelector selector = new();
 
@@ -27,7 +27,7 @@ public class AcceptedFileSelectorTests
     // filtering already happened upstream in SQL by the time rows reach this selector.
     private static IEnumerable<object[]> OrganisationScenarios()
     {
-        (string CaseId, (string Marker, DateTimeOffset Created, bool IsResubmission)[] Files, string ExpectedWinner)[] cases =
+        (string CaseId, (string Marker, DateTime Created, bool IsResubmission)[] Files, string ExpectedWinner)[] cases =
         [
             ("01_initial_before", [("Initial", T0, false)], "Initial"),
             ("02_initial_after", [("Initial", After, false)], "Initial"),
@@ -44,7 +44,7 @@ public class AcceptedFileSelectorTests
     [DynamicData(nameof(OrganisationScenarios))]
     public void SelectLatestOrganisationFiles_MatchesReferenceScenario(
         string caseId,
-        (string Marker, DateTimeOffset Created, bool IsResubmission)[] files,
+        (string Marker, DateTime Created, bool IsResubmission)[] files,
         string expectedWinner)
     {
         var organisations = files
@@ -140,7 +140,7 @@ public class AcceptedFileSelectorTests
     // Regulator_Status = 'Accepted' before streaming).
     private static IEnumerable<object[]> PomScenarios()
     {
-        (string CaseId, (string Marker, DateTimeOffset Created, bool IsResubmission)[] Files, string ExpectedWinner)[] cases =
+        (string CaseId, (string Marker, DateTime Created, bool IsResubmission)[] Files, string ExpectedWinner)[] cases =
         [
             ("01_initial_before", [("INIT", T0, false)], "INIT"),
             ("02_initial_after", [("INIT", After, false)], "INIT"),
@@ -157,7 +157,7 @@ public class AcceptedFileSelectorTests
     [DynamicData(nameof(PomScenarios))]
     public void SelectLatestPomFiles_MatchesReferenceScenario(
         string caseId,
-        (string Marker, DateTimeOffset Created, bool IsResubmission)[] files,
+        (string Marker, DateTime Created, bool IsResubmission)[] files,
         string expectedWinner)
     {
         var poms = files

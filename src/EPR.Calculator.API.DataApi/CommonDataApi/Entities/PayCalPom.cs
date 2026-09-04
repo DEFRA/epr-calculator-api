@@ -21,5 +21,5 @@ public record PayCalPom
     // File-selection inputs only (see IAcceptedFileSelector) - not carried past that stage.
     public string? FileName { get; init; }
     public bool IsResubmission { get; init; }
-    public DateTimeOffset? CreatedDateTime { get; init; }
+    public DateTime? CreatedDateTime { get; init; }
 }
