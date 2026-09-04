@@ -84,15 +84,25 @@ public sealed class ProducerDataService(
         // POM eligibility (both H1 and H2 submitted, a registration exists) and each organisation's
         // own HasH1/HasH2 flags both depend on the POM stream, so they can only run once both
         // streams have finished.
-        var organisationIds = rawOrganisations
-            .Where(o => o.OrganisationId is not null)
+        //
+        // Cancelled registrations are excluded here - the obligation stream has to keep them (they
+        // drive "Not Obligated"), but sp_GetPaycalPomData's registration gate was Granted/Accepted
+        // only. The org stream only ever carries Granted/Accepted/Cancelled, so "not Cancelled" is
+        // equivalent and also tolerates fixtures that leave RegulatorStatus unset.
+        var registeredOrganisationIds = rawOrganisations
+            .Where(o => o.OrganisationId is not null && o.RegulatorStatus is not "Cancelled")
             .Select(o => o.OrganisationId!.Value)
             .ToHashSet();
-        var eligiblePoms = pomEligibilityFilter.Filter(rawPoms, organisationIds);
+        var eligiblePoms = pomEligibilityFilter.Filter(rawPoms, registeredOrganisationIds);
         var organisationsWithPeriodFlags = organisationPeriodFlagsCalculator.ApplyPeriodFlags(rawOrganisations, rawPoms);
 
         var organisations = organisationsWithPeriodFlags.Select(MapOrganisation).ToImmutableList();
-        var poms = eligiblePoms.Select(MapPom).ToImmutableList();
+        // sp_GetPaycalPomData applied the reportable-packaging filter upstream of every consumer,
+        // error detection included - not just alignment.
+        var poms = eligiblePoms
+            .Where(p => ReportablePackaging.Includes(p.PackagingType, p.PackagingMaterial))
+            .Select(MapPom)
+            .ToImmutableList();
 
         var detection = errorDetector.Detect(organisations, poms);
 

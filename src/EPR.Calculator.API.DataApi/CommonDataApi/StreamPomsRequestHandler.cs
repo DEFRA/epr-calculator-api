@@ -70,7 +70,7 @@ public sealed class StreamPomsRequestHandler(IDbContextFactory<SynapseContext> d
                 , cpf.submitter_id
                 , cpf.FileName AS file_name
                 , cpf.CreatedDateTime AS created_date_time
-                , cpf.Is_resubmitted_POM_identifier AS is_resubmission
+                , CAST(cpf.Is_resubmitted_POM_identifier AS bit) AS is_resubmission
                 FROM rpd.POM p
                 INNER JOIN candidate_pom_files cpf
                   ON  TRIM(p.FileName)    = TRIM(cpf.FileName)

@@ -49,16 +49,18 @@ public sealed class AcceptedFileSelector : IAcceptedFileSelector
         Func<T, TKey> groupKeySelector,
         Func<T, string?> fileNameSelector,
         Func<T, bool> isResubmissionSelector,
-        Func<T, DateTimeOffset?> createdDateTimeSelector,
+        Func<T, DateTime?> createdDateTimeSelector,
         DateTimeOffset? cutOffDate)
         where TKey : notnull
     {
+        var cutOff = cutOffDate?.UtcDateTime;
+
         var winningFileNameByGroup = rows
             .GroupBy(groupKeySelector)
             .Select(group => (
                 group.Key,
                 Winner: group
-                    .Where(r => !isResubmissionSelector(r) || cutOffDate is null || createdDateTimeSelector(r) <= cutOffDate)
+                    .Where(r => !isResubmissionSelector(r) || cutOff is null || createdDateTimeSelector(r) <= cutOff)
                     .MaxBy(createdDateTimeSelector)))
             .Where(group => group.Winner is not null)
             .ToDictionary(group => group.Key, group => fileNameSelector(group.Winner!));
