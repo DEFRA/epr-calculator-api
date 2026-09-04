@@ -185,6 +185,63 @@ public class ProducerDataServiceTests
     }
 
     [TestMethod]
+    public async Task GetProducerData_NonReportablePackaging_DoesNotReachErrorDetectionOrAlignment()
+    {
+        // sp_GetPaycalPomData filtered out non-reportable packaging types before any consumer saw
+        // them; a POM for a subsidiary with no registration must not raise "Missing Registration Data"
+        // when it isn't a reportable type.
+        var submitterId = Guid.NewGuid().ToString();
+
+        var org = new PayCalOrganisation
+        {
+            OrganisationId = 1, OrganisationName = "Org Co", ObligationStatus = "O",
+            SubmitterId = submitterId, RegulatorStatus = "Granted", HasH1 = true, HasH2 = true
+        };
+
+        var reportablePom = new PayCalPom
+        {
+            OrganisationId = 1, SubmitterId = submitterId, PackagingType = "HH", PackagingMaterial = "PL",
+            SubmissionPeriod = "2024-P1", PackagingMaterialWeight = 1000
+        };
+        var nonReportablePom = new PayCalPom
+        {
+            OrganisationId = 1, SubsidiaryId = "99", SubmitterId = submitterId, PackagingType = "NH",
+            PackagingMaterial = "AL", SubmissionPeriod = "2024-P1", PackagingMaterialWeight = 500
+        };
+
+        var service = CreateService(orgs: [org], poms: [reportablePom, nonReportablePom]);
+
+        var result = await service.GetProducerData(2024, null, ["PL"]);
+
+        result.Errors.ShouldBeEmpty();
+        result.Producers.Count.ShouldBe(1);
+        result.Producers[0].ReportedMaterials.ShouldHaveSingleItem().MaterialCode.ShouldBe("PL");
+    }
+
+    [TestMethod]
+    public async Task GetProducerData_PomEligibility_ExcludesCancelledRegistrationsFromTheGate()
+    {
+        var submitterId = Guid.NewGuid().ToString();
+        var granted = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "A", ObligationStatus = "O", SubmitterId = submitterId, RegulatorStatus = "Granted" };
+        var unset = new PayCalOrganisation { OrganisationId = 2, OrganisationName = "B", ObligationStatus = "O", SubmitterId = submitterId };
+        var cancelled = new PayCalOrganisation { OrganisationId = 3, OrganisationName = "C", ObligationStatus = "E", SubmitterId = submitterId, RegulatorStatus = "Cancelled" };
+
+        IReadOnlyCollection<int>? capturedIds = null;
+        var mockEligibilityFilter = new Mock<IPomEligibilityFilter>();
+        mockEligibilityFilter
+            .Setup(f => f.Filter(It.IsAny<IReadOnlyList<PayCalPom>>(), It.IsAny<IReadOnlyCollection<int>>()))
+            .Callback((IReadOnlyList<PayCalPom> _, IReadOnlyCollection<int> ids) => capturedIds = ids)
+            .Returns((IReadOnlyList<PayCalPom> p, IReadOnlyCollection<int> _) => p);
+
+        var service = CreateService(orgs: [granted, unset, cancelled], poms: [], eligibilityFilter: mockEligibilityFilter.Object);
+
+        await service.GetProducerData(2024, null, []);
+
+        capturedIds.ShouldNotBeNull();
+        capturedIds.OrderBy(x => x).ShouldBe([1, 2]);
+    }
+
+    [TestMethod]
     public async Task GetProducerData_WhenBothStreamsFail_Throws()
     {
         var service = CreateService(
@@ -210,7 +267,8 @@ public class ProducerDataServiceTests
         IReadOnlyList<PayCalPom>? poms = null,
         IAsyncEnumerable<PayCalOrganisation>? orgsStream = null,
         IAsyncEnumerable<PayCalPom>? pomsStream = null,
-        IProducerObligationDeterminer? determiner = null)
+        IProducerObligationDeterminer? determiner = null,
+        IPomEligibilityFilter? eligibilityFilter = null)
     {
         var mockOrgHandler = new Mock<IStreamOrganisationsRequestHandler>();
         mockOrgHandler
@@ -230,10 +288,19 @@ public class ProducerDataServiceTests
             .Setup(s => s.SelectLatestPomFiles(It.IsAny<IReadOnlyList<PayCalPom>>(), It.IsAny<DateTimeOffset?>()))
             .Returns((IReadOnlyList<PayCalPom> p, DateTimeOffset? _) => p);
 
-        var mockEligibilityFilter = new Mock<IPomEligibilityFilter>();
-        mockEligibilityFilter
-            .Setup(f => f.Filter(It.IsAny<IReadOnlyList<PayCalPom>>(), It.IsAny<IReadOnlyCollection<int>>()))
-            .Returns((IReadOnlyList<PayCalPom> p, IReadOnlyCollection<int> _) => p);
+        IPomEligibilityFilter eligibilityFilterToUse;
+        if (eligibilityFilter is not null)
+        {
+            eligibilityFilterToUse = eligibilityFilter;
+        }
+        else
+        {
+            var mockEligibilityFilter = new Mock<IPomEligibilityFilter>();
+            mockEligibilityFilter
+                .Setup(f => f.Filter(It.IsAny<IReadOnlyList<PayCalPom>>(), It.IsAny<IReadOnlyCollection<int>>()))
+                .Returns((IReadOnlyList<PayCalPom> p, IReadOnlyCollection<int> _) => p);
+            eligibilityFilterToUse = mockEligibilityFilter.Object;
+        }
 
         var mockFlagsCalculator = new Mock<IOrganisationPeriodFlagsCalculator>();
         mockFlagsCalculator
@@ -250,7 +317,7 @@ public class ProducerDataServiceTests
             mockPomHandler.Object,
             mockSelector.Object,
             determiner ?? mockDeterminer!.Object,
-            mockEligibilityFilter.Object,
+            eligibilityFilterToUse,
             mockFlagsCalculator.Object,
             new ProducerErrorDetector(),
             new ProducerPomAligner());

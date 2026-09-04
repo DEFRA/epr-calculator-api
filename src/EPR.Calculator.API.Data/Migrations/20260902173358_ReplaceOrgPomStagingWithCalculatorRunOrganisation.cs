@@ -11,52 +11,6 @@ namespace EPR.Calculator.API.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_calculator_run_calculator_run_organization_data_master_calculator_run_organization_data_master_id",
-                table: "calculator_run");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_calculator_run_calculator_run_pom_data_master_calculator_run_pom_data_master_id",
-                table: "calculator_run");
-
-            migrationBuilder.DropTable(
-                name: "calculator_run_organization_data_detail");
-
-            migrationBuilder.DropTable(
-                name: "calculator_run_pom_data_detail");
-
-            migrationBuilder.DropTable(
-                name: "organisation_data");
-
-            migrationBuilder.DropTable(
-                name: "pom_data");
-
-            migrationBuilder.DropTable(
-                name: "calculator_run_organization_data_master");
-
-            migrationBuilder.DropTable(
-                name: "calculator_run_pom_data_master");
-
-            migrationBuilder.DropIndex(
-                name: "IX_calculator_run_calculator_run_organization_data_master_id",
-                table: "calculator_run");
-
-            migrationBuilder.DropIndex(
-                name: "IX_calculator_run_calculator_run_pom_data_master_id",
-                table: "calculator_run");
-
-            migrationBuilder.DropIndex(
-                name: "IX_index_calculator_run",
-                table: "calculator_run");
-
-            migrationBuilder.DropColumn(
-                name: "calculator_run_organization_data_master_id",
-                table: "calculator_run");
-
-            migrationBuilder.DropColumn(
-                name: "calculator_run_pom_data_master_id",
-                table: "calculator_run");
-
             migrationBuilder.AddColumn<string>(
                 name: "joiner_date",
                 table: "producer_detail",
@@ -136,16 +90,103 @@ namespace EPR.Calculator.API.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_calculator_run_organisation_calculator_run_id",
+                table: "calculator_run_organisation",
+                column: "calculator_run_id");
+
+            // Carry historical run data forward before the source tables are dropped. Each run had its
+            // own master row, so created_at is the run's org/POM load time.
+            migrationBuilder.Sql(@"
+                UPDATE r
+                SET org_pom_data_loaded_at = m.created_at
+                FROM calculator_run r
+                INNER JOIN calculator_run_organization_data_master m
+                    ON m.id = r.calculator_run_organization_data_master_id;");
+
+            migrationBuilder.Sql(@"
+                INSERT INTO calculator_run_organisation
+                    (calculator_run_id, organisation_id, subsidiary_id, submitter_id, organisation_name,
+                     trading_name, obligation_status, num_days_obligated, joiner_date, leaver_date,
+                     status_code, error_code, has_h1, has_h2)
+                SELECT
+                    r.id, d.organisation_id, d.subsidiary_id, d.submitter_id, d.organisation_name,
+                    d.trading_name, ISNULL(d.obligation_status, ''), d.num_days_obligated, d.joiner_date, d.leaver_date,
+                    d.status_code, d.error_code, d.has_h1, d.has_h2
+                FROM calculator_run_organization_data_detail d
+                INNER JOIN calculator_run r
+                    ON r.calculator_run_organization_data_master_id = d.calculator_run_organization_data_master_id;");
+
+            // The obligation columns moved onto producer_detail; backfill historical runs from the
+            // matching organisation-detail row so consumers (e.g. partial-obligation export) still work.
+            migrationBuilder.Sql(@"
+                UPDATE pd
+                SET obligation_status = d.obligation_status,
+                    num_days_obligated = d.num_days_obligated,
+                    status_code = d.status_code,
+                    submitter_id = d.submitter_id,
+                    joiner_date = d.joiner_date,
+                    leaver_date = d.leaver_date
+                FROM producer_detail pd
+                INNER JOIN calculator_run r
+                    ON r.id = pd.calculator_run_id
+                INNER JOIN calculator_run_organization_data_detail d
+                    ON d.calculator_run_organization_data_master_id = r.calculator_run_organization_data_master_id
+                   AND d.organisation_id = pd.producer_id
+                   AND ISNULL(d.subsidiary_id, '') = ISNULL(pd.subsidiary_id, '')
+                WHERE pd.obligation_status IS NULL;");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_calculator_run_calculator_run_organization_data_master_calculator_run_organization_data_master_id",
+                table: "calculator_run");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_calculator_run_calculator_run_pom_data_master_calculator_run_pom_data_master_id",
+                table: "calculator_run");
+
+            migrationBuilder.DropTable(
+                name: "calculator_run_organization_data_detail");
+
+            migrationBuilder.DropTable(
+                name: "calculator_run_pom_data_detail");
+
+            migrationBuilder.DropTable(
+                name: "organisation_data");
+
+            migrationBuilder.DropTable(
+                name: "pom_data");
+
+            migrationBuilder.DropTable(
+                name: "calculator_run_organization_data_master");
+
+            migrationBuilder.DropTable(
+                name: "calculator_run_pom_data_master");
+
+            migrationBuilder.DropIndex(
+                name: "IX_calculator_run_calculator_run_organization_data_master_id",
+                table: "calculator_run");
+
+            migrationBuilder.DropIndex(
+                name: "IX_calculator_run_calculator_run_pom_data_master_id",
+                table: "calculator_run");
+
+            migrationBuilder.DropIndex(
+                name: "IX_index_calculator_run",
+                table: "calculator_run");
+
+            migrationBuilder.DropColumn(
+                name: "calculator_run_organization_data_master_id",
+                table: "calculator_run");
+
+            migrationBuilder.DropColumn(
+                name: "calculator_run_pom_data_master_id",
+                table: "calculator_run");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_index_calculator_run",
                 table: "calculator_run",
                 columns: new[] { "calculator_run_classification_id", "relative_year", "billing_run_status", "id" })
                 .Annotation("SqlServer:Clustered", false)
                 .Annotation("SqlServer:Include", new[] { "name", "created_by", "created_at", "updated_by", "updated_at", "default_parameter_setting_master_id", "lapcap_data_master_id" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_calculator_run_organisation_calculator_run_id",
-                table: "calculator_run_organisation",
-                column: "calculator_run_id");
         }
 
         /// <inheritdoc />
