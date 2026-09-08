@@ -64,7 +64,7 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
         fakeOrganisationsStream.Organisations = Organisations(organisationPath);
 
         var fakePomsStream = Provider.GetRequiredService<FakeStreamPomsRequestHandler>();
-        fakePomsStream.Poms = Poms(pomPath);
+        fakePomsStream.Poms = () => StreamPoms(pomPath);
 
         var fakeBlobStorage = Provider.GetRequiredService<FakeBlobStorageUploadService>();
 
