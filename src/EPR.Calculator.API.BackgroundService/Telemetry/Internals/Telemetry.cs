@@ -22,6 +22,13 @@ public abstract class Telemetry
     public const string CategoryTag = "category";
 
     public const string ThresholdTag = "duration_warning_threshold";
+
+    /// <summary>Activity tag carrying the managed bytes allocated (process-wide, cumulative churn) while the activity ran.</summary>
+    public const string AllocatedBytesTag = "allocated_bytes";
+
+    /// <summary>Activity tag carrying the approximate live managed heap size when the activity finished.</summary>
+    public const string HeapBytesTag = "heap_bytes";
+
     protected static readonly TimeSpan DefaultThreshold = TimeSpan.FromSeconds(10);
 
     public static readonly ActivitySource ActivitySource = new(RootScope);
@@ -71,6 +78,7 @@ public sealed class Telemetry<TCategory> : Telemetry, ITelemetry<TCategory>
     public T Activity<T>(Func<T> func, TimeSpan? threshold = null, [CallerMemberName] string activityName = "")
     {
         using var activity = StartActivity(activityName, threshold);
+        var allocatedBefore = GC.GetTotalAllocatedBytes();
 
         try
         {
@@ -89,11 +97,17 @@ public sealed class Telemetry<TCategory> : Telemetry, ITelemetry<TCategory>
             activity?.AddException(ex);
             throw;
         }
+        finally
+        {
+            activity?.SetTag(AllocatedBytesTag, GC.GetTotalAllocatedBytes() - allocatedBefore);
+            activity?.SetTag(HeapBytesTag, GC.GetTotalMemory(forceFullCollection: false));
+        }
     }
 
     public async Task<T> Activity<T>(Func<Task<T>> func, TimeSpan? threshold = null, [CallerMemberName] string activityName = "")
     {
         using var activity = StartActivity(activityName, threshold);
+        var allocatedBefore = GC.GetTotalAllocatedBytes();
 
         try
         {
@@ -111,6 +125,11 @@ public sealed class Telemetry<TCategory> : Telemetry, ITelemetry<TCategory>
             activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
             activity?.AddException(ex);
             throw;
+        }
+        finally
+        {
+            activity?.SetTag(AllocatedBytesTag, GC.GetTotalAllocatedBytes() - allocatedBefore);
+            activity?.SetTag(HeapBytesTag, GC.GetTotalMemory(forceFullCollection: false));
         }
     }
 

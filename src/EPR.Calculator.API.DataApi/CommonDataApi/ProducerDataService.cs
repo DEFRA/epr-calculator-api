@@ -43,6 +43,7 @@ public sealed class ProducerDataService(
         CancellationToken cancellationToken = default)
     {
         using var activity = DataApiTelemetry.StartActivity(typeof(ProducerDataService), nameof(GetProducerData));
+        var allocatedBefore = GC.GetTotalAllocatedBytes();
 
         // If either stream fails, both should cancel.
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -64,6 +65,11 @@ public sealed class ProducerDataService(
             activity?.AddException(ex);
             await linkedCts.CancelAsync();
             throw;
+        }
+        finally
+        {
+            activity?.SetTag("allocated_bytes", GC.GetTotalAllocatedBytes() - allocatedBefore);
+            activity?.SetTag("heap_bytes", GC.GetTotalMemory(forceFullCollection: false));
         }
     }
 
@@ -123,10 +129,13 @@ public sealed class ProducerDataService(
 
     private async Task<List<PayCalOrganisation>> StreamOrganisations(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
     {
-        var rawOrganisations = new List<PayCalOrganisation>();
-
-        await foreach (var organisation in organisationsHandler.Handle(relativeYear, cancellationToken).WithCancellation(cancellationToken))
-            rawOrganisations.Add(organisation);
+        var rawOrganisations = await DataApiTelemetry.TraceAsync(typeof(ProducerDataService), "BufferOrganisationStream", async () =>
+        {
+            var buffer = new List<PayCalOrganisation>();
+            await foreach (var organisation in organisationsHandler.Handle(relativeYear, cancellationToken).WithCancellation(cancellationToken))
+                buffer.Add(organisation);
+            return buffer;
+        });
 
         // Every candidate accepted file is streamed unfiltered - pick the winning file per
         // org/submitter/period (honouring the cut-off date) before obligation determination, which
@@ -138,10 +147,13 @@ public sealed class ProducerDataService(
 
     private async Task<List<PayCalPom>> StreamPoms(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
     {
-        var poms = new List<PayCalPom>();
-
-        await foreach (var pom in pomsHandler.Handle(relativeYear, cancellationToken).WithCancellation(cancellationToken))
-            poms.Add(pom);
+        var poms = await DataApiTelemetry.TraceAsync(typeof(ProducerDataService), "BufferPomStream", async () =>
+        {
+            var buffer = new List<PayCalPom>();
+            await foreach (var pom in pomsHandler.Handle(relativeYear, cancellationToken).WithCancellation(cancellationToken))
+                buffer.Add(pom);
+            return buffer;
+        });
 
         return acceptedFileSelector.SelectLatestPomFiles(poms, cutOffDate).ToList();
     }
