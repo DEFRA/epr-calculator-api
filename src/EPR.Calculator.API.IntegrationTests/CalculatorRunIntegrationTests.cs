@@ -55,7 +55,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         await WaitForCalculatorRunAsync(db, runId);
 
         await AssertFile(
-            actualContents: GetFileContentAsString(await CallController<CalculatorController>(c => c.DownloadResultCsv(runId)), expectUtf8Bom: true),
+            actualContents: GetFileContentAsString(await CallControllerForFile<CalculatorController>(c => c.DownloadResultCsv(runId)), expectUtf8Bom: true),
             expectedPath: $"ExpectedData/{relativeYear}-results.csv",
             ignoreLines: [1, 2, 3, 7, 8, 9],
             label: "Results CSV");
@@ -95,13 +95,13 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         await WaitForBillingRunAsync(db, runId);
 
         await AssertFile(
-            actualContents: GetFileContentAsString(await CallController<BillingFileController>(c => c.DownloadBillingCsv(runId)), expectUtf8Bom: true),
+            actualContents: GetFileContentAsString(await CallControllerForFile<BillingFileController>(c => c.DownloadBillingCsv(runId)), expectUtf8Bom: true),
             expectedPath: $"ExpectedData/{relativeYear}-billing.csv",
             ignoreLines: [1, 2, 3, 7, 8, 9],
             label: "Billing CSV");
 
         await AssertFile(
-            actualContents: GetFileContentAsString(await CallController<BillingFileController>(c => c.DownloadBillingJson(runId)), expectUtf8Bom: false),
+            actualContents: GetFileContentAsString(await CallControllerForFile<BillingFileController>(c => c.DownloadBillingJson(runId)), expectUtf8Bom: false),
             expectedPath: $"ExpectedData/{relativeYear}-billing.json",
             ignoreLines: [3, 4, 5, 9, 11, 13, 16],
             label: "Billing JSON");
@@ -137,10 +137,8 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         }
     }
 
-    private static string GetFileContentAsString(IActionResult result, bool expectUtf8Bom)
+    private static string GetFileContentAsString(byte[] fileContents, bool expectUtf8Bom)
     {
-        var fileContents = result.ShouldBeOfType<FileContentResult>().FileContents;
-
         if (expectUtf8Bom)
         {
             fileContents.Take(3).ShouldBe([0xEF, 0xBB, 0xBF]);

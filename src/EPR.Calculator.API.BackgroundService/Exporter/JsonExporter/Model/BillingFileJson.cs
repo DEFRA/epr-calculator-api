@@ -50,7 +50,7 @@ public class BillingFileJson
     [JsonPropertyName("calculationResults")]
     public object? CalculationResults { get; set; }
 
-    public static BillingFileJson From(BillingRunContext runContext, CalcResult calcResult, IImmutableList<MaterialDetail> materials)
+    public static BillingFileJson From(BillingRunContext runContext, CalcResult calcResult, IImmutableList<MaterialDetail> materials, IEnumerable<FeeDetail>? producerFeeDetails = null)
     {
         return new BillingFileJson {
             CalcResultDetail                   = CalcResultDetailJson.From(calcResult.CalcResultDetail),
@@ -66,7 +66,7 @@ public class BillingFileJson
             CancelledProducers                 = CancelledProducers.From(calcResult.CalcResultCancelledProducers),
             ScaleUpProducers                   = CalcResultScaledupProducersJson.From(calcResult.CalcResultScaledupProducers, materials),
             ModulationResults                  = runContext.RequiresModulation && calcResult.CalcResultModulation is not null ? CalcResultModulationResults.From(calcResult.CalcResultModulation) : null,
-            CalculationResults                 = CalculationResultsJson.From(runContext, calcResult, materials)
+            CalculationResults                 = CalculationResultsJson.From(runContext, calcResult, materials, producerFeeDetails)
         };
     }
 }

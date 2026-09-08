@@ -73,6 +73,12 @@ public class FileExportServiceTests
                 Total = new FeeDetail { ProducerId = 0, SubsidiaryId = string.Empty, ProducerName = string.Empty },
                 Details = new List<ProducerFeeDetail>()
             });
+        calcResultReaderMock
+            .Setup(x => x.ReadProducerFeesTotal(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new FeeDetail { ProducerId = 0, SubsidiaryId = string.Empty, ProducerName = string.Empty });
+        calcResultReaderMock
+            .Setup(x => x.StreamProducerFeeDetails(It.IsAny<int>()))
+            .Returns([]);
         rejectedProducersBuilderMock
             .Setup(x => x.ConstructAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<CalcResultRejectedProducer>());
@@ -142,15 +148,21 @@ public class FileExportServiceTests
         AddBillingFileMetadata(RunId);
         AddProducerFeeRow(RunId);
         billingJsonWriterMock
-            .Setup(x => x.WriteToUtf8Bytes(It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>()))
-            .ReturnsAsync(Encoding.UTF8.GetBytes(JsonContent));
+            .Setup(x => x.WriteTo(It.IsAny<Stream>(), It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>(), It.IsAny<CancellationToken>()))
+            .Returns((Stream stream, BillingRunContext _, CalcResult _, IEnumerable<FeeDetail> _, CancellationToken ct) =>
+                stream.WriteAsync(Encoding.UTF8.GetBytes(JsonContent), ct).AsTask());
 
         var result = await service.Export(RunId, RunType.Billing, FileExportType.Json, CancellationToken.None);
 
         // Assert
-        var exported = result.ShouldBeOfType<FileExportResult.Exported>();
-        exported.FileName.ShouldBe(new CalcResultsAndBillingFileName(RunId).ToString());
-        exported.Content.ShouldBe(Encoding.UTF8.GetBytes(JsonContent));
+        var streamed = result.ShouldBeOfType<FileExportResult.Streamed>();
+        streamed.FileName.ShouldBe(new CalcResultsAndBillingFileName(RunId).ToString());
+        streamed.ContentType.ShouldBe("application/json");
+
+        using var output = new MemoryStream();
+        await streamed.WriteAsync(output, CancellationToken.None);
+        output.ToArray().ShouldBe(Encoding.UTF8.GetBytes(JsonContent));
+
         rejectedProducersBuilderMock.Verify(x => x.ConstructAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()), Times.Once);
         errorReportBuilderMock.Verify(x => x.Construct(It.IsAny<RunContext>()), Times.Never);
     }

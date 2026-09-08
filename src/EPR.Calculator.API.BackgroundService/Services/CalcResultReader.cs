@@ -15,6 +15,8 @@ namespace EPR.Calculator.API.BackgroundService.Services
         Task<ImmutableList<CalcResultScaledupProducer>> ReadScaledData(int runId, CancellationToken cancellationToken);
         Task<ImmutableList<CalcResultPartialObligation>> ReadPartialData(int runId, CancellationToken cancellationToken);
         Task<ProducerFees> ReadProducerFees(int runId, CancellationToken cancellationToken);
+        Task<FeeDetail> ReadProducerFeesTotal(int runId, CancellationToken cancellationToken);
+        IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId);
         Task<SelfManagedConsumerWaste> ReadSmcw(int runId, CancellationToken cancellationToken);
         Task<ModulationResult> ReadModulationResult(int runId, CancellationToken cancellationToken);
         Task<CalcResultLapcapData> ReadLapcapData(int runId, CancellationToken cancellationToken);
@@ -142,6 +144,24 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .Where(p => p.CalculatorRunId == runId)
                         .SingleAsync(cancellationToken);
         }
+
+        [ActivityTrace]
+        public async Task<FeeDetail> ReadProducerFeesTotal(int runId, CancellationToken cancellationToken) =>
+            await dbContext.ProducerDisposalFee
+                        .AsNoTracking()
+                        .Where(p => p.CalculatorRunId == runId)
+                        .Select(p => p.Total)
+                        .SingleAsync(cancellationToken);
+
+        // Streams the per-producer fee rows straight off the reader, one FeeDetail graph at a time,
+        // so an exporter can consume them lazily without the whole ~10^4-row collection being held.
+        public IEnumerable<FeeDetail> StreamProducerFeeDetails(int runId) =>
+            dbContext.ProducerFeeDetails
+                        .AsNoTracking()
+                        .Where(d => dbContext.ProducerDisposalFee.Any(f => f.Id == d.ProducerFeesId && f.CalculatorRunId == runId))
+                        .OrderBy(d => d.Id)
+                        .Select(d => d.FeeDetail)
+                        .AsEnumerable();
 
         [ActivityTrace]
         public async Task<SelfManagedConsumerWaste> ReadSmcw(int runId, CancellationToken cancellationToken) =>

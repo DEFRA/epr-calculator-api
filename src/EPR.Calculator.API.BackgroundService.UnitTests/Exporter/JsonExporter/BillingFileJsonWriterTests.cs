@@ -12,14 +12,11 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.JsonExporter
         public TestContext TestContext { get; set; } = null!;
 
         [TestMethod]
-        public async Task WriteToUtf8Bytes_2025_ConformsToSchema()
+        public async Task WriteTo_2025_ConformsToSchema()
         {
             var schema = JsonSchema.FromText(await File.ReadAllTextAsync("Schemas/2025-billing.schema.json", TestContext.CancellationToken));
 
-            var writer = CreateWriter();
-            var json = await writer.WriteToUtf8Bytes(
-                TestDataHelper.BillingRun2025,
-                TestDataHelper.GetCalcResult(applyModulation: false));
+            var json = await WriteJson(TestDataHelper.BillingRun2025, TestDataHelper.GetCalcResult(applyModulation: false));
 
             var result = schema.Evaluate(
                 JsonDocument.Parse(json).RootElement,
@@ -29,20 +26,31 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.JsonExporter
         }
 
         [TestMethod]
-        public async Task WriteToUtf8Bytes_2026_ConformsToSchema()
+        public async Task WriteTo_2026_ConformsToSchema()
         {
             var schema = JsonSchema.FromText(await File.ReadAllTextAsync("Schemas/2026-billing.schema.json", TestContext.CancellationToken));
 
-            var writer = CreateWriter();
-            var json = await writer.WriteToUtf8Bytes(
-                TestDataHelper.BillingRun2026,
-                TestDataHelper.GetCalcResult(applyModulation: true));
+            var json = await WriteJson(TestDataHelper.BillingRun2026, TestDataHelper.GetCalcResult(applyModulation: true));
 
             var result = schema.Evaluate(
                 JsonDocument.Parse(json).RootElement,
                 new EvaluationOptions { OutputFormat = OutputFormat.List });
 
             result.IsValid.ShouldBeTrue(FormatErrors(result));
+        }
+
+        private static async Task<byte[]> WriteJson(
+            EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts.BillingRunContext runContext,
+            EPR.Calculator.API.BackgroundService.Models.CalcResult calcResult)
+        {
+            using var stream = new MemoryStream();
+            await CreateWriter().WriteTo(
+                stream,
+                runContext,
+                calcResult,
+                calcResult.ProducerFees.Details.Select(d => d.FeeDetail),
+                CancellationToken.None);
+            return stream.ToArray();
         }
 
         private static IBillingFileJsonWriter CreateWriter()

@@ -178,6 +178,35 @@ public abstract class BaseIntegrationTest
         return await action(controller);
     }
 
+    /// <summary>
+    ///     As <see cref="CallController{T}" />, but a streaming result is executed to
+    ///     <paramref name="destination" /> while the DI scope is still open (in production the scope
+    ///     lives until the response is written). Returns the bytes written.
+    /// </summary>
+    protected static async Task<byte[]> CallControllerForFile<T>(Func<T, Task<IActionResult>> action, Stream? destination = null)
+        where T : ControllerBase
+    {
+        await using var scope = Provider.CreateAsyncScope();
+
+        var controller = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider);
+        var httpContext = new DefaultHttpContext { RequestServices = scope.ServiceProvider, User = TestUser() };
+        controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
+
+        var result = await action(controller);
+
+        if (result is FileContentResult fileContent)
+        {
+            if (destination is not null)
+                await destination.WriteAsync(fileContent.FileContents);
+            return fileContent.FileContents;
+        }
+
+        var captured = destination is null ? new MemoryStream() : null;
+        httpContext.Response.Body = destination ?? captured!;
+        await result.ExecuteResultAsync(new ActionContext { HttpContext = httpContext });
+        return captured?.ToArray() ?? [];
+    }
+
     protected static async Task WaitForCalculatorRunAsync(ApplicationDBContext db, int runId) =>
         await WaitUntilAsync(
             async () =>

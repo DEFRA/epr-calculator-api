@@ -144,9 +144,7 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
             // Results CSV - own DI scope per download, matching one production HTTP request
             Step(i + 1, "Download results CSV");
             stopwatch.Restart();
-            SaveFileResult(
-                await CallController<CalculatorController>(c => c.DownloadResultCsv(runId)),
-                Path.Combine(outputDirectory, $"run-{i + 1}-results.csv"));
+            await SaveFileResult<CalculatorController>(c => c.DownloadResultCsv(runId), Path.Combine(outputDirectory, $"run-{i + 1}-results.csv"));
             stopwatch.Stop();
             resultsCsvTimings.Add(stopwatch.Elapsed);
 
@@ -189,18 +187,14 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
             // Billing CSV - own DI scope per download
             Step(i + 1, "Download billing CSV");
             stopwatch.Restart();
-            SaveFileResult(
-                await CallController<BillingFileController>(c => c.DownloadBillingCsv(runId)),
-                Path.Combine(outputDirectory, $"run-{i + 1}-billing.csv"));
+            await SaveFileResult<BillingFileController>(c => c.DownloadBillingCsv(runId), Path.Combine(outputDirectory, $"run-{i + 1}-billing.csv"));
             stopwatch.Stop();
             billingCsvTimings.Add(stopwatch.Elapsed);
 
             // Billing JSON - own DI scope per download
             Step(i + 1, "Download billing JSON");
             stopwatch.Restart();
-            SaveFileResult(
-                await CallController<BillingFileController>(c => c.DownloadBillingJson(runId)),
-                Path.Combine(outputDirectory, $"run-{i + 1}-billing.json"));
+            await SaveFileResult<BillingFileController>(c => c.DownloadBillingJson(runId), Path.Combine(outputDirectory, $"run-{i + 1}-billing.json"));
             stopwatch.Stop();
             billingJsonTimings.Add(stopwatch.Elapsed);
         }
@@ -511,6 +505,13 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
         await db.SaveChangesAsync();
     }
 
-    private static void SaveFileResult(IActionResult result, string path) =>
-        File.WriteAllBytes(path, result.ShouldBeOfType<FileContentResult>().FileContents);
+    // Runs the download and writes it to disk. A streaming result is piped straight to the FileStream
+    // (inside the controller's DI scope) so the perf run measures the export's own footprint, not a
+    // full copy of the file held in the test.
+    private static async Task SaveFileResult<T>(Func<T, Task<IActionResult>> action, string path)
+        where T : ControllerBase
+    {
+        await using var file = File.Create(path);
+        await CallControllerForFile(action, file);
+    }
 }
