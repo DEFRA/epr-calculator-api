@@ -143,10 +143,10 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
             calculatorTimings.Add(stopwatch.Elapsed);
             calculatorAllocations.Add(GC.GetTotalAllocatedBytes() - allocatedBefore);
 
-            // Results CSV - written to blob storage during the run; read it back and save to disk
+            // Results CSV - downloaded on demand; save it to disk
             Step(i + 1, "Read results CSV");
             stopwatch.Restart();
-            await SaveBlobFile(fakeBlobStorage, await ResultsFileName(db, runId), Path.Combine(outputDirectory, $"run-{i + 1}-results.csv"));
+            await SaveFileResult<CalculatorController>(c => c.DownloadResultCsv(runId), Path.Combine(outputDirectory, $"run-{i + 1}-results.csv"));
             stopwatch.Stop();
             resultsCsvTimings.Add(stopwatch.Elapsed);
 
@@ -186,23 +186,17 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
             stopwatch.Stop();
             billingTimings.Add(stopwatch.Elapsed);
 
-            var billingMetadata = await db.CalculatorRunBillingFileMetadata
-                .AsNoTracking()
-                .Where(x => x.CalculatorRunId == runId)
-                .OrderByDescending(x => x.BillingFileCreatedDate)
-                .FirstAsync();
-
-            // Billing CSV - read from blob
+            // Billing CSV - downloaded on demand; save it to disk
             Step(i + 1, "Read billing CSV");
             stopwatch.Restart();
-            await SaveBlobFile(fakeBlobStorage, billingMetadata.BillingCsvFileName, Path.Combine(outputDirectory, $"run-{i + 1}-billing.csv"));
+            await SaveFileResult<BillingFileController>(c => c.DownloadBillingCsv(runId), Path.Combine(outputDirectory, $"run-{i + 1}-billing.csv"));
             stopwatch.Stop();
             billingCsvTimings.Add(stopwatch.Elapsed);
 
-            // Billing JSON - read from blob
+            // Billing JSON - downloaded on demand; save it to disk
             Step(i + 1, "Read billing JSON");
             stopwatch.Restart();
-            await SaveBlobFile(fakeBlobStorage, billingMetadata.BillingJsonFileName, Path.Combine(outputDirectory, $"run-{i + 1}-billing.json"));
+            await SaveFileResult<BillingFileController>(c => c.DownloadBillingJson(runId), Path.Combine(outputDirectory, $"run-{i + 1}-billing.json"));
             stopwatch.Stop();
             billingJsonTimings.Add(stopwatch.Elapsed);
         }
@@ -336,19 +330,6 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
             _          => "  (no hard limit set - physical RAM fraction)"
         };
         Console.WriteLine($"GC heap ceiling:                         {Gb(gcCeiling)}{note}");
-    }
-
-    private static async Task<string> ResultsFileName(ApplicationDBContext db, int runId) =>
-        await db.CalculatorRunCsvFileMetadata
-            .AsNoTracking()
-            .Where(x => x.CalculatorRunId == runId)
-            .Select(x => x.FileName)
-            .SingleAsync();
-
-    private static Task SaveBlobFile(FakeBlobStorageUploadService blob, string fileName, string path)
-    {
-        blob.CopyTo(fileName, path);
-        return Task.CompletedTask;
     }
 
     private static OrganisationScenario GetOrganisationScenario(int index)
@@ -587,5 +568,15 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
         }
 
         await db.SaveChangesAsync();
+    }
+
+    // Runs the download and writes it to disk. A streaming result is piped straight to the FileStream
+    // (inside the controller's DI scope) so the perf run measures the export's own footprint, not a
+    // full copy of the file held in the test.
+    private static async Task SaveFileResult<T>(Func<T, Task<IActionResult>> action, string path)
+        where T : ControllerBase
+    {
+        await using var file = File.Create(path);
+        await CallControllerForFile(action, file);
     }
 }

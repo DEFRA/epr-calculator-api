@@ -20,12 +20,16 @@ public class CalculationResultsJson
     public static CalculationResultsJson From(
         BillingRunContext runContext,
         CalcResult calcResult,
-        IImmutableList<MaterialDetail> materials)
+        IImmutableList<MaterialDetail> materials,
+        IEnumerable<FeeDetail> producerFeeDetails)
     {
+        var scaledupProducers = calcResult.CalcResultScaledupProducers.ScaledupProducers.Select(p => p.ProducerId).ToImmutableList();
+
         return new CalculationResultsJson
         {
             ProducerCalculationResultsSummary = ArrangeSummary(calcResult.ProducerFees),
-            ProducerCalculationResults        = ArrangeProducerCalculationResult(runContext, calcResult, materials),
+            ProducerCalculationResults        = ArrangeProducerCalculationResult(
+                producerFeeDetails, materials, runContext.RequiresModulation, scaledupProducers),
             ProducerCalculationResultsTotal   = ArrangeProducerCalculationResultsTotal(calcResult.ProducerFees),
         };
     }
@@ -70,16 +74,16 @@ public class CalculationResultsJson
         };
     }
 
-    // IEnumerable - deferred iterator so JsonSerializer writes one producer at a time.
+    // Lazily projected - kept as a deferred iterator so JsonSerializer pulls one producer at a time
+    // when the source is a streamed DB read, rather than the whole set being held in memory.
     private static IEnumerable<CalcSummaryProducerCalculationResults> ArrangeProducerCalculationResult(
-        BillingRunContext runContext,
-        CalcResult calcResult,
-        IImmutableList<MaterialDetail> materials)
+        IEnumerable<FeeDetail> feeDetails,
+        IImmutableList<MaterialDetail> materials,
+        bool requiresModulation,
+        IImmutableList<int> scaledupProducerIds)
     {
-        var scaledupProducers = calcResult.CalcResultScaledupProducers.ScaledupProducers.Select(p => p.ProducerId).ToImmutableList();
-
-        foreach (var producer in calcResult.ProducerFees.Details)
-            yield return CalcSummaryProducerCalculationResults.From(producer, materials, runContext.RequiresModulation, scaledupProducers);
+        foreach (var feeDetail in feeDetails)
+            yield return CalcSummaryProducerCalculationResults.From(feeDetail, materials, requiresModulation, scaledupProducerIds);
     }
 
     private static CalcResultProducerCalculationResultsTotal? ArrangeProducerCalculationResultsTotal(ProducerFees producerFees)

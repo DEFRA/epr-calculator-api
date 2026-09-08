@@ -5,12 +5,13 @@ using EPR.Calculator.API.BackgroundService.Exporter.JsonExporter.Model;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Exporter.JsonExporter;
 
 public interface IBillingFileJsonWriter
 {
-    Task WriteTo(Stream stream, BillingRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken);
+    Task WriteTo(Stream stream, BillingRunContext runContext, CalcResult calcResult, IEnumerable<FeeDetail> producerFeeDetails, CancellationToken cancellationToken);
 }
 
 public class BillingFileJsonWriter(IMaterialService materialService)
@@ -27,7 +28,7 @@ public class BillingFileJsonWriter(IMaterialService materialService)
     };
 
     [ActivityTrace]
-    public async Task WriteTo(Stream stream, BillingRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken)
+    public async Task WriteTo(Stream stream, BillingRunContext runContext, CalcResult calcResult, IEnumerable<FeeDetail> producerFeeDetails, CancellationToken cancellationToken)
     {
         var materials = (await materialService.GetMaterials())
                             .Select(m => m.Code switch
@@ -38,7 +39,10 @@ public class BillingFileJsonWriter(IMaterialService materialService)
                                 _ => m
                             }).ToImmutableList(); //Maintain previous capitalisation
 
-        var billingFileContent = BillingFileJson.From(runContext, calcResult, materials);
+        // producerFeeDetails is a deferred, streamed DB read; JsonSerializer pulls one producer at a
+        // time and SerializeAsync flushes to the stream as it goes, so neither the fee graph nor the
+        // serialized document is ever held whole in memory.
+        var billingFileContent = BillingFileJson.From(runContext, calcResult, materials, producerFeeDetails);
 
         await JsonSerializer.SerializeAsync(stream, billingFileContent, JsonSerializerOptions, cancellationToken);
     }

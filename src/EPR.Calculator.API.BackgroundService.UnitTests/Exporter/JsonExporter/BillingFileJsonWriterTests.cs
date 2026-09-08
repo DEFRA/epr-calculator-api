@@ -44,7 +44,12 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.JsonExporter
             BackgroundService.Models.CalcResult calcResult)
         {
             using var stream = new MemoryStream();
-            await CreateWriter().WriteTo(stream, runContext, calcResult, CancellationToken.None);
+            await CreateWriter().WriteTo(
+                stream,
+                runContext,
+                calcResult,
+                calcResult.ProducerFees.Details.Select(d => d.FeeDetail),
+                CancellationToken.None);
             return stream.ToArray();
         }
 
