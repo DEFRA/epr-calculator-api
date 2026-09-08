@@ -12,6 +12,8 @@ internal static class DataApiTelemetry
     private const string SourceName = "epr.paycal";
     private const string CategoryTag = "category";
     private const string ThresholdTag = "duration_warning_threshold";
+    private const string AllocatedBytesTag = "allocated_bytes";
+    private const string HeapBytesTag = "heap_bytes";
     private static readonly TimeSpan DefaultThreshold = TimeSpan.FromSeconds(10);
     private static readonly ActivitySource Source = new(SourceName);
 
@@ -25,6 +27,7 @@ internal static class DataApiTelemetry
     public static T Trace<T>(Type owner, string name, Func<T> func)
     {
         using var activity = StartActivity(owner, name);
+        var allocatedBefore = GC.GetTotalAllocatedBytes();
 
         try
         {
@@ -42,5 +45,42 @@ internal static class DataApiTelemetry
             activity?.AddException(ex);
             throw;
         }
+        finally
+        {
+            RecordMemory(activity, allocatedBefore);
+        }
+    }
+
+    public static async Task<T> TraceAsync<T>(Type owner, string name, Func<Task<T>> func)
+    {
+        using var activity = StartActivity(owner, name);
+        var allocatedBefore = GC.GetTotalAllocatedBytes();
+
+        try
+        {
+            var result = await func();
+            activity?.SetStatus(ActivityStatusCode.Ok);
+            return result;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+            activity?.AddException(ex);
+            throw;
+        }
+        finally
+        {
+            RecordMemory(activity, allocatedBefore);
+        }
+    }
+
+    private static void RecordMemory(Activity? activity, long allocatedBefore)
+    {
+        activity?.SetTag(AllocatedBytesTag, GC.GetTotalAllocatedBytes() - allocatedBefore);
+        activity?.SetTag(HeapBytesTag, GC.GetTotalMemory(forceFullCollection: false));
     }
 }
