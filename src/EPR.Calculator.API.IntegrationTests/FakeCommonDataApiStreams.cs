@@ -23,12 +23,14 @@ public class FakeStreamOrganisationsRequestHandler : IStreamOrganisationsRequest
 
 public class FakeStreamPomsRequestHandler : IStreamPomsRequestHandler
 {
-    public ImmutableList<PayCalPom> Poms { get; set; } = [];
+    // A factory, invoked fresh on each Handle() call, so POM rows are streamed rather than held in
+    // memory as a list - matching the real handler, which reads rows off a SQL reader one at a time.
+    public Func<IEnumerable<PayCalPom>> Poms { get; set; } = () => [];
 
     public async IAsyncEnumerable<PayCalPom> Handle(int relativeYear,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        foreach (var pom in Poms)
+        foreach (var pom in Poms())
         {
             yield return pom;
 

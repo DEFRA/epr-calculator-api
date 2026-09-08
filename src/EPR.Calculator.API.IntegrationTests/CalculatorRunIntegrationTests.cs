@@ -39,15 +39,10 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         fakeOrganisationsStream.Organisations = Organisations($"TestData/{relativeYear}-organisation-data.csv");
 
         var fakePomsStream = Provider.GetRequiredService<FakeStreamPomsRequestHandler>();
-        fakePomsStream.Poms = Poms($"TestData/{relativeYear}-pom-data.csv");
-
-        var calculatorController          = CreateController<CalculatorController>(services);
-        var calculatorNewController       = CreateController<CalculatorNewController>(services);
-        var producerBillingFileController = CreateController<ProducerBillingFileController>(services);
-        var billingFileController         = CreateController<BillingFileController>(services);
+        fakePomsStream.Poms = () => StreamPoms($"TestData/{relativeYear}-pom-data.csv");
 
         // Results
-        var createRunResult = (await calculatorController.Create(new CreateCalculatorRunDto {CalculatorRunName = name, RelativeYear = relativeYear}))
+        var createRunResult = (await CallController<CalculatorController>(c => c.Create(new CreateCalculatorRunDto {CalculatorRunName = name, RelativeYear = relativeYear})))
             .ShouldBeOfType<ObjectResult>();
 
         createRunResult.StatusCode.ShouldBe(StatusCodes.Status202Accepted, $"Controller returned: {JsonSerializer.Serialize(createRunResult.Value)}");
@@ -60,7 +55,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         await WaitForCalculatorRunAsync(db, runId);
 
         await AssertFile(
-            actualContents: GetFileContentAsString(await calculatorController.DownloadResultCsv(runId), expectUtf8Bom: true),
+            actualContents: GetFileContentAsString(await CallController<CalculatorController>(c => c.DownloadResultCsv(runId)), expectUtf8Bom: true),
             expectedPath: $"ExpectedData/{relativeYear}-results.csv",
             ignoreLines: [1, 2, 3, 7, 8, 9],
             label: "Results CSV");
@@ -76,10 +71,10 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         }
         await db.SaveChangesAsync();
 
-        var setBillingClassificationResult = await calculatorNewController.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto {
+        var setBillingClassificationResult = await CallController<CalculatorNewController>(c => c.PutCalculatorRunStatus(new CalculatorRunStatusUpdateDto {
                 RunId = runId,
                 ClassificationId = RunClassificationStatusIds.INITIALRUNID
-            });
+            }));
 
         if (setBillingClassificationResult is StatusCodeResult statusCodeResult)
         {
@@ -92,7 +87,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
 
         await SeedAcceptOrRejectProducersAsync(db, runId, rundBy, $"TestData/{relativeYear}-accept-or-reject-producers.csv");
 
-        var startBillingResult = (await producerBillingFileController.ProducerBillingInstructions(runId))
+        var startBillingResult = (await CallController<ProducerBillingFileController>(c => c.ProducerBillingInstructions(runId)))
             .ShouldBeOfType<ObjectResult>();
 
         startBillingResult.StatusCode.ShouldBe(StatusCodes.Status200OK, $"Controller returned: {JsonSerializer.Serialize(startBillingResult.Value)}");
@@ -100,13 +95,13 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         await WaitForBillingRunAsync(db, runId);
 
         await AssertFile(
-            actualContents: GetFileContentAsString(await billingFileController.DownloadBillingCsv(runId), expectUtf8Bom: true),
+            actualContents: GetFileContentAsString(await CallController<BillingFileController>(c => c.DownloadBillingCsv(runId)), expectUtf8Bom: true),
             expectedPath: $"ExpectedData/{relativeYear}-billing.csv",
             ignoreLines: [1, 2, 3, 7, 8, 9],
             label: "Billing CSV");
 
         await AssertFile(
-            actualContents: GetFileContentAsString(await billingFileController.DownloadBillingJson(runId), expectUtf8Bom: false),
+            actualContents: GetFileContentAsString(await CallController<BillingFileController>(c => c.DownloadBillingJson(runId)), expectUtf8Bom: false),
             expectedPath: $"ExpectedData/{relativeYear}-billing.json",
             ignoreLines: [3, 4, 5, 9, 11, 13, 16],
             label: "Billing JSON");

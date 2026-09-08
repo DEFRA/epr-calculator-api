@@ -146,30 +146,36 @@ public abstract class BaseIntegrationTest
             .AddSingleton<IStorageUploadService>(sp => sp.GetRequiredService<FakeBlobStorageUploadService>());
     }
 
-    protected static T CreateController<T>(IServiceProvider services)
+    protected static ClaimsPrincipal TestUser() =>
+        new(new ClaimsIdentity(
+            [
+                new Claim(ClaimTypes.Name, "some-user"),
+                new Claim(ClaimTypes.NameIdentifier, "some-user")
+            ],
+            authenticationType: "IntegrationTest"));
+
+    /// <summary>
+    ///     Invokes <paramref name="action" /> on a fresh controller in its own DI scope, disposed
+    ///     when the call returns - so a scoped <see cref="ApplicationDBContext" /> and the data it
+    ///     read do not live on past the call. Mirrors one HTTP request in production; make one call
+    ///     per controller action rather than holding a controller across several.
+    /// </summary>
+    protected static async Task<IActionResult> CallController<T>(Func<T, Task<IActionResult>> action)
         where T : ControllerBase
     {
-        var scope = services.CreateAsyncScope();
+        await using var scope = Provider.CreateAsyncScope();
 
         var controller = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider);
-
         controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext
             {
                 RequestServices = scope.ServiceProvider,
-                User = new ClaimsPrincipal(new ClaimsIdentity(
-                    [
-                        new Claim(ClaimTypes.Name, "some-user"),
-                        new Claim(ClaimTypes.NameIdentifier, "some-user")
-                    ],
-                    authenticationType: "IntegrationTest"))
+                User = TestUser()
             }
         };
 
-        controller.HttpContext.Response.RegisterForDispose(scope);
-
-        return controller;
+        return await action(controller);
     }
 
     protected static async Task WaitForCalculatorRunAsync(ApplicationDBContext db, int runId) =>
@@ -325,13 +331,20 @@ public abstract class BaseIntegrationTest
                 JoinerDate       = Nullable(row.joiner_date),
                 LeaverDate       = Nullable(row.leaver_date),
                 HasH1            = row.has_h1 == "1",
-                HasH2            = row.has_h2 == "1"
+                HasH2            = row.has_h2 == "1",
+                FileName         = OptionalColumn((IDictionary<string, object>)row, "file_name"),
+                CreatedDateTime  = OptionalColumn((IDictionary<string, object>)row, "created_date_time", x => DateTime.Parse(x, CultureInfo.InvariantCulture))
             }).ToImmutableList();
 
-    protected static ImmutableList<PayCalPom> Poms(string pomsPath) =>
-        SlurpCsv(pomsPath)
-            .GetRecords<dynamic>()
-            .Select(row => new PayCalPom
+    // Lazily streams the POM CSV: a fresh CsvReader per call, one row materialised at a time, so a
+    // multi-million-row file is never held in memory as a list.
+    protected static IEnumerable<PayCalPom> StreamPoms(string pomsPath)
+    {
+        using var csv = SlurpCsv(pomsPath);
+
+        foreach (var row in csv.GetRecords<dynamic>())
+        {
+            yield return new PayCalPom
             {
                 OrganisationId              = int.Parse(row.organisation_id),
                 SubsidiaryId                = Nullable(row.subsidiary_id),
@@ -344,8 +357,12 @@ public abstract class BaseIntegrationTest
                 SubmissionPeriodDescription = row.submission_period_desc,
                 SubmitterId                 = row.submitter_id,
                 PackagingMaterialSubtype    = Nullable(row.packaging_material_subtype),
-                RamRagRating                = Nullable(row.ram_rag_rating)
-            }).ToImmutableList();
+                RamRagRating                = Nullable(row.ram_rag_rating),
+                FileName                    = OptionalColumn((IDictionary<string, object>)row, "file_name"),
+                CreatedDateTime             = OptionalColumn((IDictionary<string, object>)row, "created_date_time", x => DateTime.Parse(x, CultureInfo.InvariantCulture))
+            };
+        }
+    }
 
     private  static async Task WaitUntilAsync(Func<Task<bool>> condition, string failureMessage, TimeSpan? timeout = null)
     {
@@ -372,6 +389,16 @@ public abstract class BaseIntegrationTest
         value.Equals("NULL", StringComparison.OrdinalIgnoreCase)
             ? null
             : value;
+
+    // file_name / created_date_time are emitted by the generated performance-test CSVs but absent
+    // from the hand-written fixture CSVs; a missing column reads as null rather than throwing.
+    private static string? OptionalColumn(IDictionary<string, object> row, string column) =>
+        row.TryGetValue(column, out var value)
+            ? Nullable(value?.ToString() ?? "NULL")
+            : null;
+
+    private static T? OptionalColumn<T>(IDictionary<string, object> row, string column, Func<string, T> parser) where T : struct =>
+        OptionalColumn(row, column) is { } value ? parser(value) : null;
 
     private static T? Nullable<T>(string value, Func<string, T> parser) where T : struct =>
         value.Equals("NULL", StringComparison.OrdinalIgnoreCase)
