@@ -106,17 +106,51 @@ namespace EPR.Calculator.API.BackgroundService.Services
         }
 
         [ActivityTrace]
-        public async Task StoreProducerFees(int runId, ProducerFees producerFees, CancellationToken cancellationToken)
-        {
-            dbContext.ProducerDisposalFee.Add(producerFees);
-            await dbContext.SaveChangesAsync(cancellationToken);
-        }
+        public async Task StoreProducerFees(int runId, ProducerFees producerFees, CancellationToken cancellationToken) =>
+            await SaveWithBatchedChildren(producerFees,
+                f => f.Details, (f, d) => f.Details = d, (d, f) => d.ProducerFeesId = f.Id,
+                cancellationToken);
 
         [ActivityTrace]
-        public async Task StoreSmcw(int runId, SelfManagedConsumerWaste smcw, CancellationToken cancellationToken)
+        public async Task StoreSmcw(int runId, SelfManagedConsumerWaste smcw, CancellationToken cancellationToken) =>
+            await SaveWithBatchedChildren(smcw,
+                s => s.ProducerTotals, (s, p) => s.ProducerTotals = p, (p, s) => p.SmcwId = s.Id,
+                cancellationToken);
+
+        // A calc-result root (ProducerFees, SelfManagedConsumerWaste) owns one child row per producer,
+        // each with a nested owned-JSON column. Adding them all in a single SaveChanges tracks of order
+        // 10^5-10^6 entities and exhausts memory; EFCore.BulkExtensions' SqlBulkCopy path can't
+        // serialize the owned-JSON columns on SQL Server. So insert the parent alone, then the children
+        // through SaveChanges in bounded batches, clearing the change tracker between each.
+        private async Task SaveWithBatchedChildren<TRoot, TChild>(
+            TRoot root,
+            Func<TRoot, ICollection<TChild>> getChildren,
+            Action<TRoot, ICollection<TChild>> setChildren,
+            Action<TChild, TRoot> setParent,
+            CancellationToken cancellationToken)
+            where TRoot : class
+            where TChild : class
         {
-            dbContext.SelfManagedConsumerWaste.Add(smcw);
+            const int batchSize = 500;
+
+            var children = getChildren(root);
+            setChildren(root, []);
+
+            dbContext.Add(root);
             await dbContext.SaveChangesAsync(cancellationToken);
+            dbContext.ChangeTracker.Clear();
+
+            foreach (var batch in children.Chunk(batchSize))
+            {
+                foreach (var child in batch)
+                    setParent(child, root);
+
+                dbContext.AddRange(batch);
+                await dbContext.SaveChangesAsync(cancellationToken);
+                dbContext.ChangeTracker.Clear();
+            }
+
+            setChildren(root, children);
         }
 
         [ActivityTrace]
