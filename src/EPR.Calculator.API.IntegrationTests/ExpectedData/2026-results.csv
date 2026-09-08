@@ -189,5 +189,6 @@ Parameters File,"",,"03/09/2026 12:00",,"",
 
 Error Table
 "Producer ID","Subsidiary ID","Producer / Subsidiary Name","Trading Name","Leaver Code","Error Code Text",
+"410000","-","Missing reg Ltd - different submitter","-","","Missing POM Data",
 "410000","-","Missing reg Ltd - different submitter","-","","Missing Registration Data",
 "510000","-","Error 1 Ltd","-","Some status code","Some error code",
