@@ -83,7 +83,7 @@ public class FileExportService(
         if (result is null)
             return new FileExportResult.Legacy();
 
-        var content = await resultsFileExporter.Export(runContext, result);
+        var content = await resultsFileExporter.Export(runContext, result, calcResultReader.StreamProducerFeeDetails(runContext.RunId));
         var fileName = new CalcResultsAndBillingFileName(runContext.RunId, runContext.RunName, runContext.ProcessingStartedAt.UtcDateTime);
         return new FileExportResult.Exported(ToUtf8WithBom(content), fileName);
     }
@@ -95,7 +95,7 @@ public class FileExportService(
         if(runContext is null)
             return new FileExportResult.NotFound();
 
-        var result = await GetResult(runContext, cancellationToken, streamProducerFees: billingFileType == FileExportType.Json);
+        var result = await GetResult(runContext, cancellationToken);
 
         if (result is null)
             return new FileExportResult.Legacy();
@@ -105,7 +105,7 @@ public class FileExportService(
         return billingFileType switch
         {
             FileExportType.Csv => new FileExportResult.Exported(
-                ToUtf8WithBom(await billingFileExporter.Export(runContext, filteredResult)),
+                ToUtf8WithBom(await billingFileExporter.Export(runContext, filteredResult, AcceptedFeeDetails(runContext))),
                 billingCsvFileName
             ),
             FileExportType.Json => new FileExportResult.Streamed(
@@ -179,7 +179,9 @@ public class FileExportService(
         };
     }
 
-    private async Task<CalcResult?> GetResult(RunContext runContext, CancellationToken cancellationToken, bool streamProducerFees = false)
+    // Every export path now streams the producer fee rows separately (see StreamProducerFeeDetails),
+    // so the result carries the fee Total only, never the whole Details collection.
+    private async Task<CalcResult?> GetResult(RunContext runContext, CancellationToken cancellationToken)
     {
         var hasData = await dbContext.ProducerDisposalFee.AnyAsync(f => f.CalculatorRunId == runContext.RunId, cancellationToken);
 
@@ -215,9 +217,11 @@ public class FileExportService(
         if (runContext.RequiresModulation)
             result.CalcResultModulation = await calcResultReader.ReadModulationResult(runContext.RunId, cancellationToken);
 
-        result.ProducerFees = streamProducerFees
-            ? new ProducerFees { CalculatorRunId = runContext.RunId, Total = await calcResultReader.ReadProducerFeesTotal(runContext.RunId, cancellationToken) }
-            : await calcResultReader.ReadProducerFees(runContext.RunId, cancellationToken);
+        result.ProducerFees = new ProducerFees
+        {
+            CalculatorRunId = runContext.RunId,
+            Total = await calcResultReader.ReadProducerFeesTotal(runContext.RunId, cancellationToken)
+        };
 
         if (runContext.RunType is RunType.Calculator)
             result.CalcResultErrorReports = errorReportBuilder.Construct(runContext);
