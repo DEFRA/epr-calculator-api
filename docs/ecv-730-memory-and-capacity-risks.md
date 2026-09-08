@@ -333,26 +333,24 @@ exporter, and reading once and reusing across the three exports, touches
 take the billing-JSON peak down another ~1 GB — enough for a 3 GB limit to be
 comfortable. `AsSplitQuery()` is added on this branch as an interim step.
 
-### Export byte conversion — cheap, not yet done
+### Export byte conversion
 
-Two small allocations on the export path, both avoidable without touching the
-exporters:
-
-- `FileExportService.ToUtf8WithBom` runs `Encoding.UTF8.GetBytes(content)` and
-  then copies the result again into a second array to prepend the 3-byte BOM —
-  a full second copy of every CSV. Encoding the BOM and the content into one
-  pre-sized buffer removes the copy.
-- The billing-JSON path calls `billingJsonWriter.WriteToString(...)`, which
-  returns a `JsonSerializer.Serialize` **string** — UTF-16, so roughly twice the
-  file size (~700 MB for the ~370 MB JSON) — and then `Encoding.UTF8.GetBytes`
-  converts that to the `byte[]` actually returned. `JsonSerializer.SerializeToUtf8Bytes`
-  (exposed as a `WriteToUtf8Bytes` on `BillingFileJsonWriter`) writes UTF-8
-  straight to a `byte[]` and never allocates the intermediate string.
-
-Together that is roughly 1 GB of transient allocation off the billing-JSON
-export — the heaviest of the three, currently peaking at ~3.18 GB. The changes
-are local to `FileExportService` and `BillingFileJsonWriter`; a cheap way to
-widen the margin further ahead of the streamed read.
+- **Billing-JSON UTF-16 string — done on this branch.** The billing-JSON path
+  used to call a `WriteToString` that returned a `JsonSerializer.Serialize`
+  **string** (UTF-16, ~700 MB for the ~370 MB JSON), then `Encoding.UTF8.GetBytes`
+  converted it to the `byte[]` actually returned. It now calls
+  `WriteToUtf8Bytes` (`JsonSerializer.SerializeToUtf8Bytes` on
+  `BillingFileJsonWriter`), skipping the intermediate string. That removes
+  ~700 MB of transient allocation, but it is *transient* — it widens the
+  headroom at a 3–4 GB ceiling and does not lower the floor. The billing-JSON
+  export still OOMs a 2 GB soak, because the serializer still buffers the whole
+  ~370 MB output as one (doubling-growth) `byte[]` on top of the ~1 GB retained
+  fee graph and the ~1 GB `BillingFileJson.From` model graph. Those are the
+  streamed-read and stream-the-writer work, not this.
+- **CSV BOM copy — not yet done.** `FileExportService.ToUtf8WithBom` runs
+  `Encoding.UTF8.GetBytes(content)` and then copies the result again into a
+  second array to prepend the 3-byte BOM — a full second copy of every CSV.
+  Encoding the BOM and the content into one pre-sized buffer removes the copy.
 
 ### `StoreSmcw` — done on this branch
 

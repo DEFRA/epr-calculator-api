@@ -12,12 +12,12 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.JsonExporter
         public TestContext TestContext { get; set; } = null!;
 
         [TestMethod]
-        public async Task WriteToString_2025_ConformsToSchema()
+        public async Task WriteToUtf8Bytes_2025_ConformsToSchema()
         {
             var schema = JsonSchema.FromText(await File.ReadAllTextAsync("Schemas/2025-billing.schema.json", TestContext.CancellationToken));
 
             var writer = CreateWriter();
-            var json = await writer.WriteToString(
+            var json = await writer.WriteToUtf8Bytes(
                 TestDataHelper.BillingRun2025,
                 TestDataHelper.GetCalcResult(applyModulation: false));
 
@@ -29,12 +29,12 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.JsonExporter
         }
 
         [TestMethod]
-        public async Task WriteToString_2026_ConformsToSchema()
+        public async Task WriteToUtf8Bytes_2026_ConformsToSchema()
         {
             var schema = JsonSchema.FromText(await File.ReadAllTextAsync("Schemas/2026-billing.schema.json", TestContext.CancellationToken));
 
             var writer = CreateWriter();
-            var json = await writer.WriteToString(
+            var json = await writer.WriteToUtf8Bytes(
                 TestDataHelper.BillingRun2026,
                 TestDataHelper.GetCalcResult(applyModulation: true));
 

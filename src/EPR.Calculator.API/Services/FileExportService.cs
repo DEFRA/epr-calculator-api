@@ -108,7 +108,7 @@ public class FileExportService(
                 billingCsvFileName
             ),
             FileExportType.Json => new FileExportResult.Exported(
-                Encoding.UTF8.GetBytes(await billingJsonWriter.WriteToString(runContext, filteredResult)),
+                await billingJsonWriter.WriteToUtf8Bytes(runContext, filteredResult),
                 new CalcResultsAndBillingFileName(runContext.RunId)
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(billingFileType), billingFileType, null)

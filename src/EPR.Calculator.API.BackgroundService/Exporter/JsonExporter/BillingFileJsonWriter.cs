@@ -10,7 +10,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.JsonExporter;
 
 public interface IBillingFileJsonWriter
 {
-    Task<string> WriteToString(BillingRunContext runContext, CalcResult calcResult);
+    Task<byte[]> WriteToUtf8Bytes(BillingRunContext runContext, CalcResult calcResult);
 }
 
 public class BillingFileJsonWriter(IMaterialService materialService)
@@ -26,7 +26,7 @@ public class BillingFileJsonWriter(IMaterialService materialService)
         Converters = { new DecimalPrecisionConverter(DecimalPrecision) }
     };
 
-    public async Task<string> WriteToString(BillingRunContext runContext, CalcResult calcResult)
+    public async Task<byte[]> WriteToUtf8Bytes(BillingRunContext runContext, CalcResult calcResult)
     {
         var materials = (await materialService.GetMaterials())
                             .Select(m => m.Code switch
@@ -39,6 +39,8 @@ public class BillingFileJsonWriter(IMaterialService materialService)
 
         var billingFileContent = BillingFileJson.From(runContext, calcResult, materials);
 
-        return JsonSerializer.Serialize(billingFileContent, JsonSerializerOptions);
+        // Serialize straight to UTF-8 bytes - the file is written as UTF-8, and a Serialize-to-string
+        // step would allocate the whole document again as a UTF-16 string first.
+        return JsonSerializer.SerializeToUtf8Bytes(billingFileContent, JsonSerializerOptions);
     }
 }
