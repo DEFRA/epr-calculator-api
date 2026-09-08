@@ -13,7 +13,8 @@ public interface IProducerFeesExporter
         IImmutableList<MaterialDetail> materials,
         IReadOnlyList<int> scaledupProducerIds,
         IReadOnlyList<(int, string?)> partialProducerSubsidiaryIds,
-        StringBuilder csvContent
+        StringBuilder csvContent,
+        IEnumerable<FeeDetail>? producerFeeDetails = null
     );
 }
 
@@ -26,7 +27,8 @@ public class ProducerFeesExporter : IProducerFeesExporter
         IImmutableList<MaterialDetail> materials,
         IReadOnlyList<int> scaledupProducerIds,
         IReadOnlyList<(int, string?)> partialProducerSubsidiaryIds,
-        StringBuilder csvContent
+        StringBuilder csvContent,
+        IEnumerable<FeeDetail>? producerFeeDetails = null
     )
     {
         var partExporters = BuildPartExporters(scaledupProducerIds, partialProducerSubsidiaryIds);
@@ -36,7 +38,9 @@ public class ProducerFeesExporter : IProducerFeesExporter
 
         AddSummaryDataHeader(producerFees, materials, runContext.RequiresModulation, csvContent, partExporters);
 
-        foreach (var producer in producerFees.Details.Select(fee => fee.FeeDetail))
+        // producerFeeDetails, when supplied, is a streamed DB read consumed once here; otherwise fall
+        // back to the already-materialised collection.
+        foreach (var producer in producerFeeDetails ?? producerFees.Details.Select(fee => fee.FeeDetail))
             AddNewRow(csvContent, new ProducerFeeExportRow(producer.Level, producer), runContext.RequiresModulation, partExporters, isOverallTotal: false);
 
         AddNewRow(csvContent, new ProducerFeeExportRow(string.Empty, producerFees.Total), runContext.RequiresModulation, partExporters, isOverallTotal: true);

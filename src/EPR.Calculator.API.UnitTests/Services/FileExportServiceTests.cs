@@ -109,7 +109,7 @@ public class FileExportServiceTests
         AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.None, RunName, createdAt: createdAt);
         AddProducerFeeRow(RunId);
         resultsFileExporterMock
-            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>()))
+            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>()))
             .ReturnsAsync(CsvContent);
 
         var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
@@ -129,7 +129,7 @@ public class FileExportServiceTests
         AddBillingFileMetadata(RunId, createdDate: billingFileCreatedDate);
         AddProducerFeeRow(RunId);
         billingFileExporterMock
-            .Setup(x => x.Export(It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>()))
+            .Setup(x => x.Export(It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>()))
             .ReturnsAsync(CsvContent);
 
         var result = await service.Export(RunId, RunType.Billing, FileExportType.Csv, CancellationToken.None);
@@ -193,8 +193,8 @@ public class FileExportServiceTests
 
         CalcResult? capturedResult = null;
         resultsFileExporterMock
-            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>()))
-            .Callback<CalculatorRunContext, CalcResult>((_, result) => capturedResult = result)
+            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>()))
+            .Callback<CalculatorRunContext, CalcResult, IEnumerable<FeeDetail>>((_, result, _) => capturedResult = result)
             .ReturnsAsync(CsvContent);
 
         var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
@@ -232,8 +232,8 @@ public class FileExportServiceTests
 
         CalcResult? capturedResult = null;
         resultsFileExporterMock
-            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>()))
-            .Callback<CalculatorRunContext, CalcResult>((_, result) => capturedResult = result)
+            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>()))
+            .Callback<CalculatorRunContext, CalcResult, IEnumerable<FeeDetail>>((_, result, _) => capturedResult = result)
             .ReturnsAsync(CsvContent);
 
         var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
@@ -258,8 +258,8 @@ public class FileExportServiceTests
 
         CalcResult? capturedResult = null;
         resultsFileExporterMock
-            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>()))
-            .Callback<CalculatorRunContext, CalcResult>((_, result) => capturedResult = result)
+            .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>()))
+            .Callback<CalculatorRunContext, CalcResult, IEnumerable<FeeDetail>>((_, result, _) => capturedResult = result)
             .ReturnsAsync(CsvContent);
 
         var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
