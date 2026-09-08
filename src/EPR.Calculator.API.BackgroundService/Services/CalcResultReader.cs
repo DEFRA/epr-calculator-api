@@ -137,6 +137,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
         {
             return await dbContext.ProducerDisposalFee
                         .AsNoTracking()
+                        .AsSplitQuery() // avoid repeating the parent's JSON columns across every detail row
                         .Include(p => p.Details)
                         .Where(p => p.CalculatorRunId == runId)
                         .SingleAsync(cancellationToken);
