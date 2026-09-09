@@ -64,7 +64,7 @@ public class ProducerDataTransposer(
             .ToImmutableList();
 
         var organisationDataDetails = calculatorRunOrgDataDetails
-            .Where(odd => ObligationStates.IsObligated(odd.ObligationStatus)
+            .Where(odd => (ObligationStates.IsObligated(odd.ObligationStatus) || odd.ObligationStatus == string.Empty)
                           && !string.IsNullOrWhiteSpace(odd.OrganisationName))
             .GroupBy(odd => new { odd.OrganisationId, odd.SubsidiaryId, odd.SubmitterId })
             // PERF: MaxBy is O(n) and avoids the OrderByDescending(...).First() O(n log n) sort + allocation per group.

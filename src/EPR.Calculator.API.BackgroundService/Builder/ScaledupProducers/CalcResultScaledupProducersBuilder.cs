@@ -91,10 +91,15 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
         List<L1Producer> producers
     )
     {
+        Console.WriteLine($"DEBUG ConstructAsync: producers.Count={producers.Count}, OrganisationIds=[{string.Join(",", producers.Select(p => p.OrganisationId))}]");
+
         var (scaledUpProducers, parentOrganisations) = await GetScaledUpDataAsync(runContext.RunId);
+
+        Console.WriteLine($"DEBUG ConstructAsync: scaledUpProducers.Count={scaledUpProducers.Count}, parentOrganisations.Count={parentOrganisations.Count}");
 
         if (!scaledUpProducers.Any())
         {
+            Console.WriteLine("DEBUG ConstructAsync: scaledUpProducers empty - returning early with no scaled data");
             var emptyResult = new CalcResultScaledupProducers { ScaledupProducers = [] };
             return (producers, emptyResult);
         }
@@ -124,6 +129,9 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
             .Where(s => s.IsSubtotalRow)
             .ToDictionary(s => (s.ProducerId, s.SubmissionPeriodCode ?? "N/A"));
 
+        Console.WriteLine($"DEBUG ConstructAsync: scaleupFactorByProducer keys=[{string.Join(",", scaleupFactorByProducer.Keys)}]");
+        Console.WriteLine($"DEBUG ConstructAsync: displayRowLookup keys=[{string.Join(",", displayRowLookup.Keys.Select(k => $"({k.ProducerId},{k.SubsidiaryId ?? "null"})"))}]");
+
         // Aggregates original (pre-scale) POM data per (ProducerId, Period) for subtotal rows
         var subtotalAccumulator = new Dictionary<(int, string), List<ScaledupPomEntry>>();
         var updatedL1Producers = new List<L1Producer>(producers.Count);
@@ -132,9 +140,11 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
         {
             if (!scaleupFactorByProducer.TryGetValue(l1.OrganisationId, out var factorByPeriod))
             {
+                Console.WriteLine($"DEBUG ConstructAsync: l1.OrganisationId={l1.OrganisationId} NOT found in scaleupFactorByProducer - skipping");
                 updatedL1Producers.Add(l1);
                 continue;
             }
+            Console.WriteLine($"DEBUG ConstructAsync: l1.OrganisationId={l1.OrganisationId} matched scaleupFactorByProducer, l1.Producers.Count={l1.Producers.Count}");
             var updatedPds = new List<ProducerDetail>(l1.Producers.Count);
             foreach (var pd in l1.Producers)
             {
@@ -147,14 +157,19 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
                     })
                     .ToList();
 
+                Console.WriteLine($"DEBUG ConstructAsync: pd.ProducerId={pd.ProducerId}, pd.SubsidiaryId={pd.SubsidiaryId ?? "null"}, ProducerReportedMaterials.Count={pd.ProducerReportedMaterials.Count}, scaledWithEntries.Count={scaledWithEntries.Count}");
+                Console.WriteLine($"DEBUG ConstructAsync: distinct rm.SubmissionPeriod values (quoted)=[{string.Join(",", pd.ProducerReportedMaterials.Select(rm => $"\"{rm.SubmissionPeriod}\"").Distinct())}]");
+
                 if (displayRowLookup.TryGetValue((pd.ProducerId, pd.SubsidiaryId), out var periodToRow))
                 {
+                    Console.WriteLine($"DEBUG ConstructAsync: displayRowLookup HIT for ({pd.ProducerId},{pd.SubsidiaryId ?? "null"}), periods=[{string.Join(",", periodToRow.Keys.Select(k => $"\"{k}\""))}]");
                     foreach (var (period, row) in periodToRow)
                     {
                         var entries = scaledWithEntries
                             .Where(x => x.scaledRm.SubmissionPeriod == period)
                             .Select(x => x.entry)
                             .ToList();
+                        Console.WriteLine($"DEBUG ConstructAsync: period=\"{period}\", entries.Count={entries.Count}");
                         row.PomData = entries;
 
                         var key = (pd.ProducerId, period);
@@ -167,6 +182,10 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
                         pd,
                         _ => scaledWithEntries.Select(x => x.scaledRm).ToList()
                     ));
+                }
+                else
+                {
+                    Console.WriteLine($"DEBUG ConstructAsync: displayRowLookup MISS for ({pd.ProducerId},{pd.SubsidiaryId ?? "null"})");
                 }
             }
             updatedL1Producers.Add(new L1Producer(l1.OrganisationId, updatedPds));
@@ -194,6 +213,8 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
 
         foreach (var row in orderedRows)
             row.ScaledupProducerTonnageByMaterial = GetTonnages(row.PomData, materialDetails);
+
+        Console.WriteLine($"DEBUG ConstructAsync: orderedRows.Count={orderedRows.Count}, rows with non-empty PomData={orderedRows.Count(r => r.PomData.Count > 0)}, total PomData entries={orderedRows.Sum(r => r.PomData.Count)}");
 
         var scaledupProducersSummary = new CalcResultScaledupProducers {  ScaledupProducers = orderedRows.ToImmutableList() };
         return (updatedL1Producers, scaledupProducersSummary);
@@ -226,6 +247,8 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
             select crpdd.OrganisationId
         ).Distinct().ToListAsync();
 
+        Console.WriteLine($"DEBUG GetScaledUpDataAsync: scaledProducerIds.Count={scaledProducerIds.Count}, ids=[{string.Join(",", scaledProducerIds)}]");
+
         if (scaledProducerIds.Count == 0)
             return ([], []);
 
@@ -239,7 +262,7 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
               on new { crodm.Id, pd.ProducerId, pd.SubsidiaryId, crpdd.SubmitterId }
                 equals new { Id = org.CalculatorRunOrganisationDataMasterId, ProducerId = org.OrganisationId, org.SubsidiaryId, org.SubmitterId }
             where run.Id == runId && scaledProducerIds.Contains(crpdd.OrganisationId)
-              && pd.CalculatorRunId == runId && org.ObligationStatus == ObligationStates.Obligated
+              && pd.CalculatorRunId == runId && (org.ObligationStatus == ObligationStates.Obligated || org.ObligationStatus == string.Empty)
             select new
             {
                 ProducerId             = pd.ProducerId,
@@ -253,6 +276,8 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
             }
         ).Distinct().ToImmutableListAsync();
 
+        Console.WriteLine($"DEBUG GetScaledUpDataAsync: rows.Count={rows.Count}");
+
         // The registered holding company (SubsidiaryId is null) may not submit its own POM data -
         // its subsidiaries may report on its behalf - so this is looked up independently of `rows`
         // above, which is driven off ProducerDetail (POM) data.
@@ -261,7 +286,7 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
             join crodm in dbContext.CalculatorRunOrganisationDataMaster.AsNoTracking() on run.CalculatorRunOrganisationDataMasterId equals crodm.Id
             join org in dbContext.CalculatorRunOrganisationDataDetails.AsNoTracking() on crodm.Id equals org.CalculatorRunOrganisationDataMasterId
             where run.Id == runId && scaledProducerIds.Contains(org.OrganisationId)
-              && org.SubsidiaryId == null && org.ObligationStatus == ObligationStates.Obligated
+              && org.SubsidiaryId == null && (org.ObligationStatus == ObligationStates.Obligated || org.ObligationStatus == string.Empty)
             select new Organisation
             {
                 OrganisationId   = org.OrganisationId,

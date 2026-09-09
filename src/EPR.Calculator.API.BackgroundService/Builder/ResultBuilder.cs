@@ -78,6 +78,8 @@ public class ResultBuilder(
             await calcResultWriter.StoreProjectedH2Data(runContext.RunId, result.CalcResultProjectedProducers.H2ProjectedProducers, cancellationToken);
         }
 
+        Console.WriteLine($"RunContext {runContext} RequiresScaling: {runContext.RequiresScaling}, RequiresModulation: {runContext.RequiresModulation}");
+
         if (runContext.RequiresScaling)
         {
             (producers, result.CalcResultScaledupProducers) = await scaledUpProducersBuilder.ConstructAsync(runContext, materials, producers);
