@@ -83,7 +83,8 @@ public class FileExportService(
             return new FileExportResult.Legacy();
 
         var content = await resultsFileExporter.Export(runContext, result);
-        return new FileExportResult.Exported(ToUtf8WithBom(content), $"{runContext.RunName}.csv");
+        var fileName = new CalcResultsAndBillingFileName(runContext.RunId, runContext.RunName, runContext.ProcessingStartedAt.UtcDateTime);
+        return new FileExportResult.Exported(ToUtf8WithBom(content), fileName);
     }
 
     private async Task<FileExportResult> ExportBilling(int runId, FileExportType billingFileType, CancellationToken cancellationToken)
@@ -99,15 +100,16 @@ public class FileExportService(
             return new FileExportResult.Legacy();
 
         var filteredResult = FilterResult(runId, result, runContext.AcceptedProducerIds);
+        var billingCsvFileName = new CalcResultsAndBillingFileName(runContext.RunId, runContext.RunName, runContext.ProcessingStartedAt.UtcDateTime, isDraftBillingFile: true);
         return billingFileType switch
         {
             FileExportType.Csv => new FileExportResult.Exported(
                 ToUtf8WithBom(await billingFileExporter.Export(runContext, filteredResult)),
-                $"{runContext.RunName}.csv"
+                billingCsvFileName
             ),
             FileExportType.Json => new FileExportResult.Exported(
                 Encoding.UTF8.GetBytes(await billingJsonWriter.WriteToString(runContext, filteredResult)),
-                $"{runContext.RunName}.json"
+                new CalcResultsAndBillingFileName(runContext.RunId)
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(billingFileType), billingFileType, null)
         };

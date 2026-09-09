@@ -99,7 +99,8 @@ public class FileExportServiceTests
     [TestMethod]
     public async Task Export_ResultCsv_ReturnsExported_HasData()
     {
-        AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.None, RunName);
+        var createdAt = new DateTime(2026, 3, 15, 9, 30, 0, DateTimeKind.Utc);
+        AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.None, RunName, createdAt: createdAt);
         AddProducerFeeRow(RunId);
         resultsFileExporterMock
             .Setup(x => x.Export(It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>()))
@@ -108,7 +109,7 @@ public class FileExportServiceTests
         var result = await service.Export(RunId, RunType.Calculator, FileExportType.Csv, CancellationToken.None);
 
         var exported = result.ShouldBeOfType<FileExportResult.Exported>();
-        exported.FileName.ShouldBe(RunName + ".csv");
+        exported.FileName.ShouldBe(new CalcResultsAndBillingFileName(RunId, RunName, createdAt).ToString());
         exported.Content.ShouldBe([.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(CsvContent)]);
         errorReportBuilderMock.Verify(x => x.Construct(It.IsAny<RunContext>()), Times.Once);
         rejectedProducersBuilderMock.Verify(x => x.ConstructAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -117,8 +118,9 @@ public class FileExportServiceTests
     [TestMethod]
     public async Task Export_BillingCsv_ReturnsExported_HasData()
     {
+        var billingFileCreatedDate = new DateTime(2026, 3, 15, 9, 30, 0, DateTimeKind.Utc);
         AddCalculatorRun(RunId, RunClassificationStatusIds.INITIALRUNCOMPLETEDID, BillingRunStatus.Completed, RunName);
-        AddBillingFileMetadata(RunId);
+        AddBillingFileMetadata(RunId, createdDate: billingFileCreatedDate);
         AddProducerFeeRow(RunId);
         billingFileExporterMock
             .Setup(x => x.Export(It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>()))
@@ -127,7 +129,7 @@ public class FileExportServiceTests
         var result = await service.Export(RunId, RunType.Billing, FileExportType.Csv, CancellationToken.None);
 
         var exported = result.ShouldBeOfType<FileExportResult.Exported>();
-        exported.FileName.ShouldBe(RunName + ".csv");
+        exported.FileName.ShouldBe(new CalcResultsAndBillingFileName(RunId, RunName, billingFileCreatedDate, isDraftBillingFile: true).ToString());
         exported.Content.ShouldBe([.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(CsvContent)]);
         rejectedProducersBuilderMock.Verify(x => x.ConstructAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()), Times.Once);
         errorReportBuilderMock.Verify(x => x.Construct(It.IsAny<RunContext>()), Times.Never);
@@ -147,7 +149,7 @@ public class FileExportServiceTests
 
         // Assert
         var exported = result.ShouldBeOfType<FileExportResult.Exported>();
-        exported.FileName.ShouldBe(RunName + ".json");
+        exported.FileName.ShouldBe(new CalcResultsAndBillingFileName(RunId).ToString());
         exported.Content.ShouldBe(Encoding.UTF8.GetBytes(JsonContent));
         rejectedProducersBuilderMock.Verify(x => x.ConstructAsync(It.IsAny<RunContext>(), It.IsAny<CancellationToken>()), Times.Once);
         errorReportBuilderMock.Verify(x => x.Construct(It.IsAny<RunContext>()), Times.Never);
@@ -344,7 +346,8 @@ public class FileExportServiceTests
         int classificationId,
         BillingRunStatus billingRunStatus,
         string name,
-        int relativeYear = 2026)
+        int relativeYear = 2026,
+        DateTime? createdAt = null)
     {
         dbContext.CalculatorRuns.Add(new CalculatorRun
         {
@@ -352,7 +355,7 @@ public class FileExportServiceTests
             Name = name,
             RelativeYear = new RelativeYear(relativeYear),
             CreatedBy = "test-user",
-            CreatedAt = DateTime.UtcNow,
+            CreatedAt = createdAt ?? DateTime.UtcNow,
             CalculatorRunClassificationId = classificationId,
             BillingRunStatus = billingRunStatus,
             BillingRunStartedAt = DateTime.UtcNow,
@@ -360,7 +363,7 @@ public class FileExportServiceTests
         dbContext.SaveChanges();
     }
 
-    private void AddBillingFileMetadata(int runId)
+    private void AddBillingFileMetadata(int runId, DateTime? createdDate = null)
     {
         dbContext.CalculatorRunBillingFileMetadata.Add(new CalculatorRunBillingFileMetadata
         {
@@ -368,7 +371,7 @@ public class FileExportServiceTests
             BillingCsvFileName = "billing.csv",
             BillingJsonFileName = "billing.json",
             BillingFileCreatedBy = "test-user",
-            BillingFileCreatedDate = DateTime.UtcNow,
+            BillingFileCreatedDate = createdDate ?? DateTime.UtcNow,
         });
         dbContext.SaveChanges();
     }
