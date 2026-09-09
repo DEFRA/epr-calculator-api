@@ -25,6 +25,7 @@ public class BillingFileController(
     {
         return await fileExportService.Export(runId, RunType.Billing, FileExportType.Csv, cancellationToken) switch
         {
+            FileExportResult.Streamed s => new StreamCallbackResult(s.ContentType, s.FileName, s.WriteAsync),
             FileExportResult.Exported s => File(s.Content, "text/csv", s.FileName),
             FileExportResult.NotFound _ => NotFound(),
             FileExportResult.Legacy _ => await DownloadBillingCsvFromBlobStorage(runId),

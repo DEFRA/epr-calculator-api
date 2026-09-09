@@ -174,6 +174,7 @@ public class CalculatorController(
     {
         return await fileExportService.Export(runId, RunType.Calculator, FileExportType.Csv, cancellationToken) switch
         {
+            FileExportResult.Streamed s => new StreamCallbackResult(s.ContentType, s.FileName, s.WriteAsync),
             FileExportResult.Exported s => File(s.Content, "text/csv", s.FileName),
             FileExportResult.NotFound _ => NotFound(),
             FileExportResult.Legacy _ => await DownloadResultCsvFromBlobStorage(runId),
