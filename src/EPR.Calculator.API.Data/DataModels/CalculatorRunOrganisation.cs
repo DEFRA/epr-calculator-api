@@ -5,6 +5,18 @@ namespace EPR.Calculator.API.Data.DataModels;
 ///     not filtered by obligation status or POM match - the full population a run's data was drawn
 ///     from, for consumers that need to see organisations that never became a <see cref="ProducerDetail" />.
 /// </summary>
+/// <remarks>
+///     This table must keep receiving the *unfiltered* organisation population, not just those that
+///     survived into <see cref="ProducerDetail" /> - several consumers rely on it as a per-run name/status
+///     snapshot for producers that have since stopped submitting POM data but are still relevant (a
+///     cancelled/lapsed producer still being billed, say): <c>InvoicedProducerService</c>'s
+///     cross-run "latest org name" lookup, <c>BillingFileService</c>'s explicit fallback for producers
+///     "deleted in the pom data" but not in <c>ProducerDetail</c>, and the rejected/scaled-up-producer
+///     and error-report builders. If DataApi is ever extracted to its own external service, its response
+///     contract (<c>ProducerCalculationData.Organisations</c> today) must keep returning this full
+///     population alongside the aligned producers - narrowing it to "just the producers" would silently
+///     break every one of those lookups with no compile error and no obvious test failure.
+/// </remarks>
 public class CalculatorRunOrganisation
 {
     public int Id { get; set; }
