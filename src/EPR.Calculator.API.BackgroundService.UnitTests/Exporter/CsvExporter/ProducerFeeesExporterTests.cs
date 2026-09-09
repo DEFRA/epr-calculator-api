@@ -1,4 +1,3 @@
-using System.Text;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Summary;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using EPR.Calculator.API.Data.DataModels;
@@ -16,7 +15,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter
         }
 
         [TestMethod]
-        public void ProducerFeesExporter_CanCallExport()
+        public async Task ProducerFeesExporter_CanCallExport()
         {
             // Arrange
             var runContext = TestDataHelper.CalculatorRun2025;
@@ -29,16 +28,16 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Exporter.CsvExporter
 
             var materials = TestDataHelper.GetMaterialDetails();
 
-            var csvContent = new StringBuilder();
+            var writer = new StringWriter();
 
             // Act
             var calcResult = TestDataHelper.GetCalcResult();
             var scaledupIds = calcResult.CalcResultScaledupProducers.ScaledupProducers.Select(p => p.ProducerId).ToList();
             var partialIds = calcResult.CalcResultPartialObligations.PartialObligations.Select(p => (p.ProducerId, p.SubsidiaryId)).ToList();
-            _testClass.Export(runContext, producerFees, materials, scaledupIds, partialIds, csvContent);
+            await _testClass.Export(runContext, producerFees, materials, scaledupIds, partialIds, writer, producerFeeDetails: null);
 
             // Assert
-            Assert.IsNotNull(csvContent.ToString());
+            Assert.IsNotNull(writer.ToString());
         }
     }
 }

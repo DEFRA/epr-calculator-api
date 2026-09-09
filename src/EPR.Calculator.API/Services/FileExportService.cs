@@ -58,8 +58,8 @@ public class FileExportService(
         RunClassificationStatusIds.DELETEDID
     ];
 
-    private static byte[] ToUtf8WithBom(string content) => [.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(content)];
-    
+    private static readonly UTF8Encoding Utf8WithBom = new(encoderShouldEmitUTF8Identifier: true);
+
     [ActivityMetric(nameof(Metrics.FileExportDuration), threshold: "00:00:10")]
     public Task<FileExportResult> Export(int runId, RunType runType, FileExportType fileType, CancellationToken cancellationToken)
     {
@@ -83,9 +83,21 @@ public class FileExportService(
         if (result is null)
             return new FileExportResult.Legacy();
 
-        var content = await resultsFileExporter.Export(runContext, result, calcResultReader.StreamProducerFeeDetails(runContext.RunId));
         var fileName = new CalcResultsAndBillingFileName(runContext.RunId, runContext.RunName, runContext.ProcessingStartedAt.UtcDateTime);
-        return new FileExportResult.Exported(ToUtf8WithBom(content), fileName);
+        return new FileExportResult.Streamed(
+            "text/csv",
+            fileName,
+            async (stream, ct) =>
+            {
+                await using var writer = new StreamWriter(stream, Utf8WithBom);
+                await resultsFileExporter.Export(
+                    runContext,
+                    result,
+                    ProducerSectionsFor(runContext, acceptedProducerIds: null, ct),
+                    writer,
+                    calcResultReader.StreamProducerFeeDetails(runContext.RunId));
+            }
+        );
     }
 
     private async Task<FileExportResult> ExportBilling(int runId, FileExportType billingFileType, CancellationToken cancellationToken)
@@ -104,14 +116,34 @@ public class FileExportService(
         var billingCsvFileName = new CalcResultsAndBillingFileName(runContext.RunId, runContext.RunName, runContext.ProcessingStartedAt.UtcDateTime, isDraftBillingFile: true);
         return billingFileType switch
         {
-            FileExportType.Csv => new FileExportResult.Exported(
-                ToUtf8WithBom(await billingFileExporter.Export(runContext, filteredResult, AcceptedFeeDetails(runContext))),
-                billingCsvFileName
+            FileExportType.Csv => new FileExportResult.Streamed(
+                "text/csv",
+                billingCsvFileName,
+                async (stream, ct) =>
+                {
+                    await using var writer = new StreamWriter(stream, Utf8WithBom);
+                    await billingFileExporter.Export(
+                        runContext,
+                        filteredResult,
+                        ProducerSectionsFor(runContext, runContext.AcceptedProducerIds, ct),
+                        writer,
+                        AcceptedFeeDetails(runContext));
+                }
             ),
             FileExportType.Json => new FileExportResult.Streamed(
                 "application/json",
                 new CalcResultsAndBillingFileName(runContext.RunId),
-                (stream, ct) => billingJsonWriter.WriteTo(stream, runContext, filteredResult, AcceptedFeeDetails(runContext), ct)
+                async (stream, ct) =>
+                {
+                    // The JSON model needs the scaled-up producers whole; projected producers are not
+                    // part of the billing JSON, so only that one deferred section is pulled in here.
+                    var jsonResult = filteredResult with
+                    {
+                        CalcResultScaledupProducers =
+                            await ProducerSectionsFor(runContext, runContext.AcceptedProducerIds, ct).LoadScaledupProducers()
+                    };
+                    await billingJsonWriter.WriteTo(stream, runContext, jsonResult, AcceptedFeeDetails(runContext), ct);
+                }
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(billingFileType), billingFileType, null)
         };
@@ -120,6 +152,47 @@ public class FileExportService(
     private IEnumerable<FeeDetail> AcceptedFeeDetails(BillingRunContext runContext) =>
         calcResultReader.StreamProducerFeeDetails(runContext.RunId)
             .Where(d => runContext.AcceptedProducerIds.Contains(d.ProducerId));
+
+    // Deferred loaders for the two large per-producer sections. acceptedProducerIds filters them for a
+    // billing file; null (a calculator run) keeps every row.
+    private ProducerReportSections ProducerSectionsFor(
+        RunContext runContext, ImmutableHashSet<int>? acceptedProducerIds, CancellationToken cancellationToken)
+    {
+        IImmutableList<T> Accepted<T>(IImmutableList<T> rows, Func<T, int> producerId) =>
+            acceptedProducerIds is null ? rows : rows.Where(r => acceptedProducerIds.Contains(producerId(r))).ToImmutableList();
+
+        return new ProducerReportSections
+        {
+            LoadProjectedProducers = async () =>
+            {
+                if (!runContext.RequiresModulation)
+                    return new CalcResultProjectedProducers
+                    {
+                        H1ProjectedProducers = ImmutableList<CalcResultH1ProjectedProducer>.Empty,
+                        H2ProjectedProducers = ImmutableList<CalcResultH2ProjectedProducer>.Empty
+                    };
+
+                return new CalcResultProjectedProducers
+                {
+                    H1ProjectedProducers = Accepted(await calcResultReader.ReadH1ProjectedData(runContext.RunId, cancellationToken), p => p.ProducerId),
+                    H2ProjectedProducers = Accepted(await calcResultReader.ReadH2ProjectedData(runContext.RunId, cancellationToken), p => p.ProducerId)
+                };
+            },
+            LoadScaledupProducers = async () =>
+            {
+                if (!runContext.RequiresScaling)
+                    return new CalcResultScaledupProducers { ScaledupProducers = ImmutableList<CalcResultScaledupProducer>.Empty };
+
+                var rows = await calcResultReader.ReadScaledData(runContext.RunId, cancellationToken);
+                return new CalcResultScaledupProducers
+                {
+                    ScaledupProducers = acceptedProducerIds is null
+                        ? rows
+                        : rows.Where(p => acceptedProducerIds.Contains(p.ProducerId)).ToImmutableList()
+                };
+            }
+        };
+    }
 
     private async Task<CalculatorRunContext?> GetCalculatorRunContext(int runId, CancellationToken cancellationToken)
     {
@@ -196,15 +269,7 @@ public class FileExportService(
         result.CalcResultParameterOtherCost = await calcResultReader.ReadParameterOtherCost(runContext.RunId, cancellationToken);
         result.CalcResultOnePlusFourApportionment = await calcResultReader.ReadOnePlusFourApportionment(runContext.RunId, cancellationToken);
 
-        if (runContext.RequiresModulation)
-        {
-            result.CalcResultProjectedProducers.H1ProjectedProducers = await calcResultReader.ReadH1ProjectedData(runContext.RunId, cancellationToken);
-            result.CalcResultProjectedProducers.H2ProjectedProducers = await  calcResultReader.ReadH2ProjectedData(runContext.RunId, cancellationToken);
-        }
-
-        if (runContext.RequiresScaling)
-            result.CalcResultScaledupProducers.ScaledupProducers = await calcResultReader.ReadScaledData(runContext.RunId, cancellationToken);
-
+        // The two large per-producer sections are loaded on demand by ProducerSectionsFor, not here.
         result.CalcResultPartialObligations.PartialObligations = await calcResultReader.ReadPartialData(runContext.RunId, cancellationToken);
         result.CalcResultCancelledProducers = await calcResultReader.ReadCancelledProducers(runContext.RunId, cancellationToken);
         result.Smcw = await calcResultReader.ReadSmcw(runContext.RunId, cancellationToken);
@@ -236,14 +301,10 @@ public class FileExportService(
 
         var rejectedProducerIds = calcResult.CalcResultRejectedProducers.Select(r => r.ProducerId).ToHashSet();
 
+        // Projected and scaled-up producers are filtered by ProducerSectionsFor when their deferred
+        // loader runs, so they are not touched here.
         return calcResult with
         {
-            CalcResultProjectedProducers = calcResult.CalcResultProjectedProducers with
-            {
-                H1ProjectedProducers = FilterAccepted(calcResult.CalcResultProjectedProducers.H1ProjectedProducers, p => p.ProducerId),
-                H2ProjectedProducers = FilterAccepted(calcResult.CalcResultProjectedProducers.H2ProjectedProducers, p => p.ProducerId)
-            },
-            CalcResultScaledupProducers = calcResult.CalcResultScaledupProducers with { ScaledupProducers = FilterAccepted(calcResult.CalcResultScaledupProducers.ScaledupProducers, p => p.ProducerId) },
             CalcResultPartialObligations = calcResult.CalcResultPartialObligations with { PartialObligations = FilterAccepted(calcResult.CalcResultPartialObligations.PartialObligations, p => p.ProducerId) },
             ProducerFees = new ProducerFees
             {

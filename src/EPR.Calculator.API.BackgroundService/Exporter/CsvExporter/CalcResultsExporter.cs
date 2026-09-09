@@ -22,7 +22,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter;
 
 public interface ICalcResultsExporter
 {
-    Task<string> Export(CalculatorRunContext runContext, CalcResult calcResult, IEnumerable<FeeDetail>? producerFeeDetails = null);
+    Task Export(CalculatorRunContext runContext, CalcResult calcResult, ProducerReportSections producerSections, TextWriter writer, IEnumerable<FeeDetail>? producerFeeDetails = null);
 }
 
 [SuppressMessage("Major Code Smell", "S107:Methods should not have too many parameters", Justification = "This is suppressed for now and will be refactored later.")]
@@ -46,7 +46,7 @@ public class CalcResultsExporter(
 ) : ICalcResultsExporter
 {
     [ActivityMetric(nameof(Metrics.SerializeDuration), threshold: "00:00:30")]
-    public async Task<string> Export(CalculatorRunContext runContext, CalcResult calcResult, IEnumerable<FeeDetail>? producerFeeDetails = null)
+    public async Task Export(CalculatorRunContext runContext, CalcResult calcResult, ProducerReportSections producerSections, TextWriter writer, IEnumerable<FeeDetail>? producerFeeDetails = null)
     {
         var materials = await materialService.GetMaterials();
         var csvContent = new StringBuilder();
@@ -65,19 +65,37 @@ public class CalcResultsExporter(
 
         cancelledProducersExporter.Export(calcResult.CalcResultCancelledProducers, materials, csvContent);
 
+        // Load the large per-producer section, write it, then flush and let it fall out of scope
+        // before the long fee-row stream - H1/H2 projected, scaled-up and the fee stream are never
+        // all resident at once.
+        IReadOnlyList<int> scaledupIds = [];
         if (runContext.RequiresModulation)
-            projectedProducersExporter.Export(calcResult.CalcResultProjectedProducers, materials, csvContent);
+        {
+            projectedProducersExporter.Export(await producerSections.LoadProjectedProducers(), materials, csvContent);
+        }
         else
-            scaledUpProducersExporter.Export(calcResult.CalcResultScaledupProducers, materials, showTotal: true, csvContent);
+        {
+            var scaledupProducers = await producerSections.LoadScaledupProducers();
+            scaledUpProducersExporter.Export(scaledupProducers, materials, showTotal: true, csvContent);
+            scaledupIds = scaledupProducers.ScaledupProducers.Select(p => p.ProducerId).ToList();
+        }
+        await FlushAsync(writer, csvContent);
 
         partialObligationsExporter.Export(runContext, calcResult.CalcResultPartialObligations, materials, csvContent);
-
-        var scaledupIds = calcResult.CalcResultScaledupProducers.ScaledupProducers.Select(p => p.ProducerId).ToList();
         var partialIds = calcResult.CalcResultPartialObligations.PartialObligations.Select(p => (p.ProducerId, p.SubsidiaryId)).ToList();
 
-        producerFeesExporter.Export(runContext, calcResult.ProducerFees, materials, scaledupIds, partialIds, csvContent, producerFeeDetails);
-        calcResultErrorReportExporter.Export(calcResult.CalcResultErrorReports, csvContent);
+        // The producer fee rows are the ~10^4-row bulk, so they stream straight to the writer.
+        await FlushAsync(writer, csvContent);
+        await producerFeesExporter.Export(runContext, calcResult.ProducerFees, materials, scaledupIds, partialIds, writer, producerFeeDetails);
 
-        return csvContent.ToString();
+        calcResultErrorReportExporter.Export(calcResult.CalcResultErrorReports, csvContent);
+        await FlushAsync(writer, csvContent);
+    }
+
+    private static async Task FlushAsync(TextWriter writer, StringBuilder buffer)
+    {
+        foreach (var chunk in buffer.GetChunks())
+            await writer.WriteAsync(chunk);
+        buffer.Clear();
     }
 }

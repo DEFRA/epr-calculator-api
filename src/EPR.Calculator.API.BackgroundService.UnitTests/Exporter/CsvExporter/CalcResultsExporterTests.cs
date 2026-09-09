@@ -31,6 +31,19 @@ public class CalcResultsExporterTests : TestsFor<CalcResultsExporter>
     private Mock<ICalcResultParameterOtherCostExporter> parameterOtherCostsExporter = null!;
     private Mock<ICalcResultDetailExporter> resultDetailExporter = null!;
 
+    private static readonly ProducerReportSections EmptySections = new()
+    {
+        LoadProjectedProducers = () => Task.FromResult(new CalcResultProjectedProducers
+        {
+            H1ProjectedProducers = ImmutableList<CalcResultH1ProjectedProducer>.Empty,
+            H2ProjectedProducers = ImmutableList<CalcResultH2ProjectedProducer>.Empty
+        }),
+        LoadScaledupProducers = () => Task.FromResult(new CalcResultScaledupProducers
+        {
+            ScaledupProducers = ImmutableList<CalcResultScaledupProducer>.Empty
+        })
+    };
+
     protected override void TestInitialize()
     {
         lateReportingExporter = fixture.Freeze<Mock<ICalcResultLateReportingExporter>>();
@@ -54,13 +67,14 @@ public class CalcResultsExporterTests : TestsFor<CalcResultsExporter>
         var runContext = TestDataHelper.CalculatorRun2025;
 
         // Act
-        var result = await testSubject.Export(runContext, calcResult);
+        var writer = new StringWriter();
+        await testSubject.Export(runContext, calcResult, EmptySections, writer);
 
         // Assert
-        Assert.IsNotNull(result);
+        Assert.IsNotNull(writer.ToString());
 
         lateReportingExporter.Verify(mock => mock.Export(It.IsAny<CalcResultLateReportingTonnage>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
-        producerFeesExporter.Verify(x => x.Export(runContext, It.IsAny<ProducerFees>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<IReadOnlyList<int>>(), It.IsAny<IReadOnlyList<(int, string?)>>(), It.IsAny<StringBuilder>()));
+        producerFeesExporter.Verify(x => x.Export(runContext, It.IsAny<ProducerFees>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<IReadOnlyList<int>>(), It.IsAny<IReadOnlyList<(int, string?)>>(), It.IsAny<TextWriter>(), It.IsAny<IEnumerable<FeeDetail>?>()));
         lapcapDataExporter.Verify(mock => mock.Export(It.IsAny<CalcResultLapcapData>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
         resultDetailExporter.Verify(x => x.Export(It.IsAny<CalcResultDetail>(), It.IsAny<StringBuilder>()));
         laDisposalCostExporter.Verify(mock => mock.Export(runContext, It.IsAny<CalcResultLaDisposalCostData>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
@@ -80,10 +94,11 @@ public class CalcResultsExporterTests : TestsFor<CalcResultsExporter>
         var runContext = TestDataHelper.CalculatorRun2026;
 
         // Act
-        var result = await testSubject.Export(runContext, calcResult);
+        var writer = new StringWriter();
+        await testSubject.Export(runContext, calcResult, EmptySections, writer);
 
         // Assert
-        Assert.IsNotNull(result);
+        Assert.IsNotNull(writer.ToString());
 
         scaledUpProducersExporter.Verify(x => x.Export(It.IsAny<CalcResultScaledupProducers>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<bool>(), It.IsAny<StringBuilder>()), Times.Never);
         projectedProducersExporter.Verify(x => x.Export(It.IsAny<CalcResultProjectedProducers>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));

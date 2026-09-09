@@ -1,7 +1,7 @@
 # ECV-730 — compute requirements for the calculator service
 
 **Branch:** `ECV-730-NF`
-**Date:** 2026-09-08
+**Date:** 2026-09-09
 **Purpose:** state the compute the calculator service needs after ECV-730 and
 why, so its App Service plan can be sized deliberately rather than by default.
 
@@ -25,23 +25,40 @@ therefore materially higher than before the change — this is expected, not a
 regression.
 
 **Measured at 2025 volume, after the fixes on this branch, a full run plus its
-three file downloads has a peak working set of ~1.3 GB and completes cleanly
+three file downloads has a peak working set of ~1.2 GB and completes cleanly
 under a 2 GB heap limit (five-run soak, no OOM, end-of-run managed heap 0.15 GB);
-under a 1 GB limit it completes on macOS's soft limit, with managed-heap peaks of
-~1.45 GB (billing-CSV export) and ~1.25 GB (`StoreProducerFees`). The footprint
-is manageable. The problem is that in both production and pre-prod the calculator
-web app shares one 8 GB P1v3 instance with five other applications, where any one
-app's realistic burst budget is ~2–4 GB and a neighbour can spike at any time.
-The service needs a dedicated App Service plan, or a move to the larger P2v3
-plan, so a run can reserve what it needs without contending.**
+under a 1 GB limit it is unchanged (peak still ~1.2 GB) — the peak is the
+calculator run itself, `StoreProducerFees` retaining ~1.25 GB, not the downloads,
+which run at ~0.74–1.05 GB working set. The footprint is manageable. The
+problem is that in both production and pre-prod the calculator web app shares one
+8 GB P1v3 instance with five other applications, where any one app's realistic
+burst budget is ~2–4 GB and a neighbour can spike at any time. The service needs
+a dedicated App Service plan, or a move to the larger P2v3 plan, so a run can
+reserve what it needs without contending.**
 
-Code work for the new volumes on this branch: the fee/SMCW writes are batched so
-they no longer exhaust the EF change tracker; all three file exports stream the
-producer fee rows off the reader instead of materialising the whole fee graph;
-and the DataApi picks the winning POM file from a first metadata-only pass so it
-never buffers the full raw stream. Together these took the run from OOM-at-2 GB
-to a clean 1 GB soak. The remaining structural cost is the fee builder
-(~23.6 GB churn); see [Follow-up code work](#follow-up-code-work).
+Code work for the new volumes on this branch, in the order it landed and moved
+the number:
+
+1. The fee/SMCW writes are batched so they no longer exhaust the EF change
+   tracker — this is what threw `OutOfMemoryException` at 2–3 GB.
+2. The billing-JSON download serializes straight to the response instead of
+   building the whole JSON document — it was the OOM-at-2 GB point (~3 GB peak).
+3. All three downloads read the producer fee rows off the reader as a deferred
+   sequence instead of materialising the whole `ProducerFees` graph (~1 GB).
+4. The DataApi picks the winning POM file from a first metadata-only pass so it
+   never buffers the full raw stream.
+
+Together (1)–(4) took the run from OOM-at-2 GB to a clean 1 GB soak. Two later
+changes are refinements on top, byte-identical and with no material effect on the
+whole-run peak: making the CSV downloads stream end to end (no assembled output
+string, no `ResetTotals` string surgery), and interleaving the reader with the
+exporter so `GetResult` stops over-reading the large per-producer sections
+(transient allocation ~780 MB → ~260 MB, ~0.1 GB off working set at points in the
+download sequence). What still dominates a download — ~0.8 GB, transient — is the
+H1/H2 projected reads pulling ~25× more rows than the grouped result; reducing it
+needs the DB to do the per-producer aggregation, and is 2 GB-safe as it stands.
+The remaining structural cost on the calc side is the fee builder (~23.6 GB
+churn); see [Follow-up code work](#follow-up-code-work).
 
 ## Current hosting
 
@@ -88,8 +105,9 @@ document were taken at ~1.7× that volume (10,587 producers, 89k organisation
 rows) before the generator was calibrated; where a stage number has been
 re-measured at the corrected volume it is called out.
 
-Figures below are **after** the memory work on this branch: all three exports
-stream the producer fee rows off the reader
+Figures below are **after** the memory work on this branch: all three downloads
+read the producer fee rows off the reader as a deferred sequence and write their
+output to the HTTP response
 (see [Producer-fee read](#producer-fee-read--streamed-on-this-branch)); the perf
 test's fake POM stream is read field-by-field, not as `dynamic`; and the DataApi
 picks the winning POM file in a first pass over just the file metadata, so it
@@ -100,11 +118,19 @@ never buffers the full raw stream
 |---|---|
 | DataApi `GetProducerData` (1 GB heap limit) | completes — ~10 s, ~9.7 GB allocation churn (two source reads), heap settles ~0.6 GB; returns 7,000 organisations / 6,638 producers / 2 errors |
 | Full run, unconstrained GC | ~63 s; ~56 GB allocation churn |
-| Full run, 2 GB heap limit | **five-run soak, no OOM.** End-of-run managed heap **0.15 GB**. Whole-test peak working set **1.34 GB** (67 % of the 2 GB ceiling). |
-| Full run, 1 GB heap limit | **five-run soak, no OOM** on macOS. Peak working set 1.19 GB (119 % of the 1 GB ceiling — over by working-set accounting, tolerated on the soft limit). Managed heap still peaks ~1.45 GB in the billing-CSV export and ~1.25 GB in `StoreProducerFees`, so a **hard** 1 GB limit would OOM there — but the calc's DataApi load, which used to fail here outright, now peaks ~0.6 GB. |
+| Full run, 2 GB heap limit | **five-run soak, no OOM.** End-of-run managed heap **0.15 GB**. Whole-test peak working set **1.23 GB** (62 % of the 2 GB ceiling). |
+| Full run, 1 GB heap limit | **five-run soak, no OOM** on macOS. Peak working set **1.21 GB** (121 % of the 1 GB ceiling — over by working-set accounting, tolerated on the soft limit). Near-identical to the 2 GB soak because the peak is the calculator run, not a ceiling-driven collection: `StoreProducerFees` retains ~1.25 GB and `ProducerFeesBuilder` churns 23.6 GB. The three downloads run at ~0.74–1.05 GB working set each and end-of-run managed heap is 0.15 GB. A **hard** 1 GB limit would OOM only in the calc, not in any download or in the DataApi load (which used to fail here outright and now peaks ~0.6 GB). |
+
+Measured against the parent commit (before the CSV downloads were made to stream
+end to end) the 1 GB soak is unchanged: peak working set 1.18 GB → 1.21 GB,
+end-of-run heap 0.15 GB either way, download working sets within ~0.05 GB. That
+change removed the assembled ~45 MB output string and the `ResetTotals` /
+`ToUtf8WithBom` copies — worth having for correctness, but the download-side
+memory reduction had already landed in the billing-JSON and fee-row streaming
+commits before it.
 
 Averaged over the five soak runs (either ceiling): calc ~63 s, results-CSV export
-~9.1 s, billing run ~0.5 s, billing-CSV export ~9.0 s, billing-JSON export ~8.6 s.
+~9.0 s, billing run ~0.5 s, billing-CSV export ~8.7 s, billing-JSON export ~8.6 s.
 Per-run allocation rose from ~51 GB to ~56 GB — the DataApi two-pass reads the
 source twice.
 
@@ -168,51 +194,63 @@ is what threw `OutOfMemoryException` at 2–3 GB); it does not reduce
 `StoreProducerFees`' churn — the fee builder and the streamed read are separate
 tickets.
 
-**Read / export — `CalcResultReader.*` + exporters**, three exports per calc run
+**Read / export — `CalcResultReader.*` + exporters**, three downloads per calc run
 
-All three exports now stream the producer fee rows (`StreamProducerFeeDetails` —
-a deferred `IEnumerable` consumed once) instead of calling `ReadProducerFees`.
+Each download first calls `GetResult`, which reads a whole `CalcResult` graph
+(projected producers, scaled producers, SMCW, LA disposal, comms cost, …) into
+memory — `ReadH1ProjectedData` / `ReadH2ProjectedData` / `ReadSmcw` are ~250 MB
+each — then runs ~15 sub-exporters over it. The producer fee rows, the one part
+that scales with producer count, are read with `StreamProducerFeeDetails` — a
+deferred `IEnumerable` consumed once — instead of the whole `ProducerFees` graph.
 
-| stage | allocated | heap at peak | time |
+| stage | allocated (churn) | working set while running | time |
 |---|---|---|---|
-| `ReadH1ProjectedData` / `ReadH2ProjectedData` / `ReadSmcw` | ~250 MB each | | ~0.5–1.2 s |
-| **results CSV export** | ~2.9 GB | ~1.34 GB | ~9 s |
-| **billing CSV export** | ~3.2 GB | ~1.59 GB | ~9 s |
-| **billing JSON export** | ~0.8 GB | ~1.0 GB | ~2.3 s |
+| **results CSV download** | ~1.95 GB | ~1.0–1.05 GB | ~9 s |
+| **billing CSV download** | ~1.94 GB | ~0.74 GB | ~8.7 s |
+| **billing JSON download** | ~0.8 GB | ~0.83 GB | ~2.3 s |
 
-The CSV exports still churn ~3 GB and hold ~1.3–1.6 GB — that is now the CSV text
-itself (`StringBuilder` → `string` → BOM-prefixed `byte[]` for a ~45 MB file,
-plus the exporter's per-row string building), not the fee graph. Billing JSON is
-lighter still because it serializes straight to the response with no assembled
-document. `AsSplitQuery()` on `ReadProducerFees` (now unused by the export path,
-kept for callers) took that read from ~21 s to ~8 s at the calibrated volume.
+The CSV downloads churn ~2 GB each — the fee-row stream itself is genuinely
+streamed and adds ~0 to the retained heap, so the churn is the H1/H2 projected
+reads plus per-cell string building in `CsvSanitiser`. `CalcResultsExporter` /
+`BillingFileExporter` flush a small reused `StringBuilder` to the response
+`TextWriter` after every producer row, so neither the ~45 MB output nor the fee
+graph is held whole. A forced full GC between downloads leaves ~0.6 GB of the
+projected-read churn live for a run or two, but nothing accumulates — the
+end-of-run managed heap is 0.15 GB. `AsSplitQuery()` on `ReadProducerFees` (now
+unused by the download path, kept for callers) took that read from ~21 s to ~8 s
+at the calibrated volume.
 
-**Whole calc run** `CalculatorRunProcessor.Process`: ~50.9 GB churn, ~1 min 3 s,
-retained heap ~1.26 GB. Finalize (4,201 billing instructions + 33,608 invoiced
-net tonnages) is ~120 MB; the billing run proper is 1–7 MB.
+`GetResult` no longer reads the two large per-producer sections (H1/H2 projected,
+scaled-up) up front — a deferred loader hands each to its sub-exporter and it is
+released before the fee stream. This cut `GetResult`'s transient allocation from
+~780 MB to ~260 MB and ~0.1 GB off working set at several points, though not the
+whole-run peak (the projected reads still dominate a download, just later); see
+[Reader and exporter interleaving](#reader-and-exporter-interleaving--done-on-this-branch-modest-effect).
+
+**Whole calc run** `CalculatorRunProcessor.Process`: ~56 GB churn, ~1 min 2 s,
+retained heap ~1.26 GB — this is now the whole test's peak. Finalize (4,201
+billing instructions + 33,608 invoiced net tonnages) is ~120 MB; the billing run
+proper is 1–7 MB.
 
 The producer-fee data dominates on all of build, write and read.
 
 ### Heap consistency and test retention
 
 At the calibrated volume the calc pipeline is bit-for-bit reproducible run to
-run: ~51 GB churn per run, fee builder ~23.6 GB every time, retained heap
-~1.3 GB at the end of each calc. Nothing in the pipeline leaks or grows, and the
-**end-of-run managed heap is 0.15 GB** — the streamed exports leave no residue.
+run: ~56 GB churn per run, fee builder ~23.6 GB every time, retained heap
+~1.26 GB at the end of each calc. Nothing in the pipeline leaks or grows across
+the five-run soak, and the **end-of-run managed heap is 0.15 GB** — whatever a
+download holds is released within a run or two, not accumulated.
 
-Each export enters at ~0.15 GB (a forced blocking gen-2 collection between
-sections — `CollectAndMeasure` in `CalculatorRunPerformanceTests` — models
-production's separate, time-separated requests) and peaks at:
-
-| export | heap at peak |
-|---|---|
-| results CSV | ~1.34 GB |
-| billing CSV | ~1.59 GB |
-| billing JSON | ~1.0 GB |
-
-None of the three is close to the 2 GB ceiling. The residual CSV cost is the
-~45 MB CSV text held as a `StringBuilder`/`string`/`byte[]` during assembly, not
-the fee data.
+Each download runs in its own DI scope (a forced blocking gen-2 collection
+between sections — `CollectAndMeasure` in `CalculatorRunPerformanceTests` —
+models production's separate, time-separated requests). Their working sets while
+running: results CSV ~1.0–1.05 GB, billing CSV ~0.74 GB, billing JSON ~0.83 GB.
+None is close to the 2 GB ceiling; the churn figures in the table above are
+uncollected allocation, not retained output. A full GC after a download still
+leaves ~0.6 GB live for a run or two — the H1/H2 projected read churn (see
+[Reader and exporter interleaving](#reader-and-exporter-interleaving--done-on-this-branch-modest-effect))
+— but the end-of-run managed heap is 0.15 GB, so nothing accumulates.
 
 Test hygiene also addressed on this branch so the soak measures the service, not
 the harness: every controller call now goes through `CallController<T>`, which
@@ -250,24 +288,30 @@ so this is the notable trade-off).
 Reading:
 
 - **The DataApi load no longer sets the floor.** It peaks ~0.6 GB retained; a
-  1 GB soak completes on macOS (working set 1.19 GB).
-- **Every export streams** — results CSV ~1.34 GB, billing CSV ~1.45–1.59 GB,
-  billing JSON ~1.0 GB, end-of-run managed heap 0.15 GB. The residual CSV cost is
-  the ~45 MB file text held as `StringBuilder`/`string`/`byte[]` during assembly.
-- **The remaining managed-heap peaks are the billing-CSV export (~1.45 GB) and
-  `StoreProducerFees` (~1.25 GB)** — both fine at 2 GB, both over a hard 1 GB.
-- **The fee builder is the other structural cost** (~23.6 GB churn, see below),
-  and its per-producer cost rises faster than linearly — a future year with more
-  obligated producers needs its own measurement.
+  1 GB soak completes on macOS (working set 1.21 GB).
+- **The downloads run at ~0.67–1.05 GB working set** and leave no residue
+  (end-of-run managed heap 0.15 GB). `GetResult` and the exporters now interleave,
+  and the fee-row stream is confirmed genuinely streaming (adds ~0). What remains
+  is the H1/H2 projected reads — ~0.8 GB, of which ~0.6 GB is read churn a GC
+  won't reclaim for ~a minute, because the query pulls ~25× more rows than the
+  grouped result. Transient, not a ceiling risk at 2 GB; see
+  [Reader and exporter interleaving](#reader-and-exporter-interleaving--done-on-this-branch-modest-effect).
+- **The remaining managed-heap peak is the calculator run** — `StoreProducerFees`
+  retains ~1.25 GB and `ProducerFeesBuilder` churns 23.6 GB. Fine at 2 GB, over a
+  hard 1 GB.
+- **The fee builder is the structural cost that remains** (~23.6 GB churn, see
+  below), and its per-producer cost rises faster than linearly — a future year
+  with more obligated producers needs its own measurement.
 
 ## Compute requirement
 
 The service-side footprint of a run at 2025 volume, after the memory work on this
-branch, is modest: exports peak at ~1–1.6 GB managed heap and leave no residue;
-`StoreProducerFees` retains ~1.25 GB; the DataApi load peaks ~0.6 GB. The
-whole-run peak working set is ~1.3 GB under a 2 GB ceiling. The problem is not
-the absolute number — it is that whatever a run needs has to be *reserved*,
-repeatedly, on an instance the calculator does not have to itself.
+branch, is modest: the three downloads run at ~0.74–1.05 GB working set and leave
+no residue; the DataApi load peaks ~0.6 GB; the highest retained point is
+`StoreProducerFees` at ~1.25 GB. The whole-run peak working set is ~1.2 GB under
+both a 1 GB and a 2 GB ceiling. The problem is not the absolute number — it is
+that whatever a run needs has to be *reserved*, repeatedly, on an instance the
+calculator does not have to itself.
 
 1. **A calculator run should not share an instance with other apps.** On the
    P1v3 plan, after platform overhead six apps share ~6.5 GB per instance and any
@@ -278,9 +322,9 @@ repeatedly, on an instance the calculator does not have to itself.
    platform will not kill a neighbour (or be killed by one).
 2. **Size for a run, not for idle.** The steady-state API footprint is small; the
    requirement is driven by the periodic calc run. At 2025 volume the run peaks
-   at ~1.3–1.5 GB; target headroom of at least 2× that on an instance the
-   calculator does not contend for. The fee-builder work would bring it down
-   further.
+   at ~1.2–1.3 GB, set by `StoreProducerFees`; target headroom of at least 2×
+   that on an instance the calculator does not contend for. The fee-builder work
+   would bring it down further.
 3. **Confirm run concurrency is one per instance.** Runs are queue-driven and
    assumed serial, but this is not enforced; two concurrent runs on one instance
    would double the transient memory.
@@ -339,41 +383,120 @@ delegates (get children, set children, set parent) passed per call.
 
 ### Producer-fee read — streamed on this branch
 
-`CalcResultReader.ReadProducerFees` used to load the whole `ProducerFees` object
-with all detail rows and their JSON graphs in one go — ~8 s and ~2.67 GB of
-allocation, retaining ~1 GB — three times per calc run (results CSV, billing
-CSV, billing JSON).
-
-All three export paths now stream instead. `CalcResultReader.StreamProducerFeeDetails`
+`CalcResultReader.ReadProducerFees` loaded the whole `ProducerFees` object with
+all detail rows and their JSON graphs in one go — ~8 s and ~2.67 GB of
+allocation, retaining ~1 GB — three times per calc run. `GetResult` and the
+three downloads now use `CalcResultReader.StreamProducerFeeDetails`, which
 returns the per-producer `FeeDetail` rows as a **deferred `IEnumerable` read
-straight off the reader**, consumed once:
+straight off the reader**, consumed once. `GetResult` no longer materialises
+`ProducerFees.Details` at all.
 
-- **Billing JSON**: `CalculationResultsJson` projects the rows lazily and
-  `BillingFileJsonWriter` serializes with `JsonSerializer.SerializeAsync` to the
-  response body via a `StreamCallbackResult` — the fee graph, the JSON model
-  list, and the output buffer are none of them held whole. ~3.18 GB peak (OOM at
-  2 GB) → **~1.0 GB peak, ~0.8 GB churn, ~2.3 s**.
-- **Results CSV / billing CSV**: `ProducerFeesExporter` (already a single
-  forward pass) and the summary part-exporters (which only need `.Total`) take
-  the streamed enumerable; `GetResult` reads the fee `Total` only.
-  ~1.9 GB heap / ~4.2 GB churn / ~11 s → **~1.3–1.6 GB heap / ~3 GB churn /
-  ~9 s**. The residual is the ~45 MB CSV text held during assembly, not the fee
-  data.
+- **Billing JSON** (`02c296c`): `CalculationResultsJson` projects the rows lazily
+  and `BillingFileJsonWriter` serializes with `JsonSerializer.SerializeAsync` to
+  the response via a `StreamCallbackResult` — no assembled JSON document. This
+  was the OOM-at-2 GB point: ~3.18 GB peak → **~0.83 GB working set, ~0.8 GB
+  churn, ~2.3 s**.
+- **Results CSV / billing CSV** (`03304dd`): `ProducerFeesExporter` and the
+  summary part-exporters take the streamed enumerable instead of the fee graph.
 
-`GetResult` no longer materialises `ProducerFees.Details` at all. Output is
-byte-identical on all three (golden-file integration test). `ReadProducerFees`
-is kept for other callers but is unused by the export path.
+`ReadProducerFees` is kept for other callers but is unused by the download path.
+Output byte-identical (golden-file integration test).
 
-### Export byte conversion
+### CSV download end-to-end streaming — cleanup, no measured memory delta
 
-- **Billing-JSON output — superseded by the streaming change above.** The path
-  briefly used `JsonSerializer.SerializeToUtf8Bytes` (skipping an intermediate
-  UTF-16 string) but still buffered the whole output; it now streams to the
-  response with `SerializeAsync` and buffers nothing.
-- **CSV BOM copy — not yet done.** `FileExportService.ToUtf8WithBom` runs
-  `Encoding.UTF8.GetBytes(content)` and then copies the result again into a
-  second array to prepend the 3-byte BOM — a full second copy of every CSV.
-  Encoding the BOM and the content into one pre-sized buffer removes the copy.
+A follow-up (`c5ed1ec`) made the results-CSV and billing-CSV downloads stream to
+the response the way billing JSON already did: `CalcResultsExporter` /
+`BillingFileExporter` take a `TextWriter`, build the small fixed report tables
+into a local `StringBuilder`, flush, then hand the writer to `ProducerFeesExporter`
+which flushes a reused `StringBuilder` after every producer row. The assembled
+`StringBuilder` → `string` → BOM-prefixed `byte[]` for the ~45 MB file is gone,
+`BillingFileExporter.ResetTotals`' `LastIndexOf("Totals")` string surgery is
+replaced by emitting the total row's identity columns directly, and
+`FileExportService.ToUtf8WithBom`'s second `byte[]` copy is gone (the
+`StreamWriter` emits the BOM).
+
+Measured before/after at a 1 GB ceiling: **no change** — peak working set
+1.18 GB → 1.21 GB, end-of-run heap 0.15 GB either way, per-download working sets
+within ~0.05 GB. The ~45 MB assembled string was never a material fraction of a
+download's footprint (the H1/H2 projected reads are). Worth having for
+correctness and for headroom as volumes grow; not a memory win in itself.
+
+### Reader and exporter interleaving — done on this branch, modest effect
+
+`FileExportService.GetResult` used to read the whole `CalcResult` graph — every
+section a download needs — and hold all of it for the export's duration. Of that
+graph only two sections scale with producer count: the H1/H2 projected producers
+(`ReadH1ProjectedData` / `ReadH2ProjectedData`) and the scaled-up producers
+(`ReadScaledData`). Everything else — `CalcResultLapcapData`,
+`LateReportingTonnage`, `ParameterOtherCost`, `OnePlusFourApportionment`,
+`CommsCost`, `LaDisposalCostData`, `ModulationResult`, `SelfManagedConsumerWaste`,
+partial obligations (~3 MB), cancelled producers (~0) — is material-keyed or
+small.
+
+`GetResult` now skips those two sections; `ProducerReportSections` carries a
+deferred loader for each, which `CalcResultsExporter` / `BillingFileExporter`
+call immediately before the projected / scaled-up sub-exporter and let fall out
+of scope straight after, before the ~9 s fee-row stream. The billing
+accepted-producer filter (previously all in `FilterResult`) is baked into the
+billing loaders; the billing JSON path, which needs scaled-up whole, pulls that
+one section in via `filteredResult with { … }`.
+
+Measured at 2025 volume, 1 GB soak, against the parent commit:
+
+| | before | after |
+|---|---|---|
+| `GetResult` transient allocation | ~780 MB | ~260 MB |
+| billing-CSV download working set | ~0.74 GB | ~0.67 GB |
+| billing-JSON download working set | ~0.87 GB | ~0.82 GB |
+| calc-run entry working set (post-download) | ~0.77 GB | ~0.65 GB |
+| **whole-test peak working set** | **1.18 GB** | **1.21 GB** |
+| end-of-run managed heap | 0.15 GB | 0.15 GB |
+
+Output byte-identical (golden-file integration test, both fixtures). The
+whole-run peak is unchanged because it is the calculator run
+([`StoreProducerFees`](#producer-fee-builder--biggest-single-cost-own-ticket)),
+not a download.
+
+Forced-GC probes through a 2026 results-CSV download locate the download's
+footprint precisely:
+
+| point (live heap after two compacting gen-2 GCs) | |
+|---|---|
+| after `GetResult` | ~0.2 GB |
+| after `ReadH1ProjectedData` + `ReadH2ProjectedData` | **~1.02 GB** |
+| after the projected lists leave scope | ~0.82 GB |
+| after the fee-row stream (6,600 rows) | ~0.82 GB **(+0)** |
+
+- **The fee-row stream is genuinely streaming** — `StreamProducerFeeDetails`
+  (deferred `IEnumerable` off the reader) adds nothing measurable over 6,600
+  rows. No further work needed there.
+- **The projected reads add ~0.8 GB.** ~0.2 GB of that is the retained grouped
+  objects (~6,000 producers × a 13-material tonnage map, every field used by the
+  exporter — about as small as the current model allows). The other **~0.6 GB is
+  read churn** — SqlClient / EF shaper buffers — that a compacting GC does not
+  reclaim for ~a minute. It is transient (gone by the next operation, end-of-run
+  managed heap 0.15 GB) and safe at any ceiling ≥ ~1.5 GB, but under a hard 1 GB
+  it is the wall: the heap is at ~1 GB before the fee stream even starts.
+
+The cause is that `ReadH1ProjectedData` / `ReadH2ProjectedData` / `ReadScaledData`
+read `TransformProjectedH1` / `H2` / `TransformScaled` — one row per
+producer × subsidiary × period × level × **material**, ~150K rows of 58 columns
+for H1+H2 combined — then `GroupBy` + `MapTo…MaterialTonnages` collapse the
+~13 material rows per producer into one object, ~6,000 out. EF pulls ~25× more
+rows off the wire than the result shape. Interleaving does not change that; it
+only moved the read out of `GetResult` and into the callback and released the
+retained lists sooner. Streaming the reader (`AsAsyncEnumerable`) would not help
+either — the projected-producers exporter is two-pass (it builds a
+"producers with complete RAM tonnage" set across all H1+H2 rows, then emits the
+complement), so its input is re-buffered regardless.
+
+**Not yet done — the real lever:** push the per-producer material aggregation
+into the database (a keyless-entity query or view returning ~6,000 pre-pivoted
+rows) so SqlClient pulls ~25× less. That is a DB-side change — new view,
+migration, rewrite of the three `Read…ProjectedData` / `ReadScaledData` methods,
+and a byte-identical check on the projected CSV/JSON output. Since the churn is
+transient and 2 GB-safe, it ranks below the fee builder; it is the download
+side's remaining structural cost.
 
 ### `StoreSmcw` — done on this branch
 
@@ -402,17 +525,18 @@ not `= null`.
 
 ## Open items
 
-- **The run peaks at ~1.3 GB working set** at 2025 volume. Exports, the DataApi
-  load and the fee write are all streamed or bounded; the highest managed-heap
-  points are the billing-CSV export (~1.45 GB) and `StoreProducerFees` (~1.25 GB),
-  both comfortable at 2 GB.
+- **The run peaks at ~1.2 GB working set** at 2025 volume, under both a 1 GB and
+  a 2 GB ceiling. The DataApi load and the fee write are bounded; the single
+  highest retained point is `StoreProducerFees` at ~1.25 GB, comfortable at 2 GB.
+- **A download's H1/H2 projected reads churn ~0.8 GB** (~0.6 GB not
+  GC-reclaimable for ~a minute), because `Read…ProjectedData` pulls ~150K rows —
+  one per producer × material — to build ~6K grouped objects. Fixing it means the
+  DB doing the per-producer material aggregation; transient and 2 GB-safe, so it
+  ranks below the fee builder. See
+  [Reader and exporter interleaving](#reader-and-exporter-interleaving--done-on-this-branch-modest-effect).
 - **Re-measure after a growth year.** The fee builder's per-producer cost rises
   faster than linearly, so a future year with materially more obligated producers
   needs its own measurement.
-- **Optional next step:** the billing-CSV export still assembles the whole ~45 MB
-  file as a `StringBuilder`/`string`/`byte[]`. Writing it to the response stream
-  (as the billing JSON now does) would drop its ~1.45 GB peak, but it is no longer
-  on the critical path for a 2 GB plan.
 - **Production hosting confirmed** — `PRDRWDWEBAS1403` is P1v3, 2 instances, 6
   apps, same as pre-prod. Still outstanding: the names of the five co-tenant apps
   and the plan's live memory metrics, which need reader access on
