@@ -100,7 +100,41 @@ Follow-on request, after stage 6's SQL inlining: move the cutoff-date logic stil
 
 **Known caveat:** same as stage 6 — the SQL text changes are unexecuted/unverified against a real Synapse warehouse in this environment (integration tests exercise the fakes, not this SQL). Needs review by someone with warehouse access before deployment.
 
-**Status:** implemented and fully green (see Verification status below) but not yet committed — sitting on top of the namespace-restructure commit (`126019d`).
+**Status:** implemented and fully green, committed as `db020f4`.
+
+---
+
+## 8. Single-request DataApi boundary: alignment + error detection consolidated (`27a2e09`)
+
+Follow-on request: with Steps 1–7 having moved every piece of org/POM business logic into the `DataApi` project, review how `BackgroundService` actually *calls* that logic ahead of DataApi's eventual extraction to its own service — with the explicit goal of a single request returning fully-transposed data, rather than the two streaming calls plus several more in-process stages that existed at the time.
+
+**What the review found:** `CommonDataApiLoader` made two concurrent streaming calls (`IStreamOrganisationsRequestHandler`/`IStreamPomsRequestHandler`), then ran five more processing stages client-side — `IAcceptedFileSelector`, `IProducerObligationDeterminer`, `IPomEligibilityFilter`, `IOrganisationPeriodFlagsCalculator`, and a private mapper (`PayCalOrganisation`/`PayCalPom` → `AlignmentOrganisation`/`AlignmentPom`) — using types that physically lived in `DataApi` but executed wherever `BackgroundService` ran, purely as an artifact of the project split rather than any real ownership boundary. A further two stages (`IProducerPomAligner.DedupeOrganisations`/`.Align`, in `ProducerDataTransposer`) plus `ErrorReportService`'s four error/warning detection rules ran the same way.
+
+**Consolidated into one DataApi entry point:** `IProducerDataService.GetProducerData(relativeYear, cutOffDate, materialCodes, invoicedOrganisationIds)` (`DataApi/CommonDataApi/ProducerDataService.cs`) now owns the entire pipeline — streaming, file selection, obligation determination, POM eligibility, period flags, mapping, error/warning detection, and alignment — returning one `ProducerCalculationData { Organisations, Producers, Errors }`.
+
+**New DataApi component:** `IProducerErrorDetector`/`ProducerErrorDetector` (`DataApi/Alignment/ProducerErrorDetector.cs`) — ported from `ErrorReportService`'s four static rules (`HandleMissingRegistrationData`, `HandleMissingPomData`, `HandleObligatedErrors`, `HandleObligatedWarnings`) plus the holding-company roll-up, now operating on `AlignmentOrganisation`/`AlignmentPom` and producing `ProducerCalculationError` (`OrganisationId`/`SubsidiaryId`/`ErrorCode`/`LeaverCode`/`IsWarning`). Each org/subsidiary in the result is represented against an error, POM data (via `Producers`), or both for a warning (which is kept in calculation, so it still gets aligned).
+
+**BackgroundService thinned:** `CommonDataApiLoader` now just checks the `Enabled` flag, gathers the small inputs only it can supply (`materialCodes` via `IMaterialService`, at this stage `invoicedOrganisationIds` via `IInvoicedProducerService`), and makes the one call. `ProducerDataTransposer` no longer runs alignment itself. `ErrorReportService` shrank to a pure `PersistErrors` writer.
+
+**Test coverage:** business-rule tests moved to `DataApi.UnitTests/Alignment/ProducerErrorDetectorTests.cs` (17 tests, ported 1:1 from the old `ErrorReportServiceTests.cs`); new `DataApi.UnitTests/CommonDataApi/ProducerDataServiceTests.cs` (6 tests) covering the orchestration itself — notably the previously-untested sequencing where a hard error's org/subsidiary must be excluded from alignment even though a matching POM exists, while a warning's must not.
+
+**Status:** implemented, fully green against the whole suite plus both integration tests (byte-identical to fixture data, confirming the consolidation changed nothing observable), committed as `27a2e09`.
+
+---
+
+## 9. Removed billing-history dependency from DataApi's contract (`ea9f0ca`)
+
+Follow-on to stage 8, raised by the user: didn't want a potentially-large `invoicedOrganisationIds` set fed into DataApi at all — less because of literal payload size (bounded by the large-producer population, likely low thousands) and more because DataApi's contract shouldn't need billing-history knowledge it has no other reason to own; that data lives entirely in Calculator API's own DB (`ProducerResultFileSuggestedBillingInstruction` and related tables via `IInvoicedProducerService`).
+
+**The problem:** `HandleObligatedErrors`/`HandleObligatedWarnings`'s old gate — <span style="white-space:nowrap">`poms.Any(matches) || invoicedOrganisationIds.Contains(o.OrganisationId)`</span> — only ever needed the invoiced half for organisations with **no** POM match (a POM match alone always satisfied the gate). So the fix was to stop gating on it in DataApi at all.
+
+**Change:** `ProducerErrorDetector` now always includes every qualifying `"E"`-status/warning-eligible organisation unconditionally, and each `ProducerCalculationError` gained a `HasPomMatch` flag recording whether a current-year POM match was found (`true` unconditionally for the POM-driven `MissingRegistrationData`/`MissingPOMData` categories, computed per-row for `HandleObligatedErrors`/`HandleObligatedWarnings`). `IProducerDataService.GetProducerData` no longer takes `invoicedOrganisationIds` at all.
+
+**The decision moved to `ErrorReportService.PersistErrors`**, which now also takes `relativeYear`, looks up invoiced organisations itself (`IInvoicedProducerService`, re-added as a dependency here), and keeps a row when `e.HasPomMatch || invoicedOrganisationIds.Contains(e.OrganisationId)`. The holding-company roll-up had to move with it rather than stay in `ProducerErrorDetector`: it's computed by grouping on which errors are subsidiary-scoped, and doing that *before* the invoiced-filter (as stage 8 did, inside DataApi) would leave an orphaned roll-up row for a producer whose only underlying error got filtered out — a real behaviour bug, not just a relocation. Caught by reasoning through the ordering before implementing, then locked in with a dedicated regression test, `PersistErrors_DoesNotOrphanRollup_WhenOnlySubsidiaryErrorWasFilteredOut`.
+
+**Test coverage:** `ProducerErrorDetectorTests.cs` updated (unconditional-inclusion + `HasPomMatch` assertions replace the old invoiced-gating tests); `ErrorReportServiceTests.cs` rewritten with 9 tests covering the filter, the roll-up, and the ordering interaction between them.
+
+**Status:** implemented, fully green against the whole suite plus both integration tests (again byte-identical), committed as `ea9f0ca`.
 
 ---
 
@@ -112,6 +146,8 @@ Follow-on request, after stage 6's SQL inlining: move the cutoff-date logic stil
 - `CommonDataApi/PomEligibility/OrganisationPeriodFlagsCalculator.cs`
 - `CommonDataApi/PomEligibility/SubmissionPeriodClassification.cs`
 - `AcceptedFileSelection/AcceptedFileSelector.cs` (stage 7)
+- `Alignment/ProducerCalculationError.cs`, `Alignment/ProducerErrorCodes.cs`, `Alignment/ProducerErrorDetector.cs` (stage 8, `ProducerErrorDetector`/`ProducerCalculationError` reworked in stage 9 — unconditional inclusion + `HasPomMatch`, no more holding-roll-up or `invoicedOrganisationIds` param)
+- `CommonDataApi/ProducerCalculationData.cs`, `CommonDataApi/ProducerDataService.cs` (stage 8 — the single DataApi entry point; stage 9 dropped `invoicedOrganisationIds` from `GetProducerData`)
 
 **Modified product code:**
 - `DataApi/CommonDataApi/Entities/PayCalOrganisation.cs` (added `RegulatorStatus`; stage 7 added `FileName`/`IsResubmission`/`CreatedDateTime`)
@@ -121,8 +157,12 @@ Follow-on request, after stage 6's SQL inlining: move the cutoff-date logic stil
 - `DataApi/StoredProcs/sp_GetPaycalOrgData.sql` (thinned twice by this session: obligation logic, then H1/H2; then deleted entirely in stage 6, inlined into `StreamOrganisationsRequestHandler.cs`; stage 7 dropped its ranking/cut-off logic entirely)
 - `DataApi/StoredProcs/sp_GetPaycalPomData.sql` (thinned twice by this session: eligibility gates, then packaging type; then deleted entirely in stage 6, inlined into `StreamPomsRequestHandler.cs`; stage 7 dropped its ranking/cut-off logic entirely)
 - `DataApi/StoredProcs/fn_ProducerObligationDetermination.sql` (deleted in stage 1)
-- `BackgroundService/Services/DataLoading/CommonDataApiLoader.cs` (restructured pipeline three times across the three moves; stage 7 wired in `IAcceptedFileSelector`)
-- `EPR.Calculator.API/App/ServiceConfiguration.cs` (DI registrations)
+- `BackgroundService/Services/DataLoading/CommonDataApiLoader.cs` (restructured pipeline three times across the three moves; stage 7 wired in `IAcceptedFileSelector`; stage 8 thinned drastically down to the `Enabled` check + gathering `materialCodes`/`invoicedOrganisationIds` + one DataApi call; stage 9 dropped the `invoicedOrganisationIds` gathering entirely)
+- `BackgroundService/Services/DataLoading/CommonDataApiLoaderMapper.cs` (deleted in stage 8 — the `PayCal*` → `Alignment*` mapping, including Guid/RAG-rating validation, moved into `ProducerDataService`)
+- `BackgroundService/Services/ErrorReportService.cs` (shrunk to a pure `PersistErrors` DB writer in stage 8; regained the invoiced-filter and holding-roll-up logic in stage 9, now taking `relativeYear`)
+- `BackgroundService/Services/ProducerDataTransposer.cs` (stage 8 — no longer runs `IProducerPomAligner` itself, just persists DataApi's `ProducerCalculationData`; stage 9 threads `relativeYear` through to `PersistErrors`)
+- `BackgroundService/Features/CalculatorRuns/CalculatorRunDataInitializer.cs` (stage 8 — updated to the new `ProducerCalculationData` return shape)
+- `EPR.Calculator.API/App/ServiceConfiguration.cs` (DI registrations; stage 8 added `IProducerErrorDetector`/`IProducerDataService`)
 
 **New test coverage:**
 - `DataApi.UnitTests/CommonDataApi/ObligationDetermination/{ObligationTestCaseLoader,ProducerObligationDeterminerTests}.cs`
@@ -131,6 +171,10 @@ Follow-on request, after stage 6's SQL inlining: move the cutoff-date logic stil
 - Extended `DataApi.UnitTests/CommonDataApi/Alignment/ProducerPomAlignerTests.cs`
 - Extended `BackgroundService.UnitTests/Services/DataLoading/CommonDataApiLoaderTests.cs`
 - `DataApi.UnitTests/AcceptedFileSelection/AcceptedFileSelectorTests.cs` (stage 7)
+- `DataApi.UnitTests/Alignment/ProducerErrorDetectorTests.cs` (stage 8 — ported from the old `ErrorReportServiceTests.cs`; stage 9 reworked for unconditional inclusion/`HasPomMatch`)
+- `DataApi.UnitTests/CommonDataApi/ProducerDataServiceTests.cs` (stage 8 — new orchestration coverage, including the hard-error-vs-warning alignment-exclusion sequencing that had no prior test)
+- `BackgroundService.UnitTests/Services/DataLoading/CommonDataApiLoaderTests.cs` (stage 8 rewritten for the thinned loader; stage 9 dropped the invoiced-related setup)
+- `BackgroundService.UnitTests/Services/ErrorReportServiceTests.cs` (stage 8 rewritten as persistence-only tests; stage 9 rewritten again — filter/roll-up/ordering coverage, including the orphan-roll-up regression case)
 
 **Integration test fixtures:**
 - `IntegrationTests/TestData/{2025,2026}-pom-data.csv` (added complementary H1/H2 periods for the eligibility gate)
@@ -143,12 +187,13 @@ Follow-on request, after stage 6's SQL inlining: move the cutoff-date logic stil
 
 ## Verification status
 
-- **`DataApi.UnitTests`**: 147 tests, all passing (includes ~100 ported obligation-determination scenarios, eligibility/flags/alignment tests, and stage 7's 16 `AcceptedFileSelector` tests).
-- **`BackgroundService.UnitTests`**: 479 tests, all passing.
-- **`EPR.Calculator.API.UnitTests`**: 346 tests, all passing.
-- **`IntegrationTests`**: 2 tests (`IntegrationTest_2025`/`2026`), passing — confirmed stable across repeated runs against a freshly-created `Testcontainers` SQL Server instance (not the long-lived, potentially-stale one used for most of this session's debugging). Stage 7's output was byte-identical to the pre-change baseline, confirming the existing fixtures (single candidate file per group, `IsResubmission` defaulting `false`) flow through the new selector unchanged.
+- **`DataApi.UnitTests`**: 171 tests, all passing (includes ~100 ported obligation-determination scenarios, eligibility/flags/alignment tests, stage 7's 16 `AcceptedFileSelector` tests, and stages 8–9's 17 `ProducerErrorDetectorTests` + 6 `ProducerDataServiceTests`).
+- **`BackgroundService.UnitTests`**: 452 tests, all passing (down from 479 — stage 8 deleted `CommonDataApiLoaderMapperTests.cs` outright and traded the fine-grained `ErrorReportServiceTests.cs`/`CommonDataApiLoaderTests.cs` coverage for the leaner DataApi-side tests above plus stage 9's rewritten `ErrorReportServiceTests.cs`).
+- **`EPR.Calculator.API.UnitTests`**: 346 tests, all passing (untouched by stages 8–9).
+- **`IntegrationTests`**: 2 tests (`IntegrationTest_2025`/`2026`), passing — confirmed stable across repeated runs against a freshly-created `Testcontainers` SQL Server instance (not the long-lived, potentially-stale one used for most of this session's debugging). Stage 7's output was byte-identical to the pre-change baseline, confirming the existing fixtures (single candidate file per group, `IsResubmission` defaulting `false`) flow through the new selector unchanged. Stages 8 and 9 were each independently verified byte-identical too, confirming both the DataApi consolidation and the later invoiced-filter/roll-up relocation changed nothing observable end-to-end.
 
 ## Known caveats for whoever picks this branch up next
 
 - The Synapse queries (formerly `sp_GetPaycalOrgData.sql`/`sp_GetPaycalPomData.sql`, now inlined as raw SQL text in `StreamOrganisationsRequestHandler.cs`/`StreamPomsRequestHandler.cs` per stage 6) are a best-effort port, never executed against a real Synapse warehouse in this environment. They should be reviewed by someone with that access before deployment.
 - The integration test suite's `Testcontainers` SQL Server instance is configured with `WithReuse(true)`. That's convenient for fast local iteration but means state accumulates across every test run in a session — as this session found out, that can produce misleading results during heavy ad-hoc debugging. Worth remembering to `docker rm -f` it (find via `docker ps --filter "label=org.testcontainers=true"`) before trusting a result that seems surprising.
+- Stage 8's consolidation dropped one piece of telemetry rather than porting it: `CommonDataApiLoader` used to wrap each stream's *first item* with `ITelemetry<T>.Metric(..., StreamDelayThreshold)`, logging a warning if either stream took over 5 minutes to start yielding rows. That's a BackgroundService-specific concept (`ITelemetry<T>`'s named `Metrics` enum + threshold-warning semantics) with no equivalent in DataApi's own telemetry (`DataApiTelemetry`, a plain `ActivitySource` wrapper). `ProducerDataService.GetProducerData` is still wrapped in a single activity span end-to-end, so total duration is still visible, but a slow-to-start stream specifically won't trigger the old dedicated warning any more.
