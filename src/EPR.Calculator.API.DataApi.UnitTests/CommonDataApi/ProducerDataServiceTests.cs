@@ -273,20 +273,18 @@ public class ProducerDataServiceTests
         var mockOrgHandler = new Mock<IStreamOrganisationsRequestHandler>();
         mockOrgHandler
             .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .Returns(orgsStream ?? ToAsyncEnumerable(orgs ?? []));
+            .Returns(() => orgsStream ?? ToAsyncEnumerable(orgs ?? []));
 
+        // Handle() is invoked twice by StreamPoms (once to pick winning files, once to buffer their
+        // rows), so hand out a fresh enumerable each time.
         var mockPomHandler = new Mock<IStreamPomsRequestHandler>();
         mockPomHandler
             .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .Returns(pomsStream ?? ToAsyncEnumerable(poms ?? []));
+            .Returns(() => pomsStream ?? ToAsyncEnumerable(poms ?? []));
 
-        var mockSelector = new Mock<IAcceptedFileSelector>();
-        mockSelector
-            .Setup(s => s.SelectLatestOrganisationFiles(It.IsAny<IReadOnlyList<PayCalOrganisation>>(), It.IsAny<DateTimeOffset?>()))
-            .Returns((IReadOnlyList<PayCalOrganisation> o, DateTimeOffset? _) => o);
-        mockSelector
-            .Setup(s => s.SelectLatestPomFiles(It.IsAny<IReadOnlyList<PayCalPom>>(), It.IsAny<DateTimeOffset?>()))
-            .Returns((IReadOnlyList<PayCalPom> p, DateTimeOffset? _) => p);
+        // The real selector is a cheap pure component - the fixtures leave file names null, so every
+        // group's sole candidate wins and nothing is filtered out, matching the previous pass-through.
+        var selector = new AcceptedFileSelector();
 
         IPomEligibilityFilter eligibilityFilterToUse;
         if (eligibilityFilter is not null)
@@ -315,7 +313,7 @@ public class ProducerDataServiceTests
         return new ProducerDataService(
             mockOrgHandler.Object,
             mockPomHandler.Object,
-            mockSelector.Object,
+            selector,
             determiner ?? mockDeterminer!.Object,
             eligibilityFilterToUse,
             mockFlagsCalculator.Object,

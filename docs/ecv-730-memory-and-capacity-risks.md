@@ -25,25 +25,23 @@ therefore materially higher than before the change — this is expected, not a
 regression.
 
 **Measured at 2025 volume, after the fixes on this branch, a full run plus its
-three file downloads completes under a 2 GB heap limit on macOS (five-run soak,
-no OOM, end-of-run managed heap 0.15 GB, peak working set 1.94 GB). The exports
-peak at ~1–1.6 GB and leave no residue; the build/write pipeline retains ~1.3 GB.
-The one large transient is the DataApi buffering all ~2.1M raw POM rows (~2.5 GB)
-before de-duplicating them — real, and reducible by a two-pass file selection
-(separate ticket). Sizing aside, the problem is that in both production and
-pre-prod the calculator web app shares one 8 GB P1v3 instance with five other
-applications, where any one app's realistic burst budget is ~2–4 GB and a
-neighbour can spike at any time. The service needs a dedicated App Service plan,
-or a move to the larger P2v3 plan, so a run can reserve what it needs without
-contending.**
+three file downloads has a peak working set of ~1.3 GB and completes cleanly
+under a 2 GB heap limit (five-run soak, no OOM, end-of-run managed heap 0.15 GB);
+under a 1 GB limit it completes on macOS's soft limit, with managed-heap peaks of
+~1.45 GB (billing-CSV export) and ~1.25 GB (`StoreProducerFees`). The footprint
+is manageable. The problem is that in both production and pre-prod the calculator
+web app shares one 8 GB P1v3 instance with five other applications, where any one
+app's realistic burst budget is ~2–4 GB and a neighbour can spike at any time.
+The service needs a dedicated App Service plan, or a move to the larger P2v3
+plan, so a run can reserve what it needs without contending.**
 
 Code work for the new volumes on this branch: the fee/SMCW writes are batched so
-they no longer exhaust the EF change tracker, and all three file exports now
-stream the producer fee rows off the reader instead of materialising the whole
-fee graph — this took the run from OOM-at-2 GB to a clean 2 GB soak with the
-exports no longer the constraint. Remaining structural costs: the fee builder
-(~23.6 GB churn) and the DataApi raw-POM buffer; see
-[Follow-up code work](#follow-up-code-work).
+they no longer exhaust the EF change tracker; all three file exports stream the
+producer fee rows off the reader instead of materialising the whole fee graph;
+and the DataApi picks the winning POM file from a first metadata-only pass so it
+never buffers the full raw stream. Together these took the run from OOM-at-2 GB
+to a clean 1 GB soak. The remaining structural cost is the fee builder
+(~23.6 GB churn); see [Follow-up code work](#follow-up-code-work).
 
 ## Current hosting
 
@@ -90,27 +88,25 @@ document were taken at ~1.7× that volume (10,587 producers, 89k organisation
 rows) before the generator was calibrated; where a stage number has been
 re-measured at the corrected volume it is called out.
 
-Figures below are **after** all three exports were made to stream the producer
-fee rows off the reader rather than materialise the whole `ProducerFees` graph
-(see [Producer-fee read](#producer-fee-read--streamed-on-this-branch)), and after
-the perf test's fake POM stream was switched from `CsvHelper.GetRecords<dynamic>`
-to a field-by-field read. The export path is no longer the memory constraint at
-any tested ceiling.
+Figures below are **after** the memory work on this branch: all three exports
+stream the producer fee rows off the reader
+(see [Producer-fee read](#producer-fee-read--streamed-on-this-branch)); the perf
+test's fake POM stream is read field-by-field, not as `dynamic`; and the DataApi
+picks the winning POM file in a first pass over just the file metadata, so it
+never buffers the full raw stream
+(see [the DataApi POM buffer](#the-dataapi-pom-buffer--reduced-on-this-branch)).
 
 | | value |
 |---|---|
-| DataApi `GetProducerData` (2 GB heap limit) | completes — ~8 s, ~4.8 GB allocation churn, heap settles ~2.5 GB; returns 7,000 organisations / 6,638 producers / 2 errors |
-| Full run, unconstrained GC | ~63 s; ~51 GB allocation churn |
-| Full run, 2 GB heap limit | **five-run soak completes with no OOM** on macOS. End-of-run managed heap **0.15 GB**. Export heap peaks: results CSV ~1.34 GB, billing CSV ~1.59 GB, billing JSON ~1.0 GB. Whole-test peak working set **1.94 GB** (97 % of the 2 GB ceiling). |
-| Full run, 1 GB heap limit | the **calc run** fails in `BufferPomStream` — it holds ~2.5 GB of raw POM rows (see below), which no CSV-parser change removes. The exports were not reached; on their own they fit ~1–1.6 GB. |
+| DataApi `GetProducerData` (1 GB heap limit) | completes — ~10 s, ~9.7 GB allocation churn (two source reads), heap settles ~0.6 GB; returns 7,000 organisations / 6,638 producers / 2 errors |
+| Full run, unconstrained GC | ~63 s; ~56 GB allocation churn |
+| Full run, 2 GB heap limit | **five-run soak, no OOM.** End-of-run managed heap **0.15 GB**. Whole-test peak working set **1.34 GB** (67 % of the 2 GB ceiling). |
+| Full run, 1 GB heap limit | **five-run soak, no OOM** on macOS. Peak working set 1.19 GB (119 % of the 1 GB ceiling — over by working-set accounting, tolerated on the soft limit). Managed heap still peaks ~1.45 GB in the billing-CSV export and ~1.25 GB in `StoreProducerFees`, so a **hard** 1 GB limit would OOM there — but the calc's DataApi load, which used to fail here outright, now peaks ~0.6 GB. |
 
-Averaged over the five 2 GB soak runs: calc 61.6 s, results-CSV export 9.1 s,
-billing run 0.5 s, billing-CSV export 8.8 s, billing-JSON export 8.7 s.
-
-The 1.94 GB working-set peak is a macOS soft-limit figure. The calc run's
-managed heap still reaches ~2.5 GB during `BufferPomStream` and ~2.8 GB during
-`Transpose`, so a **hard** limit (Linux cgroup) below ~3 GB would still OOM in
-the calc's DataApi load — see [the DataApi buffer](#the-dataapi-pom-buffer-is-the-real-floor).
+Averaged over the five soak runs (either ceiling): calc ~63 s, results-CSV export
+~9.1 s, billing run ~0.5 s, billing-CSV export ~9.0 s, billing-JSON export ~8.6 s.
+Per-run allocation rose from ~51 GB to ~56 GB — the DataApi two-pass reads the
+source twice.
 
 Before the billing-JSON streaming change the same 2 GB soak OOM'd in the
 billing-JSON export on run 1 (at ~3.18 GB against a 4 GB ceiling it fit only on
@@ -125,24 +121,26 @@ retained bytes; `heap after` is the approximate live managed heap when it
 finished. Figures are run 1 of the five-run soak; the other four were within
 ~1 % of every line.
 
-**DataApi — `ProducerDataService.GetProducerData` / `CommonDataApiLoader.LoadDataCore`** (~4.8 GB churn, 8 s, heap settles ~2.5 GB)
+**DataApi — `ProducerDataService.GetProducerData` / `CommonDataApiLoader.LoadDataCore`** (~9.7 GB churn, 10 s, heap settles ~0.6 GB)
 
 | sub-stage | allocated | time | heap after |
 |---|---|---|---|
 | `BufferOrganisationStream` | 27 MB | 0.1 s | ~140 MB |
 | `SelectLatestOrganisationFiles` | 16 MB | 0.04 s | ~150 MB |
-| `BufferPomStream` (buffers the raw ~2.1M-row POM stream) | **4.81 GB** | 6.2 s | ~2.52 GB |
-| `SelectLatestPomFiles` | 54 MB | 0.5 s | ~2.55 GB |
-| `PomEligibilityFilter` / `ApplyPeriodFlags` | ~6 MB each | <0.1 s | ~2.55 GB |
-| `ProducerPomAligner.Align` | 30 MB | 0.05 s | ~2.6 GB |
-| `ProducerDataTransposer.Transpose` | 300 MB | 1.3 s | ~2.78 GB |
+| `SelectPomFiles` (pass 1 — pick winning files from metadata) | **4.9 GB churn** | 4.5 s | ~0.24 GB |
+| `BufferPomStream` (pass 2 — buffer only the winning files' rows) | **4.75 GB churn** | 4.5 s | ~0.4 GB |
+| `PomEligibilityFilter` / `ApplyPeriodFlags` | ~6 MB each | <0.1 s | ~0.4 GB |
+| `ProducerPomAligner.Align` | 30 MB | 0.05 s | ~0.4 GB |
+| `ProducerDataTransposer.Transpose` | 300 MB | 1.3 s | ~0.6 GB |
 
-Buffering the raw POM stream is the whole DataApi cost; every filter after it is
-6–50 MB because it re-references the buffered rows rather than copying them. The
-~2.5 GB retained `List<PayCalPom>` (all 2.1M rows, pre-dedup) is genuine — it is
-the same in production (SQL reader instead of CSV) and unchanged by the test's
-switch to field-by-field parsing. See
-[the DataApi POM buffer](#the-dataapi-pom-buffer-is-the-real-floor).
+The DataApi no longer buffers the full raw POM stream. Pass 1 streams every row
+but retains only one `PomFileCandidate` (file metadata) per distinct file — a few
+hundred MB — from which `AcceptedFileSelector.SelectWinningPomFileNames` picks the
+winning file per org/submitter/period. Pass 2 re-streams and buffers only rows
+belonging to a winning file (the de-duplicated set, ~0.4 GB). The two passes cost
+a second read of the source (~5 GB extra churn per run in the test; a second SQL
+query in production). See
+[the DataApi POM buffer](#the-dataapi-pom-buffer--reduced-on-this-branch).
 
 **Build — `ResultBuilder.BuildAsync`** (~46 GB, 52 s, heap ~1.25 GB at end)
 
@@ -221,47 +219,54 @@ the harness: every controller call now goes through `CallController<T>`, which
 builds and disposes a fresh DI scope per call; the reused `ApplicationDBContext`
 gets a `ChangeTracker.Clear()` each iteration; and the fake POM stream is read
 field-by-field off the `CsvReader` (one `PayCalPom` per row, no per-row dynamic
-object) rather than `GetRecords<dynamic>`. The last change cut whole-test peak
-working set from 2.25 GB to 1.94 GB — it removes the parser's churn, not the
-buffer it feeds.
+object) rather than `GetRecords<dynamic>`.
 
-### The DataApi POM buffer is the real floor
+### The DataApi POM buffer — reduced on this branch
 
-`ProducerDataService` buffers the **entire raw POM stream** into a
-`List<PayCalPom>` before `SelectLatestPomFiles` dedups it — at 2025 volume that
-is ~2.1M rows (every resubmission file version) and ~2.5 GB retained during
-`BufferPomStream`, rising to ~2.8 GB through `Transpose`. This is **not** a
-harness artifact: switching the test parser from `dynamic` to field-by-field
-left the retained figure unchanged, because the cost is the 2.1M-object list
-itself. Production reads the same rows off a SQL reader into the same list.
+`ProducerDataService` used to buffer the **entire raw POM stream** into a
+`List<PayCalPom>` before `SelectLatestPomFiles` de-duplicated it — at 2025 volume
+~2.1M rows (every resubmission file version), ~2.5 GB retained during
+`BufferPomStream` and ~2.8 GB through `Transpose`. That was the calc run's memory
+floor: a 1 GB limit failed there outright, and a 2 GB run only survived on macOS's
+soft limit. It is not a harness artifact — production reads the same rows off a
+SQL reader into the same list.
 
-Reducing it is a **DataApi change, not a test change**: a two-pass file
-selection — pass 1 buffers only the per-file `(org, submitter, period, filename,
-createdDate)` tuples (tiny) to pick the winning file per group; pass 2 re-streams
-and keeps only rows whose filename won. That would take the buffer from ~2.5 GB
-to a few hundred MB. Separate ticket.
+It now takes **two passes**:
+
+1. `SelectPomFiles` streams every row but keeps only one `PomFileCandidate`
+   (`OrganisationId`, `SubmitterId`, `SubmissionPeriod`, `FileName`,
+   `IsResubmission`, `CreatedDateTime`) per distinct file — a few hundred MB.
+   `AcceptedFileSelector.SelectWinningPomFileNames` then picks the winning file
+   name per group (same cut-off / resubmission-fallback rule as before).
+2. `BufferPomStream` re-streams the source and buffers only rows whose file won
+   its group — the de-duplicated set, ~0.4 GB.
+
+Retained heap through the DataApi load dropped from ~2.8 GB to ~0.6 GB. Output is
+byte-identical (golden-file integration test). Cost: a second read of the source
+— ~5 GB extra churn per run in the perf test, a second SQL query in production
+(the existing one already carries a 10-minute timeout for "poor db performance",
+so this is the notable trade-off).
 
 Reading:
 
-- **Every export streams and fits comfortably** — results CSV ~1.34 GB, billing
-  CSV ~1.59 GB, billing JSON ~1.0 GB, none near a 2 GB ceiling, end-of-run
-  managed heap 0.15 GB.
-- **The calc run's raw-POM buffer sets the floor** — ~2.5 GB retained during
-  `BufferPomStream`, ~2.8 GB through `Transpose`. The 2 GB soak passes only on
-  macOS's soft limit (working set 1.94 GB); a hard limit below ~3 GB OOMs here.
-  The two-pass file selection above is what removes it.
+- **The DataApi load no longer sets the floor.** It peaks ~0.6 GB retained; a
+  1 GB soak completes on macOS (working set 1.19 GB).
+- **Every export streams** — results CSV ~1.34 GB, billing CSV ~1.45–1.59 GB,
+  billing JSON ~1.0 GB, end-of-run managed heap 0.15 GB. The residual CSV cost is
+  the ~45 MB file text held as `StringBuilder`/`string`/`byte[]` during assembly.
+- **The remaining managed-heap peaks are the billing-CSV export (~1.45 GB) and
+  `StoreProducerFees` (~1.25 GB)** — both fine at 2 GB, both over a hard 1 GB.
 - **The fee builder is the other structural cost** (~23.6 GB churn, see below),
   and its per-producer cost rises faster than linearly — a future year with more
   obligated producers needs its own measurement.
 
 ## Compute requirement
 
-The service-side footprint of a run at 2025 volume, after the export streaming
-work, is: exports peak at ~1–1.6 GB and leave no residue; the build/write
-pipeline retains ~1.3 GB; and the DataApi buffers ~2.5–2.8 GB of raw POM rows
-during the load (real, and reducible by a two-pass file selection — see
-[Follow-up code work](#dataapi-raw-pom-buffer--separate-ticket)). The problem is
-not the absolute number — it is that whatever a run needs has to be *reserved*,
+The service-side footprint of a run at 2025 volume, after the memory work on this
+branch, is modest: exports peak at ~1–1.6 GB managed heap and leave no residue;
+`StoreProducerFees` retains ~1.25 GB; the DataApi load peaks ~0.6 GB. The
+whole-run peak working set is ~1.3 GB under a 2 GB ceiling. The problem is not
+the absolute number — it is that whatever a run needs has to be *reserved*,
 repeatedly, on an instance the calculator does not have to itself.
 
 1. **A calculator run should not share an instance with other apps.** On the
@@ -272,10 +277,10 @@ repeatedly, on an instance the calculator does not have to itself.
    room there. On a dedicated plan the run has the whole instance and the
    platform will not kill a neighbour (or be killed by one).
 2. **Size for a run, not for idle.** The steady-state API footprint is small; the
-   requirement is driven by the periodic calc run streaming ~2M rows and building
-   the result set. Once the DataApi figure is confirmed against a real SQL read,
-   target headroom of at least 2× that peak on an instance the calculator does
-   not contend for. The fee-builder work would bring it down further.
+   requirement is driven by the periodic calc run. At 2025 volume the run peaks
+   at ~1.3–1.5 GB; target headroom of at least 2× that on an instance the
+   calculator does not contend for. The fee-builder work would bring it down
+   further.
 3. **Confirm run concurrency is one per instance.** Runs are queue-driven and
    assumed serial, but this is not enforced; two concurrent runs on one instance
    would double the transient memory.
@@ -286,20 +291,17 @@ should not be sharing in the first place. It is used here only as a test tool.
 
 ## Follow-up code work
 
-### DataApi raw-POM buffer — separate ticket
+### DataApi raw-POM buffer — done on this branch
 
-`ProducerDataService` reads the whole raw POM stream into a `List<PayCalPom>`
-(~2.1M rows / ~2.5 GB at 2025 volume, ~90 % of them superseded resubmission
-versions) before `AcceptedFileSelector.SelectLatestPomFiles` dedups it. That
-buffer is the calc run's memory floor.
-
-A two-pass read removes it: pass 1 streams the source and keeps only the per-file
-`(organisationId, submitterId, submissionPeriod, fileName, createdDate)` tuples,
-from which `SelectLatestPomFiles`'s existing logic picks the winning file name
-per group; pass 2 re-streams and yields only rows whose file name won. Pass 1's
-buffer is a few hundred KB; the pipeline downstream of `StreamPoms` is unchanged.
-Costs a second read of the source (a second SQL query in production, a second
-file scan in the perf test).
+`ProducerDataService.StreamPoms` used to read the whole raw POM stream into a
+`List<PayCalPom>` (~2.1M rows / ~2.5 GB at 2025 volume, ~90 % superseded
+resubmission versions) before de-duplicating it. It now does two passes:
+`SelectPomFiles` retains only one `PomFileCandidate` per distinct file and
+`AcceptedFileSelector.SelectWinningPomFileNames` picks the winners; then
+`BufferPomStream` re-streams and buffers only the winning files' rows. Retained
+heap through the DataApi load fell from ~2.8 GB to ~0.6 GB, output is
+byte-identical, and the cost is a second read of the source (a second SQL query
+in production; ~5 GB extra churn per run in the perf test).
 
 ### Producer-fee builder — biggest single cost, own ticket
 
@@ -400,17 +402,17 @@ not `= null`.
 
 ## Open items
 
-- **The exports are no longer the constraint.** All three stream; a five-run 2 GB
-  soak completes with no OOM, end-of-run managed heap 0.15 GB, peak working set
-  1.94 GB.
-- **The calc run's raw-POM buffer is the floor** (~2.5 GB retained,
-  `BufferPomStream`). A hard limit below ~3 GB OOMs there. The
-  [two-pass file selection](#dataapi-raw-pom-buffer--separate-ticket) removes it;
-  until then the plan must be sized for it plus the fee builder's retained
-  ~1.3 GB.
+- **The run peaks at ~1.3 GB working set** at 2025 volume. Exports, the DataApi
+  load and the fee write are all streamed or bounded; the highest managed-heap
+  points are the billing-CSV export (~1.45 GB) and `StoreProducerFees` (~1.25 GB),
+  both comfortable at 2 GB.
 - **Re-measure after a growth year.** The fee builder's per-producer cost rises
   faster than linearly, so a future year with materially more obligated producers
   needs its own measurement.
+- **Optional next step:** the billing-CSV export still assembles the whole ~45 MB
+  file as a `StringBuilder`/`string`/`byte[]`. Writing it to the response stream
+  (as the billing JSON now does) would drop its ~1.45 GB peak, but it is no longer
+  on the critical path for a 2 GB plan.
 - **Production hosting confirmed** — `PRDRWDWEBAS1403` is P1v3, 2 instances, 6
   apps, same as pre-prod. Still outstanding: the names of the five co-tenant apps
   and the plan's live memory metrics, which need reader access on

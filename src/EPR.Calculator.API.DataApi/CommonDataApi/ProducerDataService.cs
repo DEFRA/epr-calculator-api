@@ -147,15 +147,30 @@ public sealed class ProducerDataService(
 
     private async Task<List<PayCalPom>> StreamPoms(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
     {
-        var poms = await DataApiTelemetry.TraceAsync(typeof(ProducerDataService), "BufferPomStream", async () =>
+        // The raw POM stream is one row per line item and mostly superseded resubmission files; buffering
+        // all of it costs ~1 GB+ at production volume. Instead take two passes: the first keeps only the
+        // per-file metadata and picks the winning file per org/submitter/period; the second re-streams and
+        // buffers only the winners' line items.
+        var winningFileNames = await DataApiTelemetry.TraceAsync(typeof(ProducerDataService), "SelectPomFiles", async () =>
+        {
+            var candidates = new Dictionary<(int?, string?, string?, string?), PomFileCandidate>();
+            await foreach (var pom in pomsHandler.Handle(relativeYear, cancellationToken).WithCancellation(cancellationToken))
+                candidates.TryAdd(
+                    (pom.OrganisationId, pom.SubmitterId, pom.SubmissionPeriod, pom.FileName),
+                    new PomFileCandidate(pom.OrganisationId, pom.SubmitterId, pom.SubmissionPeriod, pom.FileName, pom.IsResubmission, pom.CreatedDateTime));
+
+            return acceptedFileSelector.SelectWinningPomFileNames(candidates.Values, cutOffDate);
+        });
+
+        return await DataApiTelemetry.TraceAsync(typeof(ProducerDataService), "BufferPomStream", async () =>
         {
             var buffer = new List<PayCalPom>();
             await foreach (var pom in pomsHandler.Handle(relativeYear, cancellationToken).WithCancellation(cancellationToken))
-                buffer.Add(pom);
+                if (winningFileNames.TryGetValue((pom.OrganisationId, pom.SubmitterId, pom.SubmissionPeriod), out var winner) &&
+                    pom.FileName == winner)
+                    buffer.Add(pom);
             return buffer;
         });
-
-        return acceptedFileSelector.SelectLatestPomFiles(poms, cutOffDate).ToList();
     }
 
     private static AlignmentOrganisation MapOrganisation(PayCalOrganisation r) => new()
