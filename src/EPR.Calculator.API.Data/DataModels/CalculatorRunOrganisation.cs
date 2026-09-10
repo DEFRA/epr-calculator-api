@@ -1,21 +1,22 @@
 namespace EPR.Calculator.API.Data.DataModels;
 
 /// <summary>
-///     Every organisation/subsidiary/submitter seen in a calculator run's Synapse pull, deduped but
-///     not filtered by obligation status or POM match - the full population a run's data was drawn
-///     from, for consumers that need to see organisations that never became a <see cref="ProducerDetail" />.
+///     Every organisation/subsidiary/submitter this run that DataApi returned a <c>ProducerRecord</c>
+///     for: every obligated ("O") organisation - whether or not it has POM data of its own - plus every
+///     "E"-status organisation and any org/subsidiary an error/warning was raised against. It is
+///     <b>not</b> the full unfiltered Synapse population - a non-obligated organisation with no
+///     error/warning gets no row here.
 /// </summary>
 /// <remarks>
-///     This table must keep receiving the *unfiltered* organisation population, not just those that
-///     survived into <see cref="ProducerDetail" /> - several consumers rely on it as a per-run name/status
-///     snapshot for producers that have since stopped submitting POM data but are still relevant (a
-///     cancelled/lapsed producer still being billed, say): <c>InvoicedProducerService</c>'s
-///     cross-run "latest org name" lookup, <c>BillingFileService</c>'s explicit fallback for producers
-///     "deleted in the pom data" but not in <c>ProducerDetail</c>, and the rejected/scaled-up-producer
-///     and error-report builders. If DataApi is ever extracted to its own external service, its response
-///     contract (<c>ProducerCalculationData.Organisations</c> today) must keep returning this full
-///     population alongside the aligned producers - narrowing it to "just the producers" would silently
-///     break every one of those lookups with no compile error and no obvious test failure.
+///     A row here for an obligated organisation with no <see cref="ProducerDetail" /> of its own (e.g.
+///     a holding company whose subsidiaries submit all the POM data) is relied on directly, in the same
+///     run, by <c>ProducerFeesBuilder</c> and <c>CalcResultScaledupProducersBuilder</c> to find that
+///     parent's identity. Several other consumers rely on this table as a name/status snapshot for
+///     producers that have since stopped being obligated but are still relevant (a cancelled/lapsed
+///     producer still being billed, say) - <c>InvoicedProducerService</c>'s cross-run "latest org name"
+///     lookup, and <c>BillingFileService</c>'s explicit fallback for producers "deleted in the pom data"
+///     but not in <see cref="ProducerDetail" /> - by searching earlier runs this financial year, not by
+///     requiring every run to carry a row for every organisation regardless of relevance.
 /// </remarks>
 public class CalculatorRunOrganisation
 {

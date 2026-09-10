@@ -79,7 +79,7 @@ public class ProducerPomAlignerTests
     // ─────────────────────────── Align ───────────────────────────
 
     [TestMethod]
-    public void Align_WithObligatedOrganisationAndMatchingPom_ProducesAlignedProducer()
+    public void Align_WithObligatedOrganisationAndMatchingPom_ProducesProducerRecord()
     {
         var organisations = new[] { Organisation() };
         var poms = new[] { Pom() };
@@ -108,6 +108,21 @@ public class ProducerPomAlignerTests
     }
 
     [TestMethod]
+    public void Align_WithObligatedOrganisationAndNoPoms_ProducesRecordWithNoReportedMaterials()
+    {
+        // E.g. a holding company obligated in its own right, whose subsidiaries submit all the POM
+        // data on its behalf - it still needs a record so callers don't have to fall back to a
+        // separate, unfiltered organisation population to find its identity.
+        var organisations = new[] { Organisation() };
+
+        var result = aligner.Align(organisations, [], ["PL"]).ToList();
+
+        result.Count.ShouldBe(1);
+        result[0].OrganisationId.ShouldBe(1);
+        result[0].ReportedMaterials.ShouldBeEmpty();
+    }
+
+    [TestMethod]
     public void Align_WithNonObligatedOrganisation_ExcludesOrganisation()
     {
         var organisations = new[] { Organisation() with { ObligationStatus = "N" } };
@@ -130,36 +145,41 @@ public class ProducerPomAlignerTests
     }
 
     [TestMethod]
-    public void Align_WithNoMatchingPoms_ExcludesOrganisation()
+    public void Align_WithNoMatchingPoms_ProducesRecordWithNoReportedMaterials()
     {
+        // The org still gets a record - e.g. a holding company obligated in its own right, whose
+        // subsidiaries report on its behalf - just with no reported materials.
         var organisations = new[] { Organisation() };
         var poms = new[] { Pom() with { SubsidiaryId = "OTHER-SUB" } };
 
-        var result = aligner.Align(organisations, poms, ["PL"]);
+        var result = aligner.Align(organisations, poms, ["PL"]).ToList();
 
-        result.ShouldBeEmpty();
+        result.Count.ShouldBe(1);
+        result[0].ReportedMaterials.ShouldBeEmpty();
     }
 
     [TestMethod]
-    public void Align_WithPomForDifferentSubmitter_ExcludesPom()
+    public void Align_WithPomForDifferentSubmitter_ProducesRecordWithNoReportedMaterials()
     {
         var organisations = new[] { Organisation() };
         var poms = new[] { Pom() with { SubmitterId = Guid.NewGuid() } };
 
-        var result = aligner.Align(organisations, poms, ["PL"]);
+        var result = aligner.Align(organisations, poms, ["PL"]).ToList();
 
-        result.ShouldBeEmpty();
+        result.Count.ShouldBe(1);
+        result[0].ReportedMaterials.ShouldBeEmpty();
     }
 
     [TestMethod]
-    public void Align_WithPomMissingPackagingType_ExcludesPom()
+    public void Align_WithPomMissingPackagingType_ProducesRecordWithNoReportedMaterials()
     {
         var organisations = new[] { Organisation() };
         var poms = new[] { Pom() with { PackagingType = null } };
 
-        var result = aligner.Align(organisations, poms, ["PL"]);
+        var result = aligner.Align(organisations, poms, ["PL"]).ToList();
 
-        result.ShouldBeEmpty();
+        result.Count.ShouldBe(1);
+        result[0].ReportedMaterials.ShouldBeEmpty();
     }
 
     [TestMethod]
@@ -177,14 +197,15 @@ public class ProducerPomAlignerTests
     }
 
     [TestMethod]
-    public void Align_WithUnreportablePackagingType_ExcludesPom()
+    public void Align_WithUnreportablePackagingType_ProducesRecordWithNoReportedMaterials()
     {
         var organisations = new[] { Organisation() };
         var poms = new[] { Pom() with { PackagingType = "NH" } };
 
         var result = aligner.Align(organisations, poms, ["PL"]).ToList();
 
-        result.ShouldBeEmpty();
+        result.Count.ShouldBe(1);
+        result[0].ReportedMaterials.ShouldBeEmpty();
     }
 
     [TestMethod]
@@ -199,14 +220,15 @@ public class ProducerPomAlignerTests
     }
 
     [TestMethod]
-    public void Align_WithHouseholdDrinksContainersAndNonGlassMaterial_ExcludesPom()
+    public void Align_WithHouseholdDrinksContainersAndNonGlassMaterial_ProducesRecordWithNoReportedMaterials()
     {
         var organisations = new[] { Organisation() };
         var poms = new[] { Pom() with { PackagingType = "HDC", PackagingMaterial = "PL" } };
 
         var result = aligner.Align(organisations, poms, ["PL"]).ToList();
 
-        result.ShouldBeEmpty();
+        result.Count.ShouldBe(1);
+        result[0].ReportedMaterials.ShouldBeEmpty();
     }
 
     [TestMethod]

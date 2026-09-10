@@ -3,7 +3,6 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Utils;
 using EPR.CommonDataService.DataApi.Alignment;
-using EPR.CommonDataService.DataApi.CommonDataApi;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Services;
@@ -16,7 +15,7 @@ public interface IProducerDataTransposer
     /// </summary>
     Task Transpose(
         CalculatorRunContext runContext,
-        ProducerCalculationData data,
+        IReadOnlyList<ProducerRecord> data,
         CancellationToken cancellationToken);
 }
 
@@ -31,7 +30,7 @@ public class ProducerDataTransposer(
     [ActivityTrace]
     public async Task Transpose(
         CalculatorRunContext runContext,
-        ProducerCalculationData data,
+        IReadOnlyList<ProducerRecord> data,
         CancellationToken cancellationToken)
     {
         var calculatorRun = await dbContext.CalculatorRuns
@@ -46,7 +45,14 @@ public class ProducerDataTransposer(
         // ⚠️ Only set scalar FK columns (e.g. CalculatorRunId, MaterialId) on the entities below.
         // Navigation properties to existing rows (CalculatorRun, Material) are intentionally left
         // unset so that the IncludeGraph bulk insert below does not try to re-insert them.
-        var newProducerDetails = data.Producers
+        //
+        // Only records with reported materials become a ProducerDetail row - e.g. a holding company
+        // obligated in its own right but with no POM data of its own (its subsidiaries report on its
+        // behalf) gets a CalculatorRunOrganisation row below but no ProducerDetail row, exactly as
+        // before this type was unified. ProducerFeesBuilder/CalcResultScaledupProducersBuilder rely on
+        // that absence to know to look the parent up via CalculatorRunOrganisation instead.
+        var newProducerDetails = data
+            .Where(producer => producer.ReportedMaterials.Count > 0)
             .Select(producer =>
             {
                 var producerDetail = new ProducerDetail
@@ -73,8 +79,8 @@ public class ProducerDataTransposer(
 
         // ⚠️ Only set the scalar CalculatorRunId FK - the CalculatorRun navigation is intentionally
         // left unset so the bulk insert below does not try to re-insert it.
-        var organisations = data.Organisations
-            .Select(o => ToCalculatorRunOrganisation(o, calculatorRun.Id))
+        var organisations = data
+            .Select(record => ToCalculatorRunOrganisation(record, calculatorRun.Id))
             .ToList();
 
         var totalReportedMaterials = newProducerDetails.Sum(p => p.ProducerReportedMaterials.Count);
@@ -95,28 +101,38 @@ public class ProducerDataTransposer(
             cfg.UseTempDB = true;
         }, cancellationToken);
 
-        await errorReportService.PersistErrors(data.Errors, calculatorRun.Id, calculatorRun.CreatedBy, runContext.RelativeYear, cancellationToken);
+        var errors = data
+            .SelectMany(record => record.Errors.Concat(record.Warnings)
+                .Select(error => new OrganisationCalculationError
+                {
+                    OrganisationId = record.OrganisationId,
+                    SubsidiaryId = record.SubsidiaryId,
+                    Error = error
+                }))
+            .ToList();
+
+        await errorReportService.PersistErrors(errors, calculatorRun.Id, calculatorRun.CreatedBy, runContext.RelativeYear, cancellationToken);
 
         calculatorRun.OrgPomDataLoadedAt = timeProvider.GetUtcNow().UtcDateTime;
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private static CalculatorRunOrganisation ToCalculatorRunOrganisation(AlignmentOrganisation o, int calculatorRunId) => new()
+    private static CalculatorRunOrganisation ToCalculatorRunOrganisation(ProducerRecord record, int calculatorRunId) => new()
     {
         CalculatorRunId = calculatorRunId,
-        OrganisationId = o.OrganisationId,
-        SubsidiaryId = o.SubsidiaryId,
-        SubmitterId = o.SubmitterId,
-        OrganisationName = o.OrganisationName,
-        TradingName = o.TradingName,
-        ObligationStatus = o.ObligationStatus,
-        DaysObligated = o.DaysObligated,
-        JoinerDate = o.JoinerDate,
-        LeaverDate = o.LeaverDate,
-        StatusCode = o.StatusCode,
-        ErrorCode = o.ErrorCode,
-        HasH1 = o.HasH1,
-        HasH2 = o.HasH2
+        OrganisationId = record.OrganisationId,
+        SubsidiaryId = record.SubsidiaryId,
+        SubmitterId = record.SubmitterId,
+        OrganisationName = record.ProducerName,
+        TradingName = record.TradingName,
+        ObligationStatus = record.ObligationStatus,
+        DaysObligated = record.DaysObligated,
+        JoinerDate = record.JoinerDate,
+        LeaverDate = record.LeaverDate,
+        StatusCode = record.StatusCode,
+        ErrorCode = record.ErrorCode,
+        HasH1 = record.HasH1,
+        HasH2 = record.HasH2
     };
 
     private static ProducerReportedMaterial ToProducerReportedMaterial(AlignedReportedMaterial reportedMaterial, Material material) => new()

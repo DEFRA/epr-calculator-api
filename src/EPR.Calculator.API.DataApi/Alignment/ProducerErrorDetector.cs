@@ -7,7 +7,7 @@ public sealed record ProducerErrorDetectionResult
     ///     false, the caller decides whether it's still worth surfacing (e.g. because the organisation
     ///     was invoiced in a previous run) - DataApi has no visibility into billing history.
     /// </summary>
-    public required IReadOnlyList<ProducerCalculationError> Errors { get; init; }
+    public required IReadOnlyList<OrganisationCalculationError> Errors { get; init; }
 
     /// <summary>
     ///     Org/subsidiary keys with a hard (non-warning) error - these should be excluded from
@@ -56,7 +56,7 @@ public sealed class ProducerErrorDetector : IProducerErrorDetector
         // an "E"-status organisation's POM data should never enter the calculation. Warnings are kept
         // in calculation (they still get POM data), so they're excluded from the unmatched set.
         var unmatchedKeys = calcErrors
-            .Where(e => !e.IsWarning)
+            .Where(e => !e.Error.IsWarning)
             .Select(e => (e.OrganisationId, e.SubsidiaryId))
             .ToHashSet();
 
@@ -67,7 +67,7 @@ public sealed class ProducerErrorDetector : IProducerErrorDetector
         };
     }
 
-    public static IReadOnlyList<ProducerCalculationError> HandleMissingRegistrationData(
+    public static IReadOnlyList<OrganisationCalculationError> HandleMissingRegistrationData(
         IReadOnlyCollection<AlignmentPom> poms,
         IReadOnlyCollection<AlignmentOrganisation> organisations)
     {
@@ -87,7 +87,7 @@ public sealed class ProducerErrorDetector : IProducerErrorDetector
             .ToList();
     }
 
-    public static IReadOnlyList<ProducerCalculationError> HandleMissingPomData(
+    public static IReadOnlyList<OrganisationCalculationError> HandleMissingPomData(
         IReadOnlyCollection<AlignmentPom> poms,
         IReadOnlyCollection<AlignmentOrganisation> organisations)
     {
@@ -110,7 +110,7 @@ public sealed class ProducerErrorDetector : IProducerErrorDetector
             .ToList();
     }
 
-    public static IReadOnlyList<ProducerCalculationError> HandleObligatedErrors(
+    public static IReadOnlyList<OrganisationCalculationError> HandleObligatedErrors(
         IReadOnlyCollection<AlignmentPom> poms,
         IReadOnlyCollection<AlignmentOrganisation> organisations)
     {
@@ -120,7 +120,7 @@ public sealed class ProducerErrorDetector : IProducerErrorDetector
             .ToList();
     }
 
-    public static IReadOnlyList<ProducerCalculationError> HandleObligatedWarnings(
+    public static IReadOnlyList<OrganisationCalculationError> HandleObligatedWarnings(
         IReadOnlyCollection<AlignmentPom> poms,
         IReadOnlyCollection<AlignmentOrganisation> organisations)
     {
@@ -133,14 +133,17 @@ public sealed class ProducerErrorDetector : IProducerErrorDetector
     private static bool HasPomMatch(AlignmentOrganisation o, IReadOnlyCollection<AlignmentPom> poms) =>
         poms.Any(p => new { OrgId = p.OrganisationId, p.SubsidiaryId, p.SubmitterId }.Equals(new { OrgId = (int?)o.OrganisationId, o.SubsidiaryId, o.SubmitterId }));
 
-    private static ProducerCalculationError CreateError(int orgId, string? subId, string? errorCode, string? leaverCode, bool isWarning, bool hasPomMatch) =>
+    private static OrganisationCalculationError CreateError(int orgId, string? subId, string? errorCode, string? leaverCode, bool isWarning, bool hasPomMatch) =>
         new()
         {
             OrganisationId = orgId,
             SubsidiaryId = subId,
-            ErrorCode = errorCode ?? string.Empty,
-            LeaverCode = leaverCode ?? string.Empty,
-            IsWarning = isWarning,
-            HasPomMatch = hasPomMatch
+            Error = new ProducerCalculationError
+            {
+                ErrorCode = errorCode ?? string.Empty,
+                LeaverCode = leaverCode ?? string.Empty,
+                IsWarning = isWarning,
+                HasPomMatch = hasPomMatch
+            }
         };
 }

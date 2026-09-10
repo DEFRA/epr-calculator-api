@@ -19,7 +19,7 @@ public interface IErrorReportService
     ///     is then added for any producer whose surviving errors are all subsidiary-scoped.
     /// </remarks>
     Task PersistErrors(
-        IReadOnlyList<ProducerCalculationError> errors,
+        IReadOnlyList<OrganisationCalculationError> errors,
         int calculatorRunId,
         string createdBy,
         RelativeYear relativeYear,
@@ -33,7 +33,7 @@ public class ErrorReportService(
     : IErrorReportService
 {
     public async Task PersistErrors(
-        IReadOnlyList<ProducerCalculationError> errors,
+        IReadOnlyList<OrganisationCalculationError> errors,
         int calculatorRunId,
         string createdBy,
         RelativeYear relativeYear,
@@ -43,7 +43,7 @@ public class ErrorReportService(
         var invoicedOrganisationIds = invoicedProducers.Select(i => i.ProducerId).ToHashSet();
 
         var displayedErrors = errors
-            .Where(e => e.HasPomMatch || invoicedOrganisationIds.Contains(e.OrganisationId))
+            .Where(e => e.Error.HasPomMatch || invoicedOrganisationIds.Contains(e.OrganisationId))
             .ToImmutableList();
 
         // Roll up a holding-company-level error for any producer whose surviving errors are all
@@ -51,14 +51,17 @@ public class ErrorReportService(
         var holdingRegErrors = displayedErrors
             .GroupBy(x => x.OrganisationId)
             .Where(x => !x.Any(y => string.IsNullOrEmpty(y.SubsidiaryId)))
-            .Select(x => new ProducerCalculationError
+            .Select(x => new OrganisationCalculationError
             {
                 OrganisationId = x.Key,
                 SubsidiaryId = null,
-                ErrorCode = ProducerErrorCodes.Empty,
-                LeaverCode = ProducerErrorCodes.Empty,
-                IsWarning = false,
-                HasPomMatch = true // Irrelevant here - the roll-up isn't itself filtered by HasPomMatch.
+                Error = new ProducerCalculationError
+                {
+                    ErrorCode = ProducerErrorCodes.Empty,
+                    LeaverCode = ProducerErrorCodes.Empty,
+                    IsWarning = false,
+                    HasPomMatch = true // Irrelevant here - the roll-up isn't itself filtered by HasPomMatch.
+                }
             })
             .ToImmutableList();
 
@@ -71,8 +74,8 @@ public class ErrorReportService(
                 CalculatorRunId = calculatorRunId,
                 ProducerId = e.OrganisationId,
                 SubsidiaryId = e.SubsidiaryId,
-                ErrorCode = e.ErrorCode,
-                LeaverCode = e.LeaverCode,
+                ErrorCode = e.Error.ErrorCode,
+                LeaverCode = e.Error.LeaverCode,
                 CreatedBy = createdBy,
                 CreatedAt = createdAt
             })

@@ -151,15 +151,18 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             Assert.AreEqual("test user", report.CreatedBy);
         }
 
-        private static ProducerCalculationError CreateError(int orgId, string? subId, string errorCode, string leaverCode, bool isWarning, bool hasPomMatch) =>
+        private static OrganisationCalculationError CreateError(int orgId, string? subId, string errorCode, string leaverCode, bool isWarning, bool hasPomMatch) =>
             new()
             {
                 OrganisationId = orgId,
                 SubsidiaryId = subId,
-                ErrorCode = errorCode,
-                LeaverCode = leaverCode,
-                IsWarning = isWarning,
-                HasPomMatch = hasPomMatch
+                Error = new ProducerCalculationError
+                {
+                    ErrorCode = errorCode,
+                    LeaverCode = leaverCode,
+                    IsWarning = isWarning,
+                    HasPomMatch = hasPomMatch
+                }
             };
 
         private static InvoicedProducer CreateInvoicedProducer(int producerId) => new()
