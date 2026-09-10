@@ -98,7 +98,11 @@ public abstract class BaseIntegrationTest
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Database:ConnectionString"] = connectionString,
-                ["Synapse:ConnectionString"] = connectionString
+                ["Synapse:ConnectionString"] = connectionString,
+                // Lets a perf/CI run exercise both DataApi modes: DATAAPI_LOADER_ENABLED=false reads
+                // the source directly, =true (default) stages it through data_api_load_* first.
+                ["CommonDataApi:DataLoader:Enabled"] =
+                    Environment.GetEnvironmentVariable("DATAAPI_LOADER_ENABLED") ?? "true"
             })
             .Build();
 

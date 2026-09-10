@@ -3,8 +3,10 @@ using EPR.CommonDataService.DataApi.AcceptedFileSelection;
 using EPR.CommonDataService.DataApi.Alignment;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.CommonDataService.DataApi.CommonDataApi.LoadTables;
 using EPR.CommonDataService.DataApi.ObligationDetermination;
 using EPR.CommonDataService.DataApi.PomEligibility;
+using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.DataApi.UnitTests.CommonDataApi;
 
@@ -262,13 +264,37 @@ public class ProducerDataServiceTests
         await Should.ThrowAsync<OperationCanceledException>(async () => await service.GetProducerData(2024, null, [], cts.Token));
     }
 
+    [TestMethod]
+    public async Task GetProducerData_WhenLoadTableEnabled_RefreshesLoadTablesFirst()
+    {
+        var refresher = new Mock<ILoadTableRefresher>();
+        var service = CreateService(orgs: [], poms: [], loadTableEnabled: true, loadTableRefresher: refresher.Object);
+
+        await service.GetProducerData(2024, cutOffDate: null, materialCodes: []);
+
+        refresher.Verify(r => r.RefreshAsync(2024, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task GetProducerData_WhenLoadTableDisabled_DoesNotRefreshLoadTables()
+    {
+        var refresher = new Mock<ILoadTableRefresher>();
+        var service = CreateService(orgs: [], poms: [], loadTableEnabled: false, loadTableRefresher: refresher.Object);
+
+        await service.GetProducerData(2024, cutOffDate: null, materialCodes: []);
+
+        refresher.Verify(r => r.RefreshAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
     private static ProducerDataService CreateService(
         IReadOnlyList<PayCalOrganisation>? orgs = null,
         IReadOnlyList<PayCalPom>? poms = null,
         IAsyncEnumerable<PayCalOrganisation>? orgsStream = null,
         IAsyncEnumerable<PayCalPom>? pomsStream = null,
         IProducerObligationDeterminer? determiner = null,
-        IPomEligibilityFilter? eligibilityFilter = null)
+        IPomEligibilityFilter? eligibilityFilter = null,
+        bool loadTableEnabled = false,
+        ILoadTableRefresher? loadTableRefresher = null)
     {
         var mockOrgHandler = new Mock<IStreamOrganisationsRequestHandler>();
         mockOrgHandler
@@ -310,15 +336,22 @@ public class ProducerDataServiceTests
             .Setup(d => d.Determine(It.IsAny<IReadOnlyList<PayCalOrganisation>>()))
             .Returns((IReadOnlyList<PayCalOrganisation> o) => o);
 
+        // The load-table stage's DB behaviour is exercised in the integration tests; here the source
+        // reads straight from the mocked handlers and the refresher is a mock so these tests can
+        // assert the routing (RefreshAsync runs only when the option is on).
+        var dataSource = new SynapseDataSource(mockOrgHandler.Object, mockPomHandler.Object);
+        var loadOptions = Options.Create(new DataApiLoadOptions { Enabled = loadTableEnabled });
+
         return new ProducerDataService(
-            mockOrgHandler.Object,
-            mockPomHandler.Object,
+            dataSource,
             selector,
             determiner ?? mockDeterminer!.Object,
             eligibilityFilterToUse,
             mockFlagsCalculator.Object,
             new ProducerErrorDetector(),
-            new ProducerPomAligner());
+            new ProducerPomAligner(),
+            loadTableRefresher ?? Mock.Of<ILoadTableRefresher>(),
+            loadOptions);
     }
 
     private static async IAsyncEnumerable<T> ToAsyncEnumerable<T>(

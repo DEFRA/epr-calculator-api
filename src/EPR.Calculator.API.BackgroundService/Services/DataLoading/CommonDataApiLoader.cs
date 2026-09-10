@@ -1,8 +1,6 @@
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.Common;
-using EPR.Calculator.API.BackgroundService.Options;
 using EPR.CommonDataService.DataApi.CommonDataApi;
-using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.BackgroundService.Services.DataLoading;
 
@@ -21,29 +19,19 @@ public interface IDataLoader
 
 /// <summary>
 ///     Loads producer data by making a single request to DataApi. Performs no persistence - that's
-///     the caller's responsibility.
+///     the caller's responsibility. Whether DataApi stages the source through the load tables first is
+///     decided inside DataApi from CommonDataApi:DataLoader:Enabled.
 /// </summary>
 public class CommonDataApiLoader(
-    IOptions<CommonDataApiLoaderOptions> options,
     IProducerDataService producerDataService,
     IMaterialService materialService,
     ILogger<CommonDataApiLoader> logger
 ) : IDataLoader
 {
-    private static readonly ProducerCalculationData Empty = new() { Organisations = [], Producers = [], Errors = [] };
-
     /// <inheritdoc />
-    public async Task<ProducerCalculationData> LoadData(
-        CalculatorRunContext runContext, CancellationToken cancellationToken = default)
-    {
-        if (!options.Value.Enabled)
-        {
-            logger.LogInformation("Disabled, skipping load");
-            return Empty;
-        }
-
-        return await LoadDataCore(runContext, cancellationToken);
-    }
+    public Task<ProducerCalculationData> LoadData(
+        CalculatorRunContext runContext, CancellationToken cancellationToken = default) =>
+        LoadDataCore(runContext, cancellationToken);
 
     [ActivityTrace]
     private async Task<ProducerCalculationData> LoadDataCore(RunContext runContext, CancellationToken cancellationToken)

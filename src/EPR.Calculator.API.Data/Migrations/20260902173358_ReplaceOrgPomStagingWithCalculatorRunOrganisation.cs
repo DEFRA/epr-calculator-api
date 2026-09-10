@@ -187,11 +187,67 @@ namespace EPR.Calculator.API.Data.Migrations
                 columns: new[] { "calculator_run_classification_id", "relative_year", "billing_run_status", "id" })
                 .Annotation("SqlServer:Clustered", false)
                 .Annotation("SqlServer:Include", new[] { "name", "created_by", "created_at", "updated_by", "updated_at", "default_parameter_setting_master_id", "lapcap_data_master_id" });
+
+            // DataApi staging tables. Owned by EPR.Calculator.API.DataApi's DataApiLoadContext (which
+            // excludes them from its own migrations); created here because that is the only migration
+            // pipeline the app database has. Raw SQL so they stay out of ApplicationDBContext's model
+            // snapshot - EF must never try to manage or drop them.
+            migrationBuilder.Sql(@"
+                IF OBJECT_ID(N'[data_api_load_organisations]', N'U') IS NULL
+                CREATE TABLE [data_api_load_organisations] (
+                    [id] int NOT NULL IDENTITY,
+                    [organisation_id] int NULL,
+                    [subsidiary_id] nvarchar(400) NULL,
+                    [submitter_id] nvarchar(400) NULL,
+                    [organisation_name] nvarchar(400) NULL,
+                    [trading_name] nvarchar(400) NULL,
+                    [status_code] nvarchar(400) NULL,
+                    [leaver_date] nvarchar(50) NULL,
+                    [joiner_date] nvarchar(50) NULL,
+                    [regulator_status] nvarchar(50) NULL,
+                    [obligation_status] nvarchar(10) NULL,
+                    [num_days_obligated] smallint NULL,
+                    [error_code] nvarchar(max) NULL,
+                    [submission_period_year] int NULL,
+                    [has_h1] bit NOT NULL,
+                    [has_h2] bit NOT NULL,
+                    [file_name] nvarchar(400) NULL,
+                    [is_resubmission] bit NOT NULL,
+                    [created_date_time] datetime2 NULL,
+                    [load_ts] datetime2 NOT NULL,
+                    CONSTRAINT [PK_data_api_load_organisations] PRIMARY KEY ([id])
+                );");
+
+            migrationBuilder.Sql(@"
+                IF OBJECT_ID(N'[data_api_load_poms]', N'U') IS NULL
+                CREATE TABLE [data_api_load_poms] (
+                    [id] bigint NOT NULL IDENTITY,
+                    [organisation_id] int NULL,
+                    [subsidiary_id] nvarchar(400) NULL,
+                    [submitter_id] nvarchar(400) NULL,
+                    [submission_period] nvarchar(400) NULL,
+                    [submission_period_desc] nvarchar(400) NULL,
+                    [packaging_activity] nvarchar(400) NULL,
+                    [packaging_type] nvarchar(400) NULL,
+                    [packaging_class] nvarchar(400) NULL,
+                    [packaging_material] nvarchar(400) NULL,
+                    [packaging_material_subtype] nvarchar(400) NULL,
+                    [packaging_material_weight] float NULL,
+                    [ram_rag_rating] nvarchar(50) NULL,
+                    [file_name] nvarchar(400) NULL,
+                    [is_resubmission] bit NOT NULL,
+                    [created_date_time] datetime2 NULL,
+                    [load_ts] datetime2 NOT NULL,
+                    CONSTRAINT [PK_data_api_load_poms] PRIMARY KEY ([id])
+                );");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("DROP TABLE IF EXISTS [data_api_load_poms];");
+            migrationBuilder.Sql("DROP TABLE IF EXISTS [data_api_load_organisations];");
+
             migrationBuilder.DropTable(
                 name: "calculator_run_organisation");
 

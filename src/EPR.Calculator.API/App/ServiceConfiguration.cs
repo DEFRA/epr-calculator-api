@@ -14,6 +14,7 @@ using EPR.CommonDataService.DataApi.AcceptedFileSelection;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using EPR.CommonDataService.DataApi.Alignment;
 using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
+using EPR.CommonDataService.DataApi.CommonDataApi.LoadTables;
 using EPR.CommonDataService.DataApi.ObligationDetermination;
 using EPR.CommonDataService.DataApi.PomEligibility;
 using FluentValidation;
@@ -187,6 +188,25 @@ public static class ServiceConfiguration
             services.AddTransient<IOrganisationPeriodFlagsCalculator, OrganisationPeriodFlagsCalculator>();
             services.AddTransient<IProducerErrorDetector, ProducerErrorDetector>();
             services.AddTransient<IProducerDataService, ProducerDataService>();
+
+            // The optional load-table stage: when CommonDataApi:DataLoader:Enabled, the RPD source is
+            // streamed once into data_api_load_* (in the app database) and the run reads those tables
+            // back; otherwise the run reads RPD directly. Both wirings are registered - the choice is
+            // made at run time from the option so no configuration is read here.
+            services
+                .AddOptions<DataApiLoadOptions>()
+                .BindConfiguration(DataApiLoadOptions.SectionKey);
+
+            services.AddDbContextFactory<DataApiLoadContext>((provider, builder) => builder.UseSqlServer(
+                provider.GetRequiredService<IOptions<DatabaseOptions>>().Value.ConnectionString));
+
+            services.AddTransient<ILoadTableRefresher, LoadTableRefresher>();
+            services.AddTransient<SynapseDataSource>();
+            services.AddTransient<LoadTableDataSource>();
+            services.AddTransient<IPayCalDataSource>(provider =>
+                provider.GetRequiredService<IOptions<DataApiLoadOptions>>().Value.Enabled
+                    ? provider.GetRequiredService<LoadTableDataSource>()
+                    : provider.GetRequiredService<SynapseDataSource>());
 
             return services;
         }

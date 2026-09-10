@@ -51,6 +51,13 @@ internal static class DataApiTelemetry
         }
     }
 
+    public static Task TraceAsync(Type owner, string name, Func<Task> func) =>
+        TraceAsync(owner, name, async () =>
+        {
+            await func();
+            return true;
+        });
+
     public static async Task<T> TraceAsync<T>(Type owner, string name, Func<Task<T>> func)
     {
         using var activity = StartActivity(owner, name);

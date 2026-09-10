@@ -32,9 +32,11 @@ calculator run itself, `StoreProducerFees` retaining ~1.25 GB, not the downloads
 which run at ~0.74–1.05 GB working set. The footprint is manageable. The
 problem is that in both production and pre-prod the calculator web app shares one
 8 GB P1v3 instance with five other applications, where any one app's realistic
-burst budget is ~2–4 GB and a neighbour can spike at any time. The service needs
-a dedicated App Service plan, or a move to the larger P2v3 plan, so a run can
-reserve what it needs without contending.**
+burst budget is ~2–4 GB and a neighbour can spike at any time. The Function App
+being consolidated in is no better off — it sits on a P2v3 plan shared with 11
+other apps, not on dedicated memory. The service needs its **own** App Service
+plan so a run can reserve what it needs without contending; moving to a bigger
+shared plan (P2v3) only helps on vCPU and neighbour type, not headroom.**
 
 Code work for the new volumes on this branch, in the order it landed and moved
 the number:
@@ -64,22 +66,24 @@ churn); see [Follow-up code work](#follow-up-code-work).
 
 | | Calculator web app | Function app being consolidated |
 |---|---|---|
-| App Service plan | `PRERWDWEBAS2403` / `PRDRWDWEBAS1403` | `PRERWDWEBAS2405` |
-| SKU | **P1v3** — 8 GB / 2 vCPU per instance | P2v3 — 16 GB / 4 vCPU per instance |
+| App | `PRERWDWEBWA2422` / `PRDRWDWEBWA1422` | `PRDRWDWEBFA1411` |
+| App Service plan | `PRERWDWEBAS2403` / `PRDRWDWEBAS1403` | `PRERWDWEBAS2405` / `PRDRWDWEBAS1405` |
+| SKU | **P1v3** — 8 GB / 2 vCPU per instance | **P2v3** — 16 GB / 4 vCPU per instance |
 | Instances | 2 (scale-out; memory is per-instance, not pooled) | 2 |
-| Apps sharing each instance | **6** | 12 |
+| Apps sharing each instance | **6** | **12** |
 
-Production and pre-prod are sized identically: the calculator web app
-`PRDRWDWEBWA1422` runs on plan `PRDRWDWEBAS1403` (P1v3, 2 instances, 6 apps, no
-slots) in `PRDRWDWEBRG1401`, the same shape as pre-prod's `PRERWDWEBWA2422` on
-`PRERWDWEBAS2403`.
+Both plans are Premium v3 — the *Dedicated* App Service tier, not Isolated and not
+an Elastic Premium functions plan. Neither app has memory of its own: every app on
+a plan runs on every instance and shares that instance's RAM.
 
-On Linux App Service every app on a plan runs on every instance of that plan and
-**shares that instance's RAM** — there is no per-app memory isolation. After
-~1–1.5 GB of platform overhead, six apps share ~6.5 GB per instance, so any one
-app's realistic burst budget is ~2–4 GB and lower when a neighbour is active.
-When an instance is under memory pressure the platform kills processes on it —
-which can be the calculator mid-run or an unrelated neighbour.
+Production and pre-prod are sized identically (prod resource group
+`PRDRWDWEBRG1401`), so a decision on one applies to both.
+
+On the calculator's P1v3 plan, after ~1–1.5 GB of platform overhead the six apps
+share ~6.5 GB per instance, so any one app's realistic burst budget is ~2–4 GB
+and lower when a neighbour is active. When an instance is under memory pressure
+the platform kills processes on it — which can be the calculator mid-run or an
+unrelated neighbour.
 
 Calculator runs are triggered via the Service Bus queue
 `defra.epr.calculator.run` and processed in-process by the BackgroundService
@@ -316,10 +320,12 @@ calculator does not have to itself.
 1. **A calculator run should not share an instance with other apps.** On the
    P1v3 plan, after platform overhead six apps share ~6.5 GB per instance and any
    one app's realistic burst budget is ~2–4 GB — and a neighbour can spike into
-   it at any time. Move the calculator web app to its own App Service plan, or
-   onto the P2v3 plan (16 GB / 4 vCPU) as the Function App consolidation frees
-   room there. On a dedicated plan the run has the whole instance and the
-   platform will not kill a neighbour (or be killed by one).
+   it at any time. The fix is the calculator web app on **its own** App Service
+   plan (or one it is effectively alone on): then the run has the whole instance
+   and the platform will not kill a neighbour or be killed by one. Moving instead
+   onto the Function App's P2v3 plan is not a fix — that plan is shared 12 ways,
+   so 16 GB ÷ 12 is about the same per-app share as 8 GB ÷ 6; P2v3 only buys the
+   4 vCPU (useful for the build/write) and quieter, event-driven neighbours.
 2. **Size for a run, not for idle.** The steady-state API footprint is small; the
    requirement is driven by the periodic calc run. At 2025 volume the run peaks
    at ~1.2–1.3 GB, set by `StoreProducerFees`; target headroom of at least 2×
@@ -334,6 +340,48 @@ production mitigation. That only makes the process fail sooner under a limit it
 should not be sharing in the first place. It is used here only as a test tool.
 
 ## Follow-up code work
+
+### DataApi load tables — optional, QA-driven, done on this branch
+
+`CommonDataApi:DataLoader:Enabled` now chooses how the DataApi sources its rows:
+
+- **`false`** — stream the RPD source directly, as the rest of this branch does. The
+  two-pass POM dedup queries RPD twice.
+- **`true`** — `LoadTableRefresher` streams the RPD source once into two staging
+  tables (`data_api_load_organisations`, `data_api_load_poms`), each truncated and
+  refilled in its own transaction with batched `BulkInsert`; the run then reads
+  those tables back (`LoadTableDataSource`) for the two dedup passes. QA can inspect
+  exactly what a run consumed, and RPD is hit once, not twice.
+
+`main` had a similar loader but also copied into per-run master/detail tables — this
+does not; the pipeline reads the staging table straight through to
+`calculator_run_organisation` / `producer_detail`. The staging tables and their
+`DataApiLoadContext` live in `EPR.Calculator.API.DataApi` (which references neither
+`ApplicationDBContext` nor the calculator's `Data` project) so the module stays
+extractable into its own service; their DDL is created by the calculator migration
+`20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation` (raw SQL, kept
+out of `ApplicationDBContext`'s model snapshot).
+
+**Measured** (3-run perf, 2026 / PRE2 volume ≈ 98k organisations, 2.1M POM rows,
+unconstrained GC; the perf test's "source" is a local CSV, so this understates the
+`true`-mode benefit — production's source is the slow RPD database):
+
+| | `Enabled = false` | `Enabled = true` |
+|---|---|---|
+| calc time (avg) | 65.0 s | 83.2 s (**+18 s**) |
+| DataApi step | ~10 s | ~31 s |
+| — of which: fill the staging tables | — | ~23 s (orgs ~1 s, 2.1M POMs ~22 s) |
+| — two-pass dedup read | ~9.9 s (CSV ×2) | ~7.1 s (local table ×2) |
+| peak working set (whole run) | 1.18 GB | 1.22 GB |
+| end-of-run managed heap | 0.08 GB | 0.08 GB |
+| allocation per run | 56.3 GB | 60.8 GB (+4.5 GB churn) |
+
+So the load-table stage costs **≈ +18 s per run and ≈ +0.04 GB working set** at PRE2
+volume. The refresher streams and inserts in ~10k-row batches, so retained heap is
+unchanged (~200 MB through the fill). Byte-identical calculator output in both modes
+(golden-file integration tests run with each). In production the `+18 s` shrinks or
+reverses: the RPD query, not a CSV parse, is the bottleneck, and `true` mode runs it
+once instead of twice.
 
 ### DataApi raw-POM buffer — done on this branch
 
@@ -537,7 +585,8 @@ not `= null`.
 - **Re-measure after a growth year.** The fee builder's per-producer cost rises
   faster than linearly, so a future year with materially more obligated producers
   needs its own measurement.
-- **Production hosting confirmed** — `PRDRWDWEBAS1403` is P1v3, 2 instances, 6
-  apps, same as pre-prod. Still outstanding: the names of the five co-tenant apps
-  and the plan's live memory metrics, which need reader access on
-  `PRDRWDWEBRG1401`.
+- **Production hosting confirmed** — the calculator web app is on `PRDRWDWEBAS1403`
+  (P1v3, 2 instances, 6 apps) and the Function App being consolidated in is on
+  `PRDRWDWEBAS1405` (P2v3, 2 instances, 12 apps); both Premium v3 Dedicated, both
+  shared RAM. Still outstanding: the co-tenant app names on each plan and the
+  plans' live memory metrics, which need reader access on `PRDRWDWEBRG1401`.

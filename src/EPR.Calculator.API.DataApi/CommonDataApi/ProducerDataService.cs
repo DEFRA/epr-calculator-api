@@ -2,8 +2,10 @@ using System.Diagnostics;
 using EPR.CommonDataService.DataApi.AcceptedFileSelection;
 using EPR.CommonDataService.DataApi.Alignment;
 using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.CommonDataService.DataApi.CommonDataApi.LoadTables;
 using EPR.CommonDataService.DataApi.ObligationDetermination;
 using EPR.CommonDataService.DataApi.PomEligibility;
+using Microsoft.Extensions.Options;
 
 namespace EPR.CommonDataService.DataApi.CommonDataApi;
 
@@ -24,14 +26,15 @@ public interface IProducerDataService
 }
 
 public sealed class ProducerDataService(
-    IStreamOrganisationsRequestHandler organisationsHandler,
-    IStreamPomsRequestHandler pomsHandler,
+    IPayCalDataSource dataSource,
     IAcceptedFileSelector acceptedFileSelector,
     IProducerObligationDeterminer obligationDeterminer,
     IPomEligibilityFilter pomEligibilityFilter,
     IOrganisationPeriodFlagsCalculator organisationPeriodFlagsCalculator,
     IProducerErrorDetector errorDetector,
-    IProducerPomAligner aligner
+    IProducerPomAligner aligner,
+    ILoadTableRefresher loadTableRefresher,
+    IOptions<DataApiLoadOptions> loadOptions
 ) : IProducerDataService
 {
     private static readonly HashSet<string> ValidRagRatings = ["R", "A", "G", "R-M", "A-M", "G-M"];
@@ -79,6 +82,11 @@ public sealed class ProducerDataService(
         IReadOnlyList<string> materialCodes,
         CancellationToken cancellationToken)
     {
+        // When the load-table stage is on, pull the RPD source once into data_api_load_* first; the
+        // streams below then read those tables (dataSource is LoadTableDataSource). Off: they read RPD.
+        if (loadOptions.Value.Enabled)
+            await loadTableRefresher.RefreshAsync(relativeYear, cancellationToken);
+
         var orgsTask = StreamOrganisations(relativeYear, cutOffDate, cancellationToken);
         var pomsTask = StreamPoms(relativeYear, cutOffDate, cancellationToken);
 
@@ -132,7 +140,7 @@ public sealed class ProducerDataService(
         var rawOrganisations = await DataApiTelemetry.TraceAsync(typeof(ProducerDataService), "BufferOrganisationStream", async () =>
         {
             var buffer = new List<PayCalOrganisation>();
-            await foreach (var organisation in organisationsHandler.Handle(relativeYear, cancellationToken).WithCancellation(cancellationToken))
+            await foreach (var organisation in dataSource.StreamOrganisations(relativeYear, cancellationToken).WithCancellation(cancellationToken))
                 buffer.Add(organisation);
             return buffer;
         });
@@ -154,7 +162,7 @@ public sealed class ProducerDataService(
         var winningFileNames = await DataApiTelemetry.TraceAsync(typeof(ProducerDataService), "SelectPomFiles", async () =>
         {
             var candidates = new Dictionary<(int?, string?, string?, string?), PomFileCandidate>();
-            await foreach (var pom in pomsHandler.Handle(relativeYear, cancellationToken).WithCancellation(cancellationToken))
+            await foreach (var pom in dataSource.StreamPoms(relativeYear, cancellationToken).WithCancellation(cancellationToken))
                 candidates.TryAdd(
                     (pom.OrganisationId, pom.SubmitterId, pom.SubmissionPeriod, pom.FileName),
                     new PomFileCandidate(pom.OrganisationId, pom.SubmitterId, pom.SubmissionPeriod, pom.FileName, pom.IsResubmission, pom.CreatedDateTime));
@@ -165,7 +173,7 @@ public sealed class ProducerDataService(
         return await DataApiTelemetry.TraceAsync(typeof(ProducerDataService), "BufferPomStream", async () =>
         {
             var buffer = new List<PayCalPom>();
-            await foreach (var pom in pomsHandler.Handle(relativeYear, cancellationToken).WithCancellation(cancellationToken))
+            await foreach (var pom in dataSource.StreamPoms(relativeYear, cancellationToken).WithCancellation(cancellationToken))
                 if (winningFileNames.TryGetValue((pom.OrganisationId, pom.SubmitterId, pom.SubmissionPeriod), out var winner) &&
                     pom.FileName == winner)
                     buffer.Add(pom);

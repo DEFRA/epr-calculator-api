@@ -74,13 +74,8 @@ public static class BackgroundServiceConfiguration
             services.AddTransient<ICalculatorRunFinalizer, CalculatorRunFinalizer>();
             services.AddTransient<ICalcResultsExporter, CalcResultsExporter>();
 
-            // Register CommonDataApi
-            services
-                .AddOptions<CommonDataApiLoaderOptions>()
-                .BindConfiguration(CommonDataApiLoaderOptions.SectionKey)
-                .ValidateDataAnnotations()
-                .ValidateOnStart();
-
+            // Register CommonDataApi. The load-table stage and its CommonDataApi:DataLoader:Enabled
+            // flag live in EPR.Calculator.API.DataApi (see AddPayCalDataApi).
             services.AddTransient<IDataLoader, CommonDataApiLoader>();
             services.AddTransient<IProducerDataTransposer, ProducerDataTransposer>();
 
