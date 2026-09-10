@@ -79,11 +79,13 @@ public sealed partial class TelemetryLoggingHost(ILoggerFactory loggerFactory) :
             };
 
             var threshold = activity.GetTagItem(Telemetry.ThresholdTag) as TimeSpan?;
+            var allocated = FormatBytes(activity.GetTagItem(Telemetry.AllocatedBytesTag) as long? ?? 0);
+            var heap = FormatBytes(activity.GetTagItem(Telemetry.HeapBytesTag) as long? ?? 0);
 
             if(threshold > TimeSpan.Zero && activity.Duration > threshold)
-                LogWarningActivityEnded(activityLogger, activityName, state, activity.Duration, threshold.Value);
+                LogWarningActivityEnded(activityLogger, activityName, state, activity.Duration, threshold.Value, allocated, heap);
             else
-                LogActivityEnded(activityLogger, activityName, state, activity.Duration);
+                LogActivityEnded(activityLogger, activityName, state, activity.Duration, allocated, heap);
         };
 
         ActivitySource.AddActivityListener(activityListener);
@@ -125,9 +127,14 @@ public sealed partial class TelemetryLoggingHost(ILoggerFactory loggerFactory) :
     [LoggerMessage(LogLevel.Trace, "{Activity}: Starting...")]
     private static partial void LogActivityStarting(ILogger logger, string activity);
 
-    [LoggerMessage(LogLevel.Debug, "{Activity}: {State} after {Duration}")]
-    private static partial void LogActivityEnded(ILogger logger, string activity, string state, TimeSpan duration);
+    private static string FormatBytes(long bytes) =>
+        bytes >= 1L << 30
+            ? $"{bytes / (double)(1L << 30):0.00} GB"
+            : $"{bytes / (double)(1L << 20):0} MB";
 
-    [LoggerMessage(LogLevel.Warning, "{Activity}: {State} after {Duration} (over threshold {Threshold})")]
-    private static partial void LogWarningActivityEnded(ILogger logger, string activity, string state, TimeSpan duration, TimeSpan threshold);
+    [LoggerMessage(LogLevel.Debug, "{Activity}: {State} after {Duration}, allocated {Allocated}, heap ~{Heap}")]
+    private static partial void LogActivityEnded(ILogger logger, string activity, string state, TimeSpan duration, string allocated, string heap);
+
+    [LoggerMessage(LogLevel.Warning, "{Activity}: {State} after {Duration} (over threshold {Threshold}), allocated {Allocated}, heap ~{Heap}")]
+    private static partial void LogWarningActivityEnded(ILogger logger, string activity, string state, TimeSpan duration, TimeSpan threshold, string allocated, string heap);
 }
