@@ -190,17 +190,13 @@ public sealed class ProducerDataService(
     {
         OrganisationId = organisation.OrganisationId,
         SubsidiaryId = organisation.SubsidiaryId,
-        SubmitterId = organisation.SubmitterId,
         ProducerName = organisation.OrganisationName,
         TradingName = organisation.TradingName,
-        ObligationStatus = organisation.ObligationStatus,
         DaysObligated = organisation.DaysObligated,
         JoinerDate = organisation.JoinerDate,
         LeaverDate = organisation.LeaverDate,
         StatusCode = organisation.StatusCode,
         ErrorCode = organisation.ErrorCode,
-        HasH1 = organisation.HasH1,
-        HasH2 = organisation.HasH2,
         Errors = errors,
         Warnings = warnings,
         ReportedMaterials = []
@@ -214,7 +210,6 @@ public sealed class ProducerDataService(
         OrganisationId = key.OrganisationId,
         SubsidiaryId = key.SubsidiaryId,
         ProducerName = string.Empty,
-        ObligationStatus = string.Empty,
         Errors = errors,
         Warnings = warnings,
         ReportedMaterials = []

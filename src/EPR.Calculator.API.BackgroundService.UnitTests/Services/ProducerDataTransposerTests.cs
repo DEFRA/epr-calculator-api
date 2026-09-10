@@ -117,7 +117,6 @@ public class ProducerDataTransposerTests
         OrganisationId = organisationId,
         SubsidiaryId = subsidiaryId,
         ProducerName = "Org Co",
-        ObligationStatus = "O",
         Errors = [],
         Warnings = [],
         ReportedMaterials =
@@ -143,7 +142,6 @@ public class ProducerDataTransposerTests
         OrganisationId = organisationId,
         SubsidiaryId = subsidiaryId,
         ProducerName = "Holding Co",
-        ObligationStatus = "O",
         Errors = [],
         Warnings = [],
         ReportedMaterials = []

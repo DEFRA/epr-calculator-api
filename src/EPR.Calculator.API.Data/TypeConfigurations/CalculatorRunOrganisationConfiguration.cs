@@ -25,9 +25,6 @@ public class CalculatorRunOrganisationConfiguration : IEntityTypeConfiguration<C
             .HasColumnName("subsidiary_id")
             .HasMaxLength(400);
 
-        builder.Property(p => p.SubmitterId)
-            .HasColumnName("submitter_id");
-
         builder.Property(p => p.OrganisationName)
             .HasColumnName("organisation_name")
             .HasMaxLength(400);
@@ -35,10 +32,6 @@ public class CalculatorRunOrganisationConfiguration : IEntityTypeConfiguration<C
         builder.Property(p => p.TradingName)
             .HasColumnName("trading_name")
             .HasMaxLength(400);
-
-        builder.Property(p => p.ObligationStatus)
-            .HasColumnName("obligation_status")
-            .HasMaxLength(10);
 
         builder.Property(p => p.DaysObligated)
             .HasColumnName("num_days_obligated");
@@ -56,12 +49,6 @@ public class CalculatorRunOrganisationConfiguration : IEntityTypeConfiguration<C
 
         builder.Property(p => p.ErrorCode)
             .HasColumnName("error_code");
-
-        builder.Property(p => p.HasH1)
-            .HasColumnName("has_h1");
-
-        builder.Property(p => p.HasH2)
-            .HasColumnName("has_h2");
 
         builder.Property(p => p.IsError)
             .HasColumnName("is_error");

@@ -138,6 +138,60 @@ Follow-on to stage 8, raised by the user: didn't want a potentially-large `invoi
 
 ---
 
+## 10. Reshaped DataApi's producer response into a single `ProducerRecord` list (`69eb8cc`)
+
+Follow-on request, raised after reviewing stage 8's `ProducerCalculationData { Organisations, Producers, Errors }` shape: the user felt returning three parallel lists wasn't RESTful and asked for a review of what actually blocked collapsing it into `List<ProducerRecord>` — one row per organisation, carrying its own error/warning/packaging data, instead of a shape callers have to reassemble themselves.
+
+**What the review found:** the split existed because `ProducerPomAligner.Align` silently dropped any obligated organisation with no POM data of its own (a holding company whose subsidiaries report on its behalf) — so `ProducerFeesBuilder`/`CalcResultScaledupProducersBuilder` had to bypass `Producers` and re-query the unfiltered `Organisations` population directly to find that parent's identity. A second, softer finding: dropping non-obligated/no-error organisations from the response entirely was safe, since `BillingFileService`/`InvoicedProducerService` already fall back across previous runs for a cancelled/lapsed producer's "last known name" — nothing needed same-run visibility into organisations that were never obligated and never errored.
+
+**New type:** `ProducerRecord` (`DataApi/Alignment/ProducerRecord.cs`, replacing `AlignedProducer`) — org identity plus `Errors` (hard, exclusionary) and `Warnings` (soft, non-exclusionary — can coexist with `ReportedMaterials`) as separate lists, since a single org/subsidiary can pick up more than one hard error (e.g. an "E"-status org whose POM data also fails the missing-registration check) and a warning never excludes packaging data the way a hard error does. `ProducerCalculationError` trimmed of its now-redundant `OrganisationId`/`SubsidiaryId` (the parent `ProducerRecord` already carries them); a new small carrier, `OrganisationCalculationError` (org/sub key + `ProducerCalculationError`), fills the two remaining spots that still need a flat, keyed list — the detector's output, and re-flattening a record's errors/warnings for persistence.
+
+**`ProducerPomAligner.Align`** no longer drops an obligated organisation with zero matched POM data — it now yields a record with empty `ReportedMaterials`, closing the gap the review found.
+
+**`ProducerDataService.GetProducerDataCore`** gained the merge logic that reassembles the three-way split into one list: aligned obligated records (with detection's errors/warnings attached, matched by org/subsidiary since detection doesn't distinguish submitters), "E"-status organisations the aligner never looks at, and "orphan" `MissingRegistrationData` errors — POM-driven, so they can reference an org/subsidiary with no exact registration match — borrowing identity from any other row sharing the `OrganisationId` where one exists, falling back to an empty identity in the rare case none does (mirroring the pre-existing behaviour where such an organisation never got a `CalculatorRunOrganisation` snapshot either).
+
+**`ProducerCalculationData` deleted.** `IProducerDataService.GetProducerData` now returns `Task<IReadOnlyList<ProducerRecord>>` directly. `ProducerDataTransposer` writes every record to `CalculatorRunOrganisation` (replacing the old, separately-carried `Organisations` list — the deliberate persistence-level narrowing the review justified), but keeps writing `ProducerDetail`/`ProducerReportedMaterial` only for records with non-empty `ReportedMaterials`, preserving the existing gate that keeps empty-POM obligated parents out of `ProducerDetail`.
+
+**Test coverage:** all three affected DataApi/BackgroundService unit test projects updated for the new shape; new cases added for the empty-POM obligated org now yielding a record and the orphan-error identity fallback; new `ProducerDataTransposerTests.cs` (no dedicated test file existed for the transposer before this) covering the three-way split at persistence time.
+
+**Status:** implemented, fully green against the whole suite plus both integration tests, committed as `69eb8cc`.
+
+---
+
+## 11. Replaced `ObligationStatus` filtering with an explicit `IsError` flag (`25a19ee`)
+
+Follow-on discussion: three downstream consumers (`ProducerFeesBuilder`, `CalcResultScaledupProducersBuilder`, `InvoicedProducerService`) filtered `CalculatorRunOrganisation` on `ObligationStatus == "O"` to find "the real, calculation-valid row" as opposed to one that exists only to carry error data. Talked through with the user whether that filter was still correct now that stage 10 could put a hard error onto an otherwise-obligated record (or, more rarely, let an orphan record borrow an "O" `ObligationStatus` despite having no usable identity) — concluding the two concepts aren't the same axis, and `ObligationStatus == "O"` gets both edge cases wrong.
+
+**New property:** `ProducerRecord.IsError` (`Errors.Count > 0`, computed, not settable) — the two-way split the user asked for: valid-for-calculation (with or without a warning) versus error/excluded. Persisted as a new `is_error` column on `CalculatorRunOrganisation` (migration `AddIsErrorToCalculatorRunOrganisation`); `ProducerDataTransposer` sets it from `record.IsError`.
+
+**Consumers switched from `ObligationStatus == "O"` to `!IsError`:** `ProducerFeesBuilder`/`CalcResultScaledupProducersBuilder`'s parent-organisation lookups, and `InvoicedProducerService`'s cross-run tie-break when picking the preferred org-name snapshot. (`CalcResultPartialObligationBuilder`'s `ProducerDetail.ObligationStatus` check was left alone at this stage — it's on a different table that never contains error rows in the first place, so it was already redundant either way.)
+
+**Test coverage:** no existing test needed changes (every fixture's default `IsError = false` already matched the intended "valid" case); added targeted assertions locking in the semantics — `IsError` true for hard-errored and orphan-error records, false for the happy path, and, the key one, false for a record carrying only a warning (proving a warning alone doesn't flip the split); extended `ProducerDataTransposerTests.cs` to confirm `IsError` persists from a record's `Errors`, not its `Warnings`.
+
+**Status:** implemented, fully green against the whole suite plus both integration tests, committed as `25a19ee`.
+
+---
+
+## 12. Removed the now-dead `ObligationStatus`/`HasH1`/`HasH2`/`SubmitterId` fields (`06b0b18`)
+
+Follow-on request: with stage 11 replacing every real reader of `ProducerRecord.ObligationStatus`, and `HasH1`/`HasH2`/`SubmitterId` having no reader anywhere outside DataApi's own internal dedup/matching logic (confirmed by grepping the whole app for each field before removing it), the user asked to drop all four from `ProducerRecord` outright — and, once confirmed the corresponding DB columns had no external reader either, to drop the columns too rather than leave them silently unpopulated going forward.
+
+**Removed from `ProducerRecord`** (`DataApi/Alignment/ProducerRecord.cs`): `ObligationStatus`, `HasH1`, `HasH2`, `SubmitterId`. The internal `AlignmentOrganisation`/`AlignmentPom`/`PayCalOrganisation`/`PayCalPom` types are untouched — they still need these fields for dedup, alignment, and POM matching; only the DataApi *response* type lost them.
+
+**Removed from persisted entities:** `SubmitterId`/`ObligationStatus`/`HasH1`/`HasH2` from `CalculatorRunOrganisation`; `SubmitterId`/`ObligationStatus` from `ProducerDetail` (it never had `HasH1`/`HasH2`) — along with their EF `TypeConfiguration` mappings.
+
+**`CalcResultPartialObligationBuilder`**'s `pd.ObligationStatus == Obligated` filter on `ProducerDetail` replaced with just `pd.DaysObligated != null` — safe because a `ProducerDetail` row is now provably always obligated: it's only ever created for a record with reported materials, and only the aligner (which only ever processes "O"-status organisations) ever produces those.
+
+**Migration** `RemoveUnusedObligationAndSubmitterColumns` drops exactly those six columns — verified against a clean model-snapshot diff before committing.
+
+**Dead code removed:** `ObligationStates` (the BackgroundService-side status-constant helper) had zero remaining consumers after this stage and was deleted.
+
+**Test coverage:** mechanical updates only — every fixture/assertion referencing a removed field had its now-invalid property initializer dropped; no new behavioural coverage needed since this was pure removal of unused surface.
+
+**Status:** implemented, fully green against the whole suite plus both integration tests, committed as `06b0b18`.
+
+---
+
 ## Files changed this session
 
 **New C# components** (`EPR.Calculator.API.DataApi/`):
@@ -146,35 +200,48 @@ Follow-on to stage 8, raised by the user: didn't want a potentially-large `invoi
 - `CommonDataApi/PomEligibility/OrganisationPeriodFlagsCalculator.cs`
 - `CommonDataApi/PomEligibility/SubmissionPeriodClassification.cs`
 - `AcceptedFileSelection/AcceptedFileSelector.cs` (stage 7)
-- `Alignment/ProducerCalculationError.cs`, `Alignment/ProducerErrorCodes.cs`, `Alignment/ProducerErrorDetector.cs` (stage 8, `ProducerErrorDetector`/`ProducerCalculationError` reworked in stage 9 — unconditional inclusion + `HasPomMatch`, no more holding-roll-up or `invoicedOrganisationIds` param)
-- `CommonDataApi/ProducerCalculationData.cs`, `CommonDataApi/ProducerDataService.cs` (stage 8 — the single DataApi entry point; stage 9 dropped `invoicedOrganisationIds` from `GetProducerData`)
+- `Alignment/ProducerCalculationError.cs`, `Alignment/ProducerErrorCodes.cs`, `Alignment/ProducerErrorDetector.cs` (stage 8, `ProducerErrorDetector`/`ProducerCalculationError` reworked in stage 9 — unconditional inclusion + `HasPomMatch`; `ProducerCalculationError` trimmed of `OrganisationId`/`SubsidiaryId` in stage 10)
+- `CommonDataApi/ProducerDataService.cs` (stage 8 — the single DataApi entry point; stage 9 dropped `invoicedOrganisationIds` from `GetProducerData`; stage 10 gained the `ProducerRecord` merge logic and dropped `ProducerCalculationData` entirely; stage 12 stopped setting `ObligationStatus`/`HasH1`/`HasH2`/`SubmitterId`)
+- `Alignment/ProducerRecord.cs` (stage 10, replacing `Alignment/AlignedProducer.cs` — the single unified response record; gained `IsError` in stage 11; lost `ObligationStatus`/`HasH1`/`HasH2`/`SubmitterId` in stage 12)
+- `Alignment/OrganisationCalculationError.cs` (stage 10 — the org/sub-keyed error carrier used by the detector's output and by re-flattening a record's errors/warnings for persistence)
+- ~~`CommonDataApi/ProducerCalculationData.cs`~~ (deleted in stage 10 — superseded by the flat `IReadOnlyList<ProducerRecord>` response)
+- ~~`Alignment/AlignedProducer.cs`~~ (deleted in stage 10 — superseded by `ProducerRecord`)
 
 **Modified product code:**
 - `DataApi/CommonDataApi/Entities/PayCalOrganisation.cs` (added `RegulatorStatus`; stage 7 added `FileName`/`IsResubmission`/`CreatedDateTime`)
 - `DataApi/CommonDataApi/Entities/PayCalPom.cs` (stage 7 added `FileName`/`IsResubmission`/`CreatedDateTime`)
 - `DataApi/CommonDataApi/Infrastructure/SynapseContext.cs` (unmapped C#-computed fields; stage 7 mapped the three new file-selection columns on both entities)
-- `DataApi/CommonDataApi/Alignment/ProducerPomAligner.cs` (packaging-type filter)
+- `DataApi/CommonDataApi/Alignment/ProducerPomAligner.cs` (packaging-type filter; stage 10 stopped dropping an obligated organisation with zero matched POM data - now yields a record with empty `ReportedMaterials`; stage 12 stopped setting `ObligationStatus`/`HasH1`/`HasH2`/`SubmitterId`)
 - `DataApi/StoredProcs/sp_GetPaycalOrgData.sql` (thinned twice by this session: obligation logic, then H1/H2; then deleted entirely in stage 6, inlined into `StreamOrganisationsRequestHandler.cs`; stage 7 dropped its ranking/cut-off logic entirely)
 - `DataApi/StoredProcs/sp_GetPaycalPomData.sql` (thinned twice by this session: eligibility gates, then packaging type; then deleted entirely in stage 6, inlined into `StreamPomsRequestHandler.cs`; stage 7 dropped its ranking/cut-off logic entirely)
 - `DataApi/StoredProcs/fn_ProducerObligationDetermination.sql` (deleted in stage 1)
 - `BackgroundService/Services/DataLoading/CommonDataApiLoader.cs` (restructured pipeline three times across the three moves; stage 7 wired in `IAcceptedFileSelector`; stage 8 thinned drastically down to the `Enabled` check + gathering `materialCodes`/`invoicedOrganisationIds` + one DataApi call; stage 9 dropped the `invoicedOrganisationIds` gathering entirely)
 - `BackgroundService/Services/DataLoading/CommonDataApiLoaderMapper.cs` (deleted in stage 8 — the `PayCal*` → `Alignment*` mapping, including Guid/RAG-rating validation, moved into `ProducerDataService`)
-- `BackgroundService/Services/ErrorReportService.cs` (shrunk to a pure `PersistErrors` DB writer in stage 8; regained the invoiced-filter and holding-roll-up logic in stage 9, now taking `relativeYear`)
-- `BackgroundService/Services/ProducerDataTransposer.cs` (stage 8 — no longer runs `IProducerPomAligner` itself, just persists DataApi's `ProducerCalculationData`; stage 9 threads `relativeYear` through to `PersistErrors`)
-- `BackgroundService/Features/CalculatorRuns/CalculatorRunDataInitializer.cs` (stage 8 — updated to the new `ProducerCalculationData` return shape)
+- `BackgroundService/Services/ErrorReportService.cs` (shrunk to a pure `PersistErrors` DB writer in stage 8; regained the invoiced-filter and holding-roll-up logic in stage 9, now taking `relativeYear`; stage 10 changed its parameter from a flat `ProducerCalculationError` list to the keyed `OrganisationCalculationError` list)
+- `BackgroundService/Services/ProducerDataTransposer.cs` (stage 8 — no longer runs `IProducerPomAligner` itself, just persists DataApi's result; stage 9 threads `relativeYear` through to `PersistErrors`; stage 10 rewritten to split one `IReadOnlyList<ProducerRecord>` across `CalculatorRunOrganisation`/`ProducerDetail`/`PersistErrors`; stage 11 sets the new `IsError` column; stage 12 stopped mapping the removed fields)
+- `BackgroundService/Features/CalculatorRuns/CalculatorRunDataInitializer.cs` (stage 8 — updated to the new return shape; stage 10 updated again for `IReadOnlyList<ProducerRecord>`)
 - `EPR.Calculator.API/App/ServiceConfiguration.cs` (DI registrations; stage 8 added `IProducerErrorDetector`/`IProducerDataService`)
+- `BackgroundService/Builder/Summary/ProducerFeesBuilder.cs`, `BackgroundService/Builder/ScaledupProducers/CalcResultScaledupProducersBuilder.cs` (stage 11 — parent-organisation lookup switched from `ObligationStatus == "O"` to `!IsError`)
+- `BackgroundService/Services/InvoicedProducerService.cs` (stage 11 — cross-run preferred-snapshot tie-break switched from `ObligationStatus` to `IsError`)
+- `BackgroundService/Builder/PartialObligations/CalcResultPartialObligationBuilder.cs` (stage 12 — dropped the now-tautological `ProducerDetail.ObligationStatus == "O"` check)
+- ~~`BackgroundService/Services/ObligationStates.cs`~~ (deleted in stage 12 — zero remaining consumers)
+- `EPR.Calculator.API.Data/DataModels/CalculatorRunOrganisation.cs`, `.../TypeConfigurations/CalculatorRunOrganisationConfiguration.cs` (stage 10 doc comment rewritten for the narrower persistence contract; stage 11 added `IsError`/`is_error`; stage 12 dropped `SubmitterId`/`ObligationStatus`/`HasH1`/`HasH2`)
+- `EPR.Calculator.API.Data/DataModels/ProducerDetail.cs`, `.../TypeConfigurations/ProducerDetailConfiguration.cs` (stage 12 — dropped `SubmitterId`/`ObligationStatus`)
+- New migrations `AddIsErrorToCalculatorRunOrganisation` (stage 11) and `RemoveUnusedObligationAndSubmitterColumns` (stage 12), plus the regenerated `ApplicationDBContextModelSnapshot.cs`
 
 **New test coverage:**
 - `DataApi.UnitTests/CommonDataApi/ObligationDetermination/{ObligationTestCaseLoader,ProducerObligationDeterminerTests}.cs`
 - `DataApi.UnitTests/CommonDataApi/PomEligibility/{PomEligibilityFilterTests,OrganisationPeriodFlagsCalculatorTests}.cs`
 - `DataApi.UnitTests/TestData/myc-obligation-determination-test-cases.csv` (ported from `epr-data`)
-- Extended `DataApi.UnitTests/CommonDataApi/Alignment/ProducerPomAlignerTests.cs`
+- `DataApi.UnitTests/CommonDataApi/Alignment/ProducerPomAlignerTests.cs` (extended in earlier stages; stage 10 — five tests changed from "excludes the organisation" to "produces a record with no reported materials", plus a new explicit no-POM-data case; stage 12 dropped the removed-field assertions)
 - Extended `BackgroundService.UnitTests/Services/DataLoading/CommonDataApiLoaderTests.cs`
 - `DataApi.UnitTests/AcceptedFileSelection/AcceptedFileSelectorTests.cs` (stage 7)
 - `DataApi.UnitTests/Alignment/ProducerErrorDetectorTests.cs` (stage 8 — ported from the old `ErrorReportServiceTests.cs`; stage 9 reworked for unconditional inclusion/`HasPomMatch`)
-- `DataApi.UnitTests/CommonDataApi/ProducerDataServiceTests.cs` (stage 8 — new orchestration coverage, including the hard-error-vs-warning alignment-exclusion sequencing that had no prior test)
-- `BackgroundService.UnitTests/Services/DataLoading/CommonDataApiLoaderTests.cs` (stage 8 rewritten for the thinned loader; stage 9 dropped the invoiced-related setup)
-- `BackgroundService.UnitTests/Services/ErrorReportServiceTests.cs` (stage 8 rewritten as persistence-only tests; stage 9 rewritten again — filter/roll-up/ordering coverage, including the orphan-roll-up regression case)
+- `DataApi.UnitTests/CommonDataApi/ProducerDataServiceTests.cs` (stage 8 — new orchestration coverage, including the hard-error-vs-warning alignment-exclusion sequencing that had no prior test; stage 10 rewritten for the unified `ProducerRecord` list, plus a new orphan-identity-fallback case; stage 11 added `IsError` assertions, including the "warning alone doesn't flip it" case; stage 12 dropped the removed-field assertions)
+- `BackgroundService.UnitTests/Services/DataLoading/CommonDataApiLoaderTests.cs` (stage 8 rewritten for the thinned loader; stage 9 dropped the invoiced-related setup; stage 10 updated to `IReadOnlyList<ProducerRecord>`; stage 12 dropped the removed-field initializers)
+- `BackgroundService.UnitTests/Services/ErrorReportServiceTests.cs` (stage 8 rewritten as persistence-only tests; stage 9 rewritten again — filter/roll-up/ordering coverage, including the orphan-roll-up regression case; stage 10 switched its error builder to `OrganisationCalculationError`)
+- `BackgroundService.UnitTests/Services/ProducerDataTransposerTests.cs` (new in stage 10 — no dedicated transposer test file existed before; covers the three-way `CalculatorRunOrganisation`/`ProducerDetail`/error-flattening split; stage 11 added the `IsError`-from-`Errors`-not-`Warnings` case; stage 12 dropped the removed-field initializers)
+- `BackgroundService.UnitTests/Builder/CalcResultScaledupProducersBuilderTest.cs`, `BackgroundService.UnitTests/Builder/CalcResultPartialObligationBuilderTest.cs`, `BackgroundService.UnitTests/TestHelpers/TestData/TestDataHelper.cs` (stage 12 — dropped `ObligationStatus`/`SubmitterId` fixture initializers now that defaults suffice)
 
 **Integration test fixtures:**
 - `IntegrationTests/TestData/{2025,2026}-pom-data.csv` (added complementary H1/H2 periods for the eligibility gate)
@@ -187,13 +254,15 @@ Follow-on to stage 8, raised by the user: didn't want a potentially-large `invoi
 
 ## Verification status
 
-- **`DataApi.UnitTests`**: 171 tests, all passing (includes ~100 ported obligation-determination scenarios, eligibility/flags/alignment tests, stage 7's 16 `AcceptedFileSelector` tests, and stages 8–9's 17 `ProducerErrorDetectorTests` + 6 `ProducerDataServiceTests`).
-- **`BackgroundService.UnitTests`**: 452 tests, all passing (down from 479 — stage 8 deleted `CommonDataApiLoaderMapperTests.cs` outright and traded the fine-grained `ErrorReportServiceTests.cs`/`CommonDataApiLoaderTests.cs` coverage for the leaner DataApi-side tests above plus stage 9's rewritten `ErrorReportServiceTests.cs`).
-- **`EPR.Calculator.API.UnitTests`**: 346 tests, all passing (untouched by stages 8–9).
-- **`IntegrationTests`**: 2 tests (`IntegrationTest_2025`/`2026`), passing — confirmed stable across repeated runs against a freshly-created `Testcontainers` SQL Server instance (not the long-lived, potentially-stale one used for most of this session's debugging). Stage 7's output was byte-identical to the pre-change baseline, confirming the existing fixtures (single candidate file per group, `IsResubmission` defaulting `false`) flow through the new selector unchanged. Stages 8 and 9 were each independently verified byte-identical too, confirming both the DataApi consolidation and the later invoiced-filter/roll-up relocation changed nothing observable end-to-end.
+- **`DataApi.UnitTests`**: 175 tests, all passing (includes ~100 ported obligation-determination scenarios, eligibility/flags/alignment tests, stage 7's 16 `AcceptedFileSelector` tests, stages 8–9's `ProducerErrorDetectorTests`/`ProducerDataServiceTests`, and stage 10's additional `ProducerDataServiceTests`/`ProducerPomAlignerTests` cases for the unified-record merge and the orphan-identity fallback).
+- **`BackgroundService.UnitTests`**: 456 tests, all passing (down from 479 pre-stage-8 — stage 8 deleted `CommonDataApiLoaderMapperTests.cs` outright and traded fine-grained coverage for the leaner DataApi-side tests; stage 10 added the new `ProducerDataTransposerTests.cs`, the file's first dedicated test coverage).
+- **`EPR.Calculator.API.UnitTests`**: 346 tests, all passing (untouched by stages 8–12).
+- **`IntegrationTests`**: 2 tests (`IntegrationTest_2025`/`2026`), passing — confirmed stable across repeated runs against a freshly-created `Testcontainers` SQL Server instance (not the long-lived, potentially-stale one used for most of this session's debugging). Stage 7's output was byte-identical to the pre-change baseline, confirming the existing fixtures (single candidate file per group, `IsResubmission` defaulting `false`) flow through the new selector unchanged. Stages 8 through 12 were each independently verified byte-identical too, confirming the DataApi consolidation, the invoiced-filter/roll-up relocation, the unified-record reshape, the `IsError` split, and the final field/column removal each changed nothing observable end-to-end.
 
 ## Known caveats for whoever picks this branch up next
 
 - The Synapse queries (formerly `sp_GetPaycalOrgData.sql`/`sp_GetPaycalPomData.sql`, now inlined as raw SQL text in `StreamOrganisationsRequestHandler.cs`/`StreamPomsRequestHandler.cs` per stage 6) are a best-effort port, never executed against a real Synapse warehouse in this environment. They should be reviewed by someone with that access before deployment.
 - The integration test suite's `Testcontainers` SQL Server instance is configured with `WithReuse(true)`. That's convenient for fast local iteration but means state accumulates across every test run in a session — as this session found out, that can produce misleading results during heavy ad-hoc debugging. Worth remembering to `docker rm -f` it (find via `docker ps --filter "label=org.testcontainers=true"`) before trusting a result that seems surprising.
 - Stage 8's consolidation dropped one piece of telemetry rather than porting it: `CommonDataApiLoader` used to wrap each stream's *first item* with `ITelemetry<T>.Metric(..., StreamDelayThreshold)`, logging a warning if either stream took over 5 minutes to start yielding rows. That's a BackgroundService-specific concept (`ITelemetry<T>`'s named `Metrics` enum + threshold-warning semantics) with no equivalent in DataApi's own telemetry (`DataApiTelemetry`, a plain `ActivitySource` wrapper). `ProducerDataService.GetProducerData` is still wrapped in a single activity span end-to-end, so total duration is still visible, but a slow-to-start stream specifically won't trigger the old dedicated warning any more.
+- Stage 12's `RemoveUnusedObligationAndSubmitterColumns` migration is data-losing once applied to a real database — `Down()` re-adds the six columns but with no data, since dropping a column throws away its contents. Both this migration and stage 11's `AddIsErrorToCalculatorRunOrganisation` were generated and validated (`dotnet ef migrations add` against a dummy connection string, then a clean model-snapshot-diff review) but never applied to a real SQL Server instance in this environment — same caveat as the Synapse queries above, review before deploying.
+- Stage 10's persistence-level narrowing (only obligated/errored organisations get a `CalculatorRunOrganisation` row, not the full unfiltered Synapse population) is a deliberate behaviour change from every prior stage, justified in the session's conversation by tracing `BillingFileService`'s and `InvoicedProducerService`'s cross-run name-lookup fallbacks — but it hasn't been observed against a long history of real production data, only against the integration test fixtures' two-run scenario. Worth keeping an eye on the first few real runs after deployment for a cancelled/lapsed producer whose name can't be found at all (only possible if it was cancelled on its very first-ever appearance, with zero prior run history to fall back to).

@@ -82,17 +82,13 @@ public sealed class ProducerPomAligner : IProducerPomAligner
             {
                 OrganisationId = organisation.OrganisationId,
                 SubsidiaryId = organisation.SubsidiaryId,
-                SubmitterId = organisation.SubmitterId,
                 TradingName = organisation.TradingName,
                 ProducerName = organisation.OrganisationName,
-                ObligationStatus = organisation.ObligationStatus,
                 DaysObligated = organisation.DaysObligated,
                 JoinerDate = organisation.JoinerDate,
                 LeaverDate = organisation.LeaverDate,
                 StatusCode = organisation.StatusCode,
                 ErrorCode = organisation.ErrorCode,
-                HasH1 = organisation.HasH1,
-                HasH2 = organisation.HasH2,
                 Errors = [],
                 Warnings = [],
                 ReportedMaterials = reportedMaterials

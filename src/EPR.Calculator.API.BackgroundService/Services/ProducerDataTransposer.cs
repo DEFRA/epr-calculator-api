@@ -62,8 +62,6 @@ public class ProducerDataTransposer(
                     TradingName = producer.TradingName,
                     SubsidiaryId = producer.SubsidiaryId,
                     ProducerName = producer.ProducerName,
-                    SubmitterId = producer.SubmitterId,
-                    ObligationStatus = producer.ObligationStatus,
                     DaysObligated = producer.DaysObligated,
                     JoinerDate = producer.JoinerDate,
                     LeaverDate = producer.LeaverDate,
@@ -122,17 +120,13 @@ public class ProducerDataTransposer(
         CalculatorRunId = calculatorRunId,
         OrganisationId = record.OrganisationId,
         SubsidiaryId = record.SubsidiaryId,
-        SubmitterId = record.SubmitterId,
         OrganisationName = record.ProducerName,
         TradingName = record.TradingName,
-        ObligationStatus = record.ObligationStatus,
         DaysObligated = record.DaysObligated,
         JoinerDate = record.JoinerDate,
         LeaverDate = record.LeaverDate,
         StatusCode = record.StatusCode,
         ErrorCode = record.ErrorCode,
-        HasH1 = record.HasH1,
-        HasH2 = record.HasH2,
         IsError = record.IsError
     };
 

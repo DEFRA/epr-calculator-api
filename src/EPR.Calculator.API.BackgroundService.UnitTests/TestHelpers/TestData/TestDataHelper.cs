@@ -1646,8 +1646,6 @@ public static partial class TestDataHelper
 
     public static ImmutableList<CalculatorRunOrganisation> GetCalculatorRunOrganisations(int calculatorRunId = 1)
     {
-        var submitterId1 = Guid.NewGuid();
-
         return
         [
             new CalculatorRunOrganisation
@@ -1657,8 +1655,6 @@ public static partial class TestDataHelper
                 SubsidiaryId = null,
                 OrganisationName = "Allied Packaging",
                 TradingName = "Allied Trading",
-                ObligationStatus = ObligationStates.Obligated,
-                SubmitterId = submitterId1,
                 CalculatorRunId = calculatorRunId
             },
             new CalculatorRunOrganisation
@@ -1693,8 +1689,6 @@ public static partial class TestDataHelper
                 SubsidiaryId = "Sub 1",
                 OrganisationName = "Allied Packaging sub 1",
                 TradingName = "Allied Trading sub 1",
-                ObligationStatus = ObligationStates.Obligated,
-                SubmitterId = submitterId1,
                 CalculatorRunId = calculatorRunId
             },
             new CalculatorRunOrganisation
@@ -1704,8 +1698,6 @@ public static partial class TestDataHelper
                 SubsidiaryId = "Sub 2",
                 OrganisationName = "Allied Packaging sub 2",
                 TradingName = "Allied Trading sub 2",
-                ObligationStatus = ObligationStates.Obligated,
-                SubmitterId = submitterId1,
                 CalculatorRunId = calculatorRunId
             },
             new CalculatorRunOrganisation
@@ -1715,8 +1707,6 @@ public static partial class TestDataHelper
                 SubsidiaryId = null,
                 OrganisationName = "Allied Packaging",
                 TradingName = "Allied Trading - Old Compliance Scheme",
-                ObligationStatus = ObligationStates.NotObligated,
-                SubmitterId = submitterId1,
                 CalculatorRunId = calculatorRunId
             },
             new CalculatorRunOrganisation
@@ -1726,8 +1716,6 @@ public static partial class TestDataHelper
                 SubsidiaryId = "Sub 1",
                 OrganisationName = "Allied Packaging sub 1 - Old Compliance Scheme",
                 TradingName = "Allied Trading",
-                ObligationStatus = ObligationStates.NotObligated,
-                SubmitterId = submitterId1,
                 CalculatorRunId = calculatorRunId
             },
             new CalculatorRunOrganisation
@@ -1737,7 +1725,6 @@ public static partial class TestDataHelper
                 SubsidiaryId = "Sub 2",
                 OrganisationName = "Allied Packaging sub 2 - Old Compliance Scheme",
                 TradingName = "Allied Trading",
-                ObligationStatus = ObligationStates.NotObligated,
                 CalculatorRunId = calculatorRunId
             }
         ];
