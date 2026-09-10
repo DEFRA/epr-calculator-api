@@ -36,6 +36,14 @@ public class CalculatorRunOrganisation
     public bool HasH1 { get; set; }
     public bool HasH2 { get; set; }
 
+    /// <summary>
+    ///     Whether this row was excluded from calculation by a hard error - <c>ProducerRecord.IsError</c>
+    ///     at persistence time. Use this, not <see cref="ObligationStatus" />, to tell a genuine
+    ///     calculation participant (obligated, with or without a warning) apart from a row that exists
+    ///     only to carry error/warning data for the error report.
+    /// </summary>
+    public bool IsError { get; set; }
+
     #region EF navigational properties
 
     public virtual CalculatorRun CalculatorRun { get; set; } = null!;

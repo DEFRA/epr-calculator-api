@@ -132,7 +132,8 @@ public class ProducerDataTransposer(
         StatusCode = record.StatusCode,
         ErrorCode = record.ErrorCode,
         HasH1 = record.HasH1,
-        HasH2 = record.HasH2
+        HasH2 = record.HasH2,
+        IsError = record.IsError
     };
 
     private static ProducerReportedMaterial ToProducerReportedMaterial(AlignedReportedMaterial reportedMaterial, Material material) => new()
