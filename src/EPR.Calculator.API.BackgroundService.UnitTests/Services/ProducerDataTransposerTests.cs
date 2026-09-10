@@ -69,6 +69,25 @@ public class ProducerDataTransposerTests
     }
 
     [TestMethod]
+    public async Task Transpose_WritesIsError_FromRecordsHardErrors_NotWarnings()
+    {
+        var error = new ProducerCalculationError { ErrorCode = "some error", LeaverCode = "01", IsWarning = false, HasPomMatch = true };
+        var warning = new ProducerCalculationError { ErrorCode = "some warning", LeaverCode = "", IsWarning = true, HasPomMatch = true };
+
+        var records = new[]
+        {
+            ProducerRecordWithNoMaterials(organisationId: 1) with { Errors = [error] },
+            ProducerRecordWithMaterials(organisationId: 2) with { Warnings = [warning] }
+        };
+
+        await sut.Transpose(TestDataHelper.CalculatorRun2024, records, CancellationToken.None);
+
+        var organisations = dbContext.CalculatorRunOrganisations.ToList();
+        organisations.Single(o => o.OrganisationId == 1).IsError.ShouldBeTrue();
+        organisations.Single(o => o.OrganisationId == 2).IsError.ShouldBeFalse();
+    }
+
+    [TestMethod]
     public async Task Transpose_FlattensErrorsAndWarnings_IntoKeyedErrorList()
     {
         var error = new ProducerCalculationError { ErrorCode = "some error", LeaverCode = "01", IsWarning = false, HasPomMatch = true };

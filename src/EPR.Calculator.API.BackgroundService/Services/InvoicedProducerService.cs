@@ -232,7 +232,7 @@ public class InvoicedProducerService(
                     org.OrganisationId == eligibleId
                 orderby
                     org.CalculatorRunId descending,
-                    org.ObligationStatus == ObligationStates.Obligated ? 0 : 1,
+                    org.IsError ? 1 : 0,
                     org.Id
                 select org).Take(1)
             select new InvoicedProducerProjection.PreferredOrgDetail

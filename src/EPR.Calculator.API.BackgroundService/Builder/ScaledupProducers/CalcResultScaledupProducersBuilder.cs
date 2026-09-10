@@ -249,7 +249,7 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
         var parentOrganisations = await (
             from org in dbContext.CalculatorRunOrganisations.AsNoTracking()
             where org.CalculatorRunId == runId && scaledProducerIds.Contains(org.OrganisationId)
-              && org.SubsidiaryId == null && org.ObligationStatus == ObligationStates.Obligated
+              && org.SubsidiaryId == null && !org.IsError
             select new Organisation
             {
                 OrganisationId   = org.OrganisationId,

@@ -54,6 +54,7 @@ public class ProducerDataServiceTests
         result[0].ReportedMaterials[0].MaterialCode.ShouldBe("PL");
         result[0].Errors.ShouldBeEmpty();
         result[0].Warnings.ShouldBeEmpty();
+        result[0].IsError.ShouldBeFalse();
     }
 
     [TestMethod]
@@ -114,6 +115,7 @@ public class ProducerDataServiceTests
         result[0].Errors[0].ErrorCode.ShouldBe("some synapse error");
         result[0].Errors[0].IsWarning.ShouldBeFalse();
         result[0].Errors[0].HasPomMatch.ShouldBeTrue();
+        result[0].IsError.ShouldBeTrue();
     }
 
     [TestMethod]
@@ -183,6 +185,10 @@ public class ProducerDataServiceTests
         result[0].Warnings[0].IsWarning.ShouldBeTrue();
         result[0].Warnings[0].ErrorCode.ShouldBe("some warning");
         result[0].Warnings[0].HasPomMatch.ShouldBeTrue();
+
+        // A warning alone must not flip IsError - it's the two-way split consumers rely on to tell a
+        // genuine calculation participant apart from a row that exists only to carry error data.
+        result[0].IsError.ShouldBeFalse();
     }
 
     [TestMethod]
@@ -248,6 +254,7 @@ public class ProducerDataServiceTests
         result[0].ReportedMaterials.ShouldBeEmpty();
         result[0].Errors.Count.ShouldBe(1);
         result[0].Errors[0].ErrorCode.ShouldBe(ProducerErrorCodes.MissingRegistrationData);
+        result[0].IsError.ShouldBeTrue();
     }
 
     [TestMethod]

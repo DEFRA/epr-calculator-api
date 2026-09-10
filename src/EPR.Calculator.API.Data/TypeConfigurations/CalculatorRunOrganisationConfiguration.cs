@@ -62,5 +62,8 @@ public class CalculatorRunOrganisationConfiguration : IEntityTypeConfiguration<C
 
         builder.Property(p => p.HasH2)
             .HasColumnName("has_h2");
+
+        builder.Property(p => p.IsError)
+            .HasColumnName("is_error");
     }
 }

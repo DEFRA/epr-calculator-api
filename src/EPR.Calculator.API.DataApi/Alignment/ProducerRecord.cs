@@ -43,4 +43,12 @@ public sealed record ProducerRecord
     public required IReadOnlyList<ProducerCalculationError> Warnings { get; init; }
 
     public required IReadOnlyList<AlignedReportedMaterial> ReportedMaterials { get; init; }
+
+    /// <summary>
+    ///     Whether this org/subsidiary was excluded from calculation by a hard error - the two-way
+    ///     split consumers should use instead of <see cref="ObligationStatus" /> when deciding whether a
+    ///     row is a genuine calculation participant: <see cref="Warnings" /> don't affect this (a
+    ///     warned org/subsidiary is still valid), but a non-empty <see cref="Errors" /> always does.
+    /// </summary>
+    public bool IsError => Errors.Count > 0;
 }

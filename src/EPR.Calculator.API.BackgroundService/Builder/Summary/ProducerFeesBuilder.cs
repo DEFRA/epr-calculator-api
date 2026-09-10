@@ -74,7 +74,7 @@ public class ProducerFeesBuilder(
         var parentOrganisations = await (
             from run in context.CalculatorRuns
             join org in context.CalculatorRunOrganisations on run.Id equals org.CalculatorRunId
-            where run.Id == runContext.RunId && org.ObligationStatus == ObligationStates.Obligated && org.SubsidiaryId == null
+            where run.Id == runContext.RunId && !org.IsError && org.SubsidiaryId == null
             select new Organisation
             {
                 OrganisationId   = org.OrganisationId,
