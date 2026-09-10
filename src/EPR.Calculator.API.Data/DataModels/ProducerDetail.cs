@@ -8,8 +8,6 @@ public class ProducerDetail
     public string? TradingName { get; set; }
     public string? SubsidiaryId { get; set; }
     public string? ProducerName { get; set; }
-    public Guid? SubmitterId { get; set; }
-    public string? ObligationStatus { get; set; }
     public int? DaysObligated { get; set; }
     public string? JoinerDate { get; set; }
     public string? LeaverDate { get; set; }

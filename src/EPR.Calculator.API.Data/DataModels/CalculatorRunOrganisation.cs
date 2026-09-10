@@ -24,23 +24,19 @@ public class CalculatorRunOrganisation
     public int CalculatorRunId { get; set; }
     public int OrganisationId { get; set; }
     public string? SubsidiaryId { get; set; }
-    public Guid? SubmitterId { get; set; }
     public required string OrganisationName { get; set; }
     public string? TradingName { get; set; }
-    public string ObligationStatus { get; set; } = string.Empty;
     public int? DaysObligated { get; set; }
     public string? JoinerDate { get; set; }
     public string? LeaverDate { get; set; }
     public string? StatusCode { get; set; }
     public string? ErrorCode { get; set; }
-    public bool HasH1 { get; set; }
-    public bool HasH2 { get; set; }
 
     /// <summary>
     ///     Whether this row was excluded from calculation by a hard error - <c>ProducerRecord.IsError</c>
-    ///     at persistence time. Use this, not <see cref="ObligationStatus" />, to tell a genuine
-    ///     calculation participant (obligated, with or without a warning) apart from a row that exists
-    ///     only to carry error/warning data for the error report.
+    ///     at persistence time. Use this to tell a genuine calculation participant (obligated, with or
+    ///     without a warning) apart from a row that exists only to carry error/warning data for the
+    ///     error report.
     /// </summary>
     public bool IsError { get; set; }
 

@@ -67,7 +67,6 @@ public class CommonDataApiLoaderTests
         {
             OrganisationId = 1,
             ProducerName = "Org Co",
-            ObligationStatus = "O",
             Errors = [],
             Warnings = [],
             ReportedMaterials = []

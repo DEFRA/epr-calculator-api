@@ -72,8 +72,10 @@ public class ProducerDataServiceTests
 
         var result = await service.GetProducerData(2024, null, []);
 
+        // The org only becomes a record at all because the determiner returned ObligationStatus "O" -
+        // that's what the aligner requires - so its presence here, with the determiner's DaysObligated,
+        // is itself evidence obligation determination ran before mapping.
         result.Count.ShouldBe(1);
-        result[0].ObligationStatus.ShouldBe("O");
         result[0].DaysObligated.ShouldBe(42);
         mockDeterminer.VerifyAll();
     }

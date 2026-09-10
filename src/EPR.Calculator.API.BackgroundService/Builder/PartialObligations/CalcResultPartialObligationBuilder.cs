@@ -128,7 +128,10 @@ namespace EPR.Calculator.API.BackgroundService.Builder.PartialObligations
             return await (
                 from run in dbContext.CalculatorRuns.AsNoTracking()
                 join pd in dbContext.ProducerDetail.AsNoTracking() on run.Id equals pd.CalculatorRunId
-                where run.Id == runId && pd.ObligationStatus == ObligationStates.Obligated && pd.DaysObligated != null
+                // ProducerDetail rows only ever exist for obligated organisations - a ProducerDetail row
+                // is only ever created for a record with reported materials, which only ever comes from
+                // an obligated ("O"-status) aligner-produced ProducerRecord.
+                where run.Id == runId && pd.DaysObligated != null
                 let daysInYear = DateTime.IsLeapYear(run.RelativeYear) ? 366 : 365
                 let partialAmount = pd.DaysObligated != null ? (decimal)pd.DaysObligated! / daysInYear : 1
                 select new CalcResultPartialObligation

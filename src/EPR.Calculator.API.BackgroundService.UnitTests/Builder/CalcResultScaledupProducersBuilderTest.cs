@@ -118,8 +118,7 @@ public class CalcResultScaledupProducersBuilderTest : TestsFor<CalcResultScaledu
                 OrganisationId = 11,
                 SubsidiaryId = null,
                 OrganisationName = "Allied Packaging",
-                CalculatorRunId = runContext.RunId,
-                ObligationStatus = ObligationStates.Obligated
+                CalculatorRunId = runContext.RunId
             }
         );
 
@@ -163,8 +162,7 @@ public class CalcResultScaledupProducersBuilderTest : TestsFor<CalcResultScaledu
                 OrganisationId = 12,
                 SubsidiaryId = null,
                 OrganisationName = "Allied Packaging 2",
-                CalculatorRunId = runContext.RunId,
-                ObligationStatus = ObligationStates.Obligated
+                CalculatorRunId = runContext.RunId
             }
         );
 
@@ -383,16 +381,14 @@ public class CalcResultScaledupProducersBuilderTest : TestsFor<CalcResultScaledu
                 OrganisationId = producerId,
                 SubsidiaryId = null,
                 OrganisationName = "Holdco Ltd",
-                CalculatorRunId = runContext.RunId,
-                ObligationStatus = ObligationStates.Obligated
+                CalculatorRunId = runContext.RunId
             },
             new CalculatorRunOrganisation
             {
                 OrganisationId = producerId,
                 SubsidiaryId = subsidiaryId,
                 OrganisationName = "Sub Corp",
-                CalculatorRunId = runContext.RunId,
-                ObligationStatus = ObligationStates.Obligated
+                CalculatorRunId = runContext.RunId
             }
         );
 
@@ -443,16 +439,14 @@ public class CalcResultScaledupProducersBuilderTest : TestsFor<CalcResultScaledu
                 OrganisationId = producerId,
                 SubsidiaryId = null,
                 OrganisationName = "Parent Corp",
-                CalculatorRunId = runContext.RunId,
-                ObligationStatus = ObligationStates.Obligated
+                CalculatorRunId = runContext.RunId
             },
             new CalculatorRunOrganisation
             {
                 OrganisationId = producerId,
                 SubsidiaryId = subsidiaryId,
                 OrganisationName = "Sub Corp",
-                CalculatorRunId = runContext.RunId,
-                ObligationStatus = ObligationStates.Obligated
+                CalculatorRunId = runContext.RunId
             }
         );
 

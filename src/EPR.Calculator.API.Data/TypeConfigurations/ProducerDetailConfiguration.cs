@@ -33,13 +33,6 @@ public class ProducerDetailConfiguration : IEntityTypeConfiguration<ProducerDeta
         builder.Property(p => p.CalculatorRunId)
             .HasColumnName("calculator_run_id");
 
-        builder.Property(p => p.SubmitterId)
-            .HasColumnName("submitter_id");
-
-        builder.Property(p => p.ObligationStatus)
-            .HasColumnName("obligation_status")
-            .HasMaxLength(10);
-
         builder.Property(p => p.DaysObligated)
             .HasColumnName("num_days_obligated");
 

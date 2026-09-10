@@ -42,8 +42,7 @@ public class CalcResultPartialObligationBuilderTest : TestsFor<CalcResultPartial
             CalculatorRunId = runContext.RunId,
             ProducerId = 11,
             SubsidiaryId = null,
-            ProducerName = "Allied Packaging",
-            ObligationStatus = ObligationStates.Obligated
+            ProducerName = "Allied Packaging"
         };
 
         var producerDetail2 = new ProducerDetail
@@ -53,7 +52,6 @@ public class CalcResultPartialObligationBuilderTest : TestsFor<CalcResultPartial
             ProducerId = 22,
             SubsidiaryId = null,
             ProducerName = "Partial Packaging",
-            ObligationStatus = ObligationStates.Obligated,
             DaysObligated = 183,
             JoinerDate = "15/07/2025"
         };
@@ -130,8 +128,7 @@ public class CalcResultPartialObligationBuilderTest : TestsFor<CalcResultPartial
             CalculatorRunId = runContext.RunId,
             ProducerId = 11,
             SubsidiaryId = null,
-            ProducerName = "Allied Packaging",
-            ObligationStatus = ObligationStates.Obligated
+            ProducerName = "Allied Packaging"
         };
 
         var producerDetail2 = new ProducerDetail
@@ -141,7 +138,6 @@ public class CalcResultPartialObligationBuilderTest : TestsFor<CalcResultPartial
             ProducerId = 22,
             SubsidiaryId = null,
             ProducerName = "Partial Packaging",
-            ObligationStatus = ObligationStates.Obligated,
             DaysObligated = 183,
             JoinerDate = "15/07/2025"
         };

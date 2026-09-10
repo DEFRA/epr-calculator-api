@@ -90,10 +90,8 @@ public class ProducerPomAlignerTests
         var producer = result[0];
         producer.OrganisationId.ShouldBe(1);
         producer.SubsidiaryId.ShouldBe("SUB-1");
-        producer.SubmitterId.ShouldBe(SubmitterId);
         producer.TradingName.ShouldBe("Trading Co");
         producer.ProducerName.ShouldBe("Org Co");
-        producer.ObligationStatus.ShouldBe("O");
         producer.DaysObligated.ShouldBe(200);
         producer.JoinerDate.ShouldBe("2024-01-01");
         producer.LeaverDate.ShouldBe("2024-12-31");
