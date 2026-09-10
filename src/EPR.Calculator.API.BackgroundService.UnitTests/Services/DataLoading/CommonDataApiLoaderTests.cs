@@ -3,6 +3,7 @@ using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Services.DataLoading;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.CommonDataService.DataApi.Alignment;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -46,9 +47,7 @@ public class CommonDataApiLoaderTests
         var result = await loader.LoadData(TestDataHelper.CalculatorRun2024);
 
         // Assert
-        result.Organisations.ShouldBeEmpty();
-        result.Producers.ShouldBeEmpty();
-        result.Errors.ShouldBeEmpty();
+        result.ShouldBeEmpty();
         mockProducerDataService.Verify(
             s => s.GetProducerData(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<IReadOnlyList<string>>(), It.IsAny<CancellationToken>()),
             Times.Never);
@@ -64,7 +63,15 @@ public class CommonDataApiLoaderTests
                 new MaterialDetail { Id = 1, Code = "PL", Name = "Plastic" },
                 new MaterialDetail { Id = 2, Code = "GL", Name = "Glass" }));
 
-        var expected = new ProducerCalculationData { Organisations = [], Producers = [], Errors = [] };
+        IReadOnlyList<ProducerRecord> expected = [new ProducerRecord
+        {
+            OrganisationId = 1,
+            ProducerName = "Org Co",
+            ObligationStatus = "O",
+            Errors = [],
+            Warnings = [],
+            ReportedMaterials = []
+        }];
         mockProducerDataService
             .Setup(s => s.GetProducerData(
                 It.IsAny<int>(),

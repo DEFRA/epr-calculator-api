@@ -10,16 +10,19 @@ public interface IProducerPomAligner
     IReadOnlyList<AlignmentOrganisation> DedupeOrganisations(IReadOnlyCollection<AlignmentOrganisation> organisations);
 
     /// <summary>
-    ///     Aligns organisation and POM data into producers and their reported materials: filters to
-    ///     obligated organisations, matches POMs to their organisation, and aggregates reported
-    ///     weights by material and RAG rating.
+    ///     Aligns organisation and POM data into producer records: filters to obligated organisations,
+    ///     matches POMs to their organisation, and aggregates reported weights by material and RAG
+    ///     rating. Yields a record for every obligated organisation, even one with no POM data of its
+    ///     own (e.g. a holding company whose subsidiaries report on its behalf) - <see cref="ProducerRecord.ReportedMaterials" />
+    ///     is empty in that case. <see cref="ProducerRecord.Errors" /> and <see cref="ProducerRecord.Warnings" />
+    ///     are left unset - it's the caller's job to attach detection results.
     /// </summary>
     /// <param name="organisations">Deduped organisation rows (see <see cref="DedupeOrganisations" />) to align.</param>
     /// <param name="poms">POM rows to align.</param>
     /// <param name="materialCodes">
     ///     The known material codes, in the order reported materials should be produced.
     /// </param>
-    IEnumerable<AlignedProducer> Align(
+    IEnumerable<ProducerRecord> Align(
         IReadOnlyCollection<AlignmentOrganisation> organisations,
         IReadOnlyCollection<AlignmentPom> poms,
         IReadOnlyList<string> materialCodes);
@@ -36,14 +39,14 @@ public sealed class ProducerPomAligner : IProducerPomAligner
             .Select(grp => grp.MaxBy(o => o.HasH2)!)
             .ToImmutableList();
 
-    public IEnumerable<AlignedProducer> Align(
+    public IEnumerable<ProducerRecord> Align(
         IReadOnlyCollection<AlignmentOrganisation> organisations,
         IReadOnlyCollection<AlignmentPom> poms,
         IReadOnlyList<string> materialCodes) =>
         DataApiTelemetry.Trace(typeof(ProducerPomAligner), nameof(Align),
             () => AlignCore(organisations, poms, materialCodes).ToList());
 
-    private static IEnumerable<AlignedProducer> AlignCore(
+    private static IEnumerable<ProducerRecord> AlignCore(
         IReadOnlyCollection<AlignmentOrganisation> organisations,
         IReadOnlyCollection<AlignmentPom> poms,
         IReadOnlyList<string> materialCodes)
@@ -68,10 +71,14 @@ public sealed class ProducerPomAligner : IProducerPomAligner
                     grp => grp.ToImmutableList(),
                     StringComparer.OrdinalIgnoreCase);
 
-            if (pomsByMaterial.Count == 0)
-                continue;
+            // No POM data of its own - e.g. a holding company whose subsidiaries report on its behalf.
+            // Still yielded (with no reported materials) so callers that need the org's identity don't
+            // have to fall back to a separate, unfiltered organisation population.
+            var reportedMaterials = pomsByMaterial.Count == 0
+                ? []
+                : GetReportedMaterials(materialCodes, pomsByMaterial).ToImmutableList();
 
-            yield return new AlignedProducer
+            yield return new ProducerRecord
             {
                 OrganisationId = organisation.OrganisationId,
                 SubsidiaryId = organisation.SubsidiaryId,
@@ -83,7 +90,12 @@ public sealed class ProducerPomAligner : IProducerPomAligner
                 JoinerDate = organisation.JoinerDate,
                 LeaverDate = organisation.LeaverDate,
                 StatusCode = organisation.StatusCode,
-                ReportedMaterials = GetReportedMaterials(materialCodes, pomsByMaterial).ToImmutableList()
+                ErrorCode = organisation.ErrorCode,
+                HasH1 = organisation.HasH1,
+                HasH2 = organisation.HasH2,
+                Errors = [],
+                Warnings = [],
+                ReportedMaterials = reportedMaterials
             };
         }
     }

@@ -16,7 +16,7 @@ namespace EPR.CommonDataService.DataApi.CommonDataApi;
 /// </summary>
 public interface IProducerDataService
 {
-    Task<ProducerCalculationData> GetProducerData(
+    Task<IReadOnlyList<ProducerRecord>> GetProducerData(
         int relativeYear,
         DateTimeOffset? cutOffDate,
         IReadOnlyList<string> materialCodes,
@@ -34,9 +34,10 @@ public sealed class ProducerDataService(
     IProducerPomAligner aligner
 ) : IProducerDataService
 {
+    private const string ErrorStatus = "E";
     private static readonly HashSet<string> ValidRagRatings = ["R", "A", "G", "R-M", "A-M", "G-M"];
 
-    public async Task<ProducerCalculationData> GetProducerData(
+    public async Task<IReadOnlyList<ProducerRecord>> GetProducerData(
         int relativeYear,
         DateTimeOffset? cutOffDate,
         IReadOnlyList<string> materialCodes,
@@ -67,7 +68,7 @@ public sealed class ProducerDataService(
         }
     }
 
-    private async Task<ProducerCalculationData> GetProducerDataCore(
+    private async Task<IReadOnlyList<ProducerRecord>> GetProducerDataCore(
         int relativeYear,
         DateTimeOffset? cutOffDate,
         IReadOnlyList<string> materialCodes,
@@ -111,15 +112,113 @@ public sealed class ProducerDataService(
             .ToImmutableList();
 
         var dedupedOrganisations = aligner.DedupeOrganisations(organisations);
-        var producers = aligner.Align(dedupedOrganisations, matchedPoms, materialCodes).ToImmutableList();
+        var aligned = aligner.Align(dedupedOrganisations, matchedPoms, materialCodes).ToImmutableList();
 
-        return new ProducerCalculationData
-        {
-            Organisations = organisations,
-            Producers = producers,
-            Errors = detection.Errors
-        };
+        return MergeProducerRecords(dedupedOrganisations, aligned, detection.Errors);
     }
+
+    /// <summary>
+    ///     Combines the aligner's per-obligated-organisation output with detection's error/warning
+    ///     results into the final per-organisation record set. Three sources feed the result:
+    ///     obligated organisations (from <paramref name="aligned" />, keyed by (OrganisationId,
+    ///     SubsidiaryId) since detection doesn't distinguish submitters), "E"-status organisations
+    ///     (which the aligner never looks at, since it only iterates obligated ones), and "orphan"
+    ///     errors - almost always <see cref="ProducerErrorCodes.MissingRegistrationData" />, which is
+    ///     POM-driven and can reference an org/subsidiary combo with no exact registration match.
+    /// </summary>
+    private static IReadOnlyList<ProducerRecord> MergeProducerRecords(
+        IReadOnlyList<AlignmentOrganisation> dedupedOrganisations,
+        IReadOnlyList<ProducerRecord> aligned,
+        IReadOnlyList<OrganisationCalculationError> errors)
+    {
+        var alignedByKey = aligned.ToLookup(r => (r.OrganisationId, r.SubsidiaryId));
+        var errorsByKey = errors.ToLookup(e => (e.OrganisationId, e.SubsidiaryId));
+
+        var records = new List<ProducerRecord>(aligned.Count);
+        var coveredKeys = new HashSet<(int OrganisationId, string? SubsidiaryId)>();
+
+        foreach (var key in alignedByKey.Select(g => g.Key))
+        {
+            coveredKeys.Add(key);
+            var (hardErrors, warnings) = SplitErrors(errorsByKey[key]);
+
+            foreach (var record in alignedByKey[key])
+                records.Add(record with { Errors = hardErrors, Warnings = warnings });
+        }
+
+        // "E"-status organisations: never obligated, so the aligner never produces a record for them.
+        foreach (var organisation in dedupedOrganisations.Where(o => o.ObligationStatus == ErrorStatus))
+        {
+            var key = (organisation.OrganisationId, organisation.SubsidiaryId);
+            coveredKeys.Add(key);
+            var (hardErrors, warnings) = SplitErrors(errorsByKey[key]);
+            records.Add(ToProducerRecord(organisation, hardErrors, warnings));
+        }
+
+        // Orphan errors: a key with no aligned or "E"-status row at all. Borrow identity fields from
+        // any other row sharing the OrganisationId (e.g. a POM submitted under a subsidiary/submitter
+        // combo that doesn't match any registration); fall back to an empty identity in the rare case
+        // no registration exists for the organisation at all - mirroring today's behaviour, where such
+        // an organisation never gets a CalculatorRunOrganisation snapshot either.
+        foreach (var key in errorsByKey.Select(g => g.Key))
+        {
+            if (!coveredKeys.Add(key))
+                continue;
+
+            var (hardErrors, warnings) = SplitErrors(errorsByKey[key]);
+            var anyOrganisationRow = dedupedOrganisations.FirstOrDefault(o => o.OrganisationId == key.OrganisationId);
+
+            records.Add(anyOrganisationRow is not null
+                ? ToProducerRecord(anyOrganisationRow with { SubsidiaryId = key.SubsidiaryId, SubmitterId = null }, hardErrors, warnings)
+                : ToOrphanProducerRecord(key, hardErrors, warnings));
+        }
+
+        return records;
+    }
+
+    private static (IReadOnlyList<ProducerCalculationError> HardErrors, IReadOnlyList<ProducerCalculationError> Warnings) SplitErrors(
+        IEnumerable<OrganisationCalculationError> errors)
+    {
+        var list = errors.Select(e => e.Error).ToImmutableList();
+        return (list.Where(e => !e.IsWarning).ToImmutableList(), list.Where(e => e.IsWarning).ToImmutableList());
+    }
+
+    private static ProducerRecord ToProducerRecord(
+        AlignmentOrganisation organisation,
+        IReadOnlyList<ProducerCalculationError> errors,
+        IReadOnlyList<ProducerCalculationError> warnings) => new()
+    {
+        OrganisationId = organisation.OrganisationId,
+        SubsidiaryId = organisation.SubsidiaryId,
+        SubmitterId = organisation.SubmitterId,
+        ProducerName = organisation.OrganisationName,
+        TradingName = organisation.TradingName,
+        ObligationStatus = organisation.ObligationStatus,
+        DaysObligated = organisation.DaysObligated,
+        JoinerDate = organisation.JoinerDate,
+        LeaverDate = organisation.LeaverDate,
+        StatusCode = organisation.StatusCode,
+        ErrorCode = organisation.ErrorCode,
+        HasH1 = organisation.HasH1,
+        HasH2 = organisation.HasH2,
+        Errors = errors,
+        Warnings = warnings,
+        ReportedMaterials = []
+    };
+
+    private static ProducerRecord ToOrphanProducerRecord(
+        (int OrganisationId, string? SubsidiaryId) key,
+        IReadOnlyList<ProducerCalculationError> errors,
+        IReadOnlyList<ProducerCalculationError> warnings) => new()
+    {
+        OrganisationId = key.OrganisationId,
+        SubsidiaryId = key.SubsidiaryId,
+        ProducerName = string.Empty,
+        ObligationStatus = string.Empty,
+        Errors = errors,
+        Warnings = warnings,
+        ReportedMaterials = []
+    };
 
     private async Task<List<PayCalOrganisation>> StreamOrganisations(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
     {

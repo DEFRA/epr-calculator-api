@@ -20,7 +20,7 @@ namespace EPR.Calculator.API.DataApi.UnitTests.CommonDataApi;
 public class ProducerDataServiceTests
 {
     [TestMethod]
-    public async Task GetProducerData_HappyPath_ReturnsOrganisationsAndAlignedProducers()
+    public async Task GetProducerData_HappyPath_ReturnsProducerRecord()
     {
         var submitterId = Guid.NewGuid().ToString();
 
@@ -48,15 +48,12 @@ public class ProducerDataServiceTests
 
         var result = await service.GetProducerData(2024, cutOffDate: null, materialCodes: ["PL"]);
 
-        result.Organisations.Count.ShouldBe(1);
-        result.Organisations[0].OrganisationId.ShouldBe(1);
-
-        result.Producers.Count.ShouldBe(1);
-        result.Producers[0].OrganisationId.ShouldBe(1);
-        result.Producers[0].ReportedMaterials.Count.ShouldBe(1);
-        result.Producers[0].ReportedMaterials[0].MaterialCode.ShouldBe("PL");
-
-        result.Errors.ShouldBeEmpty();
+        result.Count.ShouldBe(1);
+        result[0].OrganisationId.ShouldBe(1);
+        result[0].ReportedMaterials.Count.ShouldBe(1);
+        result[0].ReportedMaterials[0].MaterialCode.ShouldBe("PL");
+        result[0].Errors.ShouldBeEmpty();
+        result[0].Warnings.ShouldBeEmpty();
     }
 
     [TestMethod]
@@ -74,14 +71,14 @@ public class ProducerDataServiceTests
 
         var result = await service.GetProducerData(2024, null, []);
 
-        result.Organisations.Count.ShouldBe(1);
-        result.Organisations[0].ObligationStatus.ShouldBe("O");
-        result.Organisations[0].DaysObligated.ShouldBe(42);
+        result.Count.ShouldBe(1);
+        result[0].ObligationStatus.ShouldBe("O");
+        result[0].DaysObligated.ShouldBe(42);
         mockDeterminer.VerifyAll();
     }
 
     [TestMethod]
-    public async Task GetProducerData_HardErroredOrganisation_IsExcludedFromProducers_ButIncludedInErrors()
+    public async Task GetProducerData_HardErroredOrganisation_HasNoReportedMaterials_ButHasError()
     {
         var submitterId = Guid.NewGuid().ToString();
 
@@ -110,12 +107,13 @@ public class ProducerDataServiceTests
 
         // The org is obligation-status "E" and has a matching POM, so it's a hard error - it should
         // never reach Align, even though a matching POM exists.
-        result.Producers.ShouldBeEmpty();
-        result.Errors.Count.ShouldBe(1);
-        result.Errors[0].OrganisationId.ShouldBe(1);
-        result.Errors[0].ErrorCode.ShouldBe("some synapse error");
-        result.Errors[0].IsWarning.ShouldBeFalse();
-        result.Errors[0].HasPomMatch.ShouldBeTrue();
+        result.Count.ShouldBe(1);
+        result[0].OrganisationId.ShouldBe(1);
+        result[0].ReportedMaterials.ShouldBeEmpty();
+        result[0].Errors.Count.ShouldBe(1);
+        result[0].Errors[0].ErrorCode.ShouldBe("some synapse error");
+        result[0].Errors[0].IsWarning.ShouldBeFalse();
+        result[0].Errors[0].HasPomMatch.ShouldBeTrue();
     }
 
     [TestMethod]
@@ -137,10 +135,11 @@ public class ProducerDataServiceTests
 
         var result = await service.GetProducerData(2024, null, []);
 
-        result.Producers.ShouldBeEmpty();
-        result.Errors.Count.ShouldBe(1);
-        result.Errors[0].OrganisationId.ShouldBe(1);
-        result.Errors[0].HasPomMatch.ShouldBeFalse();
+        result.Count.ShouldBe(1);
+        result[0].OrganisationId.ShouldBe(1);
+        result[0].ReportedMaterials.ShouldBeEmpty();
+        result[0].Errors.Count.ShouldBe(1);
+        result[0].Errors[0].HasPomMatch.ShouldBeFalse();
     }
 
     [TestMethod]
@@ -173,15 +172,17 @@ public class ProducerDataServiceTests
 
         var result = await service.GetProducerData(2024, null, ["PL"]);
 
-        // A warning is kept in calculation - the org/sub should get both its POM data (via Producers)
-        // and the warning (via Errors).
-        result.Producers.Count.ShouldBe(1);
-        result.Producers[0].OrganisationId.ShouldBe(1);
+        // A warning is kept in calculation - the org/sub should get both its POM data and the warning
+        // on the same record.
+        result.Count.ShouldBe(1);
+        result[0].OrganisationId.ShouldBe(1);
+        result[0].ReportedMaterials.Count.ShouldBe(1);
+        result[0].Errors.ShouldBeEmpty();
 
-        result.Errors.Count.ShouldBe(1);
-        result.Errors[0].IsWarning.ShouldBeTrue();
-        result.Errors[0].ErrorCode.ShouldBe("some warning");
-        result.Errors[0].HasPomMatch.ShouldBeTrue();
+        result[0].Warnings.Count.ShouldBe(1);
+        result[0].Warnings[0].IsWarning.ShouldBeTrue();
+        result[0].Warnings[0].ErrorCode.ShouldBe("some warning");
+        result[0].Warnings[0].HasPomMatch.ShouldBeTrue();
     }
 
     [TestMethod]
@@ -213,9 +214,40 @@ public class ProducerDataServiceTests
 
         var result = await service.GetProducerData(2024, null, ["PL"]);
 
-        result.Errors.ShouldBeEmpty();
-        result.Producers.Count.ShouldBe(1);
-        result.Producers[0].ReportedMaterials.ShouldHaveSingleItem().MaterialCode.ShouldBe("PL");
+        result.Count.ShouldBe(1);
+        result[0].Errors.ShouldBeEmpty();
+        result[0].Warnings.ShouldBeEmpty();
+        result[0].ReportedMaterials.ShouldHaveSingleItem().MaterialCode.ShouldBe("PL");
+    }
+
+    [TestMethod]
+    public async Task GetProducerData_PomWithNoRegistrationAtAll_StillReturnsMissingRegistrationError()
+    {
+        // No PayCalOrganisation at all for this org - the registration is missing entirely, not just
+        // mismatched to a different subsidiary/submitter. There's no organisation row to attach the
+        // error to, so it gets a best-effort empty identity rather than being silently dropped.
+        var pom = new PayCalPom
+        {
+            OrganisationId = 99,
+            SubsidiaryId = "SUB",
+            SubmitterId = Guid.NewGuid().ToString(),
+            PackagingType = "HH",
+            PackagingMaterial = "PL",
+            SubmissionPeriod = "2024-P1",
+            PackagingMaterialWeight = 1000
+        };
+
+        var service = CreateService(orgs: [], poms: [pom]);
+
+        var result = await service.GetProducerData(2024, null, ["PL"]);
+
+        result.Count.ShouldBe(1);
+        result[0].OrganisationId.ShouldBe(99);
+        result[0].SubsidiaryId.ShouldBe("SUB");
+        result[0].ProducerName.ShouldBe(string.Empty);
+        result[0].ReportedMaterials.ShouldBeEmpty();
+        result[0].Errors.Count.ShouldBe(1);
+        result[0].Errors[0].ErrorCode.ShouldBe(ProducerErrorCodes.MissingRegistrationData);
     }
 
     [TestMethod]

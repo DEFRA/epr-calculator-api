@@ -3,7 +3,7 @@ using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Services.DataLoading;
 using EPR.Calculator.API.Data;
-using EPR.CommonDataService.DataApi.CommonDataApi;
+using EPR.CommonDataService.DataApi.Alignment;
 
 namespace EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
 
@@ -30,7 +30,7 @@ public class CalculatorRunDataInitializer(
     [ActivityMetric(nameof(Metrics.DataDuration), threshold: "00:00:30")]
     private async Task TransposeData(
         CalculatorRunContext runContext,
-        ProducerCalculationData data,
+        IReadOnlyList<ProducerRecord> data,
         CancellationToken cancellationToken)
     {
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);

@@ -1,15 +1,14 @@
 namespace EPR.CommonDataService.DataApi.Alignment;
 
 /// <summary>
-///     A calculation-blocking error or informational warning raised against a specific org/subsidiary
-///     while detecting registration/POM data issues. Errors exclude the org/subsidiary from
-///     <see cref="AlignedProducer" /> output; warnings do not - the org/subsidiary still gets a matching
-///     <see cref="AlignedProducer" /> alongside the warning.
+///     A calculation-blocking error or informational warning raised while detecting registration/POM
+///     data issues, nested inside the <see cref="ProducerRecord" /> it was raised against - see
+///     <see cref="ProducerRecord.Errors" /> and <see cref="ProducerRecord.Warnings" />. A hard error
+///     excludes the org/subsidiary from <see cref="ProducerRecord.ReportedMaterials" />; a warning does
+///     not - the org/subsidiary still gets its reported materials alongside the warning.
 /// </summary>
 public sealed record ProducerCalculationError
 {
-    public required int OrganisationId { get; init; }
-    public string? SubsidiaryId { get; init; }
     public required string ErrorCode { get; init; }
     public required string LeaverCode { get; init; }
     public required bool IsWarning { get; init; }
