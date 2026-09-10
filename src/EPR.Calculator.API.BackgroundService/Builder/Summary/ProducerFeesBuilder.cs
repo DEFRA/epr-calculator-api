@@ -58,7 +58,7 @@ public class ProducerFeesBuilder(
             .ThenBy(pd => pd.SubsidiaryId)
             .ToImmutableList();
 
-        var producerInvoicedMaterialNetTonnage = await invoicedProducerService.GetLatestAcceptedInvoicedProducers(runContext.RelativeYear);
+        var producerInvoicedMaterialNetTonnage = await invoicedProducerService.GetLatestAcceptedInvoicedProducers(runContext.RelativeYear, runContext.RunId);
 
         // PERF: Replace per-(producer, material) linear scans of the invoiced records collection with an O(1) lookup.
         var invoicedNetTonnageByProducerMaterial = BuildInvoicedNetTonnageByProducerMaterial(producerInvoicedMaterialNetTonnage);

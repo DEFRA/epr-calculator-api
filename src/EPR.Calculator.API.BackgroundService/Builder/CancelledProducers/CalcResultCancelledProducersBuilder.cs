@@ -62,7 +62,7 @@ public class CalcResultCancelledProducersBuilder(IInvoicedProducerService invoic
     private async Task<ImmutableDictionary<int, ImmutableDictionary<int, InvoicedProducer>>> GetMissingAcceptedCancelledInvoicedProducersLookup(RunContext runContext)
     {
         var producerIdsForRun = await invoicedProducerService.GetProducerIdsForRun(runContext.RunId);
-        var invoicedProducerIdsForYear = await invoicedProducerService.GetInvoicedProducerIdsForYear(runContext.RelativeYear);
+        var invoicedProducerIdsForYear = await invoicedProducerService.GetInvoicedProducerIdsForYear(runContext.RelativeYear, runContext.RunId);
         var missingProducerIds = invoicedProducerIdsForYear.Except(producerIdsForRun);
 
         ImmutableHashSet<int> missingAcceptedCancelledProducerIds;
@@ -74,11 +74,11 @@ public class CalcResultCancelledProducersBuilder(IInvoicedProducerService invoic
         }
         else
         {
-            var acceptedCancelledProducers = await invoicedProducerService.GetInvoicedThenCancelledProducerIdsForYear(runContext.RelativeYear);
+            var acceptedCancelledProducers = await invoicedProducerService.GetInvoicedThenCancelledProducerIdsForYear(runContext.RelativeYear, runContext.RunId);
             missingAcceptedCancelledProducerIds = missingProducerIds.Except(acceptedCancelledProducers);
         }
 
-        var missingAcceptedCancelledInvoicedProducers = await invoicedProducerService.GetInvoicedProducers(runContext.RelativeYear, missingAcceptedCancelledProducerIds);
+        var missingAcceptedCancelledInvoicedProducers = await invoicedProducerService.GetInvoicedProducers(runContext.RelativeYear, runContext.RunId, missingAcceptedCancelledProducerIds);
 
         // The grouping here selects the latest invoice for each producer/material combination
         return missingAcceptedCancelledInvoicedProducers

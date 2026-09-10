@@ -31,7 +31,7 @@ public class ErrorReportService(
         RelativeYear relativeYear,
         CancellationToken cancellationToken)
     {
-        var invoiced = await invoicedProducerService.GetInvoicedProducers(relativeYear, cancellationToken: cancellationToken);
+        var invoiced = await invoicedProducerService.GetInvoicedProducers(relativeYear, calculatorRunId, cancellationToken: cancellationToken);
         var obligatedErrors = HandleObligatedErrors(pomDetails, orgDetails, invoiced, calculatorRunId, createdBy);
         var obligatedWarnings = HandleObligatedWarnings(pomDetails, orgDetails, invoiced, calculatorRunId, createdBy);
         var missingRegErrors = HandleMissingRegistrationData(pomDetails, orgDetails, calculatorRunId, createdBy);
