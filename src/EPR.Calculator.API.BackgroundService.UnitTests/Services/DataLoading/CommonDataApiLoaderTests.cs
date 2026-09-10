@@ -1,4 +1,3 @@
-using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Services.DataLoading;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
@@ -6,7 +5,6 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.CommonDataService.DataApi.Alignment;
 using EPR.CommonDataService.DataApi.CommonDataApi;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading;
 
@@ -14,7 +12,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading;
 ///     Unit tests for <see cref="CommonDataApiLoader" />.
 ///     <para>
 ///         All streaming/business-rule logic now lives in DataApi's <c>IProducerDataService</c> (a single
-///         call). This loader's own job is just: the disabled guard, and gathering the one small
+///         call; it also owns the CommonDataApi:DataLoader:Enabled flag). This loader's own job is just gathering the one small
 ///         BackgroundService-owned input (material codes) that DataApi needs but doesn't own.
 ///     </para>
 /// </summary>
@@ -38,23 +36,7 @@ public class CommonDataApiLoaderTests
     }
 
     [TestMethod]
-    public async Task LoadData_WhenDisabled_DoesNotCallDataApi()
-    {
-        // Arrange
-        var loader = CreateLoader(enabled: false);
-
-        // Act
-        var result = await loader.LoadData(TestDataHelper.CalculatorRun2024);
-
-        // Assert
-        result.ShouldBeEmpty();
-        mockProducerDataService.Verify(
-            s => s.GetProducerData(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<IReadOnlyList<string>>(), It.IsAny<CancellationToken>()),
-            Times.Never);
-    }
-
-    [TestMethod]
-    public async Task LoadData_WhenEnabled_PassesMaterialCodesToDataApi()
+    public async Task LoadData_PassesMaterialCodesToDataApi()
     {
         // Arrange
         mockMaterialService
@@ -79,7 +61,7 @@ public class CommonDataApiLoaderTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(expected);
 
-        var loader = CreateLoader(enabled: true);
+        var loader = CreateLoader();
 
         // Act
         var result = await loader.LoadData(TestDataHelper.CalculatorRun2024);
@@ -97,20 +79,12 @@ public class CommonDataApiLoaderTests
             .Setup(s => s.GetProducerData(It.IsAny<int>(), It.IsAny<DateTimeOffset?>(), It.IsAny<IReadOnlyList<string>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("data api failed"));
 
-        var loader = CreateLoader(enabled: true);
+        var loader = CreateLoader();
 
         // Act & Assert
         await Should.ThrowAsync<InvalidOperationException>(async () => await loader.LoadData(TestDataHelper.CalculatorRun2024));
     }
 
-    private CommonDataApiLoader CreateLoader(bool enabled)
-    {
-        var loaderOptions = new OptionsWrapper<CommonDataApiLoaderOptions>(new CommonDataApiLoaderOptions { Enabled = enabled });
-
-        return new CommonDataApiLoader(
-            loaderOptions,
-            mockProducerDataService.Object,
-            mockMaterialService.Object,
-            mockLogger.Object);
-    }
+    private CommonDataApiLoader CreateLoader() =>
+        new(mockProducerDataService.Object, mockMaterialService.Object, mockLogger.Object);
 }

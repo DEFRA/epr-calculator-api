@@ -8460,6 +8460,67 @@ IF NOT EXISTS (
     WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
 )
 BEGIN
+
+                    IF OBJECT_ID(N'[data_api_load_organisations]', N'U') IS NULL
+                    CREATE TABLE [data_api_load_organisations] (
+                        [id] int NOT NULL IDENTITY,
+                        [organisation_id] int NULL,
+                        [subsidiary_id] nvarchar(400) NULL,
+                        [submitter_id] nvarchar(400) NULL,
+                        [organisation_name] nvarchar(400) NULL,
+                        [trading_name] nvarchar(400) NULL,
+                        [status_code] nvarchar(400) NULL,
+                        [leaver_date] nvarchar(50) NULL,
+                        [joiner_date] nvarchar(50) NULL,
+                        [regulator_status] nvarchar(50) NULL,
+                        [obligation_status] nvarchar(10) NULL,
+                        [num_days_obligated] smallint NULL,
+                        [error_code] nvarchar(max) NULL,
+                        [submission_period_year] int NULL,
+                        [has_h1] bit NOT NULL,
+                        [has_h2] bit NOT NULL,
+                        [file_name] nvarchar(400) NULL,
+                        [is_resubmission] bit NOT NULL,
+                        [created_date_time] datetime2 NULL,
+                        [load_ts] datetime2 NOT NULL,
+                        CONSTRAINT [PK_data_api_load_organisations] PRIMARY KEY ([id])
+                    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
+
+                    IF OBJECT_ID(N'[data_api_load_poms]', N'U') IS NULL
+                    CREATE TABLE [data_api_load_poms] (
+                        [id] bigint NOT NULL IDENTITY,
+                        [organisation_id] int NULL,
+                        [subsidiary_id] nvarchar(400) NULL,
+                        [submitter_id] nvarchar(400) NULL,
+                        [submission_period] nvarchar(400) NULL,
+                        [submission_period_desc] nvarchar(400) NULL,
+                        [packaging_activity] nvarchar(400) NULL,
+                        [packaging_type] nvarchar(400) NULL,
+                        [packaging_class] nvarchar(400) NULL,
+                        [packaging_material] nvarchar(400) NULL,
+                        [packaging_material_subtype] nvarchar(400) NULL,
+                        [packaging_material_weight] float NULL,
+                        [ram_rag_rating] nvarchar(50) NULL,
+                        [file_name] nvarchar(400) NULL,
+                        [is_resubmission] bit NOT NULL,
+                        [created_date_time] datetime2 NULL,
+                        [load_ts] datetime2 NOT NULL,
+                        CONSTRAINT [PK_data_api_load_poms] PRIMARY KEY ([id])
+                    );
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+)
+BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
     VALUES (N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation', N'10.0.11');
 END;
