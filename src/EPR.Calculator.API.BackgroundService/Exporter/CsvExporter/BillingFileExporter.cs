@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CancelledProducers;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.CommsCost;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Detail;
@@ -16,12 +15,13 @@ using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Summary;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter;
 
 public interface IBillingFileExporter
 {
-    Task<string> Export(BillingRunContext runContext, CalcResult calcResult);
+    Task Export(BillingRunContext runContext, CalcResult calcResult, TextWriter writer, IEnumerable<FeeDetail> producerFeeDetails);
 }
 
 [SuppressMessage("Constructor has 8 parameters, which is greater than the 7 authorized.", "S107", Justification = "This is suppressed for now and will be refactored later")]
@@ -44,7 +44,7 @@ public class BillingFileExporter(
 ) : IBillingFileExporter
 {
     [ActivityMetric(nameof(Metrics.SerializeDuration), threshold: "00:00:30")]
-    public async Task<string> Export(BillingRunContext runContext, CalcResult calcResult)
+    public async Task Export(BillingRunContext runContext, CalcResult calcResult, TextWriter writer, IEnumerable<FeeDetail> producerFeeDetails)
     {
         var materials = await materialService.GetMaterials();
         var csvContent = new StringBuilder();
@@ -72,19 +72,20 @@ public class BillingFileExporter(
         var scaledupIds = calcResult.CalcResultScaledupProducers.ScaledupProducers.Select(p => p.ProducerId).ToList();
         var partialIds = calcResult.CalcResultPartialObligations.PartialObligations.Select(p => (p.ProducerId, p.SubsidiaryId)).ToList();
 
-        producerFeesExporter.Export(runContext, calcResult.ProducerFees, materials, scaledupIds, partialIds, csvContent);
-        csvContent = ResetTotals(csvContent.ToString());
-        rejectedProducersExporter.Export(calcResult.CalcResultRejectedProducers, csvContent);
+        // The producer fee rows are the bulk, so they stream straight to the writer. For a billing run
+        // ProducerFeesExporter emits only the identity columns of the overall-total row (ending
+        // "...,\"Totals\",") - this is what the old string-surgery ResetTotals step used to truncate to.
+        await FlushAsync(writer, csvContent);
+        await producerFeesExporter.Export(runContext, calcResult.ProducerFees, materials, scaledupIds, partialIds, writer, producerFeeDetails);
 
-        return csvContent.ToString();
+        rejectedProducersExporter.Export(calcResult.CalcResultRejectedProducers, csvContent);
+        await FlushAsync(writer, csvContent);
     }
 
-    private static StringBuilder ResetTotals(string sb)
+    private static async Task FlushAsync(TextWriter writer, StringBuilder buffer)
     {
-        var idx = sb.LastIndexOf(CommonConstants.Totals, StringComparison.Ordinal);
-        if (idx < 0)
-            return new StringBuilder(sb);
-        var exceptTotals = sb.Substring(startIndex: 0, idx + CommonConstants.Totals.Length + 2);
-        return new StringBuilder().Append(exceptTotals);
+        foreach (var chunk in buffer.GetChunks())
+            await writer.WriteAsync(chunk);
+        buffer.Clear();
     }
 }

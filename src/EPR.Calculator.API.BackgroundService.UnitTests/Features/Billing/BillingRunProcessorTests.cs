@@ -3,6 +3,7 @@ using EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Models;
+using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
@@ -20,6 +21,7 @@ public class BillingRunProcessorTests : TestsFor<BillingRunProcessor>
     private Mock<IBillingBuilder> builder = null!;
     private Mock<IBillingFileGenerator> fileGenerator = null!;
     private Mock<IBillingRunFinalizer> finalizer = null!;
+    private Mock<ICalcResultReader> calcResultReader = null!;
     private Mock<ILogger<BillingRunProcessor>> logger = null!;
     private BillingRunContext runContext = null!;
 
@@ -29,6 +31,8 @@ public class BillingRunProcessorTests : TestsFor<BillingRunProcessor>
         builder = fixture.Freeze<Mock<IBillingBuilder>>();
         fileGenerator = fixture.Freeze<Mock<IBillingFileGenerator>>();
         finalizer = fixture.Freeze<Mock<IBillingRunFinalizer>>();
+        calcResultReader = fixture.Freeze<Mock<ICalcResultReader>>();
+        calcResultReader.Setup(r => r.StreamProducerFeeDetails(It.IsAny<int>())).Returns([]);
         logger = fixture.Freeze<Mock<ILogger<BillingRunProcessor>>>();
 
         builder.Setup(b => b.BuildAsync(It.IsAny<BillingRunContext>(), It.IsAny<CancellationToken>()))
@@ -75,8 +79,8 @@ public class BillingRunProcessorTests : TestsFor<BillingRunProcessor>
 
         CalcResult? exported = null;
         fileGenerator
-            .Setup(f => f.SerializeAndExport(runContext, It.IsAny<CalcResult>(), It.IsAny<CancellationToken>()))
-            .Callback<BillingRunContext, CalcResult, CancellationToken>((_, calcResult, _) => exported = calcResult)
+            .Setup(f => f.SerializeAndExport(runContext, It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>(), It.IsAny<CancellationToken>()))
+            .Callback<BillingRunContext, CalcResult, IEnumerable<FeeDetail>, CancellationToken>((_, calcResult, _, _) => exported = calcResult)
             .ReturnsAsync((BillingFileResult?)null!);
 
         var result = await testSubject.Process(runContext, CancellationToken.None);
@@ -103,8 +107,8 @@ public class BillingRunProcessorTests : TestsFor<BillingRunProcessor>
 
         CalcResult? exported = null;
         fileGenerator
-            .Setup(f => f.SerializeAndExport(runContext, It.IsAny<CalcResult>(), It.IsAny<CancellationToken>()))
-            .Callback<BillingRunContext, CalcResult, CancellationToken>((_, calcResult, _) => exported = calcResult)
+            .Setup(f => f.SerializeAndExport(runContext, It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>(), It.IsAny<CancellationToken>()))
+            .Callback<BillingRunContext, CalcResult, IEnumerable<FeeDetail>, CancellationToken>((_, calcResult, _, _) => exported = calcResult)
             .ReturnsAsync((BillingFileResult?)null!);
 
         var result = await testSubject.Process(runContext, CancellationToken.None);

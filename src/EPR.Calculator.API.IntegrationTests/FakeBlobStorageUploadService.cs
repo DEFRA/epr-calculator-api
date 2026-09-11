@@ -14,6 +14,14 @@ public class FakeBlobStorageUploadService : IStorageUploadService, IBlobStorageS
         return Task.FromResult(request.FileName);
     }
 
+    public async Task<string> UploadFileStreamAsync(IStorageUploadService.StreamRequest request, Func<Stream, CancellationToken, Task> writeContent, CancellationToken cancellationToken)
+    {
+        using var buffer = new MemoryStream();
+        await writeContent(buffer, cancellationToken);
+        store[request.FileName] = Encoding.UTF8.GetString(buffer.ToArray());
+        return request.FileName;
+    }
+
     public string Get(string fileName)
     {
         return store.TryGetValue(fileName, out var content)

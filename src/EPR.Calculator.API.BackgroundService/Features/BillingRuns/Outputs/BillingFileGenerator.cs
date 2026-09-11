@@ -1,3 +1,4 @@
+using System.Text;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter;
 using EPR.Calculator.API.BackgroundService.Exporter.JsonExporter;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
@@ -14,7 +15,11 @@ public interface IBillingFileGenerator
     /// <summary>
     ///     Serializes the calcResult to CSV/JSON billing files and exports them.
     /// </summary>
-    Task<BillingFileResult> SerializeAndExport(BillingRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken);
+    /// <param name="producerFeeDetails">
+    ///     Deferred, streamed per-producer fee rows - enumerated once by the CSV export and once by the
+    ///     JSON export, so the whole fee graph is never held in memory.
+    /// </param>
+    Task<BillingFileResult> SerializeAndExport(BillingRunContext runContext, CalcResult calcResult, IEnumerable<FeeDetail> producerFeeDetails, CancellationToken cancellationToken);
 }
 
 public class BillingFileGenerator(
@@ -25,12 +30,12 @@ public class BillingFileGenerator(
     ILogger<BillingFileGenerator> logger)
     : IBillingFileGenerator
 {
-    public async Task<BillingFileResult> SerializeAndExport(BillingRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken)
+    public async Task<BillingFileResult> SerializeAndExport(BillingRunContext runContext, CalcResult calcResult, IEnumerable<FeeDetail> producerFeeDetails, CancellationToken cancellationToken)
     {
-        var csvMetaData = await HandleCsvFile(runContext, calcResult, cancellationToken);
+        var csvMetaData = await HandleCsvFile(runContext, calcResult, producerFeeDetails, cancellationToken);
         logger.LogInformation($"{nameof(HandleCsvFile)} Completed. File: {{Filename}}", csvMetaData.FileName);
 
-        var jsonMetaData = await HandleJsonFile(runContext, calcResult, csvMetaData, cancellationToken);
+        var jsonMetaData = await HandleJsonFile(runContext, calcResult, csvMetaData, producerFeeDetails, cancellationToken);
         logger.LogInformation($"{nameof(HandleJsonFile)} Completed. File: {{Filename}}", jsonMetaData.BillingJsonFileName);
 
         return new BillingFileResult
@@ -43,20 +48,27 @@ public class BillingFileGenerator(
     private async Task<CalculatorRunCsvFileMetadata> HandleCsvFile(
         BillingRunContext runContext,
         CalcResult calcResults,
+        IEnumerable<FeeDetail> producerFeeDetails,
         CancellationToken ct)
     {
         var csvFilename = new CalcResultsAndBillingFileName(runContext.RunId, runContext.RunName, runContext.ProcessingStartedAt.UtcDateTime, true);
-        var csvContent = await exporter.Export(runContext, calcResults);
 
-        var request = new IStorageUploadService.Request
+        var request = new IStorageUploadService.StreamRequest
         {
             FileName = csvFilename,
-            Content = csvContent,
             ContainerName = blobStorageUploadOptions.Value.BillingFileCsvContainer,
             Overwrite = true
         };
 
-        var csvBlobUri = await storageUploadService.UploadFileContentAsync(request, ct);
+        var csvBlobUri = await storageUploadService.UploadFileStreamAsync(
+            request,
+            async (stream, token) =>
+            {
+                await using var writer = new StreamWriter(stream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), leaveOpen: true);
+                await exporter.Export(runContext, calcResults, writer, producerFeeDetails);
+                await writer.FlushAsync(token);
+            },
+            ct);
 
         return new CalculatorRunCsvFileMetadata
         {
@@ -70,21 +82,23 @@ public class BillingFileGenerator(
         BillingRunContext runContext,
         CalcResult calcResults,
         CalculatorRunCsvFileMetadata csvMetaData,
+        IEnumerable<FeeDetail> producerFeeDetails,
         CancellationToken ct)
     {
         var jsonFilename = new CalcResultsAndBillingFileName(runContext.RunId);
-        var jsonContent = await jsonWriter.WriteToString(runContext, calcResults);
 
-        var request = new IStorageUploadService.Request
+        var request = new IStorageUploadService.StreamRequest
         {
             FileName = jsonFilename,
-            Content = jsonContent,
             ContainerName = blobStorageUploadOptions.Value.BillingFileJsonContainer,
             Overwrite = true,
             UseUtf8Bom = false
         };
 
-        await storageUploadService.UploadFileContentAsync(request, ct);
+        await storageUploadService.UploadFileStreamAsync(
+            request,
+            (stream, token) => jsonWriter.WriteTo(stream, runContext, calcResults, producerFeeDetails, token),
+            ct);
 
         return new CalculatorRunBillingFileMetadata
         {

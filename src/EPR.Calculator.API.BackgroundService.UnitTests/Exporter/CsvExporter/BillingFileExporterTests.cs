@@ -58,7 +58,8 @@ public class BillingFileExporterTests : TestsFor<BillingFileExporter>
         var runContext = TestDataHelper.BillingRun2025;
 
         // Act
-        var result = await testSubject.Export(runContext, calcResult);
+        var writer = new StringWriter();
+        await testSubject.Export(runContext, calcResult, writer, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
 
         // Assert
         resultDetailExporter.Verify(mock => mock.Export(It.IsAny<CalcResultDetail>(), It.IsAny<StringBuilder>()));
@@ -69,12 +70,12 @@ public class BillingFileExporterTests : TestsFor<BillingFileExporter>
         projectedProducersExporter.Verify(mock => mock.Export(It.IsAny<CalcResultProjectedProducers>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()), Times.Never);
         lapcapDataExporter.Verify(mock => mock.Export(It.IsAny<CalcResultLapcapData>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
         parameterOtherCostsExporter.Verify(mock => mock.Export(It.IsAny<CalcResultParameterOtherCost>(), It.IsAny<StringBuilder>()));
-        producerFeesExporter.Verify(mock => mock.Export(runContext, It.IsAny<ProducerFees>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<IReadOnlyList<int>>(), It.IsAny<IReadOnlyList<(int, string?)>>(), It.IsAny<StringBuilder>()));
+        producerFeesExporter.Verify(mock => mock.Export(runContext, It.IsAny<ProducerFees>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<IReadOnlyList<int>>(), It.IsAny<IReadOnlyList<(int, string?)>>(), It.IsAny<TextWriter>(), It.IsAny<IEnumerable<FeeDetail>>()));
         laDisposalCostExporter.Verify(mock => mock.Export(runContext, It.IsAny<CalcResultLaDisposalCostData>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
         commsCostExporter.Verify(mock => mock.Export(It.IsAny<CalcResultCommsCost>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
         cancelledProducersExporter.Verify(mock => mock.Export(It.IsAny<IReadOnlyList<CalcResultCancelledProducer>>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
 
-        Assert.IsNotNull(result);
+        Assert.IsNotNull(writer.ToString());
     }
 
     [TestMethod]
@@ -85,7 +86,8 @@ public class BillingFileExporterTests : TestsFor<BillingFileExporter>
         var runContext = TestDataHelper.BillingRun2026;
 
         // Act
-        var result = await testSubject.Export(runContext, calcResult);
+        var writer = new StringWriter();
+        await testSubject.Export(runContext, calcResult, writer, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
 
         // Assert
         resultDetailExporter.Verify(mock => mock.Export(It.IsAny<CalcResultDetail>(), It.IsAny<StringBuilder>()));
@@ -96,11 +98,11 @@ public class BillingFileExporterTests : TestsFor<BillingFileExporter>
         projectedProducersExporter.Verify(mock => mock.Export(It.IsAny<CalcResultProjectedProducers>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
         lapcapDataExporter.Verify(mock => mock.Export(It.IsAny<CalcResultLapcapData>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
         parameterOtherCostsExporter.Verify(mock => mock.Export(It.IsAny<CalcResultParameterOtherCost>(), It.IsAny<StringBuilder>()));
-        producerFeesExporter.Verify(mock => mock.Export(runContext, It.IsAny<ProducerFees>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<IReadOnlyList<int>>(), It.IsAny<IReadOnlyList<(int, string?)>>(), It.IsAny<StringBuilder>()));
+        producerFeesExporter.Verify(mock => mock.Export(runContext, It.IsAny<ProducerFees>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<IReadOnlyList<int>>(), It.IsAny<IReadOnlyList<(int, string?)>>(), It.IsAny<TextWriter>(), It.IsAny<IEnumerable<FeeDetail>>()));
         laDisposalCostExporter.Verify(mock => mock.Export(runContext, It.IsAny<CalcResultLaDisposalCostData>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
         commsCostExporter.Verify(mock => mock.Export(It.IsAny<CalcResultCommsCost>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
         cancelledProducersExporter.Verify(mock => mock.Export(It.IsAny<IReadOnlyList<CalcResultCancelledProducer>>(), It.IsAny<IImmutableList<MaterialDetail>>(), It.IsAny<StringBuilder>()));
 
-        Assert.IsNotNull(result);
+        Assert.IsNotNull(writer.ToString());
     }
 }

@@ -6,6 +6,7 @@ using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
+using EPR.Calculator.API.Data.DataModels;
 using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Features.Billing.FileExports;
@@ -32,21 +33,23 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
 
         csvWriter = fixture.Freeze<Mock<IBillingFileExporter>>();
         csvWriter.Setup(m => m.Export(
-                It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>()))
-            .ReturnsAsync("csv-content");
+                It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>(), It.IsAny<TextWriter>(), It.IsAny<IEnumerable<FeeDetail>>()))
+            .Returns(Task.CompletedTask);
 
         jsonWriter = fixture.Freeze<Mock<IBillingFileJsonWriter>>();
-        jsonWriter.Setup(m => m.WriteToString(
-                It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>()))
-            .ReturnsAsync("json-content");
+        jsonWriter.Setup(m => m.WriteTo(
+                It.IsAny<Stream>(), It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>(), It.IsAny<IEnumerable<FeeDetail>>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         storageUploadService = fixture.Freeze<Mock<IStorageUploadService>>();
-        storageUploadService.Setup(m => m.UploadFileContentAsync(
-                It.Is<IStorageUploadService.Request>(a => a.ContainerName == "csv-container"),
+        storageUploadService.Setup(m => m.UploadFileStreamAsync(
+                It.Is<IStorageUploadService.StreamRequest>(a => a.ContainerName == "csv-container"),
+                It.IsAny<Func<Stream, CancellationToken, Task>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync("https://csv.uri");
-        storageUploadService.Setup(m => m.UploadFileContentAsync(
-                It.Is<IStorageUploadService.Request>(a => a.ContainerName == "json-container"),
+        storageUploadService.Setup(m => m.UploadFileStreamAsync(
+                It.Is<IStorageUploadService.StreamRequest>(a => a.ContainerName == "json-container"),
+                It.IsAny<Func<Stream, CancellationToken, Task>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync("https://json.uri");
 
@@ -58,14 +61,14 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
     public async Task Should_upload_csv_to_correct_container()
     {
         // Act
-        await testSubject.SerializeAndExport(runContext, calcResult, CancellationToken.None);
+        await testSubject.SerializeAndExport(runContext, calcResult, [], CancellationToken.None);
 
         // Assert
-        storageUploadService.Verify(x => x.UploadFileContentAsync(
-            It.Is<IStorageUploadService.Request>(request =>
-                request.Content == "csv-content"
-                && request.ContainerName == "csv-container"
+        storageUploadService.Verify(x => x.UploadFileStreamAsync(
+            It.Is<IStorageUploadService.StreamRequest>(request =>
+                request.ContainerName == "csv-container"
                 && request.Overwrite),
+            It.IsAny<Func<Stream, CancellationToken, Task>>(),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -73,14 +76,14 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
     public async Task Should_upload_json_to_correct_container()
     {
         // Act
-        await testSubject.SerializeAndExport(runContext, calcResult, CancellationToken.None);
+        await testSubject.SerializeAndExport(runContext, calcResult, [], CancellationToken.None);
 
         // Assert
-        storageUploadService.Verify(x => x.UploadFileContentAsync(
-            It.Is<IStorageUploadService.Request>(request =>
-                request.Content == "json-content"
-                && request.ContainerName == "json-container"
+        storageUploadService.Verify(x => x.UploadFileStreamAsync(
+            It.Is<IStorageUploadService.StreamRequest>(request =>
+                request.ContainerName == "json-container"
                 && request.Overwrite),
+            It.IsAny<Func<Stream, CancellationToken, Task>>(),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -88,7 +91,7 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
     public async Task Should_return_csv_metadata_with_correct_values()
     {
         // Act
-        var result = await testSubject.SerializeAndExport(runContext, calcResult, CancellationToken.None);
+        var result = await testSubject.SerializeAndExport(runContext, calcResult, [], CancellationToken.None);
 
         // Assert
         result.CsvMetadata.CalculatorRunId.ShouldBe(runContext.RunId);
@@ -102,7 +105,7 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
     public async Task Should_return_json_metadata_with_correct_values()
     {
         // Act
-        var result = await testSubject.SerializeAndExport(runContext, calcResult, CancellationToken.None);
+        var result = await testSubject.SerializeAndExport(runContext, calcResult, [], CancellationToken.None);
 
         // Assert
         result.JsonMetadata.CalculatorRunId.ShouldBe(runContext.RunId);
