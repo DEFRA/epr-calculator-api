@@ -1,6 +1,7 @@
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 
@@ -20,7 +21,10 @@ public class BillingRunProcessor(
     {
         try
         {
-            var producerFees = dbContext.ProducerDisposalFee.SingleOrDefault(f => f.CalculatorRunId == runContext.RunId);
+            var producerFees = await dbContext.ProducerDisposalFee
+                .AsNoTracking()
+                .Include(f => f.Details)
+                .SingleOrDefaultAsync(f => f.CalculatorRunId == runContext.RunId, cancellationToken);
 
             if(producerFees is null)
                 throw new InvalidOperationException("ProducerFees cannot be null for billing file run");

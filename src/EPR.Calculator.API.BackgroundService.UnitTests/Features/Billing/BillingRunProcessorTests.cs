@@ -67,6 +67,35 @@ public class BillingRunProcessorTests : TestsFor<BillingRunProcessor>
     }
 
     [TestMethod]
+    public async Task Should_include_producer_fee_details_when_finalizing()
+    {
+        var producerFees = dbContext.ProducerDisposalFee.Single(f => f.CalculatorRunId == runContext.RunId);
+        producerFees.Details.Add(new ProducerFeeDetail
+        {
+            FeeDetail = new FeeDetail
+            {
+                ProducerId = 1,
+                SubsidiaryId = string.Empty,
+                ProducerName = "Test Producer",
+                Level = CommonConstants.LevelOne.ToString()
+            }
+        });
+        dbContext.SaveChanges();
+        dbContext.ChangeTracker.Clear();
+
+        ProducerFees? capturedProducerFees = null;
+        finalizer
+            .Setup(f => f.FinalizeAsCompleted(runContext, It.IsAny<ProducerFees>(), CancellationToken.None))
+            .Callback<BillingRunContext, ProducerFees, CancellationToken>((_, fees, _) => capturedProducerFees = fees)
+            .Returns(Task.CompletedTask);
+
+        await testSubject.Process(runContext, CancellationToken.None);
+
+        capturedProducerFees.ShouldNotBeNull();
+        capturedProducerFees!.Details.ShouldNotBeEmpty();
+    }
+
+    [TestMethod]
     public async Task Should_handle_missing_producer_fees()
     {
         dbContext.ProducerDisposalFee.RemoveRange(dbContext.ProducerDisposalFee);
