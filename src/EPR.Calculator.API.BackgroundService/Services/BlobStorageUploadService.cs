@@ -7,10 +7,24 @@ public interface IStorageUploadService
 {
     Task<string> UploadFileContentAsync(Request request, CancellationToken cancellationToken);
 
+    /// <summary>
+    ///     Uploads a file by handing <paramref name="writeContent" /> a stream that writes straight to
+    ///     blob storage, so a large document never has to be materialised whole in memory first.
+    /// </summary>
+    Task<string> UploadFileStreamAsync(StreamRequest request, Func<Stream, CancellationToken, Task> writeContent, CancellationToken cancellationToken);
+
     public record Request
     {
         public required string FileName { get; init; }
         public required string Content { get; init; }
+        public required string ContainerName { get; init; }
+        public bool Overwrite { get; init; }
+        public bool UseUtf8Bom { get; init; } = true;
+    }
+
+    public record StreamRequest
+    {
+        public required string FileName { get; init; }
         public required string ContainerName { get; init; }
         public bool Overwrite { get; init; }
         public bool UseUtf8Bom { get; init; } = true;
@@ -37,6 +51,28 @@ public class BlobStorageUploadService(
         var blobClient = blobContainerClient.GetBlobClient(request.FileName);
         var binaryData = new BinaryData(GetContentBytes(request.Content, request.UseUtf8Bom));
         await blobClient.UploadAsync(binaryData, request.Overwrite, cancellationToken);
+
+        return blobClient.Uri.ToString();
+    }
+
+    [ActivityTrace]
+    public async Task<string> UploadFileStreamAsync(IStorageUploadService.StreamRequest request, Func<Stream, CancellationToken, Task> writeContent, CancellationToken cancellationToken)
+    {
+        var blobContainerClient = blobService.GetBlobContainerClient(request.ContainerName);
+
+        if (!await blobContainerClient.ExistsAsync(cancellationToken))
+            await blobContainerClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
+
+        var blobClient = blobContainerClient.GetBlobClient(request.FileName);
+
+        await using (var blobStream = await blobClient.OpenWriteAsync(request.Overwrite, options: null, cancellationToken))
+        {
+            if (request.UseUtf8Bom)
+                await blobStream.WriteAsync(Encoding.UTF8.GetPreamble(), cancellationToken);
+
+            await writeContent(blobStream, cancellationToken);
+            await blobStream.FlushAsync(cancellationToken);
+        }
 
         return blobClient.Uri.ToString();
     }

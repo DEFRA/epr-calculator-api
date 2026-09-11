@@ -1,3 +1,4 @@
+using System.Text;
 using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Models;
@@ -36,21 +37,28 @@ public class CalculatorFileGenerator(
 
     public async Task<CalculatorRunCsvFileMetadata> HandleCsvFile(CalculatorRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken)
     {
-        var csvContent = await csvWriter.Export(runContext, calcResult);
-
         var csvFilename = new CalcResultsAndBillingFileName(
             calcResult.CalcResultDetail.RunId,
             calcResult.CalcResultDetail.RunName,
             calcResult.CalcResultDetail.RunDate);
 
-        var request = new IStorageUploadService.Request
+        var request = new IStorageUploadService.StreamRequest
         {
             FileName = csvFilename,
-            Content = csvContent,
             ContainerName = blobStorageUploadOptions.Value.ResultFileCsvContainer
         };
 
-        var csvBlobUri = await storageUploadService.UploadFileContentAsync(request, cancellationToken);
+        var csvBlobUri = await storageUploadService.UploadFileStreamAsync(
+            request,
+            async (stream, token) =>
+            {
+                await using var writer = new StreamWriter(stream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), leaveOpen: true);
+                // The calc run just built this in memory, so there's nothing to stream from the DB -
+                // export straight off the materialised collection.
+                await csvWriter.Export(runContext, calcResult, writer, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
+                await writer.FlushAsync(token);
+            },
+            cancellationToken);
 
         return new CalculatorRunCsvFileMetadata
         {

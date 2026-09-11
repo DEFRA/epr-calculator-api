@@ -40,7 +40,7 @@ public class BillingBuilderTests : TestsFor<BillingBuilder>
     public async Task Build_ShouldReturnCalcResult()
     {
         var runContext = TestDataHelper.BillingRun2026;
-        var mockSummary = new Mock<ProducerFees>();
+        var feesTotal = new FeeDetail { ProducerId = 0, SubsidiaryId = string.Empty, ProducerName = string.Empty };
         var mockSmcw = new Mock<SelfManagedConsumerWaste>();
         var mockMod = new Mock<ModulationResult>();
         var mockLapcapData = new Mock<CalcResultLapcapData>();
@@ -58,8 +58,8 @@ public class BillingBuilderTests : TestsFor<BillingBuilder>
             .ReturnsAsync([]);
         mockCalcResultReader.Setup(m => m.ReadPartialData(runContext.RunId, CancellationToken.None))
             .ReturnsAsync([]);
-        mockCalcResultReader.Setup(m => m.ReadProducerFees(runContext.RunId, CancellationToken.None))
-            .ReturnsAsync(mockSummary.Object);
+        mockCalcResultReader.Setup(m => m.ReadProducerFeesTotal(runContext.RunId, CancellationToken.None))
+            .ReturnsAsync(feesTotal);
         mockCalcResultReader.Setup(m => m.ReadSmcw(runContext.RunId, CancellationToken.None))
             .ReturnsAsync(mockSmcw.Object);
         mockCalcResultReader.Setup(m => m.ReadModulationResult(runContext.RunId, CancellationToken.None))
@@ -82,7 +82,9 @@ public class BillingBuilderTests : TestsFor<BillingBuilder>
         Assert.IsNotNull(result);
         Assert.AreSame(mockSmcw.Object, result.Smcw);
         Assert.AreSame(mockMod.Object, result.CalcResultModulation);
-        Assert.AreSame(mockSummary.Object, result.ProducerFees);
+        Assert.AreSame(feesTotal, result.ProducerFees.Total);
+        Assert.AreEqual(runContext.RunId, result.ProducerFees.CalculatorRunId);
+        Assert.AreEqual(0, result.ProducerFees.Details.Count);
         Assert.AreSame(mockLapcapData.Object, result.CalcResultLapcapData);
         Assert.AreSame(mockLateReportingTonnage.Object, result.CalcResultLateReportingTonnageData);
         Assert.AreSame(mockParameterOtherCost.Object, result.CalcResultParameterOtherCost);

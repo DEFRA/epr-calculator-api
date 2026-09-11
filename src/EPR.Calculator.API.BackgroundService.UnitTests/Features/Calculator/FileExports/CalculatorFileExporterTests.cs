@@ -5,6 +5,7 @@ using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
+using EPR.Calculator.API.Data.DataModels;
 using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Features.Calculator.FileExports;
@@ -30,12 +31,13 @@ public class CalculatorFileGeneratorTests : TestsFor<CalculatorFileGenerator>
         csvWriter = fixture.Freeze<Mock<ICalcResultsExporter>>();
         csvWriter
             .Setup(m => m.Export(
-                It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>()))
-            .ReturnsAsync("results-content");
+                It.IsAny<CalculatorRunContext>(), It.IsAny<CalcResult>(), It.IsAny<TextWriter>(), It.IsAny<IEnumerable<FeeDetail>>()))
+            .Returns(Task.CompletedTask);
 
         storageUploadService = fixture.Freeze<Mock<IStorageUploadService>>();
-        storageUploadService.Setup(m => m.UploadFileContentAsync(
-                It.Is<IStorageUploadService.Request>(a => a.ContainerName == "results-container"),
+        storageUploadService.Setup(m => m.UploadFileStreamAsync(
+                It.Is<IStorageUploadService.StreamRequest>(a => a.ContainerName == "results-container"),
+                It.IsAny<Func<Stream, CancellationToken, Task>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync("https://results.uri");
 
@@ -50,12 +52,12 @@ public class CalculatorFileGeneratorTests : TestsFor<CalculatorFileGenerator>
         await testSubject.SerializeAndExport(runContext, calcResult, CancellationToken.None);
 
         // Assert
-        storageUploadService.Verify(x => x.UploadFileContentAsync(
-            It.Is<IStorageUploadService.Request>(args =>
-                args.Content == "results-content"
-                && args.ContainerName == "results-container"
+        storageUploadService.Verify(x => x.UploadFileStreamAsync(
+            It.Is<IStorageUploadService.StreamRequest>(args =>
+                args.ContainerName == "results-container"
                 && !args.Overwrite
                 && args.UseUtf8Bom),
+            It.IsAny<Func<Stream, CancellationToken, Task>>(),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

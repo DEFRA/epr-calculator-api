@@ -67,30 +67,33 @@ public class CalcSummaryProducerCalculationResults
     [JsonPropertyName("calculationOfSuggestedBillingInstructionsAndInvoiceAmounts")]
     public required CalculationOfSuggestedBillingInstructionsAndInvoiceAmounts CalculationOfSuggestedBillingInstructionsAndInvoiceAmounts { get; set; }
 
-    public static CalcSummaryProducerCalculationResults From(ProducerFeeDetail producer, IImmutableList<MaterialDetail> materials, bool applyModulation, IReadOnlyList<int> scaledupProducerIds)
+    public static CalcSummaryProducerCalculationResults From(ProducerFeeDetail producer, IImmutableList<MaterialDetail> materials, bool applyModulation, IReadOnlyList<int> scaledupProducerIds) =>
+        From(producer.FeeDetail, materials, applyModulation, scaledupProducerIds);
+
+    public static CalcSummaryProducerCalculationResults From(FeeDetail feeDetail, IImmutableList<MaterialDetail> materials, bool applyModulation, IReadOnlyList<int> scaledupProducerIds)
     {
         return new CalcSummaryProducerCalculationResults
             {
-                ProducerID                                   = producer.FeeDetail.ProducerId.ToString(),
-                SubsidiaryID                                 = producer.FeeDetail.SubsidiaryId,
-                ProducerName                                 = producer.FeeDetail.ProducerName,
-                TradingName                                  = producer.FeeDetail.TradingName,
-                Level                                        = string.IsNullOrWhiteSpace(producer.FeeDetail.Level) ? null : int.Parse(producer.FeeDetail.Level),
-                ScaledUpTonnages                             = scaledupProducerIds.Contains(producer.FeeDetail.ProducerId) ? CommonConstants.Yes : CommonConstants.No,
-                ProducerDisposalFeesWithBadDebtProvision1    = ProducerDisposalFeesWithBadDebtProvision1.From(producer.FeeDetail.DisposalFeesByMaterial, materials, producer.FeeDetail.Level!, applyModulation),
-                FeesForCommsCostsWithBadDebtProvision2a      = CalcResultCommsCostByMaterial2AJson.From(producer.FeeDetail.CommsFeesByMaterial, materials),
-                FeeForSAOperatingCostsWithBadDebtProvision_3 = CalcResultSAOperatingCostsWithBadDebtProvision.From(producer.FeeDetail),
-                FeeForLADataPrepCostsWithBadDebtProvision_4  = FeeForLADataPrepCostsWithBadDebtProvision_4.From(producer.FeeDetail),
-                FeeForCommsCostsWithBadDebtProvision_2a      = CalcResultSummaryFeeForCommsCostsWithBadDebtProvision2A.From(producer.FeeDetail),
-                FeeForCommsCostsWithBadDebtProvision_2b      = CalcResultSummaryFeeForCommsCostsWithBadDebtProvision2B.From(producer.FeeDetail),
-                CommsCostsByMaterialFeesSummary2a            = CalcResultSummaryCommsCostsByMaterialFeesSummary2A.From(producer.FeeDetail),
-                TotalProducerFeeWithBadDebtProvisionFor2con_1_2a_2b_2c = TotalProducerFeeWithBadDebtProvisionFor2Con12A2B2CMapper.From(producer.FeeDetail),
-                FeeForSASetUpCostsWithBadDebtProvision_5     = FeeForSaSetUpCostsWithBadDebtProvision5.From(producer.FeeDetail),
-                FeeForCommsCostsWithBadDebtProvision_2c      = CalcResultsCommsCostsWithBadDebtProvision2C.From(producer.FeeDetail),
-                CalculationOfSuggestedBillingInstructionsAndInvoiceAmounts = CalculationOfSuggestedBillingInstructionsAndInvoiceAmounts.From(producer.FeeDetail),
-                TotalProducerBillWithBadDebtProvision        = TotalProducerBillWithBadDebtProvision.From(producer.FeeDetail),
-                FeeForLADisposalCosts1                       = CalculationResultsProducerCalculationResultsFeeForLADisposalCosts1.From(producer.FeeDetail),
-                DisposalFeeSummary1                          = DisposalFeeSummary1.From(producer.FeeDetail),
+                ProducerID                                   = feeDetail.ProducerId.ToString(),
+                SubsidiaryID                                 = feeDetail.SubsidiaryId,
+                ProducerName                                 = feeDetail.ProducerName,
+                TradingName                                  = feeDetail.TradingName,
+                Level                                        = string.IsNullOrWhiteSpace(feeDetail.Level) ? null : int.Parse(feeDetail.Level),
+                ScaledUpTonnages                             = scaledupProducerIds.Contains(feeDetail.ProducerId) ? CommonConstants.Yes : CommonConstants.No,
+                ProducerDisposalFeesWithBadDebtProvision1    = ProducerDisposalFeesWithBadDebtProvision1.From(feeDetail.DisposalFeesByMaterial, materials, feeDetail.Level!, applyModulation),
+                FeesForCommsCostsWithBadDebtProvision2a      = CalcResultCommsCostByMaterial2AJson.From(feeDetail.CommsFeesByMaterial, materials),
+                FeeForSAOperatingCostsWithBadDebtProvision_3 = CalcResultSAOperatingCostsWithBadDebtProvision.From(feeDetail),
+                FeeForLADataPrepCostsWithBadDebtProvision_4  = FeeForLADataPrepCostsWithBadDebtProvision_4.From(feeDetail),
+                FeeForCommsCostsWithBadDebtProvision_2a      = CalcResultSummaryFeeForCommsCostsWithBadDebtProvision2A.From(feeDetail),
+                FeeForCommsCostsWithBadDebtProvision_2b      = CalcResultSummaryFeeForCommsCostsWithBadDebtProvision2B.From(feeDetail),
+                CommsCostsByMaterialFeesSummary2a            = CalcResultSummaryCommsCostsByMaterialFeesSummary2A.From(feeDetail),
+                TotalProducerFeeWithBadDebtProvisionFor2con_1_2a_2b_2c = TotalProducerFeeWithBadDebtProvisionFor2Con12A2B2CMapper.From(feeDetail),
+                FeeForSASetUpCostsWithBadDebtProvision_5     = FeeForSaSetUpCostsWithBadDebtProvision5.From(feeDetail),
+                FeeForCommsCostsWithBadDebtProvision_2c      = CalcResultsCommsCostsWithBadDebtProvision2C.From(feeDetail),
+                CalculationOfSuggestedBillingInstructionsAndInvoiceAmounts = CalculationOfSuggestedBillingInstructionsAndInvoiceAmounts.From(feeDetail),
+                TotalProducerBillWithBadDebtProvision        = TotalProducerBillWithBadDebtProvision.From(feeDetail),
+                FeeForLADisposalCosts1                       = CalculationResultsProducerCalculationResultsFeeForLADisposalCosts1.From(feeDetail),
+                DisposalFeeSummary1                          = DisposalFeeSummary1.From(feeDetail),
             };
     }
 }

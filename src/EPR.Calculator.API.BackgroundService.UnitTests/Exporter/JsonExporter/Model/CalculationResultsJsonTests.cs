@@ -24,7 +24,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
 
         var roundTrippedData = JsonSerializer.Deserialize<JsonObject>(json)!["producerCalculationResultsSummary"];
@@ -101,7 +101,7 @@ public class CalculationResultsJsonFromTests
         var materials  = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
 
         var roundTrippedData = JsonSerializer.Deserialize<JsonObject>(json)!
@@ -152,7 +152,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
 
         var roundTrippedData = JsonSerializer.Deserialize<JsonObject>(json)!
@@ -176,7 +176,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
 
         var roundTrippedData = JsonSerializer.Deserialize<JsonObject>(json)!
@@ -205,7 +205,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
         var roundTrippedData = JsonSerializer.Deserialize<JsonObject>(json)!
             ["producerCalculationResults"];
@@ -233,7 +233,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
 
         var roundTrippedData = JsonSerializer.Deserialize<JsonObject>(json)!
@@ -263,7 +263,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
         var roundTrippedData = JsonSerializer.Deserialize<JsonObject>(json)!
             ["producerCalculationResults"];
@@ -292,7 +292,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
         var roundTrippedData = JsonSerializer.Deserialize<JsonObject>(json)!
             ["producerCalculationResults"];
@@ -321,7 +321,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
         var roundTrippedData = JsonSerializer.Deserialize<JsonObject>(json)!
             ["producerCalculationResults"];
@@ -350,7 +350,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
         var roundTrippedData = JsonSerializer.Deserialize<JsonObject>(json)!
             ["producerCalculationResults"];
@@ -395,7 +395,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var options = new JsonSerializerOptions
         {
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
@@ -421,7 +421,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
         var node = JsonNode.Parse(json);
         var roundTrippedData = node?["producerCalculationResults"]?.AsArray();
@@ -453,7 +453,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
         var roundTrippedData = JsonSerializer.Deserialize<JsonObject>(json)!
             ["producerCalculationResults"];
@@ -484,7 +484,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
         var producerCalculationResultsTotal = JsonSerializer.Deserialize<JsonObject>(json)!["producerCalculationResultsTotal"]!;
 
@@ -501,7 +501,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
         var roundTrippedData = JsonSerializer.Deserialize<JsonObject>(json)!
             ["producerCalculationResults"];
@@ -533,7 +533,7 @@ public class CalculationResultsJsonFromTests
         var materials = TestDataHelper.GetMaterialDetails();
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
         var roundTrippedData = JsonSerializer.Deserialize<JsonObject>(json)!
                 ["producerCalculationResults"]!;
@@ -593,7 +593,7 @@ public class CalculationResultsJsonFromTests
         data.Details.First().FeeDetail.Level = "1";
 
         // Act
-        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials);
+        var obj = CalculationResultsJson.From(TestDataHelper.BillingRun2025, calcResult, materials, calcResult.ProducerFees.Details.Select(d => d.FeeDetail));
         var json = JsonSerializer.Serialize(obj);
         var roundTrippedData = JsonSerializer.Deserialize<JsonObject>(json)![
                 "producerCalculationResults"]!;

@@ -16,12 +16,13 @@ using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Validation;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter;
 
 public interface ICalcResultsExporter
 {
-    Task<string> Export(CalculatorRunContext runContext, CalcResult calcResult);
+    Task Export(CalculatorRunContext runContext, CalcResult calcResult, TextWriter writer, IEnumerable<FeeDetail> producerFeeDetails);
 }
 
 [SuppressMessage("Major Code Smell", "S107:Methods should not have too many parameters", Justification = "This is suppressed for now and will be refactored later.")]
@@ -45,7 +46,7 @@ public class CalcResultsExporter(
 ) : ICalcResultsExporter
 {
     [ActivityMetric(nameof(Metrics.SerializeDuration), threshold: "00:00:30")]
-    public async Task<string> Export(CalculatorRunContext runContext, CalcResult calcResult)
+    public async Task Export(CalculatorRunContext runContext, CalcResult calcResult, TextWriter writer, IEnumerable<FeeDetail> producerFeeDetails)
     {
         var materials = await materialService.GetMaterials();
         var csvContent = new StringBuilder();
@@ -74,9 +75,18 @@ public class CalcResultsExporter(
         var scaledupIds = calcResult.CalcResultScaledupProducers.ScaledupProducers.Select(p => p.ProducerId).ToList();
         var partialIds = calcResult.CalcResultPartialObligations.PartialObligations.Select(p => (p.ProducerId, p.SubsidiaryId)).ToList();
 
-        producerFeesExporter.Export(runContext, calcResult.ProducerFees, materials, scaledupIds, partialIds, csvContent);
-        calcResultErrorReportExporter.Export(calcResult.CalcResultErrorReports, csvContent);
+        // The producer fee rows are the ~10^4-row bulk, so they stream straight to the writer.
+        await FlushAsync(writer, csvContent);
+        await producerFeesExporter.Export(runContext, calcResult.ProducerFees, materials, scaledupIds, partialIds, writer, producerFeeDetails);
 
-        return csvContent.ToString();
+        calcResultErrorReportExporter.Export(calcResult.CalcResultErrorReports, csvContent);
+        await FlushAsync(writer, csvContent);
+    }
+
+    private static async Task FlushAsync(TextWriter writer, StringBuilder buffer)
+    {
+        foreach (var chunk in buffer.GetChunks())
+            await writer.WriteAsync(chunk);
+        buffer.Clear();
     }
 }

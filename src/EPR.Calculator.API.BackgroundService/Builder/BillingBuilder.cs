@@ -46,7 +46,13 @@ public class BillingBuilder(
         if (runContext.RequiresModulation)
             result.CalcResultModulation = await calcResultReader.ReadModulationResult(runContext.RunId, cancellationToken);
 
-        result.ProducerFees = await calcResultReader.ReadProducerFees(runContext.RunId, cancellationToken);
+        // Only the totals are needed in memory; the per-producer fee rows are streamed off the reader
+        // at export time (see BillingFileGenerator) so the whole fee graph is never held.
+        result.ProducerFees = new Data.DataModels.ProducerFees
+        {
+            CalculatorRunId = runContext.RunId,
+            Total = await calcResultReader.ReadProducerFeesTotal(runContext.RunId, cancellationToken)
+        };
 
         return result;
     }

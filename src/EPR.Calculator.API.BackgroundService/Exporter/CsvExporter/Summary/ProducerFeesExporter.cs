@@ -7,46 +7,82 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Summary;
 
 public interface IProducerFeesExporter
 {
-    void Export(
+    // producerFeeDetails is the sole source of the per-producer rows - producerFees itself carries
+    // only the overall Total (and, for the header, its own summary fields); callers on the calc-run
+    // path pass producerFees.Details.Select(fee => fee.FeeDetail) explicitly, and callers on the
+    // billing-run path pass a streamed DB read, so there is exactly one place to look for what gets
+    // exported and no ambiguity about which of two sources wins.
+    Task Export(
         RunContext runContext,
         ProducerFees producerFees,
         IImmutableList<MaterialDetail> materials,
         IReadOnlyList<int> scaledupProducerIds,
         IReadOnlyList<(int, string?)> partialProducerSubsidiaryIds,
-        StringBuilder csvContent
+        TextWriter writer,
+        IEnumerable<FeeDetail> producerFeeDetails
     );
 }
 
 public class ProducerFeesExporter : IProducerFeesExporter
 {
     [ActivityTrace]
-    public void Export(
+    public async Task Export(
         RunContext runContext,
         ProducerFees producerFees,
         IImmutableList<MaterialDetail> materials,
         IReadOnlyList<int> scaledupProducerIds,
         IReadOnlyList<(int, string?)> partialProducerSubsidiaryIds,
-        StringBuilder csvContent
+        TextWriter writer,
+        IEnumerable<FeeDetail> producerFeeDetails
     )
     {
         var partExporters = BuildPartExporters(scaledupProducerIds, partialProducerSubsidiaryIds);
 
-        csvContent.AppendLine();
-        csvContent.AppendLine();
+        // One reused buffer holds the current row (or the header block) - it is flushed and cleared
+        // after each, so the producer rows are never all held in memory at once.
+        var buffer = new StringBuilder();
 
-        AddSummaryDataHeader(producerFees, materials, runContext.RequiresModulation, csvContent, partExporters);
+        buffer.AppendLine();
+        buffer.AppendLine();
+        AddSummaryDataHeader(producerFees, materials, runContext.RequiresModulation, buffer, partExporters);
+        await Flush(writer, buffer);
 
-        foreach (var producer in producerFees.Details.Select(fee => fee.FeeDetail))
-            AddNewRow(csvContent, new ProducerFeeExportRow(producer.Level, producer), runContext.RequiresModulation, partExporters, isOverallTotal: false);
+        foreach (var producer in producerFeeDetails)
+        {
+            AppendRow(buffer, new ProducerFeeExportRow(producer.Level, producer), runContext.RequiresModulation, partExporters, isOverallTotal: false);
+            buffer.AppendLine();
+            await Flush(writer, buffer);
+        }
 
-        AddNewRow(csvContent, new ProducerFeeExportRow(string.Empty, producerFees.Total), runContext.RequiresModulation, partExporters, isOverallTotal: true);
+        var total = new ProducerFeeExportRow(string.Empty, producerFees.Total);
+        if (runContext.RunType is RunType.Billing)
+        {
+            // The billing file keeps only the identity columns of the overall-total row (its Leaver's
+            // Date cell carries "Totals"), with no trailing newline - the rejected-producers section
+            // that follows starts with its own blank lines. This used to be done by building the whole
+            // row and truncating it back out of the assembled string.
+            partExporters[0].AppendRow(buffer, total, runContext.RequiresModulation, isOverallTotal: true);
+        }
+        else
+        {
+            AppendRow(buffer, total, runContext.RequiresModulation, partExporters, isOverallTotal: true);
+            buffer.AppendLine();
+        }
+
+        await Flush(writer, buffer);
     }
 
-    private static void AddNewRow(StringBuilder csvContent, ProducerFeeExportRow producer, bool applyModulation, IReadOnlyList<IProducerFeesPartExporter> partExporters, bool isOverallTotal)
+    private static void AppendRow(StringBuilder buffer, ProducerFeeExportRow producer, bool applyModulation, IReadOnlyList<IProducerFeesPartExporter> partExporters, bool isOverallTotal)
     {
         foreach (var exporter in partExporters)
-            exporter.AppendRow(csvContent, producer, applyModulation, isOverallTotal);
-        csvContent.AppendLine();
+            exporter.AppendRow(buffer, producer, applyModulation, isOverallTotal);
+    }
+
+    private static async Task Flush(TextWriter writer, StringBuilder buffer)
+    {
+        foreach (var chunk in buffer.GetChunks())
+            await writer.WriteAsync(chunk);
+        buffer.Clear();
     }
 
     private static IReadOnlyList<IProducerFeesPartExporter> BuildPartExporters(
