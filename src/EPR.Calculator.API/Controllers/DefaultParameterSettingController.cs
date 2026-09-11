@@ -1,10 +1,11 @@
 using System.Globalization;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Utils;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Mappers;
-using EPR.Calculator.API.Validators;
+using EPR.Calculator.API.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,88 +15,81 @@ namespace EPR.Calculator.API.Controllers;
 [Produces("application/json")]
 [Route("v1")]
 public class DefaultParameterSettingController (
-    ApplicationDBContext context,
-    ICreateDefaultParameterDataValidator validator,
-    ILogger<DefaultParameterSettingController> logger
+    ApplicationDBContext dbContext
 ) : ControllerBase
 {
-    [HttpPost]
+    [HttpPut]
     [Route("defaultParameterSetting")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Create([FromBody] CreateDefaultParameterSettingDto request)
+    public async Task<IActionResult> Set(SetDefaultParametersRequest request, CancellationToken cancellationToken = default)
     {
-        logger.LogDebug("Requested Parameter filename: {ParameterFilename}", request.ParameterFileName);
-
-        var validationResult = validator.Validate(request);
-
-        if (validationResult.IsInvalid)
-            return BadRequest(validationResult.Errors);
-
-        using (var transaction = await context.Database.BeginTransactionAsync())
+        await using (var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken))
         {
             try
             {
-                var relativeYear = await context.FindRelativeYearAsync(request.RelativeYear.Value);
-                if (relativeYear == null)
-                    return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
-
-                var oldDefaultSettings = await context.DefaultParameterSettings
+                var oldMasters = await dbContext.DefaultParameterSettings
                     .Where(x => x.EffectiveTo == null && x.RelativeYear == request.RelativeYear)
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
 
-                oldDefaultSettings.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // side effecting db update
+                oldMasters.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // Side effecting db update
 
-                var defaultParamSettingMaster = new DefaultParameterSettingMaster
+                var newMaster = new DefaultParameterSettingMaster
                 {
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = User.GetName(),
                     EffectiveFrom = DateTime.UtcNow,
                     EffectiveTo = null,
-                    RelativeYear = request.RelativeYear,
-                    ParameterFileName = request.ParameterFileName
+                    ParameterFileName = request.Filename!,
+                    RelativeYear = request.RelativeYear!.Value
                 };
-                await context.DefaultParameterSettings.AddAsync(defaultParamSettingMaster);
+                await dbContext.DefaultParameterSettings.AddAsync(newMaster, cancellationToken);
 
-                var defaultParameterSettingDetails = request.SchemeParameterTemplateValues
-                    .Select(templateValue =>
+                var masterTemplate = await dbContext.DefaultParameterTemplateMasterList
+                    .ToImmutableDictionaryAsync(t => t.ParameterUniqueReferenceId, StringComparer.OrdinalIgnoreCase, cancellationToken);
+
+                foreach (var parameter in request.Parameters!)
+                {
+                    var template = masterTemplate[parameter.Id!];
+
+                    var newDetail = new DefaultParameterSettingDetail
                     {
-                        var parameterValue = templateValue.ParameterValue
-                            .TrimEnd('%')
-                            .Replace("£", "")
-                            .Replace(",", "")
-                            .Trim();
+                        DefaultParameterSettingMaster = newMaster,
+                        ParameterUniqueReferenceId = template.ParameterUniqueReferenceId,
+                        ParameterValue = SanitizeParameterValue(template.Unit, parameter.Value!)
+                    };
 
-                        if (decimal.TryParse(parameterValue, NumberStyles.Number, CultureInfo.InvariantCulture, out var value))
-                        {
-                            parameterValue = Math.Round(value, 3).ToString("F3", CultureInfo.InvariantCulture);
-                        }
+                    await dbContext.DefaultParameterSettingDetail.AddAsync(newDetail, cancellationToken);
+                }
 
-                        return new DefaultParameterSettingDetail
-                        {
-                            ParameterValue                = parameterValue,
-                            ParameterUniqueReferenceId    = templateValue.ParameterUniqueReferenceId,
-                            DefaultParameterSettingMaster = defaultParamSettingMaster
-                        };
-                    })
-                    .ToList();
-
-                await context.DefaultParameterSettingDetail.AddRangeAsync(defaultParameterSettingDetails);
-
-                await context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                await dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
             }
             catch (Exception)
             {
-                await transaction.RollbackAsync();
+                await transaction.RollbackAsync(CancellationToken.None);
                 throw;
             }
         }
 
-        return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+        return new NoContentResult();
+
+        static string SanitizeParameterValue(ParameterUnit unit, string value)
+        {
+            if (unit != ParameterUnit.Date)
+            {
+                value = RegexPatterns.NonDecimalChars().Replace(value, "");
+                return decimal.Parse(value).ToString("F3");
+            }
+
+            value = value.Trim().ToUpperInvariant();
+
+            return value != "NA"
+                ? DateOnly.Parse(value, CultureInfo.CurrentCulture).ToShortDateString()
+                : "NA";
+        }
     }
 
     [HttpGet]
@@ -105,18 +99,18 @@ public class DefaultParameterSettingController (
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Get([FromRoute] int relativeYearValue)
     {
-        var relativeYear = await context.FindRelativeYearAsync(relativeYearValue);
+        var relativeYear = await dbContext.FindRelativeYearAsync(relativeYearValue);
         if (relativeYear == null)
             return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status400BadRequest };
 
-        var currentDefaultSetting = await context.DefaultParameterSettings
+        var currentDefaultSetting = await dbContext.DefaultParameterSettings
             .Include(x => x.Details)
             .SingleOrDefaultAsync(x => x.EffectiveTo == null && x.RelativeYear == relativeYearValue);
 
         if (currentDefaultSetting == null)
             return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
 
-        var templateDetails = await context.DefaultParameterTemplateMasterList.ToListAsync();
+        var templateDetails = await dbContext.DefaultParameterTemplateMasterList.ToListAsync();
 
         var schemeParameters = CreateDefaultParameterSettingMapper.Map(currentDefaultSetting, templateDetails);
         return new ObjectResult(schemeParameters) { StatusCode = StatusCodes.Status200OK };

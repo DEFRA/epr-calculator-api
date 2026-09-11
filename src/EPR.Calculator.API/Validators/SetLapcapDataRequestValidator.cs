@@ -9,12 +9,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Validators;
 
-public class CreateLapcapDataRequestValidator : AbstractValidator<CreateLapcapDataRequest>
+public class SetLapcapDataRequestValidator : AbstractValidator<SetLapcapDataRequest>
 {
     private readonly ApplicationDBContext dbContext;
     private ImmutableDictionary<string, LapcapDataTemplateMaster> masterTemplate = null!;
 
-    public CreateLapcapDataRequestValidator(ApplicationDBContext dbContext)
+    public SetLapcapDataRequestValidator(ApplicationDBContext dbContext)
     {
         this.dbContext = dbContext;
 
@@ -36,7 +36,7 @@ public class CreateLapcapDataRequestValidator : AbstractValidator<CreateLapcapDa
             {
                 RuleFor(r => r.Values!)
                     .Custom(MustNotHaveDuplicates)
-                    .Custom(AllMasterCombinationsMustBePresent)
+                    .Custom(AllTemplateValuesMustBePresent)
                     .Custom(CountriesMustNotBeNegative)
                     .Custom(MaterialsMustNotBeNegative);
 
@@ -45,8 +45,9 @@ public class CreateLapcapDataRequestValidator : AbstractValidator<CreateLapcapDa
             });
     }
 
-
-    public override async Task<ValidationResult> ValidateAsync(ValidationContext<CreateLapcapDataRequest> context, CancellationToken cancellation = default)
+    public override async Task<ValidationResult> ValidateAsync(
+        ValidationContext<SetLapcapDataRequest> context,
+        CancellationToken cancellation = default)
     {
         // Cache the master template for use in validator rules.
         masterTemplate = await dbContext
@@ -56,7 +57,9 @@ public class CreateLapcapDataRequestValidator : AbstractValidator<CreateLapcapDa
         return await base.ValidateAsync(context, cancellation);
     }
 
-    private static void MustNotHaveDuplicates(ImmutableList<CreateLapcapDataRequest.LapcapValue> values, ValidationContext<CreateLapcapDataRequest> context)
+    private static void MustNotHaveDuplicates(
+        IReadOnlyList<SetLapcapDataRequest.LapcapValue> values,
+        ValidationContext<SetLapcapDataRequest> context)
     {
         var duplicates = values
             .Select((value, index) => new
@@ -79,7 +82,9 @@ public class CreateLapcapDataRequestValidator : AbstractValidator<CreateLapcapDa
         }
     }
 
-    private void AllMasterCombinationsMustBePresent(ImmutableList<CreateLapcapDataRequest.LapcapValue> values, ValidationContext<CreateLapcapDataRequest> context)
+    private void AllTemplateValuesMustBePresent(
+        IReadOnlyList<SetLapcapDataRequest.LapcapValue> values,
+        ValidationContext<SetLapcapDataRequest> context)
     {
         var requestKeys = values
             .Select(LapcapKeyHelper.KeyFor)
@@ -98,16 +103,20 @@ public class CreateLapcapDataRequestValidator : AbstractValidator<CreateLapcapDa
         }
     }
 
-    private void CountriesMustNotBeNegative(ImmutableList<CreateLapcapDataRequest.LapcapValue> values, ValidationContext<CreateLapcapDataRequest> context)
+    private void CountriesMustNotBeNegative(
+        IReadOnlyList<SetLapcapDataRequest.LapcapValue> values,
+        ValidationContext<SetLapcapDataRequest> context)
         => OverallTotalMustNotBeNegative(values, value => value.Country, context);
 
-    private void MaterialsMustNotBeNegative(ImmutableList<CreateLapcapDataRequest.LapcapValue> values, ValidationContext<CreateLapcapDataRequest> context)
+    private void MaterialsMustNotBeNegative(
+        IReadOnlyList<SetLapcapDataRequest.LapcapValue> values,
+        ValidationContext<SetLapcapDataRequest> context)
         => OverallTotalMustNotBeNegative(values, value => value.Material, context);
 
     private void OverallTotalMustNotBeNegative(
-        IEnumerable<CreateLapcapDataRequest.LapcapValue> values,
-        Func<CreateLapcapDataRequest.LapcapValue, string?> groupSelector,
-        ValidationContext<CreateLapcapDataRequest> context)
+        IReadOnlyList<SetLapcapDataRequest.LapcapValue> values,
+        Func<SetLapcapDataRequest.LapcapValue, string?> groupSelector,
+        ValidationContext<SetLapcapDataRequest> context)
     {
         var negativeTotals = values
             .Where(value => masterTemplate.ContainsKey(LapcapKeyHelper.KeyFor(value)))
@@ -123,7 +132,7 @@ public class CreateLapcapDataRequestValidator : AbstractValidator<CreateLapcapDa
             context.AddFailure($"The overall total disposal cost for {negative.Name} is negative ({negative.TotalCost:C}).");
     }
 
-    private sealed class LapcapValueValidator : AbstractValidator<CreateLapcapDataRequest.LapcapValue>
+    private sealed class LapcapValueValidator : AbstractValidator<SetLapcapDataRequest.LapcapValue>
     {
         private readonly Func<IReadOnlyDictionary<string, LapcapDataTemplateMaster>> masterTemplateAccessor;
 
@@ -145,7 +154,7 @@ public class CreateLapcapDataRequestValidator : AbstractValidator<CreateLapcapDa
             When(lv => !string.IsNullOrWhiteSpace(lv.Country) && !string.IsNullOrWhiteSpace(lv.Material), () =>
             {
                 RuleFor(lv => lv)
-                    .Must(ExistInMaster)
+                    .Must(ExistInTemplate)
                     .WithMessage("The country and material combination {Country}/{Material} does not exist in the master template.");
 
                 When(lv => lv.TotalCost.HasValue, () =>
@@ -157,7 +166,10 @@ public class CreateLapcapDataRequestValidator : AbstractValidator<CreateLapcapDa
             });
         }
 
-        private bool ExistInMaster(CreateLapcapDataRequest.LapcapValue lapcapValue, CreateLapcapDataRequest.LapcapValue _, ValidationContext<CreateLapcapDataRequest.LapcapValue> context)
+        private bool ExistInTemplate(
+            SetLapcapDataRequest.LapcapValue lapcapValue,
+            SetLapcapDataRequest.LapcapValue _,
+            ValidationContext<SetLapcapDataRequest.LapcapValue> context)
         {
             context.MessageFormatter.AppendArgument("Material", lapcapValue.Material);
             context.MessageFormatter.AppendArgument("Country", lapcapValue.Country);
@@ -165,19 +177,21 @@ public class CreateLapcapDataRequestValidator : AbstractValidator<CreateLapcapDa
             return masterTemplateAccessor().ContainsKey(LapcapKeyHelper.KeyFor(lapcapValue));
         }
 
-        private bool BeWithinRange(CreateLapcapDataRequest.LapcapValue lapcapValue, decimal? totalCost, ValidationContext<CreateLapcapDataRequest.LapcapValue> context)
+        private bool BeWithinRange(
+            SetLapcapDataRequest.LapcapValue lapcapValue,
+            decimal? totalCost,
+            ValidationContext<SetLapcapDataRequest.LapcapValue> context)
         {
-            if (masterTemplateAccessor().TryGetValue(LapcapKeyHelper.KeyFor(lapcapValue), out var master))
-            {
-                context.MessageFormatter.AppendArgument("Material", lapcapValue.Material);
-                context.MessageFormatter.AppendArgument("Country", lapcapValue.Country);
-                context.MessageFormatter.AppendArgument("Min", master.TotalCostFrom.ToString("C"));
-                context.MessageFormatter.AppendArgument("Max", master.TotalCostTo.ToString("C"));
+            // Skip when missing from template
+            if (!masterTemplateAccessor().TryGetValue(LapcapKeyHelper.KeyFor(lapcapValue), out var template))
+                return true;
 
-                return totalCost >= master.TotalCostFrom && totalCost <= master.TotalCostTo;
-            }
+            context.MessageFormatter.AppendArgument("Material", lapcapValue.Material);
+            context.MessageFormatter.AppendArgument("Country", lapcapValue.Country);
+            context.MessageFormatter.AppendArgument("Min", template.TotalCostFrom.ToString("C"));
+            context.MessageFormatter.AppendArgument("Max", template.TotalCostTo.ToString("C"));
 
-            return true;
+            return totalCost >= template.TotalCostFrom && totalCost <= template.TotalCostTo;
         }
     }
 }

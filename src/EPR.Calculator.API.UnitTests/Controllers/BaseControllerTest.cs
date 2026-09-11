@@ -23,9 +23,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 DefaultParameterSettingHelper.GetDefaultParameterTemplateMasterData().ToList());
             this.DbContext.SaveChanges();
 
-
-            var validator = new CreateDefaultParameterDataValidator(this.DbContext);
-            this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext, validator, Mock.Of<ILogger<DefaultParameterSettingController>>());
+            this.DefaultParameterSettingController = new DefaultParameterSettingController(this.DbContext);
             this.LapcapDataController = new LapcapDataController(this.DbContext);
 
             var mockStorageService = new Mock<IBlobStorageService>();
