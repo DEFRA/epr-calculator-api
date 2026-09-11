@@ -24,7 +24,10 @@ public class BillingRunProcessor(
         {
             await SetStartedStatus(runContext, cancellationToken);
 
-            var producerFees = dbContext.ProducerDisposalFee.SingleOrDefault(f => f.CalculatorRunId == runContext.RunId);
+            var producerFees = await dbContext.ProducerDisposalFee
+                .AsNoTracking()
+                .Include(f => f.Details)
+                .SingleOrDefaultAsync(f => f.CalculatorRunId == runContext.RunId, cancellationToken);
 
             if(producerFees is null)
                 throw new InvalidOperationException("ProducerFees cannot be null for billing file run");
