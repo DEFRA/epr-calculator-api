@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.BackgroundService.Constants;
 using EPR.Calculator.API.BackgroundService.Exceptions;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
@@ -8,6 +8,7 @@ using EPR.Calculator.API.BackgroundService.Utils;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataTypes;
 using Microsoft.EntityFrameworkCore;
+using EPR.Calculator.API.Data.DataModels;
 
 namespace EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 
@@ -16,7 +17,7 @@ namespace EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 /// </summary>
 public interface IBillingRunFinalizer
 {
-    Task FinalizeAsCompleted(BillingRunContext runContext, CalcResult calcResult, BillingFileResult exportResult, CancellationToken cancellationToken);
+    Task FinalizeAsCompleted(BillingRunContext runContext, ProducerFees producerFees, CancellationToken cancellationToken);
     Task FinalizeAsErrored(BillingRunContext runContext, CancellationToken cancellationToken);
 }
 
@@ -27,14 +28,14 @@ public class BillingRunFinalizer(
 ) : IBillingRunFinalizer
 {
     [ActivityTrace]
-    public async Task FinalizeAsCompleted(BillingRunContext runContext, CalcResult calcResult, BillingFileResult exportResult, CancellationToken cancellationToken)
+    public async Task FinalizeAsCompleted(BillingRunContext runContext, ProducerFees producerFees, CancellationToken cancellationToken)
     {
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
         try
         {
-            await SaveSuggestedBillingFees(runContext, calcResult, cancellationToken);
-            await SaveExportMetadata(exportResult, cancellationToken);
+            await SaveSuggestedBillingFees(runContext, producerFees, cancellationToken);
+            await SaveExportMetadata(runContext, cancellationToken);
             await SaveCompletedRunStatus(runContext, cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
@@ -66,9 +67,9 @@ public class BillingRunFinalizer(
     }
 
     [ActivityTrace]
-    private async Task SaveSuggestedBillingFees(BillingRunContext runContext, CalcResult calcResults, CancellationToken cancellationToken)
+    private async Task SaveSuggestedBillingFees(BillingRunContext runContext, ProducerFees producerFees, CancellationToken cancellationToken)
     {
-        var level1FeesByProducerId = calcResults.ProducerFees.Details
+        var level1FeesByProducerId = producerFees.Details
             .Where(f => f.FeeDetail.Level == CommonConstants.LevelOne.ToString())
             .ToImmutableDictionary(f => f.FeeDetail.ProducerId, f => f);
 
@@ -97,10 +98,17 @@ public class BillingRunFinalizer(
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task SaveExportMetadata(BillingFileResult exportResult, CancellationToken cancellationToken)
+    private async Task SaveExportMetadata(BillingRunContext runContext, CancellationToken cancellationToken)
     {
-        dbContext.CalculatorRunCsvFileMetadata.Add(exportResult.CsvMetadata);
-        dbContext.CalculatorRunBillingFileMetadata.Add(exportResult.JsonMetadata);
+        var metadata = new CalculatorRunBillingFileMetadata
+        {
+            CalculatorRunId = runContext.RunId,
+            BillingCsvFileName = string.Empty,
+            BillingFileCreatedBy = runContext.User,
+            BillingFileCreatedDate = runContext.ProcessingStartedAt.UtcDateTime,
+            BillingJsonFileName = string.Empty
+        };
+        dbContext.CalculatorRunBillingFileMetadata.Add(metadata);
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }

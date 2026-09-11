@@ -185,6 +185,16 @@ public static class ServiceConfiguration
             services.AddScoped<IBillingFileService, BillingFileService>();
             services.AddScoped<IAvailableClassificationsService, AvailableClassificationsService>();
             services.AddScoped<ICalculationRunService, CalculationRunService>();
+            services.AddScoped<IFileExportService, FileExportService>();
+
+            return services;
+        }
+
+        public IServiceCollection AddPayCalFeatureFlags()
+        {
+            services
+                .AddOptions<FeatureFlagOptions>()
+                .BindConfiguration(FeatureFlagOptions.SectionKey);
 
             return services;
         }

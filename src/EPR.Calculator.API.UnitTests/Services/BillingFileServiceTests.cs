@@ -16,7 +16,6 @@ namespace EPR.Calculator.API.UnitTests.Services
         private const string TestUser = "TestUser";
 
         private ApplicationDBContext dbContext = null!;
-        private Mock<IBlobStorageService> blobStorage = null!;
         private BillingFileService service = null!;
 
         [TestInitialize]
@@ -30,9 +29,7 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             this.dbContext = new ApplicationDBContext(options);
             this.dbContext.Database.EnsureCreated();
-
-            this.blobStorage = new Mock<IBlobStorageService>();
-            this.service = new BillingFileService(this.dbContext, this.blobStorage.Object);
+            this.service = new BillingFileService(this.dbContext);
         }
 
         [TestCleanup]
@@ -165,49 +162,6 @@ namespace EPR.Calculator.API.UnitTests.Services
 
             // Assert
             Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
-        }
-
-        [TestMethod]
-        public async Task MoveBillingJsonFile_ReturnsFalse_WhenMetadataNotFound()
-        {
-            // Arrange
-            const int runWithoutMetadata = 999;
-
-            // Act
-            var result = await this.service.MoveBillingJsonFile(runWithoutMetadata, CancellationToken.None);
-
-            // Assert
-            result.ShouldBeFalse();
-            this.blobStorage.Verify(
-                x => x.MoveBillingJsonToFss(It.IsAny<string>(), It.IsAny<CancellationToken>()),
-                Times.Never());
-        }
-
-        [TestMethod]
-        public async Task MoveBillingJsonFile_MovesFileAndReturnsTrue_WhenMetadataExists()
-        {
-            // Arrange
-            const string billingJsonFileName = "test-billing.json";
-            await SeedAsync(new CalculatorRunBillingFileMetadata
-            {
-                CalculatorRunId = 1,
-                BillingCsvFileName = "ignored",
-                BillingJsonFileName = billingJsonFileName,
-                BillingFileCreatedDate = DateTime.UtcNow,
-                BillingFileCreatedBy = "test",
-            });
-            this.blobStorage
-                .Setup(x => x.MoveBillingJsonToFss(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(true);
-
-            // Act
-            var result = await this.service.MoveBillingJsonFile(1, CancellationToken.None);
-
-            // Assert
-            result.ShouldBeTrue();
-            this.blobStorage.Verify(
-                x => x.MoveBillingJsonToFss(billingJsonFileName, It.IsAny<CancellationToken>()),
-                Times.Once());
         }
 
         [TestMethod]

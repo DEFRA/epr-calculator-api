@@ -34,10 +34,8 @@ using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Validation;
 using EPR.Calculator.API.BackgroundService.Exporter.JsonExporter;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
-using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
-using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services;
@@ -75,7 +73,6 @@ public static class BackgroundServiceConfiguration
             services.AddTransient<ICalculatorRunProcessor, CalculatorRunProcessor>();
             services.AddTransient<ICalculatorRunDataInitializer, CalculatorRunDataInitializer>();
             services.AddTransient<ICalculatorRunFinalizer, CalculatorRunFinalizer>();
-            services.AddTransient<ICalculatorFileGenerator, CalculatorFileGenerator>();
             services.AddTransient<ICalcResultsExporter, CalcResultsExporter>();
 
             // Register CommonDataApi
@@ -102,8 +99,6 @@ public static class BackgroundServiceConfiguration
             services.AddTransient<IBillingRunContextBuilder, BillingRunContextBuilder>();
             services.AddTransient<IBillingRunProcessor, BillingRunProcessor>();
             services.AddTransient<IBillingRunFinalizer, BillingRunFinalizer>();
-            services.AddTransient<IBillingBuilder, BillingBuilder>();
-            services.AddTransient<IBillingFileGenerator, BillingFileGenerator>();
             services.AddTransient<IBillingFileExporter, BillingFileExporter>();
             services.AddTransient<IBillingFileJsonWriter, BillingFileJsonWriter>();
 

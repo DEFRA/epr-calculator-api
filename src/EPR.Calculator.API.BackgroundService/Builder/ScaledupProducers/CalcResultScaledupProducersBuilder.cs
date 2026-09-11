@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.BackgroundService.Builder.PartialObligations;
 using EPR.Calculator.API.BackgroundService.Constants;
+using EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.ScaledupProducers;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
@@ -191,6 +192,9 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
             .ThenBy(p => p.SubsidiaryId)
             .ToList();
 
+        foreach (var row in orderedRows)
+            row.ScaledupProducerTonnageByMaterial = GetTonnages(row.PomData, materialDetails);
+
         var scaledupProducersSummary = new CalcResultScaledupProducers {  ScaledupProducers = orderedRows.ToImmutableList() };
         return (updatedL1Producers, scaledupProducersSummary);
     }
@@ -280,5 +284,58 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
         }).ToList();
 
         return (producers, parentOrganisations);
+    }
+
+    public static Dictionary<string, CalcResultScaledupProducerTonnage> GetTonnages(
+            IReadOnlyCollection<ScaledupPomEntry> pomData,
+            IReadOnlyCollection<MaterialDetail> materials
+    )
+    {
+        var scaledupProducerTonnages = new Dictionary<string, CalcResultScaledupProducerTonnage>();
+
+        foreach (var material in materials)
+        {
+            var scaledupProducerTonnage = new CalcResultScaledupProducerTonnage();
+            var materialPomData = pomData.Where(e => e.MaterialId == material.Id).ToImmutableList();
+
+            var hh  = materialPomData.SingleOrDefault(e => e.PackagingType == PackagingTypes.Household);
+            var pb  = materialPomData.SingleOrDefault(e => e.PackagingType == PackagingTypes.PublicBin);
+            var cw  = materialPomData.SingleOrDefault(e => e.PackagingType == PackagingTypes.ConsumerWaste);
+
+            scaledupProducerTonnage.ReportedHouseholdPackagingWasteTonnage          = hh?.Tonnage       ?? 0;
+            scaledupProducerTonnage.ScaledupReportedHouseholdPackagingWasteTonnage  = hh?.ScaledTonnage ?? 0;
+            scaledupProducerTonnage.ReportedPublicBinTonnage                        = pb?.Tonnage       ?? 0;
+            scaledupProducerTonnage.ScaledupReportedPublicBinTonnage                = pb?.ScaledTonnage ?? 0;
+            scaledupProducerTonnage.ReportedSelfManagedConsumerWasteTonnage         = cw?.Tonnage       ?? 0;
+            scaledupProducerTonnage.ScaledupReportedSelfManagedConsumerWasteTonnage = cw?.ScaledTonnage ?? 0;
+
+            if (material.Code == MaterialCodes.Glass)
+            {
+                var hdc = materialPomData.SingleOrDefault(e => e.PackagingType == PackagingTypes.HouseholdDrinksContainers);
+                scaledupProducerTonnage.HouseholdDrinksContainersTonnageGlass          = hdc?.Tonnage       ?? 0;
+                scaledupProducerTonnage.ScaledupHouseholdDrinksContainersTonnageGlass  = hdc?.ScaledTonnage ?? 0;
+
+                scaledupProducerTonnage.TotalReportedTonnage = scaledupProducerTonnage.ReportedHouseholdPackagingWasteTonnage +
+                    scaledupProducerTonnage.ReportedPublicBinTonnage + scaledupProducerTonnage.HouseholdDrinksContainersTonnageGlass;
+                scaledupProducerTonnage.ScaledupTotalReportedTonnage = scaledupProducerTonnage.ScaledupReportedHouseholdPackagingWasteTonnage +
+                    scaledupProducerTonnage.ScaledupReportedPublicBinTonnage + scaledupProducerTonnage.ScaledupHouseholdDrinksContainersTonnageGlass;
+            }
+            else
+            {
+                scaledupProducerTonnage.TotalReportedTonnage = scaledupProducerTonnage.ReportedHouseholdPackagingWasteTonnage +
+                    scaledupProducerTonnage.ReportedPublicBinTonnage;
+                scaledupProducerTonnage.ScaledupTotalReportedTonnage = scaledupProducerTonnage.ScaledupReportedHouseholdPackagingWasteTonnage +
+                    scaledupProducerTonnage.ScaledupReportedPublicBinTonnage;
+            }
+
+            scaledupProducerTonnage.NetReportedTonnage = scaledupProducerTonnage.TotalReportedTonnage -
+                scaledupProducerTonnage.ReportedSelfManagedConsumerWasteTonnage;
+            scaledupProducerTonnage.ScaledupNetReportedTonnage = scaledupProducerTonnage.ScaledupTotalReportedTonnage -
+                scaledupProducerTonnage.ScaledupReportedSelfManagedConsumerWasteTonnage;
+
+            scaledupProducerTonnages.Add(material.Code, scaledupProducerTonnage);
+        }
+
+        return scaledupProducerTonnages;
     }
 }

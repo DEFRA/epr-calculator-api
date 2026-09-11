@@ -25,6 +25,7 @@
     <PackageReference Include="FluentValidation" Version="12.1.1"/>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1"/>
     <PackageReference Include="JetBrains.Annotations" Version="*" PrivateAssets="All"/>
+    <PackageReference Include="Metalama.Framework" Version="2026.1.24" PrivateAssets="All"/>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.11">
       <PrivateAssets>all</PrivateAssets>
