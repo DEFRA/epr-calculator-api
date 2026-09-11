@@ -21,14 +21,17 @@ public class ReportedProducerService(ApplicationDBContext dbContext)
     [ActivityTrace]
     public async Task<List<L1Producer>> GetProducers(RunContext runContext)
     {
-        return
-            await dbContext.ProducerDetail.AsNoTracking()
+        // Group in memory, not SQL: EF's GroupBy+ToList() per group can misattribute rows under some query plans.
+        var producerDetails = await dbContext.ProducerDetail.AsNoTracking()
                 .Include(pd => pd.ProducerReportedMaterials)
                 .ThenInclude(prm => prm.Material)
                 .Where(pd => pd.CalculatorRunId == runContext.RunId)
                 .AsSplitQuery()
+                .ToListAsync();
+
+        return producerDetails
                 .GroupBy(pd => pd.ProducerId)
                 .Select(pds => new L1Producer(pds.Key, pds.ToList()))
-                .ToListAsync();
+                .ToList();
     }
 }
