@@ -32,8 +32,11 @@ namespace EPR.Calculator.API.BackgroundService.Services
         [ActivityTrace]
         public async Task<ImmutableList<CalcResultH1ProjectedProducer>> ReadH1ProjectedData(int runId, CancellationToken cancellationToken)
         {
-            return await dbContext.TransformProjectedH1
+            var rows = await dbContext.TransformProjectedH1
                         .Where(p => p.CalculatorRunId == runId)
+                        .ToListAsync(cancellationToken);
+
+            return rows
                         .GroupBy(p => new { p.ProducerId, p.SubsidiaryId, p.SubmissionPeriodCode, p.Level })
                         .Select(g => new CalcResultH1ProjectedProducer
                         {
@@ -46,14 +49,17 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .OrderBy(p => p.ProducerId)
                         .ThenBy(p => p.Level)
                         .ThenBy(p => p.SubsidiaryId)
-                        .ToImmutableListAsync(cancellationToken);
+                        .ToImmutableList();
         }
 
         [ActivityTrace]
         public async Task<ImmutableList<CalcResultH2ProjectedProducer>> ReadH2ProjectedData(int runId, CancellationToken cancellationToken)
         {
-            return await dbContext.TransformProjectedH2
+            var rows = await dbContext.TransformProjectedH2
                         .Where(p => p.CalculatorRunId == runId)
+                        .ToListAsync(cancellationToken);
+
+            return rows
                         .GroupBy(p => new { p.ProducerId, p.SubsidiaryId, p.SubmissionPeriodCode, p.Level })
                         .Select(g => new CalcResultH2ProjectedProducer
                         {
@@ -66,14 +72,17 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .OrderBy(p => p.ProducerId)
                         .ThenBy(p => p.Level)
                         .ThenBy(p => p.SubsidiaryId)
-                        .ToImmutableListAsync(cancellationToken);
+                        .ToImmutableList();
         }
 
         [ActivityTrace]
         public async Task<ImmutableList<CalcResultScaledupProducer>> ReadScaledData(int runId, CancellationToken cancellationToken)
         {
-            var scaledupProducers = await dbContext.TransformScaled
+            var scaledRows = await dbContext.TransformScaled
                         .Where(p => p.CalculatorRunId == runId)
+                        .ToListAsync(cancellationToken);
+
+            var scaledupProducers = scaledRows
                         .GroupBy(p => new { p.ProducerId, p.SubsidiaryId, p.ProducerName, p.TradingName, p.SubmissionPeriodCode, p.Level, p.IsSubTotal, p.DaysInSubmissionPeriod, p.DaysInWholePeriod, p.ScaleupFactor })
                         .Select(g =>
                             new CalcResultScaledupProducer
@@ -96,7 +105,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .ThenBy(p => p.Level)
                         .ThenBy(p => p.SubsidiaryId)
                         .ThenBy(p => p.SubmissionPeriodCode)
-                        .ToImmutableListAsync(cancellationToken);
+                        .ToImmutableList();
 
             var materials = await materialService.GetMaterials();
             foreach (var producer in scaledupProducers)
@@ -107,8 +116,11 @@ namespace EPR.Calculator.API.BackgroundService.Services
 
         [ActivityTrace]
         public async Task<ImmutableList<CalcResultPartialObligation>> ReadPartialData(int runId, CancellationToken cancellationToken){
-            return await dbContext.TransformPartial
+            var rows = await dbContext.TransformPartial
                         .Where(p => p.CalculatorRunId == runId)
+                        .ToListAsync(cancellationToken);
+
+            return rows
                         .GroupBy(p => new { p.ProducerId, p.SubsidiaryId, p.ProducerName, p.TradingName, p.SubmissionYear, p.Level, p.DaysInSubmissionYear, p.JoiningDate, p.DaysObligated, p.ObligatedFactor })
                         .Select(g =>
                             new CalcResultPartialObligation
@@ -129,7 +141,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
                         .OrderBy(p => p.ProducerId)
                         .ThenBy(p => p.Level)
                         .ThenBy(p => p.SubsidiaryId)
-                        .ToImmutableListAsync(cancellationToken);
+                        .ToImmutableList();
         }
 
         [ActivityTrace]
