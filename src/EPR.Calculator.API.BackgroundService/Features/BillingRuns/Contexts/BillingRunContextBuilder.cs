@@ -30,6 +30,7 @@ public class BillingRunContextBuilder(
     ILogger<BillingRunContextBuilder> logger)
     : IBillingRunContextBuilder
 {
+    [ActivityTrace]
     public async Task<BillingRunContext> Build(int runId, string? user, CancellationToken cancellationToken)
     {
         var preContext = await GetPreContext(runId, user, cancellationToken);
