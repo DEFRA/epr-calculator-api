@@ -51,10 +51,10 @@ public class FileExportService(
 )  : IFileExportService
 {
     private static readonly ImmutableHashSet<int> NonDownloadableClassifications = [
-        RunClassificationStatusIds.INTHEQUEUEID,
-        RunClassificationStatusIds.RUNNINGID,
-        RunClassificationStatusIds.ERRORID,
-        RunClassificationStatusIds.DELETEDID
+        // RunClassificationStatusIds.INTHEQUEUEID,
+        // RunClassificationStatusIds.RUNNINGID,
+        // RunClassificationStatusIds.ERRORID,
+        // RunClassificationStatusIds.DELETEDID
     ];
 
     private static byte[] ToUtf8WithBom(string content) => [.. Encoding.UTF8.GetPreamble(), .. Encoding.UTF8.GetBytes(content)];

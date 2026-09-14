@@ -56,6 +56,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.RejectedProducers
                 join b in billingInstructionsQuery
                     on crodd.OrganisationId equals b.ProducerId
                 where cr.RelativeYear == runContext.RelativeYear
+                      && cr.Id <= runContext.RunId
                       && crodd.OrganisationName != null
                       && crodd.SubsidiaryId == null
                 group cr by crodd.OrganisationId into g

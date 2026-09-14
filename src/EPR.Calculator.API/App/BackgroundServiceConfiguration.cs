@@ -74,6 +74,7 @@ public static class BackgroundServiceConfiguration
             services.AddTransient<ICalculatorRunDataInitializer, CalculatorRunDataInitializer>();
             services.AddTransient<ICalculatorRunFinalizer, CalculatorRunFinalizer>();
             services.AddTransient<ICalcResultsExporter, CalcResultsExporter>();
+            services.AddTransient<IHistoricalCalculatorRunReprocessor, HistoricalCalculatorRunReprocessor>();
 
             // Register CommonDataApi
             services

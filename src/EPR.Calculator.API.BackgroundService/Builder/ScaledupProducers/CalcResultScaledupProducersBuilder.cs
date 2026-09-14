@@ -239,7 +239,7 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
               on new { crodm.Id, pd.ProducerId, pd.SubsidiaryId, crpdd.SubmitterId }
                 equals new { Id = org.CalculatorRunOrganisationDataMasterId, ProducerId = org.OrganisationId, org.SubsidiaryId, org.SubmitterId }
             where run.Id == runId && scaledProducerIds.Contains(crpdd.OrganisationId)
-              && pd.CalculatorRunId == runId && org.ObligationStatus == ObligationStates.Obligated
+              && pd.CalculatorRunId == runId && (org.ObligationStatus == ObligationStates.Obligated || org.ObligationStatus == string.Empty)
             select new
             {
                 ProducerId             = pd.ProducerId,
@@ -261,7 +261,7 @@ public class CalcResultScaledupProducersBuilder(ApplicationDBContext dbContext) 
             join crodm in dbContext.CalculatorRunOrganisationDataMaster.AsNoTracking() on run.CalculatorRunOrganisationDataMasterId equals crodm.Id
             join org in dbContext.CalculatorRunOrganisationDataDetails.AsNoTracking() on crodm.Id equals org.CalculatorRunOrganisationDataMasterId
             where run.Id == runId && scaledProducerIds.Contains(org.OrganisationId)
-              && org.SubsidiaryId == null && org.ObligationStatus == ObligationStates.Obligated
+              && org.SubsidiaryId == null && (org.ObligationStatus == ObligationStates.Obligated || org.ObligationStatus == string.Empty)
             select new Organisation
             {
                 OrganisationId   = org.OrganisationId,

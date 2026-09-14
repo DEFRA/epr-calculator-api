@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>86bfd8af-32c6-4de1-869a-572d24c3ea1f</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Reuses EPR.Calculator.API's DI wiring (AddPayCalDatabase, AddPayCalBackgroundServices)
+         so this tool doesn't have to duplicate the ~30 result-builder registrations. -->
+    <ProjectReference Include="..\EPR.Calculator.API\EPR.Calculator.API.csproj"/>
+  </ItemGroup>
+
+</Project>

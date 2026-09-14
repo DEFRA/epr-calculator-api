@@ -5,7 +5,6 @@ using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
-using EPR.Calculator.API.Data.DataModels;
 using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Features.Billing;
