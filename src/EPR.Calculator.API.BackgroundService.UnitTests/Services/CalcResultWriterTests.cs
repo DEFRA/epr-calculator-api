@@ -283,23 +283,49 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         public async Task StoreProducerFees_WorksAsExpected()
         {
             var producerFees = TestDataHelper.GetProducerFees();
+            var expectedDetail = producerFees.Details.Single().FeeDetail;
 
             await _sut.StoreProducerFees(1, producerFees, CancellationToken.None);
 
-            var stored = await _dbContext.ProducerDisposalFee.ToImmutableListAsync();
-            stored.Count.ShouldBe(1);
-            stored.First().ShouldBeEquivalentTo(producerFees);
+            var stored = await _dbContext.ProducerDisposalFee
+                .AsNoTracking()
+                .Include(p => p.Details)
+                .SingleAsync();
+
+            stored.Total.ShouldBeEquivalentTo(producerFees.Total);
+
+            // The detail rows are bulk-inserted; confirm the nested owned-JSON round-trips.
+            var storedDetail = stored.Details.Single().FeeDetail;
+            storedDetail.ProducerName.ShouldBe(expectedDetail.ProducerName);
+            storedDetail.LADisposalCostsSection1.FeeWithoutBadDebt.ShouldBe(expectedDetail.LADisposalCostsSection1.FeeWithoutBadDebt);
+            storedDetail.LADisposalCostsSection1.ByCountry.England.ShouldBe(expectedDetail.LADisposalCostsSection1.ByCountry.England);
+            storedDetail.FeesByMaterial.Count.ShouldBe(expectedDetail.FeesByMaterial.Count);
         }
 
         [TestMethod]
         public async Task StoreSmcw_WorksAsExpected()
         {
             var smcw = MkSelfManagedConsumerWaste(1);
+            var expectedProducer = smcw.ProducerTotals.Single();
 
             await _sut.StoreSmcw(1, smcw, CancellationToken.None);
 
-            var stored = await _dbContext.SelfManagedConsumerWaste.SingleAsync();
-            stored.ShouldBeEquivalentTo(smcw);
+            var stored = await _dbContext.SelfManagedConsumerWaste
+                .AsNoTracking()
+                .Include(s => s.ProducerTotals)
+                .SingleAsync();
+
+            stored.CalculatorRunId.ShouldBe(1);
+            stored.TotalByMaterial[MaterialCodes.Aluminium].SmcwTonnage
+                .ShouldBe(smcw.TotalByMaterial[MaterialCodes.Aluminium].SmcwTonnage);
+
+            // The producer rows are batch-inserted; confirm the nested owned-JSON round-trips.
+            var storedProducer = stored.ProducerTotals.Single();
+            storedProducer.ProducerId.ShouldBe(expectedProducer.ProducerId);
+            storedProducer.SmcwByMaterial[MaterialCodes.Aluminium].SmcwTonnage
+                .ShouldBe(expectedProducer.SmcwByMaterial[MaterialCodes.Aluminium].SmcwTonnage);
+            storedProducer.SmcwByMaterial[MaterialCodes.Aluminium].NetTonnage.Red
+                .ShouldBe(expectedProducer.SmcwByMaterial[MaterialCodes.Aluminium].NetTonnage.Red);
         }
 
         [TestMethod]

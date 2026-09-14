@@ -146,6 +146,8 @@ namespace EPR.Calculator.API.BackgroundService.Services
         public async Task<ProducerFees> ReadProducerFees(int runId, CancellationToken cancellationToken)
         {
             return await dbContext.ProducerDisposalFee
+                        .AsNoTracking()
+                        .AsSplitQuery() // avoid repeating the parent's JSON columns across every detail row
                         .Include(p => p.Details)
                         .Where(p => p.CalculatorRunId == runId)
                         .SingleAsync(cancellationToken);
@@ -154,6 +156,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
         [ActivityTrace]
         public async Task<SelfManagedConsumerWaste> ReadSmcw(int runId, CancellationToken cancellationToken) =>
             await dbContext.SelfManagedConsumerWaste
+                    .AsNoTracking()
                     .Include(s => s.ProducerTotals)
                     .Where(p => p.CalculatorRunId == runId)
                     .SingleAsync(cancellationToken);
@@ -162,6 +165,7 @@ namespace EPR.Calculator.API.BackgroundService.Services
         [ActivityTrace]
         public async Task<ModulationResult> ReadModulationResult(int runId, CancellationToken cancellationToken) =>
             await dbContext.ModulationResult
+                    .AsNoTracking()
                     .Where(p => p.CalculatorRunId == runId)
                     .SingleAsync(cancellationToken);
 
