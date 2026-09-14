@@ -2,7 +2,7 @@
 
 namespace EPR.Calculator.API.Dtos;
 
-public record CreateLapcapDataRequest
+public record SetLapcapDataRequest
 {
     public string? Filename { get; init; }
     public RelativeYear? RelativeYear { get; init; }

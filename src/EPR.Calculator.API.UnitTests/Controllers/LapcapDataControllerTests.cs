@@ -30,7 +30,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             {
                 HttpContext = context,
             };
-            await this.LapcapDataController.Create(createDefaultParameterDto);
+            await this.LapcapDataController.Set(createDefaultParameterDto);
 
             var tempdateData = new LapCapParameterDto()
             {
@@ -86,7 +86,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         }
 
         [TestMethod]
-        public void CreateTest_With_Records()
+        public async Task CreateTest_With_Records()
         {
             var identity = new GenericIdentity("TestUser");
             identity.AddClaim(new Claim("name", "TestUser"));
@@ -102,24 +102,22 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 HttpContext = context,
             };
             var createDefaultParameterDto = CreateDto();
-            var task = this.LapcapDataController.Create(createDefaultParameterDto);
-            task.Wait(TestContext.CancellationTokenSource.Token);
-            var actionResult = task.Result as ObjectResult;
-            Assert.AreEqual(201, actionResult?.StatusCode);
+            var result = await this.LapcapDataController.Set(createDefaultParameterDto);
+            Assert.IsNotNull(result);
             Assert.AreEqual(1, this.DbContext.LapcapDataMaster.Count());
         }
 
-        private static CreateLapcapDataRequest CreateDto(IReadOnlyCollection<string>? uniqueRefsToAvoid = null)
+        private static SetLapcapDataRequest CreateDto(IReadOnlyCollection<string>? uniqueRefsToAvoid = null)
         {
             uniqueRefsToAvoid ??= new List<string>();
 
-            return new CreateLapcapDataRequest
+            return new SetLapcapDataRequest
             {
                 RelativeYear = new RelativeYear(2024),
                 Values = [
                     ..GetLapcapTemplateMasterData()
                         .Where(m => !uniqueRefsToAvoid.Contains(m.UniqueReference))
-                        .Select(m => new CreateLapcapDataRequest.LapcapValue
+                        .Select(m => new SetLapcapDataRequest.LapcapValue
                         {
                             Country = m.Country,
                             Material = m.Material,
