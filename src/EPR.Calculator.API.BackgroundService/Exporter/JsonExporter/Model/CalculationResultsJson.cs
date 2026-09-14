@@ -70,20 +70,16 @@ public class CalculationResultsJson
         };
     }
 
-    private static List<CalcSummaryProducerCalculationResults> ArrangeProducerCalculationResult(
+    // IEnumerable - deferred iterator so JsonSerializer writes one producer at a time.
+    private static IEnumerable<CalcSummaryProducerCalculationResults> ArrangeProducerCalculationResult(
         BillingRunContext runContext,
         CalcResult calcResult,
         IImmutableList<MaterialDetail> materials)
     {
-        var results = new List<CalcSummaryProducerCalculationResults>();
         var scaledupProducers = calcResult.CalcResultScaledupProducers.ScaledupProducers.Select(p => p.ProducerId).ToImmutableList();
 
         foreach (var producer in calcResult.ProducerFees.Details)
-        {
-            results.Add(CalcSummaryProducerCalculationResults.From(producer, materials, runContext.RequiresModulation, scaledupProducers));
-        }
-
-        return results;
+            yield return CalcSummaryProducerCalculationResults.From(producer, materials, runContext.RequiresModulation, scaledupProducers);
     }
 
     private static CalcResultProducerCalculationResultsTotal? ArrangeProducerCalculationResultsTotal(ProducerFees producerFees)

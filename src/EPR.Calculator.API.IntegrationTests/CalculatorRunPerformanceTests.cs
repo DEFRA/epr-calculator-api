@@ -74,14 +74,14 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
 
         Directory.CreateDirectory(outputDirectory);
 
-        // Sample the process working set every 250ms so we can report the peak reached during the runs.
+        // Sample the process working set every 50ms so we can report the peak reached during the runs.
         using var process = Process.GetCurrentProcess();
         var peakWorkingSet = 0L;
         using var workingSetSampler = new Timer(_ =>
         {
             process.Refresh();
             peakWorkingSet = Math.Max(peakWorkingSet, process.WorkingSet64);
-        }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(250));
+        }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(50));
 
         Console.WriteLine($"Test setup retained heap: {Gb(GC.GetTotalMemory(forceFullCollection: true))}");
 
@@ -277,8 +277,11 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
             .Select(x => x.FileName)
             .SingleAsync();
 
-    private static async Task SaveBlobFile(FakeBlobStorageUploadService blob, string fileName, string path) =>
-        await File.WriteAllTextAsync(path, blob.Get(fileName));
+    private static Task SaveBlobFile(FakeBlobStorageUploadService blob, string fileName, string path)
+    {
+        blob.CopyTo(fileName, path);
+        return Task.CompletedTask;
+    }
 
     private static OrganisationScenario GetOrganisationScenario(int index)
     {
