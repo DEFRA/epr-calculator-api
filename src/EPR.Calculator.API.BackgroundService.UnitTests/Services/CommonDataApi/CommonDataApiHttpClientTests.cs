@@ -131,7 +131,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.CommonDataApi
             });
             var client = CreateClient(handler);
 
-            var cutOffDate = new DateTime(2026, 7, 9);
+            var cutOffDate = new DateTimeOffset(2026, 7, 9, 23, 59, 59, 999, TimeSpan.Zero);
 
             // Act
             await CollectAsync(client.StreamOrganisations(new RelativeYear(2025), cutOffDate));
@@ -139,7 +139,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.CommonDataApi
             // Assert
             Assert.IsNotNull(capturedUrl);
             StringAssert.Contains(capturedUrl, "relativeYear=2025");
-            StringAssert.Contains(capturedUrl, "cutOffDate=2026-07-09");
+            StringAssert.Contains(capturedUrl, "cutOffDate=2026-07-09T23%3A59%3A59.9990000Z");
         }
 
 
