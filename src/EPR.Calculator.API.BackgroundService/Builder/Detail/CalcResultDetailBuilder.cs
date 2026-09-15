@@ -18,6 +18,7 @@ namespace EPR.Calculator.API.BackgroundService.Builder.Detail
         public async Task<CalcResultDetail> ConstructAsync(RunContext runContext, CancellationToken cancellationToken)
         {
             var calculatorRun = await dbContext.CalculatorRuns
+                .AsNoTracking()
                 .Include(o => o.CalculatorRunOrganisationDataMaster)
                 .Include(o => o.CalculatorRunPomDataMaster)
                 .Include(o => o.DefaultParameterSettingMaster)

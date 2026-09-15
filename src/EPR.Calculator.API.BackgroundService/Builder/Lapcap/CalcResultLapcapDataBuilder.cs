@@ -45,9 +45,9 @@ namespace EPR.Calculator.API.BackgroundService.Builder.Lapcap
                 }
             ).ToListAsync(cancellationToken);
 
-            var countries = await dbContext.Country.ToListAsync(cancellationToken);
+            var countries = await dbContext.Country.AsNoTracking().ToListAsync(cancellationToken);
 
-            var costType = await dbContext.CostType.SingleAsync(x => x.Name == "Fee for LA Disposal Costs", cancellationToken);
+            var costType = await dbContext.CostType.AsNoTracking().SingleAsync(x => x.Name == "Fee for LA Disposal Costs", cancellationToken);
             var costTypeId = costType.Id;
 
             var data = materialDetails.Select(material =>
