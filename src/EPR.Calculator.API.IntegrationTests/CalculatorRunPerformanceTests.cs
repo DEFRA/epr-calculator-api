@@ -248,7 +248,68 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
             Console.WriteLine($"Peak working set (whole test):           {Gb(peakWorkingSet)} ({Percent(peakWorkingSet, gcCeiling)} of ceiling)");
             Console.WriteLine($"Managed heap live at end:                {Gb(GC.GetTotalMemory(forceFullCollection: true))}");
             Console.WriteLine($"Managed bytes allocated per Results run: {Gb((long)calculatorAllocations.Average())} avg, {Gb(calculatorAllocations.Max())} max");
+
+            if (numberOfRuns > 1)
+                CompareRuns(outputDirectory, numberOfRuns);
         }
+    }
+
+    // Runs have identical input data so beyond a handful of known run id/name/date lines, every run's output should be identical.
+    private static void CompareRuns(string outputDirectory, int numberOfRuns)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Comparing runs (differences beyond known run id/name/date lines are unexpected)");
+        Console.WriteLine("--------------------------------------------------------------------------------");
+
+        CompareFiles("results.csv", ignoreLines: [1, 2, 3, 7, 8, 9]);
+        CompareFiles("billing.csv", ignoreLines: [1, 2, 3, 7, 8, 9]);
+        CompareFiles("billing.json",ignoreLines: [3, 4, 5, 9, 11, 13, 16]);
+
+        void CompareFiles(string suffix, int[] ignoreLines)
+        {
+            var baselinePath = Path.Combine(outputDirectory, $"run-1-{suffix}");
+            if (!File.Exists(baselinePath))
+                return;
+
+            var baseline = File.ReadAllLines(baselinePath);
+
+            for (var i = 1; i < numberOfRuns; i++)
+            {
+                var path = Path.Combine(outputDirectory, $"run-{i + 1}-{suffix}");
+                if (!File.Exists(path))
+                    continue;
+
+                var lines = File.ReadAllLines(path);
+                var unexpected = new List<(int Line, string Baseline, string Actual)>();
+
+                for (var lineNumber = 1; lineNumber <= Math.Min(baseline.Length, lines.Length); lineNumber++)
+                {
+                    if (ignoreLines.Contains(lineNumber))
+                        continue;
+
+                    if (baseline[lineNumber - 1] != lines[lineNumber - 1])
+                        unexpected.Add((lineNumber, baseline[lineNumber - 1], lines[lineNumber - 1]));
+                }
+
+                if (baseline.Length != lines.Length)
+                    Console.WriteLine($"  run 1 vs run {i + 1} ({suffix}): line count differs ({baseline.Length} vs {lines.Length})");
+
+                if (unexpected.Count == 0)
+                {
+                    Console.WriteLine($"  run 1 vs run {i + 1} ({suffix}): OK");
+                }
+                else
+                {
+                    Console.WriteLine($"  run 1 vs run {i + 1} ({suffix}): {unexpected.Count} unexpected line(s) differ");
+                    foreach (var (lineNumber, baselineLine, actualLine) in unexpected.Take(3))
+                        Console.WriteLine($"    line {lineNumber}: {Truncate(baselineLine)} -> {Truncate(actualLine)}");
+                    if (unexpected.Count > 3)
+                        Console.WriteLine($"    ... and {unexpected.Count - 3} more");
+                }
+            }
+        }
+
+        static string Truncate(string s) => s.Length > 120 ? s[..120] + "..." : s;
     }
 
     private static string Gb(long bytes) => $"{bytes / 1024d / 1024d / 1024d:0.00} GB";
