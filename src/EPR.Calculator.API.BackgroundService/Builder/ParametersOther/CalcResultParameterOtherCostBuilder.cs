@@ -20,8 +20,8 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ParametersOther
         public async Task<CalcResultParameterOtherCost> ConstructAsync(RunContext runContext)
         {
             var dp        = runContext.DefaultParameters;
-            var countries = await dbContext.Country.ToListAsync();
-            var costType  = await dbContext.CostType.SingleAsync(x => x.Name == "LA Data Prep Charge");
+            var countries = await dbContext.Country.AsNoTracking().ToListAsync();
+            var costType  = await dbContext.CostType.AsNoTracking().SingleAsync(x => x.Name == "LA Data Prep Charge");
 
             if (runContext.RunType == RunType.Calculator)
             {

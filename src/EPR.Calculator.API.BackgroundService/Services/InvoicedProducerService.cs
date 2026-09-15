@@ -4,6 +4,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Data.Utils;
+using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Services;
 
@@ -34,7 +35,7 @@ public class InvoicedProducerService(
     {
         var query =
             from
-                producerDetail in dbContext.ProducerDetail
+                producerDetail in dbContext.ProducerDetail.AsNoTracking()
             where
                 producerDetail.CalculatorRunId == runId
             select
@@ -47,7 +48,7 @@ public class InvoicedProducerService(
     {
         var query =
             from
-                suggested in dbContext.ProducerResultFileSuggestedBillingInstruction
+                suggested in dbContext.ProducerResultFileSuggestedBillingInstruction.AsNoTracking()
             where
                 suggested.CalculatorRunId == runId
                 && suggested.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
@@ -62,9 +63,9 @@ public class InvoicedProducerService(
     {
         var query =
             from
-                suggested in dbContext.ProducerResultFileSuggestedBillingInstruction
+                suggested in dbContext.ProducerResultFileSuggestedBillingInstruction.AsNoTracking()
             join
-                run in dbContext.CalculatorRuns
+                run in dbContext.CalculatorRuns.AsNoTracking()
                 on suggested.CalculatorRunId equals run.Id
             where
                 ValidClassifications.Contains(run.CalculatorRunClassificationId)
@@ -81,9 +82,9 @@ public class InvoicedProducerService(
     {
         var query =
             from
-                suggested in dbContext.ProducerResultFileSuggestedBillingInstruction
+                suggested in dbContext.ProducerResultFileSuggestedBillingInstruction.AsNoTracking()
             join
-                run in dbContext.CalculatorRuns
+                run in dbContext.CalculatorRuns.AsNoTracking()
                 on suggested.CalculatorRunId equals run.Id
             where
                 ValidClassifications.Contains(run.CalculatorRunClassificationId)
@@ -152,9 +153,9 @@ public class InvoicedProducerService(
                 //  - a later accepted non-cancel billing for the same producer + material (i.e. this row isn't the latest).
                 && !(
                     from
-                        laterRun in dbContext.CalculatorRuns
+                        laterRun in dbContext.CalculatorRuns.AsNoTracking()
                     join
-                        laterSuggested in dbContext.ProducerResultFileSuggestedBillingInstruction
+                        laterSuggested in dbContext.ProducerResultFileSuggestedBillingInstruction.AsNoTracking()
                         on laterRun.Id equals laterSuggested.CalculatorRunId
                     where
                         laterRun.Id > projection.CalculatorRun.Id
@@ -164,7 +165,7 @@ public class InvoicedProducerService(
                         && laterSuggested.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
                         && (
                             laterSuggested.SuggestedBillingInstruction == BillingConstants.Suggestion.Cancel
-                            || dbContext.ProducerInvoicedMaterialNetTonnage.Any(t =>
+                            || dbContext.ProducerInvoicedMaterialNetTonnage.AsNoTracking().Any(t =>
                                 t.CalculatorRunId == laterRun.Id
                                 && t.ProducerId == projection.InvoicedTonnage.ProducerId
                                 && t.MaterialId == projection.InvoicedTonnage.MaterialId)
@@ -192,15 +193,15 @@ public class InvoicedProducerService(
     private IQueryable<InvoicedProducerProjection> GetInvoicedProducerProjection()
     {
         return from
-                run in dbContext.CalculatorRuns
+                run in dbContext.CalculatorRuns.AsNoTracking()
             join
-                suggested in dbContext.ProducerResultFileSuggestedBillingInstruction
+                suggested in dbContext.ProducerResultFileSuggestedBillingInstruction.AsNoTracking()
                 on run.Id equals suggested.CalculatorRunId
             join
-                invoicedTonnage in dbContext.ProducerInvoicedMaterialNetTonnage
+                invoicedTonnage in dbContext.ProducerInvoicedMaterialNetTonnage.AsNoTracking()
                 on new { suggested.ProducerId, suggested.CalculatorRunId } equals new { invoicedTonnage.ProducerId, invoicedTonnage.CalculatorRunId }
             join
-                invoiceInstruction in dbContext.ProducerDesignatedRunInvoiceInstruction
+                invoiceInstruction in dbContext.ProducerDesignatedRunInvoiceInstruction.AsNoTracking()
                 on new { suggested.ProducerId, suggested.CalculatorRunId } equals new { invoiceInstruction.ProducerId, invoiceInstruction.CalculatorRunId }
             join
                 orgDetail in GetPreferredOrgDetailsProjection()
@@ -220,6 +221,7 @@ public class InvoicedProducerService(
     private IQueryable<InvoicedProducerProjection.PreferredOrgDetail> GetPreferredOrgDetailsProjection()
     {
         var eligible = dbContext.CalculatorRunOrganisationDataDetails
+            .AsNoTracking()
             .Where(detail => string.IsNullOrEmpty(detail.SubsidiaryId));
 
         return

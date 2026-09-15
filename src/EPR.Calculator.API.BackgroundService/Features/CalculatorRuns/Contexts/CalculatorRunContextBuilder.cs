@@ -28,6 +28,7 @@ public class CalculatorRunContextBuilder(
     TimeProvider timeProvider)
     : ICalculatorRunContextBuilder
 {
+    [ActivityTrace]
     public async Task<CalculatorRunContext> Build(int runId, string? user, CancellationToken cancellationToken)
     {
         var now = timeProvider.GetUtcNow();

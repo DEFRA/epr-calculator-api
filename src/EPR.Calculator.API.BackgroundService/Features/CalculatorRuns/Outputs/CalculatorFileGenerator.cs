@@ -23,6 +23,7 @@ public class CalculatorFileGenerator(
     ILogger<CalculatorFileGenerator> logger)
     : ICalculatorFileGenerator
 {
+    [ActivityTrace]
     public async Task<CalculatorFileResult> SerializeAndExport(CalculatorRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken)
     {
         var csvMetaData = await HandleCsvFile(runContext, calcResult, cancellationToken);

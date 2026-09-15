@@ -24,8 +24,6 @@ namespace EPR.Calculator.API.IntegrationTests;
 [DoNotParallelize]
 public class CalculatorRunIntegrationTests : BaseIntegrationTest
 {
-    private static readonly DateTime Now = DateTime.UtcNow;
-
     [TestMethod]
     public async Task IntegrationTest_2025() => await RunTest("test2025", new RelativeYear(2025), "some-user");
 
@@ -44,7 +42,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
 
         var fakeCommonDataApi                   = Provider.GetRequiredService<FakeCommonDataApiClient>();
         fakeCommonDataApi.OrganisationResponses = OrganisationResponses($"TestData/{relativeYear}-organisation-data.csv");
-        fakeCommonDataApi.PomResponses          = PomResponses($"TestData/{relativeYear}-pom-data.csv");
+        fakeCommonDataApi.Poms                  = () => StreamPoms($"TestData/{relativeYear}-pom-data.csv");
 
         var fakeBlobStorageUploadService = Provider.GetRequiredService<FakeBlobStorageUploadService>();
 
@@ -234,95 +232,4 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         await db.SaveChangesAsync();
     }
 
-    private static ImmutableList<DefaultParameterSettingDetail> DefaultParameterSettingDetails(string defaultParamsPath, int masterId) =>
-        SlurpCsv(defaultParamsPath)
-            .GetRecords<dynamic>()
-            .Select(row => (IDictionary<string, object>)row)
-            .SelectMany(row =>
-            {
-                var paramRef = row["Parameter Unique Ref"]?.ToString();
-                var rawValue = row["Parameter Value"]?.ToString();
-
-                if (string.IsNullOrWhiteSpace(paramRef))
-                    return Enumerable.Empty<DefaultParameterSettingDetail>();
-
-                if (string.IsNullOrWhiteSpace(rawValue))
-                    return Enumerable.Empty<DefaultParameterSettingDetail>();
-
-                var valueClean = rawValue!
-                    .Replace("£", "")
-                    .Replace("%", "")
-                    .Replace(",", "")
-                    .Trim();
-
-                return
-                [
-                    new DefaultParameterSettingDetail
-                    {
-                        DefaultParameterSettingMasterId = masterId,
-                        ParameterUniqueReferenceId      = paramRef!,
-                        ParameterValue                  = valueClean
-                    }
-                ];
-            }).ToImmutableList();
-
-    private static ImmutableList<LapcapDataDetail> LapcapDataDetails(string lapcapPath, LapcapDataMaster master, ImmutableList<LapcapDataTemplateMaster> templates) =>
-        SlurpCsv(lapcapPath)
-            .GetRecords<dynamic>()
-            .Select(row => new LapcapDataDetail
-            {
-                LapcapDataMasterId = master.Id,
-                UniqueReference    = templates.Single(x => x.Material == row.material && x.Country == row.country).UniqueReference,
-                TotalCost          = decimal.Parse(row.total_cost),
-                LapcapDataMaster   = master // TODO make virtual?
-            }).ToImmutableList();
-
-    private static ImmutableList<OrganisationResponse> OrganisationResponses(string organisationsPath) =>
-        SlurpCsv(organisationsPath)
-            .GetRecords<dynamic>()
-            .Select(row => new OrganisationResponse
-            {
-                OrganisationId   = int.Parse(row.organisation_id),
-                SubsidiaryId     = Nullable(row.subsidiary_id),
-                OrganisationName = row.organisation_name,
-                TradingName      = row.trading_name,
-                ObligationStatus = row.obligation_status,
-                SubmitterId      = row.submitter_id,
-                ErrorCode        = Nullable(row.error_code),
-                StatusCode       = Nullable(row.status_code),
-                NumDaysObligated = Nullable((string)row.num_days_obligated, short.Parse),
-                JoinerDate       = Nullable(row.joiner_date),
-                LeaverDate       = Nullable(row.leaver_date),
-                HasH1            = row.has_h1 == "1",
-                HasH2            = row.has_h2 == "1"
-            }).ToImmutableList();
-
-    private static ImmutableList<PomResponse> PomResponses(string pomsPath) =>
-        SlurpCsv(pomsPath)
-            .GetRecords<dynamic>()
-            .Select(row => new PomResponse
-            {
-                OrganisationId              = int.Parse(row.organisation_id),
-                SubsidiaryId                = Nullable(row.subsidiary_id),
-                SubmissionPeriod            = row.submission_period,
-                PackagingActivity           = row.packaging_activity,
-                PackagingType               = row.packaging_type,
-                PackagingClass              = row.packaging_class,
-                PackagingMaterial           = row.packaging_material,
-                PackagingMaterialWeight     = Nullable((string)row.packaging_material_weight, double.Parse),
-                SubmissionPeriodDescription = row.submission_period_desc,
-                SubmitterId                 = row.submitter_id,
-                PackagingMaterialSubtype    = Nullable(row.packaging_material_subtype),
-                RamRagRating                = Nullable(row.ram_rag_rating)
-            }).ToImmutableList();
-
-    private static string? Nullable(string value) =>
-        value.Equals("NULL", StringComparison.OrdinalIgnoreCase)
-            ? null
-            : value;
-
-    private static T? Nullable<T>(string value, Func<string, T> parser) where T : struct =>
-        value.Equals("NULL", StringComparison.OrdinalIgnoreCase)
-            ? null
-            : parser(value);
 }

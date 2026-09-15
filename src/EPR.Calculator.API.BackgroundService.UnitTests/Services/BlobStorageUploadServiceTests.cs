@@ -137,4 +137,117 @@ public class BlobStorageServiceTests
         var bytes = uploadedContent!.ToArray();
         bytes.ShouldBe(Encoding.UTF8.GetBytes("test content"));
     }
+
+    [TestMethod]
+    public async Task UploadFileStreamAsync_ReturnsUri_WhenUploadSucceeds()
+    {
+        // Arrange
+        var request = new IStorageUploadService.StreamRequest
+        {
+            FileName = "test.json",
+            ContainerName = fixture.Create<string>(),
+        };
+
+        var expectedUri = new Uri("https://example.com/test.json");
+
+        mockBlobClient.Setup(x => x.OpenWriteAsync(It.IsAny<bool>(), It.IsAny<BlobOpenWriteOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new NonDisposingMemoryStream());
+        mockBlobClient.Setup(x => x.Uri)
+            .Returns(expectedUri);
+
+        // Act
+        var result = await sut.UploadFileStreamAsync(
+            request,
+            (stream, ct) => stream.WriteAsync(Encoding.UTF8.GetBytes("test content"), ct).AsTask(),
+            CancellationToken.None);
+
+        // Assert
+        Assert.AreEqual(result, expectedUri.ToString());
+    }
+
+    [TestMethod]
+    public async Task UploadFileStreamAsync_WritesUtf8Bom_WhenUseUtf8BomIsTrue()
+    {
+        // Arrange
+        var request = new IStorageUploadService.StreamRequest
+        {
+            FileName = "test.txt",
+            ContainerName = fixture.Create<string>(),
+            UseUtf8Bom = true
+        };
+
+        var uploadedContent = new NonDisposingMemoryStream();
+
+        mockBlobClient.Setup(x => x.OpenWriteAsync(It.IsAny<bool>(), It.IsAny<BlobOpenWriteOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(uploadedContent);
+        mockBlobClient.Setup(x => x.Uri)
+            .Returns(new Uri("https://example.com/test.csv"));
+
+        // Act
+        await sut.UploadFileStreamAsync(
+            request,
+            (stream, ct) => stream.WriteAsync(Encoding.UTF8.GetBytes("test content"), ct).AsTask(),
+            CancellationToken.None);
+
+        // Assert
+        var bytes = uploadedContent.ToArray();
+        bytes.Take(3).ShouldBe(new byte[] { 0xEF, 0xBB, 0xBF });
+        bytes.Skip(3).ShouldBe(Encoding.UTF8.GetBytes("test content"));
+    }
+
+    [TestMethod]
+    public async Task UploadFileStreamAsync_DoesNotWriteUtf8Bom_WhenUseUtf8BomIsFalse()
+    {
+        // Arrange
+        var request = new IStorageUploadService.StreamRequest
+        {
+            FileName = "test.json",
+            ContainerName = fixture.Create<string>(),
+            UseUtf8Bom = false
+        };
+
+        var uploadedContent = new NonDisposingMemoryStream();
+
+        mockBlobClient.Setup(x => x.OpenWriteAsync(It.IsAny<bool>(), It.IsAny<BlobOpenWriteOptions>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(uploadedContent);
+        mockBlobClient.Setup(x => x.Uri)
+            .Returns(new Uri("https://example.com/test.json"));
+
+        // Act
+        await sut.UploadFileStreamAsync(
+            request,
+            (stream, ct) => stream.WriteAsync(Encoding.UTF8.GetBytes("test content"), ct).AsTask(),
+            CancellationToken.None);
+
+        // Assert
+        var bytes = uploadedContent.ToArray();
+        bytes.ShouldBe(Encoding.UTF8.GetBytes("test content"));
+    }
+
+    [TestMethod]
+    public async Task UploadFileStreamAsync_ShouldThrow_WhenUploadFails()
+    {
+        // Arrange
+        var request = new IStorageUploadService.StreamRequest
+        {
+            FileName = "test.json",
+            ContainerName = fixture.Create<string>(),
+        };
+
+        mockBlobClient.Setup(x => x.OpenWriteAsync(It.IsAny<bool>(), It.IsAny<BlobOpenWriteOptions>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new TestException());
+
+        // Act & Assert
+        await Should.ThrowAsync<TestException>(async () => await sut.UploadFileStreamAsync(
+            request, (stream, ct) => Task.CompletedTask, CancellationToken.None));
+    }
+
+    // OpenWriteAsync's stream is disposed by the sut before the test gets to inspect what was written to
+    // it - this keeps the buffer readable afterwards instead of throwing ObjectDisposedException.
+    private sealed class NonDisposingMemoryStream : MemoryStream
+    {
+        protected override void Dispose(bool disposing)
+        {
+        }
+    }
 }
