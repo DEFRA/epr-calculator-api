@@ -1,11 +1,12 @@
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Enums;
 
 namespace EPR.Calculator.API.Data.DataModels;
 
 public class CalculatorRun
 {
     public int Id { get; set; }
-    public int CalculatorRunClassificationId { get; set; }
+    public RunClassification Classification { get; set; }
     public BillingRunStatus BillingRunStatus { get; set; }
     public DateTime? BillingRunStartedAt { get; set; }
     public required string Name { get; set; }

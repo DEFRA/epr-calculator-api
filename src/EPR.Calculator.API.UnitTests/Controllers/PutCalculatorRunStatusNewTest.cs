@@ -4,8 +4,8 @@ using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
@@ -19,10 +19,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     [TestClass]
     public class PutCalculatorRunStatusNewTest
     {
-        private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
-        private readonly Mock<IBillingFileService> mockBillingFileService;
-        private readonly Mock<IInvoiceDetailsService> mockInvoiceDetailsService;
-        private readonly Mock<ICalculationRunService> mockCalculationRunService;
+        private readonly Mock<IRunClassificationValidator> mockValidator;
         private readonly ApplicationDBContext context;
 
         private readonly CalculatorNewController calculatorNewControllerUnderTest;
@@ -36,19 +33,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.context = new ApplicationDBContext(dbContextOptions);
             this.context.Database.EnsureCreated();
 
-            this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
-            this.mockBillingFileService = new Mock<IBillingFileService>();
-            this.mockInvoiceDetailsService = new Mock<IInvoiceDetailsService>();
-            this.mockCalculationRunService = new Mock<ICalculationRunService>();
-
+            this.mockValidator = new Mock<IRunClassificationValidator>();
 
             this.calculatorNewControllerUnderTest = new CalculatorNewController(
                 this.context,
                 this.mockValidator.Object,
-                this.mockBillingFileService.Object,
-                this.mockInvoiceDetailsService.Object,
-                Mock.Of<ILogger<CalculatorNewController>>(),
-                this.mockCalculationRunService.Object);
+                Mock.Of<IBillingFileService>(),
+                Mock.Of<IInvoiceDetailsService>(),
+                Mock.Of<ILogger<CalculatorNewController>>());
 
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
@@ -71,9 +63,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void CallingPutCalculatorRunStatusMethod_ShouldReturn201SuccessCode_WhenAllValidationPassed()
         {
             // Act
-            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            var request = new SetRunClassificationRequest
             {
-                ClassificationId = 6,
+                Classification = RunClassification.Initial,
                 RunId = 1,
             };
 
@@ -86,8 +78,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 User = principal,
             };
 
-            List<CalculatorRunDto> designatedRuns = [];
-
             this.calculatorNewControllerUnderTest.ControllerContext = new ControllerContext
             {
                 HttpContext = userContext,
@@ -95,23 +85,14 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Setup
             this.mockValidator.Setup(
-                x => x.Validate(
+                x => x.ValidateAsync(
                     It.IsAny<CalculatorRun>(),
-                    It.IsAny<CalculatorRunStatusUpdateDto>()))
-                .Returns(new GenericValidationResultDto { IsInvalid = false });
-            this.mockCalculationRunService.Setup(
-                x => x.GetDesignatedRunsByFinancialYear(
-                    It.IsAny<RelativeYear>(),
-                    default)).ReturnsAsync(designatedRuns);
-            this.mockValidator.Setup(
-                x => x.Validate(
-                    designatedRuns,
-                    It.IsAny<CalculatorRun>(),
-                    It.IsAny<CalculatorRunStatusUpdateDto>()))
-                .Returns(new GenericValidationResultDto { IsInvalid = false });
+                    It.IsAny<RunClassification>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new GenericValidationResultDto());
 
             // Act
-            var task = this.calculatorNewControllerUnderTest.PutCalculatorRunStatus(runStatusUpdateDto);
+            var task = this.calculatorNewControllerUnderTest.PutCalculatorRunStatus(request, CancellationToken.None);
             task.Wait(TestContext.CancellationTokenSource.Token);
 
             // Assert
@@ -119,22 +100,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(result);
             Assert.AreEqual(201, result.StatusCode);
 
-            // Veify
             this.mockValidator.Verify(
-                x => x.Validate(
+                x => x.ValidateAsync(
                     It.IsAny<CalculatorRun>(),
-                    It.IsAny<CalculatorRunStatusUpdateDto>()),
-                Times.Once());
-            this.mockCalculationRunService.Verify(
-                x => x.GetDesignatedRunsByFinancialYear(
-                    It.IsAny<RelativeYear>(),
-                    default),
-                Times.Once());
-            this.mockValidator.Verify(
-                x => x.Validate(
-                    designatedRuns,
-                    It.IsAny<CalculatorRun>(),
-                    It.IsAny<CalculatorRunStatusUpdateDto>()),
+                    request.Classification,
+                    It.IsAny<CancellationToken>()),
                 Times.Once());
         }
 
@@ -142,9 +112,9 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public void CallingPutCalculatorRunStatusMethod_ShouldReturn422FailureCode_WhenClassificationRunValidationFailed()
         {
             // Arrange
-            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
+            var request = new SetRunClassificationRequest
             {
-                ClassificationId = 6,
+                Classification = RunClassification.Initial,
                 RunId = 1,
             };
 
@@ -164,20 +134,17 @@ namespace EPR.Calculator.API.UnitTests.Controllers
 
             // Setup
             this.mockValidator.Setup(
-                x => x.Validate(
+                x => x.ValidateAsync(
                     It.IsAny<CalculatorRun>(),
-                    It.IsAny<CalculatorRunStatusUpdateDto>()))
-                .Returns(new GenericValidationResultDto
+                    It.IsAny<RunClassification>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new GenericValidationResultDto
                 {
-                    IsInvalid = true,
-                    Errors =
-                    [
-                        "Some error",
-                    ],
+                    Errors = [ "Some error" ],
                 });
 
             // Act
-            var task = this.calculatorNewControllerUnderTest.PutCalculatorRunStatus(runStatusUpdateDto);
+            var task = this.calculatorNewControllerUnderTest.PutCalculatorRunStatus(request, CancellationToken.None);
             task.Wait(TestContext.CancellationTokenSource.Token);
 
             // Assert
@@ -189,118 +156,11 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             Assert.IsNotNull(errors);
             Assert.AreEqual("Some error", errors.First());
 
-            // Veify
             this.mockValidator.Verify(
-                x => x.Validate(
+                x => x.ValidateAsync(
                     It.IsAny<CalculatorRun>(),
-                    It.IsAny<CalculatorRunStatusUpdateDto>()),
-                Times.Once());
-            this.mockCalculationRunService.Verify(
-                x => x.GetDesignatedRunsByFinancialYear(
-                    It.IsAny<RelativeYear>(),
-                    default),
-                Times.Never());
-            this.mockValidator.Verify(
-                x => x.Validate(
-                    It.IsAny<List<CalculatorRunDto>>(),
-                    It.IsAny<CalculatorRun>(),
-                    It.IsAny<CalculatorRunStatusUpdateDto>()),
-                Times.Never());
-        }
-
-        [TestMethod]
-        public void CallingPutCalculatorRunStatusMethod_ShouldReturn422FailureCode_WhenOtherRunsClassificationsStatusValidationFailed()
-        {
-            // Arrange
-            var runStatusUpdateDto = new CalculatorRunStatusUpdateDto
-            {
-                ClassificationId = (int)RunClassification.INITIAL_RUN,
-                RunId = 1,
-            };
-
-            var identity = new GenericIdentity("TestUser");
-            identity.AddClaim(new Claim("name", "TestUser"));
-            var principal = new ClaimsPrincipal(identity);
-
-            var userContext = new DefaultHttpContext()
-            {
-                User = principal,
-            };
-
-            List<CalculatorRunDto> designatedRuns = [];
-            designatedRuns.Add(new CalculatorRunDto
-            {
-                RunId = 2,
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                RunName = "Run 2",
-                RunClassification = RunClassification.INITIAL_RUN,
-                UpdatedAt = DateTime.UtcNow.AddMinutes(-1),
-                RelativeYear = new RelativeYear(2024),
-                CreatedBy = "ignored",
-                UpdatedBy = "ignored",
-                BillingRunStatus = BillingRunStatus.None,
-                BillingRunStartedAt = null,
-                BillingFile = null
-            });
-
-            this.calculatorNewControllerUnderTest.ControllerContext = new ControllerContext
-            {
-                HttpContext = userContext,
-            };
-
-            // Setup
-            this.mockValidator.Setup(
-                x => x.Validate(
-                    It.IsAny<CalculatorRun>(),
-                    It.IsAny<CalculatorRunStatusUpdateDto>()))
-                .Returns(new GenericValidationResultDto { IsInvalid = false });
-            this.mockCalculationRunService.Setup(
-                x => x.GetDesignatedRunsByFinancialYear(
-                    It.IsAny<RelativeYear>(),
-                    default)).ReturnsAsync(designatedRuns);
-            this.mockValidator.Setup(
-                x => x.Validate(
-                    designatedRuns,
-                    It.IsAny<CalculatorRun>(),
-                    It.IsAny<CalculatorRunStatusUpdateDto>()))
-                .Returns(new GenericValidationResultDto
-                {
-                    IsInvalid = true,
-                    Errors =
-                    [
-                        "Some error",
-                    ],
-                });
-
-            // Act
-            var task = this.calculatorNewControllerUnderTest.PutCalculatorRunStatus(runStatusUpdateDto);
-            task.Wait(TestContext.CancellationTokenSource.Token);
-
-            // Assert
-            var result = task.Result as ObjectResult;
-            Assert.IsNotNull(result);
-            Assert.AreEqual(422, result.StatusCode);
-            Assert.IsNotNull(result.Value);
-            var errors = result.Value as IEnumerable<string>;
-            Assert.IsNotNull(errors);
-            Assert.AreEqual("Some error", errors.First());
-
-            // Veify
-            this.mockValidator.Verify(
-                x => x.Validate(
-                    It.IsAny<CalculatorRun>(),
-                    It.IsAny<CalculatorRunStatusUpdateDto>()),
-                Times.Once());
-            this.mockCalculationRunService.Verify(
-                x => x.GetDesignatedRunsByFinancialYear(
-                    It.IsAny<RelativeYear>(),
-                    default),
-                Times.Once());
-            this.mockValidator.Verify(
-                x => x.Validate(
-                    designatedRuns,
-                    It.IsAny<CalculatorRun>(),
-                    It.IsAny<CalculatorRunStatusUpdateDto>()),
+                    request.Classification,
+                    It.IsAny<CancellationToken>()),
                 Times.Once());
         }
     }

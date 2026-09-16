@@ -3,6 +3,7 @@ using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Utils;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,14 +24,6 @@ public class InvoicedProducerService(
     ILogger<InvoicedProducerService> logger)
     : IInvoicedProducerService
 {
-    private static readonly ImmutableHashSet<int> ValidClassifications =
-    [
-        RunClassificationStatusIds.INITIALRUNCOMPLETEDID,
-        RunClassificationStatusIds.INTERMRECALCULATIONRUNCOMPID,
-        RunClassificationStatusIds.FINALRECALCULATIONRUNCOMPID,
-        RunClassificationStatusIds.FINALRUNCOMPLETEDID
-    ];
-
     public async Task<ImmutableHashSet<int>> GetProducerIdsForRun(int runId, CancellationToken cancellationToken = default)
     {
         var query =
@@ -68,7 +61,7 @@ public class InvoicedProducerService(
                 run in dbContext.CalculatorRuns.AsNoTracking()
                 on suggested.CalculatorRunId equals run.Id
             where
-                ValidClassifications.Contains(run.CalculatorRunClassificationId)
+                RunClassificationHelper.CompletedClassifications.Contains(run.Classification)
                 && run.RelativeYear == relativeYear
                 && suggested.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
                 && suggested.SuggestedBillingInstruction == BillingConstants.Suggestion.Cancel
@@ -87,7 +80,7 @@ public class InvoicedProducerService(
                 run in dbContext.CalculatorRuns.AsNoTracking()
                 on suggested.CalculatorRunId equals run.Id
             where
-                ValidClassifications.Contains(run.CalculatorRunClassificationId)
+                RunClassificationHelper.CompletedClassifications.Contains(run.Classification)
                 && run.RelativeYear == relativeYear
                 && suggested.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
             select
@@ -116,7 +109,7 @@ public class InvoicedProducerService(
             from
                 projection in GetInvoicedProducerProjection()
             where
-                ValidClassifications.Contains(projection.CalculatorRun.CalculatorRunClassificationId)
+                RunClassificationHelper.CompletedClassifications.Contains(projection.CalculatorRun.Classification)
                 && projection.CalculatorRun.RelativeYear == relativeYear
                 && projection.SuggestedInstruction.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
                 && (producerIdFilter == null || producerIdFilter.Contains(projection.ProducerId))
@@ -143,7 +136,7 @@ public class InvoicedProducerService(
             from
                 projection in GetInvoicedProducerProjection()
             where
-                ValidClassifications.Contains(projection.CalculatorRun.CalculatorRunClassificationId)
+                RunClassificationHelper.CompletedClassifications.Contains(projection.CalculatorRun.Classification)
                 && projection.CalculatorRun.RelativeYear == relativeYear
                 && projection.SuggestedInstruction.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
                 && projection.SuggestedInstruction.SuggestedBillingInstruction != BillingConstants.Suggestion.Cancel
@@ -160,7 +153,7 @@ public class InvoicedProducerService(
                     where
                         laterRun.Id > projection.CalculatorRun.Id
                         && laterRun.RelativeYear == relativeYear
-                        && ValidClassifications.Contains(laterRun.CalculatorRunClassificationId)
+                        && RunClassificationHelper.CompletedClassifications.Contains(laterRun.Classification)
                         && laterSuggested.ProducerId == projection.ProducerId
                         && laterSuggested.BillingInstructionAcceptReject == BillingConstants.Action.Accepted
                         && (

@@ -1,5 +1,5 @@
 ﻿using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Data.Enums;
 
 namespace EPR.Calculator.API.Dtos;
 

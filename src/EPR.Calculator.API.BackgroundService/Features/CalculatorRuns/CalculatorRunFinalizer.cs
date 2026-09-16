@@ -1,12 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using EPR.Calculator.API.BackgroundService.Enums;
 using EPR.Calculator.API.BackgroundService.Exceptions;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
@@ -15,12 +14,12 @@ public interface ICalculatorRunFinalizer
 {
     /// <summary>
     ///     Persists any required state changes to the database, then marks the calculator run as
-    ///     <see cref="RunClassification.UNCLASSIFIED" />.
+    ///     <see cref="RunClassification.Unclassified" />.
     /// </summary>
     Task FinalizeAsCompleted(CalculatorRunContext runContext, CalcResult calcResult, CalculatorFileResult exportResult, CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Marks the calculator run as <see cref="RunClassification.ERROR" />.
+    ///     Marks the calculator run as <see cref="RunClassification.Errored" />.
     /// </summary>
     Task FinalizeAsErrored(CalculatorRunContext runContext, CancellationToken cancellationToken);
 }
@@ -63,7 +62,7 @@ public class CalculatorRunFinalizer(
                 .CalculatorRuns
                 .SingleAsync(run => run.Id == runContext.RunId, cancellationToken);
 
-            calcRun.CalculatorRunClassificationId = RunClassificationStatusIds.ERRORID;
+            calcRun.Classification = RunClassification.Errored;
 
             await dbContext.SaveChangesAsync(cancellationToken);
         }
@@ -86,7 +85,7 @@ public class CalculatorRunFinalizer(
             .CalculatorRuns
             .SingleAsync(run => run.Id == runContext.RunId, cancellationToken);
 
-        calcRun.CalculatorRunClassificationId = RunClassificationStatusIds.UNCLASSIFIEDID;
+        calcRun.Classification = RunClassification.Unclassified;
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }

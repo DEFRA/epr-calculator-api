@@ -92,7 +92,7 @@ public static class ServiceConfiguration
                 options.Filters.Add<FluentValidationActionFilter>());
 
             services.AddScoped<ICalcRelativeYearRequestDtoDataValidator, CalcRelativeYearRequestDtoDataValidator>();
-            services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatusDataValidator>();
+            services.AddScoped<IRunClassificationValidator, RunClassificationValidator>();
 
             return services;
         }
