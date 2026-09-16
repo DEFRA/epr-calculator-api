@@ -3,8 +3,8 @@ using EPR.Calculator.API.BackgroundService;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.Services;
@@ -24,7 +24,7 @@ public class CalculatorController(
     ApplicationDBContext dbContext,
     IBlobStorageService blobStorage,
     IBackgroundTaskQueue backgroundTaskQueue,
-    ICalculatorRunStatusDataValidator runStatusValidator,
+    IRunClassificationValidator runClassificationValidator,
     ICalcRelativeYearRequestDtoDataValidator validator,
     IAvailableClassificationsService availableClassificationsService,
     ICalculationRunService calculationRunService
@@ -40,7 +40,7 @@ public class CalculatorController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Create([FromBody] CreateCalculatorRunDto request)
     {
-        var isCalcAlreadyRunning = await dbContext.CalculatorRuns.AnyAsync(run => run.CalculatorRunClassificationId == (int)RunClassification.RUNNING);
+        var isCalcAlreadyRunning = await dbContext.CalculatorRuns.AnyAsync(run => run.Classification == RunClassification.Running);
         if (isCalcAlreadyRunning)
         {
             return new ObjectResult(new { Message = CommonResources.CalculationAlreadyRunning })
@@ -87,7 +87,7 @@ public class CalculatorController(
             RelativeYear = relativeYear.Value,
             CreatedBy = User.GetName(),
             CreatedAt = DateTime.UtcNow,
-            CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+            Classification = RunClassification.Running,
             DefaultParameterSettingMasterId = activeDefaultParameterSettingsMaster.Id,
             LapcapDataMasterId = activeLapcapDataMaster.Id,
             BillingRunStatus = BillingRunStatus.None
@@ -231,30 +231,15 @@ public class CalculatorController(
         var run = await dbContext.CalculatorRuns
             .SingleOrDefaultAsync(run => run.Id == runId, cancellationToken);
 
-        if (run == null || run.CalculatorRunClassificationId == (int)RunClassification.DELETED)
+        if (run == null || run.Classification == RunClassification.Deleted)
             return NoContent();
 
-        var request = new CalculatorRunStatusUpdateDto
-        {
-            RunId = runId,
-            ClassificationId = (int) RunClassification.DELETED
-        };
-
-        // Perform basic validation on classification status
-        var validationResult = runStatusValidator.Validate(run, request);
+        var validationResult = await runClassificationValidator.ValidateAsync(run, RunClassification.Deleted, cancellationToken);
 
         if (validationResult.IsInvalid)
             return new ObjectResult(validationResult.Errors) { StatusCode = StatusCodes.Status422UnprocessableEntity };
 
-        // Perform validation to check other designated runs are not in progress and not already completed for the same relative year
-        var designatedRuns = await calculationRunService.GetDesignatedRunsByFinancialYear(run.RelativeYear, cancellationToken);
-
-        validationResult = runStatusValidator.Validate(designatedRuns, run, request);
-
-        if (validationResult.IsInvalid)
-            return new ObjectResult(validationResult.Errors) { StatusCode = StatusCodes.Status422UnprocessableEntity };
-
-        run.CalculatorRunClassificationId = (int) RunClassification.DELETED;
+        run.Classification = RunClassification.Deleted;
         run.UpdatedAt = DateTime.UtcNow;
         run.UpdatedBy = User.GetDisplayName();
 

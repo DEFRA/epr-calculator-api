@@ -4,6 +4,7 @@ using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Enums;
 using Microsoft.Extensions.Time.Testing;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Features.Billing.Contexts;
@@ -20,7 +21,7 @@ public class BillingRunContextBuilderTests : TestsFor<BillingRunContextBuilder>
         {
             Id = 1,
             Name = "Valid test run",
-            CalculatorRunClassificationId = RunClassificationStatusIds.INITIALRUNID,
+            Classification = RunClassification.Initial,
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = 1,
             CalculatorRunOrganisationDataMasterId = 1,

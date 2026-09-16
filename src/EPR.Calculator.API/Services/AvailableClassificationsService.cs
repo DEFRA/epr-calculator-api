@@ -1,7 +1,8 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Services;
@@ -29,33 +30,10 @@ public class AvailableClassificationsService(
         return validStatuses
             .Join(
                 allClassifications,
-                status => (int)status,
+                status => status,
                 classification => classification.Id,
-                (status, classification) => classification)
+                (_, classification) => classification)
             .ToList();
-    }
-
-    private static bool IsPreInitialRun(List<RunClassificationStatus> currentClassifications) => currentClassifications.TrueForAll(c => !c.HasFlag(RunClassificationStatus.Designated));
-
-    private static bool IsDesignatedButIncomplete(List<RunClassificationStatus> currentClassifications) => currentClassifications.Exists(c => c.HasFlag(RunClassificationStatus.Designated) && !c.HasFlag(RunClassificationStatus.Complete));
-
-    private static bool HasNeitherFinalRunNorFinalRecalculationRun(List<RunClassificationStatus> currentClassifications)
-    {
-        return currentClassifications.Exists(c => c == RunClassificationStatus.INITIAL_RUN_COMPLETED)
-               && currentClassifications.TrueForAll(c => c != RunClassificationStatus.FINAL_RECALCULATION_RUN_COMPLETED && c != RunClassificationStatus.FINAL_RUN_COMPLETED);
-    }
-
-    private static bool HasFinalRecalculationButNoFinalRun(List<RunClassificationStatus> currentClassifications)
-    {
-        return currentClassifications.Exists(c => c == RunClassificationStatus.INITIAL_RUN_COMPLETED)
-               && currentClassifications.Exists(c => c == RunClassificationStatus.FINAL_RECALCULATION_RUN_COMPLETED)
-               && currentClassifications.TrueForAll(c => c != RunClassificationStatus.FINAL_RUN_COMPLETED);
-    }
-
-    private static bool HasFinalRun(List<RunClassificationStatus> currentClassifications)
-    {
-        return currentClassifications.Exists(c => c == RunClassificationStatus.INITIAL_RUN_COMPLETED)
-               && currentClassifications.Exists(c => c == RunClassificationStatus.FINAL_RUN_COMPLETED);
     }
 
     private async Task<bool> IsCurrentRunOlderThanOtherCompletedRuns(
@@ -63,10 +41,8 @@ public class AvailableClassificationsService(
         List<CalculatorRun> filteredRuns,
         CancellationToken cancellationToken)
     {
-        var compledRunIds = filteredRuns.Where(run => run.CalculatorRunClassificationId == (int)RunClassification.INITIAL_RUN_COMPLETED
-                                                      || run.CalculatorRunClassificationId == (int)RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED
-                                                      || run.CalculatorRunClassificationId == (int)RunClassification.FINAL_RECALCULATION_RUN_COMPLETED
-                                                      || run.CalculatorRunClassificationId == (int)RunClassification.FINAL_RUN_COMPLETED)
+        var completedRuns = filteredRuns
+            .Where(run => run.Classification.IsCompleted)
             .Select(run => run.Id)
             .ToList();
 
@@ -74,7 +50,7 @@ public class AvailableClassificationsService(
             (from run in context.CalculatorRuns
                 join calculatorRunBillingFileMetadata in context.CalculatorRunBillingFileMetadata
                     on run.Id equals calculatorRunBillingFileMetadata.CalculatorRunId
-                where compledRunIds.Contains(run.Id)
+                where completedRuns.Contains(run.Id)
                 select new
                 {
                     RunId = run.Id,
@@ -92,77 +68,48 @@ public class AvailableClassificationsService(
         CancellationToken cancellationToken)
     {
         var allRuns = await GetCalculatorRuns(request, cancellationToken);
-        List<CalculatorRun> filteredRuns = [.. allRuns.Where(run => run.Id != request.RunId)];
-        List<RunClassificationStatus> currentClassifications = [.. filteredRuns.Select(run => (RunClassification)run.CalculatorRunClassificationId).Select(classification => (RunClassificationStatus)Enum.Parse(typeof(RunClassificationStatus), classification.ToString()))];
+        var run = allRuns.Single(r => r.Id == request.RunId);
+        List<CalculatorRun> filteredRuns = [.. allRuns.Where(r => r.Id != request.RunId)];
 
-        if (IsPreInitialRun(currentClassifications))
+        if (!filteredRuns.Exists(r => r.Classification.IsDesignated))
         {
             return
             [
-                RunClassification.INITIAL_RUN,
-                RunClassification.TEST_RUN
+                RunClassification.Initial,
+                RunClassification.Test
             ];
         }
 
-        if (IsDesignatedButIncomplete(currentClassifications))
+        if (filteredRuns.Exists(r => r.Classification is { IsDesignated: true, IsCompleted: false }))
         {
             return
             [
-                RunClassification.TEST_RUN
+                RunClassification.Test
             ];
         }
 
-        var currentRun = allRuns.Single(run => run.Id == request.RunId);
-
-        if (await IsCurrentRunOlderThanOtherCompletedRuns(currentRun, filteredRuns, cancellationToken))
+        if (await IsCurrentRunOlderThanOtherCompletedRuns(run, filteredRuns, cancellationToken))
         {
             return
             [
-                RunClassification.TEST_RUN
+                RunClassification.Test
             ];
         }
 
-        if (HasNeitherFinalRunNorFinalRecalculationRun(currentClassifications))
-        {
-            return
-            [
-                RunClassification.INTERIM_RECALCULATION_RUN,
-                RunClassification.FINAL_RECALCULATION_RUN,
-                RunClassification.FINAL_RUN,
-                RunClassification.TEST_RUN
-            ];
-        }
-
-        if (HasFinalRecalculationButNoFinalRun(currentClassifications))
-        {
-            return
-            [
-                RunClassification.INTERIM_RECALCULATION_RUN,
-                RunClassification.FINAL_RUN,
-                RunClassification.TEST_RUN
-            ];
-        }
-
-        if (HasFinalRun(currentClassifications))
-        {
-            return
-            [
-                RunClassification.INTERIM_RECALCULATION_RUN,
-                RunClassification.TEST_RUN
-            ];
-        }
-
-        return [];
+        return
+        [
+            RunClassification.Recalculation,
+            RunClassification.Test
+        ];
     }
 
     private async Task<List<CalculatorRun>> GetCalculatorRuns(CalcRelativeYearRequestDto request, CancellationToken cancellationToken)
     {
         var currentRuns = await context.CalculatorRuns
             .Where(run => run.RelativeYear == request.RelativeYearValue
-                          && run.CalculatorRunClassificationId != (int)RunClassification.DELETED
-                          && run.CalculatorRunClassificationId != (int)RunClassification.ERROR
-                          && run.CalculatorRunClassificationId != (int)RunClassification.RUNNING
-                          && run.CalculatorRunClassificationId != (int)RunClassification.INTHEQUEUE)
+                          && run.Classification != RunClassification.Deleted
+                          && run.Classification != RunClassification.Errored
+                          && run.Classification != RunClassification.Running)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 

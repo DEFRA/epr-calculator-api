@@ -1,5 +1,6 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Mappers;
 using EPR.Calculator.API.UnitTests.TestHelpers.Fixtures;
@@ -17,8 +18,8 @@ public class RelativeYearClassificationsMapperTests
         // Arrange
         List<CalculatorRunClassification> classifications =
         [
-            new() { Id = 1, Status = "RUNNING" },
-            new() { Id = 2, Status = "UNCLASSIFIED" }
+            new() { Id = RunClassification.Running, Status = "RUNNING" },
+            new() { Id = RunClassification.Unclassified, Status = "UNCLASSIFIED" }
         ];
 
         // Act
@@ -30,9 +31,9 @@ public class RelativeYearClassificationsMapperTests
         result.Classifications.Count.ShouldBe(classifications.Count);
         result.ClassifiedRuns.ShouldBeEmpty();
 
-        result.Classifications[0].Id.ShouldBe(1);
+        result.Classifications[0].Id.ShouldBe(RunClassification.Running);
         result.Classifications[0].Status.ShouldBe("RUNNING");
-        result.Classifications[1].Id.ShouldBe(2);
+        result.Classifications[1].Id.ShouldBe(RunClassification.Unclassified);
         result.Classifications[1].Status.ShouldBe("UNCLASSIFIED");
     }
 

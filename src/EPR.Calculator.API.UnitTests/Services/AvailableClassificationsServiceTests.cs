@@ -1,8 +1,8 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,7 +38,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             {
                 dbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification
                 {
-                    Id = (int)value,
+                    Id = value,
                     Status = value.ToString()
                 });
             }
@@ -70,7 +70,7 @@ namespace EPR.Calculator.API.UnitTests.Services
                 RelativeYearValue = 2024,
             };
 
-            AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.Unclassified, requestId: request.RunId, isComplete: false);
 
             // Act
             var result = await service.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
@@ -80,8 +80,8 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    nameof(RunClassification.INITIAL_RUN),
-                    nameof(RunClassification.TEST_RUN)
+                    nameof(RunClassification.Initial),
+                    nameof(RunClassification.Test)
                 },
                 statuses);
         }
@@ -96,8 +96,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                 RelativeYearValue = 2024,
             };
 
-            AddRunToDb(RunClassification.INITIAL_RUN, requestId: 10, isComplete: false);
-            AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.Initial, requestId: 10, isComplete: false);
+            AddRunToDb(RunClassification.Unclassified, requestId: request.RunId, isComplete: false);
 
             // Act
             var result = await service.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
@@ -107,7 +107,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    nameof(RunClassification.TEST_RUN)
+                    nameof(RunClassification.Test)
                 },
                 statuses);
         }
@@ -122,10 +122,10 @@ namespace EPR.Calculator.API.UnitTests.Services
                 RelativeYearValue = 2024,
             };
 
-            AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
+            AddRunToDb(RunClassification.InitialCompleted, requestId: 10, isComplete: true);
 
             await Task.Delay(3, TestContext.CancellationTokenSource.Token); // ensure different CreatedAt timestamps
-            AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.Unclassified, requestId: request.RunId, isComplete: false);
 
             // Act
             var result = await service.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
@@ -135,10 +135,8 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    nameof(RunClassification.INTERIM_RECALCULATION_RUN),
-                    nameof(RunClassification.FINAL_RECALCULATION_RUN),
-                    nameof(RunClassification.FINAL_RUN),
-                    nameof(RunClassification.TEST_RUN)
+                    nameof(RunClassification.Recalculation),
+                    nameof(RunClassification.Test)
                 },
                 statuses);
         }
@@ -153,8 +151,8 @@ namespace EPR.Calculator.API.UnitTests.Services
                 RelativeYearValue = 2024,
             };
 
-            AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
-            AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
+            AddRunToDb(RunClassification.Unclassified, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.InitialCompleted, requestId: 10, isComplete: true);
 
             // Act
             var result = await service.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
@@ -164,7 +162,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    nameof(RunClassification.TEST_RUN)
+                    nameof(RunClassification.Test)
                 },
                 statuses);
         }
@@ -179,11 +177,9 @@ namespace EPR.Calculator.API.UnitTests.Services
                 RelativeYearValue = 2024,
             };
 
-            AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
-            AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
-            AddRunToDb(RunClassification.INTERIM_RECALCULATION_RUN, requestId: 11, isComplete: true);
-            AddRunToDb(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED, requestId: 12, isComplete: true);
-            AddRunToDb(RunClassification.FINAL_RUN_COMPLETED, requestId: 13, isComplete: true);
+            AddRunToDb(RunClassification.Unclassified, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.InitialCompleted, requestId: 10, isComplete: true);
+            AddRunToDb(RunClassification.Recalculation, requestId: 11, isComplete: true);
 
             // Act
             var result = await service.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
@@ -193,7 +189,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    nameof(RunClassification.TEST_RUN)
+                    nameof(RunClassification.Test)
                 },
                 statuses);
         }
@@ -208,11 +204,10 @@ namespace EPR.Calculator.API.UnitTests.Services
                 RelativeYearValue = 2024,
             };
 
-            AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
-            AddRunToDb(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED, requestId: 11, isComplete: true);
+            AddRunToDb(RunClassification.InitialCompleted, requestId: 10, isComplete: true);
 
             await Task.Delay(3, TestContext.CancellationTokenSource.Token); // ensure different CreatedAt timestamps
-            AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.Unclassified, requestId: request.RunId, isComplete: false);
 
             // Act
             var result = await service.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
@@ -222,9 +217,8 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    nameof(RunClassification.INTERIM_RECALCULATION_RUN),
-                    nameof(RunClassification.FINAL_RUN),
-                    nameof(RunClassification.TEST_RUN)
+                    nameof(RunClassification.Recalculation),
+                    nameof(RunClassification.Test)
                 },
                 statuses);
         }
@@ -239,11 +233,10 @@ namespace EPR.Calculator.API.UnitTests.Services
                 RelativeYearValue = 2024,
             };
 
-            AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 10, isComplete: true);
-            AddRunToDb(RunClassification.FINAL_RUN_COMPLETED, requestId: 11, isComplete: true);
+            AddRunToDb(RunClassification.InitialCompleted, requestId: 10, isComplete: true);
 
             await Task.Delay(3, TestContext.CancellationTokenSource.Token); // ensure different CreatedAt timestamps
-            AddRunToDb(RunClassification.UNCLASSIFIED, requestId: request.RunId, isComplete: false);
+            AddRunToDb(RunClassification.Unclassified, requestId: request.RunId, isComplete: false);
 
             // Act
             var result = await service.GetAvailableClassificationsForRelativeYearAsync(request, TestContext.CancellationTokenSource.Token);
@@ -253,8 +246,8 @@ namespace EPR.Calculator.API.UnitTests.Services
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    nameof(RunClassification.INTERIM_RECALCULATION_RUN),
-                    nameof(RunClassification.TEST_RUN)
+                    nameof(RunClassification.Recalculation),
+                    nameof(RunClassification.Test)
                 },
                 statuses);
         }
@@ -273,7 +266,7 @@ namespace EPR.Calculator.API.UnitTests.Services
             dbContext.CalculatorRuns.Add(new CalculatorRun
             {
                 Id = requestId,
-                CalculatorRunClassificationId = (int)classification,
+                Classification = classification,
                 Name = "Test",
                 RelativeYear = new RelativeYear(2024),
                 CreatedBy = userName,

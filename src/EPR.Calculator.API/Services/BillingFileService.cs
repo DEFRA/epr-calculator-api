@@ -2,6 +2,7 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Models;
@@ -55,7 +56,7 @@ public class BillingFileService(
         CancellationToken cancellationToken)
     {
         var calculatorRun = await dbContext.CalculatorRuns
-            .SingleOrDefaultAsync(x => x.Id == runId && AcceptableRunStatusForBillingInstructions().Contains(x.CalculatorRunClassificationId), cancellationToken)
+            .SingleOrDefaultAsync(x => x.Id == runId && AcceptableRunStatusForBillingInstructions.Contains(x.Classification), cancellationToken)
             .ConfigureAwait(false);
 
         if (calculatorRun is null)
@@ -242,7 +243,7 @@ public class BillingFileService(
         // Valid if:
         // * Billing file has not been sent to FSS (i.e. classification is not 'Completed')
         // * Not already Running OR has been for more than 1 hour (i.e. 'stuck' due to unclean shutdown of the processor)
-        return AcceptableRunStatusForBillingInstructions().Contains(run.CalculatorRunClassificationId)
+        return AcceptableRunStatusForBillingInstructions.Contains(run.Classification)
                && (run.BillingRunStatus != BillingRunStatus.Running
                    || run.BillingRunStartedAt?.AddHours(1) < DateTime.UtcNow);
     }
@@ -286,13 +287,13 @@ public class BillingFileService(
         IEnumerable<int> producerIds,
         CancellationToken cancellationToken)
     {
-        var runClassificationsToIgnore = new List<int>
+        var runClassificationsToIgnore = new HashSet<RunClassification>
         {
-            (int)RunClassification.INTHEQUEUE,
-            (int)RunClassification.RUNNING,
-            (int)RunClassification.TEST_RUN,
-            (int)RunClassification.ERROR,
-            (int)RunClassification.DELETED
+            RunClassification.Unknown,
+            RunClassification.Running,
+            RunClassification.Test,
+            RunClassification.Errored,
+            RunClassification.Deleted
         };
 
         var parentProducers = await (from odd in dbContext.CalculatorRunOrganisationDataDetails
@@ -324,7 +325,7 @@ public class BillingFileService(
             var outstandingParentProducers = await (from p in dbContext.ProducerDetail
                 join r in dbContext.CalculatorRuns on p.CalculatorRunId equals r.Id
                 where r.RelativeYear == relativeYear
-                      && !runClassificationsToIgnore.Contains(r.CalculatorRunClassificationId)
+                      && !runClassificationsToIgnore.Contains(r.Classification)
                       && outstandingProducerIds.Contains(p.ProducerId)
                       && p.SubsidiaryId == null
                 orderby p.Id descending
@@ -429,12 +430,10 @@ public class BillingFileService(
         response.TotalNoActionRecords = groupedBillingInstructionResult.Find(s => string.Equals(s.Suggestion, BillingInstructionAction.Noaction.ToString(), StringComparison.OrdinalIgnoreCase))?.TotalRecords ?? 0;
     }
 
-    private static IEnumerable<int> AcceptableRunStatusForBillingInstructions() =>
+    private static readonly ImmutableHashSet<RunClassification> AcceptableRunStatusForBillingInstructions =
         [
-            (int)RunClassification.INITIAL_RUN,
-            (int)RunClassification.INTERIM_RECALCULATION_RUN,
-            (int)RunClassification.FINAL_RUN,
-            (int)RunClassification.FINAL_RECALCULATION_RUN,
+            RunClassification.Initial,
+            RunClassification.Recalculation
         ];
 
     public record Response

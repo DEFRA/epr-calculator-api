@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Data.DataSeeder;
@@ -7,7 +9,7 @@ namespace EPR.Calculator.API.Data.DataSeeder;
 [ExcludeFromCodeCoverage]
 public static class Seeder
 {
-    public const string CreatedBy = "System User";
+    private const string SystemUser = "System User";
 
     public static void Initialize(ModelBuilder modelBuilder)
     {
@@ -496,87 +498,57 @@ public static class Seeder
         modelBuilder.Entity<CalculatorRunClassification>().HasData(
             new CalculatorRunClassification
             {
-                Id = RunClassificationStatusIds.INTHEQUEUEID,
-                Status = RunClassificationDescStatus.INTHEQUEUE,
-                CreatedBy = "Test User"
+                Id = RunClassification.Running,
+                Status = "RUNNING",
+                CreatedBy = SystemUser
             },
             new CalculatorRunClassification
             {
-                Id = RunClassificationStatusIds.RUNNINGID,
-                Status = RunClassificationDescStatus.RUNNING,
-                CreatedBy = "Test User"
+                Id = RunClassification.Unclassified,
+                Status = "UNCLASSIFIED",
+                CreatedBy = SystemUser
             },
             new CalculatorRunClassification
             {
-                Id = RunClassificationStatusIds.UNCLASSIFIEDID,
-                Status = RunClassificationDescStatus.UNCLASSIFIED,
-                CreatedBy = "Test User"
+                Id = RunClassification.Test,
+                Status = "TEST RUN",
+                CreatedBy = SystemUser
             },
             new CalculatorRunClassification
             {
-                Id = RunClassificationStatusIds.TESTRUNID,
-                Status = RunClassificationDescStatus.TESTRUN,
-                CreatedBy = "Test User"
+                Id = RunClassification.Errored,
+                Status = "ERROR",
+                CreatedBy = SystemUser
             },
             new CalculatorRunClassification
             {
-                Id = RunClassificationStatusIds.ERRORID,
-                Status = RunClassificationDescStatus.ERROR,
-                CreatedBy = "Test User"
+                Id = RunClassification.Deleted,
+                Status = "DELETED",
+                CreatedBy = SystemUser
             },
             new CalculatorRunClassification
             {
-                Id = RunClassificationStatusIds.DELETEDID,
-                Status = RunClassificationDescStatus.DELETED,
-                CreatedBy = CreatedBy
+                Id = RunClassification.Initial,
+                Status = "INITIAL RUN",
+                CreatedBy = SystemUser
             },
             new CalculatorRunClassification
             {
-                Id = RunClassificationStatusIds.INITIALRUNCOMPLETEDID,
-                Status = RunClassificationDescStatus.INITIALRUNCOMPLETED,
-                CreatedBy = CreatedBy
+                Id = RunClassification.InitialCompleted,
+                Status = "INITIAL RUN COMPLETED",
+                CreatedBy = SystemUser
             },
             new CalculatorRunClassification
             {
-                Id = RunClassificationStatusIds.INITIALRUNID,
-                Status = RunClassificationDescStatus.INITIALRUN,
-                CreatedBy = "Test user"
+                Id = RunClassification.Recalculation,
+                Status = "RECALCULATION RUN",
+                CreatedBy = SystemUser
             },
             new CalculatorRunClassification
             {
-                Id = RunClassificationStatusIds.INTERIMRECALCULATIONRUNID,
-                Status = RunClassificationDescStatus.INTERIMRECALCULATIONRUN,
-                CreatedBy = "Test user"
-            },
-            new CalculatorRunClassification
-            {
-                Id = RunClassificationStatusIds.FINALRUNID,
-                Status = RunClassificationDescStatus.FINALRUN,
-                CreatedBy = "Test user"
-            },
-            new CalculatorRunClassification
-            {
-                Id = RunClassificationStatusIds.FINALRECALCULATIONRUNID,
-                Status = RunClassificationDescStatus.FINALRECALCULATIONRUN,
-                CreatedBy = "Test user"
-            },
-            new CalculatorRunClassification
-            {
-                Id = RunClassificationStatusIds.INTERMRECALCULATIONRUNCOMPID,
-                Status = RunClassificationDescStatus.INTERMRECALCULATIONRUNCOMP,
-                CreatedBy = CreatedBy
-            },
-            new CalculatorRunClassification
-            {
-                Id = RunClassificationStatusIds.FINALRECALCULATIONRUNCOMPID,
-                Status = RunClassificationDescStatus.FINALRECALCULATIONRUNCOMP,
-                CreatedBy = CreatedBy
-            },
-            new CalculatorRunClassification
-            {
-                Id = RunClassificationStatusIds.FINALRUNCOMPLETEDID,
-                Status = RunClassificationDescStatus.FINALRUNCOMPLETED,
-                CreatedBy = CreatedBy
+                Id = RunClassification.RecalculationCompleted,
+                Status = "RECALCULATION RUN COMPLETED",
+                CreatedBy = SystemUser
             });
     }
 
