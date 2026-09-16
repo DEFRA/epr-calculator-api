@@ -1,7 +1,7 @@
 ﻿using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Data.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -85,7 +85,7 @@ namespace EPR.Calculator.API.UnitTests
                 {
                     new()
                     {
-                        CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                        Classification = RunClassification.Initial,
                         Name = "Test Run 1",
                         RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
@@ -93,7 +93,7 @@ namespace EPR.Calculator.API.UnitTests
                     },
                     new()
                     {
-                        CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+                        Classification = RunClassification.Errored,
                         Name = "Test Calculated Result",
                         RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
@@ -101,7 +101,7 @@ namespace EPR.Calculator.API.UnitTests
                     },
                     new()
                     {
-                        CalculatorRunClassificationId = (int)RunClassification.INTERIM_RECALCULATION_RUN,
+                        Classification = RunClassification.Recalculation,
                         Name = "Test Run 2",
                         RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
@@ -111,7 +111,7 @@ namespace EPR.Calculator.API.UnitTests
                     },
                     new()
                     {
-                        CalculatorRunClassificationId = (int)RunClassification.INITIAL_RUN,
+                        Classification = RunClassification.Initial,
                         Name = "Test 422 error",
                         RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),
@@ -123,7 +123,7 @@ namespace EPR.Calculator.API.UnitTests
                     },
                     new()
                     {
-                        CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+                        Classification = RunClassification.Deleted,
                         Name = "Test Calculated Result",
                         RelativeYear = new RelativeYear(2024),
                         CreatedAt = new DateTime(2024, 8, 21, 14, 16, 27, DateTimeKind.Utc),

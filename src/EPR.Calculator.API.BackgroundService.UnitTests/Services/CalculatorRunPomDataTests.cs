@@ -3,6 +3,7 @@ using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Enums;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -75,7 +76,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             var (relativeYear, classification, pomData) = await SeedData();
 
             //Run 1
-            var run = new CalculatorRun { Id = runContext1.RunId, RelativeYear = runContext1.RelativeYear, Name = "CalculatorRunTest1", CalculatorRunClassificationId = classification.Id };
+            var run = new CalculatorRun { Id = runContext1.RunId, RelativeYear = runContext1.RelativeYear, Name = "CalculatorRunTest1", Classification = (RunClassification) classification.Id };
             context.CalculatorRuns.Add(run);
             await context.SaveChangesAsync();
 
@@ -99,7 +100,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             Assert.AreEqual(pomMasterRun1.Id, calculatorRun1!.CalculatorRunPomDataMasterId);
 
             //Run 2
-            var run2 = new CalculatorRun { Id = runContext2.RunId, RelativeYear = runContext2.RelativeYear, Name = "CalculatorRunTest2", CalculatorRunClassificationId = classification.Id };
+            var run2 = new CalculatorRun { Id = runContext2.RunId, RelativeYear = runContext2.RelativeYear, Name = "CalculatorRunTest2", Classification = (RunClassification) classification.Id };
             context.CalculatorRuns.Add(run2);
             await context.SaveChangesAsync();
 

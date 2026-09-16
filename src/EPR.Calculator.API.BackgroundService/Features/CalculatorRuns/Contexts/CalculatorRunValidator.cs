@@ -1,13 +1,13 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Enums;
 using FluentValidation;
 
 namespace EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 
 public class CalculatorRunValidator : AbstractValidator<CalculatorRun>
 {
-    private static readonly ImmutableHashSet<int> ValidClassifications = [
-        RunClassificationStatusIds.INTHEQUEUEID,
-        RunClassificationStatusIds.RUNNINGID
+    private static readonly ImmutableHashSet<RunClassification> ValidClassifications = [
+        RunClassification.Running
     ];
 
     public CalculatorRunValidator()
@@ -34,7 +34,7 @@ public class CalculatorRunValidator : AbstractValidator<CalculatorRun>
             .Null()
             .WithMessage("Run already has PomDataMaster associated");
 
-        RuleFor(run => run.CalculatorRunClassificationId)
+        RuleFor(run => run.Classification)
             .Must(classification => ValidClassifications.Contains(classification))
             .WithMessage($"Run classification must be one of [{string.Join(", ", ValidClassifications)}]");
     }

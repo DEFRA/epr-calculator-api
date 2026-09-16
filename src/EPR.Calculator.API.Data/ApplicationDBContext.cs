@@ -3,6 +3,7 @@ using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataSeeder;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Data.DataTypes.Enums;
+using EPR.Calculator.API.Data.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Data;
@@ -96,6 +97,10 @@ public class ApplicationDBContext : DbContext
         // Configures global conversion for BillingRunStatus enum to database string type.
         configurationBuilder.Properties<BillingRunStatus>()
             .HaveConversion<StringEnumConverter<BillingRunStatus>, EnumComparer<BillingRunStatus>>();
+
+        // Configures global conversion for RunClassification enum.
+        configurationBuilder.Properties<RunClassification>()
+            .HaveConversion<IntEnumConverter<RunClassification>, EnumComparer<RunClassification>>();
 
         configurationBuilder.Properties<decimal>().HavePrecision(18, 6);
     }

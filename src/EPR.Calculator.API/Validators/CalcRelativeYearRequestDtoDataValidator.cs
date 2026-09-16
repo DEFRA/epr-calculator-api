@@ -1,6 +1,6 @@
 using EPR.Calculator.API.Data;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Validators;
@@ -9,28 +9,25 @@ public class CalcRelativeYearRequestDtoDataValidator : ICalcRelativeYearRequestD
 {
     private readonly ApplicationDBContext context;
 
-    public CalcRelativeYearRequestDtoDataValidator(ApplicationDBContext context)
-    {
-        this.context = context;
-    }
+    public CalcRelativeYearRequestDtoDataValidator(ApplicationDBContext context) => this.context = context;
 
     public async Task<ValidationResultDto<ErrorDto>> Validate(CalcRelativeYearRequestDto request, CancellationToken cancellationToken = default)
     {
         var validationResult = new ValidationResultDto<ErrorDto>();
 
         // Check if relativeYear exists in the database
-        var dbYear = await this.context.FindRelativeYearAsync(request.RelativeYearValue, cancellationToken);
+        var dbYear = await context.FindRelativeYearAsync(request.RelativeYearValue, cancellationToken);
         if (dbYear == null)
         {
             validationResult.IsInvalid = true;
             validationResult.Errors.Add(new ErrorDto
             {
-                Message = CommonResources.RelativeYearNotInDatabase,
+                Message = CommonResources.RelativeYearNotInDatabase
             });
             return validationResult;
         }
 
-        var currentRun = await this.context.CalculatorRuns
+        var currentRun = await context.CalculatorRuns
             .AsNoTracking()
             .SingleOrDefaultAsync(run => run.Id == request.RunId, cancellationToken);
 
@@ -40,7 +37,7 @@ public class CalcRelativeYearRequestDtoDataValidator : ICalcRelativeYearRequestD
             validationResult.IsInvalid = true;
             validationResult.Errors.Add(new ErrorDto
             {
-                Message = "Run not found in the database.",
+                Message = "Run not found in the database."
             });
             return validationResult;
         }
@@ -50,17 +47,17 @@ public class CalcRelativeYearRequestDtoDataValidator : ICalcRelativeYearRequestD
             validationResult.IsInvalid = true;
             validationResult.Errors.Add(new ErrorDto
             {
-                Message = CommonResources.NoMatchingRunFound,
+                Message = CommonResources.NoMatchingRunFound
             });
         }
 
         // Check that the run is unclassified
-        if (currentRun.CalculatorRunClassificationId != (int)RunClassification.UNCLASSIFIED)
+        if (currentRun.Classification != RunClassification.Unclassified)
         {
             validationResult.IsInvalid = true;
             validationResult.Errors.Add(new ErrorDto
             {
-                Message = "Run is already classified.",
+                Message = "Run is already classified."
             });
         }
 

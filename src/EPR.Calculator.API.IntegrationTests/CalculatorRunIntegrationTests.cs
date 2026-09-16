@@ -1,7 +1,6 @@
 using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
-using EPR.Calculator.API.BackgroundService.Enums;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
@@ -11,6 +10,7 @@ using EPR.Calculator.API.BackgroundService.Telemetry;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -126,7 +126,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
     {
         // Simulates the billing run being started by a user in the FE
         var calcRun = await dbContext.CalculatorRuns.SingleAsync(r => r.Id == runId);
-        calcRun.CalculatorRunClassificationId = RunClassificationStatusIds.INITIALRUNID;
+        calcRun.Classification = RunClassification.Initial;
         calcRun.BillingRunStatus = BillingRunStatus.Running;
         calcRun.BillingRunStartedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync();
@@ -200,7 +200,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
             RelativeYear                    = relativeYear,
             CreatedBy                       = "some-user",
             CreatedAt                       = Now,
-            CalculatorRunClassificationId   = (int)RunClassification.RUNNING,
+            Classification                  = RunClassification.Running,
             DefaultParameterSettingMasterId = parameterMaster.Id,
             LapcapDataMasterId              = lapcap.Id,
             BillingRunStatus                = BillingRunStatus.None

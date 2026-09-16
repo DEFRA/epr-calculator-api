@@ -6,6 +6,7 @@ using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Helpers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
+using EPR.Calculator.API.Data.Enums;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 
@@ -1622,7 +1623,7 @@ public static partial class TestDataHelper
             new CalculatorRun
             {
                 Id = 1,
-                CalculatorRunClassificationId = 3,
+                Classification = RunClassification.Unclassified,
                 Name = "Test Run 1",
                 RelativeYear = new RelativeYear(204),
                 CreatedAt = DateTime.UtcNow,
@@ -1635,7 +1636,7 @@ public static partial class TestDataHelper
             new CalculatorRun
             {
                 Id = 2,
-                CalculatorRunClassificationId = 2,
+                Classification = RunClassification.Running,
                 Name = "Test Run 2",
                 RelativeYear = new RelativeYear(204),
                 CreatedAt = DateTime.UtcNow,
@@ -1800,8 +1801,8 @@ public static partial class TestDataHelper
 
         List<CalculatorRun> runs =
         [
-            new() { Id = runContext.RunId,     RelativeYear = runContext.RelativeYear, CalculatorRunClassificationId = 7, Name = "CalculatorRunTest1", CalculatorRunOrganisationDataMaster = dataMasters[0] },
-            new() { Id = runContext.RunId + 1, RelativeYear = runContext.RelativeYear, CalculatorRunClassificationId = 2, Name = "CalculatorRunTest2", CalculatorRunOrganisationDataMaster = dataMasters[0] }
+            new() { Id = runContext.RunId,     RelativeYear = runContext.RelativeYear, Classification = RunClassification.InitialCompleted, Name = "CalculatorRunTest1", CalculatorRunOrganisationDataMaster = dataMasters[0] },
+            new() { Id = runContext.RunId + 1, RelativeYear = runContext.RelativeYear, Classification = RunClassification.Running,               Name = "CalculatorRunTest2", CalculatorRunOrganisationDataMaster = dataMasters[0] }
         ];
         dbContext.CalculatorRuns.AddRange(runs);
 

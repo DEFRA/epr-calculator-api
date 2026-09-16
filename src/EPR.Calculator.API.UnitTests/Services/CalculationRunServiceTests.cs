@@ -1,10 +1,9 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.UnitTests.Services;
 
@@ -13,7 +12,6 @@ public class CalculationRunServiceTests
 {
     private ApplicationDBContext dbContext = null!;
     private CalculationRunService service = null!;
-    private Mock<ILogger<CalculationRunService>> loggerMock = null!;
 
     public TestContext TestContext { get; set; }
 
@@ -31,7 +29,7 @@ public class CalculationRunServiceTests
         {
             this.dbContext.CalculatorRunClassifications.Add(new CalculatorRunClassification
             {
-                Id = (int)value,
+                Id = value,
                 Status = value.ToString()
             });
         }
@@ -43,7 +41,6 @@ public class CalculationRunServiceTests
 
         this.dbContext.SaveChanges();
 
-        this.loggerMock = new Mock<ILogger<CalculationRunService>>();
         this.service = new CalculationRunService(this.dbContext);
     }
 
@@ -54,20 +51,15 @@ public class CalculationRunServiceTests
     }
 
     [TestMethod]
-    [DataRow(RunClassification.INTHEQUEUE)]
-    [DataRow(RunClassification.RUNNING)]
-    [DataRow(RunClassification.UNCLASSIFIED)]
-    [DataRow(RunClassification.TEST_RUN)]
-    [DataRow(RunClassification.ERROR)]
-    [DataRow(RunClassification.DELETED)]
-    [DataRow(RunClassification.INITIAL_RUN_COMPLETED)]
-    [DataRow(RunClassification.INITIAL_RUN)]
-    [DataRow(RunClassification.INTERIM_RECALCULATION_RUN)]
-    [DataRow(RunClassification.FINAL_RUN)]
-    [DataRow(RunClassification.FINAL_RECALCULATION_RUN)]
-    [DataRow(RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED)]
-    [DataRow(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED)]
-    [DataRow(RunClassification.FINAL_RUN_COMPLETED)]
+    [DataRow(RunClassification.Running)]
+    [DataRow(RunClassification.Unclassified)]
+    [DataRow(RunClassification.Test)]
+    [DataRow(RunClassification.Errored)]
+    [DataRow(RunClassification.Deleted)]
+    [DataRow(RunClassification.InitialCompleted)]
+    [DataRow(RunClassification.Initial)]
+    [DataRow(RunClassification.Recalculation)]
+    [DataRow(RunClassification.RecalculationCompleted)]
     public async Task GetDesignatedRunsByFinanialYear_ExcludesRunsInWrongRelativeYear(RunClassification classification)
     {
         // Arrange
@@ -81,20 +73,15 @@ public class CalculationRunServiceTests
     }
 
     [TestMethod]
-    [DataRow(RunClassification.INTHEQUEUE, 0)]
-    [DataRow(RunClassification.RUNNING, 0)]
-    [DataRow(RunClassification.UNCLASSIFIED, 0)]
-    [DataRow(RunClassification.TEST_RUN, 0)]
-    [DataRow(RunClassification.ERROR, 0)]
-    [DataRow(RunClassification.DELETED, 0)]
-    [DataRow(RunClassification.INITIAL_RUN_COMPLETED, 1)]
-    [DataRow(RunClassification.INITIAL_RUN, 1)]
-    [DataRow(RunClassification.INTERIM_RECALCULATION_RUN, 1)]
-    [DataRow(RunClassification.FINAL_RUN, 1)]
-    [DataRow(RunClassification.FINAL_RECALCULATION_RUN, 1)]
-    [DataRow(RunClassification.INTERIM_RECALCULATION_RUN_COMPLETED, 1)]
-    [DataRow(RunClassification.FINAL_RECALCULATION_RUN_COMPLETED, 1)]
-    [DataRow(RunClassification.FINAL_RUN_COMPLETED, 1)]
+    [DataRow(RunClassification.Running, 0)]
+    [DataRow(RunClassification.Unclassified, 0)]
+    [DataRow(RunClassification.Test, 0)]
+    [DataRow(RunClassification.Errored, 0)]
+    [DataRow(RunClassification.Deleted, 0)]
+    [DataRow(RunClassification.InitialCompleted, 1)]
+    [DataRow(RunClassification.Initial, 1)]
+    [DataRow(RunClassification.Recalculation, 1)]
+    [DataRow(RunClassification.RecalculationCompleted, 1)]
     public async Task GetDesignatedRunsByFinanialYear_ReturnsRunsWithValidClassifications(
         RunClassification classification,
         int expectedRowCount)
@@ -113,10 +100,10 @@ public class CalculationRunServiceTests
     public async Task GetDesignatedRunsByFinanialYear_ExcludesRunsInWrongRelativeYearOrClassification()
     {
         // Arrange
-        this.AddRunToDb(RunClassification.INITIAL_RUN, requestId: 1, 1923);
-        this.AddRunToDb(RunClassification.INITIAL_RUN_COMPLETED, requestId: 2, 2024);
-        this.AddRunToDb(RunClassification.INTERIM_RECALCULATION_RUN, requestId: 3, 2024);
-        this.AddRunToDb(RunClassification.TEST_RUN, requestId: 4, 2024);
+        this.AddRunToDb(RunClassification.Initial, requestId: 1, 1923);
+        this.AddRunToDb(RunClassification.InitialCompleted, requestId: 2, 2024);
+        this.AddRunToDb(RunClassification.Recalculation, requestId: 3, 2024);
+        this.AddRunToDb(RunClassification.Test, requestId: 4, 2024);
 
         // Act
         var result = await this.service.GetDesignatedRunsByFinancialYear(new RelativeYear(2024), TestContext.CancellationTokenSource.Token);
@@ -124,9 +111,9 @@ public class CalculationRunServiceTests
         // Assert
         result.Count.ShouldBe(2);
         result[0].RunId.ShouldBe(2);
-        result[0].RunClassification.ShouldBe(RunClassification.INITIAL_RUN_COMPLETED);
+        result[0].RunClassification.ShouldBe(RunClassification.InitialCompleted);
         result[1].RunId.ShouldBe(3);
-        result[1].RunClassification.ShouldBe(RunClassification.INTERIM_RECALCULATION_RUN);
+        result[1].RunClassification.ShouldBe(RunClassification.Recalculation);
     }
 
     private void AddRunToDb(RunClassification classification, int requestId, int relativeYearValue)
@@ -134,7 +121,7 @@ public class CalculationRunServiceTests
         this.dbContext.CalculatorRuns.Add(new CalculatorRun
         {
             Id = requestId,
-            CalculatorRunClassificationId = (int)classification,
+            Classification = classification,
             Name = "Test",
             RelativeYear = new RelativeYear(relativeYearValue),
             CreatedBy = "TestUser",
