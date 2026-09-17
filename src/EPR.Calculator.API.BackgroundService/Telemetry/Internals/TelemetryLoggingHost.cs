@@ -66,26 +66,8 @@ public sealed partial class TelemetryLoggingHost(ILoggerFactory loggerFactory) :
         {
             var activityLogger = LoggerFor(activity);
 
-            if (activityLogger is null)
-                return;
-
-            var activityName = GetActivityName(activity);
-
-            var state = activity.Status switch
-            {
-                ActivityStatusCode.Ok => "Completed",
-                ActivityStatusCode.Error => "Failed",
-                _ => "Cancelled"
-            };
-
-            var threshold = activity.GetTagItem(Telemetry.ThresholdTag) as TimeSpan?;
-            var allocated = FormatBytes(activity.GetTagItem(Telemetry.AllocatedBytesTag) as long? ?? 0);
-            var heap = FormatBytes(activity.GetTagItem(Telemetry.HeapBytesTag) as long? ?? 0);
-
-            if(threshold > TimeSpan.Zero && activity.Duration > threshold)
-                LogWarningActivityEnded(activityLogger, activityName, state, activity.Duration, threshold.Value, allocated, heap);
-            else
-                LogActivityEnded(activityLogger, activityName, state, activity.Duration, allocated, heap);
+            if (activityLogger is not null)
+                LogActivityStopped(activityLogger, GetActivityName(activity), activity);
         };
 
         ActivitySource.AddActivityListener(activityListener);
@@ -105,6 +87,36 @@ public sealed partial class TelemetryLoggingHost(ILoggerFactory loggerFactory) :
                 ? activity.OperationName
                 : activity.OperationName[(activity.OperationName.LastIndexOf('.') + 1)..];
         }
+    }
+
+    private static void LogActivityStopped(ILogger logger, string activityName, Activity activity)
+    {
+        var state = activity.Status switch
+        {
+            ActivityStatusCode.Ok => "Completed",
+            ActivityStatusCode.Error => "Failed",
+            _ => "Cancelled"
+        };
+
+        var threshold = activity.GetTagItem(Telemetry.ThresholdTag) as TimeSpan?;
+        var overThreshold = threshold > TimeSpan.Zero && activity.Duration > threshold;
+
+        if (!Telemetry.CaptureMemoryMetrics)
+        {
+            if (overThreshold)
+                LogWarningActivityEnded(logger, activityName, state, activity.Duration, threshold!.Value);
+            else
+                LogActivityEnded(logger, activityName, state, activity.Duration);
+            return;
+        }
+
+        var allocated = FormatBytes(activity.GetTagItem(Telemetry.AllocatedBytesTag) as long? ?? 0);
+        var heap = FormatBytes(activity.GetTagItem(Telemetry.HeapBytesTag) as long? ?? 0);
+
+        if (overThreshold)
+            LogWarningActivityEnded(logger, activityName, state, activity.Duration, threshold!.Value, allocated, heap);
+        else
+            LogActivityEnded(logger, activityName, state, activity.Duration, allocated, heap);
     }
 
     private void StartMetricListener()
@@ -132,8 +144,14 @@ public sealed partial class TelemetryLoggingHost(ILoggerFactory loggerFactory) :
             ? $"{bytes / (double)(1L << 30):0.00} GB"
             : $"{bytes / (double)(1L << 20):0} MB";
 
+    [LoggerMessage(LogLevel.Debug, "{Activity}: {State} after {Duration}")]
+    private static partial void LogActivityEnded(ILogger logger, string activity, string state, TimeSpan duration);
+
     [LoggerMessage(LogLevel.Debug, "{Activity}: {State} after {Duration}, allocated {Allocated}, heap ~{Heap}")]
     private static partial void LogActivityEnded(ILogger logger, string activity, string state, TimeSpan duration, string allocated, string heap);
+
+    [LoggerMessage(LogLevel.Warning, "{Activity}: {State} after {Duration} (over threshold {Threshold})")]
+    private static partial void LogWarningActivityEnded(ILogger logger, string activity, string state, TimeSpan duration, TimeSpan threshold);
 
     [LoggerMessage(LogLevel.Warning, "{Activity}: {State} after {Duration} (over threshold {Threshold}), allocated {Allocated}, heap ~{Heap}")]
     private static partial void LogWarningActivityEnded(ILogger logger, string activity, string state, TimeSpan duration, TimeSpan threshold, string allocated, string heap);

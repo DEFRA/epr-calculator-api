@@ -110,6 +110,8 @@ public abstract class BaseIntegrationTest
             .WithTracing(tracing => tracing.AddSource(Telemetry.RootScope))
             .WithMetrics(metrics => metrics.AddMeter(Telemetry.RootScope));
 
+        Telemetry.CaptureMemoryMetrics = configuration.GetValue("Telemetry:CaptureMemoryMetrics", defaultValue: false);
+
         services.AddHostedService<TelemetryLoggingHost>();
 
         services

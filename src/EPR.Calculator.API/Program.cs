@@ -19,7 +19,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
 
 builder.Services
-    .AddPayCalTelemetry(builder.Environment)
+    .AddPayCalTelemetry(builder.Environment, builder.Configuration)
     .AddPayCalProblemDetails(builder.Environment)
     .AddPayCalAuthentication(builder.Configuration, builder.Environment)
     .AddPayCalAuthorization()
