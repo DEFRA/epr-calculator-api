@@ -6,7 +6,6 @@ using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Helpers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.Data.Enums;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 

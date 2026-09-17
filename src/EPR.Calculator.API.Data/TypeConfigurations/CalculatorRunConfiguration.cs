@@ -1,5 +1,5 @@
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.DataTypes.DateTime;
+using EPR.Calculator.API.Data.DataTypes.Converters.DateTime;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

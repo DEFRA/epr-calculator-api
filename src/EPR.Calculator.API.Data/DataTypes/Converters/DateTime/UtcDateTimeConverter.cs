@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace EPR.Calculator.API.Data.DataTypes.DateTime;
+namespace EPR.Calculator.API.Data.DataTypes.Converters.DateTime;
 
 /// <summary>
 ///     DateTime converter for Entity Framework that ensures UTC time is used for storage and retrieval.

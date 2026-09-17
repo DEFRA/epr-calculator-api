@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.Data.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Data.DataSeeder;
