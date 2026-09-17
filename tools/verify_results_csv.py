@@ -76,7 +76,7 @@ For each L1 producer row, the checks are:
      Cost for (1+2a+2b+2c)" -- which we also independently recompute, as that
      producer's own (1+2a+2b+2c) total over the run-wide total printed once
      in the file's header row -- then split by country (3 and 5 via 1+4%,
-     4 via its own "4 Country Apportionment %s").
+     4 via its own "4 Country Apportionment %").
 
   5. Total Producer Bill: Section 1 through 5 (all independently recomputed
      above) should sum to the printed Total Producer Bill, both in total and
@@ -228,28 +228,12 @@ def d(value) -> Decimal:
 
 def load_rows(path: str) -> list[list[str]]:
     """
-    Reads and CSV-parses the Results file, auto-detecting its text encoding. Results
-    files exported by the real application have been seen in the wild as UTF-16LE with
-    no byte-order mark (a common outcome of .NET's default Encoding.Unicode), which
-    plain UTF-8 decoding rejects outright -- as well as plain UTF-8 and UTF-8 with a
-    byte-order mark (used by this project's own test fixtures).
+    Reads and CSV-parses the Results file. Exported as UTF-8 with a byte-order mark
+    since ECV-697; utf-8-sig tolerates that BOM if present and decodes fine without one.
     """
     with open(path, "rb") as f:
         raw = f.read()
-
-    if raw.startswith(b"\xff\xfe"):
-        text = raw.decode("utf-16-le")
-    elif raw.startswith(b"\xfe\xff"):
-        text = raw.decode("utf-16-be")
-    elif raw.startswith(b"\xef\xbb\xbf"):
-        text = raw.decode("utf-8-sig")
-    elif len(raw) >= 2 and raw[0] != 0 and raw[1] == 0:
-        # No BOM, but every other byte is null -- consistent with ASCII/Latin text
-        # encoded as UTF-16LE without a leading byte-order mark.
-        text = raw.decode("utf-16-le")
-    else:
-        text = raw.decode("utf-8")
-
+    text = raw.decode("utf-8-sig")
     return list(csv.reader(io.StringIO(text)))
 
 
@@ -325,7 +309,7 @@ class LapcapData:
     materials_order: list[str]
     total_by_country: ByCountry  # "1 LA Disposal Cost Total" row, in GBP
     country_apportionment_pct: ByCountry  # derived exactly from total_by_country
-    printed_country_apportionment_pct: ByCountry  # "1 Country Apportionment %s" as printed, for cross-check
+    printed_country_apportionment_pct: ByCountry  # "1 Country Apportionment %" as printed, for cross-check
 
 
 def parse_lapcap_data(rows: list[list[str]]) -> LapcapData:
@@ -342,7 +326,7 @@ def parse_lapcap_data(rows: list[list[str]]) -> LapcapData:
         scotland=d(parse_money(total_row[3])), northern_ireland=d(parse_money(total_row[4])),
     )
     apportionment_row = rows[r + 1]
-    assert apportionment_row[0].strip() == "1 Country Apportionment %s", apportionment_row[0]
+    assert apportionment_row[0].strip() == "1 Country Apportionment %", apportionment_row[0]
     printed_apportionment = ByCountry(
         england=parse_percent(apportionment_row[1]),
         wales=parse_percent(apportionment_row[2]),
@@ -359,14 +343,14 @@ def parse_lapcap_data(rows: list[list[str]]) -> LapcapData:
 
 @dataclass
 class LaDisposalCostData:
-    # material name -> Disposal Cost Price Per Tonne (the "Amber"/flat price)
+    # material name -> Disposal Cost Per Tonne (the "Amber"/flat price)
     price_per_tonne: dict[str, Decimal]
 
 
 def parse_la_disposal_cost_data(rows: list[list[str]], materials_order: list[str]) -> LaDisposalCostData:
     section = find_row(rows, "LA Disposal Cost Data")
     header = rows[section + 1]
-    price_col = header.index("Disposal Cost Price Per Tonne")
+    price_col = header.index("Disposal Cost Per Tonne")
     prices = {}
     r = section + 2
     for _ in materials_order:
@@ -490,8 +474,8 @@ class OtherParameters:
     sa_operating_cost_total: Decimal  # "3 SA Operating Costs" Total column
     la_data_prep_by_country: ByCountry  # "4 LA Data Prep Charge" row, in GBP
     la_data_prep_apportionment_pct: ByCountry  # derived exactly from la_data_prep_by_country
-    printed_la_data_prep_apportionment_pct: ByCountry  # "4 Country Apportionment %s" as printed, for cross-check
-    scheme_setup_cost_total: Decimal  # "5 Scheme set up cost Yearly Cost" Total column
+    printed_la_data_prep_apportionment_pct: ByCountry  # "4 Country Apportionment %" as printed, for cross-check
+    scheme_setup_cost_total: Decimal  # "5 Scheme Annual Set-up Cost" Total column
     bad_debt_pct: Decimal
     materiality_increase: Materiality
     materiality_decrease: Materiality
@@ -514,7 +498,7 @@ def parse_other_parameters(rows: list[list[str]]) -> OtherParameters:
         scotland=d(parse_money(la_data_prep_row[3])), northern_ireland=d(parse_money(la_data_prep_row[4])),
     )
     la_data_prep_apportionment_row = rows[la_data_prep_row_idx + 1]
-    assert la_data_prep_apportionment_row[0].strip() == "4 Country Apportionment %s", la_data_prep_apportionment_row[0]
+    assert la_data_prep_apportionment_row[0].strip() == "4 Country Apportionment %", la_data_prep_apportionment_row[0]
     printed_la_data_prep_apportionment_pct = ByCountry(
         england=parse_percent(la_data_prep_apportionment_row[1]),
         wales=parse_percent(la_data_prep_apportionment_row[2]),
@@ -522,7 +506,7 @@ def parse_other_parameters(rows: list[list[str]]) -> OtherParameters:
         northern_ireland=parse_percent(la_data_prep_apportionment_row[4]),
     )
 
-    scheme_setup_row = rows[find_row(rows, "5 Scheme set up cost Yearly Cost")]
+    scheme_setup_row = rows[find_row(rows, "5 Scheme Annual Set-up Cost")]
     scheme_setup_cost_total = parse_money(scheme_setup_row[5])
 
     bad_debt_row = find_row(rows, "6 Bad Debt Provision")
@@ -555,7 +539,7 @@ def parse_other_parameters(rows: list[list[str]]) -> OtherParameters:
 @dataclass
 class CommsCostParameters:
     one_plus_four_apportionment_pct: ByCountry  # derived exactly from LAPCAP + LA Data Prep totals
-    printed_one_plus_four_apportionment_pct: ByCountry  # "1 + 4 Apportionment %s" as printed, for cross-check
+    printed_one_plus_four_apportionment_pct: ByCountry  # "1 + 4 Apportionment %" as printed, for cross-check
     price_per_tonne_by_material: dict[str, Decimal]  # "2a Comms Costs - by Material" -- price per tonne column
     # "2b Comms Costs - UK wide"'s Total column, read directly rather than summed from its
     # four country cells: those are each independently rounded from an apportioned share
@@ -572,7 +556,7 @@ def parse_comms_cost_parameters(
     la_data_prep_by_country: ByCountry,
 ) -> CommsCostParameters:
     section = find_row(rows, "Parameters - Comms Costs")
-    apportionment_row = rows[find_row(rows, "1 + 4 Apportionment %s", start=section)]
+    apportionment_row = rows[find_row(rows, "1 + 4 Apportionment %", start=section)]
     printed_one_plus_four_apportionment_pct = ByCountry(
         england=parse_percent(apportionment_row[1]),
         wales=parse_percent(apportionment_row[2]),
@@ -816,7 +800,7 @@ def parse_with_bdp(cells: list[str], i: int) -> tuple[WithBdp, int]:
 @dataclass
 class MaterialFigures:
     raw_total_tonnage: Optional[Decimal]  # "Total Tonnage" -- reported tonnage before SMCW is deducted
-    smcw_tonnage: Optional[Decimal]  # "Self Managed Consumer Waste Tonnage"
+    smcw_tonnage: Optional[Decimal]  # "Self-managed Consumer Waste Tonnage"
     net_red: Optional[Decimal]
     net_amber: Optional[Decimal]
     net_green: Optional[Decimal]
@@ -900,7 +884,7 @@ def parse_producer_row(
 
         lo2a, hi2a = offsets[f"section2a::{material}"]
         m2a = cells[lo2a:hi2a]
-        j = 2  # skip Household Packaging Tonnage, Public Bin Tonnage
+        j = 2  # skip Household Tonnage, Public Bin Tonnage
         if is_glass:
             j += 1  # skip Household Drinks Containers Tonnage
         total_reported_tonnage_2a = parse_decimal(m2a[j]); j += 1
@@ -1254,7 +1238,7 @@ def verify_l1_equals_sum_of_l2(
         l1 = p.by_material[material].tonnage
         section_name = f"L1 vs sum(L2) :: {material}"
 
-        check_exact(result, label, section_name, "Household Packaging Tonnage", summed.household, l1.household, 3)
+        check_exact(result, label, section_name, "Household Tonnage", summed.household, l1.household, 3)
         check_exact(result, label, section_name, "Public Bin Tonnage", summed.public_bin, l1.public_bin, 3)
         check_exact(result, label, section_name, "Household Drinks Containers Tonnage", summed.hdc, l1.hdc, 3)
         check_exact(result, label, section_name, "Total Tonnage", summed.total, l1.total, 3)
@@ -1296,7 +1280,7 @@ def verify_section1_disposal_fee(
         # waste tonnage exceeds raw reported tonnage. For a multi-entity producer this
         # compares the *group's* SMCW tonnage against the *group's* summed raw tonnage
         # -- but the app prints exactly those two (already-aggregated) group figures as
-        # this L1 row's own "Self Managed Consumer Waste Tonnage" and "Total Tonnage"
+        # this L1 row's own "Self-managed Consumer Waste Tonnage" and "Total Tonnage"
         # columns (see ProducerRowBuilder.GetL1TotalRow), so no L2 data is needed to
         # replicate it: this row's own printed columns are already the right inputs,
         # for single-entity and multi-entity producers alike.
@@ -1513,7 +1497,7 @@ def verify_sections_3_4_5(
     Check 4: SA Operating Costs, LA Data Prep Costs, SA Set Up Costs. All three are
     structurally identical -- a fixed run-wide total apportioned to this producer by its
     (unrounded) 'Percentage of Overall Producer Cost for (1+2a+2b+2c)', then split by
-    country. Section 4 uses its own ("4 Country Apportionment %s") apportionment; 3 and 5
+    country. Section 4 uses its own ("4 Country Apportionment %") apportionment; 3 and 5
     use 1+4%. Returns the three unrounded sections, for exact summation into the Total
     Producer Bill.
     """
@@ -1699,11 +1683,11 @@ def main() -> int:
     # Sanity-check the derived (exact) apportionment percentages against the file's own
     # printed (8dp-rounded) percentages -- confirms the derivation matches what the app
     # actually computed, rather than silently drifting from it.
-    check_exact(result, "(run-wide)", "Apportionment", "1 Country Apportionment %s (England)",
+    check_exact(result, "(run-wide)", "Apportionment", "1 Country Apportionment % (England)",
                 lapcap.country_apportionment_pct.england, lapcap.printed_country_apportionment_pct.england, 8)
-    check_exact(result, "(run-wide)", "Apportionment", "1 + 4 Apportionment %s (England)",
+    check_exact(result, "(run-wide)", "Apportionment", "1 + 4 Apportionment % (England)",
                 comms.one_plus_four_apportionment_pct.england, comms.printed_one_plus_four_apportionment_pct.england, 8)
-    check_exact(result, "(run-wide)", "Apportionment", "4 Country Apportionment %s (England)",
+    check_exact(result, "(run-wide)", "Apportionment", "4 Country Apportionment % (England)",
                 other_params.la_data_prep_apportionment_pct.england, other_params.printed_la_data_prep_apportionment_pct.england, 8)
 
     # Sanity-check the modulation section's Amber price against LA Disposal Cost Data

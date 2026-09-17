@@ -44,7 +44,7 @@ KEY DESIGN DECISIONS (agreed in conversation, 2026-07-30)
 
 2. RAG tonnage columns are taken AS REPORTED, from the plain (non-Projected,
    non-defaulted) columns of each period's own section:
-     Total Household packaging-X          <- "Household Packaging Tonnage"
+     Total Household packaging-X          <- "Household Tonnage"
      Total Household packaging-X RAM R    <- "Household Red Material Tonnage"
      Total Household packaging-X RAM G    <- "Household Green Material Tonnage"
      Total Household packaging-X RAM A    <- "Household Amber Material Tonnage"
@@ -64,7 +64,7 @@ KEY DESIGN DECISIONS (agreed in conversation, 2026-07-30)
    Waste Tonnage" - are attributed 100% to the H2 row and 0 to the H1 row.
    This is a deliberate simplification (agreed answer), not a derivation.
 
-3b. The H1/H2 "Packaging Data - Submitted & Projected" sections are NOT a
+3b. The H1/H2 "Packaging Data - Submitted and Projected" sections are NOT a
     full per-producer dump - they only exist as an audit trail for
     producers who had at least one blank/unrated material in either
     period. A producer whose H1 and H2 submissions were both fully RAG-
@@ -115,7 +115,7 @@ KEY DESIGN DECISIONS (agreed in conversation, 2026-07-30)
    Scotland/Northern Ireland with Bad Debt Provision" columns in
    Calculation Result) are each producer's disposal fee split across all
    four nations using the SAME fixed LAPCAP apportionment percentage from
-   the "1 Country Apportionment %s" table at the top of the file (verified:
+   the "1 Country Apportionment %" table at the top of the file (verified:
    e.g. two different producers' Aluminium England/Wales fee figures are
    both in exactly the 17.24%/27.59% ratio set globally for Aluminium,
    regardless of where either producer is actually registered) - i.e. it's
@@ -178,9 +178,16 @@ DEFAULT_SINGLE_FILE_SUBMISSION = "N"
 DEFAULT_FILENAME = "N/A"
 
 
-def read_utf16_rows(path):
-    with open(path, encoding="utf-16le") as f:
-        return f.readlines()
+def load_rows(path):
+    """
+    Reads the Results file. Exported as UTF-8 with a byte-order mark since ECV-697;
+    utf-8-sig tolerates that BOM if present and decodes fine without one.
+    """
+    with open(path, "rb") as f:
+        raw = f.read()
+    text = raw.decode("utf-8-sig")
+
+    return text.splitlines(keepends=True)
 
 
 def parse_csv_line(line):
@@ -297,10 +304,10 @@ class MaterialCols:
         return col_index(self.group, self.header, self.src_material, col_name)
 
     def household_total(self):
-        return self.idx("Household Packaging Tonnage")
+        return self.idx("Household Tonnage")
 
     def public_bin_total(self):
-        return self.idx("Public Bin Packaging Tonnage")
+        return self.idx("Public Bin Tonnage")
 
     def household_rag(self, suffix):
         return self.idx(f"Household {suffix}")
@@ -387,7 +394,7 @@ def populate_totals_only_from_calc(row_out, calc_row, calc_group, calc_header, t
     breakdown is populated - see module docstring for why.
     """
     group_name = f"{src_material} Breakdown"
-    hh_idx = col_index(calc_group, calc_header, group_name, "Household Packaging Tonnage")
+    hh_idx = col_index(calc_group, calc_header, group_name, "Household Tonnage")
     pb_idx = col_index(calc_group, calc_header, group_name, "Public Bin Tonnage")
 
     row_out[f"Total Household packaging-{target_name}"] = fmt(num(calc_row, hh_idx))
@@ -402,21 +409,23 @@ def main():
     base = Path(__file__).resolve().parent
     results_file = Path(sys.argv[1]) if len(sys.argv) > 1 else base / "78-R180smoketest_Results File_20260720.csv"
     output_file = Path(sys.argv[2]) if len(sys.argv) > 2 else base / "v_extract_recent_pom_org_data_from_results.csv"
-    target_header_ref = base.parent / "v_extract_recent_pom_org_data.csv"
 
-    with open(target_header_ref, newline="", encoding="utf-8", errors="replace") as f:
+    # The exact v_extract_recent_pom_org_data.csv column list/order, copied from the
+    # outer SELECT of dbo.Views.v_extract_recent_pom_org_data.sql in epr-data-sqldb --
+    # keep this file in sync if that view's columns change.
+    with open(base / "v_extract_recent_pom_org_data_header.csv", newline="", encoding="utf-8") as f:
         target_header = next(csv.reader(f))
 
-    lines = read_utf16_rows(results_file)
+    lines = load_rows(results_file)
 
-    h2_rows, h2_group, h2_header = build_section(lines, "H2 Packaging Data - Submitted & Projected")
-    h1_rows, h1_group, h1_header = build_section(lines, "H1 Packaging Data - Submitted & Projected")
+    h2_rows, h2_group, h2_header = build_section(lines, "H2 Packaging Data - Submitted and Projected")
+    h1_rows, h1_group, h1_header = build_section(lines, "H1 Packaging Data - Submitted and Projected")
     calc_rows, calc_group, calc_header = build_section(lines, "Calculation Result")
 
     calc_lookup = build_lookup(calc_rows, calc_group, calc_header)
     name_idx = col_index(calc_group, calc_header, "", "Producer / Subsidiary Name")
     smcw_idx_by_material = {
-        src: col_index(calc_group, calc_header, f"{src} Breakdown", "Self Managed Consumer Waste Tonnage")
+        src: col_index(calc_group, calc_header, f"{src} Breakdown", "Self-managed Consumer Waste Tonnage")
         for src, _ in MATERIALS
     }
 
