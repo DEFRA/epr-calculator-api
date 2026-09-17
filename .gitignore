@@ -488,3 +488,9 @@ $RECYCLE.BIN/
 **/appsettings.local.json
 
 coveragereport/
+
+# Generated output from tools/verify_results_csv and build_org_extract_from_results_file
+tools/*.csv
+!tools/v_extract_recent_pom_org_data_header.csv
+v_extract_recent_pom_org_data_from_results.csv
+/out.csv

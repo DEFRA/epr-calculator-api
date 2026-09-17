@@ -158,34 +158,20 @@ fmt_bigq <- function(value, places) {
 # Whole-file loading and section lookup
 # ---------------------------------------------------------------------------
 
-# Reads and CSV-parses the Results file, auto-detecting its text encoding.
-# Results files exported by the real application have been seen in the wild
-# as UTF-16LE with no byte-order mark (a common outcome of .NET's default
-# Encoding.Unicode), which plain UTF-8 decoding rejects outright -- as well
-# as plain UTF-8 and UTF-8 with a byte-order mark (used by this project's own
-# test fixtures). Returns a character matrix, NA-padded beyond each row's own
-# true field count (see header comment).
+# Reads and CSV-parses the Results file. Exported as UTF-8 with a byte-order
+# mark since ECV-697; strips that BOM if present and reads fine without one.
+# Returns a character matrix, NA-padded beyond each row's own true field
+# count (see header comment).
 load_rows <- function(path) {
   sz <- file.info(path)$size
   con <- file(path, open = "rb")
   raw <- readBin(con, "raw", n = sz)
   close(con)
 
-  if (length(raw) >= 2 && raw[1] == as.raw(0xff) && raw[2] == as.raw(0xfe)) {
-    enc <- "UTF-16LE"
-  } else if (length(raw) >= 2 && raw[1] == as.raw(0xfe) && raw[2] == as.raw(0xff)) {
-    enc <- "UTF-16BE"
-  } else if (length(raw) >= 3 && raw[1] == as.raw(0xef) && raw[2] == as.raw(0xbb) && raw[3] == as.raw(0xbf)) {
+  if (length(raw) >= 3 && raw[1] == as.raw(0xef) && raw[2] == as.raw(0xbb) && raw[3] == as.raw(0xbf)) {
     raw <- raw[-(1:3)]
-    enc <- "UTF-8"
-  } else if (length(raw) >= 2 && raw[1] != as.raw(0x00) && raw[2] == as.raw(0x00)) {
-    # No BOM, but every other byte is null -- consistent with ASCII/Latin
-    # text encoded as UTF-16LE without a leading byte-order mark.
-    enc <- "UTF-16LE"
-  } else {
-    enc <- "UTF-8"
   }
-  text <- iconv(list(raw), from = enc, to = "UTF-8")
+  text <- iconv(list(raw), from = "UTF-8", to = "UTF-8")
 
   lines <- strsplit(text, "\n", fixed = TRUE)[[1]]
   lines <- sub("\r$", "", lines) # tolerate CRLF line endings too
@@ -291,7 +277,7 @@ parse_lapcap_data <- function(mat) {
   total_by_country <- make_by_country(d(parse_money(total_row[2])), d(parse_money(total_row[3])),
                                        d(parse_money(total_row[4])), d(parse_money(total_row[5])))
   apportionment_row <- mat[r + 1, ]
-  stopifnot(trimws(apportionment_row[1]) == "1 Country Apportionment %s")
+  stopifnot(trimws(apportionment_row[1]) == "1 Country Apportionment %")
   printed_apportionment <- make_by_country(parse_percent(apportionment_row[2]), parse_percent(apportionment_row[3]),
                                             parse_percent(apportionment_row[4]), parse_percent(apportionment_row[5]))
   list(materials_order = materials, total_by_country = total_by_country,
@@ -302,7 +288,7 @@ parse_lapcap_data <- function(mat) {
 parse_la_disposal_cost_data <- function(mat, materials_order) {
   section <- find_row(mat, "LA Disposal Cost Data")
   header <- mat[section + 1, ]
-  price_col <- which(header == "Disposal Cost Price Per Tonne")[1]
+  price_col <- which(header == "Disposal Cost Per Tonne")[1]
   prices <- list()
   r <- section + 2
   for (i in seq_along(materials_order)) {
@@ -386,13 +372,13 @@ parse_other_parameters <- function(mat) {
   la_data_prep_by_country <- make_by_country(d(parse_money(la_data_prep_row[2])), d(parse_money(la_data_prep_row[3])),
                                               d(parse_money(la_data_prep_row[4])), d(parse_money(la_data_prep_row[5])))
   la_data_prep_apportionment_row <- mat[la_data_prep_row_idx + 1, ]
-  stopifnot(trimws(la_data_prep_apportionment_row[1]) == "4 Country Apportionment %s")
+  stopifnot(trimws(la_data_prep_apportionment_row[1]) == "4 Country Apportionment %")
   printed_la_data_prep_apportionment_pct <- make_by_country(
     parse_percent(la_data_prep_apportionment_row[2]), parse_percent(la_data_prep_apportionment_row[3]),
     parse_percent(la_data_prep_apportionment_row[4]), parse_percent(la_data_prep_apportionment_row[5])
   )
 
-  scheme_setup_row <- mat[find_row(mat, "5 Scheme set up cost Yearly Cost"), ]
+  scheme_setup_row <- mat[find_row(mat, "5 Scheme Annual Set-up Cost"), ]
   scheme_setup_cost_total <- parse_money(scheme_setup_row[6])
 
   bad_debt_row <- find_row(mat, "6 Bad Debt Provision")
@@ -425,7 +411,7 @@ parse_other_parameters <- function(mat) {
 
 parse_comms_cost_parameters <- function(mat, materials_order, lapcap_total_by_country, la_data_prep_by_country) {
   section <- find_row(mat, "Parameters - Comms Costs")
-  apportionment_row <- mat[find_row(mat, "1 + 4 Apportionment %s", start = section), ]
+  apportionment_row <- mat[find_row(mat, "1 + 4 Apportionment %", start = section), ]
   printed_one_plus_four_apportionment_pct <- make_by_country(
     parse_percent(apportionment_row[2]), parse_percent(apportionment_row[3]),
     parse_percent(apportionment_row[4]), parse_percent(apportionment_row[5])
@@ -642,7 +628,7 @@ parse_producer_row <- function(cells, offsets, materials_order, glass_name) {
 
     m2a <- slice_block(cells, offsets[[paste0("section2a::", material)]])
     cur2a <- make_cursor(1)
-    skip(cur2a, 2) # Household Packaging Tonnage, Public Bin Tonnage
+    skip(cur2a, 2) # Household Tonnage, Public Bin Tonnage
     if (is_glass) skip(cur2a, 1) # Household Drinks Containers Tonnage
     total_reported_tonnage_2a <- parse_decimal(take(cur2a, m2a))
     price_per_tonne_2a <- parse_money(take(cur2a, m2a))
@@ -902,7 +888,7 @@ verify_l1_equals_sum_of_l2 <- function(p, l2_tonnage_rows, materials_order, resu
     l1 <- p$by_material[[material]]$tonnage
     section_name <- sprintf("L1 vs sum(L2) :: %s", material)
 
-    check_exact(result, label, section_name, "Household Packaging Tonnage", summed$household, l1$household, 3)
+    check_exact(result, label, section_name, "Household Tonnage", summed$household, l1$household, 3)
     check_exact(result, label, section_name, "Public Bin Tonnage", summed$public_bin, l1$public_bin, 3)
     check_exact(result, label, section_name, "Household Drinks Containers Tonnage", summed$hdc, l1$hdc, 3)
     check_exact(result, label, section_name, "Total Tonnage", summed$total, l1$total, 3)
@@ -1273,11 +1259,11 @@ main <- function() {
 
   # Sanity-check the derived (exact) apportionment percentages against the
   # file's own printed (8dp-rounded) percentages.
-  check_exact(result, "(run-wide)", "Apportionment", "1 Country Apportionment %s (England)",
+  check_exact(result, "(run-wide)", "Apportionment", "1 Country Apportionment % (England)",
               lapcap$country_apportionment_pct$england, lapcap$printed_country_apportionment_pct$england, 8)
-  check_exact(result, "(run-wide)", "Apportionment", "1 + 4 Apportionment %s (England)",
+  check_exact(result, "(run-wide)", "Apportionment", "1 + 4 Apportionment % (England)",
               comms$one_plus_four_apportionment_pct$england, comms$printed_one_plus_four_apportionment_pct$england, 8)
-  check_exact(result, "(run-wide)", "Apportionment", "4 Country Apportionment %s (England)",
+  check_exact(result, "(run-wide)", "Apportionment", "4 Country Apportionment % (England)",
               other_params$la_data_prep_apportionment_pct$england, other_params$printed_la_data_prep_apportionment_pct$england, 8)
 
   # Sanity-check the modulation section's Amber price against LA Disposal

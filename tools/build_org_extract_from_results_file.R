@@ -66,19 +66,22 @@ KEY_SEP <- "\x1f"
 # Low-level file loading / CSV parsing
 # ---------------------------------------------------------------------------
 
-# Reads the Results File assuming UTF-16LE (matches the Python original,
-# which hardcodes this encoding rather than autodetecting it -- real Results
-# Files exported by the app have been seen in the wild as UTF-16LE with no
-# byte-order mark, a common outcome of .NET's default Encoding.Unicode).
-# Returns the raw physical lines, unparsed -- parse_csv_line() below parses
-# one on demand, matching the Python original's per-line re-parsing.
-read_utf16_rows <- function(path) {
+# Reads the Results File (matches load_rows() in verify_results_csv.R).
+# Exported as UTF-8 with a byte-order mark since ECV-697; strips that BOM if
+# present and reads fine without one. Returns the raw physical lines,
+# unparsed -- parse_csv_line() below parses one on demand, matching the
+# Python original's per-line re-parsing.
+load_rows <- function(path) {
   sz <- file.info(path)$size
   con <- file(path, open = "rb")
   raw <- readBin(con, "raw", n = sz)
   close(con)
 
-  text <- iconv(list(raw), from = "UTF-16LE", to = "UTF-8")
+  if (length(raw) >= 3 && raw[1] == as.raw(0xef) && raw[2] == as.raw(0xbb) && raw[3] == as.raw(0xbf)) {
+    raw <- raw[-(1:3)]
+  }
+  text <- iconv(list(raw), from = "UTF-8", to = "UTF-8")
+
   lines <- strsplit(text, "\n", fixed = TRUE)[[1]]
   sub("\r$", "", lines) # tolerate CRLF line endings too
 }
@@ -207,7 +210,7 @@ material_col_idx <- function(group, header, src_material, col_name) {
 
 populate_material_columns <- function(row_out, row_src, group, header, src_material, target_name,
                                        materials_with_drinks = c("Glass")) {
-  hh_total <- num(row_src, material_col_idx(group, header, src_material, "Household Packaging Tonnage"))
+  hh_total <- num(row_src, material_col_idx(group, header, src_material, "Household Tonnage"))
   row_out[[sprintf("Total Household packaging-%s", target_name)]] <- fmt(hh_total)
 
   rag_vals <- setNames(numeric(length(RAG_MAP)), vapply(RAG_MAP, `[[`, character(1), "src"))
@@ -231,7 +234,7 @@ populate_material_columns <- function(row_out, row_src, group, header, src_mater
     row_out[[sprintf("Total Household packaging-%s %s", target_name, m[["target"]])]] <- fmt(medical_vals[[m[["src"]]]])
   }
 
-  pb_total <- num(row_src, material_col_idx(group, header, src_material, "Public Bin Packaging Tonnage"))
+  pb_total <- num(row_src, material_col_idx(group, header, src_material, "Public Bin Tonnage"))
   row_out[[sprintf("Public binned-%s", target_name)]] <- fmt(pb_total)
 
   pb_rag_vals <- setNames(numeric(length(RAG_MAP)), vapply(RAG_MAP, `[[`, character(1), "src"))
@@ -295,7 +298,7 @@ populate_material_columns <- function(row_out, row_src, group, header, src_mater
 # breakdown is populated - see module docstring for why.
 populate_totals_only_from_calc <- function(row_out, calc_row, calc_group, calc_header, target_name, src_material) {
   group_name <- paste0(src_material, " Breakdown")
-  hh_idx <- col_index(calc_group, calc_header, group_name, "Household Packaging Tonnage")
+  hh_idx <- col_index(calc_group, calc_header, group_name, "Household Tonnage")
   pb_idx <- col_index(calc_group, calc_header, group_name, "Public Bin Tonnage")
 
   row_out[[sprintf("Total Household packaging-%s", target_name)]] <- fmt(num(calc_row, hh_idx))
@@ -346,20 +349,23 @@ main <- function() {
   argv <- commandArgs(trailingOnly = TRUE)
   results_file <- if (length(argv) >= 1) argv[1] else file.path(base, "78-R180smoketest_Results File_20260720.csv")
   output_file <- if (length(argv) >= 2) argv[2] else file.path(base, "v_extract_recent_pom_org_data_from_results.csv")
-  target_header_ref <- file.path(dirname(base), "v_extract_recent_pom_org_data.csv")
 
-  target_header <- colnames(read.csv(target_header_ref, nrows = 0, check.names = FALSE, encoding = "UTF-8"))
+  # The exact v_extract_recent_pom_org_data.csv column list/order, copied from the
+  # outer SELECT of dbo.Views.v_extract_recent_pom_org_data.sql in epr-data-sqldb --
+  # keep this file in sync if that view's columns change.
+  target_header <- colnames(read.csv(file.path(base, "v_extract_recent_pom_org_data_header.csv"),
+                                      nrows = 0, check.names = FALSE, encoding = "UTF-8"))
 
-  lines <- read_utf16_rows(results_file)
+  lines <- load_rows(results_file)
 
-  h2 <- build_section(lines, "H2 Packaging Data - Submitted & Projected")
-  h1 <- build_section(lines, "H1 Packaging Data - Submitted & Projected")
+  h2 <- build_section(lines, "H2 Packaging Data - Submitted and Projected")
+  h1 <- build_section(lines, "H1 Packaging Data - Submitted and Projected")
   calc <- build_section(lines, "Calculation Result")
 
   calc_lookup <- build_lookup(calc$rows, calc$group, calc$header)
   name_idx <- col_index(calc$group, calc$header, "", "Producer / Subsidiary Name")
   smcw_idx_by_material <- setNames(
-    vapply(MATERIALS, function(m) col_index(calc$group, calc$header, paste0(m[["src"]], " Breakdown"), "Self Managed Consumer Waste Tonnage"), integer(1)),
+    vapply(MATERIALS, function(m) col_index(calc$group, calc$header, paste0(m[["src"]], " Breakdown"), "Self-managed Consumer Waste Tonnage"), integer(1)),
     vapply(MATERIALS, `[[`, character(1), "src")
   )
   blank_row <- function() {
