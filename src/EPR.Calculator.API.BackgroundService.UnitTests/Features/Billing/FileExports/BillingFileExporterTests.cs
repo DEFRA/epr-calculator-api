@@ -36,17 +36,18 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
             .ReturnsAsync("csv-content");
 
         jsonWriter = fixture.Freeze<Mock<IBillingFileJsonWriter>>();
-        jsonWriter.Setup(m => m.WriteToString(
-                It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>()))
-            .ReturnsAsync("json-content");
+        jsonWriter.Setup(m => m.WriteTo(
+                It.IsAny<Stream>(), It.IsAny<BillingRunContext>(), It.IsAny<CalcResult>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
 
         storageUploadService = fixture.Freeze<Mock<IStorageUploadService>>();
         storageUploadService.Setup(m => m.UploadFileContentAsync(
                 It.Is<IStorageUploadService.Request>(a => a.ContainerName == "csv-container"),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync("https://csv.uri");
-        storageUploadService.Setup(m => m.UploadFileContentAsync(
-                It.Is<IStorageUploadService.Request>(a => a.ContainerName == "json-container"),
+        storageUploadService.Setup(m => m.UploadFileStreamAsync(
+                It.Is<IStorageUploadService.StreamRequest>(a => a.ContainerName == "json-container"),
+                It.IsAny<Func<Stream, CancellationToken, Task>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync("https://json.uri");
 
@@ -76,11 +77,11 @@ public class BillingFileGeneratorTests : TestsFor<BillingFileGenerator>
         await testSubject.SerializeAndExport(runContext, calcResult, CancellationToken.None);
 
         // Assert
-        storageUploadService.Verify(x => x.UploadFileContentAsync(
-            It.Is<IStorageUploadService.Request>(request =>
-                request.Content == "json-content"
-                && request.ContainerName == "json-container"
+        storageUploadService.Verify(x => x.UploadFileStreamAsync(
+            It.Is<IStorageUploadService.StreamRequest>(request =>
+                request.ContainerName == "json-container"
                 && request.Overwrite),
+            It.IsAny<Func<Stream, CancellationToken, Task>>(),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

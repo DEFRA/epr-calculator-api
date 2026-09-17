@@ -25,6 +25,7 @@ public class BillingFileGenerator(
     ILogger<BillingFileGenerator> logger)
     : IBillingFileGenerator
 {
+    [ActivityTrace]
     public async Task<BillingFileResult> SerializeAndExport(BillingRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken)
     {
         var csvMetaData = await HandleCsvFile(runContext, calcResult, cancellationToken);
@@ -73,18 +74,19 @@ public class BillingFileGenerator(
         CancellationToken ct)
     {
         var jsonFilename = new CalcResultsAndBillingFileName(runContext.RunId);
-        var jsonContent = await jsonWriter.WriteToString(runContext, calcResults);
 
-        var request = new IStorageUploadService.Request
+        var request = new IStorageUploadService.StreamRequest
         {
             FileName = jsonFilename,
-            Content = jsonContent,
             ContainerName = blobStorageUploadOptions.Value.BillingFileJsonContainer,
             Overwrite = true,
             UseUtf8Bom = false
         };
 
-        await storageUploadService.UploadFileContentAsync(request, ct);
+        await storageUploadService.UploadFileStreamAsync(
+            request,
+            (stream, token) => jsonWriter.WriteTo(stream, runContext, calcResults, token),
+            ct);
 
         return new CalculatorRunBillingFileMetadata
         {

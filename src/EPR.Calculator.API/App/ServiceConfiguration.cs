@@ -28,7 +28,7 @@ public static class ServiceConfiguration
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddPayCalTelemetry(IHostEnvironment environment)
+        public IServiceCollection AddPayCalTelemetry(IHostEnvironment environment, IConfiguration configuration)
         {
             services.AddOpenTelemetry()
                 .WithTracing(tracing => tracing
@@ -38,6 +38,8 @@ public static class ServiceConfiguration
                 .WithMetrics(metrics => metrics
                     .AddMeter(Telemetry.RootScope))
                 .UseAzureMonitor();
+
+            Telemetry.CaptureMemoryMetrics = configuration.GetValue("Telemetry:CaptureMemoryMetrics", defaultValue: false);
 
             if (environment.IsLocal())
                 services.AddHostedService<TelemetryLoggingHost>();

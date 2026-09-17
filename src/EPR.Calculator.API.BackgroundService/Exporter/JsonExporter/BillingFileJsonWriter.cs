@@ -1,4 +1,4 @@
-﻿using System.Text.Encodings.Web;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using EPR.Calculator.API.BackgroundService.Converter;
 using EPR.Calculator.API.BackgroundService.Exporter.JsonExporter.Model;
@@ -10,7 +10,7 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.JsonExporter;
 
 public interface IBillingFileJsonWriter
 {
-    Task<string> WriteToString(BillingRunContext runContext, CalcResult calcResult);
+    Task WriteTo(Stream stream, BillingRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken);
 }
 
 public class BillingFileJsonWriter(IMaterialService materialService)
@@ -26,7 +26,8 @@ public class BillingFileJsonWriter(IMaterialService materialService)
         Converters = { new DecimalPrecisionConverter(DecimalPrecision) }
     };
 
-    public async Task<string> WriteToString(BillingRunContext runContext, CalcResult calcResult)
+    [ActivityTrace]
+    public async Task WriteTo(Stream stream, BillingRunContext runContext, CalcResult calcResult, CancellationToken cancellationToken)
     {
         var materials = (await materialService.GetMaterials())
                             .Select(m => m.Code switch
@@ -35,10 +36,10 @@ public class BillingFileJsonWriter(IMaterialService materialService)
                                 "FC" => m with { Name = "Fibre composite" },
                                 "OT" => m with { Name = "Other materials" },
                                 _ => m
-                            }).ToImmutableList(); //Maintain previous capitalisation 
+                            }).ToImmutableList(); //Maintain previous capitalisation
 
         var billingFileContent = BillingFileJson.From(runContext, calcResult, materials);
 
-        return JsonSerializer.Serialize(billingFileContent, JsonSerializerOptions);
+        await JsonSerializer.SerializeAsync(stream, billingFileContent, JsonSerializerOptions, cancellationToken);
     }
 }

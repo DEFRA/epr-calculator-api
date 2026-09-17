@@ -6,7 +6,11 @@ namespace EPR.Calculator.API.IntegrationTests;
 
 public class FakeCommonDataApiClient : ICommonDataApiClient
 {
-    public ImmutableList<PomResponse> PomResponses { get; set; } = [];
+    // A factory, invoked fresh on each StreamPoms() call, so POM rows are streamed off disk rather
+    // than held in memory as a list - matching the real client, which reads the NDJSON response one
+    // record at a time.
+    public Func<IEnumerable<PomResponse>> Poms { get; set; } = () => [];
+
     public ImmutableList<OrganisationResponse> OrganisationResponses { get; set; } = [];
 
     public async IAsyncEnumerable<PomResponse> StreamPoms(
@@ -14,7 +18,7 @@ public class FakeCommonDataApiClient : ICommonDataApiClient
         DateTime? cutOffDate,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        foreach (var pom in PomResponses)
+        foreach (var pom in Poms())
         {
             cancellationToken.ThrowIfCancellationRequested();
 
