@@ -3,7 +3,6 @@ using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Utils;
 using Microsoft.EntityFrameworkCore;
 

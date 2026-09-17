@@ -1,5 +1,5 @@
 using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.Enums;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using Microsoft.EntityFrameworkCore;
 

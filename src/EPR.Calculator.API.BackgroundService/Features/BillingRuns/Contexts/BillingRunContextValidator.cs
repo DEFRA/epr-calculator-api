@@ -1,6 +1,5 @@
 ﻿using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.Data.Enums;
 using FluentValidation;
 
 namespace EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;

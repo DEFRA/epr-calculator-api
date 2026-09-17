@@ -1,4 +1,4 @@
-namespace EPR.Calculator.API.Data.Enums;
+namespace EPR.Calculator.API.Data.DataTypes;
 
 public enum RagRating
 {
