@@ -10,9 +10,15 @@ public class CalculatorRunClassificationConfiguration : IEntityTypeConfiguration
     {
         builder.ToTable("calculator_run_classification");
 
+        // Ids come from RunClassification, so identity is redundant. It is kept because the existing
+        // column is an IDENTITY primary key referenced by calculator_run, and SQL Server cannot drop
+        // the identity property without rebuilding the table. Declaring it keeps the model honest
+        // about what the database actually holds.
         builder.Property(p => p.Id)
             .HasColumnName("id")
-            .IsRequired();
+            .IsRequired()
+            .ValueGeneratedOnAdd()
+            .UseIdentityColumn();
 
         builder.Property(p => p.Status)
             .HasColumnName("status")
