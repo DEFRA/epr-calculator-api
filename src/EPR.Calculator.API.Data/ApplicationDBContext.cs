@@ -2,8 +2,8 @@
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataSeeder;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.Data.DataTypes.Enums;
-using EPR.Calculator.API.Data.Enums;
+using EPR.Calculator.API.Data.DataTypes.Converters.Enums;
+using EPR.Calculator.API.Data.DataTypes.Converters.RelativeYear;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.Data;

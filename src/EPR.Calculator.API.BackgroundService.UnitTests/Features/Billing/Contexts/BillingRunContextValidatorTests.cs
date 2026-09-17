@@ -3,7 +3,6 @@ using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.Calculator.API.Data.Enums;
 using FluentValidation.TestHelper;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Features.Billing.Contexts;

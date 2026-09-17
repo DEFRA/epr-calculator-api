@@ -3,7 +3,7 @@ using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.Enums;
+using EPR.Calculator.API.Data.DataTypes;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;

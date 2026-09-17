@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace EPR.Calculator.API.Data.DataTypes.Enums;
+namespace EPR.Calculator.API.Data.DataTypes.Converters.Enums;
 
 /// <summary>
 ///     A value comparer for enum types to enable equality comparison and hash code generation for Entity Framework's

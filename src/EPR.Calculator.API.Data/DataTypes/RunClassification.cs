@@ -1,4 +1,4 @@
-﻿namespace EPR.Calculator.API.Data.Enums;
+﻿namespace EPR.Calculator.API.Data.DataTypes;
 
 /// <remarks>
 ///     Numbering is based on the database enum. There are some gaps due to the removal of obsoleted legacy values.

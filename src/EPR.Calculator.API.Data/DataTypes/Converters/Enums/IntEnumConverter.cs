@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace EPR.Calculator.API.Data.DataTypes.Enums;
+namespace EPR.Calculator.API.Data.DataTypes.Converters.Enums;
 
 /// <summary>
 ///     Enum converter for Entity Framework that stores an int representation of the enum.
