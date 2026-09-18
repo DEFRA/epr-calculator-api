@@ -704,7 +704,10 @@ def build_producer_table_schema(materials_order: list[str], glass_name: Optional
     def is_glass(material: str) -> bool:
         return glass_name is not None and material == glass_name
 
-    blocks: list[Block] = [Block("identity", 10)]
+    blocks: list[Block] = [
+        Block("identity", 10),
+        Block("summary", 6),  # SummaryExporter: repeats 6 billing-instruction/total-bill columns for visibility
+    ]
 
     for material in materials_order:
         # 1 (prev invoiced)
