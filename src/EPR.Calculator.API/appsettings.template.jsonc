@@ -72,5 +72,9 @@
       "CompressionEnabled": true,
       "StreamStartTimeout": "00:15:00"
     }
+  },
+
+  "FeatureFlags": {
+    "UploadFssBillingFileToBlobStorage": true
   }
 }
