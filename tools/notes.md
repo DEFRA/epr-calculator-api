@@ -13,6 +13,20 @@ nix run .#build-org-extract -- <results.csv> <out.csv>   # must be run from tool
 nix run .#verify-results-csv -- <results.csv> [--verbose]
 `
 
+When modifying these scripts (especially the producer-table column schema in
+`build_producer_table_schema`), run both the Python and R verify scripts
+against a results fixture with a full producer table and modulation section,
+e.g.:
+
+```bash
+python3 verify_results_csv.py ../src/EPR.Calculator.API.IntegrationTests/ExpectedData/2026-results.csv
+nix run .#verify-results-csv -- ../src/EPR.Calculator.API.IntegrationTests/ExpectedData/2026-results.csv
+```
+
+Both should report "No discrepancies found." A schema/offset mismatch won't
+always raise an exception -- it can silently misalign columns instead, so a
+clean run on both is the check, not just "it didn't crash."
+
 Notable things found along the way (worth knowing about, not just implementation trivia):
 
 - A real correctness bug in my own translation, not the Python original: parsing the whole file into one padded matrix (for speed) silently let a short physical line's forward-filled section label bleed into columns that never existed on that line. Fixed by tracking each row's true length and marking padding beyond it as unmatchable.
