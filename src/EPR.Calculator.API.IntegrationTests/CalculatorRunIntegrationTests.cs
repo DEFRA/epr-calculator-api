@@ -76,7 +76,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
             $"Calculator run {runId} did not complete.");
 
         await AssertCsv(
-            actualContents: await ExecuteFileResult(await calculatorController.DownloadResultCsv(runId), services),
+            actualContents: await ExecuteFileResult(await calculatorController.DownloadResultCsv(runId), services, expectUtf8Bom: true),
             expectedPath: $"ExpectedData/{relativeYear}-results.csv",
             ignoreLines: [1, 2, 3, 7, 8, 9],
             label: "Results CSV");
@@ -129,13 +129,13 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
             $"Billing run for calculator run {runId} did not complete.");
 
         await AssertCsv(
-            actualContents: await ExecuteFileResult(await billingFileController.DownloadBillingCsv(runId), services),
+            actualContents: await ExecuteFileResult(await billingFileController.DownloadBillingCsv(runId), services, expectUtf8Bom: true),
             expectedPath: $"ExpectedData/{relativeYear}-billing.csv",
             ignoreLines: [1, 2, 3, 7, 8, 9],
             label: "Billing CSV");
 
         await AssertCsv(
-            actualContents: await ExecuteFileResult(await billingFileController.DownloadBillingJson(runId), services),
+            actualContents: await ExecuteFileResult(await billingFileController.DownloadBillingJson(runId), services, expectUtf8Bom: false),
             expectedPath: $"ExpectedData/{relativeYear}-billing.json",
             ignoreLines: [3, 4, 5, 9, 11, 13, 16],
             label: "Billing JSON");
@@ -211,8 +211,15 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         throw new TimeoutException(failureMessage);
     }
 
-    private static Task<string> ExecuteFileResult(IActionResult result, IServiceProvider services) =>
-        Task.FromResult(Encoding.UTF8.GetString(result.ShouldBeOfType<FileContentResult>().FileContents));
+    private static Task<string> ExecuteFileResult(IActionResult result, IServiceProvider services, bool expectUtf8Bom)
+    {
+        var fileContents = result.ShouldBeOfType<FileContentResult>().FileContents;
+
+        if (expectUtf8Bom)
+            fileContents.Take(3).ShouldBe([0xEF, 0xBB, 0xBF]);
+
+        return Task.FromResult(Encoding.UTF8.GetString(fileContents));
+    }
 
     private static CsvReader SlurpCsv(string csvPath) =>
         new(new StreamReader(csvPath), new CsvConfiguration(CultureInfo.InvariantCulture)
