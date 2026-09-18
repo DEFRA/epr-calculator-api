@@ -10,13 +10,13 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 namespace EPR.Calculator.API.UnitTests.Validators;
 
 [TestClass]
-public class CreateLapcapDataRequestValidatorTests
+public class SetLapcapDataRequestValidatorTests
 {
     private static readonly RelativeYear ValidRelativeYear = new(2024);
 
     private ApplicationDBContext dbContext = null!;
     private List<LapcapDataTemplateMaster> masterData = null!;
-    private CreateLapcapDataRequestValidator validator = null!;
+    private SetLapcapDataRequestValidator validator = null!;
 
     [TestInitialize]
     public void Setup()
@@ -68,7 +68,7 @@ public class CreateLapcapDataRequestValidatorTests
         dbContext.CalculatorRunRelativeYears.Add(new CalculatorRunRelativeYear { Value = ValidRelativeYear });
         dbContext.SaveChanges();
 
-        validator = new CreateLapcapDataRequestValidator(dbContext);
+        validator = new SetLapcapDataRequestValidator(dbContext);
     }
 
     [TestCleanup]
@@ -171,7 +171,7 @@ public class CreateLapcapDataRequestValidatorTests
 
         var result = await validator.TestValidateAsync(request);
 
-        result.ShouldHaveValidationErrorFor($"{nameof(CreateLapcapDataRequest.Values)}[0].{nameof(CreateLapcapDataRequest.LapcapValue.Country)}");
+        result.ShouldHaveValidationErrorFor($"{nameof(SetLapcapDataRequest.Values)}[0].{nameof(SetLapcapDataRequest.LapcapValue.Country)}");
     }
 
     [TestMethod]
@@ -183,7 +183,7 @@ public class CreateLapcapDataRequestValidatorTests
 
         var result = await validator.TestValidateAsync(request);
 
-        result.ShouldHaveValidationErrorFor($"{nameof(CreateLapcapDataRequest.Values)}[0].{nameof(CreateLapcapDataRequest.LapcapValue.Material)}");
+        result.ShouldHaveValidationErrorFor($"{nameof(SetLapcapDataRequest.Values)}[0].{nameof(SetLapcapDataRequest.LapcapValue.Material)}");
     }
 
     [TestMethod]
@@ -195,7 +195,7 @@ public class CreateLapcapDataRequestValidatorTests
 
         var result = await validator.TestValidateAsync(request);
 
-        result.ShouldHaveValidationErrorFor($"{nameof(CreateLapcapDataRequest.Values)}[0].{nameof(CreateLapcapDataRequest.LapcapValue.TotalCost)}");
+        result.ShouldHaveValidationErrorFor($"{nameof(SetLapcapDataRequest.Values)}[0].{nameof(SetLapcapDataRequest.LapcapValue.TotalCost)}");
     }
 
     [TestMethod]
@@ -207,7 +207,7 @@ public class CreateLapcapDataRequestValidatorTests
 
         var result = await validator.TestValidateAsync(request);
 
-        result.ShouldHaveValidationErrorFor($"{nameof(CreateLapcapDataRequest.Values)}[0].{nameof(CreateLapcapDataRequest.LapcapValue.Country)}");
+        result.ShouldHaveValidationErrorFor($"{nameof(SetLapcapDataRequest.Values)}[0].{nameof(SetLapcapDataRequest.LapcapValue.Country)}");
     }
 
     [TestMethod]
@@ -219,7 +219,7 @@ public class CreateLapcapDataRequestValidatorTests
 
         var result = await validator.TestValidateAsync(request);
 
-        result.ShouldHaveValidationErrorFor($"{nameof(CreateLapcapDataRequest.Values)}[0].{nameof(CreateLapcapDataRequest.LapcapValue.Material)}");
+        result.ShouldHaveValidationErrorFor($"{nameof(SetLapcapDataRequest.Values)}[0].{nameof(SetLapcapDataRequest.LapcapValue.Material)}");
     }
 
     [TestMethod]
@@ -230,7 +230,7 @@ public class CreateLapcapDataRequestValidatorTests
             Values =
             [
                 ..CreateValidValues(),
-                new CreateLapcapDataRequest.LapcapValue
+                new SetLapcapDataRequest.LapcapValue
                 {
                     Country = "England",
                     Material = "Aluminium",
@@ -241,7 +241,7 @@ public class CreateLapcapDataRequestValidatorTests
 
         var result = await validator.TestValidateAsync(request);
 
-        result.ShouldHaveValidationErrorFor($"{nameof(CreateLapcapDataRequest.Values)}[4]")
+        result.ShouldHaveValidationErrorFor($"{nameof(SetLapcapDataRequest.Values)}[4]")
             .WithErrorMessage("You have entered the total cost for Aluminium in England more than once." +
                               " Make sure there is only one entry for Aluminium in England.");
     }
@@ -299,7 +299,7 @@ public class CreateLapcapDataRequestValidatorTests
     public async Task Validate_ReturnsError_WhenCountryMaterialDoesNotExistInMaster()
     {
         var values = CreateValidValues();
-        values.Add(new CreateLapcapDataRequest.LapcapValue
+        values.Add(new SetLapcapDataRequest.LapcapValue
         {
             Country = "France",
             Material = "Aluminium",
@@ -322,7 +322,7 @@ public class CreateLapcapDataRequestValidatorTests
 
         var result = await validator.TestValidateAsync(request);
 
-        result.ShouldHaveValidationErrorFor($"{nameof(CreateLapcapDataRequest.Values)}[0].{nameof(CreateLapcapDataRequest.LapcapValue.TotalCost)}")
+        result.ShouldHaveValidationErrorFor($"{nameof(SetLapcapDataRequest.Values)}[0].{nameof(SetLapcapDataRequest.LapcapValue.TotalCost)}")
             .WithErrorMessage("The total cost for Aluminium in England is invalid. Enter a total cost between -£999,999,999.99 and £999,999,999.99.");
     }
 
@@ -335,7 +335,7 @@ public class CreateLapcapDataRequestValidatorTests
 
         var result = await validator.TestValidateAsync(request);
 
-        result.ShouldHaveValidationErrorFor($"{nameof(CreateLapcapDataRequest.Values)}[0].{nameof(CreateLapcapDataRequest.LapcapValue.TotalCost)}")
+        result.ShouldHaveValidationErrorFor($"{nameof(SetLapcapDataRequest.Values)}[0].{nameof(SetLapcapDataRequest.LapcapValue.TotalCost)}")
             .WithErrorMessage("The total cost for Aluminium in England is invalid. Enter a total cost between -£999,999,999.99 and £999,999,999.99.");
     }
 
@@ -366,9 +366,9 @@ public class CreateLapcapDataRequestValidatorTests
         result.ShouldNotHaveAnyValidationErrors();
     }
 
-    private CreateLapcapDataRequest CreateValidRequest()
+    private SetLapcapDataRequest CreateValidRequest()
     {
-        return new CreateLapcapDataRequest
+        return new SetLapcapDataRequest
         {
             RelativeYear = ValidRelativeYear,
             Filename = "lapcap-data.csv",
@@ -376,10 +376,10 @@ public class CreateLapcapDataRequestValidatorTests
         };
     }
 
-    private List<CreateLapcapDataRequest.LapcapValue> CreateValidValues()
+    private List<SetLapcapDataRequest.LapcapValue> CreateValidValues()
     {
         return masterData
-            .Select(m => new CreateLapcapDataRequest.LapcapValue
+            .Select(m => new SetLapcapDataRequest.LapcapValue
             {
                 Country = m.Country,
                 Material = m.Material,

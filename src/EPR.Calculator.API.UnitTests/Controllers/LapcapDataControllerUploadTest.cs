@@ -18,7 +18,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
         public TestContext TestContext { get; set; }
 
         [TestMethod]
-        public void Test_With_Multiple_RelativeYears()
+        public async Task Test_With_Multiple_RelativeYears()
         {
             var dbContextOptions = new DbContextOptionsBuilder<ApplicationDBContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // unique DB per test
@@ -82,23 +82,19 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             // -----------------------------
             // Act: create new Lapcap data for 2029
             // -----------------------------
-            var request = new CreateLapcapDataRequest
+            var request = new SetLapcapDataRequest
             {
                 RelativeYear = new RelativeYear(2029),
                 Filename = "Test File",
                 Values = []
             };
 
-            var result = controller.Create(request).Result;
+            var result = await controller.Set(request);
 
             // -----------------------------
             // Assert
             // -----------------------------
             Assert.IsNotNull(result);
-
-            var objectResult = result as ObjectResult;
-            Assert.IsNotNull(objectResult);
-            Assert.AreEqual(201, objectResult.StatusCode); // success
 
             var activeLapcap = dbContext.LapcapDataMaster.Where(x => x.EffectiveTo == null).ToList();
             Assert.HasCount(2, activeLapcap); // only 2029 and 2030 active

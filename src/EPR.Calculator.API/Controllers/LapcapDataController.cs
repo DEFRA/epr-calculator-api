@@ -1,5 +1,6 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.Utils;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Mappers;
@@ -13,31 +14,28 @@ namespace EPR.Calculator.API.Controllers;
 [Produces("application/json")]
 [Route("v1")]
 public class LapcapDataController (
-    ApplicationDBContext context
+    ApplicationDBContext dbContext
 ) : ControllerBase
 {
-    [HttpPost]
+    [HttpPut]
     [Route("lapcapData")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Create(CreateLapcapDataRequest request, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Set(SetLapcapDataRequest request, CancellationToken cancellationToken = default)
     {
-        await using (var transaction = await context.Database.BeginTransactionAsync(cancellationToken))
+        await using (var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken))
         {
             try
             {
-                var master = await context.LapcapDataTemplateMaster
-                    .ToDictionaryAsync(LapcapKeyHelper.KeyFor, cancellationToken);
-
-                var oldLapcapData = await context.LapcapDataMaster
+                var oldMasters = await dbContext.LapcapDataMaster
                     .Where(x => x.EffectiveTo == null && x.RelativeYear == request.RelativeYear)
                     .ToListAsync(cancellationToken);
 
-                oldLapcapData.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // Side effecting db update
+                oldMasters.ForEach(x => { x.EffectiveTo = DateTime.UtcNow; }); // Side effecting db update
 
-                var lapcapDataMaster = new LapcapDataMaster
+                var newMaster = new LapcapDataMaster
                 {
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = User.GetName(),
@@ -46,19 +44,24 @@ public class LapcapDataController (
                     LapcapFileName = request.Filename!,
                     RelativeYear = request.RelativeYear!.Value
                 };
-                await context.LapcapDataMaster.AddAsync(lapcapDataMaster, cancellationToken);
+                await dbContext.LapcapDataMaster.AddAsync(newMaster, cancellationToken);
+
+                var masterTemplate = await dbContext.LapcapDataTemplateMaster
+                    .ToImmutableDictionaryAsync(LapcapKeyHelper.KeyFor, cancellationToken);
 
                 foreach (var value in request.Values!)
                 {
-                    await context.LapcapDataDetail.AddAsync(new LapcapDataDetail
+                    var newDetail = new LapcapDataDetail
                     {
                         TotalCost = value.TotalCost!.Value,
-                        UniqueReference = master[LapcapKeyHelper.KeyFor(value)].UniqueReference,
-                        LapcapDataMaster = lapcapDataMaster
-                    }, cancellationToken);
+                        UniqueReference = masterTemplate[LapcapKeyHelper.KeyFor(value)].UniqueReference,
+                        LapcapDataMaster = newMaster
+                    };
+
+                    await dbContext.LapcapDataDetail.AddAsync(newDetail, cancellationToken);
                 }
 
-                await context.SaveChangesAsync(cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
             }
             catch (Exception)
@@ -68,7 +71,7 @@ public class LapcapDataController (
             }
         }
 
-        return new ObjectResult(null) { StatusCode = StatusCodes.Status201Created };
+        return new NoContentResult();
     }
 
     /// <summary>
@@ -93,18 +96,18 @@ public class LapcapDataController (
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Get([FromRoute] int relativeYearValue)
     {
-        var relativeYear = await context.FindRelativeYearAsync(relativeYearValue);
+        var relativeYear = await dbContext.FindRelativeYearAsync(relativeYearValue);
         if (relativeYear == null)
             return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
 
-        var lapcapDataMaster = await context.LapcapDataMaster
+        var lapcapDataMaster = await dbContext.LapcapDataMaster
             .Include(m => m.Details)
             .SingleOrDefaultAsync(m => m.EffectiveTo == null && m.RelativeYear == relativeYear);
 
         if (lapcapDataMaster == null)
             return new ObjectResult(CommonResources.NoDataForSpecifiedYear) { StatusCode = StatusCodes.Status404NotFound };
 
-        var lapcaptemplateDetails = await context.LapcapDataTemplateMaster.ToListAsync();
+        var lapcaptemplateDetails = await dbContext.LapcapDataTemplateMaster.ToListAsync();
         var lapcapdatavalues = LapcapDataParameterSettingMapper.Map(lapcapDataMaster, lapcaptemplateDetails);
         return new ObjectResult(lapcapdatavalues) { StatusCode = StatusCodes.Status200OK };
     }

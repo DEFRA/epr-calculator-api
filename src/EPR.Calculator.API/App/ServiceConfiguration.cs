@@ -91,7 +91,6 @@ public static class ServiceConfiguration
             services.Configure<MvcOptions>(options =>
                 options.Filters.Add<FluentValidationActionFilter>());
 
-            services.AddScoped<ICreateDefaultParameterDataValidator, CreateDefaultParameterDataValidator>();
             services.AddScoped<ICalcRelativeYearRequestDtoDataValidator, CalcRelativeYearRequestDtoDataValidator>();
             services.AddScoped<ICalculatorRunStatusDataValidator, CalculatorRunStatusDataValidator>();
 

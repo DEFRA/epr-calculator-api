@@ -5,12 +5,10 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
-using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.API.UnitTests.Controllers
 {
@@ -84,26 +82,21 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             DbContext.DefaultParameterSettingDetail.AddRange(defaultParameterDetail29, defaultParameterDetail30);
             DbContext.SaveChanges();
 
-            // Mock validator
-            var defaultParameterValidator = new Mock<ICreateDefaultParameterDataValidator>();
-            defaultParameterValidator.Setup(x => x.Validate(It.IsAny<CreateDefaultParameterSettingDto>()))
-                .Returns(new ValidationResultDto<CreateDefaultParameterSettingErrorDto> { IsInvalid = false });
-
             // Controller
-            this.DefaultParameterController = new DefaultParameterSettingController(DbContext, defaultParameterValidator.Object, Mock.Of<ILogger<DefaultParameterSettingController>>())
+            this.DefaultParameterController = new DefaultParameterSettingController(DbContext)
             {
                 ControllerContext = new ControllerContext { HttpContext = context },
             };
 
             // Act: create for the new year
-            var request = new CreateDefaultParameterSettingDto()
+            var request = new SetDefaultParametersRequest()
             {
                 RelativeYear = new RelativeYear(2031),
-                ParameterFileName = "Test File",
-                SchemeParameterTemplateValues = new List<SchemeParameterTemplateValueDto>(),
+                Filename = "Test File",
+                Parameters = []
             };
 
-            var task = this.DefaultParameterController.Create(request);
+            var task = this.DefaultParameterController.Set(request);
             task.Wait(TestContext.CancellationTokenSource.Token);
             var result = task.Result;
 
