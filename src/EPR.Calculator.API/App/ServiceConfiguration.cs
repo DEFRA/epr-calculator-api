@@ -4,18 +4,14 @@ using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
+using EPR.Calculator.Api.DataApi;
+using EPR.Calculator.Api.DataApi.Services;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Filters;
 using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
-using EPR.CommonDataService.DataApi.AcceptedFileSelection;
-using EPR.CommonDataService.DataApi.CommonDataApi;
-using EPR.CommonDataService.DataApi.Alignment;
-using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
-using EPR.CommonDataService.DataApi.ObligationDetermination;
-using EPR.CommonDataService.DataApi.PomEligibility;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -159,7 +155,7 @@ public static class ServiceConfiguration
             return services;
         }
 
-        public IServiceCollection AddPayCalDataApi()
+        public IServiceCollection AddPayCalDataApi(IConfiguration configuration)
         {
             services
                 .AddOptions<SynapseOptions>()
@@ -167,27 +163,11 @@ public static class ServiceConfiguration
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
-            // Factory, not a scoped context: the org and POM streams query concurrently (ProducerDataService).
-            services.AddDbContextFactory<SynapseContext>((provider, builder) =>
-            {
-                var synapseOptions = provider
-                    .GetRequiredService<IOptions<SynapseOptions>>()
-                    .Value;
-
-                builder
-                    .UseSqlServer(synapseOptions.ConnectionString)
-                    .AddInterceptors(new TimeoutInterceptor());
-            });
-
-            services.AddTransient<IStreamOrganisationsRequestHandler, StreamOrganisationsRequestHandler>();
-            services.AddTransient<IStreamPomsRequestHandler, StreamPomsRequestHandler>();
-            services.AddTransient<IAcceptedFileSelector, AcceptedFileSelector>();
-            services.AddTransient<IProducerPomAligner, ProducerPomAligner>();
-            services.AddTransient<IProducerObligationDeterminer, ProducerObligationDeterminer>();
-            services.AddTransient<IPomEligibilityFilter, PomEligibilityFilter>();
-            services.AddTransient<IOrganisationPeriodFlagsCalculator, OrganisationPeriodFlagsCalculator>();
-            services.AddTransient<IProducerErrorDetector, ProducerErrorDetector>();
-            services.AddTransient<IProducerDataService, ProducerDataService>();
+            services.AddDataApi(
+                provider => provider.GetRequiredService<IOptions<SynapseOptions>>().Value.ConnectionString,
+                provider => provider.GetRequiredService<IOptions<DatabaseOptions>>().Value.ConnectionString,
+                provider => provider.GetRequiredService<IConfiguration>().GetValue("CommonDataApi:DataLoader:Enabled", true),
+                captureMemoryMetrics: configuration.GetValue("Telemetry:CaptureMemoryMetrics", defaultValue: false));
 
             return services;
         }

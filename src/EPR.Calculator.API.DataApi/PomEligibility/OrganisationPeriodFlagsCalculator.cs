@@ -1,6 +1,6 @@
-using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 
-namespace EPR.CommonDataService.DataApi.PomEligibility;
+namespace EPR.Calculator.Api.DataApi.PomEligibility;
 
 /// <summary>
 ///     Computes each organisation/subsidiary's HasH1/HasH2 flags (whether it submitted a POM for each
@@ -9,7 +9,7 @@ namespace EPR.CommonDataService.DataApi.PomEligibility;
 ///     organisation/submitter only), this groups by organisation/subsidiary/submitter, matching the
 ///     per-subsidiary flags previously computed in SQL.
 /// </summary>
-public interface IOrganisationPeriodFlagsCalculator
+internal interface IOrganisationPeriodFlagsCalculator
 {
     /// <summary>
     ///     Returns the given organisations with HasH1/HasH2 set from the POM stream. Row identity and
@@ -18,14 +18,14 @@ public interface IOrganisationPeriodFlagsCalculator
     IReadOnlyList<PayCalOrganisation> ApplyPeriodFlags(IReadOnlyList<PayCalOrganisation> organisations, IReadOnlyList<PayCalPom> poms);
 }
 
-public sealed class OrganisationPeriodFlagsCalculator : IOrganisationPeriodFlagsCalculator
+internal sealed class OrganisationPeriodFlagsCalculator : IOrganisationPeriodFlagsCalculator
 {
     public IReadOnlyList<PayCalOrganisation> ApplyPeriodFlags(IReadOnlyList<PayCalOrganisation> organisations, IReadOnlyList<PayCalPom> poms) =>
         DataApiTelemetry.Trace(typeof(OrganisationPeriodFlagsCalculator), nameof(ApplyPeriodFlags), () =>
         {
             var flagsByOrgSubSubmitter = poms
-                .Where(p => p.OrganisationId is not null && SubmissionPeriodClassification.TryParseYear(p.SubmissionPeriod, out _))
-                .GroupBy(p => (p.OrganisationId!.Value, p.SubsidiaryId, p.SubmitterId))
+                .Where(p => SubmissionPeriodClassification.TryParseYear(p.SubmissionPeriod, out _))
+                .GroupBy(p => (p.OrganisationId, p.SubsidiaryId, p.SubmitterId))
                 .ToDictionary(
                     g => g.Key,
                     g => (
@@ -35,8 +35,7 @@ public sealed class OrganisationPeriodFlagsCalculator : IOrganisationPeriodFlags
             return organisations
                 .Select(o =>
                 {
-                    if (o.OrganisationId is null ||
-                        !flagsByOrgSubSubmitter.TryGetValue((o.OrganisationId.Value, o.SubsidiaryId, o.SubmitterId), out var flags))
+                    if (!flagsByOrgSubSubmitter.TryGetValue((o.OrganisationId, o.SubsidiaryId, o.SubmitterId), out var flags))
                     {
                         return o with { HasH1 = false, HasH2 = false };
                     }

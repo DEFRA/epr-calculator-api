@@ -1,7 +1,7 @@
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.CommonDataService.DataApi.Alignment;
+using EPR.Calculator.Api.DataApi.Models;
 
 namespace EPR.Calculator.API.BackgroundService.Services;
 
@@ -19,7 +19,7 @@ public interface IErrorReportService
     ///     is then added for any producer whose surviving errors are all subsidiary-scoped.
     /// </remarks>
     Task PersistErrors(
-        IReadOnlyList<OrganisationCalculationError> errors,
+        IReadOnlyList<ProducerRecord> data,
         int calculatorRunId,
         string createdBy,
         RelativeYear relativeYear,
@@ -33,7 +33,7 @@ public class ErrorReportService(
     : IErrorReportService
 {
     public async Task PersistErrors(
-        IReadOnlyList<OrganisationCalculationError> errors,
+        IReadOnlyList<ProducerRecord> data,
         int calculatorRunId,
         string createdBy,
         RelativeYear relativeYear,
@@ -41,6 +41,17 @@ public class ErrorReportService(
     {
         var invoicedProducers = await invoicedProducerService.GetInvoicedProducers(relativeYear, cancellationToken: cancellationToken);
         var invoicedOrganisationIds = invoicedProducers.Select(i => i.ProducerId).ToHashSet();
+
+        var errors = data
+            .SelectMany(record => record.Errors.Concat(record.Warnings)
+                .Select(error =>
+                (
+                    OrganisationId: record.OrganisationId,
+                    SubsidiaryId: record.SubsidiaryId,
+                    Error: error
+                )))
+            .ToList();
+
 
         var displayedErrors = errors
             .Where(e => e.Error.HasPomMatch || invoicedOrganisationIds.Contains(e.OrganisationId))
@@ -51,18 +62,18 @@ public class ErrorReportService(
         var holdingRegErrors = displayedErrors
             .GroupBy(x => x.OrganisationId)
             .Where(x => !x.Any(y => string.IsNullOrEmpty(y.SubsidiaryId)))
-            .Select(x => new OrganisationCalculationError
-            {
-                OrganisationId = x.Key,
-                SubsidiaryId = null,
-                Error = new ProducerCalculationError
+            .Select(x =>
+            (
+                OrganisationId: x.Key,
+                SubsidiaryId: (string?) null,
+                Error: new ProducerCalculationError
                 {
-                    ErrorCode = ProducerErrorCodes.Empty,
-                    LeaverCode = ProducerErrorCodes.Empty,
+                    ErrorCode = "",
+                    LeaverCode = "",
                     IsWarning = false,
                     HasPomMatch = true // Irrelevant here - the roll-up isn't itself filtered by HasPomMatch.
                 }
-            })
+            ))
             .ToImmutableList();
 
         var createdAt = DateTime.UtcNow;

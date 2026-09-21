@@ -1,8 +1,8 @@
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Options;
-using EPR.CommonDataService.DataApi.Alignment;
-using EPR.CommonDataService.DataApi.CommonDataApi;
+using EPR.Calculator.Api.DataApi.Models;
+using EPR.Calculator.Api.DataApi.Services;
 using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.BackgroundService.Services.DataLoading;

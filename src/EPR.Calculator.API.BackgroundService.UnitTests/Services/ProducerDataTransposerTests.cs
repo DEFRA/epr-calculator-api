@@ -3,7 +3,8 @@ using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Fixtures;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.CommonDataService.DataApi.Alignment;
+using EPR.Calculator.Api.DataApi.Alignment;
+using EPR.Calculator.Api.DataApi.Models;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Services;
 
@@ -102,10 +103,10 @@ public class ProducerDataTransposerTests
         await sut.Transpose(TestDataHelper.CalculatorRun2024, records, CancellationToken.None);
 
         errorReportService.Verify(s => s.PersistErrors(
-            It.Is<IReadOnlyList<OrganisationCalculationError>>(errors =>
+            It.Is<IReadOnlyList<ProducerRecord>>(errors =>
                 errors.Count == 2 &&
-                errors.Any(e => e.OrganisationId == 1 && e.SubsidiaryId == null && e.Error == error) &&
-                errors.Any(e => e.OrganisationId == 2 && e.SubsidiaryId == "SUB" && e.Error == warning)),
+                errors.Any(e => e.OrganisationId == 1 && e.SubsidiaryId == null && e.Errors.Contains(error)) &&
+                errors.Any(e => e.OrganisationId == 2 && e.SubsidiaryId == "SUB" && e.Warnings.Contains(warning))),
             TestDataHelper.CalculatorRun2024.RunId,
             It.IsAny<string>(),
             TestDataHelper.CalculatorRun2024.RelativeYear,
@@ -121,7 +122,7 @@ public class ProducerDataTransposerTests
         Warnings = [],
         ReportedMaterials =
         [
-            new AlignedReportedMaterial
+            new ProducerMaterial
             {
                 MaterialCode = "PL",
                 PackagingType = "HH",

@@ -1,6 +1,20 @@
-namespace EPR.CommonDataService.DataApi.Alignment;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.Models;
 
-public sealed record ProducerErrorDetectionResult
+namespace EPR.Calculator.Api.DataApi.Alignment;
+
+/// <summary>
+///     A <see cref="ProducerCalculationError" /> keyed by the org/subsidiary it was raised against - the
+///     detector's flat output, folded into <see cref="ProducerRecord" />s by the caller.
+/// </summary>
+internal sealed record OrganisationCalculationError
+{
+    public required int OrganisationId { get; init; }
+    public string? SubsidiaryId { get; init; }
+    public required ProducerCalculationError Error { get; init; }
+}
+
+internal sealed record ProducerErrorDetectionResult
 {
     /// <summary>
     ///     Every error/warning row. For a row with <see cref="ProducerCalculationError.HasPomMatch" />
@@ -16,10 +30,10 @@ public sealed record ProducerErrorDetectionResult
     public required IReadOnlySet<(int OrganisationId, string? SubsidiaryId)> UnmatchedKeys { get; init; }
 }
 
-public interface IProducerErrorDetector
+internal interface IProducerErrorDetector
 {
     /// <summary>
-    ///     Runs every error/warning rule against the (pre-dedup) organisation and POM populations.
+    ///     Runs every error/warning rule against the (pre-dedupe) organisation and POM populations.
     ///     Doesn't decide whether a no-POM-match error/warning should be shown - that depends on billing
     ///     history DataApi doesn't have, so it's surfaced via <see cref="ProducerCalculationError.HasPomMatch" />
     ///     for the caller to decide. For the same reason, holding-company roll-ups aren't computed here
@@ -28,18 +42,18 @@ public interface IProducerErrorDetector
     /// <param name="organisations">The full, non-deduped organisation population for the run.</param>
     /// <param name="poms">The full POM population for the run.</param>
     ProducerErrorDetectionResult Detect(
-        IReadOnlyCollection<AlignmentOrganisation> organisations,
-        IReadOnlyCollection<AlignmentPom> poms);
+        IReadOnlyCollection<PayCalOrganisation> organisations,
+        IReadOnlyCollection<PayCalPom> poms);
 }
 
-public sealed class ProducerErrorDetector : IProducerErrorDetector
+internal sealed class ProducerErrorDetector : IProducerErrorDetector
 {
     private const string ObligatedStatus = "O";
     private const string ErrorStatus = "E";
 
     public ProducerErrorDetectionResult Detect(
-        IReadOnlyCollection<AlignmentOrganisation> organisations,
-        IReadOnlyCollection<AlignmentPom> poms)
+        IReadOnlyCollection<PayCalOrganisation> organisations,
+        IReadOnlyCollection<PayCalPom> poms)
     {
         var obligatedErrors = HandleObligatedErrors(poms, organisations);
         var missingRegErrors = HandleMissingRegistrationData(poms, organisations);
@@ -68,35 +82,41 @@ public sealed class ProducerErrorDetector : IProducerErrorDetector
     }
 
     public static IReadOnlyList<OrganisationCalculationError> HandleMissingRegistrationData(
-        IReadOnlyCollection<AlignmentPom> poms,
-        IReadOnlyCollection<AlignmentOrganisation> organisations)
+        IReadOnlyCollection<PayCalPom> poms,
+        IReadOnlyCollection<PayCalOrganisation> organisations)
     {
+        ArgumentNullException.ThrowIfNull(poms);
+        ArgumentNullException.ThrowIfNull(organisations);
+
+        var registrationKeys = organisations
+            .Select(o => ((int?)o.OrganisationId, o.SubsidiaryId, o.SubmitterId))
+            .ToHashSet();
+
         return poms
             .DistinctBy(x => (x.OrganisationId, x.SubsidiaryId, x.SubmitterId))
             .GroupBy(x => x.OrganisationId)
             .SelectMany(group =>
             {
-                var reg = organisations.Where(o => o.OrganisationId == group.Key);
-                var missing = group.Any(p => !reg.Any(o => o.SubsidiaryId == p.SubsidiaryId && o.SubmitterId == p.SubmitterId));
+                var missing = group.Any(p => !registrationKeys.Contains((p.OrganisationId, p.SubsidiaryId, p.SubmitterId)));
 
                 // Always POM-driven by definition - there's no invoiced-history question here.
                 return missing
-                    ? group.Select(p => CreateError(p.OrganisationId ?? 0, p.SubsidiaryId, ProducerErrorCodes.MissingRegistrationData, null, isWarning: false, hasPomMatch: true))
+                    ? group.Select(p => CreateError(p.OrganisationId, p.SubsidiaryId, "Missing Registration Data", null, isWarning: false, hasPomMatch: true))
                     : [];
             })
             .ToList();
     }
 
     public static IReadOnlyList<OrganisationCalculationError> HandleMissingPomData(
-        IReadOnlyCollection<AlignmentPom> poms,
-        IReadOnlyCollection<AlignmentOrganisation> organisations)
+        IReadOnlyCollection<PayCalPom> poms,
+        IReadOnlyCollection<PayCalOrganisation> organisations)
     {
         // Pre-compute the set of POM keys (subsidiary id, falling back to org id) so the membership
         // check below is O(1) per organisation rather than O(P) per organisation.
         var pomKeys = new HashSet<string>(poms.Count, StringComparer.Ordinal);
         foreach (var p in poms)
         {
-            var key = p.SubsidiaryId ?? p.OrganisationId.ToString()!;
+            var key = p.SubsidiaryId ?? p.OrganisationId.ToString();
             pomKeys.Add(key);
         }
 
@@ -106,32 +126,39 @@ public sealed class ProducerErrorDetector : IProducerErrorDetector
             .Where(o => pomKeys.Contains(o.SubsidiaryId ?? o.OrganisationId.ToString()))
             .Where(o => o is not { HasH1: true, HasH2: true })
             // Always POM-driven by definition (matched via pomKeys above).
-            .Select(o => CreateError(o.OrganisationId, o.SubsidiaryId, ProducerErrorCodes.MissingPOMData, o.StatusCode, isWarning: false, hasPomMatch: true))
+            .Select(o => CreateError(o.OrganisationId, o.SubsidiaryId, "Missing POM Data", o.StatusCode, isWarning: false, hasPomMatch: true))
             .ToList();
     }
 
     public static IReadOnlyList<OrganisationCalculationError> HandleObligatedErrors(
-        IReadOnlyCollection<AlignmentPom> poms,
-        IReadOnlyCollection<AlignmentOrganisation> organisations)
+        IReadOnlyCollection<PayCalPom> poms,
+        IReadOnlyCollection<PayCalOrganisation> organisations)
     {
+        var pomKeys = BuildPomKeys(poms);
+
         return organisations
             .Where(x => x.ObligationStatus == ErrorStatus)
-            .Select(x => CreateError(x.OrganisationId, x.SubsidiaryId, x.ErrorCode, x.StatusCode, isWarning: false, hasPomMatch: HasPomMatch(x, poms)))
+            .Select(x => CreateError(x.OrganisationId, x.SubsidiaryId, x.ErrorCode, x.StatusCode, isWarning: false,
+                hasPomMatch: pomKeys.Contains((x.OrganisationId, x.SubsidiaryId, x.SubmitterId))))
             .ToList();
     }
 
     public static IReadOnlyList<OrganisationCalculationError> HandleObligatedWarnings(
-        IReadOnlyCollection<AlignmentPom> poms,
-        IReadOnlyCollection<AlignmentOrganisation> organisations)
+        IReadOnlyCollection<PayCalPom> poms,
+        IReadOnlyCollection<PayCalOrganisation> organisations)
     {
+        var pomKeys = BuildPomKeys(poms);
+
         return organisations
             .Where(x => x.ObligationStatus == ObligatedStatus && !string.IsNullOrEmpty(x.ErrorCode))
-            .Select(x => CreateError(x.OrganisationId, x.SubsidiaryId, x.ErrorCode, x.StatusCode, isWarning: true, hasPomMatch: HasPomMatch(x, poms)))
+            .Select(x => CreateError(x.OrganisationId, x.SubsidiaryId, x.ErrorCode, x.StatusCode, isWarning: true,
+                hasPomMatch: pomKeys.Contains((x.OrganisationId, x.SubsidiaryId, x.SubmitterId))))
             .ToList();
     }
 
-    private static bool HasPomMatch(AlignmentOrganisation o, IReadOnlyCollection<AlignmentPom> poms) =>
-        poms.Any(p => new { OrgId = p.OrganisationId, p.SubsidiaryId, p.SubmitterId }.Equals(new { OrgId = (int?)o.OrganisationId, o.SubsidiaryId, o.SubmitterId }));
+    private static HashSet<(int OrganisationId, string? SubsidiaryId, string? SubmitterId)> BuildPomKeys(
+        IReadOnlyCollection<PayCalPom> poms) =>
+        poms.Select(p => (p.OrganisationId, p.SubsidiaryId, p.SubmitterId)).ToHashSet();
 
     private static OrganisationCalculationError CreateError(int orgId, string? subId, string? errorCode, string? leaverCode, bool isWarning, bool hasPomMatch) =>
         new()

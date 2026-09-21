@@ -1,10 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
 
 namespace EPR.Calculator.API.Options;
 
 /// <summary>
-///     Configuration options for <see cref="SynapseContext" />.
+///     Configuration options for the DataApi Synapse connection.
 /// </summary>
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record SynapseOptions

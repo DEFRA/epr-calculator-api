@@ -1,17 +1,17 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
-namespace EPR.CommonDataService.DataApi.CommonDataApi;
+namespace EPR.Calculator.Api.DataApi.CommonDataApi;
 
-public interface IStreamPomsRequestHandler
+internal interface IStreamPomsRequestHandler
 {
     IAsyncEnumerable<PayCalPom> Handle(int relativeYear, CancellationToken cancellationToken = default);
 }
 
-public sealed class StreamPomsRequestHandler(IDbContextFactory<SynapseContext> dbContextFactory)
+internal sealed class StreamPomsRequestHandler(IDbContextFactory<SynapseContext> dbContextFactory)
     : IStreamPomsRequestHandler
 {
     public async IAsyncEnumerable<PayCalPom> Handle(int relativeYear,
@@ -22,7 +22,7 @@ public sealed class StreamPomsRequestHandler(IDbContextFactory<SynapseContext> d
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         // Previously sourced from the stored procedure dbo.sp_GetPaycalPomData. This is selection only
-        // ("accepted data only"): every accepted POM file is returned (no dedup, no cut-off filtering) -
+        // ("accepted data only"): every accepted POM file is returned (no dedupe, no cut-off filtering) -
         // which file "wins" per org/submitter/period, honouring the cut-off date, is decided in C# (see
         // IAcceptedFileSelector). The eligibility decision (whether both H1 and H2 were submitted,
         // whether a matching registration exists) is made in C# (see IPomEligibilityFilter), and the

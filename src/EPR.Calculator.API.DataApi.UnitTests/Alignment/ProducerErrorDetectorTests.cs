@@ -1,4 +1,5 @@
-using EPR.CommonDataService.DataApi.Alignment;
+using EPR.Calculator.Api.DataApi.Alignment;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 
 namespace EPR.Calculator.API.DataApi.UnitTests.Alignment;
 
@@ -23,7 +24,7 @@ public class ProducerErrorDetectorTests
 
         foreach (var r in result)
         {
-            Assert.AreEqual(ProducerErrorCodes.MissingRegistrationData, r.Error.ErrorCode);
+            Assert.AreEqual("Missing Registration Data", r.Error.ErrorCode);
             Assert.IsFalse(r.Error.IsWarning);
         }
 
@@ -42,7 +43,7 @@ public class ProducerErrorDetectorTests
             CreatePom(10, "102", "2023-P2")
         };
 
-        var orgs = Array.Empty<AlignmentOrganisation>();
+        var orgs = Array.Empty<PayCalOrganisation>();
 
         var result = ProducerErrorDetector.HandleMissingRegistrationData(poms, orgs);
 
@@ -79,7 +80,7 @@ public class ProducerErrorDetectorTests
             .Select(_ => CreatePom(100, "200", "2023-P2"))
             .ToArray();
 
-        var orgs = Array.Empty<AlignmentOrganisation>();
+        var orgs = Array.Empty<PayCalOrganisation>();
 
         var result = ProducerErrorDetector.HandleMissingRegistrationData(poms, orgs);
 
@@ -87,7 +88,7 @@ public class ProducerErrorDetectorTests
         var report = result.First();
         Assert.AreEqual(100, report.OrganisationId);
         Assert.AreEqual("200", report.SubsidiaryId);
-        Assert.AreEqual(ProducerErrorCodes.MissingRegistrationData, report.Error.ErrorCode);
+        Assert.AreEqual("Missing Registration Data", report.Error.ErrorCode);
     }
 
     [TestMethod]
@@ -112,9 +113,9 @@ public class ProducerErrorDetectorTests
         Assert.AreEqual(3, result.Count, "Expected 3 error messages as Org 1 SubsidiaryId 202 is missing Reg data - so errors applies to all in Org 1");
         CollectionAssert.AreEquivalent(new[]
             {
-                (OrganisationId: 1, SubsidiaryId: (string?)null, ErrorCode: ProducerErrorCodes.MissingRegistrationData, LeaverCode: ""),
-                (OrganisationId: 1, SubsidiaryId: "101", ErrorCode: ProducerErrorCodes.MissingRegistrationData, LeaverCode: ""),
-                (OrganisationId: 1, SubsidiaryId: "202", ErrorCode: ProducerErrorCodes.MissingRegistrationData, LeaverCode: "")
+                (OrganisationId: 1, SubsidiaryId: (string?)null, ErrorCode: "Missing Registration Data", LeaverCode: ""),
+                (OrganisationId: 1, SubsidiaryId: "101", ErrorCode: "Missing Registration Data", LeaverCode: ""),
+                (OrganisationId: 1, SubsidiaryId: "202", ErrorCode: "Missing Registration Data", LeaverCode: "")
             },
             result.Select(r => (r.OrganisationId, r.SubsidiaryId, r.Error.ErrorCode, r.Error.LeaverCode)).ToList());
     }
@@ -182,7 +183,7 @@ public class ProducerErrorDetectorTests
 
         Assert.AreEqual(1, result.Count, "Expected 1 unmatched records to be returned.");
         var error = result.First();
-        Assert.AreEqual(ProducerErrorCodes.MissingRegistrationData, error.Error.ErrorCode, "Incorrect Error Type");
+        Assert.AreEqual("Missing Registration Data", error.Error.ErrorCode, "Incorrect Error Type");
         Assert.AreEqual(2, error.OrganisationId, "Incorrect Organisation Id");
     }
 
@@ -220,17 +221,17 @@ public class ProducerErrorDetectorTests
 
         Assert.AreEqual(3, result.Count, "Expected 3 unmatched records to be returned.");
 
-        Assert.AreEqual(ProducerErrorCodes.MissingPOMData, result[0].Error.ErrorCode);
+        Assert.AreEqual("Missing POM Data", result[0].Error.ErrorCode);
         Assert.AreEqual(200202, result[0].OrganisationId);
         Assert.AreEqual("100101", result[0].SubsidiaryId);
         Assert.AreEqual("01", result[0].Error.LeaverCode);
 
-        Assert.AreEqual(ProducerErrorCodes.MissingPOMData, result[1].Error.ErrorCode);
+        Assert.AreEqual("Missing POM Data", result[1].Error.ErrorCode);
         Assert.AreEqual(200202, result[1].OrganisationId);
         Assert.AreEqual("100102", result[1].SubsidiaryId);
         Assert.AreEqual("01", result[1].Error.LeaverCode);
 
-        Assert.AreEqual(ProducerErrorCodes.MissingPOMData, result[2].Error.ErrorCode);
+        Assert.AreEqual("Missing POM Data", result[2].Error.ErrorCode);
         Assert.AreEqual(200202, result[2].OrganisationId);
         Assert.AreEqual("100103", result[2].SubsidiaryId);
         Assert.AreEqual("01", result[2].Error.LeaverCode);
@@ -296,7 +297,7 @@ public class ProducerErrorDetectorTests
         Assert.AreEqual(3, result.Count, "Expected 3 unmatched records to be returned.");
         Assert.IsTrue(result.Any(p => p.OrganisationId == 100101 && p.SubsidiaryId == null && p.Error.ErrorCode == error1 && p.Error.LeaverCode == ""));
         Assert.IsTrue(result.Any(p => p.OrganisationId == 200202 && p.SubsidiaryId == "100500" && p.Error.ErrorCode == error2 && p.Error.LeaverCode == "some status code"));
-        Assert.IsTrue(result.Any(p => p.OrganisationId == 200202 && p.SubsidiaryId == "100101" && p.Error.ErrorCode == ProducerErrorCodes.Empty && p.Error.LeaverCode == ""));
+        Assert.IsTrue(result.Any(p => p.OrganisationId == 200202 && p.SubsidiaryId == "100101" && p.Error.ErrorCode == "" && p.Error.LeaverCode == ""));
         Assert.IsTrue(result.All(r => !r.Error.IsWarning));
         Assert.IsTrue(result.All(r => r.Error.HasPomMatch), "Every organisation here has a matching POM.");
     }
@@ -368,7 +369,7 @@ public class ProducerErrorDetectorTests
         Assert.AreEqual(5, result.Count, "Expected all 5 \"E\"-status organisation rows, regardless of POM match.");
         Assert.IsTrue(result.Any(p => p.OrganisationId == producer1 && p.SubsidiaryId == null && p.Error.ErrorCode == error1 && !p.Error.HasPomMatch));
         Assert.IsTrue(result.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == "100500" && p.Error.ErrorCode == error2 && p.Error.LeaverCode == "some status code" && p.Error.HasPomMatch));
-        Assert.IsTrue(result.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == "100101" && p.Error.ErrorCode == ProducerErrorCodes.Empty && p.Error.LeaverCode == "" && p.Error.HasPomMatch));
+        Assert.IsTrue(result.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == "100101" && p.Error.ErrorCode == "" && p.Error.LeaverCode == "" && p.Error.HasPomMatch));
         Assert.IsTrue(result.Any(p => p.OrganisationId == producer3 && p.SubsidiaryId == null && p.Error.ErrorCode == error1 && p.Error.HasPomMatch));
         Assert.IsTrue(result.Any(p => p.OrganisationId == producer4 && p.SubsidiaryId == null && p.Error.ErrorCode == error1 && !p.Error.HasPomMatch));
     }
@@ -501,8 +502,8 @@ public class ProducerErrorDetectorTests
         var result = detector.Detect(orgs, poms);
 
         Assert.AreEqual(7, result.Errors.Count, "Expected 7 individual error/warning rows - no holding roll-ups.");
-        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer5 && p.SubsidiaryId == null && p.Error.ErrorCode == ProducerErrorCodes.MissingRegistrationData && p.Error.HasPomMatch));
-        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == "100101" && p.Error.ErrorCode == ProducerErrorCodes.MissingPOMData && p.Error.LeaverCode == "01" && p.Error.HasPomMatch));
+        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer5 && p.SubsidiaryId == null && p.Error.ErrorCode == "Missing Registration Data" && p.Error.HasPomMatch));
+        Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer2 && p.SubsidiaryId == "100101" && p.Error.ErrorCode == "Missing POM Data" && p.Error.LeaverCode == "01" && p.Error.HasPomMatch));
         Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer3 && p.SubsidiaryId == null && p.Error.ErrorCode == "some warning" && p.Error.IsWarning && p.Error.HasPomMatch));
         Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer4 && p.SubsidiaryId == "404" && p.Error.ErrorCode == "some synapse error" && !p.Error.IsWarning && p.Error.HasPomMatch));
         Assert.IsTrue(result.Errors.Any(p => p.OrganisationId == producer6 && p.SubsidiaryId == null && p.Error.ErrorCode == "some synapse error" && !p.Error.IsWarning && !p.Error.HasPomMatch));
@@ -517,28 +518,28 @@ public class ProducerErrorDetectorTests
         Assert.IsTrue(result.UnmatchedKeys.Contains((producer6, null)));
     }
 
-    private static AlignmentPom CreatePom(int orgId, string? subsidiaryId, string submissionPeriod, Guid? submitterId = null) =>
+    private static PayCalPom CreatePom(int orgId, string? subsidiaryId, string submissionPeriod, Guid? submitterId = null) =>
         new()
         {
             OrganisationId = orgId,
             SubsidiaryId = subsidiaryId,
             SubmissionPeriod = submissionPeriod,
-            SubmitterId = submitterId
+            SubmitterId = submitterId?.ToString()
         };
 
-    private static AlignmentPom CreatePom(int orgId, Guid submitterId, string submissionPeriod, string packagingType, string packagingMaterial, int packagingMaterialWeight, string? subsidiaryId = null) =>
+    private static PayCalPom CreatePom(int orgId, Guid submitterId, string submissionPeriod, string packagingType, string packagingMaterial, int packagingMaterialWeight, string? subsidiaryId = null) =>
         new()
         {
             OrganisationId = orgId,
             SubmissionPeriod = submissionPeriod,
-            SubmitterId = submitterId,
+            SubmitterId = submitterId.ToString(),
             PackagingType = packagingType,
             PackagingMaterial = packagingMaterial,
             PackagingMaterialWeight = packagingMaterialWeight,
             SubsidiaryId = subsidiaryId
         };
 
-    private static AlignmentOrganisation CreateOrg(
+    private static PayCalOrganisation CreateOrg(
         int orgId,
         string? subId,
         string orgName,
@@ -555,7 +556,7 @@ public class ProducerErrorDetectorTests
             OrganisationName = orgName,
             ObligationStatus = obligationStatus,
             StatusCode = statusCode,
-            SubmitterId = submitterId,
+            SubmitterId = submitterId?.ToString(),
             ErrorCode = errorCode,
             HasH1 = hasH1,
             HasH2 = hasH2
