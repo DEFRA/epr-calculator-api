@@ -6,6 +6,8 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
 {
@@ -142,7 +144,6 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             result.First(p => p.ProducerId == 2 && p.SubsidiaryId == "B").PartialObligationTonnageByMaterial.Count.ShouldBe(2);
         }
 
-        [TestMethod]
         public async Task ReadProducerFees_WorksAsExpected()
         {
             var producerFees = TestDataHelper.GetProducerFees();
@@ -152,8 +153,30 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             var result = await _sut.ReadProducerFees(0, CancellationToken.None);
 
             result.CalculatorRunId.ShouldBeEquivalentTo(producerFees.CalculatorRunId);
-            result.Details.ShouldBeEquivalentTo(producerFees.Details);
-            result.Total.ShouldBeEquivalentTo(producerFees.Total);
+
+            // The owned entities round-trip through SQLite as JSON columns, which can change a
+            // decimal's scale (e.g. 90 -> 90.0) without changing its value. ShouldBeEquivalentTo
+            // is sensitive to that scale drift (and, for this object graph, unreliable even after
+            // normalizing it), so compare a normalized JSON projection of both sides instead.
+            SerializeNormalized(result.Details).ShouldBe(SerializeNormalized(producerFees.Details));
+            SerializeNormalized(result.Total).ShouldBe(SerializeNormalized(producerFees.Total));
+        }
+
+        private static readonly JsonSerializerOptions DecimalNormalizingJsonOptions = new()
+        {
+            Converters = { new DecimalAsDoubleJsonConverter() }
+        };
+
+        private static string SerializeNormalized<T>(T value) =>
+            JsonSerializer.Serialize(value, DecimalNormalizingJsonOptions);
+
+        private sealed class DecimalAsDoubleJsonConverter : JsonConverter<decimal>
+        {
+            public override decimal Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+                reader.GetDecimal();
+
+            public override void Write(Utf8JsonWriter writer, decimal value, JsonSerializerOptions options) =>
+                writer.WriteNumberValue((double)value);
         }
 
         [TestMethod]

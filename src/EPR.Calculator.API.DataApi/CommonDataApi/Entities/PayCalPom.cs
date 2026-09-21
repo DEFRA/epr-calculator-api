@@ -1,11 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+namespace EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 
 [ExcludeFromCodeCoverage]
-public record PayCalPom
+internal record PayCalPom
 {
-    public int? OrganisationId { get; init; }
+    public int OrganisationId { get; init; }
     public string? SubsidiaryId { get; init; }
     public string? SubmitterId { get; init; }
     public string? SubmissionPeriod { get; init; }

@@ -1,4 +1,4 @@
-namespace EPR.CommonDataService.DataApi.Alignment;
+namespace EPR.Calculator.Api.DataApi.Models;
 
 /// <summary>
 ///     A calculation-blocking error or informational warning raised while detecting registration/POM

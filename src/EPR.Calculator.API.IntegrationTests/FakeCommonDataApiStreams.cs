@@ -1,11 +1,11 @@
 using System.Runtime.CompilerServices;
-using EPR.CommonDataService.DataApi.CommonDataApi;
-using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.ObligationDetermination;
+using EPR.Calculator.Api.DataApi.CommonDataApi;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.ObligationDetermination;
 
 namespace EPR.Calculator.API.IntegrationTests;
 
-public class FakeStreamOrganisationsRequestHandler : IStreamOrganisationsRequestHandler
+internal class FakeStreamOrganisationsRequestHandler : IStreamOrganisationsRequestHandler
 {
     public ImmutableList<PayCalOrganisation> Organisations { get; set; } = [];
 
@@ -21,14 +21,16 @@ public class FakeStreamOrganisationsRequestHandler : IStreamOrganisationsRequest
     }
 }
 
-public class FakeStreamPomsRequestHandler : IStreamPomsRequestHandler
+internal class FakeStreamPomsRequestHandler : IStreamPomsRequestHandler
 {
-    public ImmutableList<PayCalPom> Poms { get; set; } = [];
+    // A factory, invoked fresh on each Handle() call, so POM rows are streamed rather than held in
+    // memory as a list - matching the real handler, which reads rows off a SQL reader one at a time.
+    public Func<IEnumerable<PayCalPom>> Poms { get; set; } = () => [];
 
     public async IAsyncEnumerable<PayCalPom> Handle(int relativeYear,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        foreach (var pom in Poms)
+        foreach (var pom in Poms())
         {
             yield return pom;
 
@@ -43,7 +45,7 @@ public class FakeStreamPomsRequestHandler : IStreamPomsRequestHandler
 ///     registrations a real determiner needs), so the real <see cref="IProducerObligationDeterminer" />
 ///     is bypassed in favour of this pass-through in integration tests.
 /// </summary>
-public class PassthroughProducerObligationDeterminer : IProducerObligationDeterminer
+internal class PassthroughProducerObligationDeterminer : IProducerObligationDeterminer
 {
     public IReadOnlyList<PayCalOrganisation> Determine(IReadOnlyList<PayCalOrganisation> organisations) => organisations;
 }

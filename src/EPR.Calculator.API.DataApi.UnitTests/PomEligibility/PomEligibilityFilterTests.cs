@@ -1,5 +1,5 @@
-using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.PomEligibility;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.PomEligibility;
 
 namespace EPR.Calculator.API.DataApi.UnitTests.PomEligibility;
 
@@ -94,16 +94,6 @@ public class PomEligibilityFilterTests
 
         result.Count.ShouldBe(2);
         result.ShouldAllBe(p => p.SubmitterId == "SUBMITTER-1");
-    }
-
-    [TestMethod]
-    public void Filter_WithMissingOrganisationId_ExcludesPom()
-    {
-        var poms = new[] { Pom() with { OrganisationId = null } };
-
-        var result = filter.Filter(poms, [1]);
-
-        result.ShouldBeEmpty();
     }
 
     [TestMethod]

@@ -1,7 +1,7 @@
 using System.Globalization;
-using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 
-namespace EPR.CommonDataService.DataApi.ObligationDetermination;
+namespace EPR.Calculator.Api.DataApi.ObligationDetermination;
 
 /// <summary>
 ///     Classifies producer registrations as Obligated (O) / Not Obligated (N) / Error (E), ported from
@@ -10,7 +10,7 @@ namespace EPR.CommonDataService.DataApi.ObligationDetermination;
 ///     run at once, since the decision depends on cross-row aggregation (how many registrations share a
 ///     producer in the same submission period).
 /// </summary>
-public interface IProducerObligationDeterminer
+internal interface IProducerObligationDeterminer
 {
     /// <summary>
     ///     Returns the given organisations with ObligationStatus/NumDaysObligated/ErrorCode populated.
@@ -19,7 +19,7 @@ public interface IProducerObligationDeterminer
     IReadOnlyList<PayCalOrganisation> Determine(IReadOnlyList<PayCalOrganisation> organisations);
 }
 
-public sealed class ProducerObligationDeterminer : IProducerObligationDeterminer
+internal sealed class ProducerObligationDeterminer : IProducerObligationDeterminer
 {
     private const string RawObligated = "Obligated";
     private const string RawNotObligated = "Not Obligated";

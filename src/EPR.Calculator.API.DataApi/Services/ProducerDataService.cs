@@ -1,11 +1,15 @@
 using System.Diagnostics;
-using EPR.CommonDataService.DataApi.AcceptedFileSelection;
-using EPR.CommonDataService.DataApi.Alignment;
-using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.ObligationDetermination;
-using EPR.CommonDataService.DataApi.PomEligibility;
+using EPR.Calculator.Api.DataApi.AcceptedFileSelection;
+using EPR.Calculator.Api.DataApi.Alignment;
+using EPR.Calculator.Api.DataApi.CommonDataApi;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.CommonDataApi.LoadTables;
+using EPR.Calculator.Api.DataApi.Models;
+using EPR.Calculator.Api.DataApi.ObligationDetermination;
+using EPR.Calculator.Api.DataApi.PomEligibility;
+using Microsoft.Extensions.Options;
 
-namespace EPR.CommonDataService.DataApi.CommonDataApi;
+namespace EPR.Calculator.Api.DataApi.Services;
 
 /// <summary>
 ///     Produces the full set of data a calculator run needs from organisation/POM data, in a single
@@ -23,18 +27,22 @@ public interface IProducerDataService
         CancellationToken cancellationToken = default);
 }
 
-public sealed class ProducerDataService(
-    IStreamOrganisationsRequestHandler organisationsHandler,
-    IStreamPomsRequestHandler pomsHandler,
+internal sealed class ProducerDataService(
+    IPayCalDataSource dataSource,
     IAcceptedFileSelector acceptedFileSelector,
     IProducerObligationDeterminer obligationDeterminer,
     IPomEligibilityFilter pomEligibilityFilter,
     IOrganisationPeriodFlagsCalculator organisationPeriodFlagsCalculator,
     IProducerErrorDetector errorDetector,
-    IProducerPomAligner aligner
+    IProducerPomAligner aligner,
+    ILoadTableRefresher loadTableRefresher,
+    IOptions<DataApiLoadOptions> loadOptions
 ) : IProducerDataService
 {
     private const string ErrorStatus = "E";
+    private const string HouseholdDrinksContainersType = "HDC";
+    private const string GlassMaterial = "GL";
+    private static readonly HashSet<string> ReportablePackagingTypes = ["HH", "CW", "PB"];
     private static readonly HashSet<string> ValidRagRatings = ["R", "A", "G", "R-M", "A-M", "G-M"];
 
     public async Task<IReadOnlyList<ProducerRecord>> GetProducerData(
@@ -44,6 +52,7 @@ public sealed class ProducerDataService(
         CancellationToken cancellationToken = default)
     {
         using var activity = DataApiTelemetry.StartActivity(typeof(ProducerDataService), nameof(GetProducerData));
+        var allocatedBefore = DataApiTelemetry.CaptureMemoryMetrics ? GC.GetTotalAllocatedBytes() : 0;
 
         // If either stream fails, both should cancel.
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -66,6 +75,14 @@ public sealed class ProducerDataService(
             await linkedCts.CancelAsync();
             throw;
         }
+        finally
+        {
+            if (DataApiTelemetry.CaptureMemoryMetrics)
+            {
+                activity?.SetTag("allocated_bytes", GC.GetTotalAllocatedBytes() - allocatedBefore);
+                activity?.SetTag("heap_bytes", GC.GetTotalMemory(forceFullCollection: false));
+            }
+        }
     }
 
     private async Task<IReadOnlyList<ProducerRecord>> GetProducerDataCore(
@@ -74,6 +91,11 @@ public sealed class ProducerDataService(
         IReadOnlyList<string> materialCodes,
         CancellationToken cancellationToken)
     {
+        // When the load-table stage is on, pull the RPD source once into data_api_load_* first; the
+        // streams below then read those tables (dataSource is LoadTableDataSource). Off: they read RPD.
+        if (loadOptions.Value.Enabled)
+            await loadTableRefresher.RefreshAsync(relativeYear, cancellationToken);
+
         var orgsTask = StreamOrganisations(relativeYear, cutOffDate, cancellationToken);
         var pomsTask = StreamPoms(relativeYear, cutOffDate, cancellationToken);
 
@@ -91,24 +113,24 @@ public sealed class ProducerDataService(
         // only. The org stream only ever carries Granted/Accepted/Cancelled, so "not Cancelled" is
         // equivalent and also tolerates fixtures that leave RegulatorStatus unset.
         var registeredOrganisationIds = rawOrganisations
-            .Where(o => o.OrganisationId is not null && o.RegulatorStatus is not "Cancelled")
-            .Select(o => o.OrganisationId!.Value)
+            .Where(o => o.RegulatorStatus is not "Cancelled")
+            .Select(o => o.OrganisationId)
             .ToHashSet();
         var eligiblePoms = pomEligibilityFilter.Filter(rawPoms, registeredOrganisationIds);
         var organisationsWithPeriodFlags = organisationPeriodFlagsCalculator.ApplyPeriodFlags(rawOrganisations, rawPoms);
 
-        var organisations = organisationsWithPeriodFlags.Select(MapOrganisation).ToImmutableList();
+        var organisations = organisationsWithPeriodFlags.Select(ValidateOrganisation).ToImmutableList();
         // sp_GetPaycalPomData applied the reportable-packaging filter upstream of every consumer,
         // error detection included - not just alignment.
         var poms = eligiblePoms
-            .Where(p => ReportablePackaging.Includes(p.PackagingType, p.PackagingMaterial))
-            .Select(MapPom)
+            .Where(p => IsReportablePackaging(p))
+            .Select(NormalisePom)
             .ToImmutableList();
 
         var detection = errorDetector.Detect(organisations, poms);
 
         var matchedPoms = poms
-            .Where(p => !detection.UnmatchedKeys.Contains((p.OrganisationId.GetValueOrDefault(), p.SubsidiaryId)))
+            .Where(p => !detection.UnmatchedKeys.Contains((p.OrganisationId, p.SubsidiaryId)))
             .ToImmutableList();
 
         var dedupedOrganisations = aligner.DedupeOrganisations(organisations);
@@ -123,11 +145,11 @@ public sealed class ProducerDataService(
     ///     obligated organisations (from <paramref name="aligned" />, keyed by (OrganisationId,
     ///     SubsidiaryId) since detection doesn't distinguish submitters), "E"-status organisations
     ///     (which the aligner never looks at, since it only iterates obligated ones), and "orphan"
-    ///     errors - almost always <see cref="ProducerErrorCodes.MissingRegistrationData" />, which is
+    ///     errors - almost always "Missing Registration Data", which is
     ///     POM-driven and can reference an org/subsidiary combo with no exact registration match.
     /// </summary>
     private static IReadOnlyList<ProducerRecord> MergeProducerRecords(
-        IReadOnlyList<AlignmentOrganisation> dedupedOrganisations,
+        IReadOnlyList<PayCalOrganisation> dedupedOrganisations,
         IReadOnlyList<ProducerRecord> aligned,
         IReadOnlyList<OrganisationCalculationError> errors)
     {
@@ -184,7 +206,7 @@ public sealed class ProducerDataService(
     }
 
     private static ProducerRecord ToProducerRecord(
-        AlignmentOrganisation organisation,
+        PayCalOrganisation organisation,
         IReadOnlyList<ProducerCalculationError> errors,
         IReadOnlyList<ProducerCalculationError> warnings) => new()
     {
@@ -192,7 +214,7 @@ public sealed class ProducerDataService(
         SubsidiaryId = organisation.SubsidiaryId,
         ProducerName = organisation.OrganisationName,
         TradingName = organisation.TradingName,
-        DaysObligated = organisation.DaysObligated,
+        DaysObligated = organisation.NumDaysObligated,
         JoinerDate = organisation.JoinerDate,
         LeaverDate = organisation.LeaverDate,
         StatusCode = organisation.StatusCode,
@@ -217,10 +239,13 @@ public sealed class ProducerDataService(
 
     private async Task<List<PayCalOrganisation>> StreamOrganisations(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
     {
-        var rawOrganisations = new List<PayCalOrganisation>();
-
-        await foreach (var organisation in organisationsHandler.Handle(relativeYear, cancellationToken).WithCancellation(cancellationToken))
-            rawOrganisations.Add(organisation);
+        var rawOrganisations = await DataApiTelemetry.TraceAsync(typeof(ProducerDataService), "BufferOrganisationStream", async () =>
+        {
+            var buffer = new List<PayCalOrganisation>();
+            await foreach (var organisation in dataSource.StreamOrganisations(relativeYear, cancellationToken).WithCancellation(cancellationToken))
+                buffer.Add(organisation);
+            return buffer;
+        });
 
         // Every candidate accepted file is streamed unfiltered - pick the winning file per
         // org/submitter/period (honouring the cut-off date) before obligation determination, which
@@ -232,49 +257,65 @@ public sealed class ProducerDataService(
 
     private async Task<List<PayCalPom>> StreamPoms(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
     {
-        var poms = new List<PayCalPom>();
+        // The raw POM stream is one row per line item and mostly superseded resubmission files; buffering
+        // all of it costs ~1 GB+ at production volume. Instead take two passes: the first keeps only the
+        // per-file metadata and picks the winning file per org/submitter/period; the second re-streams and
+        // buffers only the winners' line items.
+        var winningFileNames = await DataApiTelemetry.TraceAsync(typeof(ProducerDataService), "SelectPomFiles", async () =>
+        {
+            var candidates = new Dictionary<(int?, string?, string?, string?), PomFileCandidate>();
+            await foreach (var pom in dataSource.StreamPoms(relativeYear, cancellationToken).WithCancellation(cancellationToken))
+                candidates.TryAdd(
+                    (pom.OrganisationId, pom.SubmitterId, pom.SubmissionPeriod, pom.FileName),
+                    new PomFileCandidate(pom.OrganisationId, pom.SubmitterId, pom.SubmissionPeriod, pom.FileName, pom.IsResubmission, pom.CreatedDateTime));
 
-        await foreach (var pom in pomsHandler.Handle(relativeYear, cancellationToken).WithCancellation(cancellationToken))
-            poms.Add(pom);
+            return acceptedFileSelector.SelectWinningPomFileNames(candidates.Values, cutOffDate);
+        });
 
-        return acceptedFileSelector.SelectLatestPomFiles(poms, cutOffDate).ToList();
+        return await DataApiTelemetry.TraceAsync(typeof(ProducerDataService), "BufferPomStream", async () =>
+        {
+            var buffer = new List<PayCalPom>();
+            await foreach (var pom in dataSource.StreamPoms(relativeYear, cancellationToken).WithCancellation(cancellationToken))
+                if (winningFileNames.TryGetValue((pom.OrganisationId, pom.SubmitterId, pom.SubmissionPeriod), out var winner) &&
+                    pom.FileName == winner)
+                    buffer.Add(pom);
+            return buffer;
+        });
     }
 
-    private static AlignmentOrganisation MapOrganisation(PayCalOrganisation r) => new()
+    // Downstream stages rely on these being present and well-formed, so reject a bad row up front
+    // rather than letting them null-check every field.
+    private static PayCalOrganisation ValidateOrganisation(PayCalOrganisation r)
     {
-        OrganisationId = r.OrganisationId ?? throw new FormatException(
-            $"Invalid {nameof(PayCalOrganisation)}.{nameof(PayCalOrganisation.OrganisationId)}: {r.OrganisationId}"),
-        SubsidiaryId = r.SubsidiaryId,
-        OrganisationName = r.OrganisationName ?? throw new FormatException(
-            $"Invalid {nameof(PayCalOrganisation)}.{nameof(PayCalOrganisation.OrganisationName)}: {r.OrganisationName}"),
-        TradingName = r.TradingName,
-        StatusCode = r.StatusCode,
-        ErrorCode = r.ErrorCode,
-        JoinerDate = r.JoinerDate,
-        LeaverDate = r.LeaverDate,
-        ObligationStatus = r.ObligationStatus ?? throw new FormatException(
-            $"Invalid {nameof(PayCalOrganisation)}.{nameof(PayCalOrganisation.ObligationStatus)}: {r.ObligationStatus}"),
-        DaysObligated = r.NumDaysObligated,
-        SubmitterId = Guid.TryParse(r.SubmitterId, out var guid)
-            ? guid
-            : throw new FormatException($"Invalid {nameof(PayCalOrganisation)}.{nameof(PayCalOrganisation.SubmitterId)}: {r.SubmitterId}"),
-        HasH1 = r.HasH1,
-        HasH2 = r.HasH2
-    };
+        if (r.ObligationStatus is null)
+            throw Invalid(nameof(PayCalOrganisation), nameof(r.ObligationStatus), r.ObligationStatus);
+        if (!Guid.TryParse(r.SubmitterId, out _))
+            throw Invalid(nameof(PayCalOrganisation), nameof(r.SubmitterId), r.SubmitterId);
 
-    private static AlignmentPom MapPom(PayCalPom r) => new()
+        return r;
+    }
+
+    /// <summary>
+    ///     The reportable-packaging rule from <c>sp_GetPaycalPomData</c>'s final WHERE clause: household,
+    ///     consumer waste and public bin count regardless of material; household drinks containers count
+    ///     only for glass. Applied upstream of both error detection and alignment, matching where the
+    ///     stored procedure applied it.
+    /// </summary>
+    private static bool IsReportablePackaging(PayCalPom pom) =>
+        pom.PackagingType is not null &&
+        (ReportablePackagingTypes.Contains(pom.PackagingType) ||
+         (pom.PackagingType == HouseholdDrinksContainersType && pom.PackagingMaterial == GlassMaterial));
+
+    private static PayCalPom NormalisePom(PayCalPom r)
     {
-        SubmissionPeriod = r.SubmissionPeriod,
-        OrganisationId = r.OrganisationId,
-        SubsidiaryId = r.SubsidiaryId,
-        PackagingType = r.PackagingType,
-        PackagingMaterial = r.PackagingMaterial,
-        PackagingMaterialWeight = r.PackagingMaterialWeight,
-        RamRagRating = SafeParseRamRagRating(r),
-        SubmitterId = Guid.TryParse(r.SubmitterId, out var guid)
-            ? guid
-            : throw new FormatException($"Invalid {nameof(PayCalPom)}.{nameof(PayCalPom.SubmitterId)}: {r.SubmitterId}")
-    };
+        if (!Guid.TryParse(r.SubmitterId, out _))
+            throw Invalid(nameof(PayCalPom), nameof(r.SubmitterId), r.SubmitterId);
+
+        return r with { RamRagRating = SafeParseRamRagRating(r) };
+    }
+
+    private static FormatException Invalid(string entity, string property, object? value) =>
+        new($"Invalid {entity}.{property}: {value}");
 
     private static string? SafeParseRamRagRating(PayCalPom pom)
     {

@@ -1,13 +1,16 @@
-namespace EPR.CommonDataService.DataApi.Alignment;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.Models;
 
-public interface IProducerPomAligner
+namespace EPR.Calculator.Api.DataApi.Alignment;
+
+internal interface IProducerPomAligner
 {
     /// <summary>
     ///     Dedupes multiple registrations per organisation/subsidiary/submitter down to one row each,
-    ///     preferring the row with <see cref="AlignmentOrganisation.HasH2" /> set. Applies no other
+    ///     preferring the row with <see cref="PayCalOrganisation.HasH2" /> set. Applies no other
     ///     filtering - the result includes every organisation regardless of obligation status.
     /// </summary>
-    IReadOnlyList<AlignmentOrganisation> DedupeOrganisations(IReadOnlyCollection<AlignmentOrganisation> organisations);
+    IReadOnlyList<PayCalOrganisation> DedupeOrganisations(IReadOnlyCollection<PayCalOrganisation> organisations);
 
     /// <summary>
     ///     Aligns organisation and POM data into producer records: filters to obligated organisations,
@@ -23,16 +26,16 @@ public interface IProducerPomAligner
     ///     The known material codes, in the order reported materials should be produced.
     /// </param>
     IEnumerable<ProducerRecord> Align(
-        IReadOnlyCollection<AlignmentOrganisation> organisations,
-        IReadOnlyCollection<AlignmentPom> poms,
+        IReadOnlyCollection<PayCalOrganisation> organisations,
+        IReadOnlyCollection<PayCalPom> poms,
         IReadOnlyList<string> materialCodes);
 }
 
-public sealed class ProducerPomAligner : IProducerPomAligner
+internal sealed class ProducerPomAligner : IProducerPomAligner
 {
     private const string ObligatedStatus = "O";
 
-    public IReadOnlyList<AlignmentOrganisation> DedupeOrganisations(IReadOnlyCollection<AlignmentOrganisation> organisations) =>
+    public IReadOnlyList<PayCalOrganisation> DedupeOrganisations(IReadOnlyCollection<PayCalOrganisation> organisations) =>
         organisations
             .GroupBy(o => (o.OrganisationId, o.SubsidiaryId, o.SubmitterId))
             // PERF: MaxBy is O(n) and avoids the OrderByDescending(...).First() O(n log n) sort + allocation per group.
@@ -40,26 +43,26 @@ public sealed class ProducerPomAligner : IProducerPomAligner
             .ToImmutableList();
 
     public IEnumerable<ProducerRecord> Align(
-        IReadOnlyCollection<AlignmentOrganisation> organisations,
-        IReadOnlyCollection<AlignmentPom> poms,
+        IReadOnlyCollection<PayCalOrganisation> organisations,
+        IReadOnlyCollection<PayCalPom> poms,
         IReadOnlyList<string> materialCodes) =>
         DataApiTelemetry.Trace(typeof(ProducerPomAligner), nameof(Align),
             () => AlignCore(organisations, poms, materialCodes).ToList());
 
     private static IEnumerable<ProducerRecord> AlignCore(
-        IReadOnlyCollection<AlignmentOrganisation> organisations,
-        IReadOnlyCollection<AlignmentPom> poms,
+        IReadOnlyCollection<PayCalOrganisation> organisations,
+        IReadOnlyCollection<PayCalPom> poms,
         IReadOnlyList<string> materialCodes)
     {
         var obligatedOrganisations = organisations
             .Where(o => o.ObligationStatus == ObligatedStatus && !string.IsNullOrWhiteSpace(o.OrganisationName));
 
         // PERF: pre-build an O(1) lookup of POMs keyed by (OrganisationId, SubsidiaryId, SubmitterId).
-        // We also pre-apply the PackagingType / OrganisationId.HasValue filters here so each per-organisation
+        // We also pre-apply the PackagingType filter here so each per-organisation
         // slice is ready to group by material code directly.
         var pomsByOrgSubSubmitter = poms
-            .Where(p => p is { PackagingType: not null, OrganisationId: not null } && IsReportablePackaging(p))
-            .ToLookup(p => (OrganisationId: p.OrganisationId!.Value, p.SubsidiaryId, p.SubmitterId));
+            .Where(p => p.PackagingType is not null)
+            .ToLookup(p => (OrganisationId: p.OrganisationId, p.SubsidiaryId, p.SubmitterId));
 
         foreach (var organisation in obligatedOrganisations)
         {
@@ -84,7 +87,7 @@ public sealed class ProducerPomAligner : IProducerPomAligner
                 SubsidiaryId = organisation.SubsidiaryId,
                 TradingName = organisation.TradingName,
                 ProducerName = organisation.OrganisationName,
-                DaysObligated = organisation.DaysObligated,
+                DaysObligated = organisation.NumDaysObligated,
                 JoinerDate = organisation.JoinerDate,
                 LeaverDate = organisation.LeaverDate,
                 StatusCode = organisation.StatusCode,
@@ -96,12 +99,9 @@ public sealed class ProducerPomAligner : IProducerPomAligner
         }
     }
 
-    private static bool IsReportablePackaging(AlignmentPom pom) =>
-        ReportablePackaging.Includes(pom.PackagingType, pom.PackagingMaterial);
-
-    private static IEnumerable<AlignedReportedMaterial> GetReportedMaterials(
+    private static IEnumerable<ProducerMaterial> GetReportedMaterials(
         IReadOnlyList<string> materialCodes,
-        ImmutableDictionary<string, ImmutableList<AlignmentPom>> pomsByMaterial)
+        ImmutableDictionary<string, ImmutableList<PayCalPom>> pomsByMaterial)
     {
         foreach (var materialCode in materialCodes)
         {
@@ -136,7 +136,7 @@ public sealed class ProducerPomAligner : IProducerPomAligner
                     }
                 }
 
-                yield return new AlignedReportedMaterial
+                yield return new ProducerMaterial
                 {
                     MaterialCode = materialCode,
                     PackagingType = poms.Key.PackagingType!,

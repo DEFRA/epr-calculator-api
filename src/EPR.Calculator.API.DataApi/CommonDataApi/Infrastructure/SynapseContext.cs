@@ -1,11 +1,11 @@
-using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
 
-namespace EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
+namespace EPR.Calculator.Api.DataApi.CommonDataApi.Infrastructure;
 
 [ExcludeFromCodeCoverage]
-public class SynapseContext : DbContext
+internal class SynapseContext : DbContext
 {
     public DbSet<PayCalOrganisation> PayCalOrganisations { get; set; } = null!;
     public DbSet<PayCalPom> PayCalPoms { get; set; } = null!;
