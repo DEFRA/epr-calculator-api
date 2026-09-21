@@ -3,9 +3,10 @@ using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Services.DataLoading;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.CommonDataService.DataApi.Alignment;
-using EPR.CommonDataService.DataApi.CommonDataApi;
+using EPR.Calculator.Api.DataApi.Alignment;
+using EPR.Calculator.Api.DataApi.Services;
 using Microsoft.Extensions.Logging;
+using EPR.Calculator.Api.DataApi.Models;
 using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Services.DataLoading;

@@ -26,6 +26,11 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
     private const int BothHalvesSubmittedPercent           = 90; // organisations that submit both H1 and H2; the rest only report H1
     private const int ObligatedPercent                     = 90; // organisations with obligation status "O"; the rest stay in the Organisations output but are excluded from Producers
 
+    // DataApi filter knobs - the share of generated data that survives each significant filter.
+    // Lowering these makes the generator emit more rows that get thrown away, exercising the filter.
+    private const int FileVersionsPerSubmission  = 14;  // times each submission is re-uploaded; AcceptedFileSelector keeps only the latest file, so ~1/14 survive. With the other knobs this makes the raw POM stream ~2M rows, matching 2025 prod
+    private const int ReportablePackagingPercent = 28; // POM rows with a reportable packaging_type; the rest are dropped by ReportablePackaging
+
     // Base organisation count, back-calculated from NumberOfProducers through the subsidiary expansion.
     private static readonly int NumberOfOrganisations = OrganisationsForProducers(NumberOfProducers);
 
@@ -59,7 +64,7 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
         fakeOrganisationsStream.Organisations = Organisations(organisationPath);
 
         var fakePomsStream = Provider.GetRequiredService<FakeStreamPomsRequestHandler>();
-        fakePomsStream.Poms = Poms(pomPath);
+        fakePomsStream.Poms = () => StreamPoms(pomPath);
 
         var fakeBlobStorage = Provider.GetRequiredService<FakeBlobStorageUploadService>();
 
@@ -173,7 +178,7 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
                 throw new Exception($"Controller returned: {JsonSerializer.Serialize(setBillingClassificationResult.ShouldBeOfType<ObjectResult>().Value)}");
             }
 
-            await SeedAllProducersAsAcceptedAsync(db, runId, "some-user", fakeOrganisationsStream.Organisations.Select(x => x.OrganisationId!.Value));
+            await SeedAllProducersAsAcceptedAsync(db, runId, "some-user", fakeOrganisationsStream.Organisations.Select(x => x.OrganisationId));
             var startBillingResult = (await CallController<ProducerBillingFileController, IActionResult>(services, c => c.ProducerBillingInstructions(runId))).ShouldBeOfType<ObjectResult>();
             startBillingResult.StatusCode.ShouldBe(StatusCodes.Status200OK, $"Controller returned: {JsonSerializer.Serialize(startBillingResult.Value)}");
             await WaitForBillingRunAsync(db, runId);
@@ -377,7 +382,7 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
 
         var path = Path.Combine(AppContext.BaseDirectory, "TestData", $"performance-{relativeYear}-organisation-data.csv");
         using var output = new StreamWriter(path);
-        output.WriteLine("organisation_id,subsidiary_id,organisation_name,trading_name,obligation_status,submitter_id,error_code,num_days_obligated,status_code,joiner_date,leaver_date,has_h1,has_h2");
+        output.WriteLine("organisation_id,subsidiary_id,organisation_name,trading_name,obligation_status,submitter_id,error_code,num_days_obligated,status_code,joiner_date,leaver_date,has_h1,has_h2,file_name,created_date_time");
 
         for (var i = 0; i < NumberOfOrganisations; i++)
         {
@@ -394,23 +399,31 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
 
             var (obligationStatus, scenarioSubmitterId, errorCode, numDaysObligated, statusCode, joinerDate) = GetOrganisationValues(scenario, submitterId, obligated);
 
-            foreach (var subsidiaryId in subsidiaryIds)
+            // Each registration is re-uploaded FileVersionsPerSubmission times under a new file name;
+            // AcceptedFileSelector keeps only the latest file per (organisation, submitter).
+            for (var version = 1; version <= FileVersionsPerSubmission; version++)
             {
-                var organisationName = subsidiaryId is null
-                    ? $"Performance Test {organisationId}"
-                    : $"Performance Test {organisationId} Subsidiary {subsidiaryId}";
+                var fileName        = $"{organisationId}-reg-v{version}";
+                var createdDateTime = new DateTime(2025, 1, 1).AddDays(version).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-                output.WriteLine(
-                    $"{organisationId}," +
-                    $"{subsidiaryId?.ToString() ?? "NULL"}," +
-                    $"{organisationName},," +
-                    $"{obligationStatus}," +
-                    $"{scenarioSubmitterId}," +
-                    $"{errorCode ?? "NULL"}," +
-                    $"{numDaysObligated?.ToString() ?? "NULL"}," +
-                    $"{statusCode ?? "NULL"}," +
-                    $"{joinerDate ?? "NULL"}," +
-                    $"NULL,1,1");
+                foreach (var subsidiaryId in subsidiaryIds)
+                {
+                    var organisationName = subsidiaryId is null
+                        ? $"Performance Test {organisationId}"
+                        : $"Performance Test {organisationId} Subsidiary {subsidiaryId}";
+
+                    output.WriteLine(
+                        $"{organisationId}," +
+                        $"{subsidiaryId?.ToString() ?? "NULL"}," +
+                        $"{organisationName},," +
+                        $"{obligationStatus}," +
+                        $"{scenarioSubmitterId}," +
+                        $"{errorCode ?? "NULL"}," +
+                        $"{numDaysObligated?.ToString() ?? "NULL"}," +
+                        $"{statusCode ?? "NULL"}," +
+                        $"{joinerDate ?? "NULL"}," +
+                        $"NULL,1,1,{fileName},{createdDateTime}");
+                }
             }
         }
 
@@ -421,7 +434,7 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
     {
         var path = Path.Combine(AppContext.BaseDirectory, "TestData", $"performance-{relativeYear}-pom-data.csv");
         using var output = new StreamWriter(path);
-        output.WriteLine("organisation_id,subsidiary_id,submission_period,packaging_activity,packaging_type,packaging_class,packaging_material,packaging_material_weight,submission_period_desc,submitter_id,packaging_material_subtype,ram_rag_rating");
+        output.WriteLine("organisation_id,subsidiary_id,submission_period,packaging_activity,packaging_type,packaging_class,packaging_material,packaging_material_weight,submission_period_desc,submitter_id,packaging_material_subtype,ram_rag_rating,file_name,created_date_time");
 
         var materials = new[]
         {
@@ -463,21 +476,18 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
                     .Select(x => (int?)GetSubsidiaryId(i, x))
                     .ToArray();
 
-            foreach (var subsidiaryId in subsidiaryIds)
-            {
-                AddPomsForPeriod(output, organisationId, subsidiaryId, "2025-H1", "January to June 2025" , submitterId, selectedMaterials, random, projectedRamH1);
+            AddPomsForPeriod(output, organisationId, subsidiaryIds, "2025-H1", "January to June 2025" , submitterId, selectedMaterials, random, projectedRamH1);
 
-                if (bothHalves)
-                    AddPomsForPeriod(output, organisationId, subsidiaryId, "2025-H2", "July to December 2025", submitterId, selectedMaterials, random, projectedRamH2);
-            }
+            if (bothHalves)
+                AddPomsForPeriod(output, organisationId, subsidiaryIds, "2025-H2", "July to December 2025", submitterId, selectedMaterials, random, projectedRamH2);
         }
 
         return path;
     }
 
-    private static void AddPomsForPeriod(TextWriter output, int organisationId, int? subsidiaryId, string period, string description, Guid submitterId, string[] materials, Random random, bool projectedRam)
+    private static void AddPomsForPeriod(TextWriter output, int organisationId, int?[] subsidiaryIds, string period, string description, Guid submitterId, string[] materials, Random random, bool projectedRam)
     {
-        void AddPom(TextWriter output, string material, string packagingType, bool projectedRam)
+        void AddPom(int? subsidiaryId, string fileName, string createdDateTime, string material, string packagingType)
         {
             var weight       = random.Next(10_000, 500_001);
             var ramRagRating = projectedRam ? null : "R";
@@ -495,17 +505,36 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
                     description,
                     submitterId,
                     "NULL",
-                    ramRagRating ?? "NULL"));
+                    ramRagRating ?? "NULL",
+                    fileName,
+                    createdDateTime));
         }
 
-        foreach (var material in materials)
-        {
-            AddPom(output, material, "HH", projectedRam);
+        // For every reportable row, add (100 - ReportablePackagingPercent) / ReportablePackagingPercent
+        // non-reportable rows, so reportable rows end up ~ReportablePackagingPercent of the total.
+        var nonReportablePerReportable = (int)Math.Round((100.0 - ReportablePackagingPercent) / ReportablePackagingPercent);
+        var organisationPercent       = (double)(organisationId - 1_000_000) / NumberOfOrganisations * 100;
+        var includeCw                 = organisationPercent < OrganisationsWithCwPercent;
 
-            var organisationPercent = (double)(organisationId - 1_000_000) / NumberOfOrganisations * 100;
-            if (organisationPercent < OrganisationsWithCwPercent)
+        // Each submission is re-uploaded FileVersionsPerSubmission times under a new file name;
+        // AcceptedFileSelector keeps only the latest file per (organisation, submitter, period).
+        for (var version = 1; version <= FileVersionsPerSubmission; version++)
+        {
+            var fileName        = $"{organisationId}-{period}-v{version}";
+            var createdDateTime = new DateTime(2025, 1, 1).AddDays(version).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+            foreach (var subsidiaryId in subsidiaryIds)
             {
-                AddPom(output, material, "CW", projectedRam);
+                foreach (var material in materials)
+                {
+                    AddPom(subsidiaryId, fileName, createdDateTime, material, "HH");
+
+                    if (includeCw)
+                        AddPom(subsidiaryId, fileName, createdDateTime, material, "CW");
+
+                    for (var n = 0; n < nonReportablePerReportable; n++)
+                        AddPom(subsidiaryId, fileName, createdDateTime, material, "NH");
+                }
             }
         }
     }

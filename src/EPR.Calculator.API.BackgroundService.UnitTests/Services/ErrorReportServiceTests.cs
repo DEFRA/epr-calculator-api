@@ -3,7 +3,7 @@ using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Fixtures;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataTypes;
-using EPR.CommonDataService.DataApi.Alignment;
+using EPR.Calculator.Api.DataApi.Models;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
 {
@@ -151,19 +151,26 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
             Assert.AreEqual("test user", report.CreatedBy);
         }
 
-        private static OrganisationCalculationError CreateError(int orgId, string? subId, string errorCode, string leaverCode, bool isWarning, bool hasPomMatch) =>
-            new()
+        private static ProducerRecord CreateError(int orgId, string? subId, string errorCode, string leaverCode, bool isWarning, bool hasPomMatch)
+        {
+            var error = new ProducerCalculationError
+            {
+                ErrorCode = errorCode,
+                LeaverCode = leaverCode,
+                IsWarning = isWarning,
+                HasPomMatch = hasPomMatch
+            };
+
+            return new ProducerRecord
             {
                 OrganisationId = orgId,
                 SubsidiaryId = subId,
-                Error = new ProducerCalculationError
-                {
-                    ErrorCode = errorCode,
-                    LeaverCode = leaverCode,
-                    IsWarning = isWarning,
-                    HasPomMatch = hasPomMatch
-                }
+                ProducerName = "ignored",
+                Errors = isWarning ? [] : [error],
+                Warnings = isWarning ? [error] : [],
+                ReportedMaterials = []
             };
+        }
 
         private static InvoicedProducer CreateInvoicedProducer(int producerId) => new()
         {

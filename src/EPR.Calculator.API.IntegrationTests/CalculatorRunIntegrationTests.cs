@@ -11,7 +11,7 @@ using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Data.Utils;
-using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -44,7 +44,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         fakeOrganisationsStream.Organisations = Organisations($"TestData/{relativeYear}-organisation-data.csv");
 
         var fakePomsStream = Provider.GetRequiredService<FakeStreamPomsRequestHandler>();
-        fakePomsStream.Poms = Poms($"TestData/{relativeYear}-pom-data.csv");
+        fakePomsStream.Poms = () => StreamPoms($"TestData/{relativeYear}-pom-data.csv");
 
         var fakeBlobStorageUploadService = Provider.GetRequiredService<FakeBlobStorageUploadService>();
 

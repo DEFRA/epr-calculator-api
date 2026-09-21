@@ -1,5 +1,5 @@
-using EPR.CommonDataService.DataApi.AcceptedFileSelection;
-using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.AcceptedFileSelection;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 
 namespace EPR.Calculator.API.DataApi.UnitTests.AcceptedFileSelection;
 
@@ -74,6 +74,7 @@ public class AcceptedFileSelectorTests
             new PayCalOrganisation
             {
                 OrganisationId = 1,
+                OrganisationName = "Org Co",
                 SubmitterId = "SUBMITTER-1",
                 SubmissionPeriodYear = 2025,
                 FileName = "Resub",
@@ -124,10 +125,10 @@ public class AcceptedFileSelectorTests
     {
         var organisations = new[]
         {
-            new PayCalOrganisation { OrganisationId = 1, SubmitterId = "A", SubmissionPeriodYear = 2025, FileName = "F1", CreatedDateTime = T0 },
-            new PayCalOrganisation { OrganisationId = 2, SubmitterId = "A", SubmissionPeriodYear = 2025, FileName = "F2", CreatedDateTime = T0 },
-            new PayCalOrganisation { OrganisationId = 1, SubmitterId = "B", SubmissionPeriodYear = 2025, FileName = "F3", CreatedDateTime = T0 },
-            new PayCalOrganisation { OrganisationId = 1, SubmitterId = "A", SubmissionPeriodYear = 2026, FileName = "F4", CreatedDateTime = T0 }
+            new PayCalOrganisation { OrganisationName = "Org Co", OrganisationId = 1, SubmitterId = "A", SubmissionPeriodYear = 2025, FileName = "F1", CreatedDateTime = T0 },
+            new PayCalOrganisation { OrganisationName = "Org Co", OrganisationId = 2, SubmitterId = "A", SubmissionPeriodYear = 2025, FileName = "F2", CreatedDateTime = T0 },
+            new PayCalOrganisation { OrganisationName = "Org Co", OrganisationId = 1, SubmitterId = "B", SubmissionPeriodYear = 2025, FileName = "F3", CreatedDateTime = T0 },
+            new PayCalOrganisation { OrganisationName = "Org Co", OrganisationId = 1, SubmitterId = "A", SubmissionPeriodYear = 2026, FileName = "F4", CreatedDateTime = T0 }
         };
 
         var result = selector.SelectLatestOrganisationFiles(organisations, cutOffDate: null);
@@ -191,5 +192,38 @@ public class AcceptedFileSelectorTests
         var result = selector.SelectLatestPomFiles(poms, cutOffDate: null);
 
         result.Count.ShouldBe(3);
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(PomScenarios))]
+    public void SelectWinningPomFileNames_PicksSameWinnerAsSelectLatestPomFiles(
+        string caseId,
+        (string Marker, DateTime Created, bool IsResubmission)[] files,
+        string expectedWinner)
+    {
+        var candidates = files.Select(f => new PomFileCandidate(
+            OrganisationId: 1,
+            SubmitterId: "SUBMITTER-1",
+            SubmissionPeriod: "2025-H1",
+            FileName: f.Marker,
+            IsResubmission: f.IsResubmission,
+            CreatedDateTime: f.Created));
+
+        var winners = selector.SelectWinningPomFileNames(candidates, CutOffDate);
+
+        winners[(1, "SUBMITTER-1", "2025-H1")].ShouldBe(expectedWinner, caseId);
+    }
+
+    [TestMethod]
+    public void SelectWinningPomFileNames_ExcludesGroupWithNoEligibleCandidate()
+    {
+        var candidates = new[]
+        {
+            new PomFileCandidate(1, "SUBMITTER-1", "2025-H1", "Resub", IsResubmission: true, CreatedDateTime: After)
+        };
+
+        var winners = selector.SelectWinningPomFileNames(candidates, CutOffDate);
+
+        winners.ShouldBeEmpty();
     }
 }

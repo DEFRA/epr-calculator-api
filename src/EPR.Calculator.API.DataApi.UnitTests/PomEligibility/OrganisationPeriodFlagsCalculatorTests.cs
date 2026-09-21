@@ -1,5 +1,5 @@
-using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.PomEligibility;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.PomEligibility;
 
 namespace EPR.Calculator.API.DataApi.UnitTests.PomEligibility;
 

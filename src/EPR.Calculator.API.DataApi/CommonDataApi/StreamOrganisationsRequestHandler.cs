@@ -1,17 +1,17 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
-namespace EPR.CommonDataService.DataApi.CommonDataApi;
+namespace EPR.Calculator.Api.DataApi.CommonDataApi;
 
-public interface IStreamOrganisationsRequestHandler
+internal interface IStreamOrganisationsRequestHandler
 {
     IAsyncEnumerable<PayCalOrganisation> Handle(int relativeYear, CancellationToken cancellationToken = default);
 }
 
-public sealed class StreamOrganisationsRequestHandler(IDbContextFactory<SynapseContext> dbContextFactory)
+internal sealed class StreamOrganisationsRequestHandler(IDbContextFactory<SynapseContext> dbContextFactory)
     : IStreamOrganisationsRequestHandler
 {
     public async IAsyncEnumerable<PayCalOrganisation> Handle(int relativeYear,
@@ -22,7 +22,7 @@ public sealed class StreamOrganisationsRequestHandler(IDbContextFactory<SynapseC
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         // Previously sourced from the stored procedure dbo.sp_GetPaycalOrgData. This is selection only:
-        // every accepted-status registration file is returned (no dedup, no cut-off filtering) - which
+        // every accepted-status registration file is returned (no dedupe, no cut-off filtering) - which
         // file "wins" per org/submitter/year, honouring the cut-off date, is decided in C# (see
         // IAcceptedFileSelector). The obligation decision (leaver code, status, days obligated) is made
         // in C# from the raw columns below (see IProducerObligationDeterminer), and has_h1/has_h2 are

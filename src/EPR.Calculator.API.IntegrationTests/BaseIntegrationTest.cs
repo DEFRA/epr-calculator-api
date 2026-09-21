@@ -11,9 +11,9 @@ using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Data.Utils;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Services;
-using EPR.CommonDataService.DataApi.CommonDataApi;
-using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.ObligationDetermination;
+using EPR.Calculator.Api.DataApi.CommonDataApi;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.ObligationDetermination;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -130,7 +130,7 @@ public abstract class BaseIntegrationTest
                 x.AddSerilog(Log.Logger, dispose: true);
             })
             .AddPayCalDatabase()
-            .AddPayCalDataApi()
+            .AddPayCalDataApi(configuration)
             .AddPayCalBlobStorage()
             .AddPayCalServices()
             .AddPayCalBackgroundServices()
@@ -340,44 +340,71 @@ public abstract class BaseIntegrationTest
                 LapcapDataMaster   = master // TODO make virtual?
             }).ToImmutableList();
 
-    protected static ImmutableList<PayCalOrganisation> Organisations(string organisationsPath) =>
-        SlurpCsv(organisationsPath)
-            .GetRecords<dynamic>()
-            .Select(row => new PayCalOrganisation
-            {
-                OrganisationId   = int.Parse(row.organisation_id),
-                SubsidiaryId     = Nullable(row.subsidiary_id),
-                OrganisationName = row.organisation_name,
-                TradingName      = row.trading_name,
-                ObligationStatus = row.obligation_status,
-                SubmitterId      = row.submitter_id,
-                ErrorCode        = Nullable(row.error_code),
-                StatusCode       = Nullable(row.status_code),
-                NumDaysObligated = Nullable((string)row.num_days_obligated, short.Parse),
-                JoinerDate       = Nullable(row.joiner_date),
-                LeaverDate       = Nullable(row.leaver_date),
-                HasH1            = row.has_h1 == "1",
-                HasH2            = row.has_h2 == "1"
-            }).ToImmutableList();
+    private protected static ImmutableList<PayCalOrganisation> Organisations(string organisationsPath)
+    {
+        using var csv = SlurpCsv(organisationsPath);
+        csv.Read();
+        csv.ReadHeader();
 
-    protected static ImmutableList<PayCalPom> Poms(string pomsPath) =>
-        SlurpCsv(pomsPath)
-            .GetRecords<dynamic>()
-            .Select(row => new PayCalPom
+        var organisations = ImmutableList.CreateBuilder<PayCalOrganisation>();
+        while (csv.Read())
+        {
+            organisations.Add(new PayCalOrganisation
             {
-                OrganisationId              = int.Parse(row.organisation_id),
-                SubsidiaryId                = Nullable(row.subsidiary_id),
-                SubmissionPeriod            = row.submission_period,
-                PackagingActivity           = row.packaging_activity,
-                PackagingType               = row.packaging_type,
-                PackagingClass              = row.packaging_class,
-                PackagingMaterial           = row.packaging_material,
-                PackagingMaterialWeight     = Nullable((string)row.packaging_material_weight, double.Parse),
-                SubmissionPeriodDescription = row.submission_period_desc,
-                SubmitterId                 = row.submitter_id,
-                PackagingMaterialSubtype    = Nullable(row.packaging_material_subtype),
-                RamRagRating                = Nullable(row.ram_rag_rating)
-            }).ToImmutableList();
+                OrganisationId   = int.Parse(Field(csv, "organisation_id")!),
+                SubsidiaryId     = Field(csv, "subsidiary_id"),
+                OrganisationName = Field(csv, "organisation_name"),
+                TradingName      = Field(csv, "trading_name"),
+                ObligationStatus = Field(csv, "obligation_status"),
+                SubmitterId      = Field(csv, "submitter_id"),
+                ErrorCode        = Field(csv, "error_code"),
+                StatusCode       = Field(csv, "status_code"),
+                NumDaysObligated = Field(csv, "num_days_obligated") is { } d ? short.Parse(d) : null,
+                JoinerDate       = Field(csv, "joiner_date"),
+                LeaverDate       = Field(csv, "leaver_date"),
+                HasH1            = Field(csv, "has_h1") == "1",
+                HasH2            = Field(csv, "has_h2") == "1",
+                FileName         = Field(csv, "file_name"),
+                CreatedDateTime  = Field(csv, "created_date_time") is { } c ? DateTime.Parse(c, CultureInfo.InvariantCulture) : null
+            });
+        }
+
+        return organisations.ToImmutable();
+    }
+
+    // Streams the POM CSV field-by-field off the reader - a fresh CsvReader per call, one PayCalPom
+    // at a time, no per-row dynamic object - so a multi-million-row file costs only the row it is on.
+    private protected static IEnumerable<PayCalPom> StreamPoms(string pomsPath)
+    {
+        using var csv = SlurpCsv(pomsPath);
+        csv.Read();
+        csv.ReadHeader();
+
+        while (csv.Read())
+        {
+            yield return new PayCalPom
+            {
+                OrganisationId              = int.Parse(Field(csv, "organisation_id")!),
+                SubsidiaryId                = Field(csv, "subsidiary_id"),
+                SubmissionPeriod            = Field(csv, "submission_period"),
+                PackagingActivity           = Field(csv, "packaging_activity"),
+                PackagingType               = Field(csv, "packaging_type"),
+                PackagingClass              = Field(csv, "packaging_class"),
+                PackagingMaterial           = Field(csv, "packaging_material"),
+                PackagingMaterialWeight     = Field(csv, "packaging_material_weight") is { } w ? double.Parse(w) : null,
+                SubmissionPeriodDescription = Field(csv, "submission_period_desc"),
+                SubmitterId                 = Field(csv, "submitter_id"),
+                PackagingMaterialSubtype    = Field(csv, "packaging_material_subtype"),
+                RamRagRating                = Field(csv, "ram_rag_rating"),
+                FileName                    = Field(csv, "file_name"),
+                CreatedDateTime             = Field(csv, "created_date_time") is { } c ? DateTime.Parse(c, CultureInfo.InvariantCulture) : null
+            };
+        }
+    }
+
+    // A CSV cell as a nullable string: an absent column or the literal "NULL" both read as null.
+    private static string? Field(CsvReader csv, string name) =>
+        csv.TryGetField<string>(name, out var value) ? Nullable(value ?? "NULL") : null;
 
     private  static async Task WaitUntilAsync(Func<Task<bool>> condition, string failureMessage, TimeSpan? timeout = null)
     {
