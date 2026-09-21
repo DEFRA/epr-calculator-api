@@ -1540,6 +1540,7 @@
       "epr.calculator.api.dataapi": {
         "type": "Project",
         "dependencies": {
+          "EFCore.BulkExtensions": "[10.0.1, )",
           "Microsoft.EntityFrameworkCore.SqlServer": "[10.0.11, )"
         }
       }

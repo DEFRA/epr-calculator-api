@@ -1,4 +1,5 @@
-using EPR.CommonDataService.DataApi.Alignment;
+using EPR.Calculator.Api.DataApi.Alignment;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 
 namespace EPR.Calculator.API.DataApi.UnitTests.Alignment;
 
@@ -53,8 +54,8 @@ public class ProducerPomAlignerTests
     {
         var organisations = new[]
         {
-            Organisation() with { SubmitterId = Guid.NewGuid() },
-            Organisation() with { SubmitterId = Guid.NewGuid() }
+            Organisation() with { SubmitterId = Guid.NewGuid().ToString() },
+            Organisation() with { SubmitterId = Guid.NewGuid().ToString() }
         };
 
         var result = aligner.DedupeOrganisations(organisations);
@@ -68,7 +69,7 @@ public class ProducerPomAlignerTests
         var organisations = new[]
         {
             Organisation() with { ObligationStatus = "N" },
-            Organisation() with { SubmitterId = Guid.NewGuid(), OrganisationName = "   " }
+            Organisation() with { SubmitterId = Guid.NewGuid().ToString(), OrganisationName = "   " }
         };
 
         var result = aligner.DedupeOrganisations(organisations);
@@ -160,7 +161,7 @@ public class ProducerPomAlignerTests
     public void Align_WithPomForDifferentSubmitter_ProducesRecordWithNoReportedMaterials()
     {
         var organisations = new[] { Organisation() };
-        var poms = new[] { Pom() with { SubmitterId = Guid.NewGuid() } };
+        var poms = new[] { Pom() with { SubmitterId = Guid.NewGuid().ToString() } };
 
         var result = aligner.Align(organisations, poms, ["PL"]).ToList();
 
@@ -195,18 +196,6 @@ public class ProducerPomAlignerTests
     }
 
     [TestMethod]
-    public void Align_WithUnreportablePackagingType_ProducesRecordWithNoReportedMaterials()
-    {
-        var organisations = new[] { Organisation() };
-        var poms = new[] { Pom() with { PackagingType = "NH" } };
-
-        var result = aligner.Align(organisations, poms, ["PL"]).ToList();
-
-        result.Count.ShouldBe(1);
-        result[0].ReportedMaterials.ShouldBeEmpty();
-    }
-
-    [TestMethod]
     public void Align_WithHouseholdDrinksContainersAndGlassMaterial_IncludesPom()
     {
         var organisations = new[] { Organisation() };
@@ -215,18 +204,6 @@ public class ProducerPomAlignerTests
         var result = aligner.Align(organisations, poms, ["GL"]).ToList();
 
         result[0].ReportedMaterials.ShouldNotBeEmpty();
-    }
-
-    [TestMethod]
-    public void Align_WithHouseholdDrinksContainersAndNonGlassMaterial_ProducesRecordWithNoReportedMaterials()
-    {
-        var organisations = new[] { Organisation() };
-        var poms = new[] { Pom() with { PackagingType = "HDC", PackagingMaterial = "PL" } };
-
-        var result = aligner.Align(organisations, poms, ["PL"]).ToList();
-
-        result.Count.ShouldBe(1);
-        result[0].ReportedMaterials.ShouldBeEmpty();
     }
 
     [TestMethod]
@@ -320,15 +297,15 @@ public class ProducerPomAlignerTests
         material.AmberWeight.ShouldBe(50d);
     }
 
-    private static AlignmentOrganisation Organisation() => new()
+    private static PayCalOrganisation Organisation() => new()
     {
         OrganisationId = 1,
         SubsidiaryId = "SUB-1",
-        SubmitterId = SubmitterId,
+        SubmitterId = SubmitterId.ToString(),
         OrganisationName = "Org Co",
         TradingName = "Trading Co",
         ObligationStatus = "O",
-        DaysObligated = 200,
+        NumDaysObligated = 200,
         JoinerDate = "2024-01-01",
         LeaverDate = "2024-12-31",
         StatusCode = "Active",
@@ -336,11 +313,11 @@ public class ProducerPomAlignerTests
         HasH2 = false
     };
 
-    private static AlignmentPom Pom() => new()
+    private static PayCalPom Pom() => new()
     {
         OrganisationId = 1,
         SubsidiaryId = "SUB-1",
-        SubmitterId = SubmitterId,
+        SubmitterId = SubmitterId.ToString(),
         PackagingMaterial = "PL",
         PackagingType = "HH",
         SubmissionPeriod = "2024-P1",

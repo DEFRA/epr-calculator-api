@@ -1,12 +1,16 @@
 using System.Runtime.CompilerServices;
-using EPR.CommonDataService.DataApi.AcceptedFileSelection;
-using EPR.CommonDataService.DataApi.Alignment;
-using EPR.CommonDataService.DataApi.CommonDataApi;
-using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
-using EPR.CommonDataService.DataApi.ObligationDetermination;
-using EPR.CommonDataService.DataApi.PomEligibility;
+using EPR.Calculator.Api.DataApi.AcceptedFileSelection;
+using EPR.Calculator.Api.DataApi.Alignment;
+using EPR.Calculator.Api.DataApi.CommonDataApi;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.CommonDataApi.LoadTables;
+using EPR.Calculator.Api.DataApi.Models;
+using EPR.Calculator.Api.DataApi.ObligationDetermination;
+using EPR.Calculator.Api.DataApi.PomEligibility;
+using EPR.Calculator.Api.DataApi.Services;
+using Microsoft.Extensions.Options;
 
-namespace EPR.Calculator.API.DataApi.UnitTests.CommonDataApi;
+namespace EPR.Calculator.API.DataApi.UnitTests.Services;
 
 /// <summary>
 ///     Unit tests for <see cref="ProducerDataService" /> - the single entry point that replaces separate
@@ -229,6 +233,36 @@ public class ProducerDataServiceTests
     }
 
     [TestMethod]
+    [DataRow("HH", "PL", true)]
+    [DataRow("CW", "PL", true)]
+    [DataRow("PB", "PL", true)]
+    [DataRow("HDC", "GL", true)]
+    [DataRow("HDC", "PL", false)]
+    [DataRow("NH", "PL", false)]
+    public async Task GetProducerData_ReportsPackagingOnlyWhenReportable(string packagingType, string material, bool expectedReported)
+    {
+        var submitterId = Guid.NewGuid().ToString();
+
+        var org = new PayCalOrganisation
+        {
+            OrganisationId = 1, OrganisationName = "Org Co", ObligationStatus = "O",
+            SubmitterId = submitterId, RegulatorStatus = "Granted", HasH1 = true, HasH2 = true
+        };
+        var pom = new PayCalPom
+        {
+            OrganisationId = 1, SubmitterId = submitterId, PackagingType = packagingType, PackagingMaterial = material,
+            SubmissionPeriod = "2024-P1", PackagingMaterialWeight = 1000
+        };
+
+        var service = CreateService(orgs: [org], poms: [pom]);
+
+        var result = await service.GetProducerData(2024, null, [material]);
+
+        result.Count.ShouldBe(1);
+        (result[0].ReportedMaterials.Count > 0).ShouldBe(expectedReported);
+    }
+
+    [TestMethod]
     public async Task GetProducerData_PomWithNoRegistrationAtAll_StillReturnsMissingRegistrationError()
     {
         // No PayCalOrganisation at all for this org - the registration is missing entirely, not just
@@ -255,7 +289,7 @@ public class ProducerDataServiceTests
         result[0].ProducerName.ShouldBe(string.Empty);
         result[0].ReportedMaterials.ShouldBeEmpty();
         result[0].Errors.Count.ShouldBe(1);
-        result[0].Errors[0].ErrorCode.ShouldBe(ProducerErrorCodes.MissingRegistrationData);
+        result[0].Errors[0].ErrorCode.ShouldBe("Missing Registration Data");
         result[0].IsError.ShouldBeTrue();
     }
 
@@ -303,31 +337,53 @@ public class ProducerDataServiceTests
         await Should.ThrowAsync<OperationCanceledException>(async () => await service.GetProducerData(2024, null, [], cts.Token));
     }
 
+    [TestMethod]
+    public async Task GetProducerData_WhenLoadTableEnabled_RefreshesLoadTablesFirst()
+    {
+        var refresher = new Mock<ILoadTableRefresher>();
+        var service = CreateService(orgs: [], poms: [], loadTableEnabled: true, loadTableRefresher: refresher.Object);
+
+        await service.GetProducerData(2024, cutOffDate: null, materialCodes: []);
+
+        refresher.Verify(r => r.RefreshAsync(2024, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task GetProducerData_WhenLoadTableDisabled_DoesNotRefreshLoadTables()
+    {
+        var refresher = new Mock<ILoadTableRefresher>();
+        var service = CreateService(orgs: [], poms: [], loadTableEnabled: false, loadTableRefresher: refresher.Object);
+
+        await service.GetProducerData(2024, cutOffDate: null, materialCodes: []);
+
+        refresher.Verify(r => r.RefreshAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
     private static ProducerDataService CreateService(
         IReadOnlyList<PayCalOrganisation>? orgs = null,
         IReadOnlyList<PayCalPom>? poms = null,
         IAsyncEnumerable<PayCalOrganisation>? orgsStream = null,
         IAsyncEnumerable<PayCalPom>? pomsStream = null,
         IProducerObligationDeterminer? determiner = null,
-        IPomEligibilityFilter? eligibilityFilter = null)
+        IPomEligibilityFilter? eligibilityFilter = null,
+        bool loadTableEnabled = false,
+        ILoadTableRefresher? loadTableRefresher = null)
     {
         var mockOrgHandler = new Mock<IStreamOrganisationsRequestHandler>();
         mockOrgHandler
             .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .Returns(orgsStream ?? ToAsyncEnumerable(orgs ?? []));
+            .Returns(() => orgsStream ?? ToAsyncEnumerable(orgs ?? []));
 
+        // Handle() is invoked twice by StreamPoms (once to pick winning files, once to buffer their
+        // rows), so hand out a fresh enumerable each time.
         var mockPomHandler = new Mock<IStreamPomsRequestHandler>();
         mockPomHandler
             .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .Returns(pomsStream ?? ToAsyncEnumerable(poms ?? []));
+            .Returns(() => pomsStream ?? ToAsyncEnumerable(poms ?? []));
 
-        var mockSelector = new Mock<IAcceptedFileSelector>();
-        mockSelector
-            .Setup(s => s.SelectLatestOrganisationFiles(It.IsAny<IReadOnlyList<PayCalOrganisation>>(), It.IsAny<DateTimeOffset?>()))
-            .Returns((IReadOnlyList<PayCalOrganisation> o, DateTimeOffset? _) => o);
-        mockSelector
-            .Setup(s => s.SelectLatestPomFiles(It.IsAny<IReadOnlyList<PayCalPom>>(), It.IsAny<DateTimeOffset?>()))
-            .Returns((IReadOnlyList<PayCalPom> p, DateTimeOffset? _) => p);
+        // The real selector is a cheap pure component - the fixtures leave file names null, so every
+        // group's sole candidate wins and nothing is filtered out, matching the previous pass-through.
+        var selector = new AcceptedFileSelector();
 
         IPomEligibilityFilter eligibilityFilterToUse;
         if (eligibilityFilter is not null)
@@ -353,15 +409,22 @@ public class ProducerDataServiceTests
             .Setup(d => d.Determine(It.IsAny<IReadOnlyList<PayCalOrganisation>>()))
             .Returns((IReadOnlyList<PayCalOrganisation> o) => o);
 
+        // The load-table stage's DB behaviour is exercised in the integration tests; here the source
+        // reads straight from the mocked handlers and the refresher is a mock so these tests can
+        // assert the routing (RefreshAsync runs only when the option is on).
+        var dataSource = new SynapseDataSource(mockOrgHandler.Object, mockPomHandler.Object);
+        var loadOptions = Options.Create(new DataApiLoadOptions { Enabled = loadTableEnabled });
+
         return new ProducerDataService(
-            mockOrgHandler.Object,
-            mockPomHandler.Object,
-            mockSelector.Object,
+            dataSource,
+            selector,
             determiner ?? mockDeterminer!.Object,
             eligibilityFilterToUse,
             mockFlagsCalculator.Object,
             new ProducerErrorDetector(),
-            new ProducerPomAligner());
+            new ProducerPomAligner(),
+            loadTableRefresher ?? Mock.Of<ILoadTableRefresher>(),
+            loadOptions);
     }
 
     private static async IAsyncEnumerable<T> ToAsyncEnumerable<T>(

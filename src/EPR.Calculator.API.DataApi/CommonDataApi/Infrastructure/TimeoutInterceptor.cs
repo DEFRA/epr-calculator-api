@@ -4,14 +4,14 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace EPR.CommonDataService.DataApi.CommonDataApi.Infrastructure;
+namespace EPR.Calculator.Api.DataApi.CommonDataApi.Infrastructure;
 
 /// <summary>
 ///     Intercepts database commands. If the command text contains a matching comment, it will override the timeout for
 ///     that command.
 /// </summary>
 [ExcludeFromCodeCoverage]
-public sealed class TimeoutInterceptor : DbCommandInterceptor
+internal sealed class TimeoutInterceptor : DbCommandInterceptor
 {
     public const string Trigger = "Use timeout: ";
     private static readonly Regex Pattern = new(@$"^{Regex.Escape($"-- {Trigger}")}(\d+)",
@@ -49,7 +49,7 @@ public sealed class TimeoutInterceptor : DbCommandInterceptor
 }
 
 [ExcludeFromCodeCoverage]
-public static class TimeoutInterceptorExtensions
+internal static class TimeoutInterceptorExtensions
 {
     /// <summary>
     ///     Tags the IQueryable to be intercepted by <see cref="TimeoutInterceptor" />, effectively setting the

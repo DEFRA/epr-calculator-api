@@ -1,11 +1,11 @@
-namespace EPR.CommonDataService.DataApi.Alignment;
+namespace EPR.Calculator.Api.DataApi.Models;
 
 /// <summary>
 ///     A material reported by a producer for a submission period, aggregated across RAG ratings.
 ///     Weights are un-rounded totals in the source unit (kg) - converting to tonnage and rounding
 ///     for storage is the caller's responsibility.
 /// </summary>
-public sealed record AlignedReportedMaterial
+public sealed record ProducerMaterial
 {
     public required string MaterialCode { get; init; }
     public required string PackagingType { get; init; }

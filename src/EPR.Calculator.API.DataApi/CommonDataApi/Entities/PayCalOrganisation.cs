@@ -1,14 +1,14 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+namespace EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 
 [ExcludeFromCodeCoverage]
-public record PayCalOrganisation
+internal record PayCalOrganisation
 {
-    public int? OrganisationId { get; init; }
+    public int OrganisationId { get; init; }
     public string? SubsidiaryId { get; init; }
     public string? SubmitterId { get; init; }
-    public string? OrganisationName { get; init; }
+    public required string OrganisationName { get; init; }
     public string? TradingName { get; init; }
     public string? StatusCode { get; init; }
     public string? LeaverDate { get; init; }

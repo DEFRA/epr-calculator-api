@@ -1,4 +1,4 @@
-namespace EPR.CommonDataService.DataApi.Alignment;
+namespace EPR.Calculator.Api.DataApi.Models;
 
 /// <summary>
 ///     Everything DataApi knows about one organisation/subsidiary/submitter this run: its identity,
@@ -38,7 +38,7 @@ public sealed record ProducerRecord
     /// </summary>
     public required IReadOnlyList<ProducerCalculationError> Warnings { get; init; }
 
-    public required IReadOnlyList<AlignedReportedMaterial> ReportedMaterials { get; init; }
+    public required IReadOnlyList<ProducerMaterial> ReportedMaterials { get; init; }
 
     /// <summary>
     ///     Whether this org/subsidiary was excluded from calculation by a hard error - the two-way

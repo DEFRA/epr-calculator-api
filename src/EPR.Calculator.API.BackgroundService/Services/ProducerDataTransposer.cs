@@ -2,7 +2,7 @@ using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.Utils;
-using EPR.CommonDataService.DataApi.Alignment;
+using EPR.Calculator.Api.DataApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Services;
@@ -99,17 +99,7 @@ public class ProducerDataTransposer(
             cfg.UseTempDB = true;
         }, cancellationToken);
 
-        var errors = data
-            .SelectMany(record => record.Errors.Concat(record.Warnings)
-                .Select(error => new OrganisationCalculationError
-                {
-                    OrganisationId = record.OrganisationId,
-                    SubsidiaryId = record.SubsidiaryId,
-                    Error = error
-                }))
-            .ToList();
-
-        await errorReportService.PersistErrors(errors, calculatorRun.Id, calculatorRun.CreatedBy, runContext.RelativeYear, cancellationToken);
+        await errorReportService.PersistErrors(data, calculatorRun.Id, calculatorRun.CreatedBy, runContext.RelativeYear, cancellationToken);
 
         calculatorRun.OrgPomDataLoadedAt = timeProvider.GetUtcNow().UtcDateTime;
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -130,17 +120,17 @@ public class ProducerDataTransposer(
         IsError = record.IsError
     };
 
-    private static ProducerReportedMaterial ToProducerReportedMaterial(AlignedReportedMaterial reportedMaterial, Material material) => new()
+    private static ProducerReportedMaterial ToProducerReportedMaterial(ProducerMaterial producerMaterial, Material material) => new()
     {
         MaterialId = material.Id,
-        PackagingType = reportedMaterial.PackagingType,
-        SubmissionPeriod = reportedMaterial.SubmissionPeriod,
-        PackagingTonnage = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.TotalWeight / 1000m, decimals: 3),
-        PackagingTonnageRed = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.RedWeight / 1000m, decimals: 3),
-        PackagingTonnageAmber = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.AmberWeight / 1000m, decimals: 3),
-        PackagingTonnageGreen = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.GreenWeight / 1000m, decimals: 3),
-        PackagingTonnageRedMedical = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.RedMedicalWeight / 1000m, decimals: 3),
-        PackagingTonnageAmberMedical = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.AmberMedicalWeight / 1000m, decimals: 3),
-        PackagingTonnageGreenMedical = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.GreenMedicalWeight / 1000m, decimals: 3)
+        PackagingType = producerMaterial.PackagingType,
+        SubmissionPeriod = producerMaterial.SubmissionPeriod,
+        PackagingTonnage = MathUtils.RoundAwayFromZero((decimal)producerMaterial.TotalWeight / 1000m, decimals: 3),
+        PackagingTonnageRed = MathUtils.RoundAwayFromZero((decimal)producerMaterial.RedWeight / 1000m, decimals: 3),
+        PackagingTonnageAmber = MathUtils.RoundAwayFromZero((decimal)producerMaterial.AmberWeight / 1000m, decimals: 3),
+        PackagingTonnageGreen = MathUtils.RoundAwayFromZero((decimal)producerMaterial.GreenWeight / 1000m, decimals: 3),
+        PackagingTonnageRedMedical = MathUtils.RoundAwayFromZero((decimal)producerMaterial.RedMedicalWeight / 1000m, decimals: 3),
+        PackagingTonnageAmberMedical = MathUtils.RoundAwayFromZero((decimal)producerMaterial.AmberMedicalWeight / 1000m, decimals: 3),
+        PackagingTonnageGreenMedical = MathUtils.RoundAwayFromZero((decimal)producerMaterial.GreenMedicalWeight / 1000m, decimals: 3)
     };
 }

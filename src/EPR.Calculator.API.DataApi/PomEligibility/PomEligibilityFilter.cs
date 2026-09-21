@@ -1,6 +1,6 @@
-using EPR.CommonDataService.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 
-namespace EPR.CommonDataService.DataApi.PomEligibility;
+namespace EPR.Calculator.Api.DataApi.PomEligibility;
 
 /// <summary>
 ///     Filters raw POM rows down to those eligible for alignment, ported from the eligibility CTEs
@@ -9,7 +9,7 @@ namespace EPR.CommonDataService.DataApi.PomEligibility;
 ///     on cross-row aggregation (whether an organisation/submitter/period has submitted both halves of the
 ///     year) and on the separately-streamed organisation data (whether a registration exists at all).
 /// </summary>
-public interface IPomEligibilityFilter
+internal interface IPomEligibilityFilter
 {
     /// <summary>
     ///     Returns only the POMs whose organisation/submitter/submission-period-year has submitted both
@@ -19,7 +19,7 @@ public interface IPomEligibilityFilter
     IReadOnlyList<PayCalPom> Filter(IReadOnlyList<PayCalPom> poms, IReadOnlyCollection<int> organisationIdsWithRegistration);
 }
 
-public sealed class PomEligibilityFilter : IPomEligibilityFilter
+internal sealed class PomEligibilityFilter : IPomEligibilityFilter
 {
     public IReadOnlyList<PayCalPom> Filter(IReadOnlyList<PayCalPom> poms, IReadOnlyCollection<int> organisationIdsWithRegistration) =>
         DataApiTelemetry.Trace(typeof(PomEligibilityFilter), nameof(Filter), () =>
@@ -27,8 +27,8 @@ public sealed class PomEligibilityFilter : IPomEligibilityFilter
             var registeredOrganisationIds = organisationIdsWithRegistration as HashSet<int> ?? organisationIdsWithRegistration.ToHashSet();
 
             var eligiblePeriods = poms
-                .Where(p => p.OrganisationId is not null && SubmissionPeriodClassification.TryParseYear(p.SubmissionPeriod, out _))
-                .GroupBy(p => (p.OrganisationId!.Value, p.SubmitterId, Year: ParseYear(p.SubmissionPeriod!)))
+                .Where(p => SubmissionPeriodClassification.TryParseYear(p.SubmissionPeriod, out _))
+                .GroupBy(p => (p.OrganisationId, p.SubmitterId, Year: ParseYear(p.SubmissionPeriod!)))
                 .Where(g =>
                     g.Any(p => SubmissionPeriodClassification.IsH1(p.SubmissionPeriod!, g.Key.Year)) &&
                     g.Any(p => SubmissionPeriodClassification.IsH2(p.SubmissionPeriod!, g.Key.Year)))
@@ -37,10 +37,9 @@ public sealed class PomEligibilityFilter : IPomEligibilityFilter
 
             return poms
                 .Where(p =>
-                    p.OrganisationId is not null &&
-                    registeredOrganisationIds.Contains(p.OrganisationId.Value) &&
+                    registeredOrganisationIds.Contains(p.OrganisationId) &&
                     SubmissionPeriodClassification.TryParseYear(p.SubmissionPeriod, out var year) &&
-                    eligiblePeriods.Contains((p.OrganisationId.Value, p.SubmitterId, year)))
+                    eligiblePeriods.Contains((p.OrganisationId, p.SubmitterId, year)))
                 .ToList();
         });
 
