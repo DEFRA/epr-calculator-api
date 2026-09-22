@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EPR.Calculator.API.Data.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation")]
-    partial class ReplaceOrgPomStagingWithCalculatorRunOrganisation
+    [Migration("20260921160000_DataApiSchemaChanges")]
+    partial class DataApiSchemaChanges
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -451,13 +451,9 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("error_code");
 
-                    b.Property<bool>("HasH1")
+                    b.Property<bool>("IsError")
                         .HasColumnType("bit")
-                        .HasColumnName("has_h1");
-
-                    b.Property<bool>("HasH2")
-                        .HasColumnType("bit")
-                        .HasColumnName("has_h2");
+                        .HasColumnName("is_error");
 
                     b.Property<string>("JoinerDate")
                         .HasMaxLength(50)
@@ -468,12 +464,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("leaver_date");
-
-                    b.Property<string>("ObligationStatus")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("obligation_status");
 
                     b.Property<int>("OrganisationId")
                         .HasColumnType("int")
@@ -488,10 +478,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     b.Property<string>("StatusCode")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("status_code");
-
-                    b.Property<Guid?>("SubmitterId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("submitter_id");
 
                     b.Property<string>("SubsidiaryId")
                         .HasMaxLength(400)
@@ -1775,11 +1761,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("leaver_date");
 
-                    b.Property<string>("ObligationStatus")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)")
-                        .HasColumnName("obligation_status");
-
                     b.Property<int>("ProducerId")
                         .HasColumnType("int")
                         .HasColumnName("producer_id");
@@ -1793,10 +1774,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar(400)")
                         .HasColumnName("status_code");
-
-                    b.Property<Guid?>("SubmitterId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("submitter_id");
 
                     b.Property<string>("SubsidiaryId")
                         .HasMaxLength(400)
