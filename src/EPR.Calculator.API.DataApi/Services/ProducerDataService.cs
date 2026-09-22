@@ -13,9 +13,9 @@ namespace EPR.Calculator.Api.DataApi.Services;
 
 /// <summary>
 ///     Produces the full set of data a calculator run needs from organisation/POM data, in a single
-///     call: streams the raw Synapse data, applies every business rule (file selection, obligation
-///     determination, POM eligibility, period flags, error/warning detection), and aligns the result
-///     into producers ready for calculation. Performs no database access outside of the Synapse
+///     call: streams the raw common-data-api data, applies every business rule (file selection,
+///     obligation determination, POM eligibility, period flags, error/warning detection), and aligns
+///     the result into producers ready for calculation. Performs no database access outside of the
 ///     streams themselves - persisting the result is the caller's responsibility.
 /// </summary>
 public interface IProducerDataService

@@ -412,7 +412,7 @@ public class ProducerDataServiceTests
         // The load-table stage's DB behaviour is exercised in the integration tests; here the source
         // reads straight from the mocked handlers and the refresher is a mock so these tests can
         // assert the routing (RefreshAsync runs only when the option is on).
-        var dataSource = new SynapseDataSource(mockOrgHandler.Object, mockPomHandler.Object);
+        var dataSource = new CommonDataApiSource(mockOrgHandler.Object, mockPomHandler.Object);
         var loadOptions = Options.Create(new DataApiLoadOptions { Enabled = loadTableEnabled });
 
         var pipeline = new ProducerDataPipelineServices(

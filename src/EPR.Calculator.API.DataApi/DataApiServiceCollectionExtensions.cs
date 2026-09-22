@@ -1,7 +1,7 @@
+using System.Net.Http.Headers;
 using EPR.Calculator.Api.DataApi.AcceptedFileSelection;
 using EPR.Calculator.Api.DataApi.Alignment;
 using EPR.Calculator.Api.DataApi.CommonDataApi;
-using EPR.Calculator.Api.DataApi.CommonDataApi.Infrastructure;
 using EPR.Calculator.Api.DataApi.CommonDataApi.LoadTables;
 using EPR.Calculator.Api.DataApi.ObligationDetermination;
 using EPR.Calculator.Api.DataApi.PomEligibility;
@@ -18,7 +18,6 @@ public static class DataApiServiceCollectionExtensions
     ///     Registers DataApi. The only type callers resolve is <see cref="IProducerDataService" />; everything
     ///     else is an internal detail, so this is the single point where the host wires DataApi up.
     /// </summary>
-    /// <param name="synapseConnectionString">Resolves the Synapse connection string when the context is first created.</param>
     /// <param name="loadTableConnectionString">Resolves the connection string of the database that hosts the data_api_load_* tables.</param>
     /// <param name="loadTablesEnabled">
     ///     Whether a run stages the RPD source through the load tables (true) or reads it directly (false).
@@ -31,21 +30,21 @@ public static class DataApiServiceCollectionExtensions
     /// </param>
     public static IServiceCollection AddDataApi(
         this IServiceCollection services,
-        Func<IServiceProvider, string> synapseConnectionString,
         Func<IServiceProvider, string> loadTableConnectionString,
         Func<IServiceProvider, bool> loadTablesEnabled,
         bool captureMemoryMetrics = false)
     {
         DataApiTelemetry.CaptureMemoryMetrics = captureMemoryMetrics;
 
-        // Factory, not a scoped context: the org and POM streams query concurrently (ProducerDataService).
-        services.AddDbContextFactory<SynapseContext>((provider, builder) =>
-            builder
-                .UseSqlServer(synapseConnectionString(provider))
-                .AddInterceptors(new TimeoutInterceptor()));
+        services
+            .AddOptions<CommonDataApiHttpClientOptions>()
+            .BindConfiguration(CommonDataApiHttpClientOptions.SectionKey)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
-        services.AddTransient<IStreamOrganisationsRequestHandler, StreamOrganisationsRequestHandler>();
-        services.AddTransient<IStreamPomsRequestHandler, StreamPomsRequestHandler>();
+        services.AddHttpClient<IStreamOrganisationsRequestHandler, StreamOrganisationsRequestHandler>(ConfigureHttpClient);
+        services.AddHttpClient<IStreamPomsRequestHandler, StreamPomsRequestHandler>(ConfigureHttpClient);
+
         services.AddTransient<IAcceptedFileSelector, AcceptedFileSelector>();
         services.AddTransient<IProducerPomAligner, ProducerPomAligner>();
         services.AddTransient<IProducerObligationDeterminer, ProducerObligationDeterminer>();
@@ -63,13 +62,30 @@ public static class DataApiServiceCollectionExtensions
             builder.UseSqlServer(loadTableConnectionString(provider)));
 
         services.AddTransient<ILoadTableRefresher, LoadTableRefresher>();
-        services.AddTransient<SynapseDataSource>();
+        services.AddTransient<CommonDataApiSource>();
         services.AddTransient<LoadTableDataSource>();
         services.AddTransient<IPayCalDataSource>(provider =>
             provider.GetRequiredService<IOptions<DataApiLoadOptions>>().Value.Enabled
                 ? provider.GetRequiredService<LoadTableDataSource>()
-                : provider.GetRequiredService<SynapseDataSource>());
+                : provider.GetRequiredService<CommonDataApiSource>());
 
         return services;
+    }
+
+    private static void ConfigureHttpClient(IServiceProvider provider, HttpClient client)
+    {
+        var options = provider.GetRequiredService<IOptions<CommonDataApiHttpClientOptions>>().Value;
+
+        client.BaseAddress = new Uri(options.BaseUrl);
+
+        // Disable the built-in HttpClient timeout so that the per-request StreamStartTimeout
+        // (via CancellationTokenSource, see NdJsonHttpReader) is the sole timeout.
+        client.Timeout = Timeout.InfiniteTimeSpan;
+
+        if (options.CompressionEnabled)
+        {
+            client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+            client.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
+        }
     }
 }
