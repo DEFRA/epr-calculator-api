@@ -9,15 +9,16 @@ public interface IBlobStorageService
 {
     Task<Stream?> OpenResultCsvStream(string filename, CancellationToken cancellationToken = default);
     Task<Stream?> OpenBillingCsvStream(string filename, CancellationToken cancellationToken = default);
+    Task<Stream?> OpenBillingJsonStream(string filename, CancellationToken cancellationToken = default);
     Task<bool> MoveBillingJsonToFss(string filename, CancellationToken cancellationToken = default);
 }
 
 public class BlobStorageService : IBlobStorageService
 {
     private readonly BlobContainerClient billingCsvContainer;
-    private readonly BlobContainerClient billingJsonContainer;
     private readonly BlobContainerClient fssContainer;
     private readonly BlobContainerClient resultCsvContainer;
+    private readonly BlobContainerClient billingJsonContainer;
     private readonly ILogger<BlobStorageService> logger;
 
     public BlobStorageService(
@@ -29,15 +30,18 @@ public class BlobStorageService : IBlobStorageService
         var o = options.Value;
         resultCsvContainer   = blobServiceClient.GetBlobContainerClient(o.ResultFileCsvContainer);
         billingCsvContainer  = blobServiceClient.GetBlobContainerClient(o.BillingFileCsvContainer);
-        billingJsonContainer = blobServiceClient.GetBlobContainerClient(o.BillingFileJsonContainer);
         fssContainer         = blobServiceClient.GetBlobContainerClient(o.FssContainer);
+        billingJsonContainer = blobServiceClient.GetBlobContainerClient(o.BillingFileJsonContainer);
     }
 
     public Task<Stream?> OpenResultCsvStream(string filename, CancellationToken cancellationToken = default) =>
         OpenBlobStream(resultCsvContainer, filename, cancellationToken);
 
     public Task<Stream?> OpenBillingCsvStream(string filename, CancellationToken cancellationToken = default) =>
-        OpenBlobStream(billingCsvContainer, filename, cancellationToken);
+        OpenBlobStream(billingCsvContainer, filename, cancellationToken);    
+    
+    public async Task<Stream?> OpenBillingJsonStream(string filename, CancellationToken cancellationToken = default) =>
+        await OpenBlobStream(fssContainer, filename, cancellationToken);
 
     public Task<bool> MoveBillingJsonToFss(string filename, CancellationToken cancellationToken = default) =>
         MoveBlob(billingJsonContainer, fssContainer, filename, cancellationToken);

@@ -1,11 +1,13 @@
 ﻿using System.Security.Claims;
 using System.Security.Principal;
+using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.Controllers;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
+using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Http;
@@ -20,7 +22,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
     public class PutCalculatorRunStatusNewTest
     {
         private readonly Mock<ICalculatorRunStatusDataValidator> mockValidator;
-        private readonly Mock<IBillingFileService> mockBillingFileService;
         private readonly Mock<IInvoiceDetailsService> mockInvoiceDetailsService;
         private readonly Mock<ICalculationRunService> mockCalculationRunService;
         private readonly ApplicationDBContext context;
@@ -37,7 +38,6 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.context.Database.EnsureCreated();
 
             this.mockValidator = new Mock<ICalculatorRunStatusDataValidator>();
-            this.mockBillingFileService = new Mock<IBillingFileService>();
             this.mockInvoiceDetailsService = new Mock<IInvoiceDetailsService>();
             this.mockCalculationRunService = new Mock<ICalculationRunService>();
 
@@ -45,10 +45,20 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             this.calculatorNewControllerUnderTest = new CalculatorNewController(
                 this.context,
                 this.mockValidator.Object,
-                this.mockBillingFileService.Object,
                 this.mockInvoiceDetailsService.Object,
                 Mock.Of<ILogger<CalculatorNewController>>(),
-                this.mockCalculationRunService.Object);
+                this.mockCalculationRunService.Object,
+                Mock.Of<IFileExportService>(),
+                Mock.Of<IBlobStorageService>(),
+                Mock.Of<IStorageUploadService>(),
+                Microsoft.Extensions.Options.Options.Create(new BlobStorageOptions
+                {
+                    ConnectionString = "UseDevelopmentStorage=true",
+                    ResultFileCsvContainer = "result-csv",
+                    BillingFileCsvContainer = "billing-csv",
+                    FssContainer = "fss",
+                }),
+                Microsoft.Extensions.Options.Options.Create(new FeatureFlagOptions()));
 
             this.context.CalculatorRuns.Add(new CalculatorRun
             {
