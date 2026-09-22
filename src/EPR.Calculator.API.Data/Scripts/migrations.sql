@@ -8179,7 +8179,7 @@ GO
 BEGIN TRANSACTION;
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     ALTER TABLE [producer_detail] ADD [joiner_date] nvarchar(50) NULL;
@@ -8187,7 +8187,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     ALTER TABLE [producer_detail] ADD [leaver_date] nvarchar(50) NULL;
@@ -8195,7 +8195,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     ALTER TABLE [producer_detail] ADD [num_days_obligated] int NULL;
@@ -8203,15 +8203,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
-)
-BEGIN
-    ALTER TABLE [producer_detail] ADD [obligation_status] nvarchar(10) NULL;
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     ALTER TABLE [producer_detail] ADD [status_code] nvarchar(400) NULL;
@@ -8219,15 +8211,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
-)
-BEGIN
-    ALTER TABLE [producer_detail] ADD [submitter_id] uniqueidentifier NULL;
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     ALTER TABLE [calculator_run] ADD [org_pom_data_loaded_at] datetime2 NULL;
@@ -8235,7 +8219,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     CREATE TABLE [calculator_run_organisation] (
@@ -8243,17 +8227,14 @@ BEGIN
         [calculator_run_id] int NOT NULL,
         [organisation_id] int NOT NULL,
         [subsidiary_id] nvarchar(400) NULL,
-        [submitter_id] uniqueidentifier NULL,
         [organisation_name] nvarchar(400) NOT NULL,
         [trading_name] nvarchar(400) NULL,
-        [obligation_status] nvarchar(10) NOT NULL,
         [num_days_obligated] int NULL,
         [joiner_date] nvarchar(50) NULL,
         [leaver_date] nvarchar(50) NULL,
         [status_code] nvarchar(max) NULL,
         [error_code] nvarchar(max) NULL,
-        [has_h1] bit NOT NULL,
-        [has_h2] bit NOT NULL,
+        [is_error] bit NOT NULL,
         CONSTRAINT [PK_calculator_run_organisation] PRIMARY KEY ([id]),
         CONSTRAINT [FK_calculator_run_organisation_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE
     );
@@ -8261,7 +8242,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     CREATE INDEX [IX_calculator_run_organisation_calculator_run_id] ON [calculator_run_organisation] ([calculator_run_id]);
@@ -8269,7 +8250,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
 
@@ -8282,18 +8263,19 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
 
                     INSERT INTO calculator_run_organisation
-                        (calculator_run_id, organisation_id, subsidiary_id, submitter_id, organisation_name,
-                         trading_name, obligation_status, num_days_obligated, joiner_date, leaver_date,
-                         status_code, error_code, has_h1, has_h2)
+                        (calculator_run_id, organisation_id, subsidiary_id, organisation_name,
+                         trading_name, num_days_obligated, joiner_date, leaver_date,
+                         status_code, error_code, is_error)
                     SELECT
-                        r.id, d.organisation_id, d.subsidiary_id, d.submitter_id, d.organisation_name,
-                        d.trading_name, ISNULL(d.obligation_status, ''), d.num_days_obligated, d.joiner_date, d.leaver_date,
-                        d.status_code, d.error_code, d.has_h1, d.has_h2
+                        r.id, d.organisation_id, d.subsidiary_id, d.organisation_name,
+                        d.trading_name, d.num_days_obligated, d.joiner_date, d.leaver_date,
+                        d.status_code, d.error_code,
+                        CASE WHEN d.obligation_status = 'E' THEN 1 ELSE 0 END
                     FROM calculator_run_organization_data_detail d
                     INNER JOIN calculator_run r
                         ON r.calculator_run_organization_data_master_id = d.calculator_run_organization_data_master_id;
@@ -8301,15 +8283,13 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
 
                     UPDATE pd
-                    SET obligation_status = d.obligation_status,
-                        num_days_obligated = d.num_days_obligated,
+                    SET num_days_obligated = d.num_days_obligated,
                         status_code = d.status_code,
-                        submitter_id = d.submitter_id,
                         joiner_date = d.joiner_date,
                         leaver_date = d.leaver_date
                     FROM producer_detail pd
@@ -8318,13 +8298,52 @@ BEGIN
                     INNER JOIN calculator_run_organization_data_detail d
                         ON d.calculator_run_organization_data_master_id = r.calculator_run_organization_data_master_id
                        AND d.organisation_id = pd.producer_id
-                       AND ISNULL(d.subsidiary_id, '') = ISNULL(pd.subsidiary_id, '')
-                    WHERE pd.obligation_status IS NULL;
+                       AND ISNULL(d.subsidiary_id, '') = ISNULL(pd.subsidiary_id, '');
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
+)
+BEGIN
+    EXEC sp_rename N'calculator_run_organization_data_detail', N'calculator_run_organization_data_detail_bk';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
+)
+BEGIN
+    EXEC sp_rename N'calculator_run_pom_data_detail', N'calculator_run_pom_data_detail_bk';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
+)
+BEGIN
+    EXEC sp_rename N'calculator_run_organization_data_master', N'calculator_run_organization_data_master_bk';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
+)
+BEGIN
+    EXEC sp_rename N'calculator_run_pom_data_master', N'calculator_run_pom_data_master_bk';
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
+)
+BEGIN
+    SELECT * INTO calculator_run_bk FROM calculator_run;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     ALTER TABLE [calculator_run] DROP CONSTRAINT [FK_calculator_run_calculator_run_organization_data_master_calculator_run_organization_data_master_id];
@@ -8332,7 +8351,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     ALTER TABLE [calculator_run] DROP CONSTRAINT [FK_calculator_run_calculator_run_pom_data_master_calculator_run_pom_data_master_id];
@@ -8340,55 +8359,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
-)
-BEGIN
-    DROP TABLE [calculator_run_organization_data_detail];
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
-)
-BEGIN
-    DROP TABLE [calculator_run_pom_data_detail];
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
-)
-BEGIN
-    DROP TABLE [organisation_data];
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
-)
-BEGIN
-    DROP TABLE [pom_data];
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
-)
-BEGIN
-    DROP TABLE [calculator_run_organization_data_master];
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
-)
-BEGIN
-    DROP TABLE [calculator_run_pom_data_master];
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     DROP INDEX [IX_calculator_run_calculator_run_organization_data_master_id] ON [calculator_run];
@@ -8396,7 +8367,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     DROP INDEX [IX_calculator_run_calculator_run_pom_data_master_id] ON [calculator_run];
@@ -8404,7 +8375,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     DROP INDEX [IX_index_calculator_run] ON [calculator_run];
@@ -8412,7 +8383,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     DECLARE @var58 nvarchar(max);
@@ -8426,7 +8397,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     DECLARE @var59 nvarchar(max);
@@ -8440,7 +8411,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     CREATE NONCLUSTERED INDEX [IX_index_calculator_run] ON [calculator_run] ([calculator_run_classification_id], [relative_year], [billing_run_status], [id]) INCLUDE ([name], [created_by], [created_at], [updated_by], [updated_at], [default_parameter_setting_master_id], [lapcap_data_master_id]);
@@ -8448,7 +8419,23 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
+)
+BEGIN
+    DROP TABLE [organisation_data];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
+)
+BEGIN
+    DROP TABLE [pom_data];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
 
@@ -8480,7 +8467,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
 
@@ -8509,129 +8496,11 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation'
+    WHERE [MigrationId] = N'20260921160000_DataApiSchemaChanges'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260902173358_ReplaceOrgPomStagingWithCalculatorRunOrganisation', N'10.0.11');
-END;
-
-COMMIT;
-GO
-
-BEGIN TRANSACTION;
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260910094953_AddIsErrorToCalculatorRunOrganisation'
-)
-BEGIN
-    ALTER TABLE [calculator_run_organisation] ADD [is_error] bit NOT NULL DEFAULT CAST(0 AS bit);
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260910094953_AddIsErrorToCalculatorRunOrganisation'
-)
-BEGIN
-    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260910094953_AddIsErrorToCalculatorRunOrganisation', N'10.0.11');
-END;
-
-COMMIT;
-GO
-
-BEGIN TRANSACTION;
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260910120849_RemoveUnusedObligationAndSubmitterColumns'
-)
-BEGIN
-    DECLARE @var60 nvarchar(max);
-    SELECT @var60 = QUOTENAME([d].[name])
-    FROM [sys].[default_constraints] [d]
-    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_detail]') AND [c].[name] = N'obligation_status');
-    IF @var60 IS NOT NULL EXEC(N'ALTER TABLE [producer_detail] DROP CONSTRAINT ' + @var60 + ';');
-    ALTER TABLE [producer_detail] DROP COLUMN [obligation_status];
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260910120849_RemoveUnusedObligationAndSubmitterColumns'
-)
-BEGIN
-    DECLARE @var61 nvarchar(max);
-    SELECT @var61 = QUOTENAME([d].[name])
-    FROM [sys].[default_constraints] [d]
-    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[producer_detail]') AND [c].[name] = N'submitter_id');
-    IF @var61 IS NOT NULL EXEC(N'ALTER TABLE [producer_detail] DROP CONSTRAINT ' + @var61 + ';');
-    ALTER TABLE [producer_detail] DROP COLUMN [submitter_id];
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260910120849_RemoveUnusedObligationAndSubmitterColumns'
-)
-BEGIN
-    DECLARE @var62 nvarchar(max);
-    SELECT @var62 = QUOTENAME([d].[name])
-    FROM [sys].[default_constraints] [d]
-    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organisation]') AND [c].[name] = N'has_h1');
-    IF @var62 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organisation] DROP CONSTRAINT ' + @var62 + ';');
-    ALTER TABLE [calculator_run_organisation] DROP COLUMN [has_h1];
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260910120849_RemoveUnusedObligationAndSubmitterColumns'
-)
-BEGIN
-    DECLARE @var63 nvarchar(max);
-    SELECT @var63 = QUOTENAME([d].[name])
-    FROM [sys].[default_constraints] [d]
-    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organisation]') AND [c].[name] = N'has_h2');
-    IF @var63 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organisation] DROP CONSTRAINT ' + @var63 + ';');
-    ALTER TABLE [calculator_run_organisation] DROP COLUMN [has_h2];
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260910120849_RemoveUnusedObligationAndSubmitterColumns'
-)
-BEGIN
-    DECLARE @var64 nvarchar(max);
-    SELECT @var64 = QUOTENAME([d].[name])
-    FROM [sys].[default_constraints] [d]
-    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organisation]') AND [c].[name] = N'obligation_status');
-    IF @var64 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organisation] DROP CONSTRAINT ' + @var64 + ';');
-    ALTER TABLE [calculator_run_organisation] DROP COLUMN [obligation_status];
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260910120849_RemoveUnusedObligationAndSubmitterColumns'
-)
-BEGIN
-    DECLARE @var65 nvarchar(max);
-    SELECT @var65 = QUOTENAME([d].[name])
-    FROM [sys].[default_constraints] [d]
-    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
-    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[calculator_run_organisation]') AND [c].[name] = N'submitter_id');
-    IF @var65 IS NOT NULL EXEC(N'ALTER TABLE [calculator_run_organisation] DROP CONSTRAINT ' + @var65 + ';');
-    ALTER TABLE [calculator_run_organisation] DROP COLUMN [submitter_id];
-END;
-
-IF NOT EXISTS (
-    SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260910120849_RemoveUnusedObligationAndSubmitterColumns'
-)
-BEGIN
-    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260910120849_RemoveUnusedObligationAndSubmitterColumns', N'10.0.11');
+    VALUES (N'20260921160000_DataApiSchemaChanges', N'10.0.11');
 END;
 
 COMMIT;
