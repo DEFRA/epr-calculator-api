@@ -415,14 +415,17 @@ public class ProducerDataServiceTests
         var dataSource = new SynapseDataSource(mockOrgHandler.Object, mockPomHandler.Object);
         var loadOptions = Options.Create(new DataApiLoadOptions { Enabled = loadTableEnabled });
 
-        return new ProducerDataService(
-            dataSource,
+        var pipeline = new ProducerDataPipelineServices(
             selector,
             determiner ?? mockDeterminer!.Object,
             eligibilityFilterToUse,
             mockFlagsCalculator.Object,
             new ProducerErrorDetector(),
-            new ProducerPomAligner(),
+            new ProducerPomAligner());
+
+        return new ProducerDataService(
+            dataSource,
+            pipeline,
             loadTableRefresher ?? Mock.Of<ILoadTableRefresher>(),
             loadOptions);
     }
