@@ -29,12 +29,7 @@ public interface IProducerDataService
 
 internal sealed class ProducerDataService(
     IPayCalDataSource dataSource,
-    IAcceptedFileSelector acceptedFileSelector,
-    IProducerObligationDeterminer obligationDeterminer,
-    IPomEligibilityFilter pomEligibilityFilter,
-    IOrganisationPeriodFlagsCalculator organisationPeriodFlagsCalculator,
-    IProducerErrorDetector errorDetector,
-    IProducerPomAligner aligner,
+    ProducerDataPipelineServices pipeline,
     ILoadTableRefresher loadTableRefresher,
     IOptions<DataApiLoadOptions> loadOptions
 ) : IProducerDataService
@@ -116,8 +111,8 @@ internal sealed class ProducerDataService(
             .Where(o => o.RegulatorStatus is not "Cancelled")
             .Select(o => o.OrganisationId)
             .ToHashSet();
-        var eligiblePoms = pomEligibilityFilter.Filter(rawPoms, registeredOrganisationIds);
-        var organisationsWithPeriodFlags = organisationPeriodFlagsCalculator.ApplyPeriodFlags(rawOrganisations, rawPoms);
+        var eligiblePoms = pipeline.PomEligibilityFilter.Filter(rawPoms, registeredOrganisationIds);
+        var organisationsWithPeriodFlags = pipeline.OrganisationPeriodFlagsCalculator.ApplyPeriodFlags(rawOrganisations, rawPoms);
 
         var organisations = organisationsWithPeriodFlags.Select(ValidateOrganisation).ToImmutableList();
         // sp_GetPaycalPomData applied the reportable-packaging filter upstream of every consumer,
@@ -127,14 +122,14 @@ internal sealed class ProducerDataService(
             .Select(NormalisePom)
             .ToImmutableList();
 
-        var detection = errorDetector.Detect(organisations, poms);
+        var detection = pipeline.ErrorDetector.Detect(organisations, poms);
 
         var matchedPoms = poms
             .Where(p => !detection.UnmatchedKeys.Contains((p.OrganisationId, p.SubsidiaryId)))
             .ToImmutableList();
 
-        var dedupedOrganisations = aligner.DedupeOrganisations(organisations);
-        var aligned = aligner.Align(dedupedOrganisations, matchedPoms, materialCodes).ToImmutableList();
+        var dedupedOrganisations = pipeline.Aligner.DedupeOrganisations(organisations);
+        var aligned = pipeline.Aligner.Align(dedupedOrganisations, matchedPoms, materialCodes).ToImmutableList();
 
         return MergeProducerRecords(dedupedOrganisations, aligned, detection.Errors);
     }
@@ -251,8 +246,8 @@ internal sealed class ProducerDataService(
         // org/submitter/period (honouring the cut-off date) before obligation determination, which
         // needs every row for the run up front since it aggregates across rows (per producer/submission
         // period) rather than deciding a row in isolation.
-        var latestOrganisations = acceptedFileSelector.SelectLatestOrganisationFiles(rawOrganisations, cutOffDate);
-        return obligationDeterminer.Determine(latestOrganisations).ToList();
+        var latestOrganisations = pipeline.AcceptedFileSelector.SelectLatestOrganisationFiles(rawOrganisations, cutOffDate);
+        return pipeline.ObligationDeterminer.Determine(latestOrganisations).ToList();
     }
 
     private async Task<List<PayCalPom>> StreamPoms(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
@@ -269,7 +264,7 @@ internal sealed class ProducerDataService(
                     (pom.OrganisationId, pom.SubmitterId, pom.SubmissionPeriod, pom.FileName),
                     new PomFileCandidate(pom.OrganisationId, pom.SubmitterId, pom.SubmissionPeriod, pom.FileName, pom.IsResubmission, pom.CreatedDateTime));
 
-            return acceptedFileSelector.SelectWinningPomFileNames(candidates.Values, cutOffDate);
+            return pipeline.AcceptedFileSelector.SelectWinningPomFileNames(candidates.Values, cutOffDate);
         });
 
         return await DataApiTelemetry.TraceAsync(typeof(ProducerDataService), "BufferPomStream", async () =>

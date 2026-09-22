@@ -52,6 +52,7 @@ public static class DataApiServiceCollectionExtensions
         services.AddTransient<IPomEligibilityFilter, PomEligibilityFilter>();
         services.AddTransient<IOrganisationPeriodFlagsCalculator, OrganisationPeriodFlagsCalculator>();
         services.AddTransient<IProducerErrorDetector, ProducerErrorDetector>();
+        services.AddTransient<ProducerDataPipelineServices>();
         services.AddTransient<IProducerDataService, ProducerDataService>();
 
         services
