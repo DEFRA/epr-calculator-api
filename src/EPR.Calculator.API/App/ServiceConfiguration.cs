@@ -157,14 +157,7 @@ public static class ServiceConfiguration
 
         public IServiceCollection AddPayCalDataApi(IConfiguration configuration)
         {
-            services
-                .AddOptions<SynapseOptions>()
-                .BindConfiguration(SynapseOptions.SectionKey)
-                .ValidateDataAnnotations()
-                .ValidateOnStart();
-
             services.AddDataApi(
-                provider => provider.GetRequiredService<IOptions<SynapseOptions>>().Value.ConnectionString,
                 provider => provider.GetRequiredService<IOptions<DatabaseOptions>>().Value.ConnectionString,
                 provider => provider.GetRequiredService<IConfiguration>().GetValue("CommonDataApi:DataLoader:Enabled", true),
                 captureMemoryMetrics: configuration.GetValue("Telemetry:CaptureMemoryMetrics", defaultValue: false));
