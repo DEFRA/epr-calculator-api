@@ -15,7 +15,7 @@ public class FakeCommonDataApiClient : ICommonDataApiClient
 
     public async IAsyncEnumerable<PomResponse> StreamPoms(
         RelativeYear relativeYear,
-        DateTime? cutOffDate,
+        DateTimeOffset? cutOffDate,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         foreach (var pom in Poms())
@@ -30,7 +30,7 @@ public class FakeCommonDataApiClient : ICommonDataApiClient
 
     public async IAsyncEnumerable<OrganisationResponse> StreamOrganisations(
         RelativeYear relativeYear,
-        DateTime? cutOffDate,
+        DateTimeOffset? cutOffDate,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         foreach (var organisation in OrganisationResponses)
