@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 
@@ -10,6 +11,8 @@ internal record PayCalOrganisation
     public string? SubmitterId { get; init; }
     public required string OrganisationName { get; init; }
     public string? TradingName { get; init; }
+
+    [JsonPropertyName("LeaverCode")]
     public string? StatusCode { get; init; }
     public string? LeaverDate { get; init; }
     public string? JoinerDate { get; init; }
@@ -24,5 +27,7 @@ internal record PayCalOrganisation
     // File-selection inputs only (see IAcceptedFileSelector) - not carried past that stage.
     public string? FileName { get; init; }
     public bool IsResubmission { get; init; }
+
+    [JsonPropertyName("CreatedAt")]
     public DateTime? CreatedDateTime { get; init; }
 }

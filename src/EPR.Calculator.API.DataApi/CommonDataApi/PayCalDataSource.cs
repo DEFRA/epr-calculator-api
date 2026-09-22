@@ -18,7 +18,7 @@ internal interface IPayCalDataSource
 }
 
 /// <summary>Reads the RPD source directly via the streaming request handlers.</summary>
-internal sealed class SynapseDataSource(
+internal sealed class CommonDataApiSource(
     IStreamOrganisationsRequestHandler organisationsHandler,
     IStreamPomsRequestHandler pomsHandler) : IPayCalDataSource
 {
