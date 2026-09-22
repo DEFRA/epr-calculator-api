@@ -521,6 +521,8 @@ build_producer_table_schema <- function(materials_order, glass_name) {
   is_glass <- function(material) !is.na(glass_name) && material == glass_name
 
   blocks <- list(list(name = "identity", width = 10))
+  # SummaryExporter: repeats 6 billing-instruction/total-bill columns for visibility
+  blocks[[length(blocks) + 1]] <- list(name = "summary", width = 6)
 
   for (material in materials_order) {
     # 1 (prev invoiced)

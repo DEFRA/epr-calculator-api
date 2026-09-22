@@ -9,23 +9,46 @@ namespace EPR.Calculator.API.BackgroundService.Exporter.CsvExporter.Summary;
 
 public class BillingInstructionsExporter : IProducerFeesPartExporter
 {
-    public static readonly string Title = "Calculation of Suggested Billing Instructions and Invoice Amounts";
+    // Shared with Summary Exporter
+    internal static readonly string Title = "Calculation of Suggested Billing Instructions and Invoice Amounts";
+
+    internal static readonly string CurrentYearInvoiceTotalToDateHeader = "Current Year Invoiced Total To Date";
+    internal static readonly string TonnageChangeSinceLastInvoiceHeader = "Tonnage Change Since Last Invoice";
+    internal static readonly string PercentageLiabilityDifferenceHeader = "% Liability Difference (Calc vs Prev)";
+    internal static readonly string SuggestedBillingInstructionHeader = "Suggested Billing Instruction";
+    internal static readonly string SuggestedInvoiceAmountHeader = "Suggested Invoice Amount";
 
     public IEnumerable<string> GetColumnHeaders(IReadOnlyList<MaterialDetail> materials, bool applyModulation)
     {
         return [
-            "Current Year Invoiced Total To Date",
-            "Tonnage Change Since Last Invoice",
+            CurrentYearInvoiceTotalToDateHeader,
+            TonnageChangeSinceLastInvoiceHeader,
             "Liability Difference (Calc vs Prev)",
             "Material £ Threshold Breached",
             "Tonnage £ Threshold Breached (if tonnage changed)",
-            "% Liability Difference (Calc vs Prev)",
+            PercentageLiabilityDifferenceHeader,
             "Material % Threshold Breached",
             "Tonnage % Threshold Breached (if tonnage changed)",
-            "Suggested Billing Instruction",
-            "Suggested Invoice Amount"
+            SuggestedBillingInstructionHeader,
+            SuggestedInvoiceAmountHeader
         ];
     }
+
+    // Shared with Summary Exporter
+    internal static string FormatCurrentYearInvoiceTotalToDate(BillingInstruction s) =>
+        CsvSanitiser.SanitiseData(s.CurrentYearInvoiceTotalToDate, DecimalPlaces.Two, null, isCurrency: true, canBeEmpty: true);
+
+    internal static string FormatTonnageChangeSinceLastInvoice(BillingInstruction s) =>
+        CsvSanitiser.SanitiseData(s.TonnageChangeSinceLastInvoice ?? CommonConstants.Hyphen);
+
+    internal static string FormatPercentageLiabilityDifference(BillingInstruction s) =>
+        CsvSanitiser.SanitiseData(s.PercentageLiabilityDifference, DecimalPlaces.Two, null, isPercentage: true, canBeEmpty: true);
+
+    internal static string FormatSuggestedBillingInstruction(BillingInstruction s) =>
+        CsvSanitiser.SanitiseData(s.SuggestedBillingInstruction);
+
+    internal static string FormatSuggestedInvoiceAmount(BillingInstruction s) =>
+        CsvSanitiser.SanitiseData(s.SuggestedInvoiceAmount, DecimalPlaces.Two, null, isCurrency: true, canBeEmpty: true);
 
     public void AppendSectionHeader(StringBuilder csvContent, ProducerFees producerFees, IReadOnlyList<MaterialDetail> materials, bool applyModulation)
     {
@@ -37,15 +60,15 @@ public class BillingInstructionsExporter : IProducerFeesPartExporter
     public void AppendRow(StringBuilder csvContent, ProducerFeeExportRow producer, bool applyModulation, bool isOverallTotal)
     {
         var s = producer.FeeDetail.BillingInstruction!;
-        csvContent.Append(CsvSanitiser.SanitiseData(s.CurrentYearInvoiceTotalToDate, DecimalPlaces.Two, null, isCurrency: true, canBeEmpty: true));
-        csvContent.Append(CsvSanitiser.SanitiseData(s.TonnageChangeSinceLastInvoice ?? CommonConstants.Hyphen));
+        csvContent.Append(FormatCurrentYearInvoiceTotalToDate(s));
+        csvContent.Append(FormatTonnageChangeSinceLastInvoice(s));
         csvContent.Append(CsvSanitiser.SanitiseData(s.LiabilityDifference, DecimalPlaces.Two, null, isCurrency: true, canBeEmpty: true));
         csvContent.Append(CsvSanitiser.SanitiseData(isOverallTotal ? string.Empty : LiabilityDirectionUtils.ToThresholdBreachedString(s.MaterialityLiabilityDirection), appendLrmCharacterToPreventRenderedAsFormula: true));
         csvContent.Append(CsvSanitiser.SanitiseData(isOverallTotal ? string.Empty : LiabilityDirectionUtils.ToThresholdBreachedString(s.TonnageAmountLiabilityDirection), appendLrmCharacterToPreventRenderedAsFormula: true));
-        csvContent.Append(CsvSanitiser.SanitiseData(s.PercentageLiabilityDifference, DecimalPlaces.Two, null, isPercentage: true, canBeEmpty: true));
+        csvContent.Append(FormatPercentageLiabilityDifference(s));
         csvContent.Append(CsvSanitiser.SanitiseData(isOverallTotal ? string.Empty : LiabilityDirectionUtils.ToThresholdBreachedString(s.MaterialityPercentageLiabilityDirection), appendLrmCharacterToPreventRenderedAsFormula: true));
         csvContent.Append(CsvSanitiser.SanitiseData(isOverallTotal ? string.Empty : LiabilityDirectionUtils.ToThresholdBreachedString(s.TonnageAmountPercentageLiabilityDirection), appendLrmCharacterToPreventRenderedAsFormula: true));
-        csvContent.Append(CsvSanitiser.SanitiseData(s.SuggestedBillingInstruction));
-        csvContent.Append(CsvSanitiser.SanitiseData(s.SuggestedInvoiceAmount, DecimalPlaces.Two, null, isCurrency: true, canBeEmpty: true));
+        csvContent.Append(FormatSuggestedBillingInstruction(s));
+        csvContent.Append(FormatSuggestedInvoiceAmount(s));
     }
 }

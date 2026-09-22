@@ -55,6 +55,7 @@ public class ProducerFeesExporter : IProducerFeesExporter
     ) =>
     [
         new ProducerIdentityExporter(scaledupProducerIds, partialProducerSubsidiaryIds),
+        new SummaryExporter(),
         new Section1MaterialsExporter(),
         new Section1DisposalFeeExporter(),
         new Section2aMaterialsExporter(),
