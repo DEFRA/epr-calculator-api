@@ -149,50 +149,55 @@ internal sealed class ProducerObligationDeterminer : IProducerObligationDetermin
             var pivot = pivotCounts[(row.ProducerId, row.Source.SubmissionPeriodYear)];
             var joinerDate = ParseJoinerDate(row.Source.JoinerDate);
             var isDateSensitiveCode = row.Source.StatusCode is not null && DateSensitiveLeaverCodes.Contains(row.Source.StatusCode);
-            var yearMismatch = isDateSensitiveCode && joinerDate is not null && row.Source.SubmissionPeriodYear != joinerDate.Value.Year;
 
-            if (yearMismatch)
-            {
-                row.ObligationStatus = "E";
-                row.ErrorCode = "Date input issue";
-            }
-            else if (row.RawObligationStatus == RawInvalid)
-            {
-                row.ObligationStatus = "E";
-                row.ErrorCode = RawInvalid;
-            }
-            else if (pivot is { Obligated: 0, Blank: 0, NotObligated: > 0 })
-            {
-                row.ObligationStatus = "E";
-                row.ErrorCode = RawNotObligated;
-            }
-            else if (pivot is { Obligated: 0, Blank: > 1 })
-            {
-                row.ObligationStatus = "E";
-                row.ErrorCode = "Conflicting Obligations (Blanks)";
-            }
-            else if (pivot is { Obligated: 0, Blank: 1 })
-            {
-                row.ObligationStatus = row.RawObligationStatus == RawBlank ? "O" : "N";
-                row.ErrorCode = null;
-            }
-            else if (pivot.Obligated == 1)
-            {
-                row.ObligationStatus = row.RawObligationStatus == RawObligated ? "O" : "N";
-                row.ErrorCode = null;
-            }
-            else
-            {
-                // pivot.Obligated > 1, or any other combination not covered above.
-                row.ObligationStatus = "E";
-                row.ErrorCode = pivot.Obligated > 1 ? "Conflicting Obligations (Leaver Codes)" : "E";
-            }
-
-            row.NumDaysObligated = isDateSensitiveCode && joinerDate is not null && joinerDate.Value.Year == row.Source.SubmissionPeriodYear
-                ? (short)(new DateTime(joinerDate.Value.Year, 12, 31).DayOfYear - joinerDate.Value.DayOfYear + 1)
-                : null;
+            (row.ObligationStatus, row.ErrorCode) = DetermineStatus(row, pivot, joinerDate, isDateSensitiveCode);
+            row.NumDaysObligated = ComputeNumDaysObligated(joinerDate, isDateSensitiveCode, row.Source.SubmissionPeriodYear);
         }
     }
+
+    private static (string ObligationStatus, string? ErrorCode) DetermineStatus(
+        Row row, PivotCounts pivot, DateTime? joinerDate, bool isDateSensitiveCode)
+    {
+        var yearMismatch = isDateSensitiveCode && joinerDate is not null && row.Source.SubmissionPeriodYear != joinerDate.Value.Year;
+
+        if (yearMismatch)
+        {
+            return ("E", "Date input issue");
+        }
+
+        if (row.RawObligationStatus == RawInvalid)
+        {
+            return ("E", RawInvalid);
+        }
+
+        if (pivot is { Obligated: 0, Blank: 0, NotObligated: > 0 })
+        {
+            return ("E", RawNotObligated);
+        }
+
+        if (pivot is { Obligated: 0, Blank: > 1 })
+        {
+            return ("E", "Conflicting Obligations (Blanks)");
+        }
+
+        if (pivot is { Obligated: 0, Blank: 1 })
+        {
+            return (row.RawObligationStatus == RawBlank ? "O" : "N", null);
+        }
+
+        if (pivot.Obligated == 1)
+        {
+            return (row.RawObligationStatus == RawObligated ? "O" : "N", null);
+        }
+
+        // pivot.Obligated > 1, or any other combination not covered above.
+        return ("E", pivot.Obligated > 1 ? "Conflicting Obligations (Leaver Codes)" : "E");
+    }
+
+    private static short? ComputeNumDaysObligated(DateTime? joinerDate, bool isDateSensitiveCode, int? submissionPeriodYear) =>
+        isDateSensitiveCode && joinerDate is not null && joinerDate.Value.Year == submissionPeriodYear
+            ? (short)(new DateTime(joinerDate.Value.Year, 12, 31, 0, 0, 0, DateTimeKind.Unspecified).DayOfYear - joinerDate.Value.DayOfYear + 1)
+            : null;
 
     private static DateTime? ParseJoinerDate(string? joinerDate) =>
         DateTime.TryParseExact(joinerDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)

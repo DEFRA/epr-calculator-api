@@ -26,12 +26,15 @@ internal sealed class PomEligibilityFilter : IPomEligibilityFilter
         {
             var registeredOrganisationIds = organisationIdsWithRegistration as HashSet<int> ?? organisationIdsWithRegistration.ToHashSet();
 
+            // Parse each POM's submission period once, not once per group-key lookup - this runs over
+            // every POM row for the run.
             var eligiblePeriods = poms
-                .Where(p => SubmissionPeriodClassification.TryParseYear(p.SubmissionPeriod, out _))
-                .GroupBy(p => (p.OrganisationId, p.SubmitterId, Year: ParseYear(p.SubmissionPeriod!)))
+                .Select(p => (Pom: p, Year: ParseYear(p.SubmissionPeriod)))
+                .Where(x => x.Year is not null)
+                .GroupBy(x => (x.Pom.OrganisationId, x.Pom.SubmitterId, Year: x.Year!.Value))
                 .Where(g =>
-                    g.Any(p => SubmissionPeriodClassification.IsH1(p.SubmissionPeriod!, g.Key.Year)) &&
-                    g.Any(p => SubmissionPeriodClassification.IsH2(p.SubmissionPeriod!, g.Key.Year)))
+                    g.Any(x => SubmissionPeriodClassification.IsH1(x.Pom.SubmissionPeriod!, g.Key.Year)) &&
+                    g.Any(x => SubmissionPeriodClassification.IsH2(x.Pom.SubmissionPeriod!, g.Key.Year)))
                 .Select(g => g.Key)
                 .ToHashSet();
 
@@ -43,9 +46,6 @@ internal sealed class PomEligibilityFilter : IPomEligibilityFilter
                 .ToList();
         });
 
-    private static int ParseYear(string submissionPeriod)
-    {
-        SubmissionPeriodClassification.TryParseYear(submissionPeriod, out var year);
-        return year;
-    }
+    private static int? ParseYear(string? submissionPeriod) =>
+        SubmissionPeriodClassification.TryParseYear(submissionPeriod, out var year) ? year : null;
 }

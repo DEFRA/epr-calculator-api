@@ -23,14 +23,17 @@ internal sealed class OrganisationPeriodFlagsCalculator : IOrganisationPeriodFla
     public IReadOnlyList<PayCalOrganisation> ApplyPeriodFlags(IReadOnlyList<PayCalOrganisation> organisations, IReadOnlyList<PayCalPom> poms) =>
         DataApiTelemetry.Trace(typeof(OrganisationPeriodFlagsCalculator), nameof(ApplyPeriodFlags), () =>
         {
+            // Parse each POM's submission period once, not once per IsH1/IsH2 check - this runs over
+            // every POM row for the run.
             var flagsByOrgSubSubmitter = poms
-                .Where(p => SubmissionPeriodClassification.TryParseYear(p.SubmissionPeriod, out _))
-                .GroupBy(p => (p.OrganisationId, p.SubsidiaryId, p.SubmitterId))
+                .Select(p => (Pom: p, Year: ParseYear(p.SubmissionPeriod)))
+                .Where(x => x.Year is not null)
+                .GroupBy(x => (x.Pom.OrganisationId, x.Pom.SubsidiaryId, x.Pom.SubmitterId))
                 .ToDictionary(
                     g => g.Key,
                     g => (
-                        HasH1: g.Any(p => IsH1(p.SubmissionPeriod!)),
-                        HasH2: g.Any(p => IsH2(p.SubmissionPeriod!))));
+                        HasH1: g.Any(x => SubmissionPeriodClassification.IsH1(x.Pom.SubmissionPeriod!, x.Year!.Value)),
+                        HasH2: g.Any(x => SubmissionPeriodClassification.IsH2(x.Pom.SubmissionPeriod!, x.Year!.Value))));
 
             return organisations
                 .Select(o =>
@@ -45,15 +48,6 @@ internal sealed class OrganisationPeriodFlagsCalculator : IOrganisationPeriodFla
                 .ToList();
         });
 
-    private static bool IsH1(string submissionPeriod)
-    {
-        SubmissionPeriodClassification.TryParseYear(submissionPeriod, out var year);
-        return SubmissionPeriodClassification.IsH1(submissionPeriod, year);
-    }
-
-    private static bool IsH2(string submissionPeriod)
-    {
-        SubmissionPeriodClassification.TryParseYear(submissionPeriod, out var year);
-        return SubmissionPeriodClassification.IsH2(submissionPeriod, year);
-    }
+    private static int? ParseYear(string? submissionPeriod) =>
+        SubmissionPeriodClassification.TryParseYear(submissionPeriod, out var year) ? year : null;
 }
