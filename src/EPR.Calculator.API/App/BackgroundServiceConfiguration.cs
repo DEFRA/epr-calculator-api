@@ -41,7 +41,6 @@ using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services;
-using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Services.DataLoading;
 using EPR.Calculator.API.BackgroundService.Telemetry;
 using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
@@ -80,22 +79,12 @@ public static class BackgroundServiceConfiguration
 
             // Register CommonDataApi
             services
-                .AddOptions<CommonDataApiHttpClientOptions>()
-                .BindConfiguration(CommonDataApiHttpClientOptions.SectionKey)
-                .ValidateDataAnnotations()
-                .ValidateOnStart();
-
-            services.AddHttpClient<ICommonDataApiClient, CommonDataApiHttpClient>();
-
-            services
                 .AddOptions<CommonDataApiLoaderOptions>()
                 .BindConfiguration(CommonDataApiLoaderOptions.SectionKey)
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
             services.AddTransient<IDataLoader, CommonDataApiLoader>();
-            services.AddTransient<ICalculatorRunOrgData, CalculatorRunOrgData>();
-            services.AddTransient<ICalculatorRunPomData, CalculatorRunPomData>();
             services.AddTransient<IProducerDataTransposer, ProducerDataTransposer>();
 
             // Register BillingRunDependencies

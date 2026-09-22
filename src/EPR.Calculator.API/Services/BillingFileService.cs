@@ -295,20 +295,16 @@ public class BillingFileService(
             (int)RunClassification.DELETED
         };
 
-        var parentProducers = await (from odd in dbContext.CalculatorRunOrganisationDataDetails
-            join odm in dbContext.CalculatorRunOrganisationDataMaster
-                on odd.CalculatorRunOrganisationDataMasterId equals odm.Id
-            join run in dbContext.CalculatorRuns
-                on odm.Id equals run.CalculatorRunOrganisationDataMasterId
-            where run.Id == runId
-                  && producerIds.Contains(odd.OrganisationId)
-                  && odd.SubsidiaryId == null
-            orderby odd.Id descending
+        var parentProducers = await (from org in dbContext.CalculatorRunOrganisations
+            where org.CalculatorRunId == runId
+                  && producerIds.Contains(org.OrganisationId)
+                  && org.SubsidiaryId == null
+            orderby org.Id descending
             select new ParentProducer
             {
-                Id = odd.Id,
-                ProducerId = odd.OrganisationId,
-                ProducerName = odd.OrganisationName
+                Id = org.Id,
+                ProducerId = org.OrganisationId,
+                ProducerName = org.OrganisationName
             }).AsNoTracking().Distinct().ToListAsync(cancellationToken);
 
         // Get the distinct list of parent producer ids
@@ -342,18 +338,17 @@ public class BillingFileService(
             // fallback option -- lookup organisation snapshot from previous runs as it was deleted in the pom data and not exists in the producer details
             if (stillMissingIds.Count > 0)
             {
-                var previousRunNames = await (from odd in dbContext.CalculatorRunOrganisationDataDetails
-                        join odm in dbContext.CalculatorRunOrganisationDataMaster on odd.CalculatorRunOrganisationDataMasterId equals odm.Id
-                        join run in dbContext.CalculatorRuns on odm.Id equals run.CalculatorRunOrganisationDataMasterId
+                var previousRunNames = await (from org in dbContext.CalculatorRunOrganisations
+                        join run in dbContext.CalculatorRuns on org.CalculatorRunId equals run.Id
                         where run.RelativeYear == relativeYear.Value
-                              && stillMissingIds.Contains(odd.OrganisationId)
-                              && odd.SubsidiaryId == null
-                        orderby odd.Id descending
+                              && stillMissingIds.Contains(org.OrganisationId)
+                              && org.SubsidiaryId == null
+                        orderby org.Id descending
                         select new ParentProducer
                         {
-                            Id = odd.Id,
-                            ProducerId = odd.OrganisationId,
-                            ProducerName = odd.OrganisationName
+                            Id = org.Id,
+                            ProducerId = org.OrganisationId,
+                            ProducerName = org.OrganisationName
                         })
                     .AsNoTracking()
                     .Distinct()

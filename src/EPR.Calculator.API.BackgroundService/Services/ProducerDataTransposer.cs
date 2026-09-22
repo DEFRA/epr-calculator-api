@@ -1,8 +1,8 @@
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.Enums;
 using EPR.Calculator.API.Data.Utils;
+using EPR.CommonDataService.DataApi.Alignment;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Services;
@@ -10,112 +10,84 @@ namespace EPR.Calculator.API.BackgroundService.Services;
 public interface IProducerDataTransposer
 {
     /// <summary>
-    ///     Transposes POM and organisation data for a given calculator run into ProducerDetails and ProducerReportedMaterials.
+    ///     Persists a calculator run's organisations, producer details/reported materials, and any
+    ///     errors/warnings raised while calculating them.
     /// </summary>
-    Task Transpose(CalculatorRunContext runContext, CancellationToken cancellationToken);
+    Task Transpose(
+        CalculatorRunContext runContext,
+        IReadOnlyList<ProducerRecord> data,
+        CancellationToken cancellationToken);
 }
 
 public class ProducerDataTransposer(
     ApplicationDBContext dbContext,
     IBulkOperations bulkOps,
     IErrorReportService errorReportService,
+    TimeProvider timeProvider,
     ILogger<ProducerDataTransposer> logger
 ) : IProducerDataTransposer
 {
     [ActivityTrace]
-    public async Task Transpose(CalculatorRunContext runContext, CancellationToken cancellationToken)
+    public async Task Transpose(
+        CalculatorRunContext runContext,
+        IReadOnlyList<ProducerRecord> data,
+        CancellationToken cancellationToken)
     {
         var calculatorRun = await dbContext.CalculatorRuns
-            .AsNoTracking()
-            .Where(x => x.Id == runContext.RunId
-                        && x.CalculatorRunOrganisationDataMaster != null
-                        && x.CalculatorRunPomDataMaster != null)
-            .SingleAsync(cancellationToken);
+            .SingleAsync(x => x.Id == runContext.RunId, cancellationToken);
 
         var materials = await dbContext.Material
             .AsNoTracking()
             .ToImmutableListAsync(cancellationToken);
 
-        var calculatorRunOrgDataDetails = await dbContext.CalculatorRunOrganisationDataDetails
-            .AsNoTracking()
-            .Where(x => x.CalculatorRunOrganisationDataMasterId == calculatorRun.CalculatorRunOrganisationDataMasterId)
-            .ToImmutableListAsync(cancellationToken);
+        var materialsByCode = materials.ToImmutableDictionary(m => m.Code, StringComparer.OrdinalIgnoreCase);
 
-        var calculatorRunPomDataDetails = await dbContext.CalculatorRunPomDataDetails
-            .AsNoTracking()
-            .Where(x => x.CalculatorRunPomDataMasterId == calculatorRun.CalculatorRunPomDataMasterId)
-            .ToImmutableListAsync(cancellationToken);
-
-        var unmatchedSet = await errorReportService.HandleErrors(
-            calculatorRunPomDataDetails,
-            calculatorRunOrgDataDetails,
-            calculatorRun.Id,
-            calculatorRun.CreatedBy,
-            calculatorRun.RelativeYear,
-            cancellationToken);
-
-        calculatorRunPomDataDetails = calculatorRunPomDataDetails
-            .Where(p =>
+        // ⚠️ Only set scalar FK columns (e.g. CalculatorRunId, MaterialId) on the entities below.
+        // Navigation properties to existing rows (CalculatorRun, Material) are intentionally left
+        // unset so that the IncludeGraph bulk insert below does not try to re-insert them.
+        //
+        // Only records with reported materials become a ProducerDetail row - e.g. a holding company
+        // obligated in its own right but with no POM data of its own (its subsidiaries report on its
+        // behalf) gets a CalculatorRunOrganisation row below but no ProducerDetail row, exactly as
+        // before this type was unified. ProducerFeesBuilder/CalcResultScaledupProducersBuilder rely on
+        // that absence to know to look the parent up via CalculatorRunOrganisation instead.
+        var newProducerDetails = data
+            .Where(producer => producer.ReportedMaterials.Count > 0)
+            .Select(producer =>
             {
-                var orgId = p.OrganisationId.GetValueOrDefault();
-                var subId = p.SubsidiaryId;
-                return !unmatchedSet.Contains((orgId, subId));
+                var producerDetail = new ProducerDetail
+                {
+                    CalculatorRunId = calculatorRun.Id,
+                    ProducerId = producer.OrganisationId,
+                    TradingName = producer.TradingName,
+                    SubsidiaryId = producer.SubsidiaryId,
+                    ProducerName = producer.ProducerName,
+                    DaysObligated = producer.DaysObligated,
+                    JoinerDate = producer.JoinerDate,
+                    LeaverDate = producer.LeaverDate,
+                    StatusCode = producer.StatusCode
+                };
+
+                foreach (var reportedMaterial in producer.ReportedMaterials)
+                    producerDetail.ProducerReportedMaterials.Add(ToProducerReportedMaterial(reportedMaterial, materialsByCode[reportedMaterial.MaterialCode]));
+
+                return producerDetail;
             })
-            .ToImmutableList();
+            .ToList();
 
-        var organisationDataDetails = calculatorRunOrgDataDetails
-            .Where(odd => ObligationStates.IsObligated(odd.ObligationStatus)
-                          && !string.IsNullOrWhiteSpace(odd.OrganisationName))
-            .GroupBy(odd => new { odd.OrganisationId, odd.SubsidiaryId, odd.SubmitterId })
-            // PERF: MaxBy is O(n) and avoids the OrderByDescending(...).First() O(n log n) sort + allocation per group.
-            .Select(grp => grp.MaxBy(o => o.HasH2)!)
-            .ToImmutableList();
-
-        // PERF: pre-build an O(1) lookup of POMs keyed by (OrganisationId, SubsidiaryId, SubmitterId).
-        // We also pre-apply the PackagingType / OrganisationId.HasValue filters here so each per-organisation
-        // slice is ready to group by material code directly.
-        var pomsByOrgSubSubmitter = calculatorRunPomDataDetails
-            .Where(pdd => pdd is { PackagingType: not null, OrganisationId: not null })
-            .ToLookup(pdd => (OrganisationId: pdd.OrganisationId!.Value, pdd.SubsidiaryId, pdd.SubmitterId));
-
-        // PERF: pre-size to avoid repeated List<T> internal-array reallocations as we Add per organisation.
-        var newProducerDetails = new List<ProducerDetail>(organisationDataDetails.Count);
-
-        foreach (var organisation in organisationDataDetails)
-        {
-            var orgPoms = pomsByOrgSubSubmitter[(organisation.OrganisationId, organisation.SubsidiaryId, organisation.SubmitterId)];
-
-            var subsidiaryPomsByMaterial = orgPoms
-                .GroupBy(pdd => pdd.PackagingMaterial!)
-                .ToImmutableDictionary(grp => grp.Key,
-                    grp => grp.ToImmutableList(),
-                    StringComparer.OrdinalIgnoreCase);
-
-            if (subsidiaryPomsByMaterial.Count == 0)
-                continue;
-
-            // ⚠️ Only set scalar FK columns (e.g. CalculatorRunId, MaterialId) on the entities below.
-            // Navigation properties to existing rows (CalculatorRun, Material) are intentionally left
-            // unset so that the IncludeGraph bulk insert below does not try to re-insert them.
-            var producerDetail = new ProducerDetail
-            {
-                CalculatorRunId = calculatorRun.Id,
-                ProducerId = organisation.OrganisationId,
-                TradingName = organisation.TradingName,
-                SubsidiaryId = organisation.SubsidiaryId,
-                ProducerName = organisation.OrganisationName
-            };
-
-            foreach (var reportedMaterial in GetProducerReportedMaterials(materials, subsidiaryPomsByMaterial))
-                producerDetail.ProducerReportedMaterials.Add(reportedMaterial);
-
-            newProducerDetails.Add(producerDetail);
-        }
+        // ⚠️ Only set the scalar CalculatorRunId FK - the CalculatorRun navigation is intentionally
+        // left unset so the bulk insert below does not try to re-insert it.
+        var organisations = data
+            .Select(record => ToCalculatorRunOrganisation(record, calculatorRun.Id))
+            .ToList();
 
         var totalReportedMaterials = newProducerDetails.Sum(p => p.ProducerReportedMaterials.Count);
 
-        logger.LogInformation("Transpose produced {ProducerDetailCount} producer details and {ReportedMaterialCount} reported materials",
-            newProducerDetails.Count, totalReportedMaterials);
+        logger.LogInformation(
+            "Transpose produced {OrganisationCount} organisations, {ProducerDetailCount} producer details and {ReportedMaterialCount} reported materials",
+            organisations.Count, newProducerDetails.Count, totalReportedMaterials);
+
+        await bulkOps.BulkInsertAsync(dbContext, organisations, cancellationToken);
 
         await bulkOps.BulkInsertAsync(dbContext, newProducerDetails, cfg =>
         {
@@ -126,57 +98,49 @@ public class ProducerDataTransposer(
             // Set UseTempDB to use temp tables instead of 'proper' tables since they don't require permissions.
             cfg.UseTempDB = true;
         }, cancellationToken);
+
+        var errors = data
+            .SelectMany(record => record.Errors.Concat(record.Warnings)
+                .Select(error => new OrganisationCalculationError
+                {
+                    OrganisationId = record.OrganisationId,
+                    SubsidiaryId = record.SubsidiaryId,
+                    Error = error
+                }))
+            .ToList();
+
+        await errorReportService.PersistErrors(errors, calculatorRun.Id, calculatorRun.CreatedBy, runContext.RelativeYear, cancellationToken);
+
+        calculatorRun.OrgPomDataLoadedAt = timeProvider.GetUtcNow().UtcDateTime;
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private static IEnumerable<ProducerReportedMaterial> GetProducerReportedMaterials(ImmutableList<Material> materials, ImmutableDictionary<string, ImmutableList<CalculatorRunPomDataDetail>> pomsByMaterial)
+    private static CalculatorRunOrganisation ToCalculatorRunOrganisation(ProducerRecord record, int calculatorRunId) => new()
     {
-        foreach (var material in materials)
-        {
-            if (!pomsByMaterial.TryGetValue(material.Code, out var subsidiaryPomsForMaterial))
-                continue;
+        CalculatorRunId = calculatorRunId,
+        OrganisationId = record.OrganisationId,
+        SubsidiaryId = record.SubsidiaryId,
+        OrganisationName = record.ProducerName,
+        TradingName = record.TradingName,
+        DaysObligated = record.DaysObligated,
+        JoinerDate = record.JoinerDate,
+        LeaverDate = record.LeaverDate,
+        StatusCode = record.StatusCode,
+        ErrorCode = record.ErrorCode,
+        IsError = record.IsError
+    };
 
-            // PERF: ValueTuple key avoids the anonymous-type allocation per group.
-            foreach (var poms in subsidiaryPomsForMaterial.GroupBy(p => (p.SubmissionPeriod, p.PackagingType)))
-            {
-                // PERF: single pass over the group computing every tonnage breakdown
-                double total = 0d,
-                    red = 0d,
-                    amber = 0d,
-                    green = 0d,
-                    redMedical = 0d,
-                    amberMedical = 0d,
-                    greenMedical = 0d;
-
-                foreach (var pom in poms)
-                {
-                    var weight = pom.PackagingMaterialWeight ?? 0d;
-                    total += weight;
-
-                    switch (pom.RamRagRating)
-                    {
-                        case RagRating.Red: red += weight; break;
-                        case RagRating.Amber: amber += weight; break;
-                        case RagRating.Green: green += weight; break;
-                        case RagRating.RedMedical: redMedical += weight; break;
-                        case RagRating.AmberMedical: amberMedical += weight; break;
-                        case RagRating.GreenMedical: greenMedical += weight; break;
-                    }
-                }
-
-                yield return new ProducerReportedMaterial
-                {
-                    MaterialId = material.Id,
-                    PackagingType = poms.Key.PackagingType!,
-                    SubmissionPeriod = poms.Key.SubmissionPeriod!,
-                    PackagingTonnage = MathUtils.RoundAwayFromZero((decimal)total / 1000m, decimals: 3),
-                    PackagingTonnageRed = MathUtils.RoundAwayFromZero((decimal)red / 1000m, decimals: 3),
-                    PackagingTonnageAmber = MathUtils.RoundAwayFromZero((decimal)amber / 1000m, decimals: 3),
-                    PackagingTonnageGreen = MathUtils.RoundAwayFromZero((decimal)green / 1000m, decimals: 3),
-                    PackagingTonnageRedMedical = MathUtils.RoundAwayFromZero((decimal)redMedical / 1000m, decimals: 3),
-                    PackagingTonnageAmberMedical = MathUtils.RoundAwayFromZero((decimal)amberMedical / 1000m, decimals: 3),
-                    PackagingTonnageGreenMedical = MathUtils.RoundAwayFromZero((decimal)greenMedical / 1000m, decimals: 3)
-                };
-            }
-        }
-    }
+    private static ProducerReportedMaterial ToProducerReportedMaterial(AlignedReportedMaterial reportedMaterial, Material material) => new()
+    {
+        MaterialId = material.Id,
+        PackagingType = reportedMaterial.PackagingType,
+        SubmissionPeriod = reportedMaterial.SubmissionPeriod,
+        PackagingTonnage = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.TotalWeight / 1000m, decimals: 3),
+        PackagingTonnageRed = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.RedWeight / 1000m, decimals: 3),
+        PackagingTonnageAmber = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.AmberWeight / 1000m, decimals: 3),
+        PackagingTonnageGreen = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.GreenWeight / 1000m, decimals: 3),
+        PackagingTonnageRedMedical = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.RedMedicalWeight / 1000m, decimals: 3),
+        PackagingTonnageAmberMedical = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.AmberMedicalWeight / 1000m, decimals: 3),
+        PackagingTonnageGreenMedical = MathUtils.RoundAwayFromZero((decimal)reportedMaterial.GreenMedicalWeight / 1000m, decimals: 3)
+    };
 }
