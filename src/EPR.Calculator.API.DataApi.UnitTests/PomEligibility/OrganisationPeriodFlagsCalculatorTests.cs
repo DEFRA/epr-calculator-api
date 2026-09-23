@@ -1,4 +1,5 @@
 using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.ObligationDetermination;
 using EPR.Calculator.Api.DataApi.PomEligibility;
 
 namespace EPR.Calculator.API.DataApi.UnitTests.PomEligibility;
@@ -8,15 +9,19 @@ public class OrganisationPeriodFlagsCalculatorTests
 {
     private readonly OrganisationPeriodFlagsCalculator calculator = new();
 
-    private static PayCalOrganisation Organisation(int organisationId = 1, string? subsidiaryId = "SUB-1", string submitterId = "SUBMITTER-1") =>
+    private static DeterminedOrganisation Organisation(int organisationId = 1, string? subsidiaryId = "SUB-1", string submitterId = "SUBMITTER-1") =>
         new()
         {
-            OrganisationId = organisationId,
-            SubsidiaryId = subsidiaryId,
-            SubmitterId = submitterId,
-            OrganisationName = "Org Co",
-            SubmissionPeriodYear = 2024,
-            RegulatorStatus = "Accepted"
+            Org = new PayCalOrganisation
+            {
+                OrganisationId = organisationId,
+                SubsidiaryId = subsidiaryId,
+                SubmitterId = submitterId,
+                OrganisationName = "Org Co",
+                SubmissionPeriodYear = 2024,
+                RegulatorStatus = "Accepted"
+            },
+            ObligationStatus = "O"
         };
 
     private static PayCalPom Pom(int organisationId = 1, string? subsidiaryId = "SUB-1", string submitterId = "SUBMITTER-1", string submissionPeriod = "2024-P1") =>
@@ -82,8 +87,8 @@ public class OrganisationPeriodFlagsCalculatorTests
 
         var result = calculator.ApplyPeriodFlags(organisations, poms);
 
-        var sub1 = result.Single(o => o.SubsidiaryId == "SUB-1");
-        var sub2 = result.Single(o => o.SubsidiaryId == "SUB-2");
+        var sub1 = result.Single(o => o.Org.SubsidiaryId == "SUB-1");
+        var sub2 = result.Single(o => o.Org.SubsidiaryId == "SUB-2");
 
         sub1.HasH1.ShouldBeTrue();
         sub1.HasH2.ShouldBeTrue();
@@ -124,12 +129,13 @@ public class OrganisationPeriodFlagsCalculatorTests
     [TestMethod]
     public void ApplyPeriodFlags_PreservesRowCountAndOtherFields()
     {
-        var organisations = new[] { Organisation() with { ObligationStatus = "O", TradingName = "Trading Co" } };
+        var organisation = Organisation();
+        var organisations = new[] { organisation with { Org = organisation.Org with { TradingName = "Trading Co" } } };
 
         var result = calculator.ApplyPeriodFlags(organisations, []);
 
         result.Count.ShouldBe(1);
         result[0].ObligationStatus.ShouldBe("O");
-        result[0].TradingName.ShouldBe("Trading Co");
+        result[0].Org.TradingName.ShouldBe("Trading Co");
     }
 }

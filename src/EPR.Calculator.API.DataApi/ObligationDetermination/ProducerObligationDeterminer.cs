@@ -16,7 +16,7 @@ internal interface IProducerObligationDeterminer
     ///     Returns the given organisations with ObligationStatus/NumDaysObligated/ErrorCode populated.
     ///     Row identity and count are preserved 1:1 - this performs no filtering or deduplication.
     /// </summary>
-    IReadOnlyList<PayCalOrganisation> Determine(IReadOnlyList<PayCalOrganisation> organisations);
+    IReadOnlyList<DeterminedOrganisation> Determine(IReadOnlyList<PayCalOrganisation> organisations);
 }
 
 internal sealed class ProducerObligationDeterminer : IProducerObligationDeterminer
@@ -33,7 +33,7 @@ internal sealed class ProducerObligationDeterminer : IProducerObligationDetermin
     private static readonly HashSet<string> NotObligatedLeaverCodes = ["07", "09", "13", "14", "16", "18", "21"];
     private static readonly HashSet<string> DateSensitiveLeaverCodes = ["02", "03"];
 
-    public IReadOnlyList<PayCalOrganisation> Determine(IReadOnlyList<PayCalOrganisation> organisations) =>
+    public IReadOnlyList<DeterminedOrganisation> Determine(IReadOnlyList<PayCalOrganisation> organisations) =>
         DataApiTelemetry.Trace(typeof(ProducerObligationDeterminer), nameof(Determine), () =>
         {
             var rows = organisations.Select(o => new Row(o, ComputeProducerId(o))).ToList();
@@ -48,10 +48,12 @@ internal sealed class ProducerObligationDeterminer : IProducerObligationDetermin
             ApplyRule13And14(rows);
             ApplyRule16(rows);
 
+            // ApplyDecisionTree unconditionally assigns ObligationStatus to every row - the ! is safe.
             return rows
-                .Select(r => r.Source with
+                .Select(r => new DeterminedOrganisation
                 {
-                    ObligationStatus = r.ObligationStatus,
+                    Org = r.Source,
+                    ObligationStatus = r.ObligationStatus!,
                     NumDaysObligated = r.NumDaysObligated,
                     ErrorCode = r.ErrorCode
                 })

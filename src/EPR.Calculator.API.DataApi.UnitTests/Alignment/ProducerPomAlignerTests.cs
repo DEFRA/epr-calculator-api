@@ -1,5 +1,6 @@
 using EPR.Calculator.Api.DataApi.Alignment;
 using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.PomEligibility;
 
 namespace EPR.Calculator.API.DataApi.UnitTests.Alignment;
 
@@ -22,40 +23,46 @@ public class ProducerPomAlignerTests
     [TestMethod]
     public void DedupeOrganisations_WithMultipleRegistrationsForSameOrganisation_PicksHasH2True()
     {
+        var withoutH2 = Organisation();
+        var withH2 = Organisation();
         var organisations = new[]
         {
-            Organisation() with { TradingName = "Without H2", HasH2 = false },
-            Organisation() with { TradingName = "With H2", HasH2 = true }
+            withoutH2 with { Org = withoutH2.Org with { TradingName = "Without H2" }, HasH2 = false },
+            withH2 with { Org = withH2.Org with { TradingName = "With H2" }, HasH2 = true }
         };
 
         var result = aligner.DedupeOrganisations(organisations);
 
         result.Count.ShouldBe(1);
-        result[0].TradingName.ShouldBe("With H2");
+        result[0].Org.TradingName.ShouldBe("With H2");
     }
 
     [TestMethod]
     public void DedupeOrganisations_WithMultipleRegistrationsAllHasH2False_PicksFirstOccurrence()
     {
+        var first = Organisation();
+        var second = Organisation();
         var organisations = new[]
         {
-            Organisation() with { TradingName = "First" },
-            Organisation() with { TradingName = "Second" }
+            first with { Org = first.Org with { TradingName = "First" } },
+            second with { Org = second.Org with { TradingName = "Second" } }
         };
 
         var result = aligner.DedupeOrganisations(organisations);
 
         result.Count.ShouldBe(1);
-        result[0].TradingName.ShouldBe("First");
+        result[0].Org.TradingName.ShouldBe("First");
     }
 
     [TestMethod]
     public void DedupeOrganisations_WithDifferentSubmitters_KeepsBoth()
     {
+        var first = Organisation();
+        var second = Organisation();
         var organisations = new[]
         {
-            Organisation() with { SubmitterId = Guid.NewGuid().ToString() },
-            Organisation() with { SubmitterId = Guid.NewGuid().ToString() }
+            first with { Org = first.Org with { SubmitterId = Guid.NewGuid().ToString() } },
+            second with { Org = second.Org with { SubmitterId = Guid.NewGuid().ToString() } }
         };
 
         var result = aligner.DedupeOrganisations(organisations);
@@ -66,10 +73,11 @@ public class ProducerPomAlignerTests
     [TestMethod]
     public void DedupeOrganisations_AppliesNoObligationOrNameFiltering()
     {
+        var second = Organisation();
         var organisations = new[]
         {
             Organisation() with { ObligationStatus = "N" },
-            Organisation() with { SubmitterId = Guid.NewGuid().ToString(), OrganisationName = "   " }
+            second with { Org = second.Org with { SubmitterId = Guid.NewGuid().ToString(), OrganisationName = "   " } }
         };
 
         var result = aligner.DedupeOrganisations(organisations);
@@ -135,7 +143,8 @@ public class ProducerPomAlignerTests
     [TestMethod]
     public void Align_WithBlankOrganisationName_ExcludesOrganisation()
     {
-        var organisations = new[] { Organisation() with { OrganisationName = "   " } };
+        var organisation = Organisation();
+        var organisations = new[] { organisation with { Org = organisation.Org with { OrganisationName = "   " } } };
         var poms = new[] { Pom() };
 
         var result = aligner.Align(organisations, poms, ["PL"]);
@@ -297,21 +306,25 @@ public class ProducerPomAlignerTests
         material.AmberWeight.ShouldBe(50d);
     }
 
-    private static PayCalOrganisation Organisation() => new()
+    private static FlaggedOrganisation Organisation() => new()
     {
-        OrganisationId = 1,
-        SubsidiaryId = "SUB-1",
-        SubmitterId = SubmitterId.ToString(),
-        OrganisationName = "Org Co",
-        TradingName = "Trading Co",
+        Org = new PayCalOrganisation
+        {
+            OrganisationId = 1,
+            SubsidiaryId = "SUB-1",
+            SubmitterId = SubmitterId.ToString(),
+            OrganisationName = "Org Co",
+            TradingName = "Trading Co",
+            SubmissionPeriodYear = 2024,
+            RegulatorStatus = "Accepted",
+            JoinerDate = "2024-01-01",
+            LeaverDate = "2024-12-31",
+            StatusCode = "Active"
+        },
         ObligationStatus = "O",
-        SubmissionPeriodYear = 2024,
-        RegulatorStatus = "Accepted",
         NumDaysObligated = 200,
-        JoinerDate = "2024-01-01",
-        LeaverDate = "2024-12-31",
-        StatusCode = "Active",
         ErrorCode = null,
+        HasH1 = false,
         HasH2 = false
     };
 
