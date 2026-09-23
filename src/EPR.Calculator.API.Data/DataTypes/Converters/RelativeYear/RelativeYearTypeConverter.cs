@@ -1,8 +1,7 @@
 using System.ComponentModel;
 using System.Globalization;
 
-// ReSharper disable once CheckNamespace - Avoids namespace/classname duplication weirdness
-namespace EPR.Calculator.API.Data.DataTypes;
+namespace EPR.Calculator.API.Data.DataTypes.Converters.RelativeYear;
 
 internal sealed class RelativeYearTypeConverter : TypeConverter
 {
@@ -16,7 +15,7 @@ internal sealed class RelativeYearTypeConverter : TypeConverter
     {
         if (value is string s && int.TryParse(s, out var year))
         {
-            return new RelativeYear(year);
+            return new DataTypes.RelativeYear(year);
         }
 
         return base.ConvertFrom(context, culture, value);

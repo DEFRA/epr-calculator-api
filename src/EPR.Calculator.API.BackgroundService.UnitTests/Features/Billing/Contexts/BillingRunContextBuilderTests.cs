@@ -20,7 +20,7 @@ public class BillingRunContextBuilderTests : TestsFor<BillingRunContextBuilder>
         {
             Id = 1,
             Name = "Valid test run",
-            CalculatorRunClassificationId = RunClassificationStatusIds.INITIALRUNID,
+            Classification = RunClassification.Initial,
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = 1,
             CalculatorRunOrganisationDataMasterId = 1,

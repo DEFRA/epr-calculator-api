@@ -1,7 +1,7 @@
-﻿using EPR.Calculator.API.BackgroundService.Enums;
-using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
+﻿using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
 using FluentValidation.TestHelper;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Features.Calculator.Contexts;
@@ -10,14 +10,13 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Features.Calculator.Con
 [TestClass]
 public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
 {
-    [DataRow(RunClassification.INTHEQUEUE)]
-    [DataRow(RunClassification.RUNNING)]
+    [DataRow(RunClassification.Running)]
     [TestMethod]
     public void Should_not_error_when_run_is_valid(RunClassification classification)
     {
         var run = new CalculatorRun
         {
-            CalculatorRunClassificationId = (int)classification,
+            Classification = classification,
             Name = "TestRun",
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = 1
@@ -28,15 +27,15 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
         result.ShouldNotHaveAnyValidationErrors();
     }
 
-    [DataRow(RunClassification.UNCLASSIFIED)]
-    [DataRow(RunClassification.ERROR)]
-    [DataRow(RunClassification.DELETED)]
+    [DataRow(RunClassification.Unclassified)]
+    [DataRow(RunClassification.Errored)]
+    [DataRow(RunClassification.Deleted)]
     [TestMethod]
     public void Should_error_when_classification_is_invalid(RunClassification classification)
     {
         var run = new CalculatorRun
         {
-            CalculatorRunClassificationId = (int)classification,
+            Classification = classification,
             Name = "TestRun",
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = 1
@@ -44,7 +43,7 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
 
         var result = testSubject.TestValidate(run);
 
-        result.ShouldHaveValidationErrorFor(r => r.CalculatorRunClassificationId);
+        result.ShouldHaveValidationErrorFor(r => r.Classification);
     }
 
     [DataRow(null)]
@@ -55,7 +54,7 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
     {
         var run = new CalculatorRun
         {
-            CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+            Classification = RunClassification.Running,
             Name = name!,
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = 1
@@ -73,7 +72,7 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
     {
         var run = new CalculatorRun
         {
-            CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+            Classification = RunClassification.Running,
             Name = "TestRun",
             DefaultParameterSettingMasterId = id,
             LapcapDataMasterId = 1
@@ -91,7 +90,7 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
     {
         var run = new CalculatorRun
         {
-            CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+            Classification = RunClassification.Running,
             Name = "TestRun",
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = id
@@ -107,7 +106,7 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
     {
         var run = new CalculatorRun
         {
-            CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+            Classification = RunClassification.Running,
             Name = "TestRun",
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = 1,
@@ -124,7 +123,7 @@ public class CalculatorRunValidatorTests : TestsFor<CalculatorRunValidator>
     {
         var run = new CalculatorRun
         {
-            CalculatorRunClassificationId = (int)RunClassification.INTHEQUEUE,
+            Classification = RunClassification.Running,
             Name = "TestRun",
             DefaultParameterSettingMasterId = 1,
             LapcapDataMasterId = 1,

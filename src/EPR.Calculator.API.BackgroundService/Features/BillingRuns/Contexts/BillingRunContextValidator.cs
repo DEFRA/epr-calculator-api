@@ -27,14 +27,6 @@ public class BillingRunContextValidator : AbstractValidator<BillingRunContextBui
 
     private sealed class RunValidator : AbstractValidator<CalculatorRun>
     {
-        private static readonly ImmutableHashSet<int> ValidClassifications =
-        [
-            RunClassificationStatusIds.INITIALRUNID,
-            RunClassificationStatusIds.INTERIMRECALCULATIONRUNID,
-            RunClassificationStatusIds.FINALRECALCULATIONRUNID,
-            RunClassificationStatusIds.FINALRUNID
-        ];
-
         public RunValidator()
         {
             RuleFor(run => run.Name)
@@ -61,9 +53,9 @@ public class BillingRunContextValidator : AbstractValidator<BillingRunContextBui
                 .GreaterThan(0)
                 .WithMessage($"Run is missing {nameof(CalculatorRunPomDataMaster)}");
 
-            RuleFor(run => run.CalculatorRunClassificationId)
-                .Must(classification => ValidClassifications.Contains(classification))
-                .WithMessage($"Run classification must be one of [{string.Join(", ", ValidClassifications)}]");
+            RuleFor(run => run.Classification)
+                .Must(classification => classification is { IsOfficial: true, IsCompleted: false })
+                .WithMessage("Run must have an Official classification that is not already completed.");
 
             RuleFor(run => run.BillingRunStatus)
                 .Equal(BillingRunStatus.Running)

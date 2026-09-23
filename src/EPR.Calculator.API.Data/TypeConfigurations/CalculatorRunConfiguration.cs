@@ -1,5 +1,5 @@
 using EPR.Calculator.API.Data.DataModels;
-using EPR.Calculator.API.Data.DataTypes.DateTime;
+using EPR.Calculator.API.Data.DataTypes.Converters.DateTime;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,7 +15,7 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
             .HasColumnName("id")
             .IsRequired();
 
-        builder.Property(p => p.CalculatorRunClassificationId)
+        builder.Property(p => p.Classification)
             .HasColumnName("calculator_run_classification_id")
             .IsRequired();
 
@@ -74,7 +74,7 @@ public class CalculatorRunConfiguration : IEntityTypeConfiguration<CalculatorRun
 
         builder.HasOne<CalculatorRunClassification>()
             .WithMany()
-            .HasForeignKey(e => e.CalculatorRunClassificationId);
+            .HasForeignKey(e => e.Classification);
 
         builder.HasMany(e => e.CountryApportionments)
             .WithOne(e => e.CalculatorRun)

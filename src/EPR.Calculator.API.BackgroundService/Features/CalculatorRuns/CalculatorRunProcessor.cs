@@ -3,7 +3,7 @@ using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.Data;
-using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
@@ -71,7 +71,7 @@ public class CalculatorRunProcessor(
             .CalculatorRuns
             .SingleAsync(run => run.Id == runContext.RunId, cancellationToken);
 
-        calcRun.CalculatorRunClassificationId = RunClassificationStatusIds.RUNNINGID;
+        calcRun.Classification = RunClassification.Running;
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }

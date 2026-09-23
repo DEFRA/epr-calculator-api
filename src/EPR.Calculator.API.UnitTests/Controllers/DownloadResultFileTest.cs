@@ -37,7 +37,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 this.context,
                 this.mockBlobStorage.Object,
                 Mock.Of<IBackgroundTaskQueue>(),
-                Mock.Of<ICalculatorRunStatusDataValidator>(),
+                Mock.Of<IRunClassificationValidator>(),
                 Mock.Of<ICalcRelativeYearRequestDtoDataValidator>(),
                 Mock.Of<IAvailableClassificationsService>(),
                 Mock.Of<ICalculationRunService>());

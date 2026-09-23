@@ -68,10 +68,8 @@ public abstract class BaseIntegrationTest
         // one of those classifications, so a single abandoned row can permanently block every
         // future session. Reclassify any such leftovers as errored before tests start.
         await db.CalculatorRuns
-            .Where(run =>
-                run.CalculatorRunClassificationId == RunClassificationStatusIds.RUNNINGID ||
-                run.CalculatorRunClassificationId == RunClassificationStatusIds.INTHEQUEUEID)
-            .ExecuteUpdateAsync(s => s.SetProperty(run => run.CalculatorRunClassificationId, RunClassificationStatusIds.ERRORID));
+            .Where(run => run.Classification == RunClassification.Running)
+            .ExecuteUpdateAsync(s => s.SetProperty(run => run.Classification, RunClassification.Errored));
     }
 
     public static async Task CleanupAsync()
@@ -202,12 +200,12 @@ public abstract class BaseIntegrationTest
                 var status = await db.CalculatorRuns
                     .AsNoTracking()
                     .Where(x => x.Id == runId)
-                    .Select(x => x.CalculatorRunClassificationId)
+                    .Select(x => x.Classification)
                     .SingleAsync();
 
-                return status == RunClassificationStatusIds.ERRORID
+                return status == RunClassification.Errored
                     ? throw new Exception($"Calculator run {runId} entered Errored state.")
-                    : status == RunClassificationStatusIds.UNCLASSIFIEDID;
+                    : status == RunClassification.Unclassified;
             },
             $"Calculator run {runId} did not complete.",
             TimeSpan.FromMinutes(5));

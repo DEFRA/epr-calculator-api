@@ -42,4 +42,9 @@
     </SonarQubeSetting>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Enums\" />
+    <Folder Include="DataTypes\Converters\" />
+  </ItemGroup>
+
 </Project>

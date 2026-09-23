@@ -11,14 +11,12 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Features.Billing.Contex
 [TestClass]
 public class BillingRunContextValidatorTests : TestsFor<BillingRunContextValidator>
 {
-    [DataRow(RunClassificationStatusIds.INITIALRUNID)]
-    [DataRow(RunClassificationStatusIds.INTERIMRECALCULATIONRUNID)]
-    [DataRow(RunClassificationStatusIds.FINALRECALCULATIONRUNID)]
-    [DataRow(RunClassificationStatusIds.FINALRUNID)]
+    [DataRow(RunClassification.Initial)]
+    [DataRow(RunClassification.Recalculation)]
     [TestMethod]
-    public void Should_not_error_when_run_is_valid(int classificationId)
+    public void Should_not_error_when_run_is_valid(RunClassification classification)
     {
-        var preValidationContext = CreatePreValidationContext(classificationId: classificationId);
+        var preValidationContext = CreatePreValidationContext(classification: classification);
         var result = testSubject.TestValidate(preValidationContext);
         result.ShouldNotHaveAnyValidationErrors();
     }
@@ -109,7 +107,7 @@ public class BillingRunContextValidatorTests : TestsFor<BillingRunContextValidat
     private static BillingRunContextBuilder.PreValidationContext CreatePreValidationContext(
         string? user = "Test User",
         string? runName = "TestRun",
-        int classificationId = RunClassificationStatusIds.INITIALRUNID,
+        RunClassification classification = RunClassification.Initial,
         int? paramMasterId = 1,
         int? lapcapMasterId = 1,
         int? orgMasterId = 1,
@@ -124,7 +122,7 @@ public class BillingRunContextValidatorTests : TestsFor<BillingRunContextValidat
             Run = new CalculatorRun
             {
                 Name = runName!,
-                CalculatorRunClassificationId = classificationId,
+                Classification = classification,
                 DefaultParameterSettingMasterId = paramMasterId,
                 LapcapDataMasterId = lapcapMasterId,
                 CalculatorRunOrganisationDataMasterId = orgMasterId,

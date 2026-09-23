@@ -1,10 +1,10 @@
 ﻿using EPR.Calculator.API.BackgroundService.Builder.Lapcap;
-using EPR.Calculator.API.BackgroundService.Enums;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.Helpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Builder;
 
@@ -32,7 +32,7 @@ public class CalcResultLapcapDataBuilderTest : TestsFor<CalcResultLapcapDataBuil
             Id = runContext.RunId,
             RelativeYear = runContext.RelativeYear,
             Name = runContext.RunName,
-            CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+            Classification = RunClassification.Running,
             CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
             CreatedBy = "Test User",
             LapcapDataMasterId = 2

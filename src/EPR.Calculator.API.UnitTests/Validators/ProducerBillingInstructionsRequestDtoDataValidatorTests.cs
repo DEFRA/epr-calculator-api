@@ -28,7 +28,7 @@ namespace EPR.Calculator.API.UnitTests.Validators
             calcRunId = 85885;
             var calcRun = new CalculatorRun
             {
-                CalculatorRunClassificationId = 8,
+                Classification = RunClassification.Initial,
                 RelativeYear = new RelativeYear(2024),
                 Name = "Test",
                 Id = calcRunId,

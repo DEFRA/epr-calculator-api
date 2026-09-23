@@ -1,12 +1,12 @@
 ﻿using EPR.Calculator.API.BackgroundService.Builder.CommsCost;
 using EPR.Calculator.API.BackgroundService.Constants;
-using EPR.Calculator.API.BackgroundService.Enums;
 using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers;
 using EPR.Calculator.API.BackgroundService.UnitTests.TestHelpers.TestData;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Data.Utils;
 
 namespace EPR.Calculator.API.BackgroundService.UnitTests.Builder;
@@ -253,7 +253,7 @@ public class CalcResultCommsCostBuilderTest : TestsFor<CalcResultCommsCostBuilde
         var run = new CalculatorRun
         {
             Id = runContext.RunId,
-            CalculatorRunClassificationId = (int)RunClassification.RUNNING,
+            Classification = RunClassification.Running,
             Name = runContext.RunName,
             RelativeYear = runContext.RelativeYear,
             CreatedAt = new DateTime(2024, 8, 28, 10, 12, 30, DateTimeKind.Utc),
