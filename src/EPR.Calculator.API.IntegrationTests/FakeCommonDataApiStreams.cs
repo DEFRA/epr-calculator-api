@@ -40,12 +40,15 @@ internal class FakeStreamPomsRequestHandler : IStreamPomsRequestHandler
 }
 
 /// <summary>
-///     Test fixtures seed <see cref="PayCalOrganisation" /> rows with ObligationStatus/ErrorCode/
+///     Test fixtures seed <see cref="DeterminedOrganisation" /> rows with ObligationStatus/ErrorCode/
 ///     NumDaysObligated already resolved (a snapshot of already-determined data, not the raw multi-row
 ///     registrations a real determiner needs), so the real <see cref="IProducerObligationDeterminer" />
-///     is bypassed in favour of this pass-through in integration tests.
+///     is bypassed in favour of this pass-through in integration tests. Ignores its input - set
+///     <see cref="DeterminedOrganisations" /> directly instead, the same way <see cref="FakeStreamOrganisationsRequestHandler.Organisations" /> works.
 /// </summary>
 internal class PassthroughProducerObligationDeterminer : IProducerObligationDeterminer
 {
-    public IReadOnlyList<PayCalOrganisation> Determine(IReadOnlyList<PayCalOrganisation> organisations) => organisations;
+    public ImmutableList<DeterminedOrganisation> DeterminedOrganisations { get; set; } = [];
+
+    public IReadOnlyList<DeterminedOrganisation> Determine(IReadOnlyList<PayCalOrganisation> organisations) => DeterminedOrganisations;
 }

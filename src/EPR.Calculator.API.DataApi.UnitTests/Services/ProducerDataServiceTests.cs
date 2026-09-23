@@ -28,14 +28,17 @@ public class ProducerDataServiceTests
     {
         var submitterId = Guid.NewGuid().ToString();
 
-        var org = new PayCalOrganisation
+        var org = new FlaggedOrganisation
         {
-            OrganisationId = 1,
-            OrganisationName = "Org Co",
+            Org = new PayCalOrganisation
+            {
+                OrganisationId = 1,
+                OrganisationName = "Org Co",
+                SubmitterId = submitterId,
+                SubmissionPeriodYear = 2024,
+                RegulatorStatus = "Accepted"
+            },
             ObligationStatus = "O",
-            SubmitterId = submitterId,
-            SubmissionPeriodYear = 2024,
-            RegulatorStatus = "Accepted",
             HasH1 = true,
             HasH2 = true
         };
@@ -72,9 +75,9 @@ public class ProducerDataServiceTests
         var mockDeterminer = new Mock<IProducerObligationDeterminer>();
         mockDeterminer
             .Setup(d => d.Determine(It.Is<IReadOnlyList<PayCalOrganisation>>(l => l.Count == 1 && l[0] == rawOrganisation)))
-            .Returns([rawOrganisation with { ObligationStatus = "O", NumDaysObligated = 42 }]);
+            .Returns([new DeterminedOrganisation { Org = rawOrganisation, ObligationStatus = "O", NumDaysObligated = 42 }]);
 
-        var service = CreateService(orgs: [rawOrganisation], poms: [], determiner: mockDeterminer.Object);
+        var service = CreateService(orgsStream: ToAsyncEnumerable([rawOrganisation]), poms: [], determiner: mockDeterminer.Object);
 
         var result = await service.GetProducerData(2024, null, []);
 
@@ -91,15 +94,20 @@ public class ProducerDataServiceTests
     {
         var submitterId = Guid.NewGuid().ToString();
 
-        var org = new PayCalOrganisation
+        var org = new FlaggedOrganisation
         {
-            OrganisationId = 1,
-            OrganisationName = "Org Co",
+            Org = new PayCalOrganisation
+            {
+                OrganisationId = 1,
+                OrganisationName = "Org Co",
+                SubmitterId = submitterId,
+                SubmissionPeriodYear = 2024,
+                RegulatorStatus = "Accepted"
+            },
             ObligationStatus = "E",
             ErrorCode = "some synapse error",
-            SubmitterId = submitterId,
-            SubmissionPeriodYear = 2024,
-            RegulatorStatus = "Accepted"
+            HasH1 = false,
+            HasH2 = false
         };
 
         var pom = new PayCalPom
@@ -134,15 +142,20 @@ public class ProducerDataServiceTests
         // DataApi can't see billing history, so it can't decide whether a no-POM-match error is still
         // worth surfacing (e.g. the organisation was invoiced in a previous run) - it always includes
         // it, flagged with HasPomMatch = false, and leaves that decision to the caller.
-        var org = new PayCalOrganisation
+        var org = new FlaggedOrganisation
         {
-            OrganisationId = 1,
-            OrganisationName = "Org Co",
+            Org = new PayCalOrganisation
+            {
+                OrganisationId = 1,
+                OrganisationName = "Org Co",
+                SubmitterId = Guid.NewGuid().ToString(),
+                SubmissionPeriodYear = 2024,
+                RegulatorStatus = "Accepted"
+            },
             ObligationStatus = "E",
             ErrorCode = "some synapse error",
-            SubmitterId = Guid.NewGuid().ToString(),
-            SubmissionPeriodYear = 2024,
-            RegulatorStatus = "Accepted"
+            HasH1 = false,
+            HasH2 = false
         };
 
         var service = CreateService(orgs: [org], poms: []);
@@ -161,15 +174,18 @@ public class ProducerDataServiceTests
     {
         var submitterId = Guid.NewGuid().ToString();
 
-        var org = new PayCalOrganisation
+        var org = new FlaggedOrganisation
         {
-            OrganisationId = 1,
-            OrganisationName = "Org Co",
+            Org = new PayCalOrganisation
+            {
+                OrganisationId = 1,
+                OrganisationName = "Org Co",
+                SubmitterId = submitterId,
+                SubmissionPeriodYear = 2024,
+                RegulatorStatus = "Accepted"
+            },
             ObligationStatus = "O",
             ErrorCode = "some warning",
-            SubmitterId = submitterId,
-            SubmissionPeriodYear = 2024,
-            RegulatorStatus = "Accepted",
             HasH1 = true,
             HasH2 = true
         };
@@ -213,10 +229,14 @@ public class ProducerDataServiceTests
         // when it isn't a reportable type.
         var submitterId = Guid.NewGuid().ToString();
 
-        var org = new PayCalOrganisation
+        var org = new FlaggedOrganisation
         {
-            OrganisationId = 1, OrganisationName = "Org Co", ObligationStatus = "O",
-            SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024, HasH1 = true, HasH2 = true
+            Org = new PayCalOrganisation
+            {
+                OrganisationId = 1, OrganisationName = "Org Co",
+                SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024
+            },
+            ObligationStatus = "O", HasH1 = true, HasH2 = true
         };
 
         var reportablePom = new PayCalPom
@@ -247,10 +267,14 @@ public class ProducerDataServiceTests
         // is dropped from every bucket) is treated as Red rather than rejecting the row outright.
         var submitterId = Guid.NewGuid().ToString();
 
-        var org = new PayCalOrganisation
+        var org = new FlaggedOrganisation
         {
-            OrganisationId = 1, OrganisationName = "Org Co", ObligationStatus = "O",
-            SubmitterId = submitterId, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted", HasH1 = true, HasH2 = true
+            Org = new PayCalOrganisation
+            {
+                OrganisationId = 1, OrganisationName = "Org Co",
+                SubmitterId = submitterId, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted"
+            },
+            ObligationStatus = "O", HasH1 = true, HasH2 = true
         };
         var pom = new PayCalPom
         {
@@ -280,10 +304,14 @@ public class ProducerDataServiceTests
     {
         var submitterId = Guid.NewGuid().ToString();
 
-        var org = new PayCalOrganisation
+        var org = new FlaggedOrganisation
         {
-            OrganisationId = 1, OrganisationName = "Org Co", ObligationStatus = "O",
-            SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024, HasH1 = true, HasH2 = true
+            Org = new PayCalOrganisation
+            {
+                OrganisationId = 1, OrganisationName = "Org Co",
+                SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024
+            },
+            ObligationStatus = "O", HasH1 = true, HasH2 = true
         };
         var pom = new PayCalPom
         {
@@ -334,9 +362,9 @@ public class ProducerDataServiceTests
     public async Task GetProducerData_PomEligibility_ExcludesCancelledRegistrationsFromTheGate()
     {
         var submitterId = Guid.NewGuid().ToString();
-        var granted = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "A", ObligationStatus = "O", SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024 };
-        var accepted = new PayCalOrganisation { OrganisationId = 2, OrganisationName = "B", ObligationStatus = "O", SubmitterId = submitterId, RegulatorStatus = "Accepted", SubmissionPeriodYear = 2024 };
-        var cancelled = new PayCalOrganisation { OrganisationId = 3, OrganisationName = "C", ObligationStatus = "E", SubmitterId = submitterId, RegulatorStatus = "Cancelled", SubmissionPeriodYear = 2024 };
+        var granted = new FlaggedOrganisation { Org = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "A", SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024 }, ObligationStatus = "O", HasH1 = false, HasH2 = false };
+        var accepted = new FlaggedOrganisation { Org = new PayCalOrganisation { OrganisationId = 2, OrganisationName = "B", SubmitterId = submitterId, RegulatorStatus = "Accepted", SubmissionPeriodYear = 2024 }, ObligationStatus = "O", HasH1 = false, HasH2 = false };
+        var cancelled = new FlaggedOrganisation { Org = new PayCalOrganisation { OrganisationId = 3, OrganisationName = "C", SubmitterId = submitterId, RegulatorStatus = "Cancelled", SubmissionPeriodYear = 2024 }, ObligationStatus = "E", HasH1 = false, HasH2 = false };
 
         IReadOnlyCollection<int>? capturedIds = null;
         var mockEligibilityFilter = new Mock<IPomEligibilityFilter>();
@@ -397,7 +425,7 @@ public class ProducerDataServiceTests
     }
 
     private static ProducerDataService CreateService(
-        IReadOnlyList<PayCalOrganisation>? orgs = null,
+        IReadOnlyList<FlaggedOrganisation>? orgs = null,
         IReadOnlyList<PayCalPom>? poms = null,
         IAsyncEnumerable<PayCalOrganisation>? orgsStream = null,
         IAsyncEnumerable<PayCalPom>? pomsStream = null,
@@ -406,10 +434,12 @@ public class ProducerDataServiceTests
         bool loadTableEnabled = false,
         ILoadTableRefresher? loadTableRefresher = null)
     {
+        var flaggedOrgs = orgs ?? [];
+
         var mockOrgHandler = new Mock<IStreamOrganisationsRequestHandler>();
         mockOrgHandler
             .Setup(h => h.Handle(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .Returns(() => orgsStream ?? ToAsyncEnumerable(orgs ?? []));
+            .Returns(() => orgsStream ?? ToAsyncEnumerable(flaggedOrgs.Select(o => o.Org).ToList()));
 
         // Handle() is invoked twice by StreamPoms (once to pick winning files, once to buffer their
         // rows), so hand out a fresh enumerable each time.
@@ -436,15 +466,42 @@ public class ProducerDataServiceTests
             eligibilityFilterToUse = mockEligibilityFilter.Object;
         }
 
+        // Looks up HasH1/HasH2 from flaggedOrgs by (OrganisationId, SubsidiaryId, SubmitterId) rather
+        // than just handing flaggedOrgs back directly, so it still works when a test supplies its own
+        // determiner mock returning organisations that don't come from flaggedOrgs at all (falling back
+        // to false/false, matching OrganisationPeriodFlagsCalculator's real behaviour for a no-match).
         var mockFlagsCalculator = new Mock<IOrganisationPeriodFlagsCalculator>();
         mockFlagsCalculator
-            .Setup(c => c.ApplyPeriodFlags(It.IsAny<IReadOnlyList<PayCalOrganisation>>(), It.IsAny<IReadOnlyList<PayCalPom>>()))
-            .Returns((IReadOnlyList<PayCalOrganisation> o, IReadOnlyList<PayCalPom> _) => o);
+            .Setup(c => c.ApplyPeriodFlags(It.IsAny<IReadOnlyList<DeterminedOrganisation>>(), It.IsAny<IReadOnlyList<PayCalPom>>()))
+            .Returns((IReadOnlyList<DeterminedOrganisation> determined, IReadOnlyList<PayCalPom> _) =>
+            {
+                var flagsByKey = flaggedOrgs.ToDictionary(
+                    o => (o.Org.OrganisationId, o.Org.SubsidiaryId, o.Org.SubmitterId),
+                    o => (o.HasH1, o.HasH2));
+
+                return determined
+                    .Select(d =>
+                    {
+                        var (hasH1, hasH2) = flagsByKey.GetValueOrDefault((d.Org.OrganisationId, d.Org.SubsidiaryId, d.Org.SubmitterId));
+                        return new FlaggedOrganisation
+                        {
+                            Org = d.Org,
+                            ObligationStatus = d.ObligationStatus,
+                            NumDaysObligated = d.NumDaysObligated,
+                            ErrorCode = d.ErrorCode,
+                            HasH1 = hasH1,
+                            HasH2 = hasH2
+                        };
+                    })
+                    .ToImmutableList();
+            });
 
         var mockDeterminer = determiner is null ? new Mock<IProducerObligationDeterminer>() : null;
         mockDeterminer?
             .Setup(d => d.Determine(It.IsAny<IReadOnlyList<PayCalOrganisation>>()))
-            .Returns((IReadOnlyList<PayCalOrganisation> o) => o);
+            .Returns((IReadOnlyList<PayCalOrganisation> _) => flaggedOrgs
+                .Select(o => new DeterminedOrganisation { Org = o.Org, ObligationStatus = o.ObligationStatus, NumDaysObligated = o.NumDaysObligated, ErrorCode = o.ErrorCode })
+                .ToList());
 
         // The load-table stage's DB behaviour is exercised in the integration tests; here the source
         // reads straight from the mocked handlers and the refresher is a mock so these tests can

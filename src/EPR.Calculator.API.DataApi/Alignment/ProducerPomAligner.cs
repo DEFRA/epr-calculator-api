@@ -1,5 +1,6 @@
 using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 using EPR.Calculator.Api.DataApi.Models;
+using EPR.Calculator.Api.DataApi.PomEligibility;
 
 namespace EPR.Calculator.Api.DataApi.Alignment;
 
@@ -7,10 +8,10 @@ internal interface IProducerPomAligner
 {
     /// <summary>
     ///     Dedupes multiple registrations per organisation/subsidiary/submitter down to one row each,
-    ///     preferring the row with <see cref="PayCalOrganisation.HasH2" /> set. Applies no other
+    ///     preferring the row with <see cref="FlaggedOrganisation.HasH2" /> set. Applies no other
     ///     filtering - the result includes every organisation regardless of obligation status.
     /// </summary>
-    IReadOnlyList<PayCalOrganisation> DedupeOrganisations(IReadOnlyCollection<PayCalOrganisation> organisations);
+    IReadOnlyList<FlaggedOrganisation> DedupeOrganisations(IReadOnlyCollection<FlaggedOrganisation> organisations);
 
     /// <summary>
     ///     Aligns organisation and POM data into producer records: filters to obligated organisations,
@@ -26,7 +27,7 @@ internal interface IProducerPomAligner
     ///     The known material codes, in the order reported materials should be produced.
     /// </param>
     IEnumerable<ProducerRecord> Align(
-        IReadOnlyCollection<PayCalOrganisation> organisations,
+        IReadOnlyCollection<FlaggedOrganisation> organisations,
         IReadOnlyCollection<PayCalPom> poms,
         IReadOnlyList<string> materialCodes);
 }
@@ -35,27 +36,27 @@ internal sealed class ProducerPomAligner : IProducerPomAligner
 {
     private const string ObligatedStatus = "O";
 
-    public IReadOnlyList<PayCalOrganisation> DedupeOrganisations(IReadOnlyCollection<PayCalOrganisation> organisations) =>
+    public IReadOnlyList<FlaggedOrganisation> DedupeOrganisations(IReadOnlyCollection<FlaggedOrganisation> organisations) =>
         organisations
-            .GroupBy(o => (o.OrganisationId, o.SubsidiaryId, o.SubmitterId))
+            .GroupBy(o => (o.Org.OrganisationId, o.Org.SubsidiaryId, o.Org.SubmitterId))
             // PERF: MaxBy is O(n) and avoids the OrderByDescending(...).First() O(n log n) sort + allocation per group.
             .Select(grp => grp.MaxBy(o => o.HasH2)!)
             .ToImmutableList();
 
     public IEnumerable<ProducerRecord> Align(
-        IReadOnlyCollection<PayCalOrganisation> organisations,
+        IReadOnlyCollection<FlaggedOrganisation> organisations,
         IReadOnlyCollection<PayCalPom> poms,
         IReadOnlyList<string> materialCodes) =>
         DataApiTelemetry.Trace(typeof(ProducerPomAligner), nameof(Align),
             () => AlignCore(organisations, poms, materialCodes).ToList());
 
     private static IEnumerable<ProducerRecord> AlignCore(
-        IReadOnlyCollection<PayCalOrganisation> organisations,
+        IReadOnlyCollection<FlaggedOrganisation> organisations,
         IReadOnlyCollection<PayCalPom> poms,
         IReadOnlyList<string> materialCodes)
     {
         var obligatedOrganisations = organisations
-            .Where(o => o.ObligationStatus == ObligatedStatus && !string.IsNullOrWhiteSpace(o.OrganisationName));
+            .Where(o => o.ObligationStatus == ObligatedStatus && !string.IsNullOrWhiteSpace(o.Org.OrganisationName));
 
         // PERF: pre-build an O(1) lookup of POMs keyed by (OrganisationId, SubsidiaryId, SubmitterId).
         // We also pre-apply the PackagingType filter here so each per-organisation
@@ -66,7 +67,7 @@ internal sealed class ProducerPomAligner : IProducerPomAligner
 
         foreach (var organisation in obligatedOrganisations)
         {
-            var orgPoms = pomsByOrgSubSubmitter[(organisation.OrganisationId, organisation.SubsidiaryId, organisation.SubmitterId)];
+            var orgPoms = pomsByOrgSubSubmitter[(organisation.Org.OrganisationId, organisation.Org.SubsidiaryId, organisation.Org.SubmitterId)];
 
             var pomsByMaterial = orgPoms
                 .GroupBy(p => p.PackagingMaterial!)
@@ -83,14 +84,14 @@ internal sealed class ProducerPomAligner : IProducerPomAligner
 
             yield return new ProducerRecord
             {
-                OrganisationId = organisation.OrganisationId,
-                SubsidiaryId = organisation.SubsidiaryId,
-                TradingName = organisation.TradingName,
-                ProducerName = organisation.OrganisationName,
+                OrganisationId = organisation.Org.OrganisationId,
+                SubsidiaryId = organisation.Org.SubsidiaryId,
+                TradingName = organisation.Org.TradingName,
+                ProducerName = organisation.Org.OrganisationName,
                 DaysObligated = organisation.NumDaysObligated,
-                JoinerDate = organisation.JoinerDate,
-                LeaverDate = organisation.LeaverDate,
-                StatusCode = organisation.StatusCode,
+                JoinerDate = organisation.Org.JoinerDate,
+                LeaverDate = organisation.Org.LeaverDate,
+                StatusCode = organisation.Org.StatusCode,
                 ErrorCode = organisation.ErrorCode,
                 Errors = [],
                 Warnings = [],

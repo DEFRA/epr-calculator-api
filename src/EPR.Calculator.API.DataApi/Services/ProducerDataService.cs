@@ -108,8 +108,8 @@ internal sealed class ProducerDataService(
         // only. The org stream only ever carries Granted/Accepted/Cancelled, so "not Cancelled" is
         // equivalent and also tolerates fixtures that leave RegulatorStatus unset.
         var registeredOrganisationIds = rawOrganisations
-            .Where(o => o.RegulatorStatus is not "Cancelled")
-            .Select(o => o.OrganisationId)
+            .Where(o => o.Org.RegulatorStatus is not "Cancelled")
+            .Select(o => o.Org.OrganisationId)
             .ToHashSet();
         var eligiblePoms = pipeline.PomEligibilityFilter.Filter(rawPoms, registeredOrganisationIds);
         var organisationsWithPeriodFlags = pipeline.OrganisationPeriodFlagsCalculator.ApplyPeriodFlags(rawOrganisations, rawPoms);
@@ -144,7 +144,7 @@ internal sealed class ProducerDataService(
     ///     POM-driven and can reference an org/subsidiary combo with no exact registration match.
     /// </summary>
     private static IReadOnlyList<ProducerRecord> MergeProducerRecords(
-        IReadOnlyList<PayCalOrganisation> dedupedOrganisations,
+        IReadOnlyList<FlaggedOrganisation> dedupedOrganisations,
         IReadOnlyList<ProducerRecord> aligned,
         IReadOnlyList<OrganisationCalculationError> errors)
     {
@@ -166,7 +166,7 @@ internal sealed class ProducerDataService(
         // "E"-status organisations: never obligated, so the aligner never produces a record for them.
         foreach (var organisation in dedupedOrganisations.Where(o => o.ObligationStatus == ErrorStatus))
         {
-            var key = (organisation.OrganisationId, organisation.SubsidiaryId);
+            var key = (organisation.Org.OrganisationId, organisation.Org.SubsidiaryId);
             coveredKeys.Add(key);
             var (hardErrors, warnings) = SplitErrors(errorsByKey[key]);
             records.Add(ToProducerRecord(organisation, hardErrors, warnings));
@@ -183,10 +183,13 @@ internal sealed class ProducerDataService(
                 continue;
 
             var (hardErrors, warnings) = SplitErrors(errorsByKey[key]);
-            var anyOrganisationRow = dedupedOrganisations.FirstOrDefault(o => o.OrganisationId == key.OrganisationId);
+            var anyOrganisationRow = dedupedOrganisations.FirstOrDefault(o => o.Org.OrganisationId == key.OrganisationId);
 
             records.Add(anyOrganisationRow is not null
-                ? ToProducerRecord(anyOrganisationRow with { SubsidiaryId = key.SubsidiaryId, SubmitterId = null }, hardErrors, warnings)
+                ? ToProducerRecord(
+                    anyOrganisationRow with { Org = anyOrganisationRow.Org with { SubsidiaryId = key.SubsidiaryId, SubmitterId = null } },
+                    hardErrors,
+                    warnings)
                 : ToOrphanProducerRecord(key, hardErrors, warnings));
         }
 
@@ -201,18 +204,18 @@ internal sealed class ProducerDataService(
     }
 
     private static ProducerRecord ToProducerRecord(
-        PayCalOrganisation organisation,
+        FlaggedOrganisation organisation,
         IReadOnlyList<ProducerCalculationError> errors,
         IReadOnlyList<ProducerCalculationError> warnings) => new()
     {
-        OrganisationId = organisation.OrganisationId,
-        SubsidiaryId = organisation.SubsidiaryId,
-        ProducerName = organisation.OrganisationName,
-        TradingName = organisation.TradingName,
+        OrganisationId = organisation.Org.OrganisationId,
+        SubsidiaryId = organisation.Org.SubsidiaryId,
+        ProducerName = organisation.Org.OrganisationName,
+        TradingName = organisation.Org.TradingName,
         DaysObligated = organisation.NumDaysObligated,
-        JoinerDate = organisation.JoinerDate,
-        LeaverDate = organisation.LeaverDate,
-        StatusCode = organisation.StatusCode,
+        JoinerDate = organisation.Org.JoinerDate,
+        LeaverDate = organisation.Org.LeaverDate,
+        StatusCode = organisation.Org.StatusCode,
         ErrorCode = organisation.ErrorCode,
         Errors = errors,
         Warnings = warnings,
@@ -232,7 +235,7 @@ internal sealed class ProducerDataService(
         ReportedMaterials = []
     };
 
-    private async Task<List<PayCalOrganisation>> StreamOrganisations(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
+    private async Task<List<DeterminedOrganisation>> StreamOrganisations(int relativeYear, DateTimeOffset? cutOffDate, CancellationToken cancellationToken)
     {
         var rawOrganisations = await DataApiTelemetry.TraceAsync(typeof(ProducerDataService), "BufferOrganisationStream", async () =>
         {
@@ -278,14 +281,12 @@ internal sealed class ProducerDataService(
         });
     }
 
-    // Downstream stages rely on these being present and well-formed, so reject a bad row up front
-    // rather than letting them null-check every field.
-    private static PayCalOrganisation ValidateOrganisation(PayCalOrganisation r)
+    // Downstream stages rely on SubmitterId being well-formed, so reject a bad row up front rather
+    // than letting them null-check it.
+    private static FlaggedOrganisation ValidateOrganisation(FlaggedOrganisation r)
     {
-        if (r.ObligationStatus is null)
-            throw Invalid(nameof(PayCalOrganisation), nameof(r.ObligationStatus), r.ObligationStatus);
-        if (!Guid.TryParse(r.SubmitterId, out _))
-            throw Invalid(nameof(PayCalOrganisation), nameof(r.SubmitterId), r.SubmitterId);
+        if (!Guid.TryParse(r.Org.SubmitterId, out _))
+            throw Invalid(nameof(PayCalOrganisation), nameof(r.Org.SubmitterId), r.Org.SubmitterId);
 
         return r;
     }
