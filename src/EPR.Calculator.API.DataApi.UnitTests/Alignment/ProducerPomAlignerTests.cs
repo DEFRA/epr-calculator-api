@@ -305,6 +305,8 @@ public class ProducerPomAlignerTests
         OrganisationName = "Org Co",
         TradingName = "Trading Co",
         ObligationStatus = "O",
+        SubmissionPeriodYear = 2024,
+        RegulatorStatus = "Accepted",
         NumDaysObligated = 200,
         JoinerDate = "2024-01-01",
         LeaverDate = "2024-12-31",

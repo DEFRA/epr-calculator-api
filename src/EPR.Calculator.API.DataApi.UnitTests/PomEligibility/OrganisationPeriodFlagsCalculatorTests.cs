@@ -14,7 +14,9 @@ public class OrganisationPeriodFlagsCalculatorTests
             OrganisationId = organisationId,
             SubsidiaryId = subsidiaryId,
             SubmitterId = submitterId,
-            OrganisationName = "Org Co"
+            OrganisationName = "Org Co",
+            SubmissionPeriodYear = 2024,
+            RegulatorStatus = "Accepted"
         };
 
     private static PayCalPom Pom(int organisationId = 1, string? subsidiaryId = "SUB-1", string submitterId = "SUBMITTER-1", string submissionPeriod = "2024-P1") =>

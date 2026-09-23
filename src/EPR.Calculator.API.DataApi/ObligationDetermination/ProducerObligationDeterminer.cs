@@ -132,7 +132,7 @@ internal sealed class ProducerObligationDeterminer : IProducerObligationDetermin
         }
     }
 
-    private static Dictionary<(int? ProducerId, int? Year), PivotCounts> PivotRawObligation(List<Row> rows) =>
+    private static Dictionary<(int? ProducerId, int Year), PivotCounts> PivotRawObligation(List<Row> rows) =>
         rows
             .GroupBy(r => (r.ProducerId, r.Source.SubmissionPeriodYear))
             .ToDictionary(
@@ -142,7 +142,7 @@ internal sealed class ProducerObligationDeterminer : IProducerObligationDetermin
                     NotObligated: g.Count(r => (r.RawObligationStatus ?? RawBlank) == RawNotObligated),
                     Blank: g.Count(r => (r.RawObligationStatus ?? RawBlank) == RawBlank)));
 
-    private static void ApplyDecisionTree(List<Row> rows, Dictionary<(int?, int?), PivotCounts> pivotCounts)
+    private static void ApplyDecisionTree(List<Row> rows, Dictionary<(int? ProducerId, int Year), PivotCounts> pivotCounts)
     {
         foreach (var row in rows)
         {

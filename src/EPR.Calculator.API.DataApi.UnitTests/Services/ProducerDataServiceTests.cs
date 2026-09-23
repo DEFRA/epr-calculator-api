@@ -34,6 +34,8 @@ public class ProducerDataServiceTests
             OrganisationName = "Org Co",
             ObligationStatus = "O",
             SubmitterId = submitterId,
+            SubmissionPeriodYear = 2024,
+            RegulatorStatus = "Accepted",
             HasH1 = true,
             HasH2 = true
         };
@@ -65,7 +67,7 @@ public class ProducerDataServiceTests
     public async Task GetProducerData_ObligationDeterminationRunsBeforeMapping()
     {
         var submitterId = Guid.NewGuid().ToString();
-        var rawOrganisation = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "Org Co", SubmitterId = submitterId };
+        var rawOrganisation = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "Org Co", SubmitterId = submitterId, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted" };
 
         var mockDeterminer = new Mock<IProducerObligationDeterminer>();
         mockDeterminer
@@ -95,7 +97,9 @@ public class ProducerDataServiceTests
             OrganisationName = "Org Co",
             ObligationStatus = "E",
             ErrorCode = "some synapse error",
-            SubmitterId = submitterId
+            SubmitterId = submitterId,
+            SubmissionPeriodYear = 2024,
+            RegulatorStatus = "Accepted"
         };
 
         var pom = new PayCalPom
@@ -136,7 +140,9 @@ public class ProducerDataServiceTests
             OrganisationName = "Org Co",
             ObligationStatus = "E",
             ErrorCode = "some synapse error",
-            SubmitterId = Guid.NewGuid().ToString()
+            SubmitterId = Guid.NewGuid().ToString(),
+            SubmissionPeriodYear = 2024,
+            RegulatorStatus = "Accepted"
         };
 
         var service = CreateService(orgs: [org], poms: []);
@@ -162,6 +168,8 @@ public class ProducerDataServiceTests
             ObligationStatus = "O",
             ErrorCode = "some warning",
             SubmitterId = submitterId,
+            SubmissionPeriodYear = 2024,
+            RegulatorStatus = "Accepted",
             HasH1 = true,
             HasH2 = true
         };
@@ -208,7 +216,7 @@ public class ProducerDataServiceTests
         var org = new PayCalOrganisation
         {
             OrganisationId = 1, OrganisationName = "Org Co", ObligationStatus = "O",
-            SubmitterId = submitterId, RegulatorStatus = "Granted", HasH1 = true, HasH2 = true
+            SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024, HasH1 = true, HasH2 = true
         };
 
         var reportablePom = new PayCalPom
@@ -275,7 +283,7 @@ public class ProducerDataServiceTests
         var org = new PayCalOrganisation
         {
             OrganisationId = 1, OrganisationName = "Org Co", ObligationStatus = "O",
-            SubmitterId = submitterId, RegulatorStatus = "Granted", HasH1 = true, HasH2 = true
+            SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024, HasH1 = true, HasH2 = true
         };
         var pom = new PayCalPom
         {
@@ -326,9 +334,9 @@ public class ProducerDataServiceTests
     public async Task GetProducerData_PomEligibility_ExcludesCancelledRegistrationsFromTheGate()
     {
         var submitterId = Guid.NewGuid().ToString();
-        var granted = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "A", ObligationStatus = "O", SubmitterId = submitterId, RegulatorStatus = "Granted" };
-        var unset = new PayCalOrganisation { OrganisationId = 2, OrganisationName = "B", ObligationStatus = "O", SubmitterId = submitterId };
-        var cancelled = new PayCalOrganisation { OrganisationId = 3, OrganisationName = "C", ObligationStatus = "E", SubmitterId = submitterId, RegulatorStatus = "Cancelled" };
+        var granted = new PayCalOrganisation { OrganisationId = 1, OrganisationName = "A", ObligationStatus = "O", SubmitterId = submitterId, RegulatorStatus = "Granted", SubmissionPeriodYear = 2024 };
+        var accepted = new PayCalOrganisation { OrganisationId = 2, OrganisationName = "B", ObligationStatus = "O", SubmitterId = submitterId, RegulatorStatus = "Accepted", SubmissionPeriodYear = 2024 };
+        var cancelled = new PayCalOrganisation { OrganisationId = 3, OrganisationName = "C", ObligationStatus = "E", SubmitterId = submitterId, RegulatorStatus = "Cancelled", SubmissionPeriodYear = 2024 };
 
         IReadOnlyCollection<int>? capturedIds = null;
         var mockEligibilityFilter = new Mock<IPomEligibilityFilter>();
@@ -337,7 +345,7 @@ public class ProducerDataServiceTests
             .Callback((IReadOnlyList<PayCalPom> _, IReadOnlyCollection<int> ids) => capturedIds = ids)
             .Returns((IReadOnlyList<PayCalPom> p, IReadOnlyCollection<int> _) => p);
 
-        var service = CreateService(orgs: [granted, unset, cancelled], poms: [], eligibilityFilter: mockEligibilityFilter.Object);
+        var service = CreateService(orgs: [granted, accepted, cancelled], poms: [], eligibilityFilter: mockEligibilityFilter.Object);
 
         await service.GetProducerData(2024, null, []);
 
