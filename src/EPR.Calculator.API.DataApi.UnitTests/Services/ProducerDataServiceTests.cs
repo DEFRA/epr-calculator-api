@@ -233,6 +233,35 @@ public class ProducerDataServiceTests
     }
 
     [TestMethod]
+    public async Task GetProducerData_WithUnrecognisedRamRagRating_TreatsWeightAsRed()
+    {
+        // A rating value that isn't one of the six known codes (unlike a blank/missing rating, which
+        // is dropped from every bucket) is treated as Red rather than rejecting the row outright.
+        var submitterId = Guid.NewGuid().ToString();
+
+        var org = new PayCalOrganisation
+        {
+            OrganisationId = 1, OrganisationName = "Org Co", ObligationStatus = "O",
+            SubmitterId = submitterId, SubmissionPeriodYear = 2024, RegulatorStatus = "Accepted", HasH1 = true, HasH2 = true
+        };
+        var pom = new PayCalPom
+        {
+            OrganisationId = 1, SubmitterId = submitterId, PackagingType = "HH", PackagingMaterial = "PL",
+            SubmissionPeriod = "2024-P1", PackagingMaterialWeight = 1000, RamRagRating = "Not-A-Real-Rating"
+        };
+
+        var service = CreateService(orgs: [org], poms: [pom]);
+
+        var result = await service.GetProducerData(2024, null, ["PL"]);
+
+        var material = result.Single().ReportedMaterials.ShouldHaveSingleItem();
+        material.TotalWeight.ShouldBe(1000d);
+        material.RedWeight.ShouldBe(1000d);
+        material.AmberWeight.ShouldBe(0d);
+        material.GreenWeight.ShouldBe(0d);
+    }
+
+    [TestMethod]
     [DataRow("HH", "PL", true)]
     [DataRow("CW", "PL", true)]
     [DataRow("PB", "PL", true)]
