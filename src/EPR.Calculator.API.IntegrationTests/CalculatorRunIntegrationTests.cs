@@ -41,7 +41,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         var calculatorRunId = await SeedCalculatorRun(db, name, relativeYear, "TestData/defaultParams.csv", "TestData/lapcap.csv");
 
         var fakeOrganisationsStream = Provider.GetRequiredService<FakeStreamOrganisationsRequestHandler>();
-        fakeOrganisationsStream.Organisations = Organisations($"TestData/{relativeYear}-organisation-data.csv");
+        fakeOrganisationsStream.Organisations = Organisations($"TestData/{relativeYear}-organisation-data.csv", relativeYear);
 
         var fakePomsStream = Provider.GetRequiredService<FakeStreamPomsRequestHandler>();
         fakePomsStream.Poms = () => StreamPoms($"TestData/{relativeYear}-pom-data.csv");
