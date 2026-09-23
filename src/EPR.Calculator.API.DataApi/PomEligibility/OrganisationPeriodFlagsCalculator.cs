@@ -1,4 +1,5 @@
 using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.ObligationDetermination;
 
 namespace EPR.Calculator.Api.DataApi.PomEligibility;
 
@@ -15,12 +16,12 @@ internal interface IOrganisationPeriodFlagsCalculator
     ///     Returns the given organisations with HasH1/HasH2 set from the POM stream. Row identity and
     ///     count are preserved 1:1.
     /// </summary>
-    IReadOnlyList<PayCalOrganisation> ApplyPeriodFlags(IReadOnlyList<PayCalOrganisation> organisations, IReadOnlyList<PayCalPom> poms);
+    IReadOnlyList<FlaggedOrganisation> ApplyPeriodFlags(IReadOnlyList<DeterminedOrganisation> organisations, IReadOnlyList<PayCalPom> poms);
 }
 
 internal sealed class OrganisationPeriodFlagsCalculator : IOrganisationPeriodFlagsCalculator
 {
-    public IReadOnlyList<PayCalOrganisation> ApplyPeriodFlags(IReadOnlyList<PayCalOrganisation> organisations, IReadOnlyList<PayCalPom> poms) =>
+    public IReadOnlyList<FlaggedOrganisation> ApplyPeriodFlags(IReadOnlyList<DeterminedOrganisation> organisations, IReadOnlyList<PayCalPom> poms) =>
         DataApiTelemetry.Trace(typeof(OrganisationPeriodFlagsCalculator), nameof(ApplyPeriodFlags), () =>
         {
             // Parse each POM's submission period once, not once per IsH1/IsH2 check - this runs over
@@ -38,12 +39,17 @@ internal sealed class OrganisationPeriodFlagsCalculator : IOrganisationPeriodFla
             return organisations
                 .Select(o =>
                 {
-                    if (!flagsByOrgSubSubmitter.TryGetValue((o.OrganisationId, o.SubsidiaryId, o.SubmitterId), out var flags))
-                    {
-                        return o with { HasH1 = false, HasH2 = false };
-                    }
+                    var flags = flagsByOrgSubSubmitter.GetValueOrDefault((o.Org.OrganisationId, o.Org.SubsidiaryId, o.Org.SubmitterId));
 
-                    return o with { HasH1 = flags.HasH1, HasH2 = flags.HasH2 };
+                    return new FlaggedOrganisation
+                    {
+                        Org = o.Org,
+                        ObligationStatus = o.ObligationStatus,
+                        NumDaysObligated = o.NumDaysObligated,
+                        ErrorCode = o.ErrorCode,
+                        HasH1 = flags.HasH1,
+                        HasH2 = flags.HasH2
+                    };
                 })
                 .ToList();
         });

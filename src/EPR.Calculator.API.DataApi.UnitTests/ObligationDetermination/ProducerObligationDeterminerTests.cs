@@ -47,10 +47,10 @@ public class ProducerObligationDeterminerTests
             var context = $"{testCase.SubTitle}: org {expected.OrganisationId}/{expected.SubsidiaryId ?? "-"}";
             var expectedSubmitterId = expected.ComplianceScheme ?? $"EXT{expected.OrganisationId}";
             var actual = results.Single(o =>
-                o.OrganisationId == expected.OrganisationId &&
-                o.SubsidiaryId == expected.SubsidiaryId &&
-                o.SubmitterId == expectedSubmitterId &&
-                o.SubmissionPeriodYear == expected.SubmissionPeriodYear);
+                o.Org.OrganisationId == expected.OrganisationId &&
+                o.Org.SubsidiaryId == expected.SubsidiaryId &&
+                o.Org.SubmitterId == expectedSubmitterId &&
+                o.Org.SubmissionPeriodYear == expected.SubmissionPeriodYear);
 
             actual.ObligationStatus.ShouldBe(expected.ExpectedObligationStatus, context);
             actual.NumDaysObligated.ShouldBe(expected.ExpectedNumDaysObligated, context);
@@ -131,7 +131,7 @@ public class ProducerObligationDeterminerTests
         var results = determiner.Determine(input);
 
         // Assert
-        results.Single(o => o.OrganisationId == 900002).ObligationStatus.ShouldBe("N");
-        results.Single(o => o.OrganisationId == 900004).ObligationStatus.ShouldBe("O");
+        results.Single(o => o.Org.OrganisationId == 900002).ObligationStatus.ShouldBe("N");
+        results.Single(o => o.Org.OrganisationId == 900004).ObligationStatus.ShouldBe("O");
     }
 }

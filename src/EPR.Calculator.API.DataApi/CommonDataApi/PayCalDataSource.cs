@@ -59,12 +59,7 @@ internal sealed class LoadTableDataSource(IDbContextFactory<DataApiLoadContext> 
                 LeaverDate = o.LeaverDate,
                 JoinerDate = o.JoinerDate,
                 RegulatorStatus = o.RegulatorStatus,
-                ObligationStatus = o.ObligationStatus,
-                NumDaysObligated = o.NumDaysObligated,
-                ErrorCode = o.ErrorCode,
                 SubmissionPeriodYear = o.SubmissionPeriodYear,
-                HasH1 = o.HasH1,
-                HasH2 = o.HasH2,
                 FileName = o.FileName,
                 IsResubmission = o.IsResubmission,
                 CreatedDateTime = o.CreatedDateTime

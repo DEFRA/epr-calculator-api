@@ -20,14 +20,9 @@ internal record PayCalOrganisation
     public string? LeaverDate { get; init; }
     public string? JoinerDate { get; init; }
     public required string RegulatorStatus { get; init; }
-    public string? ObligationStatus { get; init; }
-    public short? NumDaysObligated { get; init; }
-    public string? ErrorCode { get; init; }
     public required int SubmissionPeriodYear { get; init; }
-    public bool HasH1 { get; init; }
-    public bool HasH2 { get; init; }
 
-    // File-selection inputs only (see IAcceptedFileSelector) - not carried past that stage.
+    // File-selection inputs only (see IAcceptedFileSelector) - not read past that stage.
     public string? FileName { get; init; }
     public bool IsResubmission { get; init; }
 
