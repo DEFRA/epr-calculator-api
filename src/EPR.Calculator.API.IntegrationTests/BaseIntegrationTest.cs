@@ -13,7 +13,6 @@ using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.Api.DataApi.CommonDataApi;
 using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
-using EPR.Calculator.Api.DataApi.ObligationDetermination;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -145,9 +144,6 @@ public abstract class BaseIntegrationTest
             .RemoveAll<IStreamPomsRequestHandler>()
             .AddSingleton<FakeStreamPomsRequestHandler>()
             .AddSingleton<IStreamPomsRequestHandler>(sp => sp.GetRequiredService<FakeStreamPomsRequestHandler>())
-            .RemoveAll<IProducerObligationDeterminer>()
-            .AddSingleton<PassthroughProducerObligationDeterminer>()
-            .AddSingleton<IProducerObligationDeterminer>(sp => sp.GetRequiredService<PassthroughProducerObligationDeterminer>())
             .RemoveAll<IStorageUploadService>()
             .RemoveAll<IBlobStorageService>()
             .AddSingleton<FakeBlobStorageUploadService>()
@@ -346,39 +342,33 @@ public abstract class BaseIntegrationTest
 
     // The real SQL source always filters submission_period_year = @relativeYear and regulator_status
     // IN ('Granted','Accepted','Cancelled'), so neither has its own column in the fixture CSV -
-    // every row here is hardcoded as an accepted year-matching registration. HasH1/HasH2 aren't set
-    // here either - PassthroughProducerObligationDeterminer only stands in for obligation
-    // determination, so the real OrganisationPeriodFlagsCalculator still computes those from the POM
-    // stream for real.
-    private protected static ImmutableList<DeterminedOrganisation> Organisations(string organisationsPath, int relativeYear)
+    // every row here is hardcoded as an accepted year-matching registration. The CSV's
+    // obligation_status/error_code/num_days_obligated/has_h1/has_h2 columns are left unread - the real
+    // ProducerObligationDeterminer/OrganisationPeriodFlagsCalculator compute those for real from
+    // status_code/joiner_date and the POM stream, the same way they would against live data.
+    private protected static ImmutableList<PayCalOrganisation> Organisations(string organisationsPath, int relativeYear)
     {
         using var csv = SlurpCsv(organisationsPath);
         csv.Read();
         csv.ReadHeader();
 
-        var organisations = ImmutableList.CreateBuilder<DeterminedOrganisation>();
+        var organisations = ImmutableList.CreateBuilder<PayCalOrganisation>();
         while (csv.Read())
         {
-            organisations.Add(new DeterminedOrganisation
+            organisations.Add(new PayCalOrganisation
             {
-                Org = new PayCalOrganisation
-                {
-                    OrganisationId   = int.Parse(Field(csv, "organisation_id")!),
-                    SubsidiaryId     = Field(csv, "subsidiary_id"),
-                    OrganisationName = Field(csv, "organisation_name"),
-                    TradingName      = Field(csv, "trading_name"),
-                    SubmitterId      = Field(csv, "submitter_id"),
-                    RegulatorStatus  = "Accepted",
-                    StatusCode       = Field(csv, "status_code"),
-                    JoinerDate       = Field(csv, "joiner_date"),
-                    LeaverDate       = Field(csv, "leaver_date"),
-                    SubmissionPeriodYear = relativeYear,
-                    FileName         = Field(csv, "file_name"),
-                    CreatedDateTime  = Field(csv, "created_date_time") is { } c ? DateTime.Parse(c, CultureInfo.InvariantCulture) : null
-                },
-                ObligationStatus = Field(csv, "obligation_status"),
-                NumDaysObligated = Field(csv, "num_days_obligated") is { } d ? short.Parse(d) : null,
-                ErrorCode        = Field(csv, "error_code")
+                OrganisationId   = int.Parse(Field(csv, "organisation_id")!),
+                SubsidiaryId     = Field(csv, "subsidiary_id"),
+                OrganisationName = Field(csv, "organisation_name"),
+                TradingName      = Field(csv, "trading_name"),
+                SubmitterId      = Field(csv, "submitter_id"),
+                RegulatorStatus  = "Accepted",
+                StatusCode       = Field(csv, "status_code"),
+                JoinerDate       = Field(csv, "joiner_date"),
+                LeaverDate       = Field(csv, "leaver_date"),
+                SubmissionPeriodYear = relativeYear,
+                FileName         = Field(csv, "file_name"),
+                CreatedDateTime  = Field(csv, "created_date_time") is { } c ? DateTime.Parse(c, CultureInfo.InvariantCulture) : null
             });
         }
 
