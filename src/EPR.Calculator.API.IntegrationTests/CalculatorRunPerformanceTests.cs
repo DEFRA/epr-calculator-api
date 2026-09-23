@@ -60,13 +60,8 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
 
         await SeedCalculatorDataAsync(db, relativeYear, "TestData/defaultParams.csv", "TestData/lapcap.csv");
 
-        var determinedOrganisations = Organisations(organisationPath, relativeYear);
-
         var fakeOrganisationsStream = Provider.GetRequiredService<FakeStreamOrganisationsRequestHandler>();
-        fakeOrganisationsStream.Organisations = determinedOrganisations.Select(o => o.Org).ToImmutableList();
-
-        var passthroughDeterminer = Provider.GetRequiredService<PassthroughProducerObligationDeterminer>();
-        passthroughDeterminer.DeterminedOrganisations = determinedOrganisations;
+        fakeOrganisationsStream.Organisations = Organisations(organisationPath, relativeYear);
 
         var fakePomsStream = Provider.GetRequiredService<FakeStreamPomsRequestHandler>();
         fakePomsStream.Poms = () => StreamPoms(pomPath);
@@ -376,12 +371,17 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
 
     private static string GenerateOrganisationData(RelativeYear relativeYear)
     {
-        static (string ObligationStatus, Guid SubmitterId, string? ErrorCode, int? NumDaysObligated, string? StatusCode, string? JoinerDate) GetOrganisationValues(OrganisationScenario scenario, Guid submitterId, bool obligated) =>
+        // ObligationStatus/ErrorCode/NumDaysObligated are documentation only - PayCalOrganisation no
+        // longer carries them, so the real ProducerObligationDeterminer computes them from StatusCode/
+        // JoinerDate for real. StatusCode "02" is date-sensitive (see DateSensitiveLeaverCodes), so
+        // JoinerDate's year must match relativeYear or it becomes a "Date input issue" error instead.
+        static (string ObligationStatus, Guid SubmitterId, string? ErrorCode, int? NumDaysObligated, string? StatusCode, string? JoinerDate) GetOrganisationValues(
+            OrganisationScenario scenario, Guid submitterId, bool obligated, RelativeYear relativeYear) =>
             scenario switch
             {
-                OrganisationScenario.Partial             => ("O", submitterId         , null , 233 , "02", "22-05-2025"),
-                OrganisationScenario.MissingRegistration => ("O", CreateSubmitterId(0), null , null, null, null),
-                OrganisationScenario.Error               => ("E", submitterId         , "111", null, null, null),
+                OrganisationScenario.Partial             => ("O", submitterId         , null              , 233 , "02", $"13/05/{(int)relativeYear}"),
+                OrganisationScenario.MissingRegistration => ("O", CreateSubmitterId(0), null              , null, null, null),
+                OrganisationScenario.Error               => ("E", submitterId         , "Invalid leaver code", null, "99", null),
                 _                                        => (obligated ? "O" : "N", submitterId, null, null, null, null)
             };
 
@@ -402,7 +402,7 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
                     .Select(x => (int?)GetSubsidiaryId(i, x))
                     .ToArray();
 
-            var (obligationStatus, scenarioSubmitterId, errorCode, numDaysObligated, statusCode, joinerDate) = GetOrganisationValues(scenario, submitterId, obligated);
+            var (obligationStatus, scenarioSubmitterId, errorCode, numDaysObligated, statusCode, joinerDate) = GetOrganisationValues(scenario, submitterId, obligated, relativeYear);
 
             // Each registration is re-uploaded FileVersionsPerSubmission times under a new file name;
             // AcceptedFileSelector keeps only the latest file per (organisation, submitter).
