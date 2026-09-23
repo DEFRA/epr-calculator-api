@@ -343,7 +343,10 @@ public abstract class BaseIntegrationTest
                 LapcapDataMaster   = master // TODO make virtual?
             }).ToImmutableList();
 
-    private protected static ImmutableList<PayCalOrganisation> Organisations(string organisationsPath)
+    // The real SQL source always filters submission_period_year = @relativeYear and regulator_status
+    // IN ('Granted','Accepted','Cancelled'), so neither has its own column in the fixture CSV -
+    // every row here is hardcoded as an accepted year-matching registration.
+    private protected static ImmutableList<PayCalOrganisation> Organisations(string organisationsPath, int relativeYear)
     {
         using var csv = SlurpCsv(organisationsPath);
         csv.Read();
@@ -361,10 +364,12 @@ public abstract class BaseIntegrationTest
                 ObligationStatus = Field(csv, "obligation_status"),
                 SubmitterId      = Field(csv, "submitter_id"),
                 ErrorCode        = Field(csv, "error_code"),
+                RegulatorStatus  = "Accepted",
                 StatusCode       = Field(csv, "status_code"),
                 NumDaysObligated = Field(csv, "num_days_obligated") is { } d ? short.Parse(d) : null,
                 JoinerDate       = Field(csv, "joiner_date"),
                 LeaverDate       = Field(csv, "leaver_date"),
+                SubmissionPeriodYear = relativeYear,
                 HasH1            = Field(csv, "has_h1") == "1",
                 HasH2            = Field(csv, "has_h2") == "1",
                 FileName         = Field(csv, "file_name"),

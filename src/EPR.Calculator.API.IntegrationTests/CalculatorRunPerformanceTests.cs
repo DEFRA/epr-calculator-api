@@ -61,7 +61,7 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
         await SeedCalculatorDataAsync(db, relativeYear, "TestData/defaultParams.csv", "TestData/lapcap.csv");
 
         var fakeOrganisationsStream = Provider.GetRequiredService<FakeStreamOrganisationsRequestHandler>();
-        fakeOrganisationsStream.Organisations = Organisations(organisationPath);
+        fakeOrganisationsStream.Organisations = Organisations(organisationPath, relativeYear);
 
         var fakePomsStream = Provider.GetRequiredService<FakeStreamPomsRequestHandler>();
         fakePomsStream.Poms = () => StreamPoms(pomPath);

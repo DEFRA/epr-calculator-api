@@ -140,7 +140,7 @@ internal sealed class ProducerPomAligner : IProducerPomAligner
                 {
                     MaterialCode = materialCode,
                     PackagingType = poms.Key.PackagingType!,
-                    SubmissionPeriod = poms.Key.SubmissionPeriod!,
+                    SubmissionPeriod = poms.Key.SubmissionPeriod,
                     TotalWeight = total,
                     RedWeight = red,
                     AmberWeight = amber,

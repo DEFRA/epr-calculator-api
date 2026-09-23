@@ -12,7 +12,7 @@ internal sealed class LoadPom
     public int OrganisationId { get; set; }
     public string? SubsidiaryId { get; set; }
     public string? SubmitterId { get; set; }
-    public string? SubmissionPeriod { get; set; }
+    public required string SubmissionPeriod { get; set; }
     public string? SubmissionPeriodDescription { get; set; }
     public string? PackagingActivity { get; set; }
     public string? PackagingType { get; set; }

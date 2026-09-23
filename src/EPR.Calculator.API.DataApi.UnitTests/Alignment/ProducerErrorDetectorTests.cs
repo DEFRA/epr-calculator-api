@@ -556,6 +556,8 @@ public class ProducerErrorDetectorTests
             OrganisationName = orgName,
             ObligationStatus = obligationStatus,
             StatusCode = statusCode,
+            SubmissionPeriodYear = 2024,
+            RegulatorStatus = "Accepted",
             SubmitterId = submitterId?.ToString(),
             ErrorCode = errorCode,
             HasH1 = hasH1,
