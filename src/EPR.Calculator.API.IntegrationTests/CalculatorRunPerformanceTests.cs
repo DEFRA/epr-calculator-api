@@ -60,8 +60,13 @@ public class CalculatorRunPerformanceTests : BaseIntegrationTest
 
         await SeedCalculatorDataAsync(db, relativeYear, "TestData/defaultParams.csv", "TestData/lapcap.csv");
 
+        var determinedOrganisations = Organisations(organisationPath, relativeYear);
+
         var fakeOrganisationsStream = Provider.GetRequiredService<FakeStreamOrganisationsRequestHandler>();
-        fakeOrganisationsStream.Organisations = Organisations(organisationPath, relativeYear);
+        fakeOrganisationsStream.Organisations = determinedOrganisations.Select(o => o.Org).ToImmutableList();
+
+        var passthroughDeterminer = Provider.GetRequiredService<PassthroughProducerObligationDeterminer>();
+        passthroughDeterminer.DeterminedOrganisations = determinedOrganisations;
 
         var fakePomsStream = Provider.GetRequiredService<FakeStreamPomsRequestHandler>();
         fakePomsStream.Poms = () => StreamPoms(pomPath);

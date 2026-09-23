@@ -146,7 +146,8 @@ public abstract class BaseIntegrationTest
             .AddSingleton<FakeStreamPomsRequestHandler>()
             .AddSingleton<IStreamPomsRequestHandler>(sp => sp.GetRequiredService<FakeStreamPomsRequestHandler>())
             .RemoveAll<IProducerObligationDeterminer>()
-            .AddSingleton<IProducerObligationDeterminer, PassthroughProducerObligationDeterminer>()
+            .AddSingleton<PassthroughProducerObligationDeterminer>()
+            .AddSingleton<IProducerObligationDeterminer>(sp => sp.GetRequiredService<PassthroughProducerObligationDeterminer>())
             .RemoveAll<IStorageUploadService>()
             .RemoveAll<IBlobStorageService>()
             .AddSingleton<FakeBlobStorageUploadService>()
@@ -345,35 +346,39 @@ public abstract class BaseIntegrationTest
 
     // The real SQL source always filters submission_period_year = @relativeYear and regulator_status
     // IN ('Granted','Accepted','Cancelled'), so neither has its own column in the fixture CSV -
-    // every row here is hardcoded as an accepted year-matching registration.
-    private protected static ImmutableList<PayCalOrganisation> Organisations(string organisationsPath, int relativeYear)
+    // every row here is hardcoded as an accepted year-matching registration. HasH1/HasH2 aren't set
+    // here either - PassthroughProducerObligationDeterminer only stands in for obligation
+    // determination, so the real OrganisationPeriodFlagsCalculator still computes those from the POM
+    // stream for real.
+    private protected static ImmutableList<DeterminedOrganisation> Organisations(string organisationsPath, int relativeYear)
     {
         using var csv = SlurpCsv(organisationsPath);
         csv.Read();
         csv.ReadHeader();
 
-        var organisations = ImmutableList.CreateBuilder<PayCalOrganisation>();
+        var organisations = ImmutableList.CreateBuilder<DeterminedOrganisation>();
         while (csv.Read())
         {
-            organisations.Add(new PayCalOrganisation
+            organisations.Add(new DeterminedOrganisation
             {
-                OrganisationId   = int.Parse(Field(csv, "organisation_id")!),
-                SubsidiaryId     = Field(csv, "subsidiary_id"),
-                OrganisationName = Field(csv, "organisation_name"),
-                TradingName      = Field(csv, "trading_name"),
+                Org = new PayCalOrganisation
+                {
+                    OrganisationId   = int.Parse(Field(csv, "organisation_id")!),
+                    SubsidiaryId     = Field(csv, "subsidiary_id"),
+                    OrganisationName = Field(csv, "organisation_name"),
+                    TradingName      = Field(csv, "trading_name"),
+                    SubmitterId      = Field(csv, "submitter_id"),
+                    RegulatorStatus  = "Accepted",
+                    StatusCode       = Field(csv, "status_code"),
+                    JoinerDate       = Field(csv, "joiner_date"),
+                    LeaverDate       = Field(csv, "leaver_date"),
+                    SubmissionPeriodYear = relativeYear,
+                    FileName         = Field(csv, "file_name"),
+                    CreatedDateTime  = Field(csv, "created_date_time") is { } c ? DateTime.Parse(c, CultureInfo.InvariantCulture) : null
+                },
                 ObligationStatus = Field(csv, "obligation_status"),
-                SubmitterId      = Field(csv, "submitter_id"),
-                ErrorCode        = Field(csv, "error_code"),
-                RegulatorStatus  = "Accepted",
-                StatusCode       = Field(csv, "status_code"),
                 NumDaysObligated = Field(csv, "num_days_obligated") is { } d ? short.Parse(d) : null,
-                JoinerDate       = Field(csv, "joiner_date"),
-                LeaverDate       = Field(csv, "leaver_date"),
-                SubmissionPeriodYear = relativeYear,
-                HasH1            = Field(csv, "has_h1") == "1",
-                HasH2            = Field(csv, "has_h2") == "1",
-                FileName         = Field(csv, "file_name"),
-                CreatedDateTime  = Field(csv, "created_date_time") is { } c ? DateTime.Parse(c, CultureInfo.InvariantCulture) : null
+                ErrorCode        = Field(csv, "error_code")
             });
         }
 

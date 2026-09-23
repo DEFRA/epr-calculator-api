@@ -1,5 +1,6 @@
 using EPR.Calculator.Api.DataApi.Alignment;
 using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.PomEligibility;
 
 namespace EPR.Calculator.API.DataApi.UnitTests.Alignment;
 
@@ -43,7 +44,7 @@ public class ProducerErrorDetectorTests
             CreatePom(10, "102", "2023-P2")
         };
 
-        var orgs = Array.Empty<PayCalOrganisation>();
+        var orgs = Array.Empty<FlaggedOrganisation>();
 
         var result = ProducerErrorDetector.HandleMissingRegistrationData(poms, orgs);
 
@@ -80,7 +81,7 @@ public class ProducerErrorDetectorTests
             .Select(_ => CreatePom(100, "200", "2023-P2"))
             .ToArray();
 
-        var orgs = Array.Empty<PayCalOrganisation>();
+        var orgs = Array.Empty<FlaggedOrganisation>();
 
         var result = ProducerErrorDetector.HandleMissingRegistrationData(poms, orgs);
 
@@ -539,7 +540,7 @@ public class ProducerErrorDetectorTests
             SubsidiaryId = subsidiaryId
         };
 
-    private static PayCalOrganisation CreateOrg(
+    private static FlaggedOrganisation CreateOrg(
         int orgId,
         string? subId,
         string orgName,
@@ -551,14 +552,17 @@ public class ProducerErrorDetectorTests
         bool hasH2 = true) =>
         new()
         {
-            OrganisationId = orgId,
-            SubsidiaryId = subId,
-            OrganisationName = orgName,
+            Org = new PayCalOrganisation
+            {
+                OrganisationId = orgId,
+                SubsidiaryId = subId,
+                OrganisationName = orgName,
+                StatusCode = statusCode,
+                SubmissionPeriodYear = 2024,
+                RegulatorStatus = "Accepted",
+                SubmitterId = submitterId?.ToString()
+            },
             ObligationStatus = obligationStatus,
-            StatusCode = statusCode,
-            SubmissionPeriodYear = 2024,
-            RegulatorStatus = "Accepted",
-            SubmitterId = submitterId?.ToString(),
             ErrorCode = errorCode,
             HasH1 = hasH1,
             HasH2 = hasH2
