@@ -49,16 +49,14 @@ namespace EPR.Calculator.API.BackgroundService.Builder.RejectedProducers
 
             var orgDetailsQuery =
                 from cr in dbContext.CalculatorRuns
-                join crodm in dbContext.CalculatorRunOrganisationDataMaster
-                    on cr.CalculatorRunOrganisationDataMasterId equals crodm.Id
-                join crodd in dbContext.CalculatorRunOrganisationDataDetails
-                    on crodm.Id equals crodd.CalculatorRunOrganisationDataMasterId
+                join org in dbContext.CalculatorRunOrganisations
+                    on cr.Id equals org.CalculatorRunId
                 join b in billingInstructionsQuery
-                    on crodd.OrganisationId equals b.ProducerId
+                    on org.OrganisationId equals b.ProducerId
                 where cr.RelativeYear == runContext.RelativeYear
-                      && crodd.OrganisationName != null
-                      && crodd.SubsidiaryId == null
-                group cr by crodd.OrganisationId into g
+                      && org.OrganisationName != null
+                      && org.SubsidiaryId == null
+                group cr by org.OrganisationId into g
                 select new
                 {
                     OrganisationId = g.Key,
@@ -67,22 +65,20 @@ namespace EPR.Calculator.API.BackgroundService.Builder.RejectedProducers
 
             var rejectedProducersQuery =
                 from cr in dbContext.CalculatorRuns
-                join crodm in dbContext.CalculatorRunOrganisationDataMaster
-                    on cr.CalculatorRunOrganisationDataMasterId equals crodm.Id
-                join crodd in dbContext.CalculatorRunOrganisationDataDetails
-                    on crodm.Id equals crodd.CalculatorRunOrganisationDataMasterId
+                join org in dbContext.CalculatorRunOrganisations
+                    on cr.Id equals org.CalculatorRunId
                 join b in billingInstructionsQuery
-                    on crodd.OrganisationId equals b.ProducerId
+                    on org.OrganisationId equals b.ProducerId
                 join latest in orgDetailsQuery
-                    on new { OrgId = crodd.OrganisationId, cr.Id }
+                    on new { OrgId = org.OrganisationId, cr.Id }
                     equals new { OrgId = latest.OrganisationId, Id = latest.LatestRunId }
-                where crodd.SubsidiaryId == null
+                where org.SubsidiaryId == null
                 select new CalcResultRejectedProducer
                 {
                     RunId = cr.Id,
-                    ProducerId = crodd.OrganisationId,
-                    ProducerName = crodd.OrganisationName,
-                    TradingName = crodd.TradingName ?? "",
+                    ProducerId = org.OrganisationId,
+                    ProducerName = org.OrganisationName,
+                    TradingName = org.TradingName ?? "",
                     SuggestedBillingInstruction = b.SuggestedBillingInstruction,
                     SuggestedInvoiceAmount = (b.SuggestedBillingInstruction == BillingConstants.Suggestion.Cancel &&
                                               b.BillingInstructionAcceptReject == BillingConstants.Action.Rejected

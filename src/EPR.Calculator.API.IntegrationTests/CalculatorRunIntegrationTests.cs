@@ -6,12 +6,12 @@ using EPR.Calculator.API.BackgroundService.Features.BillingRuns;
 using EPR.Calculator.API.BackgroundService.Features.BillingRuns.Contexts;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns;
 using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
-using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Telemetry;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
 using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Data.Utils;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -40,9 +40,11 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
 
         var calculatorRunId = await SeedCalculatorRun(db, name, relativeYear, "TestData/defaultParams.csv", "TestData/lapcap.csv");
 
-        var fakeCommonDataApi                   = Provider.GetRequiredService<FakeCommonDataApiClient>();
-        fakeCommonDataApi.OrganisationResponses = OrganisationResponses($"TestData/{relativeYear}-organisation-data.csv");
-        fakeCommonDataApi.Poms                  = () => StreamPoms($"TestData/{relativeYear}-pom-data.csv");
+        var fakeOrganisationsStream = Provider.GetRequiredService<FakeStreamOrganisationsRequestHandler>();
+        fakeOrganisationsStream.Organisations = Organisations($"TestData/{relativeYear}-organisation-data.csv", relativeYear);
+
+        var fakePomsStream = Provider.GetRequiredService<FakeStreamPomsRequestHandler>();
+        fakePomsStream.Poms = () => StreamPoms($"TestData/{relativeYear}-pom-data.csv");
 
         var fakeBlobStorageUploadService = Provider.GetRequiredService<FakeBlobStorageUploadService>();
 
@@ -231,5 +233,4 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
 
         await db.SaveChangesAsync();
     }
-
 }

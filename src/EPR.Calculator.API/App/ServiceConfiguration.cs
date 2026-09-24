@@ -4,6 +4,8 @@ using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Azure.Storage.Blobs;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
+using EPR.Calculator.Api.DataApi;
+using EPR.Calculator.Api.DataApi.Services;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Filters;
@@ -149,6 +151,16 @@ public static class ServiceConfiguration
             });
 
             services.AddSingleton<IBulkOperations, BulkOperationsWrapper>();
+
+            return services;
+        }
+
+        public IServiceCollection AddPayCalDataApi(IConfiguration configuration)
+        {
+            services.AddDataApi(
+                provider => provider.GetRequiredService<IOptions<DatabaseOptions>>().Value.ConnectionString,
+                provider => provider.GetRequiredService<IConfiguration>().GetValue("CommonDataApi:DataLoader:Enabled", true),
+                captureMemoryMetrics: configuration.GetValue("Telemetry:CaptureMemoryMetrics", defaultValue: false));
 
             return services;
         }

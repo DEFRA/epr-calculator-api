@@ -4,7 +4,6 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using EPR.Calculator.API.App;
 using EPR.Calculator.API.BackgroundService.Services;
-using EPR.Calculator.API.BackgroundService.Services.CommonDataApi;
 using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
@@ -12,6 +11,8 @@ using EPR.Calculator.API.Data.DataTypes;
 using EPR.Calculator.API.Data.Utils;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Services;
+using EPR.Calculator.Api.DataApi.CommonDataApi;
+using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -96,7 +97,11 @@ public abstract class BaseIntegrationTest
             .AddJsonFile("appsettings.integration.json")
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Database:ConnectionString"] = connectionString
+                ["Database:ConnectionString"] = connectionString,
+                // Lets a perf/CI run exercise both DataApi modes: DATAAPI_LOADER_ENABLED=false reads
+                // the source directly, =true (default) stages it through data_api_load_* first.
+                ["CommonDataApi:DataLoader:Enabled"] =
+                    Environment.GetEnvironmentVariable("DATAAPI_LOADER_ENABLED") ?? "true"
             })
             .Build();
 
@@ -127,14 +132,18 @@ public abstract class BaseIntegrationTest
                 x.AddSerilog(Log.Logger, dispose: true);
             })
             .AddPayCalDatabase()
+            .AddPayCalDataApi(configuration)
             .AddPayCalBlobStorage()
             .AddPayCalServices()
             .AddPayCalBackgroundServices()
             .AddPayCalRequestValidation()
             .AddDbContextFactory<ApplicationDBContext>(options => { options.UseSqlServer(connectionString); })
-            .RemoveAll<CommonDataApiHttpClient>()
-            .AddSingleton<FakeCommonDataApiClient>()
-            .AddSingleton<ICommonDataApiClient>(sp => sp.GetRequiredService<FakeCommonDataApiClient>())
+            .RemoveAll<IStreamOrganisationsRequestHandler>()
+            .AddSingleton<FakeStreamOrganisationsRequestHandler>()
+            .AddSingleton<IStreamOrganisationsRequestHandler>(sp => sp.GetRequiredService<FakeStreamOrganisationsRequestHandler>())
+            .RemoveAll<IStreamPomsRequestHandler>()
+            .AddSingleton<FakeStreamPomsRequestHandler>()
+            .AddSingleton<IStreamPomsRequestHandler>(sp => sp.GetRequiredService<FakeStreamPomsRequestHandler>())
             .RemoveAll<IStorageUploadService>()
             .RemoveAll<IBlobStorageService>()
             .AddSingleton<FakeBlobStorageUploadService>()
@@ -331,39 +340,44 @@ public abstract class BaseIntegrationTest
                 LapcapDataMaster   = master // TODO make virtual?
             }).ToImmutableList();
 
-    protected static ImmutableList<OrganisationResponse> OrganisationResponses(string organisationsPath)
+    // The real SQL source always filters submission_period_year = @relativeYear and regulator_status
+    // IN ('Granted','Accepted','Cancelled'), so neither has its own column in the fixture CSV -
+    // every row here is hardcoded as an accepted year-matching registration. The CSV's
+    // obligation_status/error_code/num_days_obligated/has_h1/has_h2 columns are left unread - the real
+    // ProducerObligationDeterminer/OrganisationPeriodFlagsCalculator compute those for real from
+    // status_code/joiner_date and the POM stream, the same way they would against live data.
+    private protected static ImmutableList<PayCalOrganisation> Organisations(string organisationsPath, int relativeYear)
     {
         using var csv = SlurpCsv(organisationsPath);
         csv.Read();
         csv.ReadHeader();
 
-        var organisations = ImmutableList.CreateBuilder<OrganisationResponse>();
+        var organisations = ImmutableList.CreateBuilder<PayCalOrganisation>();
         while (csv.Read())
         {
-            organisations.Add(new OrganisationResponse
+            organisations.Add(new PayCalOrganisation
             {
                 OrganisationId   = int.Parse(Field(csv, "organisation_id")!),
                 SubsidiaryId     = Field(csv, "subsidiary_id"),
                 OrganisationName = Field(csv, "organisation_name"),
                 TradingName      = Field(csv, "trading_name"),
-                ObligationStatus = Field(csv, "obligation_status"),
                 SubmitterId      = Field(csv, "submitter_id"),
-                ErrorCode        = Field(csv, "error_code"),
+                RegulatorStatus  = "Accepted",
                 StatusCode       = Field(csv, "status_code"),
-                NumDaysObligated = Field(csv, "num_days_obligated") is { } d ? short.Parse(d) : null,
                 JoinerDate       = Field(csv, "joiner_date"),
                 LeaverDate       = Field(csv, "leaver_date"),
-                HasH1            = Field(csv, "has_h1") == "1",
-                HasH2            = Field(csv, "has_h2") == "1"
+                SubmissionPeriodYear = relativeYear,
+                FileName         = Field(csv, "file_name"),
+                CreatedDateTime  = Field(csv, "created_date_time") is { } c ? DateTime.Parse(c, CultureInfo.InvariantCulture) : null
             });
         }
 
         return organisations.ToImmutable();
     }
 
-    // Streams the POM CSV field-by-field off the reader - a fresh CsvReader per call, one PomResponse
+    // Streams the POM CSV field-by-field off the reader - a fresh CsvReader per call, one PayCalPom
     // at a time, no per-row dynamic object - so a multi-million-row file costs only the row it is on.
-    protected static IEnumerable<PomResponse> StreamPoms(string pomsPath)
+    private protected static IEnumerable<PayCalPom> StreamPoms(string pomsPath)
     {
         using var csv = SlurpCsv(pomsPath);
         csv.Read();
@@ -371,7 +385,7 @@ public abstract class BaseIntegrationTest
 
         while (csv.Read())
         {
-            yield return new PomResponse
+            yield return new PayCalPom
             {
                 OrganisationId              = int.Parse(Field(csv, "organisation_id")!),
                 SubsidiaryId                = Field(csv, "subsidiary_id"),
@@ -384,7 +398,9 @@ public abstract class BaseIntegrationTest
                 SubmissionPeriodDescription = Field(csv, "submission_period_desc"),
                 SubmitterId                 = Field(csv, "submitter_id"),
                 PackagingMaterialSubtype    = Field(csv, "packaging_material_subtype"),
-                RamRagRating                = Field(csv, "ram_rag_rating")
+                RamRagRating                = Field(csv, "ram_rag_rating"),
+                FileName                    = Field(csv, "file_name"),
+                CreatedDateTime             = Field(csv, "created_date_time") is { } c ? DateTime.Parse(c, CultureInfo.InvariantCulture) : null
             };
         }
     }
@@ -418,6 +434,11 @@ public abstract class BaseIntegrationTest
         value.Equals("NULL", StringComparison.OrdinalIgnoreCase)
             ? null
             : value;
+
+    private static T? Nullable<T>(string value, Func<string, T> parser) where T : struct =>
+        value.Equals("NULL", StringComparison.OrdinalIgnoreCase)
+            ? null
+            : parser(value);
 }
 
 [TestClass]

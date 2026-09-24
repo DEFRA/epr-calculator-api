@@ -14,18 +14,16 @@ public class CalculatorRun
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public string? UpdatedBy { get; set; }
     public DateTime? UpdatedAt { get; set; }
-    public int? CalculatorRunPomDataMasterId { get; set; }
-    public int? CalculatorRunOrganisationDataMasterId { get; set; }
+    public DateTime? OrgPomDataLoadedAt { get; set; }
     public int? LapcapDataMasterId { get; set; }
     public int? DefaultParameterSettingMasterId { get; set; }
 
     #region EF navigational properties
 
-    public virtual CalculatorRunPomDataMaster? CalculatorRunPomDataMaster { get; set; }
-    public virtual CalculatorRunOrganisationDataMaster? CalculatorRunOrganisationDataMaster { get; set; }
     public virtual LapcapDataMaster? LapcapDataMaster { get; set; }
     public virtual DefaultParameterSettingMaster? DefaultParameterSettingMaster { get; set; }
     public virtual ICollection<ProducerDetail> ProducerDetails { get; } = [];
+    public virtual ICollection<CalculatorRunOrganisation> CalculatorRunOrganisations { get; } = [];
     public virtual ICollection<CountryApportionment> CountryApportionments { get; } = [];
     public virtual ICollection<CalculatorRunBillingFileMetadata> CalculatorRunBillingFileMetadata { get; set; } = [];
     public virtual ICollection<CalculatorRunCsvFileMetadata> CsvFileMetadata { get; } = [];
