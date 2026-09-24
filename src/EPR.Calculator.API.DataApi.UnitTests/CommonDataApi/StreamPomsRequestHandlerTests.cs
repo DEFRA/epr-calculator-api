@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using EPR.Calculator.Api.DataApi.CommonDataApi;
 using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.DataApi.UnitTests.CommonDataApi;
@@ -70,7 +71,7 @@ public class StreamPomsRequestHandlerTests
             BaseUrl = "https://test-api.example.com",
             StreamStartTimeout = TimeSpan.FromSeconds(30)
         });
-        return new StreamPomsRequestHandler(httpClient, options);
+        return new StreamPomsRequestHandler(httpClient, options, NullLogger<StreamPomsRequestHandler>.Instance);
     }
 
     private static HttpResponseMessage OkNdJson(string content) =>

@@ -14,8 +14,6 @@ internal record PayCalOrganisation
     public string? SubmitterId { get; init; }
     public required string OrganisationName { get; init; }
     public string? TradingName { get; init; }
-
-    [JsonPropertyName("LeaverCode")]
     public string? StatusCode { get; init; }
     public string? LeaverDate { get; init; }
     public string? JoinerDate { get; init; }

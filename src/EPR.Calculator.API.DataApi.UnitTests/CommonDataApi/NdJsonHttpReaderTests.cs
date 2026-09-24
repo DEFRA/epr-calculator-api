@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using EPR.Calculator.Api.DataApi.CommonDataApi.Infrastructure;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EPR.Calculator.API.DataApi.UnitTests.CommonDataApi;
 
@@ -99,7 +100,7 @@ public class NdJsonHttpReaderTests
     }
 
     private static IAsyncEnumerable<TestRecord> Read(HttpClient client) =>
-        NdJsonHttpReader.ReadAsync<TestRecord>(client, "test", TimeSpan.FromSeconds(30));
+        NdJsonHttpReader.ReadAsync<TestRecord>(client, "test", TimeSpan.FromSeconds(30), NullLogger.Instance);
 
     private static HttpClient CreateClient(HttpMessageHandler handler) =>
         new(handler) { BaseAddress = new Uri("https://test-api.example.com") };

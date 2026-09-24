@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
 using EPR.Calculator.Api.DataApi.CommonDataApi.Infrastructure;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.Api.DataApi.CommonDataApi;
@@ -11,7 +12,10 @@ internal interface IStreamOrganisationsRequestHandler
     IAsyncEnumerable<PayCalOrganisation> Handle(int relativeYear, CancellationToken cancellationToken = default);
 }
 
-internal sealed class StreamOrganisationsRequestHandler(HttpClient httpClient, IOptions<CommonDataApiHttpClientOptions> options)
+internal sealed class StreamOrganisationsRequestHandler(
+    HttpClient httpClient,
+    IOptions<CommonDataApiHttpClientOptions> options,
+    ILogger<StreamOrganisationsRequestHandler> logger)
     : IStreamOrganisationsRequestHandler
 {
     public async IAsyncEnumerable<PayCalOrganisation> Handle(int relativeYear,
@@ -23,6 +27,7 @@ internal sealed class StreamOrganisationsRequestHandler(HttpClient httpClient, I
             httpClient,
             $"api/paycal/v2/organisations?RelativeYear={relativeYear}",
             options.Value.StreamStartTimeout,
+            logger,
             cancellationToken);
 
         await foreach (var organisation in organisations.WithCancellation(cancellationToken))
