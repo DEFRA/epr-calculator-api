@@ -172,24 +172,21 @@ internal sealed class ProducerDataService(
             records.Add(ToProducerRecord(organisation, hardErrors, warnings));
         }
 
-        // Orphan errors: a key with no aligned or "E"-status row at all. Borrow identity fields from
-        // any other row sharing the OrganisationId (e.g. a POM submitted under a subsidiary/submitter
-        // combo that doesn't match any registration); fall back to an empty identity in the rare case
-        // no registration exists for the organisation at all - mirroring today's behaviour, where such
-        // an organisation never gets a CalculatorRunOrganisation snapshot either.
+        // Orphan errors: a key with no aligned or "E"-status row at all (e.g. a POM submitted under a
+        // subsidiary/submitter combo that doesn't match any registration). Only an exact
+        // (OrganisationId, SubsidiaryId) match supplies identity fields - a registration for the
+        // parent organisation doesn't tell us the subsidiary's own name or leaver code, so an
+        // unmatched subsidiary falls back to an empty identity rather than borrowing the parent's.
         foreach (var key in errorsByKey.Select(g => g.Key))
         {
             if (!coveredKeys.Add(key))
                 continue;
 
             var (hardErrors, warnings) = SplitErrors(errorsByKey[key]);
-            var anyOrganisationRow = dedupedOrganisations.FirstOrDefault(o => o.Org.OrganisationId == key.OrganisationId);
+            var matchingOrganisationRow = dedupedOrganisations.FirstOrDefault(o => o.Org.OrganisationId == key.OrganisationId && o.Org.SubsidiaryId == key.SubsidiaryId);
 
-            records.Add(anyOrganisationRow is not null
-                ? ToProducerRecord(
-                    anyOrganisationRow with { Org = anyOrganisationRow.Org with { SubsidiaryId = key.SubsidiaryId, SubmitterId = null } },
-                    hardErrors,
-                    warnings)
+            records.Add(matchingOrganisationRow is not null
+                ? ToProducerRecord(matchingOrganisationRow with { Org = matchingOrganisationRow.Org with { SubmitterId = null } }, hardErrors, warnings)
                 : ToOrphanProducerRecord(key, hardErrors, warnings));
         }
 
