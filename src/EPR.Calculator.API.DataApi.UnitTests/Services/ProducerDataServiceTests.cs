@@ -359,6 +359,53 @@ public class ProducerDataServiceTests
     }
 
     [TestMethod]
+    public async Task GetProducerData_PomForSubsidiaryWithNoRegistration_DoesNotBorrowParentsIdentity()
+    {
+        // The parent organisation itself has a registration - only the subsidiary the POM was
+        // submitted under is missing one. The subsidiary's error record must not borrow the
+        // parent's name/leaver code, since neither tells us anything true about the subsidiary.
+        var org = new FlaggedOrganisation
+        {
+            Org = new PayCalOrganisation
+            {
+                OrganisationId = 1,
+                OrganisationName = "Parent Co",
+                StatusCode = "01",
+                SubmitterId = Guid.NewGuid().ToString(),
+                SubmissionPeriodYear = 2024,
+                RegulatorStatus = "Accepted"
+            },
+            ObligationStatus = "O",
+            HasH1 = true,
+            HasH2 = true
+        };
+
+        var pom = new PayCalPom
+        {
+            OrganisationId = 1,
+            SubsidiaryId = "SUB",
+            SubmitterId = Guid.NewGuid().ToString(),
+            PackagingType = "HH",
+            PackagingMaterial = "PL",
+            SubmissionPeriod = "2024-P1",
+            PackagingMaterialWeight = 1000
+        };
+
+        var service = CreateService(orgs: [org], poms: [pom]);
+
+        var result = await service.GetProducerData(2024, null, ["PL"]);
+
+        var subsidiaryRecord = result.Single(r => r.SubsidiaryId == "SUB");
+        subsidiaryRecord.ProducerName.ShouldBe(string.Empty);
+        subsidiaryRecord.StatusCode.ShouldBeNull();
+        subsidiaryRecord.Errors.ShouldHaveSingleItem().ErrorCode.ShouldBe("Missing Registration Data");
+
+        var parentRecord = result.Single(r => r.SubsidiaryId is null);
+        parentRecord.ProducerName.ShouldBe("Parent Co");
+        parentRecord.StatusCode.ShouldBe("01");
+    }
+
+    [TestMethod]
     public async Task GetProducerData_PomEligibility_ExcludesCancelledRegistrationsFromTheGate()
     {
         var submitterId = Guid.NewGuid().ToString();
