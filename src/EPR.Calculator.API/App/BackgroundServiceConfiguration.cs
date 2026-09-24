@@ -41,7 +41,6 @@ using EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Outputs;
 using EPR.Calculator.API.BackgroundService.Models;
 using EPR.Calculator.API.BackgroundService.Options;
 using EPR.Calculator.API.BackgroundService.Services;
-using EPR.Calculator.API.BackgroundService.Services.DataLoading;
 using EPR.Calculator.API.BackgroundService.Telemetry;
 using EPR.Calculator.API.BackgroundService.Telemetry.Internals;
 using FluentValidation;
@@ -77,9 +76,10 @@ public static class BackgroundServiceConfiguration
             services.AddTransient<ICalculatorFileGenerator, CalculatorFileGenerator>();
             services.AddTransient<ICalcResultsExporter, CalcResultsExporter>();
 
-            // Register CommonDataApi. The load-table stage and its CommonDataApi:DataLoader:Enabled
-            // flag live in EPR.Calculator.API.DataApi (see AddPayCalDataApi).
-            services.AddTransient<IDataLoader, CommonDataApiLoader>();
+            // The load-table stage and its CommonDataApi:DataLoader:Enabled flag live in
+            // EPR.Calculator.API.DataApi (see AddPayCalDataApi) - DataApi decides internally whether
+            // to read the source directly or via the load tables.
+            services.AddTransient<ICalculatorDataApiService, CalculatorDataApiService>();
             services.AddTransient<IProducerDataTransposer, ProducerDataTransposer>();
 
             // Register BillingRunDependencies
