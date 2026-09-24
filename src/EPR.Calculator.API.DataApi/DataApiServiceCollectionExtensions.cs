@@ -20,7 +20,10 @@ public static class DataApiServiceCollectionExtensions
     /// </summary>
     /// <param name="loadTableConnectionString">Resolves the connection string of the database that hosts the data_api_load_* tables.</param>
     /// <param name="loadTablesEnabled">
-    ///     Whether a run stages the RPD source through the load tables (true) or reads it directly (false).
+    ///     Whether a run refreshes the load tables from the RPD source before reading them (true), or
+    ///     reads them as they already stand, without refreshing first (false) - e.g. to run several
+    ///     calculations against the same already-staged snapshot without re-querying RPD each time. A
+    ///     run always reads from the load tables; this only controls whether they're refreshed first.
     ///     Resolved when the options are first read, so the choice is made at run time.
     /// </param>
     /// <param name="captureMemoryMetrics">
@@ -63,11 +66,10 @@ public static class DataApiServiceCollectionExtensions
 
         services.AddTransient<ILoadTableRefresher, LoadTableRefresher>();
         services.AddTransient<CommonDataApiSource>();
-        services.AddTransient<LoadTableDataSource>();
-        services.AddTransient<IPayCalDataSource>(provider =>
-            provider.GetRequiredService<IOptions<DataApiLoadOptions>>().Value.Enabled
-                ? provider.GetRequiredService<LoadTableDataSource>()
-                : provider.GetRequiredService<CommonDataApiSource>());
+
+        // A run always reads from the load tables - DataApiLoadOptions.Enabled only controls whether
+        // ProducerDataService refreshes them first, not which source gets read from.
+        services.AddTransient<IPayCalDataSource, LoadTableDataSource>();
 
         return services;
     }

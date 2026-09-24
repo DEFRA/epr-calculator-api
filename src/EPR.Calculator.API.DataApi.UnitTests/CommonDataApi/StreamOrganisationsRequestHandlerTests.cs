@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using EPR.Calculator.Api.DataApi.CommonDataApi;
 using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.DataApi.UnitTests.CommonDataApi;
@@ -39,7 +40,7 @@ public class StreamOrganisationsRequestHandlerTests
             organisationId = 100,
             organisationName = "Org Co",
             subsidiaryId = "S1",
-            leaverCode = "02",
+            statusCode = "02",
             regulatorStatus = "Granted",
             submissionPeriodYear = 2025
         });
@@ -71,7 +72,7 @@ public class StreamOrganisationsRequestHandlerTests
             BaseUrl = "https://test-api.example.com",
             StreamStartTimeout = TimeSpan.FromSeconds(30)
         });
-        return new StreamOrganisationsRequestHandler(httpClient, options);
+        return new StreamOrganisationsRequestHandler(httpClient, options, NullLogger<StreamOrganisationsRequestHandler>.Instance);
     }
 
     private static HttpResponseMessage OkNdJson(string content) =>

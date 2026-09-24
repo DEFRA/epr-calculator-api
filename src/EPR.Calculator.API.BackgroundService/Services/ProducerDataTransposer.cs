@@ -15,7 +15,7 @@ public interface IProducerDataTransposer
     /// </summary>
     Task Transpose(
         CalculatorRunContext runContext,
-        IReadOnlyList<ProducerRecord> data,
+        IReadOnlyList<ProducerRecord> producerRecords,
         CancellationToken cancellationToken);
 }
 
@@ -30,7 +30,7 @@ public class ProducerDataTransposer(
     [ActivityTrace]
     public async Task Transpose(
         CalculatorRunContext runContext,
-        IReadOnlyList<ProducerRecord> data,
+        IReadOnlyList<ProducerRecord> producerRecords,
         CancellationToken cancellationToken)
     {
         var calculatorRun = await dbContext.CalculatorRuns
@@ -51,7 +51,7 @@ public class ProducerDataTransposer(
         // behalf) gets a CalculatorRunOrganisation row below but no ProducerDetail row, exactly as
         // before this type was unified. ProducerFeesBuilder/CalcResultScaledupProducersBuilder rely on
         // that absence to know to look the parent up via CalculatorRunOrganisation instead.
-        var newProducerDetails = data
+        var newProducerDetails = producerRecords
             .Where(producer => producer.ReportedMaterials.Count > 0)
             .Select(producer =>
             {
@@ -77,7 +77,7 @@ public class ProducerDataTransposer(
 
         // ⚠️ Only set the scalar CalculatorRunId FK - the CalculatorRun navigation is intentionally
         // left unset so the bulk insert below does not try to re-insert it.
-        var organisations = data
+        var organisations = producerRecords
             .Select(record => ToCalculatorRunOrganisation(record, calculatorRun.Id))
             .ToList();
 
@@ -99,7 +99,7 @@ public class ProducerDataTransposer(
             cfg.UseTempDB = true;
         }, cancellationToken);
 
-        await errorReportService.PersistErrors(data, calculatorRun.Id, calculatorRun.CreatedBy, runContext.RelativeYear, cancellationToken);
+        await errorReportService.PersistErrors(producerRecords, calculatorRun.Id, calculatorRun.CreatedBy, runContext.RelativeYear, cancellationToken);
 
         calculatorRun.OrgPomDataLoadedAt = timeProvider.GetUtcNow().UtcDateTime;
         await dbContext.SaveChangesAsync(cancellationToken);
