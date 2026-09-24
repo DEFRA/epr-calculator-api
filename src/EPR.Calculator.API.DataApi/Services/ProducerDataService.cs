@@ -86,8 +86,10 @@ internal sealed class ProducerDataService(
         IReadOnlyList<string> materialCodes,
         CancellationToken cancellationToken)
     {
-        // When the load-table stage is on, pull the RPD source once into data_api_load_* first; the
-        // streams below then read those tables (dataSource is LoadTableDataSource). Off: they read RPD.
+        // The streams below always read the load tables (dataSource is LoadTableDataSource). When
+        // this option is on, refresh them from the RPD source first; when off, read them as they
+        // already stand - e.g. to run several calculations against the same staged snapshot without
+        // re-querying RPD each time.
         if (loadOptions.Value.Enabled)
             await loadTableRefresher.RefreshAsync(relativeYear, cancellationToken);
 

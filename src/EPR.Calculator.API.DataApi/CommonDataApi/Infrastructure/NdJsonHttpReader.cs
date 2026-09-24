@@ -3,6 +3,7 @@ using System.IO.Compression;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace EPR.Calculator.Api.DataApi.CommonDataApi.Infrastructure;
 
@@ -21,6 +22,7 @@ internal static class NdJsonHttpReader
         HttpClient httpClient,
         string requestUri,
         TimeSpan streamStartTimeout,
+        ILogger logger,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // Timeout to cancel the request if it takes too long for the stream to start.
@@ -37,6 +39,10 @@ internal static class NdJsonHttpReader
             Version = HttpVersion.Version11,
             VersionPolicy = HttpVersionPolicy.RequestVersionExact
         };
+
+        // Logged before sending, not just tagged on the activity after, so the call is visible even
+        // if it hangs or fails below the HTTP-status level (e.g. a connection error).
+        logger.LogInformation("Calling {Url}", new Uri(httpClient.BaseAddress!, requestUri));
 
         using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, linkedCts.Token);
 

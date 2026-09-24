@@ -19,7 +19,7 @@ public interface IErrorReportService
     ///     is then added for any producer whose surviving errors are all subsidiary-scoped.
     /// </remarks>
     Task PersistErrors(
-        IReadOnlyList<ProducerRecord> data,
+        IReadOnlyList<ProducerRecord> producerRecords,
         int calculatorRunId,
         string createdBy,
         RelativeYear relativeYear,
@@ -33,7 +33,7 @@ public class ErrorReportService(
     : IErrorReportService
 {
     public async Task PersistErrors(
-        IReadOnlyList<ProducerRecord> data,
+        IReadOnlyList<ProducerRecord> producerRecords,
         int calculatorRunId,
         string createdBy,
         RelativeYear relativeYear,
@@ -42,7 +42,7 @@ public class ErrorReportService(
         var invoicedProducers = await invoicedProducerService.GetInvoicedProducers(relativeYear, cancellationToken: cancellationToken);
         var invoicedOrganisationIds = invoicedProducers.Select(i => i.ProducerId).ToHashSet();
 
-        var errors = data
+        var errors = producerRecords
             .SelectMany(record => record.Errors.Concat(record.Warnings)
                 .Select(error =>
                 (
