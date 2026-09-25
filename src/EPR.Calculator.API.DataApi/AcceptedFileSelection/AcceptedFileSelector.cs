@@ -1,4 +1,5 @@
 using EPR.Calculator.Api.DataApi.CommonDataApi.Entities;
+using EPR.Calculator.Api.DataApi.PomEligibility;
 
 namespace EPR.Calculator.Api.DataApi.AcceptedFileSelection;
 
@@ -21,6 +22,12 @@ public sealed record PomFileCandidate(
 ///     after <paramref name="cutOffDate" /> - in which case the search falls back to the latest file that
 ///     is still eligible (an original, or a resubmission created on/before the cut-off). Groups with no
 ///     eligible candidate are excluded entirely.
+///
+///     For POM files, "period" is a half-year, not the file's literal submission_period: 2024-P1/P2/P3
+///     all compete as one H1 group, and 2024-P4 is H2 on its own (matching how H1/H2 are classified
+///     everywhere else - see <see cref="SubmissionPeriodClassification" />). A resubmission for any one
+///     of P1/P2/P3 is treated as superseding the others, the same as a resubmission of P4 supersedes an
+///     earlier P4 file.
 /// </summary>
 internal interface IAcceptedFileSelector
 {
@@ -57,7 +64,7 @@ internal sealed class AcceptedFileSelector : IAcceptedFileSelector
         DataApiTelemetry.Trace(typeof(AcceptedFileSelector), nameof(SelectLatestPomFiles),
             () => FilterToWinners(
                 poms,
-                p => (p.OrganisationId, p.SubmitterId, p.SubmissionPeriod),
+                p => (p.OrganisationId, p.SubmitterId, HalfPeriod: ToH1OrH2(p.SubmissionPeriod)),
                 p => p.FileName,
                 p => p.IsResubmission,
                 p => p.CreatedDateTime,
@@ -66,13 +73,45 @@ internal sealed class AcceptedFileSelector : IAcceptedFileSelector
     public IReadOnlyDictionary<(int? OrganisationId, string? SubmitterId, string? SubmissionPeriod), string?>
         SelectWinningPomFileNames(IEnumerable<PomFileCandidate> candidates, DateTimeOffset? cutOffDate) =>
         DataApiTelemetry.Trace(typeof(AcceptedFileSelector), nameof(SelectWinningPomFileNames),
-            () => WinningFileNames(
-                candidates,
-                c => (c.OrganisationId, c.SubmitterId, c.SubmissionPeriod),
-                c => c.FileName,
-                c => c.IsResubmission,
-                c => c.CreatedDateTime,
-                cutOffDate));
+            () =>
+            {
+                var candidateList = candidates as IReadOnlyList<PomFileCandidate> ?? candidates.ToList();
+
+                var winnerByHalf = WinningFileNames(
+                    candidateList,
+                    c => (c.OrganisationId, c.SubmitterId, HalfPeriod: ToH1OrH2(c.SubmissionPeriod)),
+                    c => c.FileName,
+                    c => c.IsResubmission,
+                    c => c.CreatedDateTime,
+                    cutOffDate);
+
+                // Re-key by each candidate's own SubmissionPeriod - callers look up a POM's own raw
+                // period (e.g. 2024-P1), which needs to resolve to its H1 group's winner, the same
+                // winner 2024-P3's own key resolves to. A half with no eligible winner gets no entry,
+                // same as WinningFileNames excludes such groups entirely.
+                return candidateList
+                    .Select(c => (Key: (c.OrganisationId, c.SubmitterId, c.SubmissionPeriod), HalfKey: (c.OrganisationId, c.SubmitterId, HalfPeriod: ToH1OrH2(c.SubmissionPeriod))))
+                    .Distinct()
+                    .Where(x => winnerByHalf.ContainsKey(x.HalfKey))
+                    .ToDictionary(x => x.Key, x => winnerByHalf[x.HalfKey]);
+            });
+
+    /// <summary>
+    ///     Maps a POM submission_period to the half-year it belongs to (e.g. 2024-P1/P2/P3 and any year's
+    ///     "-H1" period all become "&lt;year&gt;-H1") so file selection treats them as one competing group.
+    ///     Falls back to the literal period for anything <see cref="SubmissionPeriodClassification" /> can't
+    ///     classify.
+    /// </summary>
+    private static string? ToH1OrH2(string? submissionPeriod)
+    {
+        if (!SubmissionPeriodClassification.TryParseYear(submissionPeriod, out var year))
+            return submissionPeriod;
+
+        if (SubmissionPeriodClassification.IsH1(submissionPeriod!, year))
+            return $"{year}-H1";
+
+        return SubmissionPeriodClassification.IsH2(submissionPeriod!, year) ? $"{year}-H2" : submissionPeriod;
+    }
 
     private static Dictionary<TKey, string?> WinningFileNames<T, TKey>(
         IEnumerable<T> rows,
