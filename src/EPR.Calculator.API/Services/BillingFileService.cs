@@ -221,7 +221,7 @@ public class BillingFileService(
             };
         }
 
-        calculatorRun.BillingRunStatus = BillingRunStatus.Running;
+        calculatorRun.BillingRunStatus = BillingRunStatus.Started;
         calculatorRun.BillingRunStartedAt = DateTime.UtcNow;
 
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -243,7 +243,7 @@ public class BillingFileService(
         // * Billing file has not been sent to FSS (i.e. classification is not 'Completed')
         // * Not already Running OR has been for more than 1 hour (i.e. 'stuck' due to unclean shutdown of the processor)
         return AcceptableRunStatusForBillingInstructions.Contains(run.Classification)
-               && (run.BillingRunStatus != BillingRunStatus.Running
+               && (run.BillingRunStatus != BillingRunStatus.Started
                    || run.BillingRunStartedAt?.AddHours(1) < DateTime.UtcNow);
     }
 

@@ -30,15 +30,14 @@ public enum BillingRunStatus
     None,
 
     /// <summary>
-    ///     Indicates that the billing run is currently underway.
+    ///     Indicates that the billing run has started and should be currently underway.
     /// </summary>
     /// <remarks>
     ///     If the billing run was interrupted unexpectedly, the run may become stuck in this state.
     ///     Change this status back to <see cref="None" />, then restart the billing run.
     ///     This should be safe - database changes aren't committed until the very end of the billing run.
-    ///     However: there may now be orphaned billing files for this run in blob storage (harmless, but should be cleaned up).
     /// </remarks>
-    Running,
+    Started,
 
     /// <summary>
     ///     Indicates that the billing run has completed successfully.

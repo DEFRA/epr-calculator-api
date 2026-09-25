@@ -58,8 +58,8 @@ public class BillingRunContextValidator : AbstractValidator<BillingRunContextBui
                 .WithMessage("Run must have an Official classification that is not already completed.");
 
             RuleFor(run => run.BillingRunStatus)
-                .Equal(BillingRunStatus.Running)
-                .WithMessage($"Status must be '{nameof(BillingRunStatus.Running)}'");
+                .Equal(BillingRunStatus.Started)
+                .WithMessage($"Status must be '{nameof(BillingRunStatus.Started)}'");
         }
     }
 }

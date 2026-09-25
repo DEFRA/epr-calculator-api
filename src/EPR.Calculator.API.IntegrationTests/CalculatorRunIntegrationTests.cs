@@ -126,7 +126,7 @@ public class CalculatorRunIntegrationTests : BaseIntegrationTest
         // Simulates the billing run being started by a user in the FE
         var calcRun = await dbContext.CalculatorRuns.SingleAsync(r => r.Id == runId);
         calcRun.Classification = RunClassification.Initial;
-        calcRun.BillingRunStatus = BillingRunStatus.Running;
+        calcRun.BillingRunStatus = BillingRunStatus.Started;
         calcRun.BillingRunStartedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync();
 
