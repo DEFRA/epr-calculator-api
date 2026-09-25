@@ -253,7 +253,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
                 RelativeYear = new RelativeYear(2024),
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = "Test user",
-                BillingRunStatus = BillingRunStatus.Running,
+                BillingRunStatus = BillingRunStatus.Started,
             };
             DbContext.CalculatorRuns.Add(run);
             DbContext.SaveChanges();
@@ -267,7 +267,7 @@ namespace EPR.Calculator.API.UnitTests.Controllers
             runDto.ShouldNotBeNull();
             runDto.RunId.ShouldBe(run.Id);
             runDto.RunClassification.ShouldBe(RunClassification.Running);
-            runDto.BillingRunStatus.ShouldBe(BillingRunStatus.Running);
+            runDto.BillingRunStatus.ShouldBe(BillingRunStatus.Started);
             runDto.UpdatedAt.ShouldBeNull();
             runDto.UpdatedBy.ShouldBeNull();
         }

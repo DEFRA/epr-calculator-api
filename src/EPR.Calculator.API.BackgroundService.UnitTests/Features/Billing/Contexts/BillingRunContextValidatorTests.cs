@@ -112,7 +112,7 @@ public class BillingRunContextValidatorTests : TestsFor<BillingRunContextValidat
         int? lapcapMasterId = 1,
         int? orgMasterId = 1,
         int? pomMasterId = 1,
-        BillingRunStatus billingRunStatus = BillingRunStatus.Running,
+        BillingRunStatus billingRunStatus = BillingRunStatus.Started,
         ICollection<ProducerResultFileSuggestedBillingInstruction>? instructions = null)
     {
         var ctx = new BillingRunContextBuilder.PreValidationContext

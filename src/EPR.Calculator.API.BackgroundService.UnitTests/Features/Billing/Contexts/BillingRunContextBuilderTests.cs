@@ -25,7 +25,7 @@ public class BillingRunContextBuilderTests : TestsFor<BillingRunContextBuilder>
             LapcapDataMasterId = 1,
             CalculatorRunOrganisationDataMasterId = 1,
             CalculatorRunPomDataMasterId = 1,
-            BillingRunStatus = BillingRunStatus.Running,
+            BillingRunStatus = BillingRunStatus.Started,
             ProducerResultFileSuggestedBillingInstruction =
             {
                 new ProducerResultFileSuggestedBillingInstruction
