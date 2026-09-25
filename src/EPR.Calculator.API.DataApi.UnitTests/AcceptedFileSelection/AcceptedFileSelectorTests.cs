@@ -199,6 +199,23 @@ public class AcceptedFileSelectorTests
     }
 
     [TestMethod]
+    public void SelectLatestPomFiles_ResubmissionOfOneQuarterSupersedesAnotherQuarterInTheSameHalf()
+    {
+        // 2024-P1/P2/P3 all count towards H1, so a resubmitted 2024-P3 file competes with - and here
+        // beats - an earlier, non-resubmitted 2024-P1 file for the same organisation/submitter.
+        var poms = new[]
+        {
+            new PayCalPom { OrganisationId = 1, SubmitterId = "SUBMITTER-1", SubmissionPeriod = "2024-P1", FileName = "P1", CreatedDateTime = T0 },
+            new PayCalPom { OrganisationId = 1, SubmitterId = "SUBMITTER-1", SubmissionPeriod = "2024-P3", FileName = "P3-RESUB", IsResubmission = true, CreatedDateTime = T1 },
+            new PayCalPom { OrganisationId = 1, SubmitterId = "SUBMITTER-1", SubmissionPeriod = "2024-P4", FileName = "P4", CreatedDateTime = T0 }
+        };
+
+        var result = selector.SelectLatestPomFiles(poms, cutOffDate: null);
+
+        result.Select(p => p.FileName).ShouldBe(["P3-RESUB", "P4"]);
+    }
+
+    [TestMethod]
     [DynamicData(nameof(PomScenarios))]
     public void SelectWinningPomFileNames_PicksSameWinnerAsSelectLatestPomFiles(
         string caseId,
@@ -216,6 +233,21 @@ public class AcceptedFileSelectorTests
         var winners = selector.SelectWinningPomFileNames(candidates, CutOffDate);
 
         winners[(1, "SUBMITTER-1", "2025-H1")].ShouldBe(expectedWinner, caseId);
+    }
+
+    [TestMethod]
+    public void SelectWinningPomFileNames_BothQuartersInAHalfResolveToTheSameWinner()
+    {
+        var candidates = new[]
+        {
+            new PomFileCandidate(1, "SUBMITTER-1", "2024-P1", "P1", IsResubmission: false, CreatedDateTime: T0),
+            new PomFileCandidate(1, "SUBMITTER-1", "2024-P3", "P3-RESUB", IsResubmission: true, CreatedDateTime: T1)
+        };
+
+        var winners = selector.SelectWinningPomFileNames(candidates, cutOffDate: null);
+
+        winners[(1, "SUBMITTER-1", "2024-P1")].ShouldBe("P3-RESUB");
+        winners[(1, "SUBMITTER-1", "2024-P3")].ShouldBe("P3-RESUB");
     }
 
     [TestMethod]
