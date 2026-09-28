@@ -204,8 +204,7 @@ public class CalcResultErrorReportBuilderTests : TestsFor<CalcResultErrorReportB
         var result = testSubject.Construct(runContext).ToList();
 
         // Assert
-        Assert.AreEqual(1, result.Count);
-        var report = result[0];
+        var report = result.Single(x => x.SubsidiaryId == "SUB-2");
         Assert.AreEqual(2, report.ProducerId);
         Assert.AreEqual("SUB-2", report.SubsidiaryId);
         Assert.AreEqual(CommonConstants.Hyphen, report.ProducerName);
@@ -235,9 +234,103 @@ public class CalcResultErrorReportBuilderTests : TestsFor<CalcResultErrorReportB
         var result = testSubject.Construct(runContext).ToList();
 
         // Assert
-        var report = result.Single(x => x.ProducerId == 999);
+        var report = result.Single(x => x.ProducerId == 999 && x.SubsidiaryId == "MISSING-SUB");
 
         Assert.AreEqual(CommonConstants.Hyphen, report.ProducerName);
         Assert.AreEqual(CommonConstants.Hyphen, report.TradingName);
+    }
+
+    [TestMethod]
+    public async Task ConstructAsync_AddsHoldingCompanyRow_WhenAllErrorsAreSubsidiaryScoped()
+    {
+        // Arrange
+        dbContext.ErrorReports.Add(new Data.DataModels.ErrorReport
+        {
+            Id = 1,
+            CalculatorRunId = runContext.RunId,
+            ProducerId = 1,
+            SubsidiaryId = "Sub 1",
+            ErrorCode = ErrorCodes.MissingPOMData,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = "Test user"
+        });
+
+        await dbContext.SaveChangesAsync();
+
+        // Act
+        var result = testSubject.Construct(runContext).ToList();
+
+        // Assert
+        Assert.AreEqual(2, result.Count, "Expected the subsidiary error plus a holding-company row.");
+        var holding = result[0];
+        Assert.AreEqual(1, holding.ProducerId);
+        Assert.AreEqual(CommonConstants.Hyphen, holding.SubsidiaryId);
+        Assert.AreEqual("Allied Packaging", holding.ProducerName);
+        Assert.AreEqual("Allied Trading", holding.TradingName);
+        Assert.AreEqual(string.Empty, holding.LeaverCode);
+        Assert.AreEqual(string.Empty, holding.ErrorCodeText);
+        Assert.AreEqual("Sub 1", result[1].SubsidiaryId);
+    }
+
+    [TestMethod]
+    public async Task ConstructAsync_HoldingCompanyRowUsesHyphens_WhenNoOrganisationDetailExists()
+    {
+        // Arrange
+        dbContext.ErrorReports.Add(new Data.DataModels.ErrorReport
+        {
+            Id = 1,
+            CalculatorRunId = runContext.RunId,
+            ProducerId = 999,
+            SubsidiaryId = "MISSING-SUB",
+            ErrorCode = ErrorCodes.MissingRegistrationData,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = "Test user"
+        });
+
+        await dbContext.SaveChangesAsync();
+
+        // Act
+        var result = testSubject.Construct(runContext).ToList();
+
+        // Assert
+        var holding = result.Single(x => x.ProducerId == 999 && x.SubsidiaryId == CommonConstants.Hyphen);
+        Assert.AreEqual(CommonConstants.Hyphen, holding.ProducerName);
+        Assert.AreEqual(CommonConstants.Hyphen, holding.TradingName);
+    }
+
+    [TestMethod]
+    public async Task ConstructAsync_DoesNotAddHoldingCompanyRow_WhenAHoldingLevelErrorExists()
+    {
+        // Arrange
+        dbContext.ErrorReports.AddRange(
+            new Data.DataModels.ErrorReport
+            {
+                Id = 1,
+                CalculatorRunId = runContext.RunId,
+                ProducerId = 1,
+                SubsidiaryId = "Sub 1",
+                ErrorCode = ErrorCodes.MissingPOMData,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "Test user"
+            },
+            new Data.DataModels.ErrorReport
+            {
+                Id = 2,
+                CalculatorRunId = runContext.RunId,
+                ProducerId = 1,
+                SubsidiaryId = null,
+                ErrorCode = ErrorCodes.MissingRegistrationData,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "Test user"
+            });
+
+        await dbContext.SaveChangesAsync();
+
+        // Act
+        var result = testSubject.Construct(runContext).ToList();
+
+        // Assert
+        Assert.AreEqual(2, result.Count, "Should not add a holding-company row on top of an existing holding-level error.");
+        Assert.AreEqual(ErrorCodes.MissingRegistrationData, result.Single(x => x.SubsidiaryId == CommonConstants.Hyphen).ErrorCodeText);
     }
 }

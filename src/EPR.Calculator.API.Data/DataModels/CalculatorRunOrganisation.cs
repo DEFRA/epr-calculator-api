@@ -30,7 +30,6 @@ public class CalculatorRunOrganisation
     public string? JoinerDate { get; set; }
     public string? LeaverDate { get; set; }
     public string? StatusCode { get; set; }
-    public string? ErrorCode { get; set; }
 
     /// <summary>
     ///     Whether this row was excluded from calculation by a hard error - <c>ProducerRecord.IsError</c>

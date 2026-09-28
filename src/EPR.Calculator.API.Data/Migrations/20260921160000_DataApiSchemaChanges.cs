@@ -80,7 +80,6 @@ namespace EPR.Calculator.API.Data.Migrations
                     joiner_date = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     leaver_date = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     status_code = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    error_code = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     is_error = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -114,11 +113,11 @@ namespace EPR.Calculator.API.Data.Migrations
                 INSERT INTO calculator_run_organisation
                     (calculator_run_id, organisation_id, subsidiary_id, organisation_name,
                      trading_name, num_days_obligated, joiner_date, leaver_date,
-                     status_code, error_code, is_error)
+                     status_code, is_error)
                 SELECT
                     r.id, d.organisation_id, d.subsidiary_id, d.organisation_name,
                     d.trading_name, d.num_days_obligated, d.joiner_date, d.leaver_date,
-                    d.status_code, d.error_code,
+                    d.status_code,
                     CASE WHEN d.obligation_status = 'E' THEN 1 ELSE 0 END
                 FROM calculator_run_organization_data_detail d
                 INNER JOIN calculator_run r

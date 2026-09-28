@@ -215,7 +215,6 @@ internal sealed class ProducerDataService(
         JoinerDate = organisation.Org.JoinerDate,
         LeaverDate = organisation.Org.LeaverDate,
         StatusCode = organisation.Org.StatusCode,
-        ErrorCode = organisation.ErrorCode,
         Errors = errors,
         Warnings = warnings,
         ReportedMaterials = []

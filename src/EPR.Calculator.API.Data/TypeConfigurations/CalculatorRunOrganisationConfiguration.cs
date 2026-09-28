@@ -47,9 +47,6 @@ public class CalculatorRunOrganisationConfiguration : IEntityTypeConfiguration<C
         builder.Property(p => p.StatusCode)
             .HasColumnName("status_code");
 
-        builder.Property(p => p.ErrorCode)
-            .HasColumnName("error_code");
-
         builder.Property(p => p.IsError)
             .HasColumnName("is_error");
     }
