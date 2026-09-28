@@ -14,8 +14,7 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
     ///         current-year POM match (<see cref="ProducerCalculationError.HasPomMatch" />) - it can't see
     ///         billing history, so it doesn't know whether a no-POM-match row is still worth showing. This
     ///         service makes that call (keep it if the organisation was invoiced in a previous run this
-    ///         financial year), then rolls up a holding-company-level error for any producer whose
-    ///         surviving errors are all subsidiary-scoped, then persists the result.
+    ///         financial year), then persists the result.
     ///     </para>
     /// </summary>
     [TestClass]
@@ -42,8 +41,6 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         [TestMethod]
         public async Task PersistErrors_KeepsErrorWithPomMatch_RegardlessOfInvoiceStatus()
         {
-            // Org 2's own error is holding-level (SubsidiaryId null), so no roll-up gets added for it -
-            // isolates this test to just the one row under test.
             var errors = new[] { CreateError(2, null, "Missing POM Data", "01", isWarning: false, hasPomMatch: true) };
 
             await _sut.PersistErrors(errors, 300, "test user", new RelativeYear(2025), CancellationToken.None);
@@ -73,47 +70,6 @@ namespace EPR.Calculator.API.BackgroundService.UnitTests.Services
         public async Task PersistErrors_DropsErrorWithNoPomMatch_WhenOrganisationWasNotInvoiced()
         {
             var errors = new[] { CreateError(1, null, "some synapse error", "16", isWarning: false, hasPomMatch: false) };
-
-            await _sut.PersistErrors(errors, 300, "test user", new RelativeYear(2025), CancellationToken.None);
-
-            Assert.AreEqual(0, _dbContext.ErrorReports.Count());
-        }
-
-        [TestMethod]
-        public async Task PersistErrors_AddsHoldingCompanyRollup_WhenSurvivingErrorsAreAllSubsidiaryScoped()
-        {
-            var errors = new[] { CreateError(1, "101", "Missing POM Data", "01", isWarning: false, hasPomMatch: true) };
-
-            await _sut.PersistErrors(errors, 300, "test user", new RelativeYear(2025), CancellationToken.None);
-
-            var reports = _dbContext.ErrorReports.ToList();
-            Assert.AreEqual(2, reports.Count, "Expected the subsidiary error plus a holding-company roll-up.");
-            Assert.IsTrue(reports.Any(r => r.ProducerId == 1 && r.SubsidiaryId == "101"));
-            Assert.IsTrue(reports.Any(r => r.ProducerId == 1 && r.SubsidiaryId == null && r.ErrorCode == "" && r.LeaverCode == ""));
-        }
-
-        [TestMethod]
-        public async Task PersistErrors_DoesNotAddHoldingCompanyRollup_WhenAHoldingLevelErrorAlreadyExists()
-        {
-            var errors = new[]
-            {
-                CreateError(1, "101", "Missing POM Data", "01", isWarning: false, hasPomMatch: true),
-                CreateError(1, null, "some synapse error", "16", isWarning: false, hasPomMatch: true)
-            };
-
-            await _sut.PersistErrors(errors, 300, "test user", new RelativeYear(2025), CancellationToken.None);
-
-            var reports = _dbContext.ErrorReports.ToList();
-            Assert.AreEqual(2, reports.Count, "Should not add a roll-up on top of an existing holding-level error.");
-        }
-
-        [TestMethod]
-        public async Task PersistErrors_DoesNotOrphanRollup_WhenOnlySubsidiaryErrorWasFilteredOut()
-        {
-            // The producer's only error has no POM match and wasn't invoiced, so it's dropped entirely -
-            // the roll-up must be computed after that filter, or this would leave a holding-level error
-            // with no visible reason behind it.
-            var errors = new[] { CreateError(1, "101", "some synapse error", "16", isWarning: false, hasPomMatch: false) };
 
             await _sut.PersistErrors(errors, 300, "test user", new RelativeYear(2025), CancellationToken.None);
 

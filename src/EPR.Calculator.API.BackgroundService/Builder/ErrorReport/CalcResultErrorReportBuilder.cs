@@ -60,17 +60,58 @@ namespace EPR.Calculator.API.BackgroundService.Builder.ErrorReport
                     ErrorCodeText = er.ErrorCode
                 };
 
-            var results = baseQuery
+            var errorReports = baseQuery
                 .AsNoTracking()
                 .AsEnumerable()
                 .GroupBy(x => new { x.ProducerId, x.SubsidiaryId, x.ErrorCodeText })
                 .Select(g => g.First())
+                .ToList();
+
+            return errorReports
+                .Concat(HoldingCompanyRows(runContext.RunId, errorReports))
                 .OrderBy(x => x.ProducerId)
                 .ThenBy(x => x.SubsidiaryId)
                 .ThenBy(x => x.ErrorCodeText)
                 .ToList();
+        }
 
-            return results;
+        /// <summary>
+        ///     A blank holding-company-level row for any producer whose errors are all subsidiary-scoped,
+        ///     so the holding company itself also shows up in the error report.
+        /// </summary>
+        private IEnumerable<CalcResultErrorReport> HoldingCompanyRows(int runId, IReadOnlyList<CalcResultErrorReport> errorReports)
+        {
+            var producerIds = errorReports
+                .GroupBy(x => x.ProducerId)
+                .Where(g => g.All(x => x.SubsidiaryId != CommonConstants.Hyphen))
+                .Select(g => g.Key)
+                .ToList();
+
+            if (producerIds.Count == 0)
+                return [];
+
+            var holdingCompanies = context.CalculatorRunOrganisations
+                .AsNoTracking()
+                .Where(o => o.CalculatorRunId == runId && o.SubsidiaryId == null && producerIds.Contains(o.OrganisationId))
+                .AsEnumerable()
+                .GroupBy(o => o.OrganisationId)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            return producerIds.Select(producerId =>
+            {
+                var holdingCompany = holdingCompanies.GetValueOrDefault(producerId);
+                var hasName = holdingCompany is not null && !string.IsNullOrWhiteSpace(holdingCompany.OrganisationName);
+
+                return new CalcResultErrorReport
+                {
+                    ProducerId = producerId,
+                    SubsidiaryId = CommonConstants.Hyphen,
+                    ProducerName = hasName ? holdingCompany!.OrganisationName : CommonConstants.Hyphen,
+                    TradingName = hasName ? GetFormatedTradingName(holdingCompany!.TradingName) : CommonConstants.Hyphen,
+                    LeaverCode = string.Empty,
+                    ErrorCodeText = string.Empty
+                };
+            });
         }
 
         private static string GetProducerName(CalculatorRunOrganisation? prodLeft) =>

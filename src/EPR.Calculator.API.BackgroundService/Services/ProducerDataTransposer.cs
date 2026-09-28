@@ -116,7 +116,6 @@ public class ProducerDataTransposer(
         JoinerDate = record.JoinerDate,
         LeaverDate = record.LeaverDate,
         StatusCode = record.StatusCode,
-        ErrorCode = record.ErrorCode,
         IsError = record.IsError
     };
 

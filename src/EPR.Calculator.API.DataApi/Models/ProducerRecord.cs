@@ -21,9 +21,6 @@ public sealed record ProducerRecord
     public string? LeaverDate { get; init; }
     public string? StatusCode { get; init; }
 
-    /// <summary>The organisation's own raw registration error code, if any - distinct from <see cref="Errors" />/<see cref="Warnings" />, which are DataApi's computed rule results.</summary>
-    public string? ErrorCode { get; init; }
-
     /// <summary>
     ///     Hard (non-warning) errors. Rare but possible to have more than one, e.g. an "E"-status
     ///     organisation whose POM data also fails the missing-registration check. When non-empty, this
