@@ -681,4 +681,51 @@ public class CalcResultScaledupProducersBuilderTest : TestsFor<CalcResultScaledu
         Assert.IsTrue(extraRows.All(x => x.IsSubtotalRow));
         Assert.AreEqual(2, runProducerMaterialDetails.Count(x => x.IsSubtotalRow));
     }
+
+    [TestMethod]
+    public void GetTonnagesTest()
+    {
+        var alId = 1;
+        List<MaterialDetail> materialDetails = [new() { Id = 1, Code = "AL", Name = "Aluminium" }];
+        var pomData = new List<ScaledupPomEntry>
+        {
+            new ScaledupPomEntry(alId, PackagingTypes.Household, 0.1m, 0.2m),
+        };
+        var tonnage = CalcResultScaledupProducersBuilder.GetTonnages(pomData, materialDetails);
+        Assert.IsNotNull(tonnage);
+        var aluminium = tonnage["AL"];
+        Assert.AreEqual(0.1m, aluminium.ReportedHouseholdPackagingWasteTonnage);
+        Assert.AreEqual(0.2m, aluminium.ScaledupReportedHouseholdPackagingWasteTonnage);
+    }
+
+    [TestMethod]
+    public void GetTonnages_ShouldCalculateCorrectlyForGlass()
+    {
+        var glassId = 1;
+        var materials = new List<MaterialDetail>
+        {
+            new MaterialDetail { Id = glassId, Code = MaterialCodes.Glass, Name = "Glass" },
+        };
+        var pomData = new List<ScaledupPomEntry>
+        {
+            new ScaledupPomEntry(glassId, PackagingTypes.Household, 0.1m, 0.1m),
+            new ScaledupPomEntry(glassId, PackagingTypes.HouseholdDrinksContainers, 0.03m, 0.03m),
+        };
+
+        var result = CalcResultScaledupProducersBuilder.GetTonnages(pomData, materials);
+
+        Assert.IsTrue(result.ContainsKey(MaterialCodes.Glass));
+        var glassTonnage = result[MaterialCodes.Glass];
+
+        Assert.AreEqual(0.1m, glassTonnage.ReportedHouseholdPackagingWasteTonnage);
+        Assert.AreEqual(0, glassTonnage.ReportedPublicBinTonnage);
+        Assert.AreEqual(0.03m, glassTonnage.HouseholdDrinksContainersTonnageGlass);
+        Assert.AreEqual(0.13m, glassTonnage.TotalReportedTonnage);
+        Assert.AreEqual(0.13m, glassTonnage.NetReportedTonnage);
+        Assert.AreEqual(0.1m, glassTonnage.ScaledupReportedHouseholdPackagingWasteTonnage);
+        Assert.AreEqual(0, glassTonnage.ScaledupReportedPublicBinTonnage);
+        Assert.AreEqual(0.03m, glassTonnage.ScaledupHouseholdDrinksContainersTonnageGlass);
+        Assert.AreEqual(0.13m, glassTonnage.ScaledupTotalReportedTonnage);
+        Assert.AreEqual(0.13m, glassTonnage.ScaledupNetReportedTonnage);
+    }
 }

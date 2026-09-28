@@ -1,25 +1,37 @@
-﻿using EPR.Calculator.API.Data;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Text;
+using EPR.Calculator.API.BackgroundService.Features.Common;
+using EPR.Calculator.API.BackgroundService.Services;
+using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Dtos;
 using EPR.Calculator.API.Enums;
 using EPR.Calculator.API.Extensions;
 using EPR.Calculator.API.Mappers;
+using EPR.Calculator.API.Options;
 using EPR.Calculator.API.Services;
 using EPR.Calculator.API.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace EPR.Calculator.API.Controllers;
 
 [ApiController]
 [Produces("application/json")]
 [Route("V2")]
+[SuppressMessage("Major Code Smell", "S107:Methods should not have too many parameters", Justification = "This is suppressed for now and will be refactored later.")]
 public class CalculatorNewController(
     ApplicationDBContext dbContext,
     ICalculatorRunStatusDataValidator calculatorRunStatusDataValidator,
-    IBillingFileService billingFileService,
     IInvoiceDetailsService invoiceDetailsService,
     ILogger<CalculatorNewController> logger,
-    ICalculationRunService calculationRunService
+    ICalculationRunService calculationRunService,
+    IFileExportService fileExportService,
+    IBlobStorageService blobStorage,
+    IStorageUploadService storageUploadService,
+    IOptions<BlobStorageOptions> blobStorageOptions,
+    IOptions<FeatureFlagOptions> featureFlags
 ) : ControllerBase
 {
     [HttpPut]
@@ -134,10 +146,19 @@ public class CalculatorNewController(
             dbContext.CalculatorRuns.Update(calculatorRun);
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            var result = await billingFileService.MoveBillingJsonFile(runId, cancellationToken);
+            if (featureFlags.Value.UploadFssBillingFileToBlobStorage)
+            {
+                var success = await fileExportService.Export(runId, RunType.Billing, FileExportType.Json, cancellationToken) switch
+                {
+                    FileExportResult.Exported s => await UploadBillingJson(s.Content, calculatorRun.Id, cancellationToken),
+                    FileExportResult.NotFound _ => false,
+                    FileExportResult.Legacy _ => await blobStorage.MoveBillingJsonToFss(metadata.BillingJsonFileName, cancellationToken),
+                    _ => false
+                };
 
-            if (!result)
-                return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format(CommonResources.UnableToMoveBillingFile, runId));
+                if (!success)
+                    return StatusCode(StatusCodes.Status422UnprocessableEntity, string.Format("Unable to export billing file for run {0}", calculatorRun.Id));
+            }
 
             await transaction.CommitAsync(cancellationToken);
 
@@ -148,5 +169,20 @@ public class CalculatorNewController(
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }
+    }
+
+    private async Task<bool> UploadBillingJson(byte[] content, int calculatorRunId, CancellationToken cancellationToken)
+    {
+        await storageUploadService.UploadFileContentAsync(
+            new IStorageUploadService.Request
+            {
+                FileName = string.Format(CultureInfo.CurrentCulture, CompositeFormat.Parse("{0}billing.json"), calculatorRunId),
+                Content = content,
+                ContainerName = blobStorageOptions.Value.FssContainer,
+                Overwrite = true
+            },
+            cancellationToken);
+
+        return true;
     }
 }
