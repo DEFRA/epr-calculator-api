@@ -500,11 +500,19 @@ internal sealed class ProducerRowBuilder(
             };
         });
 
-    private Organisation? GetProducerDetailsForTotalRow(int producerId, bool isOverAllTotalRow)
+    internal Organisation? GetProducerDetailsForTotalRow(int producerId, bool isOverAllTotalRow)
     {
         if (isOverAllTotalRow)
         {
             return null;
+        }
+
+        // Prefer the holding company's own reported data, when it has any - real, unambiguous, and
+        // needs no reasoning about which CalculatorRunOrganisation row is safe to trust. Only fall
+        // back to the organisation registry for a holding company with no POM data of its own.
+        if (organisationsByKey.TryGetValue((producerId, null), out var ownProducer))
+        {
+            return ownProducer;
         }
 
         // PERF: O(1) replacement for the previous FirstOrDefault scan of ParentOrganisations.
