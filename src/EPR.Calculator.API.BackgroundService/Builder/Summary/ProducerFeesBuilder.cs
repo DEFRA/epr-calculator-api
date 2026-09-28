@@ -64,17 +64,13 @@ public class ProducerFeesBuilder(
         var invoicedNetTonnageByProducerMaterial = BuildInvoicedNetTonnageByProducerMaterial(producerInvoicedMaterialNetTonnage);
 
         // Household + PublicBin + HDC.
-        // PERF: wrap in an index so downstream callers (TonnageVsAllProducerUtil / 2B / 2C) get O(1)
-        // per-producer percentage lookups instead of paying O(producers) per call.
         var totalPackagingTonnage = new TotalPackagingTonnageIndex(GetTotalPackagingTonnagePerRun(runProducerMaterialDetails, materialDetails, runContext.RunId));
 
-        // The registered holding company (SubsidiaryId is null) may not submit its own POM data - its
-        // subsidiaries may report on its behalf - so it's looked up independently of producerDetails,
-        // which is driven off POM data.
+        // Used to lookup holding companies.
         var parentOrganisations = await (
             from run in context.CalculatorRuns
             join org in context.CalculatorRunOrganisations on run.Id equals org.CalculatorRunId
-            where run.Id == runContext.RunId && !org.IsError && org.SubsidiaryId == null
+            where run.Id == runContext.RunId && org.SubsidiaryId == null
             select new Organisation
             {
                 OrganisationId   = org.OrganisationId,
@@ -88,14 +84,10 @@ public class ProducerFeesBuilder(
             .Distinct()
             .ToImmutableListAsync();
 
-        // PERF: Replace per-row FirstOrDefault scans with O(1) dictionary lookups.
-        var organisationsByKey = BuildOrganisationsByKey(producerDetails);
-        var parentOrganisationsById = BuildParentOrganisationsById(parentOrganisations);
-
         var rowBuilder = new ProducerRowBuilder(
             invoicedNetTonnageByProducerMaterial,
-            organisationsByKey,
-            parentOrganisationsById
+            BuildOrganisationsByKey(producerDetails),
+            BuildParentOrganisationsById(parentOrganisations)
         );
 
         return GetProducerFees(
