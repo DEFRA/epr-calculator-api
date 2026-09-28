@@ -8233,7 +8233,6 @@ BEGIN
         [joiner_date] nvarchar(50) NULL,
         [leaver_date] nvarchar(50) NULL,
         [status_code] nvarchar(max) NULL,
-        [error_code] nvarchar(max) NULL,
         [is_error] bit NOT NULL,
         CONSTRAINT [PK_calculator_run_organisation] PRIMARY KEY ([id]),
         CONSTRAINT [FK_calculator_run_organisation_calculator_run_calculator_run_id] FOREIGN KEY ([calculator_run_id]) REFERENCES [calculator_run] ([id]) ON DELETE CASCADE
@@ -8270,11 +8269,11 @@ BEGIN
                     INSERT INTO calculator_run_organisation
                         (calculator_run_id, organisation_id, subsidiary_id, organisation_name,
                          trading_name, num_days_obligated, joiner_date, leaver_date,
-                         status_code, error_code, is_error)
+                         status_code, is_error)
                     SELECT
                         r.id, d.organisation_id, d.subsidiary_id, d.organisation_name,
                         d.trading_name, d.num_days_obligated, d.joiner_date, d.leaver_date,
-                        d.status_code, d.error_code,
+                        d.status_code,
                         CASE WHEN d.obligation_status = 'E' THEN 1 ELSE 0 END
                     FROM calculator_run_organization_data_detail d
                     INNER JOIN calculator_run r
