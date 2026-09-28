@@ -94,6 +94,10 @@ public class ApplicationDBContext : DbContext
         configurationBuilder.Properties<RelativeYear>()
             .HaveConversion<RelativeYearValueConverter, RelativeYearValueComparer>();
 
+        // Configures global conversion for CalculationRunStatus enum to database string type.
+        configurationBuilder.Properties<CalculationRunStatus>()
+            .HaveConversion<StringEnumConverter<CalculationRunStatus>, EnumComparer<CalculationRunStatus>>();
+
         // Configures global conversion for BillingRunStatus enum to database string type.
         configurationBuilder.Properties<BillingRunStatus>()
             .HaveConversion<StringEnumConverter<BillingRunStatus>, EnumComparer<BillingRunStatus>>();

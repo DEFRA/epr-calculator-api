@@ -6,6 +6,7 @@ public class CalculatorRun
 {
     public int Id { get; set; }
     public RunClassification Classification { get; set; }
+    public CalculationRunStatus CalculationRunStatus { get; set; }
     public BillingRunStatus BillingRunStatus { get; set; }
     public DateTime? BillingRunStartedAt { get; set; }
     public required string Name { get; set; }

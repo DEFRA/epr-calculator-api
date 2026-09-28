@@ -3,6 +3,7 @@ using EPR.Calculator.API.BackgroundService.Features.Common;
 using EPR.Calculator.API.BackgroundService.Services;
 using EPR.Calculator.API.Data;
 using EPR.Calculator.API.Data.DataModels;
+using EPR.Calculator.API.Data.DataTypes;
 using Microsoft.EntityFrameworkCore;
 
 namespace EPR.Calculator.API.BackgroundService.Features.CalculatorRuns.Contexts;
@@ -25,7 +26,8 @@ public interface ICalculatorRunContextBuilder
 public class CalculatorRunContextBuilder(
     ApplicationDBContext dbContext,
     IParameterService parameterService,
-    TimeProvider timeProvider)
+    TimeProvider timeProvider,
+    ILogger<CalculatorRunContextBuilder> logger)
     : ICalculatorRunContextBuilder
 {
     [ActivityTrace]
@@ -36,20 +38,28 @@ public class CalculatorRunContextBuilder(
         if (string.IsNullOrWhiteSpace(user))
             throw new RunContextException(RunType.Calculator, runId, "User cannot be empty");
 
-        var run = await GetCalculatorRunAsync(runId, cancellationToken);
-
-        return new CalculatorRunContext
+        try
         {
-            RunId = run.Id,
-            RunName = run.Name.Trim(),
-            ProcessingStartedAt = now,
-            RelativeYear = run.RelativeYear,
-            User = user,
-            DefaultParameters = await parameterService.GetDefaultParameters(runId)
-        };
+            var run = await GetValidRunAsync(runId, cancellationToken);
+
+            return new CalculatorRunContext
+            {
+                RunId = run.Id,
+                RunName = run.Name.Trim(),
+                ProcessingStartedAt = now,
+                RelativeYear = run.RelativeYear,
+                User = user,
+                DefaultParameters = await parameterService.GetDefaultParameters(runId)
+            };
+        }
+        catch
+        {
+            await MarkRunAsErrored(runId, cancellationToken);
+            throw;
+        }
     }
 
-    private async Task<CalculatorRun> GetCalculatorRunAsync(int runId, CancellationToken ct)
+    private async Task<CalculatorRun> GetValidRunAsync(int runId, CancellationToken ct)
     {
         var run = await dbContext
             .CalculatorRuns
@@ -65,5 +75,19 @@ public class CalculatorRunContextBuilder(
             throw new RunContextException(RunType.Calculator, runId, validationResult.ToString("|"));
 
         return run;
+    }
+
+    private async Task MarkRunAsErrored(int runId, CancellationToken ct)
+    {
+        try
+        {
+            await dbContext.CalculatorRuns
+                .Where(r => r.Id == runId)
+                .ExecuteUpdateAsync(s => s.SetProperty(r => r.CalculationRunStatus, CalculationRunStatus.Errored), ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Failed to mark run {{RunId}} calculation as {nameof(CalculationRunStatus.Errored)}", runId);
+        }
     }
 }
