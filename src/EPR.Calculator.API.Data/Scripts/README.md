@@ -1,52 +1,22 @@
-## Local test of migration Docker container ##
+## Database migrations image
 
-### Prepare Azure SQL Edge Database
-Test
-1. Start container using azure-sql-edge:latest image. 
-   ```shell
-   docker run -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=Password1!' -p 1433:1433 \
-      --name azuresqledge -d mcr.microsoft.com/azure-sql-edge:latest
-   ```
-2. Find IP address of *azuresqledge* container.
-   ```shell
-   docker inspect azuresqledge | jq '.[].NetworkSettings.Networks.bridge.IPAddress'
-   ```
-   or
-   ```shell
-   docker inspect azuresqledge | grep IPAddress
-   ```
-3. Start mssql-tools interactive terminal. Connect to the database using sqlcmd using the IPAddress (here it is 172.17.0.2).
-   ```shell
-   docker run --rm -it mcr.microsoft.com/mssql-tools:latest /opt/mssql-tools/bin/sqlcmd -S 172.17.0.2 -U sa -P Password1!
-   ```
-4. Verify it works.
-   ```sql
-   select @@version;
-   go
-   ```
-   The output should be similar to:
-   > Microsoft Azure SQL Edge Developer (RTM) - 15.0.2000.1574 (ARM64) \
-   Jan 25 2023 10:36:08 \
-   Copyright (C) 2019 Microsoft Corporation \
-   Linux (Ubuntu 18.04.6 LTS aarch64) <ARM64> 
-5. Create `[Accounts]` database.
-   ```sql
-   create database [Accounts];
-   go
-   ```
-### Run database migration ###
+CI builds this folder into the `<branch>-<build>-database-migrations` image, which applies `migrations.sql` (the idempotent EF Core migrations script - see the repository README for how to regenerate it) with sqlcmd. Only the files in this folder are available to the Docker build.
 
-1. Build docker image.
-   ```shell
-   docker build -t database-migrations .
-   ```
-2. Start container.
-   ```shell
-   docker run --rm \
-      -e SERVER=172.17.0.2 \
-      -e PORT=1433 \
-      -e USER=sa \
-      -e PASSWORD=Password1! \
-      -e DATABASE=Accounts \
-      database-migrations
-   ```
+The deployment pipeline runs the image with these environment variables:
+
+- `SERVER`, `PORT`, `USER`, `PASSWORD`, `DATABASE` (required) - the SQL Server, and the existing database to migrate.
+- `TRUST_SERVER_CERTIFICATE=true` (optional) - skips validation of the server's TLS certificate. Only use it for SQL Servers with self-signed certificates, such as the local environment's; Azure SQL has a valid certificate.
+
+The container stops at the first error and exits non-zero.
+
+### Testing locally
+
+With the local environment running, build the image and run it on the environment's Docker network against its `sql` container:
+
+```shell
+docker build -t database-migrations .
+docker run --rm --network epr_net \
+   -e SERVER=sql -e PORT=1433 -e USER=sa -e PASSWORD='<SA password>' -e DATABASE=paycal \
+   -e TRUST_SERVER_CERTIFICATE=true \
+   database-migrations
+```
