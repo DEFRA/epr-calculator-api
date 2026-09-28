@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -109,13 +109,22 @@ namespace EPR.Calculator.API.Data.Migrations
 
         private static void UpSetBillingRunStatus(MigrationBuilder migrationBuilder)
         {
+            // Each statement is wrapped in EXEC() so that SQL Server resolves its column names when it runs, rather than
+            // when the batch containing it is compiled. Otherwise the generated script fails with Msg 207 (invalid column
+            // name), because:
+            // - EF Core 9+ scripts emit a whole migration as one batch, which is compiled before billing_run_status and
+            //   billing_run_started_at have been added.
+            // - Once this migration has been applied, is_billing_file_generating no longer exists - and the IF NOT EXISTS
+            //   guards in idempotent scripts don't prevent the error, as they're only evaluated at run time.
+
             // Runs with billing file metadata:
             // Set billing_run_status=Completed
             migrationBuilder.Sql("""
+                EXEC(N'
                 UPDATE
                     run
                 SET
-                    run.billing_run_status = 'Completed',
+                    run.billing_run_status = ''Completed'',
                     run.billing_run_started_at = DATEADD(MINUTE, -15, metadata.billing_file_created_date)
                 FROM
                     dbo.calculator_run AS run
@@ -124,15 +133,11 @@ namespace EPR.Calculator.API.Data.Migrations
                     ON metadata.calculator_run_id = run.id
                 WHERE
                     run.billing_run_status IS NULL
+                ')
                 """);
 
             // Remaining runs with is_billing_file_generating=true:
             // Set billing_run_status=Errored
-            // Wrapped in EXEC() so SQL Server defers column name resolution to runtime.
-            // is_billing_file_generating is dropped later in this migration; without EXEC()
-            // the IF NOT EXISTS guard in the generated script does not protect against
-            // Msg 207 (invalid column name) because SQL Server validates DML column
-            // references at compile time, before evaluating the IF condition.
             migrationBuilder.Sql("""
                 EXEC(N'UPDATE run
                 SET run.billing_run_status = ''Errored''
@@ -144,28 +149,32 @@ namespace EPR.Calculator.API.Data.Migrations
             // Remaining runs with IN_THE_QUEUE/RUNNING/UNCLASSIFIED/TEST_RUN/ERROR/DELETED run status:
             // Set billing_run_status=None
             migrationBuilder.Sql("""
+                EXEC(N'
                 UPDATE
                     run
                 SET
-                    run.billing_run_status = 'None'
+                    run.billing_run_status = ''None''
                 FROM
                     dbo.calculator_run AS run
                 WHERE
                     run.billing_run_status IS NULL AND
                     run.calculator_run_classification_id in (1,2,3,4,5,6)
+                ')
                 """);
 
             // All remaining runs:
             // Set billing_run_status=Unknown (at this point, this should be a no-op, just accounting for edge cases)
             migrationBuilder.Sql("""
+                EXEC(N'
                 UPDATE
                     run
                 SET
-                    run.billing_run_status = 'Unknown'
+                    run.billing_run_status = ''Unknown''
                 FROM
                     dbo.calculator_run AS run
                 WHERE
                     run.billing_run_status IS NULL
+                ')
                 """);
         }
 
@@ -202,7 +211,10 @@ namespace EPR.Calculator.API.Data.Migrations
 
         private static void DownSetIsBillingFileGenerating(MigrationBuilder migrationBuilder)
         {
+            // Wrapped in EXEC() for the same reason as in UpSetBillingRunStatus: is_billing_file_generating is re-added
+            // earlier in this migration, so it doesn't exist yet when a script's batch is compiled.
             migrationBuilder.Sql("""
+                EXEC(N'
                 UPDATE
                     run
                 SET
@@ -211,10 +223,12 @@ namespace EPR.Calculator.API.Data.Migrations
                     dbo.calculator_run AS run
                 WHERE
                     run.is_billing_file_generating IS NULL AND
-                    run.billing_run_status = 'Completed'
+                    run.billing_run_status = ''Completed''
+                ')
                 """);
 
             migrationBuilder.Sql("""
+                EXEC(N'
                 UPDATE
                     run
                 SET
@@ -223,7 +237,8 @@ namespace EPR.Calculator.API.Data.Migrations
                     dbo.calculator_run AS run
                 WHERE
                     run.is_billing_file_generating IS NULL AND
-                    run.billing_run_status not in ('Unknown', 'None')
+                    run.billing_run_status not in (''Unknown'', ''None'')
+                ')
                 """);
         }
     }
