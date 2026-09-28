@@ -15,8 +15,7 @@ public interface IErrorReportService
     ///     DataApi can't see billing history, so any error/warning it raises with no current-year POM
     ///     match (<see cref="ProducerCalculationError.HasPomMatch" /> false) is only kept here if the
     ///     organisation was invoiced in a previous run this financial year - otherwise it's a stale
-    ///     status error for a producer with no reason to still appear. A holding-company-level roll-up
-    ///     is then added for any producer whose surviving errors are all subsidiary-scoped.
+    ///     status error for a producer with no reason to still appear.
     /// </remarks>
     Task PersistErrors(
         IReadOnlyList<ProducerRecord> producerRecords,
@@ -52,34 +51,10 @@ public class ErrorReportService(
                 )))
             .ToList();
 
-
-        var displayedErrors = errors
-            .Where(e => e.Error.HasPomMatch || invoicedOrganisationIds.Contains(e.OrganisationId))
-            .ToImmutableList();
-
-        // Roll up a holding-company-level error for any producer whose surviving errors are all
-        // subsidiary-scoped, so the holding company itself also shows up in the error report.
-        var holdingRegErrors = displayedErrors
-            .GroupBy(x => x.OrganisationId)
-            .Where(x => !x.Any(y => string.IsNullOrEmpty(y.SubsidiaryId)))
-            .Select(x =>
-            (
-                OrganisationId: x.Key,
-                SubsidiaryId: (string?) null,
-                Error: new ProducerCalculationError
-                {
-                    ErrorCode = "",
-                    LeaverCode = "",
-                    IsWarning = false,
-                    HasPomMatch = true // Irrelevant here - the roll-up isn't itself filtered by HasPomMatch.
-                }
-            ))
-            .ToImmutableList();
-
         var createdAt = DateTime.UtcNow;
 
-        var reports = displayedErrors
-            .Concat(holdingRegErrors)
+        var reports = errors
+            .Where(e => e.Error.HasPomMatch || invoicedOrganisationIds.Contains(e.OrganisationId))
             .Select(e => new ErrorReport
             {
                 CalculatorRunId = calculatorRunId,

@@ -444,10 +444,6 @@ namespace EPR.Calculator.API.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("num_days_obligated");
 
-                    b.Property<string>("ErrorCode")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("error_code");
-
                     b.Property<bool>("IsError")
                         .HasColumnType("bit")
                         .HasColumnName("is_error");
